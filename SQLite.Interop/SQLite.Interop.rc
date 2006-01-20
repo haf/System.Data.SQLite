@@ -53,7 +53,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,24,4
+ FILEVERSION 1,0,24,5
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -71,10 +71,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "http://sourceforge.net/projects/sqlite-dotnet2"
             VALUE "FileDescription", "SQLite.NET Interop Library"
-            VALUE "FileVersion", "1.0.24.4"
+            VALUE "FileVersion", "1.0.24.5"
             VALUE "InternalName", "SQLite.Interop.DLL"
             VALUE "LegalCopyright", "Released to the public domain"
-            VALUE "OriginalFilename", "SQLite3.DLL CVS HEAD"
+            VALUE "OriginalFilename", "SQLite3.DLL 3.3.1 alpha"
             VALUE "ProductName", "SQLite.NET"
             VALUE "ProductVersion", "1.0"
         END

@@ -8,6 +8,10 @@
 #include "src/sqliteint.h"
 #include "src\os.h"
 
+#if _WIN32_WCE && NDEBUG
+#include "merge.h"
+#endif
+
 // Forward declare this function, we're implementing it later
 static void generateColumnNames(
   Parse *pParse,      /* Parser context */

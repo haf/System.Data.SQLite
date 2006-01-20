@@ -12,6 +12,8 @@ Sub Main()
   Dim srcFileContents
   dim newFileContents
   
+  ' Changes the name of the function so we can get first crack at it in interop.h to provide GetSchemaTable() support
+  '
   Set srcFile = fso.OpenTextFile("src\select.c", 1) 
   srcFileContents = srcFile.ReadAll()
   srcFile.Close()  
@@ -22,7 +24,9 @@ Sub Main()
     srcFile.Write(newFileContents)
     srcFile.Close()
   End If
-  
+
+  ' SQLite supports : and $ for named parameters, but we add support for @ as well here
+  '  
   Set srcFile = fso.OpenTextFile("src\tokenize.c", 1)  
   srcFileContents = srcFile.ReadAll()
   srcFile.Close()
@@ -36,6 +40,9 @@ Sub Main()
     End If
   End If
 
+  ' In order to support encryption, we need to know when the pager is being destroyed so we can destroy our encryption
+  ' objects.  This modification adds code to support that.
+  '
   Set srcFile = fso.OpenTextFile("src\pager.c", 1)  
   srcFileContents = srcFile.ReadAll()
   srcFile.Close()

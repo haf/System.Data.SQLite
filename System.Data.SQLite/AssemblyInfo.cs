@@ -39,7 +39,7 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.24.4")]
+[assembly: AssemblyVersion("1.0.24.5")]
 #if !PLATFORM_COMPACTFRAMEWORK
-[assembly: AssemblyFileVersion("1.0.24.4")]
+[assembly: AssemblyFileVersion("1.0.24.5")]
 #endif

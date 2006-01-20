@@ -83,9 +83,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\System.Data.SQLite\System.Data.SQLite.csproj">
+    <ProjectReference Include="..\System.Data.SQLite\System.Data.SQLite - Compact.csproj">
       <Project>{AC139951-261A-4463-B6FA-AEBC25283A66}</Project>
-      <Name>System.Data.SQLite</Name>
+      <Name>System.Data.SQLite - Compact</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

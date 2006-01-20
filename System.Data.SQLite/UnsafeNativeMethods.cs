@@ -16,7 +16,7 @@ namespace System.Data.SQLite
 #endif
   internal sealed class UnsafeNativeMethods
   {
-#if !PLATFORM_COMPACTFRAMEWORK && !USE_INTEROP_DLL
+#if !USE_INTEROP_DLL
     private const string SQLITE_DLL = "System.Data.SQLite.DLL";
 #else
     private const string SQLITE_DLL = "SQLite.Interop.DLL";
