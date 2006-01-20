@@ -406,6 +406,10 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
     }
   }
 
+  // Change the machine type to x86 if its ARM
+  if (pNT->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) 
+    pNT->FileHeader.Machine = IMAGE_FILE_MACHINE_I386;
+
   if (pCor->Flags & 0x08)
     _tprintf(_T("WARNING: %s must be re-signed before it can be used!\n"), pszNative);
 
