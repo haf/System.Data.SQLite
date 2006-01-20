@@ -54,6 +54,9 @@
     <Reference Include="System.Data">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.24.5, Culture=neutral, PublicKeyToken=1fdb50b1b62b4c84, processorArchitecture=x86">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Drawing">
       <Private>False</Private>
     </Reference>
@@ -81,13 +84,6 @@
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\System.Data.SQLite\System.Data.SQLite - Compact.csproj">
-      <Project>{AC139951-261A-4463-B6FA-AEBC25283A66}</Project>
-      <Name>System.Data.SQLite - Compact</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

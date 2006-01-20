@@ -31,7 +31,12 @@ namespace test
 		{
       this.mainMenu1 = new System.Windows.Forms.MainMenu();
       this.textBox1 = new System.Windows.Forms.TextBox();
+      this.menuItem1 = new System.Windows.Forms.MenuItem();
       this.SuspendLayout();
+      // 
+      // mainMenu1
+      // 
+      this.mainMenu1.MenuItems.Add(this.menuItem1);
       // 
       // textBox1
       // 
@@ -43,6 +48,11 @@ namespace test
       this.textBox1.Size = new System.Drawing.Size(240, 268);
       this.textBox1.TabIndex = 0;
       this.textBox1.WordWrap = false;
+      // 
+      // menuItem1
+      // 
+      this.menuItem1.Text = "Exit";
+      this.menuItem1.Click += new System.EventHandler(this.menuItem1_Click);
       // 
       // Form1
       // 
@@ -60,5 +70,6 @@ namespace test
 		#endregion
 
 		private System.Windows.Forms.TextBox textBox1;
+    private System.Windows.Forms.MenuItem menuItem1;
 	}
 }

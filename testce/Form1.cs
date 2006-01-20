@@ -24,5 +24,10 @@ namespace test
     {
       textBox1.Text += str;
     }
+
+    private void menuItem1_Click(object sender, EventArgs e)
+    {
+      Close();
+    }
 	}
 }
