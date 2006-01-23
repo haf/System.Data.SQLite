@@ -12,9 +12,26 @@
 ** This file contains C code routines that are called by the parser
 ** to handle SELECT statements in SQLite.
 **
-** $Id: select.c,v 1.16 2006/01/16 15:51:47 rmsimpson Exp $
+** $Id: select.c,v 1.17 2006/01/23 19:45:55 rmsimpson Exp $
 */
 #include "sqliteInt.h"
+
+
+/*
+** Delete all the content of a Select structure but do not deallocate
+** the select structure itself.
+*/
+void clearSelect(Select *p){
+  sqlite3ExprListDelete(p->pEList);
+  sqlite3SrcListDelete(p->pSrc);
+  sqlite3ExprDelete(p->pWhere);
+  sqlite3ExprListDelete(p->pGroupBy);
+  sqlite3ExprDelete(p->pHaving);
+  sqlite3ExprListDelete(p->pOrderBy);
+  sqlite3SelectDelete(p->pPrior);
+  sqlite3ExprDelete(p->pLimit);
+  sqlite3ExprDelete(p->pOffset);
+}
 
 
 /*
@@ -33,38 +50,46 @@ Select *sqlite3SelectNew(
   Expr *pOffset         /* OFFSET value.  NULL means no offset */
 ){
   Select *pNew;
+  Select standin;
   pNew = sqliteMalloc( sizeof(*pNew) );
   assert( !pOffset || pLimit );   /* Can't have OFFSET without LIMIT. */
   if( pNew==0 ){
-    sqlite3ExprListDelete(pEList);
-    sqlite3SrcListDelete(pSrc);
-    sqlite3ExprDelete(pWhere);
-    sqlite3ExprListDelete(pGroupBy);
-    sqlite3ExprDelete(pHaving);
-    sqlite3ExprListDelete(pOrderBy);
-    sqlite3ExprDelete(pLimit);
-    sqlite3ExprDelete(pOffset);
-  }else{
-    if( pEList==0 ){
-      pEList = sqlite3ExprListAppend(0, sqlite3Expr(TK_ALL,0,0,0), 0);
-    }
-    pNew->pEList = pEList;
-    pNew->pSrc = pSrc;
-    pNew->pWhere = pWhere;
-    pNew->pGroupBy = pGroupBy;
-    pNew->pHaving = pHaving;
-    pNew->pOrderBy = pOrderBy;
-    pNew->isDistinct = isDistinct;
-    pNew->op = TK_SELECT;
-    pNew->pLimit = pLimit;
-    pNew->pOffset = pOffset;
-    pNew->iLimit = -1;
-    pNew->iOffset = -1;
-    pNew->addrOpenVirt[0] = -1;
-    pNew->addrOpenVirt[1] = -1;
-    pNew->addrOpenVirt[2] = -1;
+    pNew = &standin;
+    memset(pNew, 0, sizeof(*pNew));
+  }
+  if( pEList==0 ){
+    pEList = sqlite3ExprListAppend(0, sqlite3Expr(TK_ALL,0,0,0), 0);
+  }
+  pNew->pEList = pEList;
+  pNew->pSrc = pSrc;
+  pNew->pWhere = pWhere;
+  pNew->pGroupBy = pGroupBy;
+  pNew->pHaving = pHaving;
+  pNew->pOrderBy = pOrderBy;
+  pNew->isDistinct = isDistinct;
+  pNew->op = TK_SELECT;
+  pNew->pLimit = pLimit;
+  pNew->pOffset = pOffset;
+  pNew->iLimit = -1;
+  pNew->iOffset = -1;
+  pNew->addrOpenVirt[0] = -1;
+  pNew->addrOpenVirt[1] = -1;
+  pNew->addrOpenVirt[2] = -1;
+  if( pNew==&standin) {
+    clearSelect(pNew);
+    pNew = 0;
   }
   return pNew;
+}
+
+/*
+** Delete the given Select structure and all of its substructures.
+*/
+void sqlite3SelectDelete(Select *p){
+  if( p ){
+    clearSelect(p);
+    sqliteFree(p);
+  }
 }
 
 /*
@@ -331,23 +356,6 @@ static int sqliteProcessJoin(Parse *pParse, Select *p){
 }
 
 /*
-** Delete the given Select structure and all of its substructures.
-*/
-void sqlite3SelectDelete(Select *p){
-  if( p==0 ) return;
-  sqlite3ExprListDelete(p->pEList);
-  sqlite3SrcListDelete(p->pSrc);
-  sqlite3ExprDelete(p->pWhere);
-  sqlite3ExprListDelete(p->pGroupBy);
-  sqlite3ExprDelete(p->pHaving);
-  sqlite3ExprListDelete(p->pOrderBy);
-  sqlite3SelectDelete(p->pPrior);
-  sqlite3ExprDelete(p->pLimit);
-  sqlite3ExprDelete(p->pOffset);
-  sqliteFree(p);
-}
-
-/*
 ** Insert code into "v" that will push the record on the top of the
 ** stack into the sorter.
 */
@@ -458,7 +466,7 @@ static int selectInnerLoop(
   /* If there was a LIMIT clause on the SELECT statement, then do the check
   ** to see if this row should be output.
   */
-  hasDistinct = distinct>=0 && pEList && pEList->nExpr>0;
+  hasDistinct = distinct>=0 && pEList->nExpr>0;
   if( pOrderBy==0 && !hasDistinct ){
     codeOffset(v, p, iContinue, 0);
   }
@@ -558,7 +566,7 @@ static int selectInnerLoop(
       break;
     }
 
-    /* If any row exists in the result set, record that fact and abort.
+    /* If any row exist in the result set, record that fact and abort.
     */
     case SRT_Exists: {
       sqlite3VdbeAddOp(v, OP_MemInt, 1, iParm);
@@ -872,8 +880,7 @@ static void _generateColumnNames(
 #endif
 
   assert( v!=0 );
-  if( pParse->colNamesSet || v==0
-     || sqlite3ThreadDataReadOnly()->mallocFailed ) return;
+  if( pParse->colNamesSet || v==0 || sqlite3MallocFailed() ) return;
   pParse->colNamesSet = 1;
   fullNames = (db->flags & SQLITE_FullColNames)!=0;
   shortNames = (db->flags & SQLITE_ShortColNames)!=0;
@@ -1002,7 +1009,7 @@ Table *sqlite3ResultSetOfSelect(Parse *pParse, char *zTabName, Select *pSelect){
       zName = sqlite3MPrintf("column%d", i+1);
     }
     sqlite3Dequote(zName);
-    if( sqlite3ThreadDataReadOnly()->mallocFailed ){
+    if( sqlite3MallocFailed() ){
       sqliteFree(zName);
       sqlite3DeleteTable(0, pTab);
       return 0;
@@ -1074,7 +1081,7 @@ static int prepSelectStmt(Parse *pParse, Select *p){
   Table *pTab;
   struct SrcList_item *pFrom;
 
-  if( p==0 || p->pSrc==0 || sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( p==0 || p->pSrc==0 || sqlite3MallocFailed() ){
     return 1;
   }
   pTabList = p->pSrc;
@@ -1389,8 +1396,8 @@ Vdbe *sqlite3GetVdbe(Parse *pParse){
 ** SELECT statements.
 */
 static void computeLimitRegisters(Parse *pParse, Select *p, int iBreak){
-  Vdbe *v;
-  int iLimit;
+  Vdbe *v = 0;
+  int iLimit = 0;
   int iOffset;
   int addr1, addr2;
 
@@ -1862,7 +1869,7 @@ static int multiSelect(
       int addr;
       u8 *pSortOrder;
 
-      aCopy = (CollSeq**)&pKeyInfo[1];
+      aCopy = &pKeyInfo->aColl[nCol];
       pSortOrder = pKeyInfo->aSortOrder = (u8*)&aCopy[nCol];
       memcpy(aCopy, pKeyInfo->aColl, nCol*sizeof(CollSeq*));
       apColl = pKeyInfo->aColl;
@@ -2021,6 +2028,10 @@ static void substSelect(Select *p, int iTable, ExprList *pEList){
 **  (12)  The subquery is not the right term of a LEFT OUTER JOIN or the
 **        subquery has no WHERE clause.  (added by ticket #350)
 **
+**  (13)  The subquery and outer query do not both use LIMIT
+**
+**  (14)  The subquery does not use OFFSET
+**
 ** In this routine, the "p" parameter is a pointer to the outer query.
 ** The subquery is p->pSrc->a[iFrom].  isAgg is true if the outer query
 ** uses aggregates and subqueryIsAgg is true if the subquery uses aggregates.
@@ -2055,18 +2066,26 @@ static int flattenSubquery(
   pSubitem = &pSrc->a[iFrom];
   pSub = pSubitem->pSelect;
   assert( pSub!=0 );
-  if( isAgg && subqueryIsAgg ) return 0;
-  if( subqueryIsAgg && pSrc->nSrc>1 ) return 0;
+  if( isAgg && subqueryIsAgg ) return 0;                 /* Restriction (1)  */
+  if( subqueryIsAgg && pSrc->nSrc>1 ) return 0;          /* Restriction (2)  */
   pSubSrc = pSub->pSrc;
   assert( pSubSrc );
-  if( (pSub->pLimit && p->pLimit) || pSub->pOffset || 
-      (pSub->pLimit && isAgg) ) return 0;
-  if( pSubSrc->nSrc==0 ) return 0;
-  if( pSub->isDistinct && (pSrc->nSrc>1 || isAgg) ){
-     return 0;
+  /* Prior to version 3.1.2, when LIMIT and OFFSET had to be simple constants,
+  ** not arbitrary expresssions, we allowed some combining of LIMIT and OFFSET
+  ** because they could be computed at compile-time.  But when LIMIT and OFFSET
+  ** became arbitrary expressions, we were forced to add restrictions (13)
+  ** and (14). */
+  if( pSub->pLimit && p->pLimit ) return 0;              /* Restriction (13) */
+  if( pSub->pOffset ) return 0;                          /* Restriction (14) */
+  if( pSubSrc->nSrc==0 ) return 0;                       /* Restriction (7)  */
+  if( (pSub->isDistinct || pSub->pLimit) 
+         && (pSrc->nSrc>1 || isAgg) ){          /* Restrictions (4)(5)(8)(9) */
+     return 0;       
   }
-  if( p->isDistinct && subqueryIsAgg ) return 0;
-  if( (p->disallowOrderBy || p->pOrderBy) && pSub->pOrderBy ) return 0;
+  if( p->isDistinct && subqueryIsAgg ) return 0;         /* Restriction (6)  */
+  if( (p->disallowOrderBy || p->pOrderBy) && pSub->pOrderBy ){
+     return 0;                                           /* Restriction (11) */
+  }
 
   /* Restriction 3:  If the subquery is a join, make sure the subquery is 
   ** not used as the right operand of an outer join.  Examples of why this
@@ -2196,6 +2215,9 @@ static int flattenSubquery(
 
   /*
   ** SELECT ... FROM (SELECT ... LIMIT a OFFSET b) LIMIT x OFFSET y;
+  **
+  ** One is tempted to try to add a and b to combine the limits.  But this
+  ** does not work if either limit is negative.
   */
   if( pSub->pLimit ){
     p->pLimit = pSub->pLimit;
@@ -2693,7 +2715,7 @@ int sqlite3Select(
   AggInfo sAggInfo;      /* Information used by aggregate queries */
   int iEnd;              /* Address of the end of the query */
 
-  if( p==0 || sqlite3ThreadDataReadOnly()->mallocFailed || pParse->nErr ){
+  if( p==0 || sqlite3MallocFailed() || pParse->nErr ){
     return 1;
   }
   if( sqlite3AuthCheck(pParse, SQLITE_SELECT, 0, 0, 0) ) return 1;
@@ -2949,7 +2971,7 @@ int sqlite3Select(
         goto select_end;
       }
     }
-    if( sqlite3ThreadDataReadOnly()->mallocFailed ) goto select_end;
+    if( sqlite3MallocFailed() ) goto select_end;
 
     /* Processing for aggregates with GROUP BY is very different and
     ** much more complex tha aggregates without a GROUP BY.

@@ -13,7 +13,7 @@
 ** interface, and routines that contribute to loading the database schema
 ** from disk.
 **
-** $Id: prepare.c,v 1.11 2006/01/16 15:51:47 rmsimpson Exp $
+** $Id: prepare.c,v 1.12 2006/01/23 19:45:55 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -24,7 +24,7 @@
 ** that the database is corrupt.
 */
 static void corruptSchema(InitData *pData, const char *zExtra){
-  if( !sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( !sqlite3MallocFailed() ){
     sqlite3SetString(pData->pzErrMsg, "malformed database schema",
        zExtra!=0 && zExtra[0]!=0 ? " - " : (char*)0, zExtra, (char*)0);
   }
@@ -49,7 +49,7 @@ int sqlite3InitCallback(void *pInit, int argc, char **argv, char **azColName){
   sqlite3 *db = pData->db;
   int iDb;
 
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( sqlite3MallocFailed() ){
     return SQLITE_NOMEM;
   }
 
@@ -76,9 +76,9 @@ int sqlite3InitCallback(void *pInit, int argc, char **argv, char **azColName){
     db->init.iDb = 0;
     if( SQLITE_OK!=rc ){
       if( rc==SQLITE_NOMEM ){
-          sqlite3ThreadData()->mallocFailed = 1;
+        sqlite3FailedMalloc();
       }else{
-          corruptSchema(pData, zErr);
+        corruptSchema(pData, zErr);
       }
       sqlite3_free(zErr);
       return rc;
@@ -303,8 +303,8 @@ static int sqlite3InitOne(sqlite3 *db, int iDb, char **pzErrMsg){
 #endif
     sqlite3BtreeCloseCursor(curMain);
   }
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ){
-    sqlite3SetString(pzErrMsg, "out of memory", (char*)0);
+  if( sqlite3MallocFailed() ){
+    /* sqlite3SetString(pzErrMsg, "out of memory", (char*)0); */
     rc = SQLITE_NOMEM;
     sqlite3ResetInternalSchema(db, 0);
   }
@@ -496,7 +496,7 @@ int sqlite3_prepare(
   int i;
 
   /* Assert that malloc() has not failed */
-  assert( !sqlite3ThreadDataReadOnly()->mallocFailed );
+  assert( !sqlite3MallocFailed() );
 
   assert( ppStmt );
   *ppStmt = 0;
@@ -519,11 +519,9 @@ int sqlite3_prepare(
   
   memset(&sParse, 0, sizeof(sParse));
   sParse.db = db;
-  sParse.pTsd = sqlite3ThreadData();
-  sParse.pTsd->nRef++;
   sqlite3RunParser(&sParse, zSql, &zErrMsg);
 
-  if( sParse.pTsd->mallocFailed ){
+  if( sqlite3MallocFailed() ){
     sParse.rc = SQLITE_NOMEM;
   }
   if( sParse.rc==SQLITE_DONE ) sParse.rc = SQLITE_OK;
@@ -570,16 +568,7 @@ int sqlite3_prepare(
     sqlite3Error(db, rc, 0);
   }
 
-  /* We must check for malloc failure last of all, in case malloc() failed
-  ** inside of the sqlite3Error() call above or something.
-  */
-  if( sParse.pTsd->mallocFailed ){
-    rc = SQLITE_NOMEM;
-    sqlite3Error(db, rc, 0);
-  }
-
-  sParse.pTsd->nRef--;
-  sqlite3MallocClearFailed();
+  rc = sqlite3ApiExit(db, rc);
   sqlite3ReleaseThreadData();
   return rc;
 }
@@ -599,19 +588,17 @@ int sqlite3_prepare16(
   ** encoded string to UTF-8, then invoking sqlite3_prepare(). The
   ** tricky bit is figuring out the pointer to return in *pzTail.
   */
-  char *zSql8 = 0;
+  char *zSql8;
   const char *zTail8 = 0;
-  int rc;
+  int rc = SQLITE_OK;
 
   if( sqlite3SafetyCheck(db) ){
     return SQLITE_MISUSE;
   }
   zSql8 = sqlite3utf16to8(zSql, nBytes);
-  if( !zSql8 ){
-    sqlite3Error(db, SQLITE_NOMEM, 0);
-    return SQLITE_NOMEM;
+  if( zSql8 ){
+    rc = sqlite3_prepare(db, zSql8, -1, ppStmt, &zTail8);
   }
-  rc = sqlite3_prepare(db, zSql8, -1, ppStmt, &zTail8);
 
   if( zTail8 && pzTail ){
     /* If sqlite3_prepare returns a tail pointer, we calculate the
@@ -623,6 +610,6 @@ int sqlite3_prepare16(
     *pzTail = (u8 *)zSql + sqlite3utf16ByteLen(zSql, chars_parsed);
   }
   sqliteFree(zSql8); 
-  return rc;
+  return sqlite3ApiExit(db, rc);
 }
 #endif /* SQLITE_OMIT_UTF16 */

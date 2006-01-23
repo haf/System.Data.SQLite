@@ -603,8 +603,6 @@ int sqlite3WinOpenReadWrite(
 #endif /* OS_WINCE */
   }
   f.h = h;
-  f.locktype = NO_LOCK;
-  f.sharedLockByte = 0;
 #if OS_WINCE
   f.zDeleteOnClose = 0;
 #endif
@@ -667,11 +665,8 @@ int sqlite3WinOpenExclusive(const char *zFilename, OsFile **pId, int delFlag){
     return SQLITE_CANTOPEN;
   }
   f.h = h;
-  f.locktype = NO_LOCK;
-  f.sharedLockByte = 0;
 #if OS_WINCE
   f.zDeleteOnClose = delFlag ? utf8ToUnicode(zFilename) : 0;
-  f.hMutex = NULL;
 #endif
   TRACE3("OPEN EX %d \"%s\"\n", h, zFilename);
   return allocateWinFile(&f, pId);
@@ -717,11 +712,8 @@ int sqlite3WinOpenReadOnly(const char *zFilename, OsFile **pId){
     return SQLITE_CANTOPEN;
   }
   f.h = h;
-  f.locktype = NO_LOCK;
-  f.sharedLockByte = 0;
 #if OS_WINCE
   f.zDeleteOnClose = 0;
-  f.hMutex = NULL;
 #endif
   TRACE3("OPEN RO %d \"%s\"\n", h, zFilename);
   return allocateWinFile(&f, pId);
@@ -1308,7 +1300,13 @@ int allocateWinFile(winFile *pInit, OsFile **pId){
   }else{
     *pNew = *pInit;
     pNew->pMethod = &sqlite3WinIoMethod;
+    pNew->locktype = NO_LOCK;
+    pNew->sharedLockByte = 0;
+#if OS_WINCE
+    pNew->hMutex = NULL;
+#endif
     *pId = (OsFile*)pNew;
+    OpenCounter(+1);
     return SQLITE_OK;
   }
 }
@@ -1356,16 +1354,20 @@ int sqlite3WinSleep(int ms){
 */
 static int inMutex = 0;
 #ifdef SQLITE_W32_THREADS
+  static DWORD mutexOwner;
   static CRITICAL_SECTION cs;
 #endif
 
 /*
-** The following pair of routine implement mutual exclusion for
+** The following pair of routines implement mutual exclusion for
 ** multi-threaded processes.  Only a single thread is allowed to
 ** executed code that is surrounded by EnterMutex() and LeaveMutex().
 **
 ** SQLite uses only a single Mutex.  There is not much critical
 ** code and what little there is executes quickly and without blocking.
+**
+** Version 3.3.1 and earlier used a simple mutex.  Beginning with
+** version 3.3.2, a recursive mutex is required.
 */
 void sqlite3WinEnterMutex(){
 #ifdef SQLITE_W32_THREADS
@@ -1380,23 +1382,32 @@ void sqlite3WinEnterMutex(){
     }
   }
   EnterCriticalSection(&cs);
+  mutexOwner = GetCurrentThreadId();
 #endif
-  assert( !inMutex );
-  inMutex = 1;
+  inMutex++;
 }
 void sqlite3WinLeaveMutex(){
   assert( inMutex );
-  inMutex = 0;
+  inMutex--;
 #ifdef SQLITE_W32_THREADS
+  assert( mutexOwner==GetCurrentThreadId() );
   LeaveCriticalSection(&cs);
 #endif
 }
 
 /*
-** Return TRUE if we are currently within the mutex and FALSE if not.
+** Return TRUE if the mutex is currently held.
+**
+** If the thisThreadOnly parameter is true, return true if and only if the
+** calling thread holds the mutex.  If the parameter is false, return
+** true if any thread holds the mutex.
 */
-int sqlite3WinInMutex(){
-  return inMutex;
+int sqlite3WinInMutex(int thisThreadOnly){
+#ifdef SQLITE_W32_THREADS
+  return inMutex>0 && (thisThreadOnly==0 || mutexOwner==GetCurrentThreadId());
+#else
+  return inMutex>0;
+#endif
 }
 
 
@@ -1495,7 +1506,7 @@ ThreadData *sqlite3WinThreadSpecificData(int allocateFlag){
       }
     }
   }else if( pTsd!=0 && allocateFlag<0 
-              && memcmp(pTsd, &zeroData, sizeof(zeroData))==0 ){
+              && memcmp(pTsd, &zeroData, sizeof(ThreadData))==0 ){
     sqlite3OsFree(pTsd);
     TlsSetValue(key, 0);
     TSD_COUNTER_DECR;

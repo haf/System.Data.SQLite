@@ -11,7 +11,7 @@
 *************************************************************************
 ** This file contains code used to implement the ATTACH and DETACH commands.
 **
-** $Id: attach.c,v 1.15 2006/01/16 15:51:47 rmsimpson Exp $
+** $Id: attach.c,v 1.16 2006/01/23 19:45:55 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 
@@ -272,7 +272,7 @@ static void codeAttach(
   sqlite3* db = pParse->db;
 
 #ifndef SQLITE_OMIT_AUTHORIZATION
-  assert( sqlite3ThreadDataReadOnly()->mallocFailed || pAuthArg );
+  assert( sqlite3MallocFailed() || pAuthArg );
   if( pAuthArg ){
     char *zAuthArg = sqlite3NameFromToken(&pAuthArg->span);
     if( !zAuthArg ){
@@ -303,7 +303,7 @@ static void codeAttach(
   sqlite3ExprCode(pParse, pDbname);
   sqlite3ExprCode(pParse, pKey);
 
-  assert(v || sqlite3ThreadDataReadOnly()->mallocFailed);
+  assert( v || sqlite3MallocFailed() );
   if( v ){
     sqlite3VdbeAddOp(v, OP_Function, 0, nFunc);
     pFunc = sqlite3FindFunction(db, zFunc, strlen(zFunc), nFunc, SQLITE_UTF8,0);
@@ -345,8 +345,8 @@ void sqlite3Attach(Parse *pParse, Expr *p, Expr *pDbname, Expr *pKey){
 */
 void sqlite3AttachFunctions(sqlite3 *db){
   static const int enc = SQLITE_UTF8;
-  sqlite3_create_function(db, "sqlite_attach", 3, enc, db, attachFunc, 0, 0);
-  sqlite3_create_function(db, "sqlite_detach", 1, enc, db, detachFunc, 0, 0);
+  sqlite3CreateFunc(db, "sqlite_attach", 3, enc, db, attachFunc, 0, 0);
+  sqlite3CreateFunc(db, "sqlite_detach", 1, enc, db, detachFunc, 0, 0);
 }
 
 /*

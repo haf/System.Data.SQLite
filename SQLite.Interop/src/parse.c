@@ -23,7 +23,7 @@ struct LimitVal {
 ** GLOB, NOT LIKE, and NOT GLOB operators.
 */
 struct LikeOp {
-  Token operator;  /* "like" or "glob" or "regexp" */
+  Token eOperator;  /* "like" or "glob" or "regexp" */
   int not;         /* True if the NOT keyword is present */
 };
 
@@ -2587,12 +2587,12 @@ static void yy_reduce(
         break;
       case 198:
 #line 685 "parse.y"
-{yygotominor.yy440.operator = yymsp[0].minor.yy0; yygotominor.yy440.not = 0;}
+{yygotominor.yy440.eOperator = yymsp[0].minor.yy0; yygotominor.yy440.not = 0;}
 #line 2593 "parse.c"
         break;
       case 199:
 #line 686 "parse.y"
-{yygotominor.yy440.operator = yymsp[0].minor.yy0; yygotominor.yy440.not = 1;}
+{yygotominor.yy440.eOperator = yymsp[0].minor.yy0; yygotominor.yy440.not = 1;}
 #line 2598 "parse.c"
         break;
       case 202:
@@ -2603,7 +2603,7 @@ static void yy_reduce(
   if( yymsp[0].minor.yy178 ){
     pList = sqlite3ExprListAppend(pList, yymsp[0].minor.yy178, 0);
   }
-  yygotominor.yy178 = sqlite3ExprFunction(pList, &yymsp[-2].minor.yy440.operator);
+  yygotominor.yy178 = sqlite3ExprFunction(pList, &yymsp[-2].minor.yy440.eOperator);
   if( yymsp[-2].minor.yy440.not ) yygotominor.yy178 = sqlite3Expr(TK_NOT, yygotominor.yy178, 0, 0);
   sqlite3ExprSpan(yygotominor.yy178, &yymsp[-3].minor.yy178->span, &yymsp[-1].minor.yy178->span);
 }

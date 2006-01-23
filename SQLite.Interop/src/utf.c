@@ -12,7 +12,7 @@
 ** This file contains routines used to translate between UTF-8, 
 ** UTF-16, UTF-16BE, and UTF-16LE.
 **
-** $Id: utf.c,v 1.15 2006/01/16 15:51:47 rmsimpson Exp $
+** $Id: utf.c,v 1.16 2006/01/23 19:45:56 rmsimpson Exp $
 **
 ** Notes on UTF-8:
 **

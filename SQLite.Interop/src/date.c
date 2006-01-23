@@ -16,7 +16,7 @@
 ** sqlite3RegisterDateTimeFunctions() found at the bottom of the file.
 ** All other code has file scope.
 **
-** $Id: date.c,v 1.16 2006/01/16 15:51:47 rmsimpson Exp $
+** $Id: date.c,v 1.17 2006/01/23 19:45:55 rmsimpson Exp $
 **
 ** NOTES:
 **
@@ -976,7 +976,7 @@ void sqlite3RegisterDateTimeFunctions(sqlite3 *db){
   int i;
 
   for(i=0; i<sizeof(aFuncs)/sizeof(aFuncs[0]); i++){
-    sqlite3_create_function(db, aFuncs[i].zName, aFuncs[i].nArg,
+    sqlite3CreateFunc(db, aFuncs[i].zName, aFuncs[i].nArg,
         SQLITE_UTF8, 0, aFuncs[i].xFunc, 0, 0);
   }
 #else
@@ -991,7 +991,7 @@ void sqlite3RegisterDateTimeFunctions(sqlite3 *db){
   int i;
 
   for(i=0; i<sizeof(aFuncs)/sizeof(aFuncs[0]); i++){
-    sqlite3_create_function(db, aFuncs[i].zName, 0, SQLITE_UTF8, 
+    sqlite3CreateFunc(db, aFuncs[i].zName, 0, SQLITE_UTF8, 
         aFuncs[i].zFormat, currentTimeFunc, 0, 0);
   }
 #endif

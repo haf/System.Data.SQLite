@@ -57,7 +57,7 @@ static void generateColumnNames(
 #endif
 
   assert( v!=0 );
-  if( pParse->colNamesSet || v==0 || sqlite3ThreadData()->mallocFailed ) return;
+  if( pParse->colNamesSet || v==0 || sqlite3MallocFailed() ) return;
   pParse->colNamesSet = 1;
   fullNames = (db->flags & SQLITE_FullColNames)!=0;
   shortNames = (db->flags & SQLITE_ShortColNames)!=0;

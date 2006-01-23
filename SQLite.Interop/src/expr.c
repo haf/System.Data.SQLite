@@ -12,7 +12,7 @@
 ** This file contains routines used for analyzing expressions and
 ** for generating VDBE code that evaluates expressions in SQLite.
 **
-** $Id: expr.c,v 1.22 2006/01/16 15:51:47 rmsimpson Exp $
+** $Id: expr.c,v 1.23 2006/01/23 19:45:55 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include <ctype.h>
@@ -263,7 +263,7 @@ Expr *sqlite3ExprAnd(Expr *pLeft, Expr *pRight){
 void sqlite3ExprSpan(Expr *pExpr, Token *pLeft, Token *pRight){
   assert( pRight!=0 );
   assert( pLeft!=0 );
-  if( !sqlite3ThreadDataReadOnly()->mallocFailed && pRight->z && pLeft->z ){
+  if( !sqlite3MallocFailed() && pRight->z && pLeft->z ){
     assert( pLeft->dyn==0 || pLeft->z[pLeft->n]==0 );
     if( pLeft->dyn==0 && pRight->dyn==0 ){
       pExpr->span.z = pLeft->z;
@@ -280,6 +280,7 @@ void sqlite3ExprSpan(Expr *pExpr, Token *pLeft, Token *pRight){
 */
 Expr *sqlite3ExprFunction(ExprList *pList, Token *pToken){
   Expr *pNew;
+  assert( pToken );
   pNew = sqliteMalloc( sizeof(Expr) );
   if( pNew==0 ){
     sqlite3ExprListDelete(pList); /* Avoid leaking memory when malloc fails */
@@ -287,12 +288,8 @@ Expr *sqlite3ExprFunction(ExprList *pList, Token *pToken){
   }
   pNew->op = TK_FUNCTION;
   pNew->pList = pList;
-  if( pToken ){
-    assert( pToken->dyn==0 );
-    pNew->token = *pToken;
-  }else{
-    pNew->token.z = 0;
-  }
+  assert( pToken->dyn==0 );
+  pNew->token = *pToken;
   pNew->span = pNew->token;
   return pNew;
 }
@@ -358,7 +355,7 @@ void sqlite3ExprAssignVarNumber(Parse *pParse, Expr *pExpr){
         sqliteReallocOrFree((void**)&pParse->apVarExpr,
                        pParse->nVarExprAlloc*sizeof(pParse->apVarExpr[0]) );
       }
-      if( !sqlite3ThreadDataReadOnly()->mallocFailed ){
+      if( !sqlite3MallocFailed() ){
         assert( pParse->apVarExpr!=0 );
         pParse->apVarExpr[pParse->nVarExpr++] = pExpr;
       }
@@ -463,7 +460,7 @@ ExprList *sqlite3ExprListDup(ExprList *p){
     }
     assert( pNewExpr==0 || pNewExpr->span.z!=0 
             || pOldExpr->span.z==0
-            || sqlite3ThreadDataReadOnly()->mallocFailed );
+            || sqlite3MallocFailed() );
     pItem->zName = sqliteStrDup(pOldItem->zName);
     pItem->sortOrder = pOldItem->sortOrder;
     pItem->isAgg = pOldItem->isAgg;
@@ -832,7 +829,7 @@ static int lookupName(
   zDb = sqlite3NameFromToken(pDbToken);
   zTab = sqlite3NameFromToken(pTableToken);
   zCol = sqlite3NameFromToken(pColumnToken);
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( sqlite3MallocFailed() ){
     goto lookupname_end;
   }
 
@@ -1309,7 +1306,7 @@ void sqlite3CodeSubselect(Parse *pParse, Expr *pExpr){
     int mem = pParse->nMem++;
     sqlite3VdbeAddOp(v, OP_MemLoad, mem, 0);
     testAddr = sqlite3VdbeAddOp(v, OP_If, 0, 0);
-    assert( testAddr>0 || sqlite3ThreadDataReadOnly()->mallocFailed );
+    assert( testAddr>0 || sqlite3MallocFailed() );
     sqlite3VdbeAddOp(v, OP_MemInt, 1, mem);
   }
 
@@ -2085,10 +2082,8 @@ void sqlite3ExprIfFalse(Parse *pParse, Expr *pExpr, int dest, int jumpIfNull){
 */
 int sqlite3ExprCompare(Expr *pA, Expr *pB){
   int i;
-  if( pA==0 ){
-    return pB==0;
-  }else if( pB==0 ){
-    return 0;
+  if( pA==0||pB==0 ){
+    return pB==pA;
   }
   if( pA->op!=pB->op ) return 0;
   if( (pA->flags & EP_Distinct)!=(pB->flags & EP_Distinct) ) return 0;

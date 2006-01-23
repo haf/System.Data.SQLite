@@ -12,7 +12,7 @@
 ** This file contains C code routines that are called by the parser
 ** to handle INSERT statements in SQLite.
 **
-** $Id: insert.c,v 1.15 2006/01/16 15:51:47 rmsimpson Exp $
+** $Id: insert.c,v 1.16 2006/01/23 19:45:55 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 
@@ -222,10 +222,10 @@ void sqlite3Insert(
 #endif
 
 #ifndef SQLITE_OMIT_AUTOINCREMENT
-  int counterRowid;     /* Memory cell holding rowid of autoinc counter */
+  int counterRowid = 0;  /* Memory cell holding rowid of autoinc counter */
 #endif
 
-  if( pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( pParse->nErr || sqlite3MallocFailed() ){
     goto insert_cleanup;
   }
   db = pParse->db;
@@ -333,7 +333,7 @@ void sqlite3Insert(
 
     /* Resolve the expressions in the SELECT statement and execute it. */
     rc = sqlite3Select(pParse, pSelect, SRT_Subroutine, iInsertBlock,0,0,0,0);
-    if( rc || pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ){
+    if( rc || pParse->nErr || sqlite3MallocFailed() ){
       goto insert_cleanup;
     }
 

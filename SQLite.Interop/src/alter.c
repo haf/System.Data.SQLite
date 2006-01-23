@@ -12,7 +12,7 @@
 ** This file contains C code routines that used to generate VDBE code
 ** that implements the ALTER TABLE command.
 **
-** $Id: alter.c,v 1.15 2006/01/16 15:51:47 rmsimpson Exp $
+** $Id: alter.c,v 1.16 2006/01/23 19:45:55 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include <ctype.h>
@@ -162,7 +162,7 @@ void sqlite3AlterFunctions(sqlite3 *db){
   int i;
 
   for(i=0; i<sizeof(aFuncs)/sizeof(aFuncs[0]); i++){
-    sqlite3_create_function(db, aFuncs[i].zName, aFuncs[i].nArg,
+    sqlite3CreateFunc(db, aFuncs[i].zName, aFuncs[i].nArg,
         SQLITE_UTF8, 0, aFuncs[i].xFunc, 0, 0);
   }
 }
@@ -267,7 +267,7 @@ void sqlite3AlterRenameTable(
   char *zWhere = 0;         /* Where clause to locate temp triggers */
 #endif
   
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ) goto exit_rename_table;
+  if( sqlite3MallocFailed() ) goto exit_rename_table;
   assert( pSrc->nSrc==1 );
 
   pTab = sqlite3LocateTable(pParse, pSrc->a[0].zName, pSrc->a[0].zDatabase);
@@ -501,7 +501,7 @@ void sqlite3AlterBeginAddColumn(Parse *pParse, SrcList *pSrc){
 
   /* Look up the table being altered. */
   assert( pParse->pNewTable==0 );
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ) goto exit_begin_add_column;
+  if( sqlite3MallocFailed() ) goto exit_begin_add_column;
   pTab = sqlite3LocateTable(pParse, pSrc->a[0].zName, pSrc->a[0].zDatabase);
   if( !pTab ) goto exit_begin_add_column;
 

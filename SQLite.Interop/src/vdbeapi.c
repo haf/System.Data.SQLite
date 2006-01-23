@@ -95,10 +95,12 @@ void sqlite3_result_error(sqlite3_context *pCtx, const char *z, int n){
   pCtx->isError = 1;
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF8, SQLITE_TRANSIENT);
 }
+#ifndef SQLITE_OMIT_UTF16
 void sqlite3_result_error16(sqlite3_context *pCtx, const void *z, int n){
   pCtx->isError = 1;
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF16NATIVE, SQLITE_TRANSIENT);
 }
+#endif
 void sqlite3_result_int(sqlite3_context *pCtx, int iVal){
   sqlite3VdbeMemSetInt64(&pCtx->s, (i64)iVal);
 }
@@ -157,7 +159,7 @@ int sqlite3_step(sqlite3_stmt *pStmt){
   int rc;
 
   /* Assert that malloc() has not failed */
-  assert( !sqlite3ThreadDataReadOnly()->mallocFailed );
+  assert( !sqlite3MallocFailed() );
 
   if( p==0 || p->magic!=VDBE_MAGIC_RUN ){
     return SQLITE_MISUSE;
@@ -241,8 +243,8 @@ int sqlite3_step(sqlite3_stmt *pStmt){
   }
 #endif
 
-  sqlite3Error(p->db, rc, p->zErrMsg ? "%s" : 0, p->zErrMsg);
-  sqlite3MallocClearFailed();
+  sqlite3Error(p->db, rc, 0);
+  p->rc = sqlite3ApiExit(p->db, p->rc);
   return rc;
 }
 
@@ -405,10 +407,8 @@ static void columnMallocFailure(sqlite3_stmt *pStmt)
   ** SQLITE_NOMEM. The next call to _step() (if any) will return SQLITE_ERROR
   ** and _finalize() will return NOMEM.
   */
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ){
-    ((Vdbe *)pStmt)->rc = SQLITE_NOMEM;
-    sqlite3MallocClearFailed();
-  }
+  Vdbe *p = (Vdbe *)pStmt;
+  p->rc = sqlite3ApiExit(0, p->rc);
 }
 
 /**************************** sqlite3_column_  *******************************
@@ -503,7 +503,7 @@ static const void *columnName(
   /* A malloc may have failed inside of the xFunc() call. If this is the case,
   ** clear the mallocFailed flag and return NULL.
   */
-  sqlite3MallocClearFailed();
+  sqlite3ApiExit(0, 0);
   return ret;
 }
 
@@ -631,13 +631,12 @@ static int bindText(
   }
   pVar = &p->aVar[i-1];
   rc = sqlite3VdbeMemSetStr(pVar, zData, nData, encoding, xDel);
-  if( rc ){
-    return rc;
-  }
   if( rc==SQLITE_OK && encoding!=0 ){
     rc = sqlite3VdbeChangeEncoding(pVar, ENC(p->db));
   }
-  return rc;
+
+  sqlite3Error(((Vdbe *)pStmt)->db, rc, 0);
+  return sqlite3ApiExit(((Vdbe *)pStmt)->db, rc);
 }
 
 
@@ -781,7 +780,9 @@ int sqlite3_transfer_bindings(sqlite3_stmt *pFromStmt, sqlite3_stmt *pToStmt){
     return SQLITE_ERROR;
   }
   for(i=0; rc==SQLITE_OK && i<pFrom->nVar; i++){
+    sqlite3MallocDisallow();
     rc = sqlite3VdbeMemMove(&pTo->aVar[i], &pFrom->aVar[i]);
+    sqlite3MallocAllow();
   }
   return rc;
 }
