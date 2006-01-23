@@ -25,6 +25,21 @@
     <DocumentationFile>
     </DocumentationFile>
     <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleAssemblies>C:\Program Files\Microsoft Visual Studio 8\Team Tools\Static Analysis Tools\FxCop\\rules</CodeAnalysisRuleAssemblies>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -94,5 +109,6 @@
   </Target>
   -->
   <PropertyGroup>
+    <PostBuildEvent>"$(SolutionDir)bin\tools\mergebin.exe" /p:"$(TargetPath)" &gt;"$(SolutionDir)SQLite.Interop\merge_full.h"</PostBuildEvent>
   </PropertyGroup>
 </Project>

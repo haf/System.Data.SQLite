@@ -203,11 +203,18 @@ void DumpCLRPragma(LPCTSTR pszAssembly, LPCTSTR pszSection)
 #pragma comment(linker, \"/SECTION:%s,ER\")\n\
   char __ph[%d] = {0}; // The number of bytes to reserve\n\
 #pragma data_seg()\n\n\
-#pragma comment(lib, \"mscoree\")\n\n\
-extern BOOL WINAPI _CorDllMain(HANDLE, DWORD, LPVOID);\n\
+typedef BOOL (WINAPI *DLLMAIN)(HANDLE, DWORD, LPVOID);\n\
+extern BOOL WINAPI _DllMainCRTStartup(HANDLE, DWORD, LPVOID);\n\n\
 __declspec(dllexport) BOOL WINAPI _CorDllMainStub(HANDLE hModule, DWORD dwReason, LPVOID pvReserved)\n\
 {\n\
-  return _CorDllMain(hModule, dwReason, pvReserved);\n\
+  HANDLE hMod;\n\
+  DLLMAIN proc;\n\n\
+  hMod = GetModuleHandle(_T(\"mscoree\"));\n\
+  if (hMod)\n\
+    proc = (DLLMAIN)GetProcAddress(hMod, _T(\"_CorDllMain\"));\n\
+  else\n\
+    proc = _DllMainCRTStartup;\n\n\
+  return proc(hModule, dwReason, pvReserved);\n\
 }\n\
 "), pszAssembly, pszSection, pszSection, (dwMaxRVA - dwMinRVA) + ((PIMAGE_COR20_HEADER)peFile)->cb);
 }
@@ -231,10 +238,19 @@ DWORD GetExportedCorDllMainRVA(CPEFile& file)
   DWORD exportsStartRVA;
   DWORD exportsEndRVA;
   CHAR szName[MAX_PATH + 1];
-  PIMAGE_NT_HEADERS pNT = file;
+  PIMAGE_NT_HEADERS32 pNT = file;
+  PIMAGE_NT_HEADERS64 pNT64 = file;
 
-  exportsStartRVA = pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
-  exportsEndRVA = exportsStartRVA + pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
+  if (pNT)
+  {
+    exportsStartRVA = pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+    exportsEndRVA = exportsStartRVA + pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
+  }
+  else
+  {
+    exportsStartRVA = pNT64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+    exportsEndRVA = exportsStartRVA + pNT64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
+  }
 
   header = file.GetEnclosingSectionHeader(exportsStartRVA);
   if (!header)
@@ -283,7 +299,8 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
   DWORD dwSize;
   DWORD dwNewEntrypoint;
   PIMAGE_COR20_HEADER pCor;
-  PIMAGE_NT_HEADERS pNT;
+  PIMAGE_NT_HEADERS32 pNT;
+  PIMAGE_NT_HEADERS64 pNT64;
   int diffRVA;
   CTableData *p;
   DWORD *pdwRVA;
@@ -342,7 +359,12 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
     if (pCor->Flags & 0x10)
     {
       pNT = peDest;
-      pNT->OptionalHeader.AddressOfEntryPoint = pCor->EntryPointToken;
+      pNT64 = peDest;
+
+      if (pNT)
+        pNT->OptionalHeader.AddressOfEntryPoint = pCor->EntryPointToken;
+      else
+        pNT64->OptionalHeader.AddressOfEntryPoint = pCor->EntryPointToken;
     }
   }
 
@@ -352,9 +374,20 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
   pDest = (LPBYTE)peDest.GetPtrFromRVA(dwDestRVA);
   CopyMemory(pDest, pSrc, dwSize);
 
+  pNT = peDest;
+  pNT64 = peDest;
+
   // Fixup the NT header on the native DLL to include the new .NET header
-  ((PIMAGE_NT_HEADERS)peDest)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = pSection->VirtualAddress;
-  ((PIMAGE_NT_HEADERS)peDest)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size = dwSize;
+  if (pNT)
+  {
+    pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = pSection->VirtualAddress;
+    pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size = dwSize;
+  }
+  else
+  {
+    pNT64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = pSection->VirtualAddress;
+    pNT64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size = dwSize;
+  }
   dwDestRVA += dwSize;
   if (dwDestRVA % 4) dwDestRVA += (4 - (dwDestRVA % 4));
 
@@ -366,14 +399,24 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
 
   // Figure out by how much we need to change the RVA's to compensate for the relocation
   diffRVA = dwDestRVA - dwMinRVA;
-  pNT = peDest;
   pCor = peDest;
 
   // Fixup the DLL entrypoints
-  if (pNT->OptionalHeader.AddressOfEntryPoint != dwNewEntrypoint)
+  if (pNT)
   {
-    pCor->EntryPointToken = pNT->OptionalHeader.AddressOfEntryPoint;
-    pNT->OptionalHeader.AddressOfEntryPoint = dwNewEntrypoint;
+    if (pNT->OptionalHeader.AddressOfEntryPoint != dwNewEntrypoint)
+    {
+      pCor->EntryPointToken = pNT->OptionalHeader.AddressOfEntryPoint;
+      pNT->OptionalHeader.AddressOfEntryPoint = dwNewEntrypoint;
+    }
+  }
+  else
+  {
+    if (pNT64->OptionalHeader.AddressOfEntryPoint != dwNewEntrypoint)
+    {
+      pCor->EntryPointToken = pNT64->OptionalHeader.AddressOfEntryPoint;
+      pNT64->OptionalHeader.AddressOfEntryPoint = dwNewEntrypoint;
+    }
   }
   // Adjust the .NET headers to indicate we're a mixed DLL
   pCor->Flags = (pCor->Flags & 0xFFFE) | 0x10;
@@ -406,9 +449,12 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
     }
   }
 
-  // Change the machine type to x86 if its ARM
-  if (pNT->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) 
-    pNT->FileHeader.Machine = IMAGE_FILE_MACHINE_I386;
+  // If this is a CE file, then change the processor to x86
+  if (pNT)
+  {
+    if (pNT->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
+      pNT->FileHeader.Machine = IMAGE_FILE_MACHINE_I386;
+  }
 
   if (pCor->Flags & 0x08)
     _tprintf(_T("WARNING: %s must be re-signed before it can be used!\n"), pszNative);

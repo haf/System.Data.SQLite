@@ -69,6 +69,7 @@ HRESULT CPEFile::Open(LPCTSTR pszFile, BOOL bReadOnly)
         hr = HRESULT_FROM_WIN32(ERROR_BAD_FORMAT);
       }
     }
+    m_bIs64Bit = (m_pNTHeader->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC);
   }
 
   if (FAILED(hr)) Close();
@@ -96,7 +97,12 @@ void CPEFile::Close(void)
 
 PIMAGE_SECTION_HEADER CPEFile::GetEnclosingSectionHeader(DWORD rva) const
 {
-  PIMAGE_SECTION_HEADER section = IMAGE_FIRST_SECTION(m_pNTHeader);
+  PIMAGE_SECTION_HEADER section;
+  
+  if (m_bIs64Bit)
+    section = IMAGE_FIRST_SECTION((PIMAGE_NT_HEADERS64)m_pNTHeader);
+  else
+    section = IMAGE_FIRST_SECTION(m_pNTHeader);
 
   for (UINT i=0; i < m_pNTHeader->FileHeader.NumberOfSections; i++, section++ )
   {
@@ -126,7 +132,12 @@ LPVOID CPEFile::GetPtrFromRVA(DWORD rva) const
 
 PIMAGE_SECTION_HEADER CPEFile::GetSectionHeader(LPCSTR name) const
 {
-  PIMAGE_SECTION_HEADER section = IMAGE_FIRST_SECTION(m_pNTHeader);
+  PIMAGE_SECTION_HEADER section;
+  
+  if (m_bIs64Bit)
+    section = IMAGE_FIRST_SECTION((PIMAGE_NT_HEADERS64)m_pNTHeader);
+  else
+    section = IMAGE_FIRST_SECTION(m_pNTHeader);
 
   for (UINT i=0; i < m_pNTHeader->FileHeader.NumberOfSections; i++, section++)
   {
@@ -137,10 +148,16 @@ PIMAGE_SECTION_HEADER CPEFile::GetSectionHeader(LPCSTR name) const
   return NULL;
 }
 
-CPEFile::operator PIMAGE_NT_HEADERS() const
+CPEFile::operator PIMAGE_NT_HEADERS32() const
 {
-  if (!m_pBase) return NULL;
+  if (!m_pBase || m_bIs64Bit) return NULL;
   return m_pNTHeader;
+}
+
+CPEFile::operator PIMAGE_NT_HEADERS64() const
+{
+  if (!m_pBase || !m_bIs64Bit) return NULL;
+  return (PIMAGE_NT_HEADERS64)m_pNTHeader;
 }
 
 CPEFile::operator PIMAGE_DOS_HEADER() const
@@ -153,7 +170,11 @@ CPEFile::operator PIMAGE_COR20_HEADER() const
   if (!m_pBase) return NULL;
 
   DWORD dwRVA;
-  dwRVA = m_pNTHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
+
+  if (m_bIs64Bit)
+    dwRVA = ((PIMAGE_NT_HEADERS64)m_pNTHeader)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
+  else
+    dwRVA = m_pNTHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
   if (!dwRVA)
   {
     return NULL;
