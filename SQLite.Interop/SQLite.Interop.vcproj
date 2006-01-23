@@ -35,8 +35,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Building SQLite netmodule ..."
-				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;cd ..\System.Data.SQLite&#x0D;&#x0A;resgen /compile SR.resx&#x0D;&#x0A;csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;cd ..\SQLite.Interop&#x0D;&#x0A;"
+				Description="Fixing sources ..."
+				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;rem cd ..\System.Data.SQLite&#x0D;&#x0A;rem resgen /compile SR.resx&#x0D;&#x0A;rem csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;rem cd ..\SQLite.Interop&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -75,14 +75,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib SQLite.netmodule $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
 				OutputFile="../bin/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
-				EmbedManagedResourceFile="&quot;..\System.Data.SQLite\SR.resources,System.Data.SQLite.SR.resources&quot;"
+				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
+				OptimizeForWindows98="1"
 				ImportLibrary=""
 				TargetMachine="1"
-				KeyFile="..\System.Data.SQLite\System.Data.SQLite.snk"
+				KeyFile=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -108,6 +109,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Merging binaries ..."
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -164,11 +167,12 @@
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
 				OutputFile="../bin/CompactFramework/System.Data.SQLite.DLL"
-				AdditionalLibraryDirectories="lib\arm"
+				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames="oldnames.lib"
 				ModuleDefinitionFile="src\sqlite3.def"
 				AddModuleNamesToAssembly=""
 				EmbedManagedResourceFile=""
+				OptimizeForWindows98="1"
 				TargetMachine="3"
 			/>
 			<Tool
@@ -186,7 +190,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\CompactFramework\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
@@ -208,8 +212,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Building SQLite netmodule ..."
-				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;cd ..\System.Data.SQLite&#x0D;&#x0A;resgen /compile SR.resx&#x0D;&#x0A;csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;cd ..\SQLite.Interop&#x0D;&#x0A;"
+				Description="Fixing sources ..."
+				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;rem cd ..\System.Data.SQLite&#x0D;&#x0A;rem resgen /compile SR.resx&#x0D;&#x0A;rem csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;rem cd ..\SQLite.Interop&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -249,14 +253,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib SQLite.netmodule $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
 				OutputFile="../bin/Itanium/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
-				EmbedManagedResourceFile="&quot;..\System.Data.SQLite\SR.resources,System.Data.SQLite.SR.resources&quot;"
+				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
+				OptimizeForWindows98="1"
 				ImportLibrary=""
 				TargetMachine="5"
-				KeyFile="..\System.Data.SQLite\System.Data.SQLite.snk"
+				KeyFile=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -282,6 +287,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Merging binaries ..."
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -295,8 +302,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Building SQLite netmodule ..."
-				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;cd ..\System.Data.SQLite&#x0D;&#x0A;resgen /compile SR.resx&#x0D;&#x0A;csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;cd ..\SQLite.Interop&#x0D;&#x0A;"
+				Description="Fixing sources ..."
+				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;rem cd ..\System.Data.SQLite&#x0D;&#x0A;rem resgen /compile SR.resx&#x0D;&#x0A;rem csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;rem cd ..\SQLite.Interop&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -336,14 +343,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib SQLite.netmodule $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
 				OutputFile="../bin/x64/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
-				EmbedManagedResourceFile="&quot;..\System.Data.SQLite\SR.resources,System.Data.SQLite.SR.resources&quot;"
+				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
+				OptimizeForWindows98="1"
 				ImportLibrary=""
 				TargetMachine="17"
-				KeyFile="..\System.Data.SQLite\System.Data.SQLite.snk"
+				KeyFile=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -369,6 +377,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Merging binaries ..."
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -512,7 +522,7 @@
 				AddModuleNamesToAssembly=""
 				EmbedManagedResourceFile=""
 				GenerateDebugInformation="true"
-				TargetMachine="0"
+				TargetMachine="3"
 			/>
 			<Tool
 				Name="VCALinkTool"
