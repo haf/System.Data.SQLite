@@ -7,10 +7,15 @@
 
 #include "src/sqliteint.h"
 #include "src\os.h"
+#include <tchar.h>
 
-#if _WIN32_WCE && NDEBUG
+#if NDEBUG
+#if _WIN32_WCE
 #include "merge.h"
-#endif
+#else
+#include "merge_full.h"
+#endif // _WIN32_WCE
+#endif // NDEBUG
 
 // Forward declare this function, we're implementing it later
 static void generateColumnNames(
