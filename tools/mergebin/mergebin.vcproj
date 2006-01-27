@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(ProjectName).exe"
+				OutputFile="..\..\bin\tools\$(ProjectName).exe"
 				LinkIncremental="1"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"

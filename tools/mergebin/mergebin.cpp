@@ -14,6 +14,11 @@ void DumpCLRInfo(LPCTSTR pszFile);
 void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection);
 void DumpCLRPragma(LPCTSTR pszAssembly, LPCTSTR pszSection);
 
+typedef struct EXTRA_STUFF
+{
+  DWORD dwNativeEntryPoint;
+} EXTRA_STUFF, *LPEXTRA_STUFF;
+
 int _tmain(int argc, _TCHAR* argv[])
 {
   if (argc == 1)
@@ -175,7 +180,7 @@ void DumpCLRInfo(LPCTSTR pszFile)
     return;
   }
 
-  _tprintf(_T("%d Bytes required to merge %s\n"), (dwMaxRVA - dwMinRVA) + ((PIMAGE_COR20_HEADER)peFile)->cb, pszFile);
+  _tprintf(_T("%d Bytes required to merge %s\n"), (dwMaxRVA - dwMinRVA) + ((PIMAGE_COR20_HEADER)peFile)->cb + sizeof(EXTRA_STUFF), pszFile);
 }
 
 void DumpCLRPragma(LPCTSTR pszAssembly, LPCTSTR pszSection)
@@ -204,19 +209,28 @@ void DumpCLRPragma(LPCTSTR pszAssembly, LPCTSTR pszSection)
   char __ph[%d] = {0}; // The number of bytes to reserve\n\
 #pragma data_seg()\n\n\
 typedef BOOL (WINAPI *DLLMAIN)(HANDLE, DWORD, LPVOID);\n\
-extern BOOL WINAPI _DllMainCRTStartup(HANDLE, DWORD, LPVOID);\n\n\
+typedef struct EXTRA_STUFF\n\
+{\n\
+  DWORD dwNativeEntryPoint;\n\
+} EXTRA_STUFF, *LPEXTRA_STUFF;\n\n\
 __declspec(dllexport) BOOL WINAPI _CorDllMainStub(HANDLE hModule, DWORD dwReason, LPVOID pvReserved)\n\
 {\n\
   HANDLE hMod;\n\
-  DLLMAIN proc;\n\n\
+  DLLMAIN proc;\n\
+  LPEXTRA_STUFF pExtra;\n\n\
   hMod = GetModuleHandle(_T(\"mscoree\"));\n\
   if (hMod)\n\
     proc = (DLLMAIN)GetProcAddress(hMod, _T(\"_CorDllMain\"));\n\
   else\n\
-    proc = _DllMainCRTStartup;\n\n\
+  {\n\
+    MEMORY_BASIC_INFORMATION mbi;\n\n\
+    VirtualQuery(_CorDllMainStub, &mbi, sizeof(mbi));\n\
+    pExtra = (LPEXTRA_STUFF)__ph;\n\
+    proc = (DLLMAIN)(pExtra->dwNativeEntryPoint + (DWORD)mbi.AllocationBase);\n\
+  }\n\
   return proc(hModule, dwReason, pvReserved);\n\
 }\n\
-"), pszAssembly, pszSection, pszSection, (dwMaxRVA - dwMinRVA) + ((PIMAGE_COR20_HEADER)peFile)->cb);
+"), pszAssembly, pszSection, pszSection, (dwMaxRVA - dwMinRVA) + ((PIMAGE_COR20_HEADER)peFile)->cb + sizeof(EXTRA_STUFF));
 }
 
 /*   When merged, the native DLL's entrypoint must go to _CorDllMain in MSCOREE.DLL.
@@ -305,6 +319,7 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
   CTableData *p;
   DWORD *pdwRVA;
   DWORD dwRows;
+  LPEXTRA_STUFF pExtra;
 
   // Open the .NET assembly
   hr = peFile.Open(pszAssembly);
@@ -332,9 +347,9 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
   }
 
   // If the section isn't large enough, tell the user how large it needs to be
-  if (pSection->Misc.VirtualSize < dwSize)
+  if (pSection->Misc.VirtualSize < (dwSize + sizeof(EXTRA_STUFF)))
   {
-    _tprintf(_T("Not enough room in section for data.  Need %d bytes\n"), dwSize);
+    _tprintf(_T("Not enough room in section for data.  Need %d bytes\n"), dwSize + sizeof(EXTRA_STUFF));
     return;
   }
 
@@ -351,6 +366,9 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
   // Change this section's flags
   pSection->Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ;
   dwDestRVA = pSection->VirtualAddress;
+
+  pExtra = (LPEXTRA_STUFF)peDest.GetPtrFromRVA(dwDestRVA);
+  dwDestRVA += sizeof(EXTRA_STUFF);
 
   // If the native DLL has been merged with an assembly beforehand, we need to strip the .NET stuff and restore the entrypoint
   pCor = peDest;
@@ -380,12 +398,14 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
   // Fixup the NT header on the native DLL to include the new .NET header
   if (pNT)
   {
-    pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = pSection->VirtualAddress;
+    pExtra->dwNativeEntryPoint = pNT->OptionalHeader.AddressOfEntryPoint;
+    pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = dwDestRVA;
     pNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size = dwSize;
   }
   else
   {
-    pNT64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = pSection->VirtualAddress;
+    pExtra->dwNativeEntryPoint = pNT64->OptionalHeader.AddressOfEntryPoint;
+    pNT64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = dwDestRVA;
     pNT64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size = dwSize;
   }
   dwDestRVA += dwSize;
