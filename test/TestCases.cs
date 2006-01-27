@@ -2,6 +2,7 @@
 using System.Data.Common;
 using System.Data;
 using System.Data.SQLite;
+using System.Transactions;
 
 namespace test
 {
@@ -70,6 +71,9 @@ namespace test
       try { CreateTable(cnn); Console.WriteLine("SUCCESS - CreateTable"); }
       catch (Exception) { Console.WriteLine("FAIL - CreateTable"); }
 
+      try { TransactionTest(cnn); Console.WriteLine("SUCCESS - Transaction Enlistment"); }
+      catch (Exception) { Console.WriteLine("FAIL - Transaction Enlistment"); }
+
       try { InsertTable(cnn); Console.WriteLine("SUCCESS - InsertTable"); }
       catch (Exception) { Console.WriteLine("FAIL - InsertTable"); }
 
@@ -122,6 +126,42 @@ namespace test
       catch (Exception) { Console.WriteLine("FAIL - DropTable"); }
 
       Console.WriteLine("\r\nTests Finished.");
+    }
+
+    internal static void TransactionTest(DbConnection cnn)
+    {
+      using (TransactionScope scope = new TransactionScope())
+      {
+        cnn.EnlistTransaction(Transaction.Current);
+
+        using (DbCommand cmd = cnn.CreateCommand())
+        {
+          cmd.CommandText = "CREATE TABLE VolatileTable (ID INTEGER PRIMARY KEY, MyValue VARCHAR(50))";
+          cmd.ExecuteNonQuery();
+          using (DbCommand cmd2 = cnn.CreateCommand())
+          {
+            using (cmd2.Transaction = cnn.BeginTransaction())
+            {
+              cmd2.CommandText = "INSERT INTO VolatileTable (ID, MyValue) VALUES(1, 'Hello')";
+              cmd2.ExecuteNonQuery();
+              cmd2.Transaction.Commit();
+            }
+          }
+        }
+      }
+      using (DbCommand cmd = cnn.CreateCommand())
+      {
+        cmd.CommandText = "SELECT COUNT(*) FROM VolatileTable";
+        try
+        {
+          object o = cmd.ExecuteScalar();
+          throw new InvalidOperationException("Transaction failed! The table exists!");
+        }
+        catch(SQLiteException e)
+        {
+          return; // Succeeded, the table should not have existed
+        }
+      }
     }
 
     internal static void CreateTable(DbConnection cnn)
