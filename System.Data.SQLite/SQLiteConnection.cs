@@ -92,6 +92,12 @@ namespace System.Data.SQLite
   /// <description>N</description>
   /// <description></description>
   /// </item>
+  /// <item>
+  /// <description>Enlist</description>
+  /// <description><B>Y</B> - Automatically enlist in distributed transactions<br/><b>N</b> - No automatic enlistment</description>
+  /// <description>N</description>
+  /// <description>Y</description>
+  /// </item>
   /// </list>
   /// </remarks>
   public sealed class SQLiteConnection : DbConnection, ICloneable
@@ -473,6 +479,12 @@ namespace System.Data.SQLite
     /// <description>{password}</description>
     /// <description>N</description>
     /// <description></description>
+    /// </item>
+    /// <item>
+    /// <description>Enlist</description>
+    /// <description><B>Y</B> - Automatically enlist in distributed transactions<br/><b>N</b> - No automatic enlistment</description>
+    /// <description>N</description>
+    /// <description>Y</description>
     /// </item>
     /// </list>
     /// </remarks>

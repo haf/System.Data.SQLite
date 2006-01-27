@@ -163,6 +163,9 @@ namespace System.Data.SQLite
     /// If you implemented your aggregate function properly,
     /// you've been recording and keeping track of your data in the contextData object provided, and now at this stage you should have
     /// all the information you need in there to figure out what to return.
+    /// NOTE:  It is possible to arrive here without receiving a previous call to Step(), in which case the contextData will
+    /// be null.  This can happen when no rows were returned.  You can either return null, or 0 or some other custom return value
+    /// if that is the case.
     /// </remarks>
     /// <param name="contextData">Your own assigned contextData, provided for you so you can return your final results.</param>
     /// <returns>You may return most simple types as a return value, null or DBNull.Value to return null, DateTime, or
