@@ -139,6 +139,26 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Determines whether or not the connection will automatically participate
+    /// in the current distributed transaction (if one exists)
+    /// </summary>
+    [DisplayName("Automatic Enlistment")]
+    [Browsable(true)]
+    [DefaultValue(true)]
+    public bool Enlist
+    {
+      get
+      {
+        if (ContainsKey("Enlist") == false) return true;
+
+        return (this["Enlist"].ToString() == "Y");
+      }
+      set
+      {
+        this["Enlist"] = (value == true) ? "Y" : "N";
+      }
+    }
+    /// <summary>
     /// Gets/sets the database encryption password
     /// </summary>
     [Browsable(true)]
