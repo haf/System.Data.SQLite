@@ -28,19 +28,22 @@ namespace System.Data.SQLite
     /// <param name="deferredLock">TRUE to defer the writelock, or FALSE to lock immediately</param>
     internal SQLiteTransaction(SQLiteConnection cnn, bool deferredLock)
     {
-      try
+      _cnn = cnn;
+      if (_cnn._transactionLevel++ == 0)
       {
-        if (!deferredLock)
-          cnn._sql.Execute("BEGIN IMMEDIATE");
-        else
-          cnn._sql.Execute("BEGIN");
-
-        _cnn = cnn;
-      }
-      catch (SQLiteException)
-      {
-        BaseDispose();
-        throw;
+        try
+        {
+          if (!deferredLock)
+            cnn._sql.Execute("BEGIN IMMEDIATE");
+          else
+            cnn._sql.Execute("BEGIN");
+        }
+        catch (SQLiteException)
+        {
+          _cnn._transactionLevel--;
+          _cnn = null;
+          throw;
+        }
       }
     }
 
@@ -49,19 +52,23 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Commit()
     {
-      if (_cnn == null)
-        throw new ArgumentNullException();
+      IsValid();
 
-      try
+      if (--_cnn._transactionLevel == 0)
       {
-        _cnn._sql.Execute("COMMIT");
+        try
+        {
+          _cnn._sql.Execute("COMMIT");
+        }
+        finally
+        {
+          _cnn = null;
+        }
       }
-      catch (SQLiteException)
+      else
       {
-        BaseDispose();
-        throw;
+        _cnn = null;
       }
-      BaseDispose();
     }
 
     /// <summary>
@@ -88,8 +95,6 @@ namespace System.Data.SQLite
       if (_cnn != null) 
         Rollback();
 
-      _cnn = null;
-
       base.Dispose(disposing);
     }
 
@@ -106,25 +111,29 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Rollback()
     {
-      if (_cnn == null)
-        throw new ArgumentNullException();
+      IsValid();
 
       try
       {
         _cnn._sql.Execute("ROLLBACK");
+        _cnn._transactionLevel = 0;
       }
-      catch (SQLiteException)
+      finally
       {
-        BaseDispose();
-        throw;
+        _cnn = null;
       }
-      BaseDispose();
     }
 
-    private void BaseDispose()
+    internal void IsValid()
     {
-      _cnn._activeTransaction = null;
-      _cnn = null;
+      if (_cnn == null)
+        throw new ArgumentNullException("No connection associated with this transaction");
+
+      if (_cnn._transactionLevel == 0)
+      {
+        _cnn = null;
+        throw new SQLiteException((int)SQLiteErrorCode.Misuse, "No transactions active on this connection");
+      }
     }
   }
 }

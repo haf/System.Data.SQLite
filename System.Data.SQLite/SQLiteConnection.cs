@@ -105,9 +105,13 @@ namespace System.Data.SQLite
     /// </summary>
     private string              _connectionString;
     /// <summary>
-    /// One transaction allowed per connection please!
+    /// Nesting level of the transactions open on the connection
     /// </summary>
-    internal SQLiteTransaction  _activeTransaction;
+    internal int                 _transactionLevel;
+    /// <summary>
+    /// Whether or not the connection is enlisted in a distrubuted transaction
+    /// </summary>
+    internal bool                _enlisted;
     /// <summary>
     /// The base SQLite object to interop with
     /// </summary>
@@ -207,7 +211,8 @@ namespace System.Data.SQLite
       _sql = null;
       _connectionState = ConnectionState.Closed;
       _connectionString = "";
-      _activeTransaction = null;
+      _transactionLevel = 0;
+      _enlisted = false;
       _commandList = new List<SQLiteCommand>();
 
       if (connectionString != null)
@@ -349,11 +354,7 @@ namespace System.Data.SQLite
       if (_connectionState != ConnectionState.Open)
         throw new InvalidOperationException();
 
-      if (_activeTransaction != null)
-        throw new ArgumentException("Transaction already pending");
-
-      _activeTransaction = new SQLiteTransaction(this, deferredLock);
-      return _activeTransaction;
+      return new SQLiteTransaction(this, deferredLock);
     }
 
     /// <summary>
@@ -566,6 +567,19 @@ namespace System.Data.SQLite
       return ar;
     }
 
+#if !PLATFORM_COMPACTFRAMEWORK
+    public override void EnlistTransaction(System.Transactions.Transaction transaction)
+    {
+      if (_transactionLevel > 0 && transaction != null)
+        throw new ArgumentException("Unable to enlist in transaction, a local transaction already exists");
+
+      if (_enlisted == true)
+        throw new ArgumentException("Already enlisted in a transaction");
+
+      transaction.EnlistVolatile(new SQLiteEnlistment(this), System.Transactions.EnlistmentOptions.None);
+    }
+#endif
+
     /// <summary>
     /// Looks for a key in the array of key/values of the parameter string.  If not found, return the specified default value
     /// </summary>
@@ -629,6 +643,11 @@ namespace System.Data.SQLite
         _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Cache_Size={0}", FindKey(opts, "Cache Size", "2000")));
         if (String.Compare(":MEMORY:", strFile, true, CultureInfo.InvariantCulture) == 0)
           _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Page_Size={0}", FindKey(opts, "Page Size", "1024")));
+
+#if !PLATFORM_COMPACTFRAMEWORK
+        if (FindKey(opts, "Enlist", "Y").ToUpper()[0] == 'Y' && Transactions.Transaction.Current != null)
+          EnlistTransaction(Transactions.Transaction.Current);
+#endif
       }
       catch (SQLiteException)
       {

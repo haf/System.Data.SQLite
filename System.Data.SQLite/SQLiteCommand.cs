@@ -53,6 +53,10 @@ namespace System.Data.SQLite
     /// Unprocessed SQL text that has not been executed
     /// </summary>
     internal string _remainingText;
+    /// <summary>
+    /// Transaction associated with this command
+    /// </summary>
+    private SQLiteTransaction _transaction;
 
     ///<overloads>
     /// Constructs a new SQLiteCommand
@@ -119,6 +123,7 @@ namespace System.Data.SQLite
       _parameterCollection = new SQLiteParameterCollection(this);
       _designTimeVisible = true;
       _updateRowSource = UpdateRowSource.FirstReturnedRecord;
+      _transaction = null;
 
       if (strSql != null)
         CommandText = strSql;
@@ -352,13 +357,20 @@ namespace System.Data.SQLite
     /// </summary>
     public new SQLiteTransaction Transaction
     {
-      get { return _cnn._activeTransaction; }
+      get { return _transaction; }
       set
       {
         if (_cnn != null)
         {
-          if (value != _cnn._activeTransaction && value != null)
-            throw new ArgumentOutOfRangeException("SQLiteTransaction", "Transaction is for a different connection than the one associated with this Command");
+          if (_isReaderOpen)
+            throw new InvalidOperationException("Cannot set Transaction while a DataReader is active");
+
+          if (value != null)
+          {
+            if (value._cnn != _cnn)
+              throw new ArgumentException("Transaction is not associated with the command's connection");
+          }
+          _transaction = value;
         }
         else if (value != null)
           throw new ArgumentOutOfRangeException("SQLiteTransaction", "Not associated with a connection");
