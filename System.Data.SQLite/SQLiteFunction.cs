@@ -338,7 +338,7 @@ namespace System.Data.SQLite
       nAux = _base.AggregateContext(context);
       if (n > 1) obj = _contextDataList[nAux];
 
-      Step(ConvertParams(nArgs, argsptr), _base.AggregateCount(context), ref obj);
+      Step(ConvertParams(nArgs, argsptr), n, ref obj);
       _contextDataList[nAux] = obj;      
     }
 
@@ -351,10 +351,15 @@ namespace System.Data.SQLite
     internal void FinalCallback(int context, int nArgs, IntPtr argsptr)
     {
       int n = _base.AggregateContext(context);
-      object obj = _contextDataList[n];
+      object obj = null;
+
+      if (_contextDataList.ContainsKey(n))
+      {
+        obj = _contextDataList[n];
+        _contextDataList.Remove(n);
+      }
 
       SetReturnValue(context, Final(obj));
-      _contextDataList.Remove(n);
 
       IDisposable disp = obj as IDisposable;
       if (disp != null) disp.Dispose();
