@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1701;1702;1699</NoWarn>
+    <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -36,20 +37,30 @@
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.Data, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Microsoft Visual Studio 8\Common7\IDE\Microsoft.VisualStudio.Data.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\VSNET2005\Common7\IDE\Microsoft.VisualStudio.Data.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SQLiteConnectionUIControl.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SQLiteConnectionUIControl.Designer.cs">
+      <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SQLiteDataConnectionSupport.cs" />
     <Compile Include="SQLiteDataObjectIdentifierResolver.cs" />
+    <Compile Include="SQLiteDataObjectSupport.cs" />
     <Compile Include="SQLiteDataSourceInformation.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="SQLiteDataViewSupport.cs" />
     <Compile Include="SR.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -57,10 +68,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="SQLiteDataViewSupport.xml" />
     <EmbeddedResource Include="SR.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SR.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SQLiteConnectionUIControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SQLiteDataObjectSupport.xml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
