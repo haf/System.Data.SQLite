@@ -93,7 +93,7 @@ namespace System.Data.SQLite
       int n = UnsafeNativeMethods.sqlite3_exec_interop(_sql, ToUTF8(strSql), 0, 0, out p, out len);
       if (p != IntPtr.Zero)
       {
-        str = ToString(p, len);
+        str = base.ToString(p, len);
         UnsafeNativeMethods.sqlite3_free_interop(p);
       }
       if (n > 0) throw new SQLiteException(n, str);

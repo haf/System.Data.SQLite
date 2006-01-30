@@ -129,8 +129,11 @@ namespace System.Data.SQLite
     /// <summary>
     /// The database filename minus path and extension
     /// </summary>
-    private string _dataSource;
-
+    private string                _dataSource;
+    /// <summary>
+    /// Temporary password storage, emptied after the database has been opened
+    /// </summary>
+    private byte[]                _password;
     /// <event/>
     /// <summary>
     /// This event is raised whenever the database is opened or closed.
@@ -623,14 +626,18 @@ namespace System.Data.SQLite
       Close();
 
       KeyValuePair<string, string>[] opts = ParseConnectionString();
+      string fileName;
 
       if (Convert.ToInt32(FindKey(opts, "Version", "3"), CultureInfo.InvariantCulture) != 3)
         throw new NotSupportedException("Only SQLite Version 3 is supported at this time");
 
-      string strFile = FindKey(opts, "Data Source", "");
+      fileName = FindKey(opts, "Data Source", "");
 
-      if (String.IsNullOrEmpty(strFile))
-        throw new ArgumentException("Data Source cannot be empty.  Use :MEMORY: to open an in-memory database");
+      if (String.IsNullOrEmpty(fileName))
+        throw new ArgumentException("Data Source cannot be empty.  Use :memory: to open an in-memory database");
+
+      if (String.Compare(fileName, ":MEMORY:", true, CultureInfo.InvariantCulture) == 0)
+        fileName = ":memory:";
 
       try
       {
@@ -641,19 +648,31 @@ namespace System.Data.SQLite
           _sql = new SQLite3_UTF16(dateFormat);
         else
           _sql = new SQLite3(dateFormat);
-        
-        _sql.Open(strFile);
+
+        try
+        {
+          if (IO.File.Exists(fileName) == false)
+            throw new IO.FileNotFoundException(String.Format(CultureInfo.CurrentCulture, "Unable to locate file \"{0}\", creating new database.", fileName));
+        }
+        catch
+        {
+        }
+
+        _sql.Open(fileName);
 
         string password = FindKey(opts, "Password", null);
 
         if (String.IsNullOrEmpty(password) == false)
-          _sql.SetPassword(String.IsNullOrEmpty(password) ? null : System.Text.UTF8Encoding.UTF8.GetBytes(password));
+          _sql.SetPassword(System.Text.UTF8Encoding.UTF8.GetBytes(password));
+        else if (_password != null)
+          _sql.SetPassword(_password);
+        _password = null;
 
-        _dataSource = System.IO.Path.GetFileNameWithoutExtension(strFile);
+        _dataSource = System.IO.Path.GetFileNameWithoutExtension(fileName);
 
         _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Synchronous={0}", FindKey(opts, "Synchronous", "Normal")));
         _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Cache_Size={0}", FindKey(opts, "Cache Size", "2000")));
-        if (String.Compare(":MEMORY:", strFile, true, CultureInfo.InvariantCulture) == 0)
+        if (fileName != ":memory:")
           _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Page_Size={0}", FindKey(opts, "Page Size", "1024")));
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -718,7 +737,7 @@ namespace System.Data.SQLite
     public void ChangePassword(byte[] newPassword)
     {
       if (_connectionState != ConnectionState.Open)
-        throw new InvalidOperationException();
+        throw new InvalidOperationException("Database must be opened before changing the password.");
 
       _sql.ChangePassword(newPassword);
     }
@@ -740,10 +759,13 @@ namespace System.Data.SQLite
     /// <param name="databasePassword">The password for the database</param>
     public void SetPassword(byte[] databasePassword)
     {
-      if (_connectionState != ConnectionState.Open)
-        throw new InvalidOperationException();
+      if (_connectionState != ConnectionState.Closed)
+        throw new InvalidOperationException("Password can only be set before the database is opened.");
 
-      _sql.SetPassword(databasePassword);
+      if (databasePassword != null)
+        if (databasePassword.Length == 0) databasePassword = null;
+
+      _password = databasePassword;
     }
 
     ///<overloads>
