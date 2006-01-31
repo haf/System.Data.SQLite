@@ -40,6 +40,7 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <ErrorReport>prompt</ErrorReport>
     <FileAlignment>512</FileAlignment>
+    <DocumentationFile>bin\System.Data.SQLite.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -72,6 +73,7 @@
     <Compile Include="SQLiteFactory.cs" />
     <Compile Include="SQLiteFunction.cs" />
     <Compile Include="SQLiteFunctionAttribute.cs" />
+    <Compile Include="SQLiteMetaDataCollectionNames.cs" />
     <Compile Include="SQLiteParameter.cs" />
     <Compile Include="SQLiteParameterCollection.cs" />
     <Compile Include="SQLiteStatement.cs" />

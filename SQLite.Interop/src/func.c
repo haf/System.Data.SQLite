@@ -16,7 +16,7 @@
 ** sqliteRegisterBuildinFunctions() found at the bottom of the file.
 ** All other code has file scope.
 **
-** $Id: func.c,v 1.18 2006/01/23 19:45:55 rmsimpson Exp $
+** $Id: func.c,v 1.19 2006/01/31 19:16:13 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include <ctype.h>

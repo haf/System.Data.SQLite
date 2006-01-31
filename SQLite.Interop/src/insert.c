@@ -12,7 +12,7 @@
 ** This file contains C code routines that are called by the parser
 ** to handle INSERT statements in SQLite.
 **
-** $Id: insert.c,v 1.16 2006/01/23 19:45:55 rmsimpson Exp $
+** $Id: insert.c,v 1.17 2006/01/31 19:16:13 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 
@@ -297,20 +297,20 @@ void sqlite3Insert(
   */
   if( pTab->autoInc ){
     int iCur = pParse->nTab;
-    int base = sqlite3VdbeCurrentAddr(v);
+    int addr = sqlite3VdbeCurrentAddr(v);
     counterRowid = pParse->nMem++;
     counterMem = pParse->nMem++;
     sqlite3OpenTable(pParse, iCur, iDb, pDb->pSchema->pSeqTab, OP_OpenRead);
-    sqlite3VdbeAddOp(v, OP_Rewind, iCur, base+13);
+    sqlite3VdbeAddOp(v, OP_Rewind, iCur, addr+13);
     sqlite3VdbeAddOp(v, OP_Column, iCur, 0);
     sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->zName, 0);
-    sqlite3VdbeAddOp(v, OP_Ne, 0x100, base+12);
+    sqlite3VdbeAddOp(v, OP_Ne, 0x100, addr+12);
     sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
     sqlite3VdbeAddOp(v, OP_MemStore, counterRowid, 1);
     sqlite3VdbeAddOp(v, OP_Column, iCur, 1);
     sqlite3VdbeAddOp(v, OP_MemStore, counterMem, 1);
-    sqlite3VdbeAddOp(v, OP_Goto, 0, base+13);
-    sqlite3VdbeAddOp(v, OP_Next, iCur, base+4);
+    sqlite3VdbeAddOp(v, OP_Goto, 0, addr+13);
+    sqlite3VdbeAddOp(v, OP_Next, iCur, addr+4);
     sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
   }
 #endif /* SQLITE_OMIT_AUTOINCREMENT */
@@ -680,10 +680,10 @@ void sqlite3Insert(
   */
   if( pTab->autoInc ){
     int iCur = pParse->nTab;
-    int base = sqlite3VdbeCurrentAddr(v);
+    int addr = sqlite3VdbeCurrentAddr(v);
     sqlite3OpenTable(pParse, iCur, iDb, pDb->pSchema->pSeqTab, OP_OpenWrite);
     sqlite3VdbeAddOp(v, OP_MemLoad, counterRowid, 0);
-    sqlite3VdbeAddOp(v, OP_NotNull, -1, base+7);
+    sqlite3VdbeAddOp(v, OP_NotNull, -1, addr+7);
     sqlite3VdbeAddOp(v, OP_Pop, 1, 0);
     sqlite3VdbeAddOp(v, OP_NewRowid, iCur, 0);
     sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->zName, 0);

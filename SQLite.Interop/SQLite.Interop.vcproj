@@ -497,6 +497,7 @@
 				FavorSizeOrSpeed="0"
 				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC"
 				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool

@@ -43,7 +43,7 @@
 ** in this file for details.  If in doubt, do not deviate from existing
 ** commenting and indentation practices when changing or adding code.
 **
-** $Id: vdbe.c,v 1.17 2006/01/23 19:45:56 rmsimpson Exp $
+** $Id: vdbe.c,v 1.18 2006/01/31 19:16:13 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -2463,6 +2463,11 @@ case OP_SetCookie: {       /* no-push */
   }
   assert( (pTos->flags & MEM_Dyn)==0 );
   pTos--;
+  if( pOp->p1==1 ){
+    /* Invalidate all prepared statements whenever the TEMP database
+    ** schema is changed.  Ticket #1644 */
+    sqlite3ExpirePreparedStatements(db);
+  }
   break;
 }
 
@@ -2971,7 +2976,7 @@ case OP_IsUnique: {        /* no-push */
   assert( pCx!=0 );
   pCrsr = pCx->pCursor;
   if( pCrsr!=0 ){
-    int res, rc;
+    int res;
     i64 v;         /* The record number on the P1 entry that matches K */
     char *zKey;    /* The value of K */
     int nKey;      /* Number of bytes in K */
@@ -2993,7 +2998,9 @@ case OP_IsUnique: {        /* no-push */
     assert( pCx->deferredMoveto==0 );
     pCx->cacheStatus = CACHE_STALE;
     rc = sqlite3BtreeMoveto(pCrsr, zKey, len, &res);
-    if( rc!=SQLITE_OK ) goto abort_due_to_error;
+    if( rc!=SQLITE_OK ){
+      goto abort_due_to_error;
+    }
     if( res<0 ){
       rc = sqlite3BtreeNext(pCrsr, &res);
       if( res ){

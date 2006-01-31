@@ -9,7 +9,7 @@
 **    May you share freely, never taking more than you give.
 **
 *************************************************************************
-** $Id: btree.c,v 1.18 2006/01/23 19:45:55 rmsimpson Exp $
+** $Id: btree.c,v 1.19 2006/01/31 19:16:13 rmsimpson Exp $
 **
 ** This file implements a external (disk-based) database using BTrees.
 ** For a detailed discussion of BTrees, refer to
@@ -560,7 +560,8 @@ static int saveAllCursors(BtShared *pBt, Pgno iRoot, BtCursor *pExcept){
   BtCursor *p;
   if( sqlite3ThreadDataReadOnly()->useSharedData ){
     for(p=pBt->pCursor; p; p=p->pNext){
-      if( p!=pExcept && p->pgnoRoot==iRoot && p->eState==CURSOR_VALID ){
+      if( p!=pExcept && (0==iRoot || p->pgnoRoot==iRoot) && 
+          p->eState==CURSOR_VALID ){
         int rc = saveCursorPosition(p);
         if( SQLITE_OK!=rc ){
           return rc;
@@ -1692,9 +1693,6 @@ int sqlite3BtreeClose(Btree *p){
   ThreadData *pTsd;
 #endif
 
-  /* Drop any table-locks */
-  unlockAllTables(p);
-
   /* Close all cursors opened via this handle.  */
   pCur = pBt->pCursor;
   while( pCur ){
@@ -1705,7 +1703,10 @@ int sqlite3BtreeClose(Btree *p){
     }
   }
 
-  /* Rollback any active transaction and free the handle structure */
+  /* Rollback any active transaction and free the handle structure.
+  ** The call to sqlite3BtreeRollback() drops any table-locks held by
+  ** this handle.
+  */
   sqlite3BtreeRollback(p);
   sqliteFree(p);
 
@@ -2537,17 +2538,40 @@ void sqlite3BtreeCursorList(Btree *p){
 ** are no active cursors, it also releases the read lock.
 */
 int sqlite3BtreeRollback(Btree *p){
-  int rc = SQLITE_OK;
+  int rc;
   BtShared *pBt = p->pBt;
   MemPage *pPage1;
 
+  rc = saveAllCursors(pBt, 0, 0);
+#ifndef SQLITE_OMIT_SHARED_CACHE
+  if( rc!=SQLITE_OK ){
+    /* This is a horrible situation. An IO or malloc() error occured whilst
+    ** trying to save cursor positions. If this is an automatic rollback (as
+    ** the result of a constraint, malloc() failure or IO error) then 
+    ** the cache may be internally inconsistent (not contain valid trees) so
+    ** we cannot simply return the error to the caller. Instead, abort 
+    ** all queries that may be using any of the cursors that failed to save.
+    */
+    while( pBt->pCursor ){
+      sqlite3 *db = pBt->pCursor->pBtree->pSqlite;
+      if( db ){
+        sqlite3AbortOtherActiveVdbes(db, 0);
+      }
+    }
+  }
+#endif
   btreeIntegrity(p);
   unlockAllTables(p);
 
   if( p->inTrans==TRANS_WRITE ){
-    assert( TRANS_WRITE==pBt->inTransaction );
+    int rc2;
 
-    rc = sqlite3pager_rollback(pBt->pPager);
+    assert( TRANS_WRITE==pBt->inTransaction );
+    rc2 = sqlite3pager_rollback(pBt->pPager);
+    if( rc2!=SQLITE_OK ){
+      rc = rc2;
+    }
+
     /* The rollback may have destroyed the pPage1->aData value.  So
     ** call getPage() on page 1 again to make sure pPage1->aData is
     ** set correctly. */

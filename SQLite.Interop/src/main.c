@@ -14,7 +14,7 @@
 ** other files are for internal use by SQLite and should not be
 ** accessed by users of the library.
 **
-** $Id: main.c,v 1.16 2006/01/23 19:45:55 rmsimpson Exp $
+** $Id: main.c,v 1.17 2006/01/31 19:16:13 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -131,9 +131,6 @@ int sqlite3_close(sqlite3 *db){
     return SQLITE_ERROR;
   }
 
-  /* sqlite3_close() may not invoke sqliteMalloc(). */
-  sqlite3MallocDisallow();
-
   for(j=0; j<db->nDb; j++){
     struct Db *pDb = &db->aDb[j];
     if( pDb->pBt ){
@@ -177,7 +174,6 @@ int sqlite3_close(sqlite3 *db){
   */
   sqliteFree(db->aDb[1].pSchema);
   sqliteFree(db);
-  sqlite3MallocAllow();
   sqlite3ReleaseThreadData();
   return SQLITE_OK;
 }
@@ -1088,23 +1084,21 @@ int sqlite3Corrupt(void){
 */
 int sqlite3_enable_shared_cache(int enable){
   ThreadData *pTd = sqlite3ThreadData();
-  if( !pTd ){
-    return SQLITE_NOMEM;
-  }
-  
-  /* It is only legal to call sqlite3_enable_shared_cache() when there
-  ** are no currently open b-trees that were opened by the calling thread.
-  ** This condition is only easy to detect if the shared-cache were 
-  ** previously enabled (and is being disabled). 
-  */
-  if( pTd->pBtree && !enable ){
-    assert( pTd->useSharedData );
-    return SQLITE_MISUSE;
-  }
+  if( pTd ){
+    /* It is only legal to call sqlite3_enable_shared_cache() when there
+    ** are no currently open b-trees that were opened by the calling thread.
+    ** This condition is only easy to detect if the shared-cache were 
+    ** previously enabled (and is being disabled). 
+    */
+    if( pTd->pBtree && !enable ){
+      assert( pTd->useSharedData );
+      return SQLITE_MISUSE;
+    }
 
-  pTd->useSharedData = enable;
-  sqlite3ReleaseThreadData();
-  return SQLITE_OK;
+    pTd->useSharedData = enable;
+    sqlite3ReleaseThreadData();
+  }
+  return sqlite3ApiExit(0, SQLITE_OK);
 }
 #endif
 

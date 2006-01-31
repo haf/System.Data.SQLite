@@ -583,6 +583,10 @@ namespace System.Data.SQLite
     }
 
 #if !PLATFORM_COMPACTFRAMEWORK
+    /// <summary>
+    /// Manual distributed transaction enlistment support
+    /// </summary>
+    /// <param name="transaction">The distributed transaction to enlist in</param>
     public override void EnlistTransaction(System.Transactions.Transaction transaction)
     {
       if (_transactionLevel > 0 && transaction != null)
@@ -778,10 +782,19 @@ namespace System.Data.SQLite
     /// <description>DataSourceInformation</description>
     /// </item>
     /// <item>
+    /// <description>Catalogs</description>
+    /// </item>
+    /// <item>
     /// <description>Columns</description>
     /// </item>
     /// <item>
+    /// <description>ForeignKeys</description>
+    /// </item>
+    /// <item>
     /// <description>Indexes</description>
+    /// </item>
+    /// <item>
+    /// <description>IndexColumns</description>
     /// </item>
     /// <item>
     /// <description>Tables</description>
@@ -790,7 +803,7 @@ namespace System.Data.SQLite
     /// <description>Views</description>
     /// </item>
     /// <item>
-    /// <description>Catalogs</description>
+    /// <description>ViewColumns</description>
     /// </item>
     /// </list>
     /// </overloads>

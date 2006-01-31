@@ -13,7 +13,7 @@
 ** interface, and routines that contribute to loading the database schema
 ** from disk.
 **
-** $Id: prepare.c,v 1.12 2006/01/23 19:45:55 rmsimpson Exp $
+** $Id: prepare.c,v 1.13 2006/01/31 19:16:13 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -217,7 +217,7 @@ static int sqlite3InitOne(sqlite3 *db, int iDb, char **pzErrMsg){
   **    meta[8]
   **    meta[9]
   **
-  ** Note: The hash defined SQLITE_UTF* symbols in sqliteInt.h correspond to
+  ** Note: The #defined SQLITE_UTF* symbols in sqliteInt.h correspond to
   ** the possible values of meta[4].
   */
   if( rc==SQLITE_OK ){
@@ -440,6 +440,10 @@ void sqlite3SchemaFree(void *p){
   pSchema->flags &= ~DB_SchemaLoaded;
 }
 
+/*
+** Find and return the schema associated with a BTree.  Create
+** a new one if necessary.
+*/
 Schema *sqlite3SchemaGet(Btree *pBt){
   Schema * p;
   if( pBt ){
@@ -456,6 +460,13 @@ Schema *sqlite3SchemaGet(Btree *pBt){
   return p;
 }
 
+/*
+** Convert a schema pointer into the iDb index that indicates
+** which database file in db->aDb[] the schema refers to.
+**
+** If the same database is attached more than once, the first
+** attached database is returned.
+*/
 int sqlite3SchemaToIndex(sqlite3 *db, Schema *pSchema){
   int i = -1000000;
 
@@ -519,7 +530,14 @@ int sqlite3_prepare(
   
   memset(&sParse, 0, sizeof(sParse));
   sParse.db = db;
-  sqlite3RunParser(&sParse, zSql, &zErrMsg);
+  if( nBytes>=0 && zSql[nBytes]!=0 ){
+    char *zSqlCopy = sqlite3StrNDup(zSql, nBytes);
+    sqlite3RunParser(&sParse, zSqlCopy, &zErrMsg);
+    sParse.zTail += zSql - zSqlCopy;
+    sqliteFree(zSqlCopy);
+  }else{
+    sqlite3RunParser(&sParse, zSql, &zErrMsg);
+  }
 
   if( sqlite3MallocFailed() ){
     sParse.rc = SQLITE_NOMEM;

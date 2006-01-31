@@ -58,8 +58,14 @@ void sqlite3VdbeTrace(Vdbe *p, FILE *trace){
 /*
 ** Resize the Vdbe.aOp array so that it contains at least N
 ** elements. If the Vdbe is in VDBE_MAGIC_RUN state, then
-** the Vdbe.aOp array will be sized to contain exactly N 
-** elements.
+** the Vdbe.aOp array will be sized to contain exactly N
+** elements. Vdbe.nOpAlloc is set to reflect the new size of
+** the array.
+**
+** If an out-of-memory error occurs while resizing the array,
+** Vdbe.aOp and Vdbe.nOpAlloc remain unchanged (this is so that
+** any opcodes already allocated can be correctly deallocated
+** along with the rest of the Vdbe).
 */
 static void resizeOpArray(Vdbe *p, int N){
   int runMode = p->magic==VDBE_MAGIC_RUN;
@@ -102,7 +108,7 @@ int sqlite3VdbeAddOp(Vdbe *p, int op, int p1, int p2){
   p->nOp++;
   assert( p->magic==VDBE_MAGIC_INIT );
   resizeOpArray(p, i+1);
-  if( p->aOp==0 || p->nOpAlloc<=i ){
+  if( sqlite3MallocFailed() ){
     return 0;
   }
   pOp = &p->aOp[i];
@@ -1101,10 +1107,10 @@ static int vdbeCommit(sqlite3 *db){
 ** aborted so that they do not have data rolled out from underneath
 ** them leading to a segfault.
 */
-static void abortOtherActiveVdbes(Vdbe *pVdbe){
+void sqlite3AbortOtherActiveVdbes(sqlite3 *db, Vdbe *pExcept){
   Vdbe *pOther;
-  for(pOther=pVdbe->db->pVdbe; pOther; pOther=pOther->pNext){
-    if( pOther==pVdbe ) continue;
+  for(pOther=db->pVdbe; pOther; pOther=pOther->pNext){
+    if( pOther==pExcept ) continue;
     if( pOther->magic!=VDBE_MAGIC_RUN || pOther->pc<0 ) continue;
     closeAllCursors(pOther);
     pOther->aborted = 1;
@@ -1237,7 +1243,7 @@ int sqlite3VdbeHalt(Vdbe *p){
           /* We are forced to roll back the active transaction. Before doing
           ** so, abort any other statements this handle currently has active.
           */
-          abortOtherActiveVdbes(p);
+          sqlite3AbortOtherActiveVdbes(db, p);
           sqlite3RollbackAll(db);
           db->autoCommit = 1;
         }
@@ -1274,7 +1280,7 @@ int sqlite3VdbeHalt(Vdbe *p){
       }else if( p->errorAction==OE_Abort ){
         xFunc = sqlite3BtreeRollbackStmt;
       }else{
-        abortOtherActiveVdbes(p);
+        sqlite3AbortOtherActiveVdbes(db, p);
         sqlite3RollbackAll(db);
         db->autoCommit = 1;
       }
