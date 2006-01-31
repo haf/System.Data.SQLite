@@ -16,6 +16,10 @@ namespace SQLite.Designer
 
   internal class SQLiteDataConnectionSupport : AdoDotNetConnectionSupport
   {
+    private SQLiteDataViewSupport _dataViewSupport;
+    private SQLiteDataObjectSupport _dataObjectSupport;
+    private SQLiteDataObjectIdentifierResolver _dataObjectIdentifierResolver;
+
     public SQLiteDataConnectionSupport()
       : base("System.Data.SQLite")
     {
@@ -23,36 +27,30 @@ namespace SQLite.Designer
 
     protected override DataSourceInformation CreateDataSourceInformation()
     {
-      return base.CreateDataSourceInformation();
-    }
-
-    public override int CompareVersions(string versionA, string versionB)
-    {
-      return base.CompareVersions(versionA, versionB);
+      return new SQLiteDataSourceInformation(Site as DataConnection);
     }
 
     protected override object GetServiceImpl(Type serviceType)
     {
       if (serviceType == typeof(DataViewSupport))
-        return new SQLiteDataViewSupport();
+      {
+        if (_dataViewSupport == null) _dataViewSupport = new SQLiteDataViewSupport();
+        return _dataViewSupport;
+      }
 
       if (serviceType == typeof(DataObjectSupport))
-        return new SQLiteDataObjectSupport();
+      {
+        if (_dataObjectSupport == null) _dataObjectSupport = new SQLiteDataObjectSupport();
+        return _dataObjectSupport;
+      }
+
+      if (serviceType == typeof(DataObjectIdentifierResolver))
+      {
+        if (_dataObjectIdentifierResolver == null) _dataObjectIdentifierResolver = new SQLiteDataObjectIdentifierResolver(Site);
+        return _dataObjectIdentifierResolver;
+      }
 
       return base.GetServiceImpl(serviceType);
-    }
-
-    public override void Initialize(object providerObj)
-    {
-      base.Initialize(providerObj);
-    }
-
-    public override object ProviderObject
-    {
-      get
-      {
-        return base.ProviderObject;
-      }
     }
   }
 }

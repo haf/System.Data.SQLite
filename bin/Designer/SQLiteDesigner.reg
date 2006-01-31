@@ -11,22 +11,11 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\%REGROOT%\DataProviders\{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}\SupportedObjects\DataConnectionProperties]
 
 [HKEY_LOCAL_MACHINE\%REGROOT%\DataProviders\{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}\SupportedObjects\DataConnectionSupport]
-
-[HKEY_LOCAL_MACHINE\%REGROOT%\DataProviders\{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}\SupportedObjects\DataObjectEnumerator]
+@="SQLite.Designer.SQLiteDataConnectionSupport"
 
 [HKEY_LOCAL_MACHINE\%REGROOT%\DataProviders\{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}\SupportedObjects\DataObjectSupport]
-@="SQLiteDataObjectSupport.xml"
-"Path"="%XMLPATH%"
 
 [HKEY_LOCAL_MACHINE\%REGROOT%\DataProviders\{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}\SupportedObjects\DataViewSupport]
-@="SQLiteDataViewSupport.xml"
-"Path"="%XMLPATH%"
-
-[HKEY_LOCAL_MACHINE\%REGROOT%\DataProviders\{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}\SupportedObjects\DataSourceInformation]
-@="SQLite.Designer.SQLiteDataSourceInformation"
-
-[HKEY_LOCAL_MACHINE\%REGROOT%\DataProviders\{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}\SupportedObjects\DataObjectIdentifierResolver]
-@="SQLite.Designer.SQLiteDataObjectIdentifierResolver"
 
 [HKEY_LOCAL_MACHINE\%REGROOT%\DataSources\{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C71}]
 @="SQLite Database File"

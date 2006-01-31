@@ -14,5 +14,15 @@ namespace SQLite.Designer
     {
       InitializeComponent();
     }
+
+    private void browseButton_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void newDatabase_Click(object sender, EventArgs e)
+    {
+
+    }
   }
 }

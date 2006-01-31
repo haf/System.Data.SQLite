@@ -21,6 +21,11 @@ namespace SQLite.Designer
     {
     }
 
+    internal SQLiteDataObjectIdentifierResolver(object site)
+    {
+      _connection = site as DataConnection;
+    }
+
     protected override object[] QuickExpandIdentifier(string typeName, object[] partialIdentifier)
     {
       if (typeName == null)

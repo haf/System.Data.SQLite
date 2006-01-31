@@ -122,7 +122,7 @@ namespace SQLite.Designer
       encodingGroup.Controls.Add(this.utf8RadioButton);
       encodingGroup.Location = new System.Drawing.Point(12, 191);
       encodingGroup.Name = "encodingGroup";
-      encodingGroup.Size = new System.Drawing.Size(81, 98);
+      encodingGroup.Size = new System.Drawing.Size(75, 98);
       encodingGroup.TabIndex = 7;
       encodingGroup.TabStop = false;
       encodingGroup.Text = "Encoding";
@@ -154,9 +154,9 @@ namespace SQLite.Designer
       // 
       dateTimeGroup.Controls.Add(this.ticksRadioButton);
       dateTimeGroup.Controls.Add(this.iso8601RadioButton);
-      dateTimeGroup.Location = new System.Drawing.Point(99, 191);
+      dateTimeGroup.Location = new System.Drawing.Point(93, 191);
       dateTimeGroup.Name = "dateTimeGroup";
-      dateTimeGroup.Size = new System.Drawing.Size(107, 98);
+      dateTimeGroup.Size = new System.Drawing.Size(113, 98);
       dateTimeGroup.TabIndex = 8;
       dateTimeGroup.TabStop = false;
       dateTimeGroup.Text = "Date/Time Format";
@@ -249,6 +249,7 @@ namespace SQLite.Designer
       this.browseButton.TabIndex = 1;
       this.browseButton.Text = "&Browse ...";
       this.browseButton.UseVisualStyleBackColor = true;
+      this.browseButton.Click += new System.EventHandler(this.browseButton_Click);
       // 
       // newDatabase
       // 
@@ -258,6 +259,7 @@ namespace SQLite.Designer
       this.newDatabase.TabIndex = 2;
       this.newDatabase.Text = "&New ...";
       this.newDatabase.UseVisualStyleBackColor = true;
+      this.newDatabase.Click += new System.EventHandler(this.newDatabase_Click);
       // 
       // syncGroup
       // 
