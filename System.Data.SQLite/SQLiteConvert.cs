@@ -71,8 +71,7 @@ namespace System.Data.SQLite
     /// </summary>
     Ticks = 0,
     /// <summary>
-    /// The default format for this provider.  More compatible with SQLite's intended usage of datetimes, but overall less accurate than Ticks as it doesn't
-    /// natively support times down to fractions of a second.
+    /// The default format for this provider.
     /// </summary>
     ISO8601 = 1,
   }
