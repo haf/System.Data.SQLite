@@ -16,7 +16,7 @@
 ** so is applicable.  Because this module is responsible for selecting
 ** indices, you might also think of this module as the "query optimizer".
 **
-** $Id: where.c,v 1.19 2006/01/31 19:16:13 rmsimpson Exp $
+** $Id: where.c,v 1.20 2006/02/02 22:45:10 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 
@@ -1500,9 +1500,16 @@ WhereInfo *sqlite3WhereBegin(
     double lowestCost;          /* Cost of the pBest */
     int bestJ = 0;              /* The value of j */
     Bitmask m;                  /* Bitmask value for j or bestJ */
+    int once = 0;               /* True when first table is seen */
 
     lowestCost = SQLITE_BIG_DBL;
     for(j=iFrom, pTabItem=&pTabList->a[j]; j<pTabList->nSrc; j++, pTabItem++){
+      if( once && 
+          ((pTabItem->jointype & (JT_LEFT|JT_CROSS))!=0
+           || (j>0 && (pTabItem[-1].jointype & (JT_LEFT|JT_CROSS))!=0))
+      ){
+        break;
+      }
       m = getMask(&maskSet, pTabItem->iCursor);
       if( (m & notReady)==0 ){
         if( j==iFrom ) iFrom++;
@@ -1512,16 +1519,12 @@ WhereInfo *sqlite3WhereBegin(
                        (i==0 && ppOrderBy) ? *ppOrderBy : 0,
                        &pIdx, &flags, &nEq);
       if( cost<lowestCost ){
+        once = 1;
         lowestCost = cost;
         pBest = pIdx;
         bestFlags = flags;
         bestNEq = nEq;
         bestJ = j;
-      }
-      if( (pTabItem->jointype & (JT_LEFT|JT_CROSS))!=0
-         || (j>0 && (pTabItem[-1].jointype & (JT_LEFT|JT_CROSS))!=0)
-      ){
-        break;
       }
     }
     TRACE(("*** Optimizer choose table %d for loop %d\n", bestJ,

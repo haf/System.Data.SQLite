@@ -43,7 +43,7 @@
 ** in this file for details.  If in doubt, do not deviate from existing
 ** commenting and indentation practices when changing or adding code.
 **
-** $Id: vdbe.c,v 1.18 2006/01/31 19:16:13 rmsimpson Exp $
+** $Id: vdbe.c,v 1.19 2006/02/02 22:45:10 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -3815,7 +3815,7 @@ case OP_IdxGE: {        /* no-push */
   assert( p->apCsr[i]!=0 );
   assert( pTos>=p->aStack );
   if( (pC = p->apCsr[i])->pCursor!=0 ){
-    int res, rc;
+    int res;
  
     assert( pTos->flags & MEM_Blob );  /* Created using OP_Make*Key */
     Stringify(pTos, encoding);
