@@ -55,7 +55,7 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
 
   if (!pExisting) // Creating a new cryptblock
   {
-    pBlock = malloc(sizeof(CRYPTBLOCK));
+    pBlock = sqliteMalloc(sizeof(CRYPTBLOCK));
     ZeroMemory(pBlock, sizeof(CRYPTBLOCK));
     pBlock->hReadKey = hKey;
     pBlock->hWriteKey = hKey;
@@ -71,7 +71,7 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
   // Existing cryptblocks may have a buffer, if so, delete it
   if (pBlock->pvCrypt)
   {
-    free(pBlock->pvCrypt);
+    sqliteFree(pBlock->pvCrypt);
     pBlock->pvCrypt = NULL;
   }
 
@@ -81,7 +81,7 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
   {
     if (pBlock->dwCryptSize > pBlock->dwPageSize)
     {
-      pBlock->pvCrypt = malloc(pBlock->dwCryptSize);
+      pBlock->pvCrypt = sqliteMalloc(pBlock->dwCryptSize);
     }
   }
   return pBlock;
@@ -105,11 +105,11 @@ static void DestroyCryptBlock(LPCRYPTBLOCK pBlock)
   // If there's extra buffer space allocated, free it as well
   if (pBlock->pvCrypt)
   {
-    free(pBlock->pvCrypt);
+    sqliteFree(pBlock->pvCrypt);
   }
 
   // All done with this cryptblock
-  free(pBlock);
+  sqliteFree(pBlock);
 }
 
 // Encrypt/Decrypt functionality, called by pager.c
@@ -267,9 +267,9 @@ void sqlite3pager_free_codecarg(void *pArg)
       CryptDestroyKey(pBlock->hWriteKey);
 
     if (pBlock->pvCrypt)
-      free(pBlock->pvCrypt);
+      sqliteFree(pBlock->pvCrypt);
   }
-  free(pBlock);
+  sqliteFree(pBlock);
 }
 
 // Once a password has been supplied and a key created, we don't keep the 
@@ -322,12 +322,14 @@ __declspec(dllexport) int __stdcall sqlite3_rekey_interop(sqlite3 *db, const voi
   if (!rc)
   {
     // Rewrite all the pages in the database using the new encryption key
-    int nPage = sqlite3pager_pagecount(p);
+    Pgno nPage = sqlite3pager_pagecount(p);
+    Pgno nSkip = PAGER_MJ_PGNO(p);
     void *pPage;
-    int n;
+    Pgno n;
 
     for(n = 1; rc == SQLITE_OK && n <= nPage; n ++)
     {
+      if (n == nSkip) continue;
       rc = sqlite3pager_get(p, n, &pPage);
       if(!rc)
       {
