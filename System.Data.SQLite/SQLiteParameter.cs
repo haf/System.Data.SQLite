@@ -41,6 +41,8 @@ namespace System.Data.SQLite
     /// </summary>
     private int            _dataSize;
 
+    private bool _nullMapping;
+
     /// <summary>
     /// Default constructor
     /// </summary>
@@ -249,6 +251,7 @@ namespace System.Data.SQLite
       _rowVersion = rowVersion;
       _objValue = null;
       _dataSize = nSize;
+      _nullMapping = false;
     }
 
     /// <summary>
@@ -351,16 +354,17 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns false, ignores any set value
+    /// Used by DbCommandBuilder to determine the mapping for nullable fields
     /// </summary>
     public override bool SourceColumnNullMapping
     {
       get
       {
-        return false;
+        return _nullMapping;
       }
       set
       {
+        _nullMapping = value;
       }
     }
 
