@@ -11,14 +11,10 @@ namespace SQLite.Designer
   using System.Collections.Generic;
   using System.Text;
   using Microsoft.VisualStudio.Data;
+  using Microsoft.VisualStudio.Data.AdoDotNet;
 
-  internal class SQLiteDataSourceInformation : DataSourceInformation
+  internal class SQLiteDataSourceInformation : AdoDotNetDataSourceInformation
   {
-    public SQLiteDataSourceInformation()
-    {
-      Initialize();
-    }
-
     public SQLiteDataSourceInformation(DataConnection connection) : base(connection)
     {
       Initialize();
@@ -38,8 +34,10 @@ namespace SQLite.Designer
       AddProperty(SchemaSupported, false);
       AddProperty(SchemaSupportedInDml, false);
       AddProperty(SchemaSeparator, "");
-      AddProperty(ParameterPrefix, "$");
+      AddProperty(ParameterPrefix, "@");
       AddProperty(ParameterPrefixInName, true);
+
+      AddProperty("DesktopDataSource");
     }
   }
 }
