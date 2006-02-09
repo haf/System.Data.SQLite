@@ -27,18 +27,19 @@ Sub Main()
 
   ' SQLite supports : and $ for named parameters, but we add support for @ as well here
   '  
-  Set srcFile = fso.OpenTextFile("src\tokenize.c", 1)  
-  srcFileContents = srcFile.ReadAll()
-  srcFile.Close()
-  If InStr(1, srcFileContents, "    case '@':", 1) = 0 Then
-    newFileContents = Replace(srcFileContents, "    case ':': {", "    case '@':" & Chr(10) & "    case ':': {")
-    If (newFileContents <> srcFileContents) Then
-      WScript.StdOut.WriteLine "Updating tokenize.c"
-      Set srcFile = fso.CreateTextFile("src\tokenize.c", true)
-      srcFile.Write(newFileContents)
-      srcFile.Close()
-    End If
-  End If
+  ' Set srcFile = fso.OpenTextFile("src\tokenize.c", 1)  
+  ' srcFileContents = srcFile.ReadAll()
+  ' srcFile.Close()
+  ' If InStr(1, srcFileContents, "    case '@':", 1) = 0 Then
+  '   newFileContents = Replace(srcFileContents, "    case ':': {", "    case '@':" & Chr(10) & "    case ':': {")
+  '   If (newFileContents <> srcFileContents) Then
+  '     WScript.StdOut.WriteLine "Updating tokenize.c"
+  '     Set srcFile = fso.CreateTextFile("src\tokenize.c", true)
+  '     srcFile.Write(newFileContents)
+  '     srcFile.Close()
+  '   End If
+  ' End If
+  ' 
 
   ' In order to support encryption, we need to know when the pager is being destroyed so we can destroy our encryption
   ' objects.  This modification adds code to support that.
