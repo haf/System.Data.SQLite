@@ -497,7 +497,7 @@ namespace System.Data.SQLite
               row[SchemaTableColumn.NumericPrecision] = 0;
               row[SchemaTableColumn.NumericScale] = 0;
               row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
-              row[SchemaTableColumn.IsLong] = false;
+              row[SchemaTableColumn.IsLong] = (GetSQLiteType(n).Type == DbType.Binary);
               row[SchemaTableColumn.AllowDBNull] = true;
               row[SchemaTableOptionalColumn.IsReadOnly] = false;
               row[SchemaTableOptionalColumn.IsRowVersion] = false;
