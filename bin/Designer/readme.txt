@@ -1,8 +1,4 @@
 Installation Instructions
 -------------------------
 
-For Visual Studio 2005 (full versions):
-  Run the INSTALL.CMD batch file to install the designer into the registry
-
-For Visual Web Developer Express Edition:
-  Run the INSTALLVWDEXPRESS.CMD batch file to install the designer into the registry
+Run the INSTALL.EXE file.  It will automatically detect what version(s) of Visual Studio 2005 are installed, and ask you which editions you'd like to install/uninstall the provider for.
