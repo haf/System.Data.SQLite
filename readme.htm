@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.25.0 Jan 31, 2006<br>
-    Using SQLite 3.3.3<br>
+    Version 1.0.26.0 Feb 10, 2006<br>
+    Using SQLite 3.3.4<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     <br>
@@ -21,13 +21,13 @@
     <UL>
       <LI>
       Written from scratch on VS2005 specifically for ADO.NET 2.0, implenting all the
-      base classes and features recently introduced in the framework.<li>Supports the Full
+      base classes and features recently introduced in the framework, including automatic
+      transaction enlistment.<li>Supports the Full
         and Compact .NET Framework, as well as native C/C++ development.&nbsp; 100% binary
         compatible with the original sqlite3.dll.</li>
       <LI>
       On the Compact Framework, it is faster than the newly-introduced Sql Server 
-      Mobile, often more than 10x faster at inserts/updates.&nbsp; SQLite databases 
-      are also a fraction of the size of Sql Mobile databases.
+      Mobile.  SQLite's installed size is a fraction of Sql Mobile's. It uses less memory at runtime, runs queries faster, and has a smaller database file size as well.
       <li>Encrypted database support.&nbsp; Encrypted databases are fully encrypted and
         support both binary and cleartext password types.</li>
       <LI>
@@ -69,11 +69,7 @@
       implement as user-defined functions and uses the same base class.
       <LI>
         Full source for the entire engine and wrapper.&nbsp; No copyrights.&nbsp; 
-        Public Domain.&nbsp; 100% free.&nbsp; If you want to know if you can use it in 
-        your commercial project, please read the previous sentence again -- only slower 
-        and sound out the words this time.
-      </LI>
-    </UL>
+        Public Domain.&nbsp; 100% free for commercial and non-commercial use.&nbsp;</LI></UL>
     <strong></strong>
     <h2>
       <strong>Design-Time Support (new as of 1.0.14)</strong></h2>
@@ -121,6 +117,22 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.26.0 - February 10, 2006</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.4</li><li>Fixed an encryption bug when changing the password of databases over 1gb in
+      size.&nbsp;</li><li>Fixed various designer issues related to construction of named parameters.&nbsp;</li><li>Implemented the SourceColumnNullMapping property of SQLiteParameter to fix
+    a DbCommandBuilder code generation bug.&nbsp;</li><li>Removed the runtime dependency on MSVCR80.DLL.&nbsp; File size is somewhat
+    larger for the varying desktop versions, but the Compact Framework version remains
+    the same.</li><li>Created an install program to manage installation and uninstallation of the
+    SQLite design-time support.</li>
+      <li>Designer support now works for all Visual Studio editions, including all Express
+        Editions.</li>
+      <li>Design-time installer will now remove (if present) the machine.config SQLite entries
+        in favor of installing the xml code into the devenv.exe.config file (or any of the
+        variations for express editions).&nbsp; The officially-accepted behavior of using
+        DbProviderFactories is to add the code to your app.config file, and the machine.config
+        file should not be touched.</li>
+    </ul>
     <p><b>1.0.25.0 - January 31, 2006</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.3</li><li>Added automatic distributed transaction enlistment and implemented the DbConnection.EnlistTransaction

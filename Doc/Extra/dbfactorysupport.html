@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>DBProviderFactories Support</title>
+    <meta name="GENERATOR" content="Microsoft Visual Studio .NET 7.1">
+    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
+    <link rel="stylesheet" type="text/css" href="MSDN.css">
+  </head>
+  <body id="bodyID" class="dtBODY">
+    <div id="nsbanner">
+      <div id="bannerrow1">
+        <table class="bannerparthead" cellspacing="0" ID="Table1">
+          <tr id="hdr">
+            <td class="runninghead">DbProviderFactories Support</td>
+            <td class="product">
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id="TitleRow">
+        <h1 class="dtH1">SQLite.NET Class Library Documentation</h1>
+      </div>
+    </div>
+    <div id="nstext">
+      <h1 class="dtH1">DbProviderFactories and You</h1>
+      <p>One of the great new features of ADO.NET 2.0 is the use of reflection as a 
+        means of instantiating database providers programmatically. The information 
+        .NET uses to enumerate the available data providers in the system is relatively 
+        simple. It merely looks in the machine.config and in your own app.config file for some XML data to tell it what providers are 
+        installed and what assemblies those providers are in.
+      </p>
+      <h4>
+        Scenario 1:&nbsp; Version Independent (does not use the Global Assembly Cache)</h4>
+      <p>
+        This method allows you to drop any new version of the System.Data.SQLite.DLL into
+        your application's folder and use it without any code modifications or recompiling.&nbsp;
+        Add the following code to your app.config file:</p>
+      <div class="syntax">
+        <PRE>&lt;configuration&gt;
+  &lt;system.data&gt;
+    &lt;DbProviderFactories&gt;
+      &lt;remove invariant="System.Data.SQLite"/&gt;
+      &lt;add name="SQLite Data Provider" invariant="System.Data.SQLite"
+           description=".Net Framework Data Provider for SQLite"<br />           type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite" /&gt;
+    &lt;/DbProviderFactories&gt;
+  &lt;/system.data&gt;
+&lt;/configuration&gt;
+</PRE>
+      </div>
+      <h4>
+        Scenario 2:&nbsp; Version Dependent, using either the DLL located in the same folder
+        as the application or the Global Assembly Cache</h4>
+      <p>
+        This method expands on the above XML to provide the version number and key token
+        of the SQLite DLL so it can be found either in the same folder as the application
+        or looked up in the GAC.&nbsp; The downside to this method is that DbProviderFactories
+        will use this version information to only load the version specified.&nbsp; This
+        means if you update the DLL, you must also update this XML.</p>
+      <div class="syntax">
+        <PRE>
+&lt;configuration&gt;
+  &lt;system.data&gt;
+    &lt;DbProviderFactories&gt;
+      &lt;remove invariant="System.Data.SQLite"/&gt;
+      &lt;add name="SQLite Data Provider" invariant="System.Data.SQLite" 
+           description=".Net Framework Data Provider for SQLite"
+           type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite,
+                 Version=1.0.25.0, Culture=neutral,
+                 PublicKeyToken=db937bc2d44ff139"/&gt;
+    &lt;/DbProviderFactories&gt;
+  &lt;/system.data&gt;
+&lt;/configuration&gt;
+</pre>
+      </div>
+      <p>
+        The following C# code demonstrates 
+        instantiating SQLite through DbProviderFactories:</p>
+      <div class="syntax"><pre>      DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+      using (DbConnection cnn = fact.CreateConnection())
+      {
+        cnn.ConnectionString = "Data Source=test.db3";
+        cnn.Open();
+      }</pre>
+      </div>
+      <hr>
+      <div id="footer">
+        <p>
+          <a href="mailto:robert@blackcastlesoft.com?subject=SQLite.NET%20Class%20Library%20Documentation%20Feedback:%20Factory%20Support">
+            Send comments on this topic.</a>
+        </p>
+        <p>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

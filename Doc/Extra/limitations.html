@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>Getting Started</title>
+    <meta name="GENERATOR" content="Microsoft Visual Studio .NET 7.1">
+    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
+    <link rel="stylesheet" type="text/css" href="MSDN.css">
+  </head>
+  <body id="bodyID" class="dtBODY">
+    <div id="nsbanner">
+      <div id="bannerrow1">
+        <table class="bannerparthead" cellspacing="0" ID="Table1">
+          <tr id="hdr">
+            <td class="runninghead">Provider Limitations</td>
+            <td class="product">
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id="TitleRow">
+        <h1 class="dtH1">SQLite.NET Class Library Documentation</h1>
+      </div>
+    </div>
+    <div id="nstext">
+      <h1 class="dtH1">Limitations of this ADO.NET SQLite Data Provider</h1>
+      <p>As providers go, this one doesn't have many restrictions. SQLite has no 
+        support for row-level or table-level locks. Therefore when a DataReader is 
+        active the database cannot be written to, and when the database is open for 
+        writing no DataReaders can be open. The SQLite.NET provider attempts to retry 
+        internally if a database is locked, up to the CommandTimeout property of the 
+        command in question.</p>
+      <p>SQLite is inherently type-less, and only understands a few basic datatypes 
+        natively. They are (in .NET-speak) Int64, Double, String and Blob. The 
+        SQLite.NET provider will use the database schema information it can glean to 
+        enforce type-ness, but it is an inexact science.</p>
+      <p>Nested transactions and hierarchical DataReaders are not supported. In the 
+        case of transactions, any SQLiteCommand created on a connection will (when 
+        executed) automatically join a transaction in progress, regardless of whether 
+        that transaction was created before or after the command.</p>
+      <p>A SQLiteCommand object <b>can</b> be re-assigned a new SQLiteConnection object 
+        as long as no DataReaders are active on the command.</p>
+      <p>Opening a transaction is considered a write operation, so only use them when 
+        you want to write to the database! If you hold open a transaction, all readers 
+        will be blocked until the transaction is closed!</p>
+      <p></p>
+      <h4 class="dtH4">Thread Safety</h4>
+      <p>Multi-threading in SQLite must be done carefully. Here are the restrictions:</p>
+      <ul>
+        <li>
+          <b>You May</b>
+        Clone() a SQLiteConnection object in one thread and pass the cloned object to 
+        another thread. Once passed, the other thread becomes the new owner of the 
+        cloned connection, and the original thread must not keep a reference to the 
+        clone or call any methods on the clone.
+        <LI>
+          <STRONG>You May</STRONG>
+        create multiple threads, and those threads can create their own 
+        SQLiteConnection and subsequent objects for accessing a database.&nbsp; 
+        Multiple connections on multiple threads to the same database file are 
+        perfectly&nbsp;acceptable&nbsp;and will behave predictably.&nbsp;
+        <li>
+          <b>You May NOT</b>
+        call methods or properties or otherwise reference any SQLite provider classes 
+        that belong to another thread.
+        <li>
+          <b>You May NOT</b> pass a SQLiteCommand, SQLiteDataReader, SQLiteDataAdapter or 
+          any other SQLite provider class except a cloned SQLiteConnection to another 
+          thread.</li>
+      </ul>
+      <p>Understand again that SQLite has no fine-grained locking mechanisms. It is 
+        therefore your own responsibility in a multi-threaded environment to handle 
+        potential timeouts that may occur if a long-running query in one thread 
+        prevents a query in another thread from executing. These timeouts will only 
+        occur if one thread is attempting to read while another thread is attempting to 
+        write. Whichever thread got its lock first will be the one to execute, and the 
+        other thread will block until the CommandTimeout value elapses or the other 
+        thread finishes.</p>
+      <hr>
+      <div id="footer">
+        <p>
+          <a href="mailto:robert@blackcastlesoft.com?subject=SQLite.NET%20Class%20Library%20Documentation%20Feedback:%20Limitations">
+            Send comments on this topic.</a>
+        </p>
+        <p>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
