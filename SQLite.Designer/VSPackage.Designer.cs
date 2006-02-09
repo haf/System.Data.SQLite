@@ -22,14 +22,14 @@ namespace SQLite.Designer {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "2.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class SR {
+    internal class VSPackage {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal SR() {
+        internal VSPackage() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace SQLite.Designer {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SQLite.Designer.SR", typeof(SR).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SQLite.Designer.VSPackage", typeof(VSPackage).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,42 +57,6 @@ namespace SQLite.Designer {
             }
             set {
                 resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to .NET Data Provider for SQLite.
-        /// </summary>
-        internal static string DataProvider_SQLite {
-            get {
-                return ResourceManager.GetString("DataProvider_SQLite", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Description of the SQLite Data Provider goes here.
-        /// </summary>
-        internal static string DataProvider_SQLite_Description {
-            get {
-                return ResourceManager.GetString("DataProvider_SQLite_Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service Provider string.
-        /// </summary>
-        internal static string DataProvider_SQLite_ServiceProvider {
-            get {
-                return ResourceManager.GetString("DataProvider_SQLite_ServiceProvider", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to SQLite Database File.
-        /// </summary>
-        internal static string DataProvider_SQLite_Short {
-            get {
-                return ResourceManager.GetString("DataProvider_SQLite_Short", resourceCulture);
             }
         }
     }

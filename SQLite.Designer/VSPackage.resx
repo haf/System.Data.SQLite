@@ -117,16 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProvider_SQLite" xml:space="preserve">
-    <value>.NET Data Provider for SQLite</value>
-  </data>
-  <data name="DataProvider_SQLite_Description" xml:space="preserve">
-    <value>Description of the SQLite Data Provider goes here</value>
-  </data>
-  <data name="DataProvider_SQLite_ServiceProvider" xml:space="preserve">
-    <value>Service Provider string</value>
-  </data>
-  <data name="DataProvider_SQLite_Short" xml:space="preserve">
-    <value>SQLite Database File</value>
-  </data>
 </root>

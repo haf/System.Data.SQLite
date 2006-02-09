@@ -50,6 +50,9 @@ namespace SQLite.Designer
         return _dataObjectIdentifierResolver;
       }
 
+      if (serviceType == typeof(DataConnectionSupport))
+        return this;
+
       return base.GetServiceImpl(serviceType);
     }
   }
