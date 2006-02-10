@@ -17,21 +17,6 @@
 #endif // _WIN32_WCE
 #endif // NDEBUG
 
-HMODULE g_hMod = 0;
-
-BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID pvReserved)
-{
-  if (dwReason == DLL_PROCESS_ATTACH)
-    g_hMod = hMod;
-
-  return TRUE;
-}
-
-__declspec(dllexport) void WINAPI testfunc()
-{
-  PIMAGE_DOS_HEADER pDos = (LPVOID)g_hMod;
-}
-
 // Forward declare this function, we're implementing it later
 static void generateColumnNames(
   Parse *pParse,      /* Parser context */
