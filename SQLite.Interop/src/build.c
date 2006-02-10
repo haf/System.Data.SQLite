@@ -22,7 +22,7 @@
 **     COMMIT
 **     ROLLBACK
 **
-** $Id: build.c,v 1.17 2006/01/31 19:16:13 rmsimpson Exp $
+** $Id: build.c,v 1.18 2006/02/10 19:45:44 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include <ctype.h>
@@ -1662,12 +1662,10 @@ int sqlite3ViewGetColumnNames(Parse *pParse, Table *pTable){
   ** Actually, this error is caught previously and so the following test
   ** should always fail.  But we will leave it in place just to be safe.
   */
-#if 0
   if( pTable->nCol<0 ){
     sqlite3ErrorMsg(pParse, "view %s is circularly defined", pTable->zName);
     return 1;
   }
-#endif
   assert( pTable->nCol>=0 );
 
   /* If we get this far, it means we need to compute the table names.
@@ -2849,6 +2847,7 @@ SrcList *sqlite3SrcListAppend(SrcList *pList, Token *pTable, Token *pDatabase){
   pItem->zName = sqlite3NameFromToken(pTable);
   pItem->zDatabase = sqlite3NameFromToken(pDatabase);
   pItem->iCursor = -1;
+  pItem->isPopulated = 0;
   pList->nSrc++;
   return pList;
 }
