@@ -15,6 +15,7 @@ namespace install
   {
     private static Guid standardDataProviderGuid = new Guid("{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}");
     private static Guid standardDataSourcesGuid = new Guid("{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C71}");
+    private static Guid standardCFDataSourcesGuid = new Guid("{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C72}");
     private static Guid oledbDataProviderGuid = new Guid("{7F041D59-D76A-44ed-9AA2-FBF6B0548B80}");
     private static Guid oledbAltDataProviderGuid = new Guid("{7F041D59-D76A-44ed-9AA2-FBF6B0548B81}");
     private static Guid jetDataSourcesGuid = new Guid("{466CE797-67A4-4495-B75C-A3FD282E7FC3}");
@@ -238,9 +239,9 @@ namespace install
           subkey.SetValue("Technology", "{77AB9A9D-78B9-4ba7-91AC-873F5338F1D2}");
           subkey.SetValue("CodeBase", Path.GetFullPath("SQLite.Designer.DLL"));
           
-          // Uncomment this line when using the VSPackage
-          // subkey.SetValue("FactoryService", "{DCBE6C8D-0E57-4099-A183-98FF74C64D9D}");
-
+#if USEPACKAGE
+           subkey.SetValue("FactoryService", "{DCBE6C8D-0E57-4099-A183-98FF74C64D9D}");
+#endif
           using (RegistryKey subsubkey = subkey.CreateSubKey("SupportedObjects", RegistryKeyPermissionCheck.ReadWriteSubTree))
           {
             subsubkey.CreateSubKey("DataConnectionProperties").Close();
@@ -249,7 +250,9 @@ namespace install
             using (RegistryKey subsubsubkey = subsubkey.CreateSubKey("DataConnectionSupport", RegistryKeyPermissionCheck.ReadWriteSubTree))
             {
               // Comment out this line when using the VSPackage
+#if !USEPACKAGE
               subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteDataConnectionSupport");
+#endif
             }
           }
         }
@@ -267,8 +270,7 @@ namespace install
         }
       }
 
-      /*
-      // Uncomment this section to use the VSPackage
+#if USEPACKAGE
       using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\Packages", keyname), true))
       {
         using (RegistryKey subkey = key.CreateSubKey("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}", RegistryKeyPermissionCheck.ReadWriteSubTree))
@@ -278,6 +280,10 @@ namespace install
           subkey.SetValue("CodeBase", Path.GetFullPath("SQLite.Designer.DLL"));
           subkey.SetValue("ID", 1);
           subkey.SetValue("InprocServer32", "mscoree.dll");
+          subkey.SetValue("CompanyName", "Black Castle Software, LLC");
+          subkey.SetValue("MinEdition", "standard");
+          subkey.SetValue("ProductName", "SQLite Designer");
+          subkey.SetValue("ProductVersion", "1.0");
         }
       }
 
@@ -289,7 +295,7 @@ namespace install
           subkey.SetValue("Name", "SQLite Provider Object Factory");
         }
       }
-      */
+#endif
 
       // We used to add factory support to the machine.config -- but its not desirable.
       // Now, we use the development environment's config file instead.
