@@ -28,7 +28,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Indicates whether or not a DataReader is active on the command.
     /// </summary>
-    private bool _isReaderOpen;
+    private SQLiteDataReader _activeReader;
     /// <summary>
     /// The timeout for the command, kludged because SQLite doesn't support per-command timeout values
     /// </summary>
@@ -118,7 +118,7 @@ namespace System.Data.SQLite
     private void Initialize(string strSql, SQLiteConnection cnn)
     {
       _statementList = null;
-      _isReaderOpen = false;
+      _activeReader = null;
       _commandTimeout = 30;
       _parameterCollection = new SQLiteParameterCollection(this);
       _designTimeVisible = true;
@@ -139,6 +139,14 @@ namespace System.Data.SQLite
     protected override void Dispose(bool disposing)
     {
       base.Dispose(disposing);
+
+      // If a reader is active on this command, don't destroy it completely
+      if (_activeReader != null)
+      {
+        _activeReader._disposeCommand = true;
+        return;
+      }
+
       Connection = null;
       _parameterCollection.Clear();
       _commandText = null;
@@ -230,7 +238,7 @@ namespace System.Data.SQLite
       {
         if (_commandText == value) return;
 
-        if (_isReaderOpen)
+        if (_activeReader != null)
         {
           throw new InvalidOperationException("Cannot set CommandText while a DataReader is active");
         }
@@ -301,7 +309,7 @@ namespace System.Data.SQLite
       get { return _cnn; }
       set
       {
-        if (_isReaderOpen)
+        if (_activeReader != null)
           throw new InvalidOperationException("Cannot set Connection while a DataReader is active");
 
         if (_cnn != null)
@@ -362,7 +370,7 @@ namespace System.Data.SQLite
       {
         if (_cnn != null)
         {
-          if (_isReaderOpen)
+          if (_activeReader != null)
             throw new InvalidOperationException("Cannot set Transaction while a DataReader is active");
 
           if (value != null)
@@ -399,7 +407,7 @@ namespace System.Data.SQLite
     /// </summary>
     private void InitializeForReader()
     {
-      if (_isReaderOpen)
+      if (_activeReader != null)
         throw new InvalidOperationException("DataReader already active on this command");
 
       if (_cnn == null)
@@ -435,7 +443,7 @@ namespace System.Data.SQLite
       InitializeForReader();
 
       SQLiteDataReader rd = new SQLiteDataReader(this, behavior);
-      _isReaderOpen = true;
+      _activeReader = rd;
 
       return rd;
     }
@@ -454,7 +462,7 @@ namespace System.Data.SQLite
     /// </summary>
     internal void ClearDataReader()
     {
-      _isReaderOpen = false;
+      _activeReader = null;
     }
 
     /// <summary>

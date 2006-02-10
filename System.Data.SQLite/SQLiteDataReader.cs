@@ -58,6 +58,11 @@ namespace System.Data.SQLite
     private CommandBehavior _commandBehavior;
 
     /// <summary>
+    /// If set, then dispose of the command object when the reader is finished
+    /// </summary>
+    internal bool           _disposeCommand;
+
+    /// <summary>
     /// Internal constructor, initializes the datareader and sets up to begin executing statements
     /// </summary>
     /// <param name="cmd">The SQLiteCommand this data reader is for</param>
@@ -94,6 +99,9 @@ namespace System.Data.SQLite
         {
         }
         _command.ClearDataReader();
+
+        if (_disposeCommand)
+          ((IDisposable)_command).Dispose();
       }
 
       // If the datareader's behavior includes closing the connection, then do so here.
@@ -110,8 +118,8 @@ namespace System.Data.SQLite
     /// </summary>
     protected override void Dispose(bool disposing)
     {
-      Close();
       base.Dispose(disposing);
+      GC.SuppressFinalize(this);
     }
 
     /// <summary>
