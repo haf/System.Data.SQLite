@@ -848,8 +848,6 @@ namespace System.Data.SQLite
           return Schema_MetaDataCollections();
         case "DATASOURCEINFORMATION":
           return Schema_DataSourceInformation();
-        //case "RESERVEDWORDS":
-        //  return Schema_ReservedWords();
         case "DATATYPES":
           return Schema_DataTypes();
         case "COLUMNS":
@@ -1014,7 +1012,7 @@ namespace System.Data.SQLite
               {
                 using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader(CommandBehavior.SchemaOnly))
                 {
-                  using (DataTable tblSchema = rd.GetSchemaTable())
+                  using (DataTable tblSchema = rd.GetSchemaTable(false))
                   {
                     foreach (DataRow schemaRow in tblSchema.Rows)
                     {
@@ -1107,7 +1105,7 @@ namespace System.Data.SQLite
               {
                 using (SQLiteDataReader rdTable = cmdTable.ExecuteReader(CommandBehavior.SchemaOnly))
                 {
-                  tblSchema = rdTable.GetSchemaTable();
+                  tblSchema = rdTable.GetSchemaTable(false);
                   foreach (DataRow schemaRow in tblSchema.Rows)
                   {
                     if (Convert.ToBoolean(schemaRow[SchemaTableColumn.IsKey], CultureInfo.CurrentCulture) == true)
@@ -1116,12 +1114,13 @@ namespace System.Data.SQLite
                       row["TABLE_CATALOG"] = strCatalog;
                       row["TABLE_NAME"] = rdTables.GetString(2);
                       row["INDEX_CATALOG"] = strCatalog;
-                      row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "PK_{0}_{1}", rdTables.GetString(2), schemaRow[SchemaTableColumn.BaseColumnName]);
+                      row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
                       row["PRIMARY_KEY"] = true;
                       row["UNIQUE"] = true;
                       if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, row["INDEX_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
                       {
                         tbl.Rows.Add(row);
+                        break;
                       }
                     }
                   }
@@ -1403,20 +1402,21 @@ namespace System.Data.SQLite
               {
                 using (SQLiteDataReader rdTable = cmdTable.ExecuteReader(CommandBehavior.SchemaOnly))
                 {
-                  tblSchema = rdTable.GetSchemaTable();
+                  tblSchema = rdTable.GetSchemaTable(false);
                   foreach (DataRow schemaRow in tblSchema.Rows)
                   {
                     if (Convert.ToBoolean(schemaRow[SchemaTableColumn.IsKey], CultureInfo.InvariantCulture) == true)
                     {
                       row = tbl.NewRow();
                       row["CONSTRAINT_CATALOG"] = strCatalog;
-                      row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "PK_{0}_{1}", rdTables.GetString(2), schemaRow[SchemaTableColumn.BaseColumnName]);
+                      row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
                       row["TABLE_CATALOG"] = strCatalog;
                       row["TABLE_NAME"] = rdTables.GetString(2);
                       row["COLUMN_NAME"] = schemaRow[SchemaTableColumn.BaseColumnName];
                       row["INDEX_NAME"] = row["CONSTRAINT_NAME"];
                       row["ORDINAL_POSITION"] = schemaRow[SchemaTableColumn.ColumnOrdinal];
-                      if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, row["INDEX_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
+                      if ((String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, row["INDEX_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
+                          && (String.IsNullOrEmpty(strColumn) || String.Compare(strColumn, row["COLUMN_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0))
                       {
                         tbl.Rows.Add(row);
                       }
@@ -1447,7 +1447,8 @@ namespace System.Data.SQLite
                             row["INDEX_NAME"] = rdIndexes.GetString(1);
                             row["ORDINAL_POSITION"] = rdIndex.GetInt32(1);
 
-                            tbl.Rows.Add(row);
+                            if (String.IsNullOrEmpty(strColumn) || String.Compare(strColumn, row["COLUMN_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
+                              tbl.Rows.Add(row);
                           }
                         }
                       }
@@ -1520,9 +1521,9 @@ namespace System.Data.SQLite
                   {
                     using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader(CommandBehavior.SchemaOnly))
                     {
-                      using (DataTable tblSchemaView = rdViewSelect.GetSchemaTable())
+                      using (DataTable tblSchemaView = rdViewSelect.GetSchemaTable(false))
                       {
-                        using (DataTable tblSchema = rd.GetSchemaTable())
+                        using (DataTable tblSchema = rd.GetSchemaTable(false))
                         {
                           for (n = 0; n < tblSchema.Rows.Count; n++)
                           {

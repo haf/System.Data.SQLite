@@ -186,6 +186,27 @@ namespace System.Data.SQLite
     internal static extern void sqlite3_realcolnames(int db, int bset);
 
     [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_table_column_metadata_interop(int db, byte[] dbName, byte[] tblName, byte[] colName, out IntPtr ptrDataType, out IntPtr ptrCollSeq, out int notNull, out int primaryKey, out int autoInc, out int dtLen, out int csLen);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_column_database_name_interop(int stmt, int index, out int len);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_column_database_name16_interop(int stmt, int index, out int len);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_column_table_name_interop(int stmt, int index, out int len);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_column_table_name16_interop(int stmt, int index, out int len);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_column_origin_name_interop(int stmt, int index, out int len);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_column_origin_name16_interop(int stmt, int index, out int len);
+
+    [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_column_text16_interop(int stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]

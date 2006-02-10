@@ -103,7 +103,7 @@ namespace System.Data.SQLite
     /// All statements prepared on this connection after this flag is changed are affected.  Existing statements are not.
     /// </remarks>
     /// <param name="bOn">Set to True to enable real column names, false to disable them.</param>
-    internal abstract void SetRealColNames(bool bOn);
+    //internal abstract void SetRealColNames(bool bOn);
 
     internal abstract void Bind_Double(SQLiteStatement stmt, int index, double value);
     internal abstract void Bind_Int32(SQLiteStatement stmt, int index, Int32 value);
@@ -121,6 +121,10 @@ namespace System.Data.SQLite
     internal abstract string ColumnName(SQLiteStatement stmt, int index);
     internal abstract string ColumnType(SQLiteStatement stmt, int index, out TypeAffinity nAffinity);
     internal abstract int    ColumnIndex(SQLiteStatement stmt, string columnName);
+    internal abstract string ColumnOriginalName(SQLiteStatement stmt, int index);
+    internal abstract string ColumnDatabaseName(SQLiteStatement stmt, int index);
+    internal abstract string ColumnTableName(SQLiteStatement stmt, int index);
+    internal abstract void ColumnMetaData(string dataBase, string table, string column, out string dataType, out string collateSequence, out bool notNull, out bool primaryKey, out bool autoIncrement);
 
     internal abstract double   GetDouble(SQLiteStatement stmt, int index);
     internal abstract Int32    GetInt32(SQLiteStatement stmt, int index);

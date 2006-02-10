@@ -322,6 +322,46 @@ namespace System.Data.SQLite
       return -1;
     }
 
+    internal override string ColumnOriginalName(SQLiteStatement stmt, int index)
+    {
+      int len;
+      return ToString(UnsafeNativeMethods.sqlite3_column_origin_name_interop(stmt._sqlite_stmt, index, out len), len);
+    }
+
+    internal override string ColumnDatabaseName(SQLiteStatement stmt, int index)
+    {
+      int len;
+      return ToString(UnsafeNativeMethods.sqlite3_column_database_name_interop(stmt._sqlite_stmt, index, out len), len);
+    }
+
+    internal override string ColumnTableName(SQLiteStatement stmt, int index)
+    {
+      int len;
+      return ToString(UnsafeNativeMethods.sqlite3_column_table_name_interop(stmt._sqlite_stmt, index, out len), len);
+    }
+
+    internal override void ColumnMetaData(string dataBase, string table, string column, out string dataType, out string collateSequence, out bool notNull, out bool primaryKey, out bool autoIncrement)
+    {
+      IntPtr dataTypePtr;
+      IntPtr collSeqPtr;
+      int dtLen;
+      int csLen;
+      int nnotNull;
+      int nprimaryKey;
+      int nautoInc;
+      int n;
+
+      n = UnsafeNativeMethods.sqlite3_table_column_metadata_interop(_sql, ToUTF8(dataBase), ToUTF8(table), ToUTF8(column), out dataTypePtr, out collSeqPtr, out nnotNull, out nprimaryKey, out nautoInc, out dtLen, out csLen);
+      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+
+      dataType = base.ToString(dataTypePtr, dtLen);
+      collateSequence = base.ToString(collSeqPtr, csLen);
+
+      notNull = (nnotNull == 1);
+      primaryKey = (nprimaryKey == 1);
+      autoIncrement = (nautoInc == 1);
+    }
+
     internal override double GetDouble(SQLiteStatement stmt, int index)
     {
       double value;
@@ -520,10 +560,10 @@ namespace System.Data.SQLite
       return UnsafeNativeMethods.sqlite3_aggregate_context_interop(context, 1);
     }
 
-    internal override void SetRealColNames(bool bOn)
-    {
-      UnsafeNativeMethods.sqlite3_realcolnames(_sql, Convert.ToInt32(bOn));
-    }
+    //internal override void SetRealColNames(bool bOn)
+    //{
+    //  UnsafeNativeMethods.sqlite3_realcolnames(_sql, Convert.ToInt32(bOn));
+    //}
 
     internal override void SetPassword(byte[] passwordBytes)
     {

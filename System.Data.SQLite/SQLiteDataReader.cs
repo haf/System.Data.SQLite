@@ -442,13 +442,21 @@ namespace System.Data.SQLite
     /// <returns>Returns a DataTable containing the schema information for the active SELECT statement being processed.</returns>
     public override DataTable GetSchemaTable()
     {
+      return GetSchemaTable(true);
+    }
+
+    internal DataTable GetSchemaTable(bool wantUniqueInfo)
+    {
       CheckClosed();
 
       DataTable tbl = new DataTable("SchemaTable");
-      string[] arName;
-      string strTable;
-      string strCatalog;
+      DataTable tblIndexes = null;
+      DataTable tblIndexColumns;
       DataRow row;
+      string temp;
+      string strCatalog = "";
+      string strTable = "";
+      string strColumn = "";
 
       tbl.Locale = CultureInfo.InvariantCulture;
       tbl.Columns.Add(SchemaTableColumn.ColumnName, typeof(String));
@@ -480,104 +488,130 @@ namespace System.Data.SQLite
 
       SQLiteConnection cnn = (SQLiteConnection)_command.Connection;
 
-      try
+      // Create a new command based on the original.  The only difference being that this new command returns
+      // fully-qualified Database.Table.Column column names because of the above pragma
+      using (SQLiteCommand cmd = (SQLiteCommand)_command.Clone())
       {
-        cnn._sql.SetRealColNames(true);
-
-        // Create a new command based on the original.  The only difference being that this new command returns
-        // fully-qualified Database.Table.Column column names because of the above pragma
-        using (SQLiteCommand cmd = (SQLiteCommand)_command.Clone())
+        using (DbDataReader rd = cmd.ExecuteReader(CommandBehavior.SchemaOnly))
         {
-          using (DbDataReader rd = cmd.ExecuteReader(CommandBehavior.SchemaOnly))
+          // No need to Read() from this reader, we just want the column names
+          for (int n = 0; n < _fieldCount; n++)
           {
-            // No need to Read() from this reader, we just want the column names
-            for (int n = 0; n < _fieldCount; n++)
+            row = tbl.NewRow();
+
+            // Default settings for the column
+            row[SchemaTableColumn.ColumnName] = GetName(n);
+            row[SchemaTableColumn.ColumnOrdinal] = n;
+            row[SchemaTableColumn.ColumnSize] = 0;
+            row[SchemaTableColumn.NumericPrecision] = 0;
+            row[SchemaTableColumn.NumericScale] = 0;
+            row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
+            row[SchemaTableColumn.IsLong] = (GetSQLiteType(n).Type == DbType.Binary);
+            row[SchemaTableColumn.AllowDBNull] = true;
+            row[SchemaTableOptionalColumn.IsReadOnly] = false;
+            row[SchemaTableOptionalColumn.IsRowVersion] = false;
+            row[SchemaTableColumn.IsUnique] = false;
+            row[SchemaTableColumn.IsKey] = false;
+            row[SchemaTableOptionalColumn.IsAutoIncrement] = false;
+            row[SchemaTableOptionalColumn.IsReadOnly] = false;
+
+            strColumn = _command.Connection._sql.ColumnOriginalName(_activeStatement, n);
+            if (String.IsNullOrEmpty(strColumn) == false) row[SchemaTableColumn.BaseColumnName] = strColumn;
+
+            temp = _command.Connection._sql.ColumnTableName(_activeStatement, n);
+            if (String.IsNullOrEmpty(temp) == false) row[SchemaTableColumn.BaseTableName] = temp;
+
+            temp = _command.Connection._sql.ColumnDatabaseName(_activeStatement, n);
+            if (String.IsNullOrEmpty(temp) == false) row[SchemaTableOptionalColumn.BaseCatalogName] = temp;
+            
+            row[SchemaTableColumn.DataType] = GetFieldType(n);
+
+            // If we have a table-bound column, extract the extra information from it
+            if (String.IsNullOrEmpty(strColumn) == false)
             {
-              strTable = "";
-              strCatalog = "main";
-
-              row = tbl.NewRow();
-
-              // Default settings for the column
-              row[SchemaTableColumn.ColumnName] = GetName(n);
-              row[SchemaTableColumn.ColumnOrdinal] = n;
-              row[SchemaTableColumn.ColumnSize] = 0;
-              row[SchemaTableColumn.NumericPrecision] = 0;
-              row[SchemaTableColumn.NumericScale] = 0;
-              row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
-              row[SchemaTableColumn.IsLong] = (GetSQLiteType(n).Type == DbType.Binary);
-              row[SchemaTableColumn.AllowDBNull] = true;
-              row[SchemaTableOptionalColumn.IsReadOnly] = false;
-              row[SchemaTableOptionalColumn.IsRowVersion] = false;
-              row[SchemaTableColumn.IsUnique] = false;
-              row[SchemaTableColumn.IsKey] = false;
-              row[SchemaTableOptionalColumn.IsAutoIncrement] = false;
-              row[SchemaTableOptionalColumn.IsReadOnly] = false;
-              row[SchemaTableColumn.BaseColumnName] = GetName(n);
-
-              // Try and extract the database, table and column from the datareader
-              arName = rd.GetName(n).Split('\x01');
-
-              if (arName.Length > 1)
-                strTable = arName[arName.Length - 2];
-
-              if (arName.Length > 2)
-                strCatalog = arName[arName.Length - 3];
-
-              // If we have a table-bound column, extract the extra information from it
-              if (arName.Length > 1)
+              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].TABLE_INFO([{1}])",
+                row[SchemaTableOptionalColumn.BaseCatalogName],
+                row[SchemaTableColumn.BaseTableName]
+                ), cnn))
               {
-                using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{1}].TABLE_INFO([{0}])", strTable, strCatalog), cnn))
+                using (DbDataReader rdTable = cmdTable.ExecuteReader())
                 {
-                  if (arName.Length < 3) strCatalog = "main";
-
-                  using (DbDataReader rdTable = cmdTable.ExecuteReader())
+                  while (rdTable.Read())
                   {
-                    while (rdTable.Read())
+                    if (String.Compare((string)row[SchemaTableColumn.BaseColumnName], rdTable.GetString(1), true, CultureInfo.InvariantCulture) == 0)
                     {
-                      if (String.Compare(arName[arName.Length - 1], rdTable.GetString(1), true, CultureInfo.InvariantCulture) == 0)
+                      string strType = rdTable.GetString(2);
+                      string[] arSize = strType.Split('(');
+                      if (arSize.Length > 1)
                       {
-                        string strType = rdTable.GetString(2);
-                        string[] arSize = strType.Split('(');
+                        strType = arSize[0];
+                        arSize = arSize[1].Split(')');
                         if (arSize.Length > 1)
-                        {
-                          strType = arSize[0];
-                          arSize = arSize[1].Split(')');
-                          if (arSize.Length > 1)
-                            row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
-                        }
-
-                        bool bNotNull = rdTable.GetBoolean(3);
-                        bool bPrimaryKey = rdTable.GetBoolean(5);
-
-                        row[SchemaTableColumn.DataType] = GetFieldType(n);
-                        row[SchemaTableColumn.BaseTableName] = strTable;
-                        row[SchemaTableColumn.BaseColumnName] = rdTable.GetString(1);
-                        if (String.IsNullOrEmpty(strCatalog) == false)
-                        {
-                          row[SchemaTableOptionalColumn.BaseCatalogName] = strCatalog;
-                        }
-
-                        row[SchemaTableColumn.AllowDBNull] = (!bNotNull && !bPrimaryKey);
-                        row[SchemaTableColumn.IsUnique] = bPrimaryKey;
-                        row[SchemaTableColumn.IsKey] = bPrimaryKey;
-                        row[SchemaTableOptionalColumn.IsAutoIncrement] = bPrimaryKey;
-                        if (rdTable.IsDBNull(4) == false)
-                          row[SchemaTableOptionalColumn.DefaultValue] = rdTable[4];
-                        break;
+                          row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
                       }
+
+                      string collSeq;
+                      string dataType;
+                      bool bNotNull;
+                      bool bPrimaryKey;
+                      bool bAutoIncrement;
+
+                      _command.Connection._sql.ColumnMetaData(
+                (string)row[SchemaTableOptionalColumn.BaseCatalogName],
+                (string)row[SchemaTableColumn.BaseTableName],
+                strColumn,
+                out dataType, out collSeq, out bNotNull, out bPrimaryKey, out bAutoIncrement);
+
+                      if (bNotNull) row[SchemaTableColumn.AllowDBNull] = false;
+                      row[SchemaTableColumn.IsKey] = bPrimaryKey;
+                      row[SchemaTableOptionalColumn.IsAutoIncrement] = bAutoIncrement;
+                      if (rdTable.IsDBNull(4) == false)
+                        row[SchemaTableOptionalColumn.DefaultValue] = rdTable[4];
+                      break;
                     }
                   }
                 }
               }
-              tbl.Rows.Add(row);
+
+              // Determine IsUnique properly, which is a pain in the butt!
+              if (wantUniqueInfo)
+              {
+                if ((string)row[SchemaTableOptionalColumn.BaseCatalogName] != strCatalog
+                  || (string)row[SchemaTableColumn.BaseTableName] != strTable)
+                {
+                  strCatalog = (string)row[SchemaTableOptionalColumn.BaseCatalogName];
+                  strTable = (string)row[SchemaTableColumn.BaseTableName];
+
+                  tblIndexes = _command.Connection.GetSchema("Indexes", new string[] {
+                (string)row[SchemaTableOptionalColumn.BaseCatalogName],
+                null,
+                (string)row[SchemaTableColumn.BaseTableName],
+                null });
+                }
+
+                foreach (DataRow rowIndexes in tblIndexes.Rows)
+                {
+                  tblIndexColumns = _command.Connection.GetSchema("IndexColumns", new string[] {
+                (string)row[SchemaTableOptionalColumn.BaseCatalogName],
+                null,
+                (string)row[SchemaTableColumn.BaseTableName],
+                (string)rowIndexes["INDEX_NAME"],
+                null
+                });
+                  foreach (DataRow rowColumnIndex in tblIndexColumns.Rows)
+                  {
+                    if (String.Compare((string)rowColumnIndex["COLUMN_NAME"], strColumn, true, CultureInfo.InvariantCulture) == 0)
+                    {
+                       if (tblIndexColumns.Rows.Count == 1) row[SchemaTableColumn.IsUnique] = rowIndexes["UNIQUE"];
+                      break;
+                    }
+                  }
+                }
+              }
             }
+            tbl.Rows.Add(row);
           }
         }
-      }
-      finally
-      {
-        cnn._sql.SetRealColNames(false);
       }
 
       tbl.AcceptChanges();

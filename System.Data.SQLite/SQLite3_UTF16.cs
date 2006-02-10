@@ -128,6 +128,24 @@ namespace System.Data.SQLite
       }
     }
 
+    internal override string ColumnOriginalName(SQLiteStatement stmt, int index)
+    {
+      int len;
+      return ToString(UnsafeNativeMethods.sqlite3_column_origin_name16_interop(stmt._sqlite_stmt, index, out len), len);
+    }
+
+    internal override string ColumnDatabaseName(SQLiteStatement stmt, int index)
+    {
+      int len;
+      return ToString(UnsafeNativeMethods.sqlite3_column_database_name16_interop(stmt._sqlite_stmt, index, out len), len);
+    }
+
+    internal override string ColumnTableName(SQLiteStatement stmt, int index)
+    {
+      int len;
+      return ToString(UnsafeNativeMethods.sqlite3_column_table_name16_interop(stmt._sqlite_stmt, index, out len), len);
+    }
+
     internal override int CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal)
     {
       int nCookie;
