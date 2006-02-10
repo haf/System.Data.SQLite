@@ -53,12 +53,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
-				Optimization="3"
+				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
@@ -77,6 +76,8 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
 				OutputFile="../bin/System.Data.SQLite.DLL"
+				GenerateManifest="false"
+				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
@@ -119,7 +120,7 @@
 			IntermediateDirectory="Pocket PC 2003 (ARMV4)\$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="1"
-			WholeProgramOptimization="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -143,10 +144,9 @@
 				ExecutionBucket="7"
 				AdditionalOptions="/GS-"
 				Optimization="1"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 			/>
@@ -231,12 +231,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
-				Optimization="3"
+				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;WIN64;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
@@ -321,12 +320,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
-				Optimization="3"
+				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;WIN64;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;WIN64;SQLITE_HAS_CODEC;;SQLITE_ENABLE_COLUMN_METADATA"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
@@ -411,7 +409,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -495,7 +493,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="0"
 				FavorSizeOrSpeed="0"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;;SQLITE_ENABLE_COLUMN_METADATA"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				DebugInformationFormat="3"
@@ -581,7 +579,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;WIN64;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -664,7 +662,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;WIN64;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -894,7 +892,6 @@
 				>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -926,7 +923,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"

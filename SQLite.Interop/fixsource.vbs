@@ -14,16 +14,16 @@ Sub Main()
   
   ' Changes the name of the function so we can get first crack at it in interop.h to provide GetSchemaTable() support
   '
-  Set srcFile = fso.OpenTextFile("src\select.c", 1) 
-  srcFileContents = srcFile.ReadAll()
-  srcFile.Close()  
-  newFileContents = Replace(srcFileContents, "static void generateColumnNames(", "static void _generateColumnNames(")
-  If (newFileContents <> srcFileContents) Then
-    WScript.StdOut.WriteLine "Updating select.c"
-    Set srcFile = fso.CreateTextFile("src\select.c", true)
-    srcFile.Write(newFileContents)
-    srcFile.Close()
-  End If
+  ' Set srcFile = fso.OpenTextFile("src\select.c", 1) 
+  ' srcFileContents = srcFile.ReadAll()
+  ' srcFile.Close()  
+  ' newFileContents = Replace(srcFileContents, "static void generateColumnNames(", "static void _generateColumnNames(")
+  ' If (newFileContents <> srcFileContents) Then
+  '   WScript.StdOut.WriteLine "Updating select.c"
+  '   Set srcFile = fso.CreateTextFile("src\select.c", true)
+  '   srcFile.Write(newFileContents)
+  '   srcFile.Close()
+  ' End If
 
   ' SQLite supports : and $ for named parameters, but we add support for @ as well here
   '  

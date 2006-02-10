@@ -17,109 +17,109 @@
 #endif // _WIN32_WCE
 #endif // NDEBUG
 
-// Forward declare this function, we're implementing it later
-static void generateColumnNames(
-  Parse *pParse,      /* Parser context */
-  SrcList *pTabList,  /* List of tables */
-  ExprList *pEList    /* Expressions defining the result set */
-);
-
-#include "src\select.c"
-
-/*
-** Generate code that will tell the VDBE the names of columns
-** in the result set.  This information is used to provide the
-** azCol[] values in the callback.
-*/
-static void generateColumnNames(
-  Parse *pParse,      /* Parser context */
-  SrcList *pTabList,  /* List of tables */
-  ExprList *pEList    /* Expressions defining the result set */
-){
-  Vdbe *v = pParse->pVdbe;
-  int i, j;
-  sqlite3 *db = pParse->db;
-  int fullNames, shortNames;
-  int realNames;                                     /*** ADDED - SQLite.Interop ***/
-
-  realNames = (db->flags & 0x01000000)!=0;           /*** ADDED - SQLite.Interop ***/
-  if (!realNames) // Default to normal Sqlite3       /*** ADDED - SQLite.Interop ***/
-  {                                                  /*** ADDED - SQLite.Interop ***/
-    _generateColumnNames(pParse, pTabList, pEList);  /*** ADDED - SQLite.Interop ***/
-    return;                                          /*** ADDED - SQLite.Interop ***/
-  }                                                  /*** ADDED - SQLite.Interop ***/
-
-#ifndef SQLITE_OMIT_EXPLAIN
-  /* If this is an EXPLAIN, skip this step */
-  if( pParse->explain ){
-    return;
-  }
-#endif
-
-  assert( v!=0 );
-  if( pParse->colNamesSet || v==0 || sqlite3MallocFailed() ) return;
-  pParse->colNamesSet = 1;
-  fullNames = (db->flags & SQLITE_FullColNames)!=0;
-  shortNames = (db->flags & SQLITE_ShortColNames)!=0;
-  if (realNames) fullNames = 1;                      /*** ADDED - SQLite.Interop ***/
-
-  sqlite3VdbeSetNumCols(v, pEList->nExpr);
-  for(i=0; i<pEList->nExpr; i++){
-    Expr *p;
-    p = pEList->a[i].pExpr;
-    if( p==0 ) continue;
-    if( pEList->a[i].zName && (realNames == 0 || p->op != TK_COLUMN)){   /*** CHANGED - SQLite.Interop ***/
-      char *zName = pEList->a[i].zName;
-      sqlite3VdbeSetColName(v, i, zName, strlen(zName));
-      continue;
-    }
-    if( p->op==TK_COLUMN && pTabList ){
-      Table *pTab;
-      char *zCol;
-      int iCol = p->iColumn;
-      for(j=0; j<pTabList->nSrc && pTabList->a[j].iCursor!=p->iTable; j++){}
-      assert( j<pTabList->nSrc );
-      pTab = pTabList->a[j].pTab;
-      if( iCol<0 ) iCol = pTab->iPKey;
-      assert( iCol==-1 || (iCol>=0 && iCol<pTab->nCol) );
-      if( iCol<0 ){
-        zCol = "rowid";
-      }else{
-        zCol = pTab->aCol[iCol].zName;
-      }
-      if( !shortNames && !fullNames && p->span.z && p->span.z[0] ){
-        sqlite3VdbeSetColName(v, i, (char*)p->span.z, p->span.n);
-      }else if( fullNames || (!shortNames && pTabList->nSrc>1) ){
-        char *zName = 0;
-        char *zTab;
-        char *zDb = 0;                                                          /*** ADDED - SQLite.Interop ***/
-        int iDb;
-
-        iDb = sqlite3SchemaToIndex(pParse->db, pTab->pSchema);
-
-        zTab = pTabList->a[j].zAlias;
-        if( fullNames || zTab==0 ){
-          if (iDb > 1) zDb = db->aDb[iDb].zName;                    /*** ADDED - SQLite.Interop ***/
-          zTab = pTab->zName;
-        }
-        if (!zDb || !realNames) sqlite3SetString(&zName, zTab, "\x01", zCol, 0);   /*** CHANGED - SQLite.Interop ***/
-        else sqlite3SetString(&zName, zDb, "\x01", zTab, "\x01", zCol, 0);            /*** ADDED - SQLite.Interop ***/
-        sqlite3VdbeSetColName(v, i, zName, P3_DYNAMIC);
-      }else{
-        sqlite3VdbeSetColName(v, i, zCol, strlen(zCol));
-      }
-    }else if( p->span.z && p->span.z[0] ){
-      sqlite3VdbeSetColName(v, i, (char*)p->span.z, p->span.n);
-      /* sqlite3VdbeCompressSpace(v, addr); */
-    }else{
-      char zName[30];
-      assert( p->op!=TK_COLUMN || pTabList==0 );
-      sprintf(zName, "column%d", i+1);
-      sqlite3VdbeSetColName(v, i, zName, 0);
-    }
-  }
-  generateColumnTypes(pParse, pTabList, pEList);
-}
+//// Forward declare this function, we're implementing it later
+//static void generateColumnNames(
+//  Parse *pParse,      /* Parser context */
+//  SrcList *pTabList,  /* List of tables */
+//  ExprList *pEList    /* Expressions defining the result set */
+//);
+//
+//#include "src\select.c"
+//
+///*
+//** Generate code that will tell the VDBE the names of columns
+//** in the result set.  This information is used to provide the
+//** azCol[] values in the callback.
+//*/
+//static void generateColumnNames(
+//  Parse *pParse,      /* Parser context */
+//  SrcList *pTabList,  /* List of tables */
+//  ExprList *pEList    /* Expressions defining the result set */
+//){
+//  Vdbe *v = pParse->pVdbe;
+//  int i, j;
+//  sqlite3 *db = pParse->db;
+//  int fullNames, shortNames;
+//  int realNames;                                     /*** ADDED - SQLite.Interop ***/
+//
+//  realNames = (db->flags & 0x01000000)!=0;           /*** ADDED - SQLite.Interop ***/
+//  if (!realNames) // Default to normal Sqlite3       /*** ADDED - SQLite.Interop ***/
+//  {                                                  /*** ADDED - SQLite.Interop ***/
+//    _generateColumnNames(pParse, pTabList, pEList);  /*** ADDED - SQLite.Interop ***/
+//    return;                                          /*** ADDED - SQLite.Interop ***/
+//  }                                                  /*** ADDED - SQLite.Interop ***/
+//
+//#ifndef SQLITE_OMIT_EXPLAIN
+//  /* If this is an EXPLAIN, skip this step */
+//  if( pParse->explain ){
+//    return;
+//  }
+//#endif
+//
+//  assert( v!=0 );
+//  if( pParse->colNamesSet || v==0 || sqlite3MallocFailed() ) return;
+//  pParse->colNamesSet = 1;
+//  fullNames = (db->flags & SQLITE_FullColNames)!=0;
+//  shortNames = (db->flags & SQLITE_ShortColNames)!=0;
+//  if (realNames) fullNames = 1;                      /*** ADDED - SQLite.Interop ***/
+//
+//  sqlite3VdbeSetNumCols(v, pEList->nExpr);
+//  for(i=0; i<pEList->nExpr; i++){
+//    Expr *p;
+//    p = pEList->a[i].pExpr;
+//    if( p==0 ) continue;
+//    if( pEList->a[i].zName && (realNames == 0 || p->op != TK_COLUMN)){   /*** CHANGED - SQLite.Interop ***/
+//      char *zName = pEList->a[i].zName;
+//      sqlite3VdbeSetColName(v, i, COLNAME_NAME, zName, strlen(zName));
+//      continue;
+//    }
+//    if( p->op==TK_COLUMN && pTabList ){
+//      Table *pTab;
+//      char *zCol;
+//      int iCol = p->iColumn;
+//      for(j=0; j<pTabList->nSrc && pTabList->a[j].iCursor!=p->iTable; j++){}
+//      assert( j<pTabList->nSrc );
+//      pTab = pTabList->a[j].pTab;
+//      if( iCol<0 ) iCol = pTab->iPKey;
+//      assert( iCol==-1 || (iCol>=0 && iCol<pTab->nCol) );
+//      if( iCol<0 ){
+//        zCol = "rowid";
+//      }else{
+//        zCol = pTab->aCol[iCol].zName;
+//      }
+//      if( !shortNames && !fullNames && p->span.z && p->span.z[0] ){
+//        sqlite3VdbeSetColName(v, i, COLNAME_NAME, (char*)p->span.z, p->span.n);
+//      }else if( fullNames || (!shortNames && pTabList->nSrc>1) ){
+//        char *zName = 0;
+//        char *zTab;
+//        char *zDb = 0;                                                          /*** ADDED - SQLite.Interop ***/
+//        int iDb;
+//
+//        iDb = sqlite3SchemaToIndex(pParse->db, pTab->pSchema);
+//
+//        zTab = pTabList->a[j].zAlias;
+//        if( fullNames || zTab==0 ){
+//          if (iDb > 1) zDb = db->aDb[iDb].zName;                    /*** ADDED - SQLite.Interop ***/
+//          zTab = pTab->zName;
+//        }
+//        if (!zDb || !realNames) sqlite3SetString(&zName, zTab, "\x01", zCol, 0);   /*** CHANGED - SQLite.Interop ***/
+//        else sqlite3SetString(&zName, zDb, "\x01", zTab, "\x01", zCol, 0);            /*** ADDED - SQLite.Interop ***/
+//        sqlite3VdbeSetColName(v, i, COLNAME_NAME, zName, P3_DYNAMIC);
+//      }else{
+//        sqlite3VdbeSetColName(v, i, COLNAME_NAME, zCol, strlen(zCol));
+//      }
+//    }else if( p->span.z && p->span.z[0] ){
+//      sqlite3VdbeSetColName(v, i, COLNAME_NAME, (char*)p->span.z, p->span.n);
+//      /* sqlite3VdbeCompressSpace(v, addr); */
+//    }else{
+//      char zName[30];
+//      assert( p->op!=TK_COLUMN || pTabList==0 );
+//      sprintf(zName, "column%d", i+1);
+//      sqlite3VdbeSetColName(v, i, COLNAME_NAME, zName, 0);
+//    }
+//  }
+//  generateColumnTypes(pParse, pTabList, pEList);
+//}
 
 #ifdef OS_WIN
 
@@ -762,12 +762,63 @@ __declspec(dllexport) void __stdcall sqlite3_result_text16_interop(sqlite3_conte
   sqlite3_result_text16(ctx, pv, n, cb);
 }
 
-__declspec(dllexport) void __stdcall sqlite3_realcolnames(sqlite3 *db, int bOn)
+__declspec(dllexport) const char * __stdcall sqlite3_column_database_name_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
-  if (bOn)
-    db->flags |= 0x01000000;
-  else
-    db->flags &= (~0x01000000);
+  const char *pval = sqlite3_column_database_name(stmt, iCol);
+  *plen = (pval != 0) ? strlen(pval) : 0;
+  return pval;
 }
+
+__declspec(dllexport) const void * __stdcall sqlite3_column_databsae_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
+{
+  const void *pval = sqlite3_column_database_name16(stmt, iCol);
+  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  return pval;
+}
+
+__declspec(dllexport) const char * __stdcall sqlite3_column_table_name_interop(sqlite3_stmt *stmt, int iCol, int *plen)
+{
+  const char *pval = sqlite3_column_table_name(stmt, iCol);
+  *plen = (pval != 0) ? strlen(pval) : 0;
+  return pval;
+}
+
+__declspec(dllexport) const void * __stdcall sqlite3_column_table_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
+{
+  const void *pval = sqlite3_column_table_name16(stmt, iCol);
+  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  return pval;
+}
+
+__declspec(dllexport) const char * __stdcall sqlite3_column_origin_name_interop(sqlite3_stmt *stmt, int iCol, int *plen)
+{
+  const char *pval = sqlite3_column_origin_name(stmt, iCol);
+  *plen = (pval != 0) ? strlen(pval) : 0;
+  return pval;
+}
+
+__declspec(dllexport) const void * __stdcall sqlite3_column_origin_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
+{
+  const void *pval = sqlite3_column_origin_name16(stmt, iCol);
+  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  return pval;
+}
+
+__declspec(dllexport) int sqlite3_table_column_metadata_interop(sqlite3 *db, const char *zDbName, const char *zTableName, const char *zColumnName, char **pzDataType, char **pzCollSeq, int *pNotNull, int *pPrimaryKey, int *pAutoinc, int *pdtLen, int *pcsLen)
+{
+  int n = sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc);
+  *pdtLen = (*pzDataType != 0) ? strlen(*pzDataType) : 0;
+  *pcsLen = (*pzCollSeq != 0) ? strlen(*pzCollSeq) : 0;
+
+  return n;
+}
+
+//__declspec(dllexport) void __stdcall sqlite3_realcolnames(sqlite3 *db, int bOn)
+//{
+//  if (bOn)
+//    db->flags |= 0x01000000;
+//  else
+//    db->flags &= (~0x01000000);
+//}
 
 #endif // OS_WIN
