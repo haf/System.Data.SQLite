@@ -111,8 +111,8 @@
     <H2><B>Development Notes Regarding the SQLite 3 Source Code</B></H2>
     <p>
       The SQLite3 source code is compiled directly from the SQLite.org release
-      sources.&nbsp; All builds of sqlite after 3.2.8 have included support for Windows CE.&nbsp; Additionally, two minor modifications are made to
-      the sources, those modifications are made automatically by the fixsource.vbs file
+      sources.&nbsp; All builds of sqlite after 3.2.8 have included support for Windows CE.&nbsp; Additionally,
+      just one minor modification is made to pager.c, that modification is made automatically by the fixsource.vbs file
       when the VS2005 solution is compiled.</p>
     <p></p>
     <p>
@@ -120,7 +120,10 @@
     <p><b>1.0.26.0 - February 10, 2006</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.4</li><li>Fixed an encryption bug when changing the password of databases over 1gb in
-      size.&nbsp;</li><li>Fixed various designer issues related to construction of named parameters.&nbsp;</li><li>Implemented the SourceColumnNullMapping property of SQLiteParameter to fix
+      size.&nbsp;</li><li>Fixed various designer issues related to construction of named parameters.</li>
+      <li>Retooled the GetSchema() method of SQLiteDataReader to use the new 3.3.4 API functions,
+        and made several enhancements and fixes to schemas.&nbsp;</li>
+      <li>Implemented the SourceColumnNullMapping property of SQLiteParameter to fix
     a DbCommandBuilder code generation bug.&nbsp;</li><li>Removed the runtime dependency on MSVCR80.DLL.&nbsp; File size is somewhat
     larger for the varying desktop versions, but the Compact Framework version remains
     the same.</li><li>Created an install program to manage installation and uninstallation of the
