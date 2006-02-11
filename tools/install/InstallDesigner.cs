@@ -1,16 +1,23 @@
-using System;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using Microsoft.Win32;
-using System.IO;
-using System.GACManagedAccess;
-using System.Xml;
+/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
 
 namespace install
 {
+  using System;
+  using System.ComponentModel;
+  using System.Data;
+  using System.Drawing;
+  using System.Text;
+  using System.Windows.Forms;
+  using Microsoft.Win32;
+  using System.IO;
+  using System.GACManagedAccess;
+  using System.Xml;
+
   public partial class InstallDesigner : Form
   {
     private static Guid standardDataProviderGuid = new Guid("{0EBAAB6E-CA80-4b4a-8DDF-CBE6BF058C70}");
@@ -249,7 +256,6 @@ namespace install
             subsubkey.CreateSubKey("DataViewSupport").Close();
             using (RegistryKey subsubsubkey = subsubkey.CreateSubKey("DataConnectionSupport", RegistryKeyPermissionCheck.ReadWriteSubTree))
             {
-              // Comment out this line when using the VSPackage
 #if !USEPACKAGE
               subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteDataConnectionSupport");
 #endif

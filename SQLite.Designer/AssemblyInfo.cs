@@ -10,7 +10,7 @@ using System.Runtime.ConstrainedExecution;
 [assembly: AssemblyTitle("SQLite.Designer")]
 [assembly: AssemblyDescription("ADO.NET 2.0 Data Designer for SQLite")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Black Castle Software, LLC")]
+[assembly: AssemblyCompany("http://sqlite.phxsoftware.com")]
 [assembly: AssemblyProduct("SQLite Designer")]
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]
@@ -32,8 +32,8 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.25.0")]
-[assembly: AssemblyFileVersion("1.0.25.0")]
+[assembly: AssemblyVersion("1.0.26.0")]
+[assembly: AssemblyFileVersion("1.0.26.0")]
 [assembly: AssemblyDelaySignAttribute(false)]
 [assembly: AssemblyKeyFileAttribute("..\\System.Data.SQLite\\System.Data.SQLite.snk")]
 [assembly: AssemblyKeyNameAttribute("")]

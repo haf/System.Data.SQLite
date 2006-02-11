@@ -14,8 +14,6 @@ namespace SQLite.Designer
   using Microsoft.Win32;
   using Microsoft.VisualStudio.Shell.Interop;
 
-
-//  [ProvideLoadKey("Standard", "1.0", "SQLite Designer", "Black Castle Software, LLC", 1)]
   [Guid("DCBE6C8D-0E57-4099-A183-98FF74C64D9C")]
   internal sealed class SQLitePackage : Package
   {
@@ -25,7 +23,8 @@ namespace SQLite.Designer
 
     protected override void Initialize()
     {
-      ((IServiceContainer)this).AddService(typeof(SQLiteProviderObjectFactory), new ServiceCreatorCallback(CreateService), true);
+      IServiceContainer sc = (IServiceContainer)this;
+      sc.AddService(typeof(SQLiteProviderObjectFactory), new ServiceCreatorCallback(CreateService), true);
       base.Initialize();
     }
 

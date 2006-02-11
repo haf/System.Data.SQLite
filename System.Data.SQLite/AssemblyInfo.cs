@@ -13,7 +13,7 @@ using System.Runtime.ConstrainedExecution;
 [assembly: AssemblyTitle("System.Data.SQLite")]
 [assembly: AssemblyDescription("ADO.NET 2.0 Data Provider for SQLite")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("http://sourceforge.net/projects/sqlite-dotnet2")]
+[assembly: AssemblyCompany("http://sqlite.phxsoftware.com")]
 [assembly: AssemblyProduct("System.Data.SQLite")]
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]
@@ -39,7 +39,7 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.25.0")]
+[assembly: AssemblyVersion("1.0.26.0")]
 #if !PLATFORM_COMPACTFRAMEWORK
-[assembly: AssemblyFileVersion("1.0.25.0")]
+[assembly: AssemblyFileVersion("1.0.26.0")]
 #endif

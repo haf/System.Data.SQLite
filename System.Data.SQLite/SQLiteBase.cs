@@ -94,17 +94,6 @@ namespace System.Data.SQLite
 
     internal abstract void Cancel();
 
-    /// <summary>
-    /// An interop-specific function, this call sets an internal flag in the sqlite.interop.dll which causes all column names
-    /// of subsequently-prepared statements to return in Database.Table.Column format, ignoring all aliases that may have been applied
-    /// to tables or columns in a resultset.
-    /// </summary>
-    /// <remarks>
-    /// All statements prepared on this connection after this flag is changed are affected.  Existing statements are not.
-    /// </remarks>
-    /// <param name="bOn">Set to True to enable real column names, false to disable them.</param>
-    //internal abstract void SetRealColNames(bool bOn);
-
     internal abstract void Bind_Double(SQLiteStatement stmt, int index, double value);
     internal abstract void Bind_Int32(SQLiteStatement stmt, int index, Int32 value);
     internal abstract void Bind_Int64(SQLiteStatement stmt, int index, Int64 value);
