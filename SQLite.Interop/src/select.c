@@ -12,7 +12,7 @@
 ** This file contains C code routines that are called by the parser
 ** to handle SELECT statements in SQLite.
 **
-** $Id: select.c,v 1.19 2006/02/10 19:45:45 rmsimpson Exp $
+** $Id: select.c,v 1.20 2006/02/11 14:43:40 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 

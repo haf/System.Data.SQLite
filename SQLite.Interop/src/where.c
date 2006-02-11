@@ -16,7 +16,7 @@
 ** so is applicable.  Because this module is responsible for selecting
 ** indices, you might also think of this module as the "query optimizer".
 **
-** $Id: where.c,v 1.20 2006/02/02 22:45:10 rmsimpson Exp $
+** $Id: where.c,v 1.21 2006/02/11 14:43:40 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 

@@ -11,7 +11,7 @@
 *************************************************************************
 ** This file contains code used to implement the ATTACH and DETACH commands.
 **
-** $Id: attach.c,v 1.17 2006/01/31 19:16:13 rmsimpson Exp $
+** $Id: attach.c,v 1.18 2006/02/11 14:43:38 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 

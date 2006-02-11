@@ -22,7 +22,7 @@
 **     COMMIT
 **     ROLLBACK
 **
-** $Id: build.c,v 1.18 2006/02/10 19:45:44 rmsimpson Exp $
+** $Id: build.c,v 1.19 2006/02/11 14:43:38 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include <ctype.h>
@@ -2362,10 +2362,10 @@ void sqlite3CreateIndex(
       nExtra                       /* Collation sequence names */
   );
   if( sqlite3MallocFailed() ) goto exit_create_index;
-  pIndex->aiColumn = (int *)(&pIndex[1]);
+  pIndex->azColl = (char**)(&pIndex[1]);
+  pIndex->aiColumn = (int *)(&pIndex->azColl[nCol]);
   pIndex->aiRowEst = (unsigned *)(&pIndex->aiColumn[nCol]);
-  pIndex->azColl = (char **)(&pIndex->aiRowEst[nCol+1]);
-  pIndex->aSortOrder = (u8 *)(&pIndex->azColl[nCol]);
+  pIndex->aSortOrder = (u8 *)(&pIndex->aiRowEst[nCol+1]);
   pIndex->zName = (char *)(&pIndex->aSortOrder[nCol]);
   zExtra = (char *)(&pIndex->zName[nName+1]);
   strcpy(pIndex->zName, zName);

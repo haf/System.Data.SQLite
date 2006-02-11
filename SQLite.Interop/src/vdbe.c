@@ -43,7 +43,7 @@
 ** in this file for details.  If in doubt, do not deviate from existing
 ** commenting and indentation practices when changing or adding code.
 **
-** $Id: vdbe.c,v 1.20 2006/02/10 19:45:46 rmsimpson Exp $
+** $Id: vdbe.c,v 1.21 2006/02/11 14:43:40 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"

@@ -15,7 +15,7 @@
 ** individual tokens and sends those tokens one-by-one over to the
 ** parser for analysis.
 **
-** $Id: tokenize.c,v 1.21 2006/01/31 19:16:13 rmsimpson Exp $
+** $Id: tokenize.c,v 1.22 2006/02/11 14:43:40 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -261,7 +261,7 @@ static int getToken(const unsigned char *z, int *tokenType){
 #ifndef SQLITE_OMIT_TCL_VARIABLE
     case '$':
 #endif
-    case '@':
+    case '@':  /* For compatibility with MS SQL Server */
     case ':': {
       int n = 0;
       *tokenType = TK_VARIABLE;
