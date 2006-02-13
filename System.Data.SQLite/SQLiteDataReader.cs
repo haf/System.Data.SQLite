@@ -483,6 +483,7 @@ namespace System.Data.SQLite
       tbl.Columns.Add(SchemaTableOptionalColumn.IsReadOnly, typeof(Boolean));
       tbl.Columns.Add(SchemaTableOptionalColumn.ProviderSpecificDataType, typeof(Type));
       tbl.Columns.Add(SchemaTableOptionalColumn.DefaultValue, typeof(object));
+      tbl.Columns.Add("DeclaredType", typeof(string));
 
       tbl.BeginLoadData();
 
@@ -563,8 +564,13 @@ namespace System.Data.SQLite
                 out dataType, out collSeq, out bNotNull, out bPrimaryKey, out bAutoIncrement);
 
                       if (bNotNull) row[SchemaTableColumn.AllowDBNull] = false;
+
                       row[SchemaTableColumn.IsKey] = bPrimaryKey;
                       row[SchemaTableOptionalColumn.IsAutoIncrement] = bAutoIncrement;
+
+                      if (String.IsNullOrEmpty(dataType) == false)
+                        row["DeclaredType"] = dataType;
+
                       if (rdTable.IsDBNull(4) == false)
                         row[SchemaTableOptionalColumn.DefaultValue] = rdTable[4];
                       break;
