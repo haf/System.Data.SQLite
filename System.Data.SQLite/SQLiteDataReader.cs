@@ -71,21 +71,13 @@ namespace System.Data.SQLite
     {
       _command = cmd;
       _commandBehavior = behave;
-      Initialize();
-
-      if (_command != null)
-        NextResult();
-    }
-
-    /// <summary>
-    /// Initializes and resets the datareader's member variables
-    /// </summary>
-    internal void Initialize()
-    {
       _activeStatementIndex = -1;
       _activeStatement = null;
       _rowsAffected = -1;
       _fieldCount = -1;
+
+      if (_command != null)
+        NextResult();
     }
 
     /// <summary>

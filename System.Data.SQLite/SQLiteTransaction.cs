@@ -24,19 +24,19 @@ namespace System.Data.SQLite
     /// <summary>
     /// Constructs the transaction object, binding it to the supplied connection
     /// </summary>
-    /// <param name="cnn">The connection to open a transaction on</param>
+    /// <param name="connection">The connection to open a transaction on</param>
     /// <param name="deferredLock">TRUE to defer the writelock, or FALSE to lock immediately</param>
-    internal SQLiteTransaction(SQLiteConnection cnn, bool deferredLock)
+    internal SQLiteTransaction(SQLiteConnection connection, bool deferredLock)
     {
-      _cnn = cnn;
+      _cnn = connection;
       if (_cnn._transactionLevel++ == 0)
       {
         try
         {
           if (!deferredLock)
-            cnn._sql.Execute("BEGIN IMMEDIATE");
+            connection._sql.Execute("BEGIN IMMEDIATE");
           else
-            cnn._sql.Execute("BEGIN");
+            connection._sql.Execute("BEGIN");
         }
         catch (SQLiteException)
         {

@@ -146,9 +146,8 @@ namespace System.Data.SQLite
     /// <summary>
     /// Default constructor
     /// </summary>
-    public SQLiteConnection()
+    public SQLiteConnection() : this("")
     {
-      Initialize(null);
     }
 
     /// <summary>
@@ -157,7 +156,15 @@ namespace System.Data.SQLite
     /// <param name="connectionString">The connection string to use on the connection</param>
     public SQLiteConnection(string connectionString)
     {
-      Initialize(connectionString);
+      _sql = null;
+      _connectionState = ConnectionState.Closed;
+      _connectionString = "";
+      _transactionLevel = 0;
+      _enlisted = false;
+      _commandList = new List<SQLiteCommand>();
+
+      if (connectionString != null)
+        ConnectionString = connectionString;
     }
 
     /// <summary>
@@ -165,19 +172,17 @@ namespace System.Data.SQLite
     /// function will open its own connection, enumerate any attached databases of the original connection, and automatically
     /// attach to them.
     /// </summary>
-    /// <param name="cnn"></param>
-    public SQLiteConnection(SQLiteConnection cnn)
+    /// <param name="connection"></param>
+    public SQLiteConnection(SQLiteConnection connection) : this(connection.ConnectionString)
     {
       string str;
 
-      Initialize(cnn.ConnectionString);
-
-      if (cnn.State == ConnectionState.Open)
+      if (connection.State == ConnectionState.Open)
       {
         Open();
 
         // Reattach all attached databases from the existing connection
-        using (DataTable tbl = cnn.GetSchema("Catalogs"))
+        using (DataTable tbl = connection.GetSchema("Catalogs"))
         {
           foreach (DataRow row in tbl.Rows)
           {
@@ -213,19 +218,6 @@ namespace System.Data.SQLite
     public object Clone()
     {
       return new SQLiteConnection(this);
-    }
-
-    private void Initialize(string connectionString)
-    {
-      _sql = null;
-      _connectionState = ConnectionState.Closed;
-      _connectionString = "";
-      _transactionLevel = 0;
-      _enlisted = false;
-      _commandList = new List<SQLiteCommand>();
-
-      if (connectionString != null)
-        ConnectionString = connectionString;
     }
 
     /// <summary>

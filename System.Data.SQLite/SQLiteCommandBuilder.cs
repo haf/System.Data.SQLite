@@ -23,7 +23,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Default constructor
     /// </summary>
-    public SQLiteCommandBuilder()
+    public SQLiteCommandBuilder() : this(null)
     {
     }
 
@@ -33,6 +33,8 @@ namespace System.Data.SQLite
     /// <param name="adp"></param>
     public SQLiteCommandBuilder(SQLiteDataAdapter adp)
     {
+      QuotePrefix = "[";
+      QuoteSuffix = "]";
       DataAdapter = adp;
     }
 
@@ -208,6 +210,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [Browsable(false)]
 #endif
+    [DefaultValue("[")]
     public override string QuotePrefix
     {
       get
@@ -239,23 +242,37 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Not implemented
+    /// Places brackets around an identifier
     /// </summary>
-    /// <param name="unquotedIdentifier"></param>
-    /// <returns></returns>
+    /// <param name="unquotedIdentifier">The identifier to quote</param>
+    /// <returns>The bracketed identifier</returns>
     public override string QuoteIdentifier(string unquotedIdentifier)
     {
-      return unquotedIdentifier;
+      if (String.IsNullOrEmpty(QuotePrefix)
+        || String.IsNullOrEmpty(QuoteSuffix)
+        || String.IsNullOrEmpty(unquotedIdentifier))
+        return unquotedIdentifier;
+
+      return QuotePrefix + unquotedIdentifier.Replace(QuoteSuffix, QuoteSuffix + QuoteSuffix) + QuoteSuffix;
     }
 
     /// <summary>
-    /// Not implemented
+    /// Removes brackets around an identifier
     /// </summary>
-    /// <param name="quotedIdentifier"></param>
-    /// <returns></returns>
+    /// <param name="quotedIdentifier">The quoted (bracketed) identifier</param>
+    /// <returns>The undecorated identifier</returns>
     public override string UnquoteIdentifier(string quotedIdentifier)
     {
-      return quotedIdentifier;
+      if (String.IsNullOrEmpty(QuotePrefix)
+        || String.IsNullOrEmpty(QuoteSuffix)
+        || String.IsNullOrEmpty(quotedIdentifier))
+        return quotedIdentifier;
+
+      if (quotedIdentifier.StartsWith(QuotePrefix, StringComparison.InvariantCultureIgnoreCase) == false
+        || quotedIdentifier.EndsWith(QuoteSuffix, StringComparison.InvariantCultureIgnoreCase) == false)
+        return quotedIdentifier;
+
+      return quotedIdentifier.Substring(QuotePrefix.Length, quotedIdentifier.Length - (QuotePrefix.Length + QuoteSuffix.Length)).Replace(QuoteSuffix + QuoteSuffix, QuoteSuffix);
     }
 
     /// <summary>

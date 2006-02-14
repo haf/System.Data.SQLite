@@ -46,9 +46,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Default constructor
     /// </summary>
-    public SQLiteParameter()
+    public SQLiteParameter() 
+      : this(null, (DbType)(-1), 0, null, DataRowVersion.Current)
     {
-      Initialize(null, -1, 0, null, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -56,8 +56,8 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="parameterName">The parameter name</param>
     public SQLiteParameter(string parameterName)
+      : this(parameterName, (DbType)(-1), 0, null, DataRowVersion.Current)
     {
-      Initialize(parameterName, -1, 0, null, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -66,8 +66,8 @@ namespace System.Data.SQLite
     /// <param name="parameterName">The parameter name</param>
     /// <param name="value">The initial value of the parameter</param>
     public SQLiteParameter(string parameterName, object value)
+      : this(parameterName, (DbType)(-1), 0, null, DataRowVersion.Current)
     {
-      Initialize(parameterName, -1, 0, null, DataRowVersion.Current);
       Value = value;
     }
 
@@ -77,8 +77,8 @@ namespace System.Data.SQLite
     /// <param name="parameterName">The parameter name</param>
     /// <param name="dbType">The datatype of the parameter</param>
     public SQLiteParameter(string parameterName, DbType dbType)
+      : this(parameterName, dbType, 0, null, DataRowVersion.Current)
     {
-      Initialize(parameterName, (int)dbType, 0, null, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -88,8 +88,8 @@ namespace System.Data.SQLite
     /// <param name="dbType">The data type</param>
     /// <param name="sourceColumn">The source column</param>
     public SQLiteParameter(string parameterName, DbType dbType, string sourceColumn)
+      : this(parameterName, dbType, 0, sourceColumn, DataRowVersion.Current)
     {
-      Initialize(parameterName, (int)dbType, 0, sourceColumn, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -100,8 +100,8 @@ namespace System.Data.SQLite
     /// <param name="sourceColumn">The source column</param>
     /// <param name="rowVersion">The row version information</param>
     public SQLiteParameter(string parameterName, DbType dbType, string sourceColumn, DataRowVersion rowVersion)
+      : this(parameterName, dbType, 0, sourceColumn, rowVersion)
     {
-      Initialize(parameterName, (int)dbType, 0, sourceColumn, rowVersion);
     }
 
     /// <summary>
@@ -109,8 +109,8 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="dbType">The datatype of the parameter</param>
     public SQLiteParameter(DbType dbType)
+      : this(null, dbType, 0, null, DataRowVersion.Current)
     {
-      Initialize(null, (int)dbType, 0, null, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -119,8 +119,8 @@ namespace System.Data.SQLite
     /// <param name="dbType">The datatype of the parameter</param>
     /// <param name="value">The initial value of the parameter</param>
     public SQLiteParameter(DbType dbType, object value)
+      : this(null, dbType, 0, null, DataRowVersion.Current)
     {
-      Initialize(null, (int)dbType, 0, null, DataRowVersion.Current);
       Value = value;
     }
 
@@ -130,8 +130,8 @@ namespace System.Data.SQLite
     /// <param name="dbType">The datatype of the parameter</param>
     /// <param name="sourceColumn">The source column</param>
     public SQLiteParameter(DbType dbType, string sourceColumn)
+      : this(null, dbType, 0, sourceColumn, DataRowVersion.Current)
     {
-      Initialize(null, (int)dbType, 0, sourceColumn, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -141,8 +141,8 @@ namespace System.Data.SQLite
     /// <param name="sourceColumn">The source column</param>
     /// <param name="rowVersion">The row version information</param>
     public SQLiteParameter(DbType dbType, string sourceColumn, DataRowVersion rowVersion)
+      : this(null, dbType, 0, sourceColumn, rowVersion)
     {
-      Initialize(null, (int)dbType, 0, sourceColumn, rowVersion);
     }
 
     /// <summary>
@@ -152,8 +152,8 @@ namespace System.Data.SQLite
     /// <param name="parameterType">The data type</param>
     /// <param name="parameterSize">The size of the parameter</param>
     public SQLiteParameter(string parameterName, DbType parameterType, int parameterSize)
+      : this(parameterName, parameterType, parameterSize, null, DataRowVersion.Current)
     {
-      Initialize(parameterName, (int)parameterType, parameterSize, null, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -164,8 +164,8 @@ namespace System.Data.SQLite
     /// <param name="parameterSize">The size of the parameter</param>
     /// <param name="sourceColumn">The source column</param>
     public SQLiteParameter(string parameterName, DbType parameterType, int parameterSize, string sourceColumn)
+      : this(parameterName, parameterType, parameterSize, sourceColumn, DataRowVersion.Current)
     {
-      Initialize(parameterName, (int)parameterType, parameterSize, sourceColumn, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -176,9 +176,15 @@ namespace System.Data.SQLite
     /// <param name="parameterSize">The size of the parameter</param>
     /// <param name="sourceColumn">The source column</param>
     /// <param name="rowVersion">The row version information</param>
-    public SQLiteParameter(string parameterName, DbType parameterType, int parameterSize, string sourceColumn, DataRowVersion rowVersion)
+    public SQLiteParameter(string parameterName, DbType parameterType, int parameterSize, string sourceColumn, DataRowVersion rowVersion)      
     {
-      Initialize(parameterName, (int)parameterType, parameterSize, sourceColumn, rowVersion);
+      _columnName = parameterName;
+      _dbType = (int)parameterType;
+      _sourceColumn = sourceColumn;
+      _rowVersion = rowVersion;
+      _objValue = null;
+      _dataSize = parameterSize;
+      _nullMapping = false;
     }
 
     /// <summary>
@@ -195,8 +201,8 @@ namespace System.Data.SQLite
     /// <param name="rowVersion">The row version information</param>
     /// <param name="value">The initial value to assign the parameter</param>
     public SQLiteParameter(string parameterName, DbType parameterType, int parameterSize, ParameterDirection direction, bool isNullable, byte precision, byte scale, string sourceColumn, DataRowVersion rowVersion, object value)
+      : this(parameterName, parameterType, parameterSize, sourceColumn, rowVersion)
     {
-      Initialize(parameterName, (int)parameterType, parameterSize, sourceColumn, rowVersion);
       Direction = direction;
       IsNullable = isNullable;
       Value = value;
@@ -208,8 +214,8 @@ namespace System.Data.SQLite
     /// <param name="parameterType">The data type</param>
     /// <param name="parameterSize">The size of the parameter</param>
     public SQLiteParameter(DbType parameterType, int parameterSize)
+      : this(null, parameterType, parameterSize, null, DataRowVersion.Current)
     {
-      Initialize(null, (int)parameterType, parameterSize, null, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -219,8 +225,8 @@ namespace System.Data.SQLite
     /// <param name="parameterSize">The size of the parameter</param>
     /// <param name="sourceColumn">The source column</param>
     public SQLiteParameter(DbType parameterType, int parameterSize, string sourceColumn)
+      : this(null, parameterType, parameterSize, sourceColumn, DataRowVersion.Current)
     {
-      Initialize(null, (int)parameterType, parameterSize, sourceColumn, DataRowVersion.Current);
     }
 
     /// <summary>
@@ -231,27 +237,8 @@ namespace System.Data.SQLite
     /// <param name="sourceColumn">The source column</param>
     /// <param name="rowVersion">The row version information</param>
     public SQLiteParameter(DbType parameterType, int parameterSize, string sourceColumn, DataRowVersion rowVersion)
+      : this(null, parameterType, parameterSize, sourceColumn, rowVersion)
     {
-      Initialize(null, (int)parameterType, parameterSize, sourceColumn, rowVersion);
-    }
-
-    /// <summary>
-    /// Initializes the parameter member variables
-    /// </summary>
-    /// <param name="parameterName">The parameter name</param>
-    /// <param name="paramType">The data type</param>
-    /// <param name="nSize">The size</param>
-    /// <param name="sourceColumn">The source column</param>
-    /// <param name="rowVersion">The row version</param>
-    private void Initialize(string parameterName, int paramType, int nSize, string sourceColumn, DataRowVersion rowVersion)
-    {
-      _columnName = parameterName;
-      _dbType = paramType;
-      _sourceColumn = sourceColumn;
-      _rowVersion = rowVersion;
-      _objValue = null;
-      _dataSize = nSize;
-      _nullMapping = false;
     }
 
     /// <summary>

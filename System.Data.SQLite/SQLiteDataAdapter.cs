@@ -46,10 +46,10 @@ namespace System.Data.SQLite
     /// Constructs a data adapter with the supplied select command text and associated with the specified connection.
     /// </summary>
     /// <param name="commandText">The select command text to associate with the data adapter.</param>
-    /// <param name="cnn">The connection to associate with the select command.</param>
-    public SQLiteDataAdapter(string commandText, SQLiteConnection cnn)
+    /// <param name="connection">The connection to associate with the select command.</param>
+    public SQLiteDataAdapter(string commandText, SQLiteConnection connection)
     {
-      SelectCommand = new SQLiteCommand(commandText, cnn);
+      SelectCommand = new SQLiteCommand(commandText, connection);
     }
 
     /// <summary>

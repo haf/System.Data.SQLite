@@ -144,7 +144,7 @@ namespace install
 
       try
       {
-        using (subkey = parent.OpenSubKey(String.Format("{0}\\8.0", subkeyname)))
+        using (subkey = parent.OpenSubKey(String.Format("{0}\\{1}", subkeyname, _regRoot)))
         {
           ListViewItem item = new ListViewItem(itemName);
 
@@ -490,13 +490,13 @@ namespace install
       xmlDoc.Save(xmlFileName);
     }
 
-    private static XmlDocument GetConfig(string keyname, out string xmlFileName)
+    private XmlDocument GetConfig(string keyname, out string xmlFileName)
     {
       // xmlFileName = Environment.ExpandEnvironmentVariables("%WinDir%\\Microsoft.NET\\Framework\\v2.0.50727\\CONFIG\\machine.config");
 
       try
       {
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0", keyname), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}", keyname, _regRoot), true))
         {
           xmlFileName = (string)key.GetValue("InstallDir");
           if (String.Compare(keyname, "VisualStudio", true) == 0)

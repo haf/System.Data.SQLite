@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.26.0 Feb 11, 2006<br>
+    Version 1.0.26.1 Feb 14, 2006<br>
     Using SQLite 3.3.4<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -31,7 +31,8 @@
       <li>Encrypted database support.&nbsp; Encrypted databases are fully encrypted and
         support both binary and cleartext password types.</li>
       <LI>
-      Visual Studio 2005 Design-Time Support.&nbsp; You can add a SQLite 
+      Visual Studio 2005 Design-Time Support, works with all versions of VS2005, including
+      all Express Editions.&nbsp; You can add a SQLite 
       database to the Servers list, design queries with the Query Designer, 
       drag-and-drop tables onto a Typed DataSet, etc.
       <LI>
@@ -73,11 +74,12 @@
     <strong></strong>
     <h2>
       <strong>Design-Time Support (new as of 1.0.14)</strong></h2>
-    <P>Until an installer is created, through a command-prompt or Windows Explorer, navigate to the <STRONG>SQLite.NET\bin\Designer</STRONG>
-        folder and execute the <STRONG>INSTALL.CMD</STRONG>
-      file.&nbsp; The script and
-      batch file will register the System.Data.SQLite DLL in the Global Assembly Cache,
-      and modify the machine.config file to add SQLite to the list of default data providers.</P>
+    <P>
+      In Windows Explorer, navigate to the <STRONG>SQLite.NET\bin\Designer</STRONG>
+        folder and execute the <STRONG>INSTALL.EXE</STRONG>
+      file.&nbsp; The program will
+      automatically detect what version(s) of Visual Studio 2005 are installed and allow
+      you to selectively install and uninstall the designer for each edition.</P>
     <H2><STRONG>DbFactory Support (Non-Compact Framework)</STRONG></H2>
     In order to use the SQLiteFactory and have the SQLite data provider enumerated 
     in the DbProviderFactories methods, you must add the following segment into your application's app.config file:<br>
@@ -117,6 +119,11 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.26.1 - February 14, 2006</b></p>
+    <ul>
+    <li>Fixed even more minor schema bugs having to do with indexes.</li><li>Added two missing pieces in the SQLite designer which were preventing it from
+    being used from within VS Express editions.&nbsp;</li><li>Several bugfixes to the design-time installer program, including supporting
+    64-bit environments.</li></ul>
     <p><b>1.0.26.0 - February 11, 2006</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.4</li><li>Fixed an encryption bug when changing the password of databases over 1gb in

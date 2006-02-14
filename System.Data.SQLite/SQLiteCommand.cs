@@ -64,18 +64,17 @@ namespace System.Data.SQLite
     /// <summary>
     /// Default constructor
     /// </summary>
-    public SQLiteCommand()
+    public SQLiteCommand() :this(null, null)
     {
-      Initialize(null, null);
     }
 
     /// <summary>
     /// Initializes the command with the given command text
     /// </summary>
     /// <param name="commandText">The SQL command text</param>
-    public SQLiteCommand(string commandText)
+    public SQLiteCommand(string commandText) 
+      : this(commandText, null, null)
     {
-      Initialize(commandText, null);
     }
 
     /// <summary>
@@ -83,39 +82,28 @@ namespace System.Data.SQLite
     /// connection.
     /// </summary>
     /// <param name="commandText">The SQL command text</param>
-    /// <param name="cnn">The connection to associate with the command</param>
-    public SQLiteCommand(string commandText, SQLiteConnection cnn)
+    /// <param name="connection">The connection to associate with the command</param>
+    public SQLiteCommand(string commandText, SQLiteConnection connection)
+      : this(commandText, connection, null)
     {
-      Initialize(commandText, cnn);
     }
 
     /// <summary>
     /// Initializes the command and associates it with the specified connection.
     /// </summary>
-    /// <param name="cnn">The connection to associate with the command</param>
-    public SQLiteCommand(SQLiteConnection cnn)
+    /// <param name="connection">The connection to associate with the command</param>
+    public SQLiteCommand(SQLiteConnection connection) 
+      : this(null, connection, null)
     {
-      Initialize(null, cnn);
     }
 
     /// <summary>
     /// Initializes a command with the given SQL, connection and transaction
     /// </summary>
     /// <param name="commandText">The SQL command text</param>
-    /// <param name="cnn">The connection to associate with the command</param>
-    /// <param name="trans">The transaction the command should be associated with</param>
-    public SQLiteCommand(string commandText, SQLiteConnection cnn, SQLiteTransaction trans)
-    {
-      Initialize(commandText, cnn);
-      Transaction = trans;
-    }
-
-    /// <summary>
-    /// Initializes the command class
-    /// </summary>
-    /// <param name="strSql">The SQL command text</param>
-    /// <param name="cnn">A connection to associate with the command</param>
-    private void Initialize(string strSql, SQLiteConnection cnn)
+    /// <param name="connection">The connection to associate with the command</param>
+    /// <param name="transaction">The transaction the command should be associated with</param>
+    public SQLiteCommand(string commandText, SQLiteConnection connection, SQLiteTransaction transaction)
     {
       _statementList = null;
       _activeReader = null;
@@ -125,11 +113,14 @@ namespace System.Data.SQLite
       _updateRowSource = UpdateRowSource.FirstReturnedRecord;
       _transaction = null;
 
-      if (strSql != null)
-        CommandText = strSql;
+      if (commandText != null)
+        CommandText = commandText;
 
-      if (cnn != null)
-        DbConnection = cnn;
+      if (connection != null)
+        DbConnection = connection;
+
+      if (transaction != null)
+        Transaction = transaction;
     }
 
     /// <summary>
