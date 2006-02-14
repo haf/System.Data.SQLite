@@ -36,6 +36,8 @@ namespace SQLite.Designer
       AddProperty(SchemaSeparator, "");
       AddProperty(ParameterPrefix, "@");
       AddProperty(ParameterPrefixInName, true);
+      AddProperty("DeskTopDataSource", true);
+      AddProperty("LocalDatabase", true);
     }
   }
 }

@@ -1157,7 +1157,7 @@ namespace System.Data.SQLite
                       row["INDEX_NAME"] = rd.GetString(1);
                       row["UNIQUE"] = rd.GetBoolean(2);
                       
-                      if (rd.GetString(1).StartsWith(primaryKey, true, CultureInfo.InvariantCulture) == true)
+                      if (rd.GetString(1).StartsWith(primaryKey, StringComparison.InvariantCultureIgnoreCase))
                         row["PRIMARY_KEY"] = true;
 
                       tbl.Rows.Add(row);

@@ -563,7 +563,7 @@ namespace System.Data.SQLite
                 strColumn,
                 out dataType, out collSeq, out bNotNull, out bPrimaryKey, out bAutoIncrement);
 
-                      if (bNotNull) row[SchemaTableColumn.AllowDBNull] = false;
+                      if (bNotNull || bPrimaryKey) row[SchemaTableColumn.AllowDBNull] = false;
 
                       row[SchemaTableColumn.IsKey] = bPrimaryKey;
                       row[SchemaTableOptionalColumn.IsAutoIncrement] = bAutoIncrement;

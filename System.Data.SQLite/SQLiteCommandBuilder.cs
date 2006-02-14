@@ -239,6 +239,26 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Not implemented
+    /// </summary>
+    /// <param name="unquotedIdentifier"></param>
+    /// <returns></returns>
+    public override string QuoteIdentifier(string unquotedIdentifier)
+    {
+      return unquotedIdentifier;
+    }
+
+    /// <summary>
+    /// Not implemented
+    /// </summary>
+    /// <param name="quotedIdentifier"></param>
+    /// <returns></returns>
+    public override string UnquoteIdentifier(string quotedIdentifier)
+    {
+      return quotedIdentifier;
+    }
+
+    /// <summary>
     /// Overridden to hide its property from the designer
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
