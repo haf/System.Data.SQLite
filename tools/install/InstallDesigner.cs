@@ -29,68 +29,92 @@ namespace install
     private static Guid jetAltDataSourcesGuid = new Guid("{466CE797-67A4-4495-B75C-A3FD282E7FC4}");
     private static string[] compactFrameworks = new string[] { "PocketPC", "SmartPhone", "WindowsCE" };
 
-    private static System.Reflection.Assembly assm = null;
+    private string _regRoot = "8.0";
+    private System.Reflection.Assembly _assm = null;
     private bool _ignoreChecks = true;
 
-    static InstallDesigner()
+    System.Reflection.Assembly SQLite
     {
-      if (assm == null)
+      get
       {
-        try
+        if (_assm == null)
         {
-          assm = System.Reflection.Assembly.LoadFrom("..\\System.Data.SQLite.DLL");
-        }
-        catch
-        {
-        }
-      }
+          Environment.CurrentDirectory = Path.GetDirectoryName(typeof(InstallDesigner).Assembly.Location);
 
-      if (assm == null)
-      {
-        try
-        {
-          assm = System.Reflection.Assembly.LoadFrom("..\\x64\\System.Data.SQLite.DLL");
-        }
-        catch
-        {
-        }
-      }
-
-      if (assm == null)
-      {
-        try
-        {
-          assm = System.Reflection.Assembly.LoadFrom("..\\itanium\\System.Data.SQLite.DLL");
-        }
-        catch
-        {
-        }
-      }
-
-      OpenFileDialog dlg = new OpenFileDialog();
-      while (assm == null)
-      {
-        dlg.Multiselect = false;
-        dlg.InitialDirectory = Environment.CurrentDirectory;
-        dlg.FileName = "System.Data.SQLite.DLL";
-        dlg.Filter = "System.Data.SQLite.DLL|System.Data.SQLite.DLL";
-        if (dlg.ShowDialog() == DialogResult.OK)
-        {
           try
           {
-            assm = System.Reflection.Assembly.LoadFrom(dlg.FileName);
+            _assm = System.Reflection.Assembly.LoadFrom("..\\System.Data.SQLite.DLL");
           }
           catch
           {
           }
         }
-        else
-          throw new ArgumentException("Unable to find or load System.Data.SQLite.DLL");
+
+        if (_assm == null)
+        {
+          try
+          {
+            _assm = System.Reflection.Assembly.LoadFrom("..\\x64\\System.Data.SQLite.DLL");
+          }
+          catch
+          {
+          }
+        }
+
+        if (_assm == null)
+        {
+          try
+          {
+            _assm = System.Reflection.Assembly.LoadFrom("..\\itanium\\System.Data.SQLite.DLL");
+          }
+          catch
+          {
+          }
+        }
+
+        OpenFileDialog dlg = new OpenFileDialog();
+        while (_assm == null)
+        {
+          dlg.Multiselect = false;
+          dlg.InitialDirectory = Environment.CurrentDirectory;
+          dlg.FileName = "System.Data.SQLite.DLL";
+          dlg.Filter = "System.Data.SQLite.DLL|System.Data.SQLite.DLL";
+          if (dlg.ShowDialog() == DialogResult.OK)
+          {
+            try
+            {
+              _assm = System.Reflection.Assembly.LoadFrom(dlg.FileName);
+            }
+            catch
+            {
+            }
+          }
+          else
+            throw new ArgumentException("Unable to find or load System.Data.SQLite.DLL");
+        }
+        return _assm;
+      }
+
+      set
+      {
+        _assm = value;
       }
     }
 
     public InstallDesigner()
     {
+      string[] args = Environment.GetCommandLineArgs();
+
+      for (int n = 0; n < args.Length; n++)
+      {
+        if (String.Compare(args[n], "/regroot", true) == 0 ||
+          String.Compare(args[n], "-regroot", true) == 0)
+        {
+          _regRoot = args[n + 1];
+          break;
+        }
+      }
+
       InitializeComponent();
     }
 
@@ -209,19 +233,29 @@ namespace install
 
       if (install && !installed)
       {
-        AssemblyCache.InstallAssembly(assm.Location, null, AssemblyCommitFlags.Default);
+        AssemblyCache.InstallAssembly(SQLite.Location, null, AssemblyCommitFlags.Default);
       }
       else if (!install && installed)
       {
-        System.Reflection.AssemblyName name = assm.GetName();
         AssemblyCacheUninstallDisposition disp;
-        AssemblyCache.UninstallAssembly(name.FullName + ", ProcessorArchitecture=" + name.ProcessorArchitecture, null, out disp);
+
+        AssemblyCacheEnum entries = new AssemblyCacheEnum("System.Data.SQLite");
+
+        string s;
+        while (true)
+        {
+          s = entries.GetNextAssembly();
+          if (String.IsNullOrEmpty(s)) break;
+
+          AssemblyCache.UninstallAssembly(s, null, out disp);
+        }
+        SQLite = null;
       }
     }
 
     private void ReplaceJet(string keyname)
     {
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataProviders", keyname), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
       {
         using (RegistryKey source = key.OpenSubKey(oledbDataProviderGuid.ToString("B")))
         {
@@ -234,7 +268,7 @@ namespace install
         key.DeleteSubKeyTree(oledbDataProviderGuid.ToString("B"));
       }
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataSources", keyname), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
       {
         using (RegistryKey source = key.OpenSubKey(jetDataSourcesGuid.ToString("B")))
         {
@@ -252,7 +286,7 @@ namespace install
 
     private void RestoreJet(string keyname)
     {
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataProviders", keyname), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
       {
         using (RegistryKey source = key.OpenSubKey(oledbAltDataProviderGuid.ToString("B")))
         {
@@ -262,7 +296,7 @@ namespace install
 
       Uninstall(keyname, oledbDataProviderGuid, jetDataSourcesGuid);
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataProviders", keyname), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
       {
         using (RegistryKey source = key.OpenSubKey(oledbAltDataProviderGuid.ToString("B")))
         {
@@ -277,7 +311,7 @@ namespace install
         }
       }
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataSources", keyname), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
       {
         using (RegistryKey source = key.OpenSubKey(jetAltDataSourcesGuid.ToString("B")))
         {
@@ -295,7 +329,7 @@ namespace install
 
     private void Install(string keyname, Guid provider, Guid source)
     {
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataProviders", keyname), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
       {
         using (RegistryKey subkey = key.CreateSubKey(provider.ToString("B"), RegistryKeyPermissionCheck.ReadWriteSubTree))
         {
@@ -322,7 +356,7 @@ namespace install
         }
       }
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataSources", keyname), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
       {
         using (RegistryKey subkey = key.CreateSubKey(source.ToString("B"), RegistryKeyPermissionCheck.ReadWriteSubTree))
         {
@@ -350,7 +384,7 @@ namespace install
         }
       }
 
-      string path = Path.GetDirectoryName(assm.Location);
+      string path = Path.GetDirectoryName(SQLite.Location);
 
       while (path.Length > 0)
       {
@@ -451,7 +485,7 @@ namespace install
       xmlNode.Attributes.GetNamedItem("name").Value = "SQLite Data Provider";
       xmlNode.Attributes.GetNamedItem("invariant").Value = "System.Data.SQLite";
       xmlNode.Attributes.GetNamedItem("description").Value = ".Net Framework Data Provider for SQLite";
-      xmlNode.Attributes.GetNamedItem("type").Value = "System.Data.SQLite.SQLiteFactory, " + assm.GetName().FullName;
+      xmlNode.Attributes.GetNamedItem("type").Value = "System.Data.SQLite.SQLiteFactory, " + SQLite.GetName().FullName;
 
       xmlDoc.Save(xmlFileName);
     }
@@ -488,11 +522,11 @@ namespace install
     {
       try
       {
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataProviders", keyname), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
         {
           if (key != null) key.DeleteSubKeyTree(provider.ToString("B"));
         }
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\DataSources", keyname), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
         {
           if (key != null) key.DeleteSubKeyTree(source.ToString("B"));
         }
