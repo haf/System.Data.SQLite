@@ -59,5 +59,14 @@ namespace SQLite.Designer {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MHM2ZQETQKDTJEPTC1MTQCZ1R1KQEMAPZHETDZPZI9RPJ0E0DHAHKCHZPKQ8AQZICADHKIZ1JAQED8IDEHZPZKZEIKAQERHPRCQMAMRKDEZZQRDRDHJEZIKECZPDIIKC.
+        /// </summary>
+        internal static string _400 {
+            get {
+                return ResourceManager.GetString("400", resourceCulture);
+            }
+        }
     }
 }

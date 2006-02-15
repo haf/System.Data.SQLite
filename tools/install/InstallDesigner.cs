@@ -32,6 +32,7 @@ namespace install
     private string _regRoot = "8.0";
     private System.Reflection.Assembly _assm = null;
     private bool _ignoreChecks = true;
+    private string _assmLocation;
 
     System.Reflection.Assembly SQLite
     {
@@ -43,7 +44,8 @@ namespace install
 
           try
           {
-            _assm = System.Reflection.Assembly.LoadFrom("..\\System.Data.SQLite.DLL");
+            _assmLocation = Path.GetFullPath("..\\System.Data.SQLite.DLL");
+            _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
           }
           catch
           {
@@ -54,7 +56,8 @@ namespace install
         {
           try
           {
-            _assm = System.Reflection.Assembly.LoadFrom("..\\x64\\System.Data.SQLite.DLL");
+            _assmLocation = Path.GetFullPath("..\\x64\\System.Data.SQLite.DLL");
+            _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
           }
           catch
           {
@@ -65,7 +68,8 @@ namespace install
         {
           try
           {
-            _assm = System.Reflection.Assembly.LoadFrom("..\\itanium\\System.Data.SQLite.DLL");
+            _assmLocation = Path.GetFullPath("..\\itanium\\System.Data.SQLite.DLL");
+            _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
           }
           catch
           {
@@ -83,6 +87,7 @@ namespace install
           {
             try
             {
+              _assmLocation = dlg.FileName;
               _assm = System.Reflection.Assembly.LoadFrom(dlg.FileName);
             }
             catch
@@ -231,25 +236,32 @@ namespace install
         }
       }
 
-      if (install && !installed)
+      try
       {
-        AssemblyCache.InstallAssembly(SQLite.Location, null, AssemblyCommitFlags.Default);
-      }
-      else if (!install && installed)
-      {
-        AssemblyCacheUninstallDisposition disp;
-
-        AssemblyCacheEnum entries = new AssemblyCacheEnum("System.Data.SQLite");
-
-        string s;
-        while (true)
+        if (install && !installed)
         {
-          s = entries.GetNextAssembly();
-          if (String.IsNullOrEmpty(s)) break;
-
-          AssemblyCache.UninstallAssembly(s, null, out disp);
+          AssemblyCache.InstallAssembly(_assmLocation, null, AssemblyCommitFlags.Default);
         }
-        SQLite = null;
+        else if (!install && installed)
+        {
+          AssemblyCacheUninstallDisposition disp;
+
+          AssemblyCacheEnum entries = new AssemblyCacheEnum("System.Data.SQLite");
+
+          string s;
+          while (true)
+          {
+            s = entries.GetNextAssembly();
+            if (String.IsNullOrEmpty(s)) break;
+
+            AssemblyCache.UninstallAssembly(s, null, out disp);
+          }
+          SQLite = null;
+        }
+      }
+      catch
+      {
+        throw;
       }
     }
 
@@ -384,9 +396,9 @@ namespace install
         }
       }
 
-      string path = Path.GetDirectoryName(SQLite.Location);
+      string path = Path.GetDirectoryName(_assmLocation);
 
-      while (path.Length > 0)
+      while (String.IsNullOrEmpty(path) == false)
       {
         if (File.Exists(path + "\\CompactFramework\\System.Data.SQLite.DLL") == false)
         {
@@ -395,7 +407,7 @@ namespace install
         else break;
       }
 
-      if (path.Length > 0)
+      if (String.IsNullOrEmpty(path) == false)
       {
         path += "\\CompactFramework\\";
 
@@ -424,11 +436,11 @@ namespace install
           subkey.SetValue(null, "SQLite Designer Package");
           subkey.SetValue("Class", "SQLite.Designer.SQLitePackage");
           subkey.SetValue("CodeBase", Path.GetFullPath("SQLite.Designer.DLL"));
-          subkey.SetValue("ID", 1);
+          subkey.SetValue("ID", 400);
           subkey.SetValue("InprocServer32", "mscoree.dll");
           subkey.SetValue("CompanyName", "Black Castle Software, LLC");
           subkey.SetValue("MinEdition", "standard");
-          subkey.SetValue("ProductName", "SQLite Designer");
+          subkey.SetValue("ProductName", "SQLite Data Provider");
           subkey.SetValue("ProductVersion", "1.0");
         }
       }

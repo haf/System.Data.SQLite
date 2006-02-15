@@ -24,12 +24,13 @@
 						in Visual Studio query designer.
 					-->
 					<CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
-				</CommandBindings>
+        </CommandBindings>
 				<Children>
 					<StaticNode nid="Tables">
             <DisplayName>User Tables</DisplayName>
 						<CommandBindings>
 							<CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
+              <CommandBinding name="NewTable" guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="256" handler="SQLite.Designer.SQLiteCommandHandler"/>
             </CommandBindings>
 						<Children>
 							<!--

@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SQLiteCommandHandler.cs" />
     <Compile Include="SQLiteConnectionProperties.cs" />
     <Compile Include="SQLiteConnectionUIControl.cs">
       <SubType>Form</SubType>
@@ -100,6 +101,13 @@
       <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SQLiteDataObjectSupport.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <CtcFile Include="CtcComponents\PkgCmd.ctc">
+      <ResourceName>1000</ResourceName>
+    </CtcFile>
+    <None Include="CtcComponents\Guids.h" />
+    <None Include="CtcComponents\PkgCmdID.h" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
