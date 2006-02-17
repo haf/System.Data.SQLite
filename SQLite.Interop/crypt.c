@@ -281,13 +281,13 @@ void sqlite3CodecGetKey(sqlite3 *db, int nDb, void **ppKey, int *pnKeyLen)
 }
 
 // We do not attach this key to the temp store, only the main database.
-__declspec(dllexport) int __stdcall sqlite3_key_interop(sqlite3 *db, const void *pKey, int nKeySize)
+__declspec(dllexport) int WINAPI sqlite3_key_interop(sqlite3 *db, const void *pKey, int nKeySize)
 {
   return sqlite3CodecAttach(db, 0, pKey, nKeySize);
 }
 
 // Changes the encryption key for an existing database.
-__declspec(dllexport) int __stdcall sqlite3_rekey_interop(sqlite3 *db, const void *pKey, int nKeySize)
+__declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *pKey, int nKeySize)
 {
   Btree *pbt = db->aDb[0].pBt;
   Pager *p = sqlite3BtreePager(pbt);
