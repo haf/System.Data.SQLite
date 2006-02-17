@@ -1053,7 +1053,8 @@ namespace System.Data.SQLite
       DataTable tbl = new DataTable("Indexes");
       DataRow row;
       DataTable tblSchema;
-      string primaryKey;
+      Collections.Generic.List<int> primaryKeys = new List<int>();
+      bool maybeRowId;
 
       tbl.Locale = CultureInfo.InvariantCulture;
       tbl.Columns.Add("TABLE_CATALOG", typeof(string));
@@ -1092,7 +1093,8 @@ namespace System.Data.SQLite
         {
           while (rdTables.Read())
           {
-            primaryKey = "";
+            maybeRowId = false;
+            primaryKeys.Clear();
             if (String.IsNullOrEmpty(strTable) || String.Compare(rdTables.GetString(2), strTable, true, CultureInfo.InvariantCulture) == 0)
             {
               // First, look for any rowid indexes -- which sqlite defines are INTEGER PRIMARY KEY columns.
@@ -1108,25 +1110,29 @@ namespace System.Data.SQLite
                     {
                       if ((bool)schemaRow[SchemaTableColumn.IsKey] == true)
                       {
-                        row = tbl.NewRow();
-
-                        row["TABLE_CATALOG"] = strCatalog;
-                        row["TABLE_NAME"] = rdTables.GetString(2);
-                        row["INDEX_CATALOG"] = strCatalog;
-                        row["PRIMARY_KEY"] = true;
+                        primaryKeys.Add((int)schemaRow[SchemaTableColumn.ColumnOrdinal]);
 
                         // If the primary key is of type INTEGER, then its a rowid and we need to make a fake index entry for it.
                         if (String.Compare((string)schemaRow["DeclaredType"], "INTEGER", true, CultureInfo.InvariantCulture) == 0)
                         {
-                          row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
-                          row["UNIQUE"] = true;
-                          tbl.Rows.Add(row);
-                          break;
+                          maybeRowId = true;
                         }
-                        // Otherwise, record this primary key's index name so we can match it up later and mark it as a primary key
-                        else primaryKey = String.Format(CultureInfo.InvariantCulture, "sqlite_autoindex_{0}_", rdTables.GetString(2));
                       }
                     }
+                  }
+                  if (primaryKeys.Count == 1 && maybeRowId == true)
+                  {
+                    row = tbl.NewRow();
+
+                    row["TABLE_CATALOG"] = strCatalog;
+                    row["TABLE_NAME"] = rdTables.GetString(2);
+                    row["INDEX_CATALOG"] = strCatalog;
+                    row["PRIMARY_KEY"] = true;
+                    row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
+                    row["UNIQUE"] = true;
+
+                    tbl.Rows.Add(row);
+                    primaryKeys.Clear();
                   }
                 }
               }
@@ -1148,9 +1154,35 @@ namespace System.Data.SQLite
                       row["INDEX_CATALOG"] = strCatalog;
                       row["INDEX_NAME"] = rd.GetString(1);
                       row["UNIQUE"] = rd.GetBoolean(2);
-                      
-                      if (rd.GetString(1).StartsWith(primaryKey, StringComparison.InvariantCultureIgnoreCase))
-                        row["PRIMARY_KEY"] = true;
+                      row["PRIMARY_KEY"] = false;
+
+                      // Now for the really hard work.  Figure out which index is the primary key index.
+                      // The only way to figure it out is to check if the index was an autoindex and if we have a non-rowid
+                      // primary key, and all the columns in the given index match the primary key columns
+                      if (primaryKeys.Count > 0 && rd.GetString(1).StartsWith("sqlite_autoindex_" + rdTables.GetString(2), StringComparison.InvariantCultureIgnoreCase) == true)
+                      {
+                        using (SQLiteCommand cmdDetails = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].index_info([{1}])", strCatalog, rd.GetString(1)), this))
+                        {
+                          using (SQLiteDataReader rdDetails = cmdDetails.ExecuteReader())
+                          {
+                            int nMatches = 0;
+                            while (rdDetails.Read())
+                            {
+                              if (primaryKeys.Contains(rdDetails.GetInt32(1)) == false)
+                              {
+                                nMatches = 0;
+                                break;
+                              }
+                              nMatches++;
+                            }
+                            if (nMatches == primaryKeys.Count)
+                            {
+                              row["PRIMARY_KEY"] = true;
+                              primaryKeys.Clear();
+                            }
+                          }
+                        }
+                      }
 
                       tbl.Rows.Add(row);
                     }
