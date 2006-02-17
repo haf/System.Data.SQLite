@@ -1004,7 +1004,7 @@ namespace System.Data.SQLite
               {
                 using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader(CommandBehavior.SchemaOnly))
                 {
-                  using (DataTable tblSchema = rd.GetSchemaTable(false))
+                  using (DataTable tblSchema = rd.GetSchemaTable(false, true))
                   {
                     foreach (DataRow schemaRow in tblSchema.Rows)
                     {
@@ -1052,7 +1052,6 @@ namespace System.Data.SQLite
     {
       DataTable tbl = new DataTable("Indexes");
       DataRow row;
-      DataTable tblSchema;
       Collections.Generic.List<int> primaryKeys = new List<int>();
       bool maybeRowId;
 
@@ -1099,41 +1098,35 @@ namespace System.Data.SQLite
             {
               // First, look for any rowid indexes -- which sqlite defines are INTEGER PRIMARY KEY columns.
               // Such indexes are not listed in the indexes list but count as indexes just the same.
-              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
+              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].table_info([{1}])", strCatalog, rdTables.GetString(2)), this))
               {
-                using (SQLiteDataReader rdTable = cmdTable.ExecuteReader(CommandBehavior.SchemaOnly))
+                using (SQLiteDataReader rdTable = cmdTable.ExecuteReader())
                 {
-                  tblSchema = rdTable.GetSchemaTable(false);
-                  foreach (DataRow schemaRow in tblSchema.Rows)
+                  while (rdTable.Read())
                   {
-                    if (schemaRow.IsNull("DeclaredType") == false)
+                    if (rdTable.GetInt32(5) == 1)
                     {
-                      if ((bool)schemaRow[SchemaTableColumn.IsKey] == true)
-                      {
-                        primaryKeys.Add((int)schemaRow[SchemaTableColumn.ColumnOrdinal]);
+                      primaryKeys.Add(rdTable.GetInt32(0));
 
-                        // If the primary key is of type INTEGER, then its a rowid and we need to make a fake index entry for it.
-                        if (String.Compare((string)schemaRow["DeclaredType"], "INTEGER", true, CultureInfo.InvariantCulture) == 0)
-                        {
-                          maybeRowId = true;
-                        }
-                      }
+                      // If the primary key is of type INTEGER, then its a rowid and we need to make a fake index entry for it.
+                      if (String.Compare(rdTable.GetString(2), "INTEGER", true, CultureInfo.InvariantCulture) == 0)
+                        maybeRowId = true;
                     }
                   }
-                  if (primaryKeys.Count == 1 && maybeRowId == true)
-                  {
-                    row = tbl.NewRow();
+                }
+                if (primaryKeys.Count == 1 && maybeRowId == true)
+                {
+                  row = tbl.NewRow();
 
-                    row["TABLE_CATALOG"] = strCatalog;
-                    row["TABLE_NAME"] = rdTables.GetString(2);
-                    row["INDEX_CATALOG"] = strCatalog;
-                    row["PRIMARY_KEY"] = true;
-                    row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
-                    row["UNIQUE"] = true;
+                  row["TABLE_CATALOG"] = strCatalog;
+                  row["TABLE_NAME"] = rdTables.GetString(2);
+                  row["INDEX_CATALOG"] = strCatalog;
+                  row["PRIMARY_KEY"] = true;
+                  row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
+                  row["UNIQUE"] = true;
 
-                    tbl.Rows.Add(row);
-                    primaryKeys.Clear();
-                  }
+                  tbl.Rows.Add(row);
+                  primaryKeys.Clear();
                 }
               }
 
@@ -1414,7 +1407,8 @@ namespace System.Data.SQLite
     {
       DataTable tbl = new DataTable("IndexColumns");
       DataRow row;
-      DataTable tblSchema;
+      List<KeyValuePair<int, string>> primaryKeys = new List<KeyValuePair<int, string>>();
+      bool maybeRowId;
 
       tbl.Locale = CultureInfo.InvariantCulture;
       tbl.Columns.Add("CONSTRAINT_CATALOG", typeof(string));
@@ -1437,37 +1431,37 @@ namespace System.Data.SQLite
         {
           while (rdTables.Read())
           {
+            maybeRowId = false;
+            primaryKeys.Clear();
             if (String.IsNullOrEmpty(strTable) || String.Compare(rdTables.GetString(2), strTable, true, CultureInfo.InvariantCulture) == 0)
             {
-              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
+              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].table_info([{1}])", strCatalog, rdTables.GetString(2)), this))
               {
-                using (SQLiteDataReader rdTable = cmdTable.ExecuteReader(CommandBehavior.SchemaOnly))
+                using (SQLiteDataReader rdTable = cmdTable.ExecuteReader())
                 {
-                  tblSchema = rdTable.GetSchemaTable(false);
-                  foreach (DataRow schemaRow in tblSchema.Rows)
+                  while (rdTable.Read())
                   {
-                    if (schemaRow.IsNull("DeclaredType") == false)
+                    if (rdTable.GetInt32(5) == 1) // is a primary key
                     {
-                      if (String.Compare((string)schemaRow["DeclaredType"], "INTEGER", true, CultureInfo.InvariantCulture) == 0
-                        && Convert.ToBoolean(schemaRow[SchemaTableColumn.IsKey], CultureInfo.InvariantCulture) == true)
-                      {
-                        row = tbl.NewRow();
-                        row["CONSTRAINT_CATALOG"] = strCatalog;
-                        row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
-                        row["TABLE_CATALOG"] = strCatalog;
-                        row["TABLE_NAME"] = rdTables.GetString(2);
-                        row["COLUMN_NAME"] = schemaRow[SchemaTableColumn.BaseColumnName];
-                        row["INDEX_NAME"] = row["CONSTRAINT_NAME"];
-                        row["ORDINAL_POSITION"] = schemaRow[SchemaTableColumn.ColumnOrdinal];
-                        if ((String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, row["INDEX_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
-                            && (String.IsNullOrEmpty(strColumn) || String.Compare(strColumn, row["COLUMN_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0))
-                        {
-                          tbl.Rows.Add(row);
-                          break;
-                        }
-                      }
+                      primaryKeys.Add(new KeyValuePair<int, string>(rdTable.GetInt32(0), rdTable.GetString(1)));
+                      // Is an integer -- could be a rowid if no other primary keys exist in the table
+                      if (String.Compare(rdTable.GetString(2), "INTEGER", true, CultureInfo.InvariantCulture) == 0)
+                        maybeRowId = true;
                     }
                   }
+                }
+                if (primaryKeys.Count == 1 && maybeRowId == true)
+                {
+                  row = tbl.NewRow();
+                  row["CONSTRAINT_CATALOG"] = strCatalog;
+                  row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
+                  row["TABLE_CATALOG"] = strCatalog;
+                  row["TABLE_NAME"] = rdTables.GetString(2);
+                  row["COLUMN_NAME"] = primaryKeys[0].Value;
+                  row["INDEX_NAME"] = row["CONSTRAINT_NAME"];
+                  row["ORDINAL_POSITION"] = primaryKeys[0].Key;
+
+                  tbl.Rows.Add(row);
                 }
               }
 
@@ -1568,9 +1562,9 @@ namespace System.Data.SQLite
                   {
                     using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader(CommandBehavior.SchemaOnly))
                     {
-                      using (DataTable tblSchemaView = rdViewSelect.GetSchemaTable(false))
+                      using (DataTable tblSchemaView = rdViewSelect.GetSchemaTable(false, false))
                       {
-                        using (DataTable tblSchema = rd.GetSchemaTable(false))
+                        using (DataTable tblSchema = rd.GetSchemaTable(false, false))
                         {
                           for (n = 0; n < tblSchema.Rows.Count; n++)
                           {
