@@ -831,9 +831,9 @@ namespace System.Data.SQLite
 
       string[] parms = new string[5];
 
+      if (restrictionValues == null) restrictionValues = new string[0];
       restrictionValues.CopyTo(parms, 0);
 
-      if (restrictionValues == null) restrictionValues = new string[0];
       switch (collectionName.ToUpper(CultureInfo.InvariantCulture))
       {
         case "METADATACOLLECTIONS":

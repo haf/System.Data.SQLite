@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.26.1 Feb 14, 2006<br>
+    Version 1.0.26.2 Feb 15, 2006<br>
     Using SQLite 3.3.4<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -119,6 +119,12 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.26.2 - February 15, 2006</b></p>
+    <ul>
+    <li>Yet another bugfix to index schemas, which was incorrectly marking most indexes
+      as primary key indexes.</li><li>Fixed GetSchema() to accept a null string array.</li><li>Fixed a misspelled export in the core C library that prevented databases opened
+    with UTF16Encoding from getting schema information and would likely cause an error
+    if attempted.</li></ul>
     <p><b>1.0.26.1 - February 14, 2006</b></p>
     <ul>
     <li>Fixed even more minor schema bugs having to do with indexes.</li><li>Added two missing pieces in the SQLite designer which were preventing it from

@@ -665,7 +665,7 @@ __declspec(dllexport) const char * WINAPI sqlite3_column_database_name_interop(s
   return pval;
 }
 
-__declspec(dllexport) const void * WINAPI sqlite3_column_databsae_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
+__declspec(dllexport) const void * WINAPI sqlite3_column_database_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const void *pval = sqlite3_column_database_name16(stmt, iCol);
   *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
