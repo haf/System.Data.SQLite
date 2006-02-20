@@ -21,7 +21,7 @@
 			</Actions>
 		</RootType>
 
-		<Type name="Table" defaultSort="Database,Schema,Name">
+		<Type name="Table" defaultSort="Database,Name">
 			<Concepts>
 				<Concept name="Table" restrictions="{Catalog},null,{Name},TABLE"/>
 			</Concepts>
@@ -74,7 +74,7 @@
 			</Actions>
 		</Type>
 
-		<Type name="TableColumn" defaultSort="Database,Schema,Table,Ordinal">
+		<Type name="TableColumn" defaultSort="Database,Table,Ordinal">
 			<Concepts>
 				<Concept name="TableColumn" restrictions="{Catalog},null,{Table},{Name}"/>
 			</Concepts>
@@ -150,7 +150,8 @@
 						<Concept name="Default"/>
 					</Concepts>
 				</Property>
-			</Properties>
+        <Property name="InPrimaryKey" type="System.Boolean" itemName="primary_key"/>
+      </Properties>
 			<Actions>
 				<Action name="Enumerate" guid="61CC0372-384D-42e5-9707-6D7C8DC5287A" handler="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectEnumerator">
 					<Parameter value="Columns"/>
@@ -186,9 +187,9 @@
 			</Actions>
 		</Type>
 
-		<Type name="View" defaultSort="Database, Schema, Name">
+		<Type name="View" defaultSort="Database,Name">
 			<Concepts>
-				<Concept name="View" restrictions="{Catalog}, null, {Name}"/>
+				<Concept name="View" restrictions="{Catalog},null,{Name}"/>
 			</Concepts>
 			<Identifier>
 				<Part name="Database" itemName="table_catalog">
@@ -241,7 +242,7 @@
 		<!--
 			Defines a type that represents a view column.
 		-->
-		<Type name="ViewColumn" defaultSort="Database,Schema,View,Ordinal">
+		<Type name="ViewColumn" defaultSort="Database,View,Ordinal">
 			<Concepts>
 				<Concept name="ViewColumn" restrictions="{Catalog},null,{View},{Name}"/>
 			</Concepts>
@@ -355,7 +356,7 @@
     <!--
 			Defines a type that represents an index.
 		-->
-    <Type name="Index" defaultSort="Database,Schema,Table,Name">
+    <Type name="Index" defaultSort="Database,Table,Name">
       <Concepts>
         <Concept name="TableUniqueKey" restrictions="{Catalog},null,{Table},{Name}" filter="IsUnique = true"/>
       </Concepts>
@@ -383,7 +384,11 @@
       </Identifier>
       <Properties>
         <Property name="Name" type="System.String" itemName="index_name"/>
-        <Property name="IsUnique" type="System.Boolean" itemName="UNIQUE"/>
+        <Property name="IsUnique" type="System.Boolean" itemName="UNIQUE">
+          <Concepts>
+            <Concept name="IsUnique"/>
+          </Concepts>
+        </Property>                  
         <Property name="IsPrimary" type="System.Boolean" itemName="PRIMARY_KEY">
           <Concepts>
             <Concept name="IsPrimary"/>
@@ -423,7 +428,7 @@
       </Actions>
     </Type>
 
-    <Type name="IndexColumn" defaultSort="Database,Schema,Table,Index,Ordinal">
+    <Type name="IndexColumn" defaultSort="Database,Table,Index,Ordinal">
       <Concepts>
         <Concept name="TableUniqueKeyColumn" restrictions="{Catalog},null,{Table},{TableUniqueKey},{Name}"/>
       </Concepts>
@@ -508,7 +513,7 @@
       </Actions>
     </Type>
 
-    <Type name="ForeignKey" defaultSort="Database,Schema,Table,Name">
+    <Type name="ForeignKey" defaultSort="Database,Table,Name">
       <Concepts>
         <Concept name="TableForeignKey" restrictions="{Catalog},null,{Table},{Name}"/>
       </Concepts>
@@ -516,6 +521,7 @@
         <Part name="Database" itemName="table_catalog">
           <Concepts>
             <Concept name="Identifier0"/>
+            <Concept name="ReferencedTableCatalog"/>
           </Concepts>
         </Part>
         <Part name="Schema" itemName="table_schema">
@@ -536,6 +542,8 @@
       </Identifier>
       <Properties>
         <Property name="Name" type="System.String" itemName="constraint_name"/>
+        <Property name="ReferencedColumnName" type="System.String" itemName="fkey_to_column"/>
+        <Property name="ColumnName" type="System.String" itemName="fkey_from_column"/>
         <Property name="ReferencedTableDatabase" type="System.String" itemName="fkey_to_catalog">
           <Concepts>
             <Concept name="ReferencedTableId0"/>
@@ -544,11 +552,13 @@
         <Property name="ReferencedTableSchema" type="System.String" itemName="fkey_to_schema">
           <Concepts>
             <Concept name="ReferencedTableId1"/>
+            <Concept name="ReferencedTableSchema"/>
           </Concepts>
         </Property>
         <Property name="ReferencedTableName" type="System.String" itemName="fkey_to_table">
           <Concepts>
             <Concept name="ReferencedTableId2"/>
+            <Concept name="ReferencedTableName"/>
           </Concepts>
         </Property>
       </Properties>
@@ -559,7 +569,7 @@
       </Actions>
     </Type>
 
-    <Type name="ForeignKeyColumn" defaultSort="Database,Schema,Table,ForeignKey,Ordinal">
+    <Type name="ForeignKeyColumn" defaultSort="Database,Table,ForeignKey,Ordinal">
       <Concepts>
         <Concept name="TableForeignKeyColumn" restrictions="{Catalog},null,{Table},{TableForeignKey},{Name}"/>
       </Concepts>

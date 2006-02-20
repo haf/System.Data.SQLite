@@ -30,20 +30,18 @@ namespace SQLite.Designer
     {
       System.Windows.Forms.Label labelPassword;
       System.Windows.Forms.GroupBox securityGroup;
-      System.Windows.Forms.Label labelConfirm;
       System.Windows.Forms.GroupBox encodingGroup;
       System.Windows.Forms.GroupBox dateTimeGroup;
       System.Windows.Forms.GroupBox databaseGroup;
       System.Windows.Forms.Label cacheSizeLabel;
       System.Windows.Forms.Label pageSizeLabel;
       System.Windows.Forms.GroupBox syncGroup;
-      this.confirmTextBox = new System.Windows.Forms.TextBox();
       this.passwordTextBox = new System.Windows.Forms.TextBox();
       this.utf16RadioButton = new System.Windows.Forms.RadioButton();
       this.utf8RadioButton = new System.Windows.Forms.RadioButton();
       this.ticksRadioButton = new System.Windows.Forms.RadioButton();
       this.iso8601RadioButton = new System.Windows.Forms.RadioButton();
-      this.textBox1 = new System.Windows.Forms.TextBox();
+      this.cacheSizeTextbox = new System.Windows.Forms.TextBox();
       this.pageSizeTextBox = new System.Windows.Forms.TextBox();
       this.fileTextBox = new System.Windows.Forms.TextBox();
       this.browseButton = new System.Windows.Forms.Button();
@@ -51,11 +49,8 @@ namespace SQLite.Designer
       this.offRadioButton = new System.Windows.Forms.RadioButton();
       this.normalRadioButton = new System.Windows.Forms.RadioButton();
       this.fullRadioButton = new System.Windows.Forms.RadioButton();
-      this.connectButton = new System.Windows.Forms.Button();
-      this.cancelButton = new System.Windows.Forms.Button();
       labelPassword = new System.Windows.Forms.Label();
       securityGroup = new System.Windows.Forms.GroupBox();
-      labelConfirm = new System.Windows.Forms.Label();
       encodingGroup = new System.Windows.Forms.GroupBox();
       dateTimeGroup = new System.Windows.Forms.GroupBox();
       databaseGroup = new System.Windows.Forms.GroupBox();
@@ -80,33 +75,14 @@ namespace SQLite.Designer
       // 
       // securityGroup
       // 
-      securityGroup.Controls.Add(this.confirmTextBox);
-      securityGroup.Controls.Add(labelConfirm);
       securityGroup.Controls.Add(this.passwordTextBox);
       securityGroup.Controls.Add(labelPassword);
-      securityGroup.Location = new System.Drawing.Point(12, 295);
+      securityGroup.Location = new System.Drawing.Point(3, 263);
       securityGroup.Name = "securityGroup";
-      securityGroup.Size = new System.Drawing.Size(306, 80);
+      securityGroup.Size = new System.Drawing.Size(306, 56);
       securityGroup.TabIndex = 10;
       securityGroup.TabStop = false;
       securityGroup.Text = "Encryption";
-      // 
-      // confirmTextBox
-      // 
-      this.confirmTextBox.Location = new System.Drawing.Point(65, 47);
-      this.confirmTextBox.Name = "confirmTextBox";
-      this.confirmTextBox.Size = new System.Drawing.Size(235, 21);
-      this.confirmTextBox.TabIndex = 3;
-      this.confirmTextBox.UseSystemPasswordChar = true;
-      // 
-      // labelConfirm
-      // 
-      labelConfirm.AutoSize = true;
-      labelConfirm.Location = new System.Drawing.Point(15, 50);
-      labelConfirm.Name = "labelConfirm";
-      labelConfirm.Size = new System.Drawing.Size(44, 13);
-      labelConfirm.TabIndex = 2;
-      labelConfirm.Text = "Confirm";
       // 
       // passwordTextBox
       // 
@@ -115,12 +91,13 @@ namespace SQLite.Designer
       this.passwordTextBox.Size = new System.Drawing.Size(235, 21);
       this.passwordTextBox.TabIndex = 1;
       this.passwordTextBox.UseSystemPasswordChar = true;
+      this.passwordTextBox.Leave += new System.EventHandler(this.passwordTextBox_Leave);
       // 
       // encodingGroup
       // 
       encodingGroup.Controls.Add(this.utf16RadioButton);
       encodingGroup.Controls.Add(this.utf8RadioButton);
-      encodingGroup.Location = new System.Drawing.Point(12, 191);
+      encodingGroup.Location = new System.Drawing.Point(3, 159);
       encodingGroup.Name = "encodingGroup";
       encodingGroup.Size = new System.Drawing.Size(75, 98);
       encodingGroup.TabIndex = 7;
@@ -137,6 +114,7 @@ namespace SQLite.Designer
       this.utf16RadioButton.TabStop = true;
       this.utf16RadioButton.Text = "UTF-16";
       this.utf16RadioButton.UseVisualStyleBackColor = true;
+      this.utf16RadioButton.CheckedChanged += new System.EventHandler(this.encoding_Changed);
       // 
       // utf8RadioButton
       // 
@@ -149,12 +127,13 @@ namespace SQLite.Designer
       this.utf8RadioButton.TabStop = true;
       this.utf8RadioButton.Text = "UTF-8";
       this.utf8RadioButton.UseVisualStyleBackColor = true;
+      this.utf8RadioButton.CheckedChanged += new System.EventHandler(this.encoding_Changed);
       // 
       // dateTimeGroup
       // 
       dateTimeGroup.Controls.Add(this.ticksRadioButton);
       dateTimeGroup.Controls.Add(this.iso8601RadioButton);
-      dateTimeGroup.Location = new System.Drawing.Point(93, 191);
+      dateTimeGroup.Location = new System.Drawing.Point(84, 159);
       dateTimeGroup.Name = "dateTimeGroup";
       dateTimeGroup.Size = new System.Drawing.Size(113, 98);
       dateTimeGroup.TabIndex = 8;
@@ -171,6 +150,7 @@ namespace SQLite.Designer
       this.ticksRadioButton.TabStop = true;
       this.ticksRadioButton.Text = "Ticks";
       this.ticksRadioButton.UseVisualStyleBackColor = true;
+      this.ticksRadioButton.CheckedChanged += new System.EventHandler(this.datetime_Changed);
       // 
       // iso8601RadioButton
       // 
@@ -183,17 +163,18 @@ namespace SQLite.Designer
       this.iso8601RadioButton.TabStop = true;
       this.iso8601RadioButton.Text = "ISO-8601";
       this.iso8601RadioButton.UseVisualStyleBackColor = true;
+      this.iso8601RadioButton.CheckedChanged += new System.EventHandler(this.datetime_Changed);
       // 
       // databaseGroup
       // 
       databaseGroup.Controls.Add(cacheSizeLabel);
-      databaseGroup.Controls.Add(this.textBox1);
+      databaseGroup.Controls.Add(this.cacheSizeTextbox);
       databaseGroup.Controls.Add(pageSizeLabel);
       databaseGroup.Controls.Add(this.pageSizeTextBox);
       databaseGroup.Controls.Add(this.fileTextBox);
       databaseGroup.Controls.Add(this.browseButton);
       databaseGroup.Controls.Add(this.newDatabase);
-      databaseGroup.Location = new System.Drawing.Point(12, 12);
+      databaseGroup.Location = new System.Drawing.Point(3, 3);
       databaseGroup.Name = "databaseGroup";
       databaseGroup.Size = new System.Drawing.Size(306, 150);
       databaseGroup.TabIndex = 8;
@@ -209,13 +190,14 @@ namespace SQLite.Designer
       cacheSizeLabel.TabIndex = 5;
       cacheSizeLabel.Text = "Cache Size";
       // 
-      // textBox1
+      // cacheSizeTextbox
       // 
-      this.textBox1.Location = new System.Drawing.Point(72, 113);
-      this.textBox1.Name = "textBox1";
-      this.textBox1.Size = new System.Drawing.Size(100, 21);
-      this.textBox1.TabIndex = 6;
-      this.textBox1.Text = "2000";
+      this.cacheSizeTextbox.Location = new System.Drawing.Point(72, 113);
+      this.cacheSizeTextbox.Name = "cacheSizeTextbox";
+      this.cacheSizeTextbox.Size = new System.Drawing.Size(100, 21);
+      this.cacheSizeTextbox.TabIndex = 6;
+      this.cacheSizeTextbox.Text = "2000";
+      this.cacheSizeTextbox.Leave += new System.EventHandler(this.cacheSizeTextbox_Leave);
       // 
       // pageSizeLabel
       // 
@@ -233,6 +215,7 @@ namespace SQLite.Designer
       this.pageSizeTextBox.Size = new System.Drawing.Size(100, 21);
       this.pageSizeTextBox.TabIndex = 4;
       this.pageSizeTextBox.Text = "1024";
+      this.pageSizeTextBox.Leave += new System.EventHandler(this.pageSizeTextBox_Leave);
       // 
       // fileTextBox
       // 
@@ -240,6 +223,7 @@ namespace SQLite.Designer
       this.fileTextBox.Name = "fileTextBox";
       this.fileTextBox.Size = new System.Drawing.Size(294, 21);
       this.fileTextBox.TabIndex = 0;
+      this.fileTextBox.Leave += new System.EventHandler(this.fileTextBox_Leave);
       // 
       // browseButton
       // 
@@ -266,7 +250,7 @@ namespace SQLite.Designer
       syncGroup.Controls.Add(this.offRadioButton);
       syncGroup.Controls.Add(this.normalRadioButton);
       syncGroup.Controls.Add(this.fullRadioButton);
-      syncGroup.Location = new System.Drawing.Point(213, 191);
+      syncGroup.Location = new System.Drawing.Point(204, 159);
       syncGroup.Name = "syncGroup";
       syncGroup.Size = new System.Drawing.Size(105, 98);
       syncGroup.TabIndex = 9;
@@ -282,6 +266,7 @@ namespace SQLite.Designer
       this.offRadioButton.TabIndex = 2;
       this.offRadioButton.Text = "Off";
       this.offRadioButton.UseVisualStyleBackColor = true;
+      this.offRadioButton.CheckedChanged += new System.EventHandler(this.sync_Changed);
       // 
       // normalRadioButton
       // 
@@ -294,6 +279,7 @@ namespace SQLite.Designer
       this.normalRadioButton.TabStop = true;
       this.normalRadioButton.Text = "Normal";
       this.normalRadioButton.UseVisualStyleBackColor = true;
+      this.normalRadioButton.CheckedChanged += new System.EventHandler(this.sync_Changed);
       // 
       // fullRadioButton
       // 
@@ -304,44 +290,19 @@ namespace SQLite.Designer
       this.fullRadioButton.TabIndex = 0;
       this.fullRadioButton.Text = "Full";
       this.fullRadioButton.UseVisualStyleBackColor = true;
-      // 
-      // connectButton
-      // 
-      this.connectButton.Location = new System.Drawing.Point(162, 388);
-      this.connectButton.Name = "connectButton";
-      this.connectButton.Size = new System.Drawing.Size(75, 23);
-      this.connectButton.TabIndex = 11;
-      this.connectButton.Text = "&Connect";
-      this.connectButton.UseVisualStyleBackColor = true;
-      // 
-      // cancelButton
-      // 
-      this.cancelButton.Location = new System.Drawing.Point(243, 388);
-      this.cancelButton.Name = "cancelButton";
-      this.cancelButton.Size = new System.Drawing.Size(75, 23);
-      this.cancelButton.TabIndex = 12;
-      this.cancelButton.Text = "Cancel";
-      this.cancelButton.UseVisualStyleBackColor = true;
+      this.fullRadioButton.CheckedChanged += new System.EventHandler(this.sync_Changed);
       // 
       // SQLiteConnectionUIControl
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(330, 423);
-      this.Controls.Add(this.cancelButton);
-      this.Controls.Add(this.connectButton);
+      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
       this.Controls.Add(syncGroup);
       this.Controls.Add(databaseGroup);
       this.Controls.Add(dateTimeGroup);
       this.Controls.Add(encodingGroup);
       this.Controls.Add(securityGroup);
       this.Font = new System.Drawing.Font("MS Shell Dlg 2", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.HelpButton = true;
-      this.MaximizeBox = false;
-      this.MinimizeBox = false;
       this.Name = "SQLiteConnectionUIControl";
-      this.ShowIcon = false;
-      this.Text = "SQLite Connection Properties";
+      this.Size = new System.Drawing.Size(312, 322);
       securityGroup.ResumeLayout(false);
       securityGroup.PerformLayout();
       encodingGroup.ResumeLayout(false);
@@ -361,18 +322,15 @@ namespace SQLite.Designer
     private System.Windows.Forms.TextBox fileTextBox;
     private System.Windows.Forms.Button browseButton;
     private System.Windows.Forms.Button newDatabase;
-    private System.Windows.Forms.TextBox confirmTextBox;
     private System.Windows.Forms.TextBox passwordTextBox;
     private System.Windows.Forms.RadioButton utf16RadioButton;
     private System.Windows.Forms.RadioButton utf8RadioButton;
     private System.Windows.Forms.RadioButton ticksRadioButton;
     private System.Windows.Forms.RadioButton iso8601RadioButton;
     private System.Windows.Forms.TextBox pageSizeTextBox;
-    private System.Windows.Forms.TextBox textBox1;
+    private System.Windows.Forms.TextBox cacheSizeTextbox;
     private System.Windows.Forms.RadioButton offRadioButton;
     private System.Windows.Forms.RadioButton normalRadioButton;
     private System.Windows.Forms.RadioButton fullRadioButton;
-    private System.Windows.Forms.Button connectButton;
-    private System.Windows.Forms.Button cancelButton;
   }
 }

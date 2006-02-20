@@ -31,6 +31,11 @@ CMDS_SECTION guidVSPackageBasedProviderPkg
         guidVSPackageBasedProviderCmdSet:cmdidCreateTable, Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Create Table";
         guidVSPackageBasedProviderCmdSet:cmdidAlterTable,  Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Alter Table";
         guidVSPackageBasedProviderCmdSet:cmdidDropTable,   Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Drop Table";
+        guidVSPackageBasedProviderCmdSet:cmdidCreateIndex, Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "Create &Index";
+        guidVSPackageBasedProviderCmdSet:cmdidDropIndex,   Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "Drop Inde&x";
+        guidVSPackageBasedProviderCmdSet:cmdidDropView,    Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "Drop &View";
+        guidVSPackageBasedProviderCmdSet:cmdidVacuum,      Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Vacuum";
+        guidVSPackageBasedProviderCmdSet:cmdidRekey,       Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "Change &Password ...";
 
     BUTTONS_END
 
@@ -39,7 +44,14 @@ CMDS_END
 CMDPLACEMENT_SECTION
 
     guidVSPackageBasedProviderCmdSet:cmdidCreateTable, guidVSData:IDG_DV_STATIC, 0x0100;
+ 
     guidVSPackageBasedProviderCmdSet:cmdidAlterTable,  guidVSData:IDG_DV_OBJECT, 0x0100;
     guidVSPackageBasedProviderCmdSet:cmdidDropTable,   guidVSData:IDG_DV_OBJECT, 0x0100;
+    guidVSPackageBasedProviderCmdSet:cmdidDropIndex,   guidVSData:IDG_DV_OBJECT, 0x0100;
+    guidVSPackageBasedProviderCmdSet:cmdidDropView,    guidVSData:IDG_DV_OBJECT, 0x0100;
+
+    guidVSPackageBasedProviderCmdSet:cmdidCreateTable, guidVSData:IDG_DV_CONNECTION, 0x0100;
+    guidVSPackageBasedProviderCmdSet:cmdidVacuum,      guidVSData:IDG_DV_CONNECTION, 0x0100;
+    guidVSPackageBasedProviderCmdSet:cmdidRekey,       guidVSData:IDG_DV_CONNECTION, 0x0100;
 
 CMDPLACEMENT_END

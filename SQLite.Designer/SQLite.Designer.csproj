@@ -67,7 +67,7 @@
     <Compile Include="SQLiteCommandHandler.cs" />
     <Compile Include="SQLiteConnectionProperties.cs" />
     <Compile Include="SQLiteConnectionUIControl.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="SQLiteConnectionUIControl.Designer.cs">
       <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>

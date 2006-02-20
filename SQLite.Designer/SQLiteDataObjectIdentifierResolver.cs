@@ -95,21 +95,16 @@ namespace SQLite.Designer
 
     protected override object[] QuickContractIdentifier(string typeName, object[] fullIdentifier)
     {
-      int length = fullIdentifier.Length;
-      object[] identifier = new object[length];
+      if (fullIdentifier.Length < 2) return fullIdentifier;
 
-      fullIdentifier.CopyTo(identifier, 0);
+      object[] identifier = new object[fullIdentifier.Length - 1];
 
-      if (length > 0)
+      for (int n = 1; n < fullIdentifier.Length; n++)
       {
-        if (!(identifier[0] is string))
-          identifier[0] = null;
+        identifier[n - 1] = fullIdentifier[n];
       }
 
-      if (length > 1)
-      {
-        identifier[1] = null;
-      }
+      identifier[0] = fullIdentifier[0];
 
       return identifier;
     }

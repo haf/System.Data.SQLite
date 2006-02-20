@@ -19,3 +19,9 @@
 #define cmdidCreateTable 256
 #define cmdidAlterTable  257
 #define cmdidDropTable   258
+
+#define cmdidCreateIndex 259
+#define cmdidDropIndex   260
+#define cmdidDropView    261
+#define cmdidVacuum      262
+#define cmdidRekey       263

@@ -11,6 +11,7 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.Data.AdoDotNet;
   using Microsoft.VisualStudio.Data;
   using System.Runtime.InteropServices;
+  using Microsoft.Data.ConnectionUI;
 
   [Guid("DCBE6C8D-0E57-4099-A183-98FF74C64D9D")]
   internal sealed class SQLiteProviderObjectFactory : AdoDotNetProviderObjectFactory
@@ -24,8 +25,11 @@ namespace SQLite.Designer
       if (objType == typeof(DataConnectionSupport))
         return new SQLiteDataConnectionSupport();
 
-      if (objType == typeof(DataConnectionProperties))
+      if (objType == typeof(IDataConnectionProperties))
         return new SQLiteConnectionProperties();
+
+      if (objType == typeof(IDataConnectionUIControl))
+        return new SQLiteConnectionUIControl();
 
       return base.CreateObject(objType);
     }
