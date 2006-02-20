@@ -987,6 +987,7 @@ namespace System.Data.SQLite
       tbl.Columns.Add("DOMAIN_CATALOG", typeof(string));
       tbl.Columns.Add("DOMAIN_NAME", typeof(string));
       tbl.Columns.Add("DESCRIPTION", typeof(string));
+      tbl.Columns.Add("PRIMARY_KEY", typeof(bool));
 
       tbl.BeginLoadData();
 
@@ -1023,6 +1024,7 @@ namespace System.Data.SQLite
                         row["DATA_TYPE"] = SQLiteConvert.DbTypeToType((DbType)schemaRow[SchemaTableColumn.ProviderType]).ToString();
                         row["CHARACTER_MAXIMUM_LENGTH"] = schemaRow[SchemaTableColumn.ColumnSize];
                         row["TABLE_SCHEMA"] = schemaRow[SchemaTableColumn.BaseSchemaName];
+                        row["PRIMARY_KEY"] = schemaRow[SchemaTableColumn.IsKey];
 
                         tbl.Rows.Add(row);
                       }
@@ -1216,7 +1218,7 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] NOT LIKE 'index'", strCatalog), this))
+      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'table'", strCatalog), this))
       {
         using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
         {
