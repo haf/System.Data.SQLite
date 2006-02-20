@@ -355,6 +355,7 @@ namespace install
 #endif
           using (RegistryKey subsubkey = subkey.CreateSubKey("SupportedObjects", RegistryKeyPermissionCheck.ReadWriteSubTree))
           {
+            subsubkey.CreateSubKey("DataConnectionUIControl").Close();
             subsubkey.CreateSubKey("DataConnectionProperties").Close();
             subsubkey.CreateSubKey("DataObjectSupport").Close();
             subsubkey.CreateSubKey("DataViewSupport").Close();
