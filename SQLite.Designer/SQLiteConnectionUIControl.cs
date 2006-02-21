@@ -14,12 +14,11 @@ namespace SQLite.Designer
   using System.Drawing;
   using System.Text;
   using System.Windows.Forms;
-  using Microsoft.Data.ConnectionUI;
+  using Microsoft.VisualStudio.Data;
+  using Microsoft.Win32;
 
-  public partial class SQLiteConnectionUIControl : UserControl, IDataConnectionUIControl
+  public partial class SQLiteConnectionUIControl : DataConnectionUIControl
   {
-    private SQLiteConnectionProperties _connectionProperties;
-
     public SQLiteConnectionUIControl()
     {
       InitializeComponent();
@@ -51,32 +50,27 @@ namespace SQLite.Designer
 
     #region IDataConnectionUIControl Members
 
-    public void Initialize(IDataConnectionProperties connectionProperties)
+    public override void LoadProperties()
     {
-      _connectionProperties = (SQLiteConnectionProperties)connectionProperties;
-    }
-
-    public void LoadProperties()
-    {
-      fileTextBox.Text = _connectionProperties["Data Source"] as string;
-      passwordTextBox.Text = _connectionProperties["Password"] as string;
+      fileTextBox.Text = ConnectionProperties["Data Source"] as string;
+      passwordTextBox.Text = ConnectionProperties["Password"] as string;
     }
 
     #endregion
 
     private void passwordTextBox_Leave(object sender, EventArgs e)
     {
-      _connectionProperties["Password"] = passwordTextBox.Text;
+      ConnectionProperties["Password"] = passwordTextBox.Text;
     }
 
     private void encoding_Changed(object sender, EventArgs e)
     {
-      _connectionProperties["UseUTF16Encoding"] = utf16RadioButton.Checked;
+      ConnectionProperties["UseUTF16Encoding"] = utf16RadioButton.Checked;
     }
 
     private void datetime_Changed(object sender, EventArgs e)
     {
-      _connectionProperties["DateTimeFormat"] = (iso8601RadioButton.Checked == true) ? "ISO8601" : "Ticks";
+      ConnectionProperties["DateTimeFormat"] = (iso8601RadioButton.Checked == true) ? "ISO8601" : "Ticks";
     }
 
     private void sync_Changed(object sender, EventArgs e)
@@ -85,24 +79,24 @@ namespace SQLite.Designer
       if (fullRadioButton.Checked == true) sync = "Full";
       else if (offRadioButton.Checked == true) sync = "Off";
 
-      _connectionProperties["Synchronous"] = sync;
+      ConnectionProperties["Synchronous"] = sync;
     }
 
     private void pageSizeTextBox_Leave(object sender, EventArgs e)
     {
       int n = Convert.ToInt32(pageSizeTextBox.Text);
-      _connectionProperties["Page Size"] = n;
+      ConnectionProperties["Page Size"] = n;
     }
 
     private void cacheSizeTextbox_Leave(object sender, EventArgs e)
     {
       int n = Convert.ToInt32(cacheSizeTextbox.Text);
-      _connectionProperties["Cache Size"] = n;
+      ConnectionProperties["Cache Size"] = n;
     }
 
     private void fileTextBox_Leave(object sender, EventArgs e)
     {
-      _connectionProperties["Data Source"] = fileTextBox.Text;
+      ConnectionProperties["Data Source"] = fileTextBox.Text;
     }
   }
 }

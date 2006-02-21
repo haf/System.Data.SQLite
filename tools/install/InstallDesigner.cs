@@ -52,29 +52,29 @@ namespace install
           }
         }
 
-        if (_assm == null)
-        {
-          try
-          {
-            _assmLocation = Path.GetFullPath("..\\x64\\System.Data.SQLite.DLL");
-            _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
-          }
-          catch
-          {
-          }
-        }
+        //if (_assm == null)
+        //{
+        //  try
+        //  {
+        //    _assmLocation = Path.GetFullPath("..\\x64\\System.Data.SQLite.DLL");
+        //    _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
+        //  }
+        //  catch
+        //  {
+        //  }
+        //}
 
-        if (_assm == null)
-        {
-          try
-          {
-            _assmLocation = Path.GetFullPath("..\\itanium\\System.Data.SQLite.DLL");
-            _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
-          }
-          catch
-          {
-          }
-        }
+        //if (_assm == null)
+        //{
+        //  try
+        //  {
+        //    _assmLocation = Path.GetFullPath("..\\itanium\\System.Data.SQLite.DLL");
+        //    _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
+        //  }
+        //  catch
+        //  {
+        //  }
+        //}
 
         OpenFileDialog dlg = new OpenFileDialog();
         while (_assm == null)
@@ -157,15 +157,16 @@ namespace install
 
           using (RegistryKey subsubkey = subkey.OpenSubKey(String.Format("DataProviders\\{0}", (isChecked == null) ? lookFor.ToString("B") : ((Guid)isChecked).ToString("B"))))
           {
-            if (subsubkey != null)
+            if (subkey == null)
             {
-              bool itemChecked = (subsubkey.GetValue(null) != null);
               DoInstallUninstall(item);
-              item.Checked = itemChecked;
+              throw new ArgumentNullException("Key doesn't exist");
             }
-            else
-              DoInstallUninstall(item);
+            bool itemChecked = (subsubkey.GetValue(null) != null);
+            DoInstallUninstall(item);
+            item.Checked = itemChecked;
           }
+
           installList.Items.Add(item);
           if (item.Checked)
           {
@@ -236,13 +237,31 @@ namespace install
         }
       }
 
+      if (install)
+      {
+        string path = SQLite.ToString();
+
+        path = Path.GetDirectoryName(_assmLocation);
+
+        using (RegistryKey key = Registry.LocalMachine.CreateSubKey("Software\\Microsoft\\.NETFramework\\v2.0.50727\\AssemblyFoldersEx\\SQLite", RegistryKeyPermissionCheck.ReadWriteSubTree))
+        {
+          key.SetValue(null, path);
+        }
+      }
+      else
+      {
+        try
+        {
+          Registry.LocalMachine.DeleteSubKey("Software\\Microsoft\\.NETFramework\\v2.0.50727\\AssemblyFoldersEx\\SQLite");
+        }
+        catch
+        {
+        }
+      }
+
       try
       {
-        if (install && !installed)
-        {
-          AssemblyCache.InstallAssembly(_assmLocation, null, AssemblyCommitFlags.Default);
-        }
-        else if (!install && installed)
+        if (installed)
         {
           AssemblyCacheUninstallDisposition disp;
 
@@ -355,8 +374,18 @@ namespace install
 #endif
           using (RegistryKey subsubkey = subkey.CreateSubKey("SupportedObjects", RegistryKeyPermissionCheck.ReadWriteSubTree))
           {
-            subsubkey.CreateSubKey("DataConnectionUIControl").Close();
-            subsubkey.CreateSubKey("DataConnectionProperties").Close();
+            using (RegistryKey subsubsubkey = subsubkey.CreateSubKey("DataConnectionUIControl", RegistryKeyPermissionCheck.ReadWriteSubTree))
+            {
+#if !USEPACKAGE
+              subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteConnectionUIControl");
+#endif
+            }
+            using (RegistryKey subsubsubkey = subsubkey.CreateSubKey("DataConnectionProperties", RegistryKeyPermissionCheck.ReadWriteSubTree))
+            {
+#if !USEPACKAGE
+              subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteConnectionProperties");
+#endif
+            }
             subsubkey.CreateSubKey("DataObjectSupport").Close();
             subsubkey.CreateSubKey("DataViewSupport").Close();
             using (RegistryKey subsubsubkey = subsubkey.CreateSubKey("DataConnectionSupport", RegistryKeyPermissionCheck.ReadWriteSubTree))
@@ -424,7 +453,6 @@ namespace install
                 subkey.SetValue(null, path);
               }
             }
-
           }
         }
       }
@@ -591,7 +619,7 @@ namespace install
         xmlNode.ParentNode.RemoveChild(xmlNode);
 
       xmlDoc.Save(xmlFileName);
-
+      
       // Remove any entries in the machine.config if they're still there
       xmlFileName = Environment.ExpandEnvironmentVariables("%WinDir%\\Microsoft.NET\\Framework\\v2.0.50727\\CONFIG\\machine.config");
       xmlDoc = new XmlDocument();

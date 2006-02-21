@@ -28,12 +28,12 @@ CMDS_SECTION guidVSPackageBasedProviderPkg
 
     BUTTONS_BEGIN
 
-        guidVSPackageBasedProviderCmdSet:cmdidCreateTable, Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Create Table";
-        guidVSPackageBasedProviderCmdSet:cmdidAlterTable,  Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Alter Table";
-        guidVSPackageBasedProviderCmdSet:cmdidDropTable,   Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Drop Table";
-        guidVSPackageBasedProviderCmdSet:cmdidCreateIndex, Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "Create &Index";
-        guidVSPackageBasedProviderCmdSet:cmdidDropIndex,   Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "Drop Inde&x";
-        guidVSPackageBasedProviderCmdSet:cmdidDropView,    Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "Drop &View";
+        guidVSPackageBasedProviderCmdSet:cmdidCreateTable, Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "New &Table";
+        guidVSPackageBasedProviderCmdSet:cmdidAlterTable,  Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Edit";
+        guidVSPackageBasedProviderCmdSet:cmdidDropTable,   Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Delete ...";
+        guidVSPackageBasedProviderCmdSet:cmdidCreateIndex, Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "New &Index";
+        guidVSPackageBasedProviderCmdSet:cmdidDropIndex,   Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Delete ...";
+        guidVSPackageBasedProviderCmdSet:cmdidDropView,    Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Delete ...";
         guidVSPackageBasedProviderCmdSet:cmdidVacuum,      Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "&Vacuum";
         guidVSPackageBasedProviderCmdSet:cmdidRekey,       Group_Undefined:0, 0x0000, OI_NOID, BUTTON, DIS_DEF, "Change &Password ...";
 

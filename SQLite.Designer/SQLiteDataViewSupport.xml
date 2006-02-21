@@ -19,17 +19,17 @@
 				<!-- We can always specify data from the root object -->
 				<InitialDisplayName>SQLite [{Root.Server}]</InitialDisplayName>
 				<CommandBindings>
-          <CommandBinding name="NewTable" guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="256" handler="SQLite.Designer.SQLiteCommandHandler"/>
+          <CommandBinding name="NewTable" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12294" handler="SQLite.Designer.SQLiteCommandHandler"/>
           <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
-          <CommandBinding name="NewIndex" guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="259" handler="SQLite.Designer.SQLiteCommandHandler"/>
           <CommandBinding name="Vacuum"   guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="262" handler="SQLite.Designer.SQLiteCommandHandler"/>
+          <CommandBinding name="Rekey"    guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="263" handler="SQLite.Designer.SQLiteCommandHandler"/>
         </CommandBindings>
 				<Children>
           
 					<StaticNode nid="Tables">
             <DisplayName>Tables</DisplayName>
 						<CommandBindings>
-              <CommandBinding name="NewTable" guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="256" handler="SQLite.Designer.SQLiteCommandHandler"/>
+              <CommandBinding name="NewTable" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12294" handler="SQLite.Designer.SQLiteCommandHandler"/>
               <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
             </CommandBindings>
 						<Children>
@@ -135,9 +135,14 @@
       </Identifier>
       <CommandBindings>
         <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
-        <CommandBinding name="DropTable" guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="258" handler="SQLite.Designer.SQLiteCommandHandler"/>
+        <CommandBinding name="DropTable" guid="5efc7975-14bc-11cf-9b2b-00aa00573819" cmdid="17" handler="SQLite.Designer.SQLiteCommandHandler">
+          <Parameter value="Table"/>
+        </CommandBinding>
         <CommandBinding name="Browse_Data" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12384" handler="Microsoft.VisualStudio.DataTools.DBPackage.VDT_OLEDB_CommandHandler_TableTools">
           <Parameter value="Open"/>
+        </CommandBinding>
+        <CommandBinding name="Design" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12291" handler="SQLite.Designer.SQLiteCommandHandler">
+          <Parameter value="Table"/>
         </CommandBinding>
       </CommandBindings>
     </TypeExtension>
@@ -159,7 +164,9 @@
       </Properties>
       <CommandBindings>
         <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
-        <CommandBinding name="DropView" guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="261" handler="SQLite.Designer.SQLiteCommandHandler"/>
+        <CommandBinding name="DropView" guid="5efc7975-14bc-11cf-9b2b-00aa00573819" cmdid="17" handler="SQLite.Designer.SQLiteCommandHandler">
+          <Parameter value="View"/>
+        </CommandBinding>
       </CommandBindings>
     </TypeExtension>
     
@@ -215,7 +222,9 @@
       </Properties>
       <CommandBindings>
         <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
-        <CommandBinding name="DropIndex" guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="260" handler="SQLite.Designer.SQLiteCommandHandler"/>
+        <CommandBinding name="DropIndex" guid="5efc7975-14bc-11cf-9b2b-00aa00573819" cmdid="17" handler="SQLite.Designer.SQLiteCommandHandler">
+          <Parameter value="Index"/>
+        </CommandBinding>
       </CommandBindings>
     </TypeExtension>
 

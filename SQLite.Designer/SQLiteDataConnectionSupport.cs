@@ -13,6 +13,7 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.Data;
   using Microsoft.VisualStudio.OLE.Interop;
   using Microsoft.VisualStudio.Data.AdoDotNet;
+  using Microsoft.Win32;
 
   internal class SQLiteDataConnectionSupport : AdoDotNetConnectionSupport
   {

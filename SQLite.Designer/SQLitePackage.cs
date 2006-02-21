@@ -11,7 +11,6 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.Shell;
   using System.Runtime.InteropServices;
   using System.ComponentModel.Design;
-  using Microsoft.Win32;
   using Microsoft.VisualStudio.Shell.Interop;
 
   [Guid("DCBE6C8D-0E57-4099-A183-98FF74C64D9C")]

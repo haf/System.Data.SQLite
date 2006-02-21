@@ -8,12 +8,9 @@ namespace SQLite.Designer
 
   enum cmdid
   {
-    CreateTable = 256,
-    AlterTable = 257,
-    DropTable = 258,
-    CreateIndex = 259,
-    DropIndex = 260,
-    DropView = 261,
+    CreateTable = 0x3006,
+    AlterTable = 0x3003,
+    Delete = 17,
     Vacuum = 262,
     Rekey = 263,
   }
@@ -24,45 +21,41 @@ namespace SQLite.Designer
     private static readonly Guid guidSQLiteCmdSet = new Guid("814658EE-A28E-4b97-BC33-4B1BC81EBECB");
     private static readonly Guid guidIFCmdId = new Guid("{74d21311-2aee-11d1-8bfb-00a0c90f26f7}");
 
+    // 5efc7975-14bc-11cf-9b2b-00aa00573819
+    // 0x5efc7975, 0x14bc, 0x11cf, { 0x9b, 0x2b, 0x00, 0xaa, 0x00, 0x57, 0x38, 0x19 }
+
     public SQLiteCommandHandler()
     {
     }
 
     public override OleCommandStatus GetCommandStatus(int[] itemIds, OleCommand command, OleCommandTextType textType, OleCommandStatus status)
     {
-      if (command.GroupGuid == guidSQLiteCmdSet)
-      {
+      //if (command.GroupGuid == guidSQLiteCmdSet)
+      //{
         switch ((cmdid)command.CommandId)
         {
           case cmdid.CreateTable:
-          case cmdid.CreateIndex:
-          case cmdid.DropView:
           case cmdid.Vacuum:
-//          case cmdid.Rekey:
+          case cmdid.Rekey:
             status.Supported = true;
             status.Visible = true;
             status.Enabled = true;
             break;
           case cmdid.AlterTable:
-          case cmdid.DropTable:
+          case cmdid.Delete:
             status.Supported = true;
             status.Visible = true;
-            status.Enabled = (SystemTableSelected == false);
-            break;
-          case cmdid.DropIndex:
-            status.Supported = true;
-            status.Visible = true;
-            status.Enabled = (SystemIndexSelected == false);
+            status.Enabled = (SystemTableSelected == false && SystemIndexSelected == false);
             break;
           default:
             base.GetCommandStatus(itemIds, command, textType, status);
             break;
         }
-      }
-      else
-      {
-        base.GetCommandStatus(itemIds, command, textType, status);
-      }
+      //}
+      //else
+      //{
+      //  base.GetCommandStatus(itemIds, command, textType, status);
+      //}
       return status;
     }
 
@@ -120,21 +113,28 @@ namespace SQLite.Designer
     public override object ExecuteCommand(int itemId, OleCommand command, OleCommandExecutionOption executionOption, object arguments)
     {
       object returnValue = null;
-      if (command.GroupGuid == guidSQLiteCmdSet)
-      {
+      object[] args = arguments as object[];
+
+      //if (command.GroupGuid == guidSQLiteCmdSet)
+      //{
         switch ((cmdid)command.CommandId)
         {
           case cmdid.CreateTable:
             CreateTable();
             break;
-          case cmdid.DropTable:
-            DropSelectedTables();
-            break;
-          case cmdid.DropIndex:
-            DropSelectedIndexes();
-            break;
-          case cmdid.DropView:
-            DropSelectedViews();
+          case cmdid.Delete:
+            switch((string)args[0])
+            {
+              case "Table":
+                DropSelectedTables();
+                break;
+              case "Index":
+                DropSelectedIndexes();
+                break;
+              case "View":
+                DropSelectedViews();
+                break;
+            }
             break;
           case cmdid.Vacuum:
             Vacuum();
@@ -146,11 +146,11 @@ namespace SQLite.Designer
             returnValue = base.ExecuteCommand(itemId, command, executionOption, arguments);
             break;
         }
-      }
-      else
-      {
-        returnValue = base.ExecuteCommand(itemId, command, executionOption, arguments);
-      }
+      //}
+      //else
+      //{
+      //  returnValue = base.ExecuteCommand(itemId, command, executionOption, arguments);
+      //}
       return returnValue;
     }
 
@@ -176,6 +176,7 @@ namespace SQLite.Designer
           DataViewHierarchyAccessor.Connection.Command.ExecuteWithoutResults(sql, (int)System.Data.CommandType.Text, null, 0);
           DataViewHierarchyAccessor.DropObjectNode(items[n]);
         }
+        else throw new OperationCanceledException();
       }
     }
 
@@ -197,6 +198,7 @@ namespace SQLite.Designer
           DataViewHierarchyAccessor.Connection.Command.ExecuteWithoutResults(sql, (int)System.Data.CommandType.Text, null, 0);
           DataViewHierarchyAccessor.DropObjectNode(items[n]);
         }
+        else throw new OperationCanceledException();
       }
     }
 
@@ -218,6 +220,7 @@ namespace SQLite.Designer
           DataViewHierarchyAccessor.Connection.Command.ExecuteWithoutResults(sql, (int)System.Data.CommandType.Text, null, 0);
           DataViewHierarchyAccessor.DropObjectNode(items[n]);
         }
+        else throw new OperationCanceledException();
       }
     }
 
@@ -227,7 +230,9 @@ namespace SQLite.Designer
     }
 
     private void ChangePassword()
-    {      
+    {
+      System.Data.SQLite.SQLiteConnection cnn = DataViewHierarchyAccessor.Connection.ConnectionSupport.ProviderObject as System.Data.SQLite.SQLiteConnection;
+      if (cnn == null) return;
     }
 
     private void Refresh(int itemId)
