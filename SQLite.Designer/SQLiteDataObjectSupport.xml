@@ -23,7 +23,7 @@
 
 		<Type name="Table" defaultSort="Database,Name">
 			<Concepts>
-				<Concept name="Table" restrictions="{Catalog},null,{Name},TABLE"/>
+				<Concept name="Table" restrictions="{Catalog},null,{Name}"/>
 			</Concepts>
 			<Identifier>
 				<Part name="Database" itemName="table_catalog">
@@ -42,17 +42,19 @@
 					</Concepts>
 				</Part>
 			</Identifier>
-			<Restrictions>
-				<Restriction name="Database"/>
-				<Restriction name="Schema"/>
-				<Restriction name="Name"/>
-				<Restriction name="Type"/>
-			</Restrictions>
 			<Properties>
 				<Property name="Name" type="System.String" itemName="table_name"/>
 				<Property name="Schema" type="System.String" itemName="table_schema"/>
-				<Property name="Type" type="System.String" itemName="table_type"/>
-			</Properties>
+        <Property name="Type" type="System.String" itemName="table_type">
+          <Concepts>
+            <Concept name="Type">
+              <Conversion>
+                <Calculate expr="IIF({0}='TABLE','USER','SYSTEM')" type="System.String"/>
+              </Conversion>
+            </Concept>
+          </Concepts>
+        </Property>
+      </Properties>
 			<Actions>
 				<Action name="Enumerate" guid="61CC0372-384D-42e5-9707-6D7C8DC5287A" handler="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectEnumerator">
 					<Parameter value="Tables"/>
@@ -521,7 +523,6 @@
         <Part name="Database" itemName="table_catalog">
           <Concepts>
             <Concept name="Identifier0"/>
-            <Concept name="ReferencedTableCatalog"/>
           </Concepts>
         </Part>
         <Part name="Schema" itemName="table_schema">
@@ -552,13 +553,11 @@
         <Property name="ReferencedTableSchema" type="System.String" itemName="fkey_to_schema">
           <Concepts>
             <Concept name="ReferencedTableId1"/>
-            <Concept name="ReferencedTableSchema"/>
           </Concepts>
         </Property>
         <Property name="ReferencedTableName" type="System.String" itemName="fkey_to_table">
           <Concepts>
             <Concept name="ReferencedTableId2"/>
-            <Concept name="ReferencedTableName"/>
           </Concepts>
         </Property>
       </Properties>

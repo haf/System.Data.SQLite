@@ -24,7 +24,7 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\designer\</OutputPath>
-    <DefineConstants>TRACE;USEPACKAGE</DefineConstants>
+    <DefineConstants>TRACE;NUSEPACKAGE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <FileAlignment>512</FileAlignment>

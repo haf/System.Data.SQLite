@@ -43,6 +43,22 @@
             </Children>
 					</StaticNode>
 
+          <StaticNode nid="Tables">
+            <DisplayName>System Tables</DisplayName>
+            <CommandBindings>
+              <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
+            </CommandBindings>
+            <Children>
+              <Selection type="Table" filter="TYPE='SYSTEM_TABLE'">
+                <SelectionNode nid="Table">
+                  <Children>
+                    <SubHierarchyRef name="Table children"/>
+                  </Children>
+                </SelectionNode>
+              </Selection>
+            </Children>
+          </StaticNode>
+
           <StaticNode nid="Views">
             <DisplayName>Views</DisplayName>
 						<CommandBindings>

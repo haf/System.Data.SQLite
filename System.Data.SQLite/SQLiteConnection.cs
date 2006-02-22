@@ -897,23 +897,23 @@ namespace System.Data.SQLite
       DataRow row;
 
       tbl.Locale = CultureInfo.InvariantCulture;
-      tbl.Columns.Add("CompositeIdentifierSeparatorPattern", typeof(string));
-      tbl.Columns.Add("DataSourceProductName", typeof(string));
-      tbl.Columns.Add("DataSourceProductVersion", typeof(string));
-      tbl.Columns.Add("DataSourceProductVersionNormalized", typeof(string));
-      tbl.Columns.Add("GroupByBehavior", typeof(int));
-      tbl.Columns.Add("IdentifierPattern", typeof(string));
-      tbl.Columns.Add("IdentifierCase", typeof(int));
-      tbl.Columns.Add("OrderByColumnsInSelect", typeof(bool));
-      tbl.Columns.Add("ParameterMarkerFormat", typeof(string));
-      tbl.Columns.Add("ParameterMarkerPattern", typeof(string));
-      tbl.Columns.Add("ParameterNameMaxLength", typeof(int));
-      tbl.Columns.Add("ParameterNamePattern", typeof(string));
-      tbl.Columns.Add("QuotedIdentifierPattern", typeof(string));
-      tbl.Columns.Add("QuotedIdentifierCase", typeof(int));
-      tbl.Columns.Add("StatementSeparatorPattern", typeof(string));
-      tbl.Columns.Add("StringLiteralPattern", typeof(string));
-      tbl.Columns.Add("SupportedJoinOperators", typeof(int));
+      tbl.Columns.Add(DbMetaDataColumnNames.CompositeIdentifierSeparatorPattern, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.DataSourceProductName, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.DataSourceProductVersion, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.DataSourceProductVersionNormalized, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.GroupByBehavior, typeof(int));
+      tbl.Columns.Add(DbMetaDataColumnNames.IdentifierPattern, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.IdentifierCase, typeof(int));
+      tbl.Columns.Add(DbMetaDataColumnNames.OrderByColumnsInSelect, typeof(bool));
+      tbl.Columns.Add(DbMetaDataColumnNames.ParameterMarkerFormat, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.ParameterMarkerPattern, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.ParameterNameMaxLength, typeof(int));
+      tbl.Columns.Add(DbMetaDataColumnNames.ParameterNamePattern, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.QuotedIdentifierPattern, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.QuotedIdentifierCase, typeof(int));
+      tbl.Columns.Add(DbMetaDataColumnNames.StatementSeparatorPattern, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.StringLiteralPattern, typeof(string));
+      tbl.Columns.Add(DbMetaDataColumnNames.SupportedJoinOperators, typeof(int));
 
       tbl.BeginLoadData();
 
@@ -927,17 +927,17 @@ namespace System.Data.SQLite
         _sql.Version,
         3,
         @"(^\[\p{Lo}\p{Lu}\p{Ll}_@#][\p{Lo}\p{Lu}\p{Ll}\p{Nd}@$#_]*$)|(^\[[^\]\0]|\]\]+\]$)|(^\""[^\""\0]|\""\""+\""$)",
-        2,
+        1,
         false,
         "{0}",
         @"@[\p{Lo}\p{Lu}\p{Ll}\p{Lm}_@#][\p{Lo}\p{Lu}\p{Ll}\p{Lm}\p{Nd}\uff3f_@#\$]*(?=\s+|$)",
         255,
         @"^[\p{Lo}\p{Lu}\p{Ll}\p{Lm}_@#][\p{Lo}\p{Lu}\p{Ll}\p{Lm}\p{Nd}\uff3f_@#\$]*(?=\s+|$)",
         @"(([^\[]|\]\])*)",
-        2,
+        1,
         ";",
         @"'(([^']|'')*)'",
-        null
+        15
       };
       tbl.Rows.Add(row);
 

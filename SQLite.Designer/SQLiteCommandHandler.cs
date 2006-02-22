@@ -9,7 +9,7 @@ namespace SQLite.Designer
   enum cmdid
   {
     CreateTable = 0x3006,
-    AlterTable = 0x3003,
+    Alter = 0x3003,
     Delete = 17,
     Vacuum = 262,
     Rekey = 263,
@@ -30,8 +30,8 @@ namespace SQLite.Designer
 
     public override OleCommandStatus GetCommandStatus(int[] itemIds, OleCommand command, OleCommandTextType textType, OleCommandStatus status)
     {
-      //if (command.GroupGuid == guidSQLiteCmdSet)
-      //{
+      if (command.GroupGuid == guidSQLiteCmdSet)
+      {
         switch ((cmdid)command.CommandId)
         {
           case cmdid.CreateTable:
@@ -40,22 +40,33 @@ namespace SQLite.Designer
             status.Supported = true;
             status.Visible = true;
             status.Enabled = true;
-            break;
-          case cmdid.AlterTable:
-          case cmdid.Delete:
+            return status;
+        }
+      }
+      else if (command.GroupGuid == VSConstants.GUID_VSStandardCommandSet97)
+      {
+        switch ((VSConstants.VSStd97CmdID)command.CommandId)
+        {
+          case VSConstants.VSStd97CmdID.Delete:
             status.Supported = true;
             status.Visible = true;
             status.Enabled = (SystemTableSelected == false && SystemIndexSelected == false);
-            break;
-          default:
-            base.GetCommandStatus(itemIds, command, textType, status);
-            break;
+            return status;
         }
-      //}
-      //else
-      //{
-      //  base.GetCommandStatus(itemIds, command, textType, status);
-      //}
+      }
+      else if (command.GroupGuid == guidDataCmdSet)
+      {
+        switch ((cmdid)command.CommandId)
+        {
+          case cmdid.Alter:
+            status.Supported = true;
+            status.Visible = true;
+            status.Enabled = (SystemTableSelected == false && SystemIndexSelected == false);
+            return status;
+        }
+      }
+      base.GetCommandStatus(itemIds, command, textType, status);
+
       return status;
     }
 
@@ -115,15 +126,30 @@ namespace SQLite.Designer
       object returnValue = null;
       object[] args = arguments as object[];
 
-      //if (command.GroupGuid == guidSQLiteCmdSet)
-      //{
+      if (command.GroupGuid == guidSQLiteCmdSet)
+      {
         switch ((cmdid)command.CommandId)
         {
           case cmdid.CreateTable:
             CreateTable();
             break;
-          case cmdid.Delete:
-            switch((string)args[0])
+          case cmdid.Vacuum:
+            Vacuum();
+            break;
+          case cmdid.Rekey:
+            ChangePassword();
+            break;
+          default:
+            returnValue = base.ExecuteCommand(itemId, command, executionOption, arguments);
+            break;
+        }
+      }
+      else if (command.GroupGuid == VSConstants.GUID_VSStandardCommandSet97)
+      {
+        switch ((VSConstants.VSStd97CmdID)command.CommandId)
+        {
+          case VSConstants.VSStd97CmdID.Delete:
+            switch ((string)args[0])
             {
               case "Table":
                 DropSelectedTables();
@@ -136,21 +162,29 @@ namespace SQLite.Designer
                 break;
             }
             break;
-          case cmdid.Vacuum:
-            Vacuum();
-            break;
-          case cmdid.Rekey:
-            ChangePassword();
-            break;
-          default:
-            returnValue = base.ExecuteCommand(itemId, command, executionOption, arguments);
+        }
+      }
+      else if (command.GroupGuid == guidDataCmdSet)
+      {
+        switch ((cmdid)command.CommandId)
+        {
+          case cmdid.Alter:
+            switch ((string)args[0])
+            {
+              case "Table":
+                break;
+              case "Index":
+                break;
+              case "View":
+                break;
+            }
             break;
         }
-      //}
-      //else
-      //{
-      //  returnValue = base.ExecuteCommand(itemId, command, executionOption, arguments);
-      //}
+      }
+      else
+      {
+        returnValue = base.ExecuteCommand(itemId, command, executionOption, arguments);
+      }
       return returnValue;
     }
 
