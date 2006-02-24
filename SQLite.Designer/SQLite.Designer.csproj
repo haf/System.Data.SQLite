@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Designer\</OutputPath>
+    <OutputPath>..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -59,11 +59,18 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.26.2, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SQLiteCommandDesigner.cs">
+    </Compile>
     <Compile Include="SQLiteCommandHandler.cs" />
     <Compile Include="SQLiteConnectionProperties.cs" />
     <Compile Include="SQLiteConnectionUIControl.cs">
@@ -72,6 +79,7 @@
     <Compile Include="SQLiteConnectionUIControl.Designer.cs">
       <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="SQLiteDataAdapterToolboxItem.cs" />
     <Compile Include="SQLiteDataConnectionSupport.cs" />
     <Compile Include="SQLiteDataObjectIdentifierResolver.cs" />
     <Compile Include="SQLiteDataObjectSupport.cs" />

@@ -17,7 +17,7 @@ namespace System.Data.SQLite
   /// SQLite implementation of DbCommand.
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
-  [Designer("Microsoft.VSDesigner.Data.VS.DataCommandDesigner, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"), ToolboxItem(true)]
+  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.26.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
 #endif
   public sealed class SQLiteCommand : DbCommand, ICloneable
   {
@@ -99,6 +99,18 @@ namespace System.Data.SQLite
     public SQLiteCommand(SQLiteConnection connection) 
       : this(null, connection, null)
     {
+    }
+
+    private SQLiteCommand(SQLiteCommand source) : this(source.CommandText, source.Connection, source.Transaction)
+    {
+      CommandTimeout = source.CommandTimeout;
+      DesignTimeVisible = source.DesignTimeVisible;
+      UpdatedRowSource = source.UpdatedRowSource;
+
+      foreach (SQLiteParameter param in source._parameterCollection)
+      {
+        Parameters.Add(param.Clone());
+      }
     }
 
     /// <summary>
@@ -573,6 +585,7 @@ namespace System.Data.SQLite
       set
       {
         _designTimeVisible = value;
+        TypeDescriptor.Refresh(this);
       }
     }
 
@@ -582,12 +595,7 @@ namespace System.Data.SQLite
     /// <returns>A new SQLiteCommand with the same commandtext, connection and parameters</returns>
     public object Clone()
     {
-      SQLiteCommand newcommand = new SQLiteCommand(CommandText, Connection as SQLiteConnection);
-      foreach (SQLiteParameter param in _parameterCollection)
-      {
-        newcommand.Parameters.Add(param.Clone());
-      }
-      return newcommand;
+      return new SQLiteCommand(this);
     }
   }
 }
