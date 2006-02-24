@@ -17,6 +17,8 @@ namespace System.Data.SQLite
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
   [DefaultEvent("RowUpdated")]
+  [ToolboxItem("Microsoft.VSDesigner.Data.VS.SqlDataAdapterToolboxItem, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+  [Designer("Microsoft.VSDesigner.Data.VS.SqlDataAdapterDesigner, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
   public sealed class SQLiteDataAdapter : DbDataAdapter
   {
@@ -108,6 +110,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/sets the select command for this DataAdapter
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DefaultValue((string)null), Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#endif
     public new SQLiteCommand SelectCommand
     {
       get { return (SQLiteCommand)base.SelectCommand; }
@@ -117,6 +122,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/sets the insert command for this DataAdapter
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DefaultValue((string)null), Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#endif
     public new SQLiteCommand InsertCommand
     {
       get { return (SQLiteCommand)base.InsertCommand; }
@@ -126,6 +134,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/sets the update command for this DataAdapter
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DefaultValue((string)null), Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#endif
     public new SQLiteCommand UpdateCommand
     {
       get { return (SQLiteCommand)base.UpdateCommand; }
@@ -135,6 +146,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/sets the delete command for this DataAdapter
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DefaultValue((string)null), Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#endif
     public new SQLiteCommand DeleteCommand
     {
       get { return (SQLiteCommand)base.DeleteCommand; }

@@ -19,9 +19,8 @@ namespace System.Data.SQLite
   /// SQLite implementation of DbParameterCollection.
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
-  [ListBindable(true)]
+  [Editor("Microsoft.VSDesigner.Data.Design.DBParametersEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"), ListBindable(false)]
 #endif
-  [DefaultMember("Item")]
   public sealed class SQLiteParameterCollection : DbParameterCollection
   {
     /// <summary>
@@ -252,6 +251,29 @@ namespace System.Data.SQLite
       get { return _parameterList.Count; }
     }
 
+    public new SQLiteParameter this[string parameterName]
+    {
+      get
+      {
+        return (SQLiteParameter)GetParameter(parameterName);
+      }
+      set
+      {
+        SetParameter(parameterName, value);
+      }
+    }
+
+    public new SQLiteParameter this[int index]
+    {
+      get
+      {
+        return (SQLiteParameter)GetParameter(index);
+      }
+      set
+      {
+        SetParameter(index, value);
+      }
+    }
     /// <summary>
     /// Retrieve a parameter by name from the collection
     /// </summary>

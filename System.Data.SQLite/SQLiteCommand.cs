@@ -11,10 +11,14 @@ namespace System.Data.SQLite
   using System.Data;
   using System.Data.Common;
   using System.Collections.Generic;
+  using System.ComponentModel;
 
   /// <summary>
   /// SQLite implementation of DbCommand.
   /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+  [Designer("Microsoft.VSDesigner.Data.VS.DataCommandDesigner, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"), ToolboxItem(true)]
+#endif
   public sealed class SQLiteCommand : DbCommand, ICloneable
   {
     /// <summary>
@@ -219,6 +223,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// The SQL command text associated with the command
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DefaultValue(""), RefreshProperties(RefreshProperties.All), Editor("Microsoft.VSDesigner.Data.SQL.Design.SqlCommandTextEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#endif
     public override string CommandText
     {
       get
@@ -259,6 +266,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// The type of the command.  SQLite only supports CommandType.Text
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [RefreshProperties(RefreshProperties.All), DefaultValue(CommandType.Text)]
+#endif
     public override CommandType CommandType
     {
       get
@@ -295,6 +305,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// The connection associated with this command
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DefaultValue((string)null), Editor("Microsoft.VSDesigner.Data.Design.DbConnectionEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#endif
     public new SQLiteConnection Connection
     {
       get { return _cnn; }
@@ -334,6 +347,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Returns the SQLiteParameterCollection for the given command
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+#endif
     public new SQLiteParameterCollection Parameters
     {
       get { return _parameterCollection; }
@@ -354,6 +370,9 @@ namespace System.Data.SQLite
     /// The transaction associated with this command.  SQLite only supports one transaction per connection, so this property forwards to the
     /// command's underlying connection.
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
     public new SQLiteTransaction Transaction
     {
       get { return _transaction; }
@@ -526,6 +545,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Sets the method the SQLiteCommandBuilder uses to determine how to update inserted or updated rows in a DataTable.
     /// </summary>
+    [DefaultValue(UpdateRowSource.FirstReturnedRecord)]
     public override UpdateRowSource UpdatedRowSource
     {
       get
@@ -541,6 +561,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Determines if the command is visible at design time.  Defaults to True.
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DesignOnly(true), Browsable(false), DefaultValue(true), EditorBrowsable(EditorBrowsableState.Never)]
+#endif
     public override bool DesignTimeVisible
     {
       get

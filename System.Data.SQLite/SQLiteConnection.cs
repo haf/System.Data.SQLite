@@ -12,6 +12,7 @@ namespace System.Data.SQLite
   using System.Data.Common;
   using System.Collections.Generic;
   using System.Globalization;
+  using System.ComponentModel;
 
   /// <summary>
   /// The I/O file cache flushing behavior for the connection
@@ -483,6 +484,9 @@ namespace System.Data.SQLite
     /// </item>
     /// </list>
     /// </remarks>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [RefreshProperties(RefreshProperties.All), DefaultValue("")]
+#endif
     public override string ConnectionString
     {
       get
@@ -522,6 +526,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Returns the filename without extension or path
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
     public override string DataSource
     {
       get 
@@ -533,6 +540,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Returns an empty string
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
     public override string Database
     {
       get
@@ -687,6 +697,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Returns the version of the underlying SQLite database engine
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
     public override string ServerVersion
     {
       get
@@ -701,6 +714,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Returns the state of the connection.
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
     public override ConnectionState State
     {
       get

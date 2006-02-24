@@ -155,16 +155,24 @@ namespace install
 
           item.Tag = subkeyname;
 
+          using (RegistryKey subsubkey = subkey.OpenSubKey("DataProviders"))
+          {
+            if (subsubkey == null)
+              throw new ArgumentException("Edition not installed");
+          }
+
           using (RegistryKey subsubkey = subkey.OpenSubKey(String.Format("DataProviders\\{0}", (isChecked == null) ? lookFor.ToString("B") : ((Guid)isChecked).ToString("B"))))
           {
-            if (subkey == null)
+            if (subsubkey == null)
             {
               DoInstallUninstall(item);
-              throw new ArgumentNullException("Key doesn't exist");
             }
-            bool itemChecked = (subsubkey.GetValue(null) != null);
-            DoInstallUninstall(item);
-            item.Checked = itemChecked;
+            else
+            {
+              bool itemChecked = (subsubkey.GetValue(null) != null);
+              DoInstallUninstall(item);
+              item.Checked = itemChecked;
+            }
           }
 
           installList.Items.Add(item);
