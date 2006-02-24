@@ -265,8 +265,8 @@ namespace SQLite.Designer
 
     private void ChangePassword()
     {
-      System.Data.SQLite.SQLiteConnection cnn = DataViewHierarchyAccessor.Connection.ConnectionSupport.ProviderObject as System.Data.SQLite.SQLiteConnection;
-      if (cnn == null) return;
+     // System.Data.SQLite.SQLiteConnection cnn = DataViewHierarchyAccessor.Connection.ConnectionSupport.ProviderObject as System.Data.SQLite.SQLiteConnection;
+     // if (cnn == null) return;
     }
 
     private void Refresh(int itemId)

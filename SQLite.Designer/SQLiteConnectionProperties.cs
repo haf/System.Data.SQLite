@@ -14,24 +14,38 @@ namespace SQLite.Designer
 
   internal class SQLiteConnectionProperties : AdoDotNetConnectionProperties
   {
+    private static System.Reflection.Assembly _sqlite = null;
+
     static SQLiteConnectionProperties()
     {
       AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
     }
 
-    static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+    private static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
     {
       if (args.Name.StartsWith("System.Data.SQLite", StringComparison.InvariantCultureIgnoreCase))
       {
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\.NETFramework\\v2.0.50727\\AssemblyFoldersEx\\SQLite"))
-        {
-          if (key != null)
-          {
-            return System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(key.GetValue(null).ToString(), "System.Data.SQLite.DLL"));
-          }
-        }
+        return SQLiteAssembly;
       }
       return null;
+    }
+
+    internal static System.Reflection.Assembly SQLiteAssembly
+    {
+      get
+      {
+        if (_sqlite == null)
+        {
+          using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\.NETFramework\\v2.0.50727\\AssemblyFoldersEx\\SQLite"))
+          {
+            if (key != null)
+            {
+              _sqlite = System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(key.GetValue(null).ToString(), "System.Data.SQLite.DLL"));
+            }
+          }
+        }
+        return _sqlite;
+      }
     }
 
     public SQLiteConnectionProperties() : base("System.Data.SQLite")

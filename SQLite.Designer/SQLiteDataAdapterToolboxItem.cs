@@ -4,7 +4,6 @@ namespace SQLite.Designer
   using System.ComponentModel;
   using System.ComponentModel.Design;
   using System.Drawing.Design;
-  using System.Data.SQLite;
   using System.Data.Common;
   using System.Reflection;
   using System.Collections.Generic;
@@ -17,12 +16,11 @@ namespace SQLite.Designer
   internal sealed class SQLiteDataAdapterToolboxItem : ToolboxItem
   {
     private static Type _wizard = null;
+    
     internal static Assembly _vsdesigner = null;
-
     static SQLiteDataAdapterToolboxItem()
     {
       _vsdesigner = Assembly.Load("Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-
       _wizard = _vsdesigner.GetType("Microsoft.VSDesigner.Data.VS.DataAdapterWizard");
     }
 
@@ -30,63 +28,62 @@ namespace SQLite.Designer
     {
     }
 
-
-    public SQLiteDataAdapterToolboxItem(Type type, Bitmap bmp) : base(typeof(SQLiteDataAdapter))
+    public SQLiteDataAdapterToolboxItem(Type type, Bitmap bmp) : base(type)
     {
       DisplayName = "SQLiteDataAdapter";
     }
 
-    private SQLiteDataAdapterToolboxItem(SerializationInfo info, StreamingContext context) : base(typeof(SQLiteDataAdapter))
+    private SQLiteDataAdapterToolboxItem(SerializationInfo info, StreamingContext context)
     {
       Deserialize(info, context);
     }
 
     protected override IComponent[] CreateComponentsCore(IDesignerHost host)
     {
-      SQLiteDataAdapter adp = new SQLiteDataAdapter();
+      DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
 
-      if (adp == null) return null;
-
+      DbDataAdapter dataAdapter = fact.CreateDataAdapter();
       IContainer container = host.Container;
-
-      adp.SelectCommand = new SQLiteCommand();
-      adp.SelectCommand.DesignTimeVisible = false;
-      container.Add(adp.SelectCommand, GenerateName(container, "SelectCommand"));
-
-      adp.InsertCommand = new SQLiteCommand();
-      adp.InsertCommand.DesignTimeVisible = false;
-      container.Add(adp.InsertCommand, GenerateName(container, "InsertCommand"));
-
-      adp.UpdateCommand = new SQLiteCommand();
-      adp.UpdateCommand.DesignTimeVisible = false;
-      container.Add(adp.UpdateCommand, GenerateName(container, "UpdateCommand"));
-
-      adp.DeleteCommand = new SQLiteCommand();
-      adp.DeleteCommand.DesignTimeVisible = false;
-      container.Add(adp.DeleteCommand, GenerateName(container, "DeleteCommand"));
-
-      ITypeResolutionService res = (ITypeResolutionService)host.GetService(typeof(ITypeResolutionService));
-      if (res != null)
+      
+      using (DbCommand adapterCommand = fact.CreateCommand())
       {
-        res.ReferenceAssembly(typeof(SQLiteDataAdapter).Assembly.GetName());
+        adapterCommand.DesignTimeVisible = false;
+        dataAdapter.SelectCommand = (DbCommand)((ICloneable)adapterCommand).Clone();
+        container.Add(dataAdapter.SelectCommand, GenerateName(container, "SelectCommand"));
+
+        dataAdapter.InsertCommand = (DbCommand)((ICloneable)adapterCommand).Clone();
+        container.Add(dataAdapter.InsertCommand, GenerateName(container, "InsertCommand"));
+
+        dataAdapter.UpdateCommand = (DbCommand)((ICloneable)adapterCommand).Clone();
+        container.Add(dataAdapter.UpdateCommand, GenerateName(container, "UpdateCommand"));
+
+        dataAdapter.DeleteCommand = (DbCommand)((ICloneable)adapterCommand).Clone();
+        container.Add(dataAdapter.DeleteCommand, GenerateName(container, "DeleteCommand"));
       }
-      container.Add(adp);
+
+      ITypeResolutionService typeResService = (ITypeResolutionService)host.GetService(typeof(ITypeResolutionService));
+      if (typeResService != null)
+      {
+        typeResService.ReferenceAssembly(dataAdapter.GetType().Assembly.GetName());
+      }
+
+      container.Add(dataAdapter);
 
       List<IComponent> list = new List<IComponent>();
-      list.Add(adp);
+      list.Add(dataAdapter);
 
       if (_wizard != null)
       {
-        using (Form wizard = (Form)Activator.CreateInstance(_wizard, new object[] { host, adp }))
+        using (Form wizard = (Form)Activator.CreateInstance(_wizard, new object[] { host, dataAdapter }))
         {
           wizard.ShowDialog();
         }
       }
 
-      if (adp.SelectCommand != null) list.Add(adp.SelectCommand);
-      if (adp.InsertCommand != null) list.Add(adp.InsertCommand);
-      if (adp.DeleteCommand != null) list.Add(adp.DeleteCommand);
-      if (adp.UpdateCommand != null) list.Add(adp.UpdateCommand);
+      if (dataAdapter.SelectCommand != null) list.Add(dataAdapter.SelectCommand);
+      if (dataAdapter.InsertCommand != null) list.Add(dataAdapter.InsertCommand);
+      if (dataAdapter.DeleteCommand != null) list.Add(dataAdapter.DeleteCommand);
+      if (dataAdapter.UpdateCommand != null) list.Add(dataAdapter.UpdateCommand);
 
       return list.ToArray();      
     }
