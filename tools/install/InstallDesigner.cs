@@ -34,6 +34,15 @@ namespace install
     private bool _ignoreChecks = true;
     private string _assmLocation;
 
+    string SQLiteLocation
+    {
+      get
+      {
+        System.Reflection.Assembly assm = SQLite;
+        return _assmLocation;
+      }
+    }
+
     System.Reflection.Assembly SQLite
     {
       get
@@ -51,30 +60,6 @@ namespace install
           {
           }
         }
-
-        //if (_assm == null)
-        //{
-        //  try
-        //  {
-        //    _assmLocation = Path.GetFullPath("..\\x64\\System.Data.SQLite.DLL");
-        //    _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
-        //  }
-        //  catch
-        //  {
-        //  }
-        //}
-
-        //if (_assm == null)
-        //{
-        //  try
-        //  {
-        //    _assmLocation = Path.GetFullPath("..\\itanium\\System.Data.SQLite.DLL");
-        //    _assm = System.Reflection.Assembly.LoadFrom(_assmLocation);
-        //  }
-        //  catch
-        //  {
-        //  }
-        //}
 
         OpenFileDialog dlg = new OpenFileDialog();
         while (_assm == null)
@@ -138,7 +123,7 @@ namespace install
          | AddItem(key, "VJSExpress", "Visual J# Express Edition *", oledbDataProviderGuid, oledbAltDataProviderGuid));
       }
 
-      CheckGac();
+      GlobalAddRemove();
 
       _ignoreChecks = false;
     }
@@ -200,7 +185,7 @@ namespace install
 
       DoInstallUninstall(e.Item);
 
-      CheckGac();
+      GlobalAddRemove();
     }
 
     private void DoInstallUninstall(ListViewItem Item)
@@ -221,21 +206,23 @@ namespace install
       }
     }
 
-    private void CheckGac()
+    private void GlobalAddRemove()
     {
       bool install = false;
-      bool installed;
+//      bool installed;
 
-      try
-      {
-        string file = AssemblyCache.QueryAssemblyInfo("System.Data.SQLite");
-        installed = true;
-      }
-      catch
-      {
-        installed = false;
-      }
+      //// Check to see if SQLite is installed in the GAC
+      //try
+      //{
+      //  string file = AssemblyCache.QueryAssemblyInfo("System.Data.SQLite");
+      //  installed = true;
+      //}
+      //catch
+      //{
+      //  installed = false;
+      //}
 
+      // Check to see if any checkboxes in the list are checked
       for (int n = 0; n < installList.Items.Count; n++)
       {
         if (installList.Items[n].Checked == true)
@@ -245,22 +232,78 @@ namespace install
         }
       }
 
+      // If at least 1 item is checked, then install some global settings
       if (install)
       {
-        string path = SQLite.ToString();
-
-        path = Path.GetDirectoryName(_assmLocation);
+        string path = Path.GetDirectoryName(SQLiteLocation);
 
         using (RegistryKey key = Registry.LocalMachine.CreateSubKey("Software\\Microsoft\\.NETFramework\\v2.0.50727\\AssemblyFoldersEx\\SQLite", RegistryKeyPermissionCheck.ReadWriteSubTree))
         {
           key.SetValue(null, path);
         }
+
+        while (String.IsNullOrEmpty(path) == false)
+        {
+          if (File.Exists(path + "\\CompactFramework\\System.Data.SQLite.DLL") == false)
+          {
+            path = Path.GetDirectoryName(path);
+          }
+          else break;
+        }
+
+        if (String.IsNullOrEmpty(path) == false)
+        {
+          path += "\\CompactFramework\\";
+
+          for (int n = 0; n < compactFrameworks.Length; n++)
+          {
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\AssemblyFoldersEx", compactFrameworks[n]), true))
+            {
+
+              if (key != null)
+              {
+                using (RegistryKey subkey = key.CreateSubKey("SQLite", RegistryKeyPermissionCheck.ReadWriteSubTree))
+                {
+                  subkey.SetValue(null, path);
+                }
+              }
+            }
+          }
+        }
       }
-      else
+      else // No checkboxes are checked, remove some global settings
       {
         try
         {
           Registry.LocalMachine.DeleteSubKey("Software\\Microsoft\\.NETFramework\\v2.0.50727\\AssemblyFoldersEx\\SQLite");
+
+          for (int n = 0; n < compactFrameworks.Length; n++)
+          {
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\DataProviders", compactFrameworks[n]), true))
+            {
+              try
+              {
+                if (key != null) key.DeleteSubKey(standardDataProviderGuid.ToString("B"));
+              }
+              catch
+              {
+              }
+            }
+          }
+
+          for (int n = 0; n < compactFrameworks.Length; n++)
+          {
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\AssemblyFoldersEx", compactFrameworks[n]), true))
+            {
+              try
+              {
+                if (key != null) key.DeleteSubKey("SQLite");
+              }
+              catch
+              {
+              }
+            }
+          }
         }
         catch
         {
@@ -269,13 +312,12 @@ namespace install
 
       try
       {
-        if (installed)
+        if (!install) // Remove SQLite from the GAC if its there
         {
           AssemblyCacheUninstallDisposition disp;
 
-          AssemblyCacheEnum entries = new AssemblyCacheEnum("System.Data.SQLite");
-
           string s;
+          AssemblyCacheEnum entries = new AssemblyCacheEnum("System.Data.SQLite");
           while (true)
           {
             s = entries.GetNextAssembly();
@@ -283,7 +325,21 @@ namespace install
 
             AssemblyCache.UninstallAssembly(s, null, out disp);
           }
-          SQLite = null;
+
+          entries = new AssemblyCacheEnum("SQLite.Designer");
+          while (true)
+          {
+            s = entries.GetNextAssembly();
+            if (String.IsNullOrEmpty(s)) break;
+
+            AssemblyCache.UninstallAssembly(s, null, out disp);
+          } SQLite = null;
+        }
+        else // Install SQLite into the GAC
+        {
+
+          AssemblyCache.InstallAssembly(SQLiteLocation, null, AssemblyCommitFlags.Default);
+          AssemblyCache.InstallAssembly(Path.GetFullPath("SQLite.Designer.DLL"), null, AssemblyCommitFlags.Default);
         }
       }
       catch
@@ -434,36 +490,6 @@ namespace install
         }
       }
 
-      string path = Path.GetDirectoryName(_assmLocation);
-
-      while (String.IsNullOrEmpty(path) == false)
-      {
-        if (File.Exists(path + "\\CompactFramework\\System.Data.SQLite.DLL") == false)
-        {
-          path = Path.GetDirectoryName(path);
-        }
-        else break;
-      }
-
-      if (String.IsNullOrEmpty(path) == false)
-      {
-        path += "\\CompactFramework\\";
-
-        for (int n = 0; n < compactFrameworks.Length; n++)
-        {
-          using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\AssemblyFoldersEx", compactFrameworks[n]), true))
-          {
-
-            if (key != null)
-            {
-              using (RegistryKey subkey = key.CreateSubKey("SQLite", RegistryKeyPermissionCheck.ReadWriteSubTree))
-              {
-                subkey.SetValue(null, path);
-              }
-            }
-          }
-        }
-      }
 
 #if USEPACKAGE
       using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\Packages", keyname), true))
@@ -578,34 +604,6 @@ namespace install
         using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
         {
           if (key != null) key.DeleteSubKeyTree(source.ToString("B"));
-        }
-
-        for (int n = 0; n < compactFrameworks.Length; n++)
-        {
-          using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\DataProviders", compactFrameworks[n]), true))
-          {
-            try
-            {
-              if (key != null) key.DeleteSubKey(standardDataProviderGuid.ToString("B"));
-            }
-            catch
-            {
-            }
-          }
-        }
-
-        for (int n = 0; n < compactFrameworks.Length; n++)
-        {
-          using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\AssemblyFoldersEx", compactFrameworks[n]), true))
-          {
-            try
-            {
-              if (key != null) key.DeleteSubKey("SQLite");
-            }
-            catch
-            {
-            }
-          }
         }
       }
       catch

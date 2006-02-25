@@ -111,7 +111,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;COPY $(TargetDir)System.Data.SQLite.* $(VSInstallDir)Common7\IDE\PublicAssemblies&#x0D;&#x0A;"
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration

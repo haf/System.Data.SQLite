@@ -251,6 +251,11 @@ namespace System.Data.SQLite
       get { return _parameterList.Count; }
     }
 
+    /// <summary>
+    /// Overloaded to specialize the return value of the default indexer
+    /// </summary>
+    /// <param name="parameterName">Name of the parameter to get/set</param>
+    /// <returns>The specified named SQLite parameter</returns>
     public new SQLiteParameter this[string parameterName]
     {
       get
@@ -263,6 +268,11 @@ namespace System.Data.SQLite
       }
     }
 
+    /// <summary>
+    /// Overloaded to specialize the return value of the default indexer
+    /// </summary>
+    /// <param name="index">The index of the parameter to get/set</param>
+    /// <returns>The specified SQLite parameter</returns>
     public new SQLiteParameter this[int index]
     {
       get
