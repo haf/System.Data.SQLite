@@ -17,7 +17,7 @@ namespace System.Data.SQLite
   /// SQLite implementation of DbCommand.
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
-  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.26.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
+  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer"), ToolboxItem(true)]
 #endif
   public sealed class SQLiteCommand : DbCommand, ICloneable
   {
@@ -585,7 +585,9 @@ namespace System.Data.SQLite
       set
       {
         _designTimeVisible = value;
+#if !PLATFORM_COMPACTFRAMEWORK
         TypeDescriptor.Refresh(this);
+#endif
       }
     }
 

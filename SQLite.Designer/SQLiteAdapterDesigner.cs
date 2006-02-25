@@ -19,10 +19,9 @@ namespace SQLite.Designer
     {
       base.Initialize(component);
 
-      Assembly assm = Assembly.Load("Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-      if (assm != null)
+      if (SQLiteDataAdapterToolboxItem._vsdesigner != null)
       {
-        Type type = assm.GetType("Microsoft.VSDesigner.Data.VS.SqlDataAdapterDesigner");
+        Type type = SQLiteDataAdapterToolboxItem._vsdesigner.GetType("Microsoft.VSDesigner.Data.VS.SqlDataAdapterDesigner");
         if (type != null)
         {
           _designer = (ComponentDesigner)Activator.CreateInstance(type);

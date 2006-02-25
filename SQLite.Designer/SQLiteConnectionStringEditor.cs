@@ -30,7 +30,7 @@ namespace SQLite.Designer
       try
       {
         context.OnComponentChanging();
-        object newConnection = base.EditValue(provider, value);
+        object newConnection = base.EditValue(context, provider, value);
         string connectionString = newConnection as string;
         int index = -1;
 
@@ -41,16 +41,14 @@ namespace SQLite.Designer
             object manager = Activator.CreateInstance(_managerType, new object[] { provider });
             if (manager != null)
             {
-              index = (int)_managerType.InvokeMember("AddNewConnection", BindingFlags.Instance | BindingFlags.InvokeMethod, null, manager, new object[] { "System.Data.SQLite" });
+              index = (int)_managerType.InvokeMember("AddNewConnection", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { "System.Data.SQLite" });
               if (index > -1 && _selector != null)
               {
-                connectionString = (string)_managerType.InvokeMember("GetConnectionString", BindingFlags.Instance | BindingFlags.InvokeMethod, null, manager, new object[] { index });
-                _selector.SelectedNode = _selector.AddNode((string)_managerType.InvokeMember("GetConnectionName", BindingFlags.Instance | BindingFlags.InvokeMethod, null, manager, new object[] { index }), connectionString, null);
+                connectionString = (string)_managerType.InvokeMember("GetConnectionString", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { index });
+                _selector.SelectedNode = _selector.AddNode((string)_managerType.InvokeMember("GetConnectionName", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { index }), connectionString, null);
               }
             }
           }
-          // VsConnectionManager manager1 = new VsConnectionManager(serviceProvider);
-          // manager1.AddNewConnection(this.ManagedProviderInvariantName);
         }
 
         if (String.IsNullOrEmpty(connectionString) == false)
@@ -73,18 +71,20 @@ namespace SQLite.Designer
 
       _selector = selector;
 
+      _selector.Clear();
+
       if (manager != null)
       {
-        int items = (int)_managerType.InvokeMember("GetConnectionCount", BindingFlags.Instance | BindingFlags.InvokeMethod, null, manager, null);
+        int items = (int)_managerType.InvokeMember("GetConnectionCount", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, null);
         string dataProvider;
         string connectionString;
         string connectionName;
 
         for (int n = 0; n < items; n++)
         {
-          connectionString = (string)_managerType.InvokeMember("GetConnectionString", BindingFlags.Instance | BindingFlags.InvokeMethod, null, manager, new object[] { n });
-          connectionName = (string)_managerType.InvokeMember("GetConnectionName", BindingFlags.Instance | BindingFlags.InvokeMethod, null, manager, new object[] { n });
-          dataProvider = (string)_managerType.InvokeMember("GetProvider", BindingFlags.Instance | BindingFlags.InvokeMethod, null, manager, new object[] { n });
+          connectionString = (string)_managerType.InvokeMember("GetConnectionString", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { n });
+          connectionName = (string)_managerType.InvokeMember("GetConnectionName", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { n });
+          dataProvider = (string)_managerType.InvokeMember("GetProvider", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { n });
           if (String.Compare(dataProvider, "System.Data.SQLite", true) == 0)
           {
             node = selector.AddNode(connectionName, connectionString, null);
@@ -93,6 +93,7 @@ namespace SQLite.Designer
               selector.SelectedNode = node;
           }
         }
+        selector.AddNode("<New Connection...>", this, null);
       }
     }
   }

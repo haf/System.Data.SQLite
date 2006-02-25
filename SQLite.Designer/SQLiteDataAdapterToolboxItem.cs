@@ -18,6 +18,7 @@ namespace SQLite.Designer
     private static Type _wizard = null;
     
     internal static Assembly _vsdesigner = null;
+
     static SQLiteDataAdapterToolboxItem()
     {
       _vsdesigner = Assembly.Load("Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");

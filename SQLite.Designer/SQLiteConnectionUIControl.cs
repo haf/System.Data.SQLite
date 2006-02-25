@@ -17,6 +17,7 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.Data;
   using Microsoft.Win32;
 
+  [ToolboxItem(false)]
   public partial class SQLiteConnectionUIControl : DataConnectionUIControl
   {
     public SQLiteConnectionUIControl()
