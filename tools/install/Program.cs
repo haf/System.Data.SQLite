@@ -14,7 +14,10 @@ namespace install
     {
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
-      new InstallDesigner().ShowDialog();
+
+      InstallDesigner designer = new InstallDesigner();
+      if (designer._remove == false)
+        designer.ShowDialog();
     }
   }
 }

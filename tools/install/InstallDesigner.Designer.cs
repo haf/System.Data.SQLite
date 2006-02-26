@@ -122,14 +122,12 @@ namespace install
       this.Controls.Add(label1);
       this.Font = new System.Drawing.Font("MS Shell Dlg 2", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+      this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
       this.Name = "InstallDesigner";
-      this.ShowIcon = false;
-      this.ShowInTaskbar = false;
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "SQLite Designer Installation";
-      this.Load += new System.EventHandler(this.InstallDesigner_Load);
       this.warningPanel.ResumeLayout(false);
       this.warningPanel.PerformLayout();
       this.ResumeLayout(false);

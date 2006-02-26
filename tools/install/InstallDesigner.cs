@@ -29,6 +29,7 @@ namespace install
     private static Guid jetAltDataSourcesGuid = new Guid("{466CE797-67A4-4495-B75C-A3FD282E7FC4}");
     private static string[] compactFrameworks = new string[] { "PocketPC", "SmartPhone", "WindowsCE" };
 
+    internal bool _remove = false;
     private string _regRoot = "8.0";
     private System.Reflection.Assembly _assm = null;
     private bool _ignoreChecks = true;
@@ -103,13 +104,15 @@ namespace install
           _regRoot = args[n + 1];
           break;
         }
+        else if (String.Compare(args[n], "/remove", true) == 0 ||
+          String.Compare(args[n], "-remove", true) == 0)
+        {
+          _remove = true;
+        }
       }
 
       InitializeComponent();
-    }
 
-    private void InstallDesigner_Load(object sender, EventArgs e)
-    {
       RegistryKey key;
 
       using (key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft"))
@@ -156,7 +159,7 @@ namespace install
             {
               bool itemChecked = (subsubkey.GetValue(null) != null);
               DoInstallUninstall(item);
-              item.Checked = itemChecked;
+              if (_remove == false) item.Checked = itemChecked;
             }
           }
 
