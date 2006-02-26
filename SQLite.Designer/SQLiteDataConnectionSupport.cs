@@ -15,7 +15,10 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.Data.AdoDotNet;
   using Microsoft.Win32;
 
-  internal class SQLiteDataConnectionSupport : AdoDotNetConnectionSupport
+  /// <summary>
+  /// This class creates many of the DDEX components when asked for by the server explorer.
+  /// </summary>
+  internal sealed class SQLiteDataConnectionSupport : AdoDotNetConnectionSupport
   {
     private SQLiteDataViewSupport _dataViewSupport;
     private SQLiteDataObjectSupport _dataObjectSupport;

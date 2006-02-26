@@ -14,7 +14,11 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.OLE.Interop;
   using Microsoft.VisualStudio.Data.AdoDotNet;
 
-  internal class SQLiteDataObjectSupport : DataObjectSupport
+  /// <summary>
+  /// Doesn't do much other than provide the DataObjectSupport base object with a location
+  /// where the XML resource can be found.
+  /// </summary>
+  internal sealed class SQLiteDataObjectSupport : DataObjectSupport
   {
     public SQLiteDataObjectSupport()
       : base("SQLite.Designer.SQLiteDataObjectSupport", typeof(SQLiteDataObjectSupport).Assembly)

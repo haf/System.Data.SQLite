@@ -17,6 +17,9 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.Data;
   using Microsoft.Win32;
 
+  /// <summary>
+  /// Provides a UI to edit/create SQLite database connections
+  /// </summary>
   [ToolboxItem(false)]
   public partial class SQLiteConnectionUIControl : DataConnectionUIControl
   {

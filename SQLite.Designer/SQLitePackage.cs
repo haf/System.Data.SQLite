@@ -13,6 +13,10 @@ namespace SQLite.Designer
   using System.ComponentModel.Design;
   using Microsoft.VisualStudio.Shell.Interop;
 
+  /// <summary>
+  /// Ideally we'd be a package provider, but the VS Express Editions don't support us, so this class
+  /// exists so that in the future we can perhaps work with the Express Editions.
+  /// </summary>
   [Guid("DCBE6C8D-0E57-4099-A183-98FF74C64D9C")]
   internal sealed class SQLitePackage : Package
   {

@@ -13,6 +13,9 @@ namespace SQLite.Designer
   using System.Runtime.InteropServices;
   using Microsoft.Data.ConnectionUI;
 
+  /// <summary>
+  /// For a package-based provider, this factory creates instances of the main objects we support
+  /// </summary>
   [Guid("DCBE6C8D-0E57-4099-A183-98FF74C64D9D")]
   internal sealed class SQLiteProviderObjectFactory : AdoDotNetProviderObjectFactory
   {

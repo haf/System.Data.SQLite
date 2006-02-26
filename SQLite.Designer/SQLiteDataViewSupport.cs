@@ -14,7 +14,10 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.OLE.Interop;
   using Microsoft.VisualStudio.Data.AdoDotNet;
 
-  internal class SQLiteDataViewSupport : DataViewSupport
+  /// <summary>
+  /// Provides DataViewSupport with a location where the XML file is for the Server Explorer's view.
+  /// </summary>
+  internal sealed class SQLiteDataViewSupport : DataViewSupport
   {
     public SQLiteDataViewSupport()
       : base("SQLite.Designer.SQLiteDataViewSupport", typeof(SQLiteDataViewSupport).Assembly)

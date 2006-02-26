@@ -13,7 +13,12 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.Data;
   using Microsoft.VisualStudio.OLE.Interop;
 
-  internal class SQLiteDataObjectIdentifierResolver : DataObjectIdentifierResolver, IObjectWithSite
+  /// <summary>
+  /// This class is used to build identifier arrays and contract them.  Typically they are 
+  /// passed to SQLiteConnection.GetSchema() or are contracted for display on the screen or in the
+  /// properties window.
+  /// </summary>
+  internal sealed class SQLiteDataObjectIdentifierResolver : DataObjectIdentifierResolver, IObjectWithSite
   {
     private DataConnection _connection;
 
@@ -93,6 +98,13 @@ namespace SQLite.Designer
       return identifier;
     }
 
+    /// <summary>
+    /// Strips out the schema, which we don't really support but has to be there for certain operations internal
+    /// to MS's designer implementation.
+    /// </summary>
+    /// <param name="typeName">The type of identifier to contract</param>
+    /// <param name="fullIdentifier">The full identifier array</param>
+    /// <returns>A contracted identifier array</returns>
     protected override object[] QuickContractIdentifier(string typeName, object[] fullIdentifier)
     {
       if (fullIdentifier.Length < 2) return fullIdentifier;

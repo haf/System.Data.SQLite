@@ -1,3 +1,10 @@
+/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
+
 namespace SQLite.Designer
 {
   using System;
@@ -11,6 +18,15 @@ namespace SQLite.Designer
   using System.Drawing;
   using System.Runtime.Serialization;
 
+  /// <summary>
+  /// Provides a toolboxitem for a SQLiteDataAdapter.  This is required in order for us to 
+  /// pop up the connection wizard when you drop the tool on a form, and to create the hidden commands
+  /// that are assigned to the data adapter and keep them hidden.  The hiding at runtime of the controls
+  /// is accomplished both here during the creation of the components and in the SQLiteCommandDesigner
+  /// which provides properties to hide the objects when they're supposed to be hidden.
+  /// 
+  /// The connection wizard is instantiated in the VSDesigner through reflection.
+  /// </summary>
   [Serializable]
   [ToolboxItem(typeof(SQLiteDataAdapterToolboxItem))]
   internal sealed class SQLiteDataAdapterToolboxItem : ToolboxItem
@@ -32,6 +48,7 @@ namespace SQLite.Designer
     public SQLiteDataAdapterToolboxItem(Type type, Bitmap bmp) : base(type)
     {
       DisplayName = "SQLiteDataAdapter";
+      Bitmap = bmp;
     }
 
     private SQLiteDataAdapterToolboxItem(SerializationInfo info, StreamingContext context)
@@ -39,6 +56,11 @@ namespace SQLite.Designer
       Deserialize(info, context);
     }
 
+    /// <summary>
+    /// Creates the necessary components associated with this data adapter instance
+    /// </summary>
+    /// <param name="host">The designer host</param>
+    /// <returns>The components created by this toolbox item</returns>
     protected override IComponent[] CreateComponentsCore(IDesignerHost host)
     {
       DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
@@ -73,6 +95,7 @@ namespace SQLite.Designer
       List<IComponent> list = new List<IComponent>();
       list.Add(dataAdapter);
 
+      // Show the connection wizard if we have a type for it
       if (_wizard != null)
       {
         using (Form wizard = (Form)Activator.CreateInstance(_wizard, new object[] { host, dataAdapter }))
@@ -89,6 +112,12 @@ namespace SQLite.Designer
       return list.ToArray();      
     }
 
+    /// <summary>
+    /// Generates a unique name for the given object
+    /// </summary>
+    /// <param name="container">The container where we're being instantiated</param>
+    /// <param name="baseName">The core name of the object to create a unique instance of</param>
+    /// <returns>A unique name within the given container</returns>
     private static string GenerateName(IContainer container, string baseName)
     {
       ComponentCollection coll = container.Components;

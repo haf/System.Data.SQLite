@@ -13,7 +13,10 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio.Data;
   using Microsoft.VisualStudio.Data.AdoDotNet;
 
-  internal class SQLiteDataSourceInformation : AdoDotNetDataSourceInformation
+  /// <summary>
+  /// Provides basic DataSourceInformation about the underlying connection
+  /// </summary>
+  internal sealed class SQLiteDataSourceInformation : AdoDotNetDataSourceInformation
   {
     public SQLiteDataSourceInformation(DataConnection connection) : base(connection)
     {

@@ -1,3 +1,10 @@
+/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
+
 namespace SQLite.Designer
 {
   using System;
@@ -20,10 +27,7 @@ namespace SQLite.Designer
     private static readonly Guid guidDataCmdSet = new Guid("501822E1-B5AF-11d0-B4DC-00A0C91506EF");
     private static readonly Guid guidSQLiteCmdSet = new Guid("814658EE-A28E-4b97-BC33-4B1BC81EBECB");
     private static readonly Guid guidIFCmdId = new Guid("{74d21311-2aee-11d1-8bfb-00a0c90f26f7}");
-
-    // 5efc7975-14bc-11cf-9b2b-00aa00573819
-    // 0x5efc7975, 0x14bc, 0x11cf, { 0x9b, 0x2b, 0x00, 0xaa, 0x00, 0x57, 0x38, 0x19 }
-
+   
     public SQLiteCommandHandler()
     {
     }
@@ -190,6 +194,7 @@ namespace SQLite.Designer
 
     private void CreateTable()
     {
+      // TODO: Implement this command
     }
 
     private void DropSelectedTables()
@@ -265,6 +270,7 @@ namespace SQLite.Designer
 
     private void ChangePassword()
     {
+      // TODO: Implement this command, but we have to use reflection because we don't have a design-time reference to the SQLite object
      // System.Data.SQLite.SQLiteConnection cnn = DataViewHierarchyAccessor.Connection.ConnectionSupport.ProviderObject as System.Data.SQLite.SQLiteConnection;
      // if (cnn == null) return;
     }

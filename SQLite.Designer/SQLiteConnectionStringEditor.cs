@@ -1,3 +1,10 @@
+/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
+
 namespace SQLite.Designer
 {
   using System;
@@ -7,19 +14,31 @@ namespace SQLite.Designer
   using System.ComponentModel.Design;
   using System.ComponentModel;
 
+  /// <summary>
+  /// This class provides connectionstring editing support in the properties window when
+  /// using a SQLiteConnection as a toolbox component on a form (for example).
+  /// 
+  /// In order to provide the dropdown list, unless someone knows a better way, I have to use
+  /// the internal VsConnectionManager class since it utilizes some interfaces in the designer
+  /// that are internal to the VSDesigner object.  We instantiate it and utilize it through reflection.
+  /// </summary>
   internal sealed class SQLiteConnectionStringEditor : ObjectSelectorEditor
   {
     private ObjectSelectorEditor.Selector _selector = null;
 
-    private Type _managerType = null;
+    private static Type _managerType = null;
 
-    public SQLiteConnectionStringEditor()
+    static SQLiteConnectionStringEditor()
     {
-      Assembly assm = Assembly.Load("Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+      Assembly assm = SQLiteDataAdapterToolboxItem._vsdesigner;
       if (assm != null)
       {
         _managerType = assm.GetType("Microsoft.VSDesigner.Data.VS.VsConnectionManager");
       }
+    }
+
+    public SQLiteConnectionStringEditor()
+    {
     }
 
     public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
