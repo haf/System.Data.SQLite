@@ -48,7 +48,6 @@ namespace SQLite.Designer
     public SQLiteDataAdapterToolboxItem(Type type, Bitmap bmp) : base(type)
     {
       DisplayName = "SQLiteDataAdapter";
-      Bitmap = bmp;
     }
 
     private SQLiteDataAdapterToolboxItem(SerializationInfo info, StreamingContext context)

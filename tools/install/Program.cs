@@ -14,6 +14,7 @@ namespace install
     {
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
+      Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
 
       InstallDesigner designer = new InstallDesigner();
       if (designer._remove == false)
