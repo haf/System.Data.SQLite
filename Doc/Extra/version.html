@@ -23,6 +23,14 @@
     </div>
     <div id="nstext">
       <h1 class="dtH1">Version History</h1>
+    <p><b>1.0.27.1 - February 28, 2006</b></p>
+    <ul>
+    <li>Fixed a bug when doing data binding in Compact Framework projects that prevented
+      you from assigning a typed dataset to a bindingsource.&nbsp; It turns out, the CF
+      version of the SQLite provider needs to be flagged as retargetable so it'll work
+      in the design-time desktop environment.&nbsp; No changes were made to the desktop
+      build, but the revision was bumped on all libraries anyway in order to keep them
+      sync'd.&nbsp;</li></ul>
     <p><b>1.0.27.0 - February 27, 2006</b></p>
     <ul>
     <li>Many optimizations and a few more minor adjustments to schemas and schema retrieval
