@@ -41,7 +41,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="SiteMap\SQLiteSiteMap.cs" />
+    <Compile Include="SiteMap\DynamicSiteMap.cs" />
+    <Compile Include="SiteMap\StaticSiteMap.cs" />
     <Compile Include="Sql\ApplicationSql.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

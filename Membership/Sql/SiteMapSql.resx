@@ -117,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="GetNodeByParentID" xml:space="preserve">
+    <value>Select NodeID, Title, Description, Url from SiteMapNode where AppID = $AppID and Parent = $ParentID;</value>
+  </data>
+  <data name="GetNodeByUrl" xml:space="preserve">
+    <value>Select NodeID Title, Description, Url from SiteMapNode where AppID = $AppID and Url like $Url;</value>
+  </data>
   <data name="GetNodeRoles" xml:space="preserve">
     <value>Select RoleName from Role
 Inner Join SiteMapNodeRoles on Role.RoleID = SiteMapNodeRoles.RoleID and Role.AppID = SiteMapNodeRoles.AppID
@@ -124,5 +130,10 @@ Where SiteMapNodeRoles.NodeID = $NodeID and Role.AppID = $AppID;</value>
   </data>
   <data name="GetNodes" xml:space="preserve">
     <value>Select NodeID, Title, Description, Url, Parent from SiteMapNode where AppID = $AppID order by Parent;</value>
+  </data>
+  <data name="GetParentByNodeID" xml:space="preserve">
+    <value>Select Parent.NodeID, Parent.Title, Parent.Description, Parent.Url from SiteMapNode Parent
+left join SiteMapNode Child on Parent.NodeID = Child.Parent and Parent.AppID = Child.AppID
+where Child.AppID = $AppID and Child.NodeID = $NodeID;</value>
   </data>
 </root>

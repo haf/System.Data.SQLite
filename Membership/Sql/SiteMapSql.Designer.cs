@@ -61,6 +61,24 @@ namespace SQLiteProvider {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select NodeID, Title, Description, Url from SiteMapNode where AppID = $AppID and Parent = $ParentID;.
+        /// </summary>
+        internal static string GetNodeByParentID {
+            get {
+                return ResourceManager.GetString("GetNodeByParentID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select NodeID Title, Description, Url from SiteMapNode where AppID = $AppID and Url like $Url;.
+        /// </summary>
+        internal static string GetNodeByUrl {
+            get {
+                return ResourceManager.GetString("GetNodeByUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select RoleName from Role
         ///Inner Join SiteMapNodeRoles on Role.RoleID = SiteMapNodeRoles.RoleID and Role.AppID = SiteMapNodeRoles.AppID
         ///Where SiteMapNodeRoles.NodeID = $NodeID and Role.AppID = $AppID;.
@@ -77,6 +95,17 @@ namespace SQLiteProvider {
         internal static string GetNodes {
             get {
                 return ResourceManager.GetString("GetNodes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Parent.NodeID, Parent.Title, Parent.Description, Parent.Url from SiteMapNode Parent
+        ///left join SiteMapNode Child on Parent.NodeID = Child.Parent and Parent.AppID = Child.AppID
+        ///where Child.AppID = $AppID and Child.NodeID = $NodeID;.
+        /// </summary>
+        internal static string GetParentByNodeID {
+            get {
+                return ResourceManager.GetString("GetParentByNodeID", resourceCulture);
             }
         }
     }
