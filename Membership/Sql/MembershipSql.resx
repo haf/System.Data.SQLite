@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>UPDATE User SET Password = $Password, LastPasswordChangedDate = datetime('now','utc') WHERE Username = $Username AND AppID = $AppID;</value>
+  </data>
+  <data name="ChangePasswordQA" xml:space="preserve">
+    <value>UPDATE User SET PasswordQuestion = $Question, PasswordAnswer = $Answer WHERE Username = $Username AND AppID = $AppID;</value>
+  </data>
+  <data name="CreateUser" xml:space="preserve">
+    <value>INSERT INTO User
+(
+	Username,
+	Password,
+	Email,
+	PasswordQuestion,
+	PasswordAnswer,
+	IsApproved,
+	Comment,
+	CreationDate,
+	LastPasswordChangedDate,
+	LastActivityDate,
+	AppID,
+	IsLockedOut,
+	LastLockedOutDate,
+	FailedPasswordAttemptCount,
+	FailedPasswordAttemptWindowStart,
+	FailedPasswordAnswerAttemptCount,
+	FailedPasswordAnswerAttemptWindowStart
+)
+Values(
+	$Username,
+	$Password,
+	$Email,
+	$PasswordQuestion,
+	$PasswordAnswer,
+	$IsApproved,
+	'',
+	datetime('now','utc'),
+	datetime('now','utc'),
+	datetime('now','utc'),
+	$AppID,
+	$IsLockedOut,
+	datetime('now','utc'),
+	0,
+	datetime('now','utc'),
+	0,
+	datetime('now','utc')
+);</value>
+  </data>
+  <data name="DeleteUser" xml:space="preserve">
+    <value>DELETE FROM User WHERE Username = $Username AND AppID = $AppID;</value>
+  </data>
+  <data name="FindUsersByEmail" xml:space="preserve">
+    <value>SELECT UserID, Username, Email, PasswordQuestion,
+Comment, IsApproved, IsLockedOut, CreationDate, LastLoginDate,
+LastActivityDate, LastPasswordChangedDate, LastLockedOutDate 
+FROM User 
+WHERE Email LIKE $EmailSearch AND AppID = $AppID 
+ORDER BY Username Asc
+LIMIT $Count, $Skip </value>
+  </data>
+  <data name="FindUsersByName" xml:space="preserve">
+    <value>SELECT UserID, Username, Email, PasswordQuestion,
+Comment, IsApproved, IsLockedOut, CreationDate, LastLoginDate,
+LastActivityDate, LastPasswordChangedDate, LastLockedOutDate 
+FROM User 
+WHERE Username LIKE $UsernameSearch AND AppID = $AppID
+ORDER BY Username Asc
+LIMIT $Count, $Skip </value>
+  </data>
+  <data name="GetAppUsers" xml:space="preserve">
+    <value>SELECT 
+	UserID, Username, Email, PasswordQuestion, Comment, IsApproved, IsLockedOut, CreationDate, LastLoginDate, LastActivityDate, LastPasswordChangedDate, LastLockedOutDate 
+FROM 
+	User 
+WHERE 
+	AppID = $AppID 
+ORDER BY 
+	Username Asc
+LIMIT
+	$Skip, $Count</value>
+  </data>
+  <data name="GetPassword" xml:space="preserve">
+    <value>SELECT Password, PasswordAnswer, IsLockedOut FROM User WHERE Username = $Username AND AppID = $AppID;</value>
+  </data>
+  <data name="GetUserByID" xml:space="preserve">
+    <value>SELECT UserID, Username, Email, PasswordQuestion,
+Comment, IsApproved, IsLockedOut, CreationDate, LastLoginDate,
+LastActivityDate, LastPasswordChangedDate, LastLockedOutDate
+FROM User WHERE UserID = $UserID;</value>
+  </data>
+  <data name="GetUserByName" xml:space="preserve">
+    <value>SELECT 
+	UserID, Username, Email, PasswordQuestion, Comment, 
+	IsApproved, IsLockedOut, CreationDate, LastLoginDate, 
+	LastActivityDate, LastPasswordChangedDate, LastLockedOutDate 
+FROM 
+	User 
+WHERE 
+	Username = $Username AND AppID = $AppID;</value>
+  </data>
+  <data name="GetUserNameByEmail" xml:space="preserve">
+    <value>SELECT Username  FROM User WHERE Email = $Email AND AppID = $AppID;</value>
+  </data>
+  <data name="GetUsersOnline" xml:space="preserve">
+    <value>SELECT Count(*) FROM User WHERE LastActivityDate &gt; $CompareDate AND AppID = $AppID;</value>
+  </data>
+  <data name="LockOutUser" xml:space="preserve">
+    <value>UPDATE User
+SET IsLockedOut = $IsLockedOut, LastLockedOutDate = datetime('now','utc')
+WHERE Username = $Username AND AppID = $AppID</value>
+  </data>
+  <data name="QueryFailureCount" xml:space="preserve">
+    <value>SELECT FailedPasswordAttemptCount, 
+FailedPasswordAttemptWindowStart, 
+FailedPasswordAnswerAttemptCount, 
+FailedPasswordAnswerAttemptWindowStart 
+FROM User 
+WHERE Username = $Username AND AppID = $AppID</value>
+  </data>
+  <data name="QueryPasswordReset" xml:space="preserve">
+    <value>SELECT PasswordAnswer, IsLockedOut FROM User WHERE Username = $Username AND AppID = $AppID;</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>UPDATE User SET Password = $Password, LastPasswordChangedDate = datetime('now','utc') WHERE Username = $Username AND AppID = $AppID AND IsLockedOut = 0</value>
+  </data>
+  <data name="UnlockUser" xml:space="preserve">
+    <value>UPDATE User 
+SET IsLockedOut = 0, LastLockedOutDate = datetime('now','utc') 
+WHERE Username = $Username AND AppID = $AppID;</value>
+  </data>
+  <data name="UpdateAccessTimeByID" xml:space="preserve">
+    <value>UPDATE User 
+SET LastActivityDate = datetime('now','utc') 
+WHERE UserID = $UserID;</value>
+  </data>
+  <data name="UpdateAnswerFailureCount" xml:space="preserve">
+    <value>UPDATE User 
+SET FailedPasswordAnswerAttemptCount = $Count
+WHERE Username = $Username AND AppID = $AppID</value>
+  </data>
+  <data name="UpdateAnswerFailureCountStart" xml:space="preserve">
+    <value>UPDATE User 
+SET FailedPasswordAnswerAttemptCount = $Count, 
+FailedPasswordAnswerAttemptWindowStart = datetime('now','utc') 
+WHERE Username = $Username AND AppID = $AppID</value>
+  </data>
+  <data name="UpdateLastLoginDate" xml:space="preserve">
+    <value>UPDATE User SET LastLoginDate = datetime('now','utc') WHERE Username = $Username AND AppID = $AppID</value>
+  </data>
+  <data name="UpdatePasswordFailureCount" xml:space="preserve">
+    <value>UPDATE User 
+SET FailedPasswordAttemptCount = $Count
+WHERE Username = $Username AND AppID = $AppID</value>
+  </data>
+  <data name="UpdatePasswordFailureCountStart" xml:space="preserve">
+    <value>UPDATE User 
+SET FailedPasswordAttemptCount = $Count, 
+FailedPasswordAttemptWindowStart = datetime('now','utc') 
+WHERE Username = $Username AND AppID = $AppID</value>
+  </data>
+  <data name="UpdateUser" xml:space="preserve">
+    <value>UPDATE User
+SET Email = $Email, Comment = $Comment,
+IsApproved = $IsApproved
+WHERE Username = $Username AND AppID = $AppID</value>
+  </data>
+  <data name="UpdateUserAccessTimeByName" xml:space="preserve">
+    <value>UPDATE User SET LastActivityDate = datetime('now','utc') WHERE Username = $Username AND AppID = $AppID;</value>
+  </data>
+  <data name="ValidateUser" xml:space="preserve">
+    <value>SELECT Password, IsApproved FROM User WHERE Username = $Username AND AppID = $AppID AND IsLockedOut = 0</value>
+  </data>
+</root>

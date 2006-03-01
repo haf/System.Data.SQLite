@@ -1,0 +1,8 @@
+
+Optimize SQL.
+Write some documentation eg: how to configure the provider via web.config
+Dump SQL statements to some sort of human readable format & possibly document them.
+
+? Create a default DB location & make the schema a resource so one can just plunk the provider in and have it just work with little or no config.
+? Implement Profile Provider
+? Implement a fully dynamic SiteMap Provider so changes to the DB get reflected immediatly
