@@ -22,83 +22,61 @@ namespace SQLiteProvider
         private string eventSource = "SQLiteRoleProvider";
 
         private string connectionString;
-
-
         private bool _WriteExceptionsToEventLog = false;
         private string _ApplicationName;
         private long _AppID;
 
+        private bool _initialized = false;
+        private object _InitLock = new Object();
+        private object _AppLock = new Object();
+
         public bool WriteExceptionsToEventLog
         {
             get { return _WriteExceptionsToEventLog; }
-            set { _WriteExceptionsToEventLog = value; }
         }
-
-
-
-        //
-        // System.Configuration.Provider.ProviderBase.Initialize Method
-        //
 
         public override void Initialize(string name, NameValueCollection config)
         {
+            bool TempInit = _initialized;
+            if (_initialized)
+                return;
 
-            //
-            // Initialize values from web.config.
-            //
-
-            if (config == null)
-                throw new ArgumentNullException("config");
-
-            if (name == null || name.Length == 0)
-                name = "SQLiteRoleProvider";
-
-            if (String.IsNullOrEmpty(config["description"]))
+            lock (_InitLock)
             {
-                config.Remove("description");
-                config.Add("description", "SQLite Role Privider");
+
+                if (config == null)
+                    throw new ArgumentNullException("config");
+
+                if (name == null || name.Length == 0)
+                    name = "SQLiteRoleProvider";
+
+                if (String.IsNullOrEmpty(config["description"]))
+                {
+                    config.Remove("description");
+                    config.Add("description", "SQLite Role Privider");
+                }
+
+                // Initialize the abstract base class.
+                base.Initialize(name, config);
+                _WriteExceptionsToEventLog = ProviderUtility.GetExceptionDesitination(config["writeExceptionsToEventLog"]);
+                connectionString = ProviderUtility.GetConnectionString(config["connectionStringName"]);
+                ApplicationName = ProviderUtility.GetApplicationName(config["applicationName"]);
+
+                _initialized = true;
             }
-
-            // Initialize the abstract base class.
-            base.Initialize(name, config);
-
-
-
-
-            _WriteExceptionsToEventLog = ProviderUtility.GetExceptionDesitination(config["writeExceptionsToEventLog"]);
-            connectionString = ProviderUtility.GetConnectionString(config["connectionStringName"]);
-            ApplicationName = ProviderUtility.GetApplicationName(config["applicationName"]);
-
         }
-
-
-
-        //
-        // System.Web.Security.RoleProvider properties.
-        //
-
-
-
-
-
         public override string ApplicationName
         {
             get { return _ApplicationName; }
             set
             {
-                _ApplicationName = value;
-                _AppID = ProviderUtility.GetApplicationID(connectionString, value);
+                lock (_AppLock)
+                {
+                    _ApplicationName = value;
+                    _AppID = ProviderUtility.GetApplicationID(connectionString, value);
+                }
             }
         }
-
-        //
-        // System.Web.Security.RoleProvider methods.
-        //
-
-        //
-        // RoleProvider.AddUsersToRoles
-        //
-
         public override void AddUsersToRoles(string[] usernames, string[] rolenames)
         {
             foreach (string rolename in rolenames)
@@ -111,11 +89,6 @@ namespace SQLiteProvider
 
             foreach (string username in usernames)
             {
-                if (username.IndexOf(',') > 0)
-                {
-                    throw new ArgumentException("User names cannot contain commas.");
-                }
-
                 foreach (string rolename in rolenames)
                 {
                     if (IsUserInRole(username, rolename))
@@ -169,19 +142,8 @@ namespace SQLiteProvider
                 conn.Close();
             }
         }
-
-
-        //
-        // RoleProvider.CreateRole
-        //
-
         public override void CreateRole(string rolename)
         {
-            if (rolename.IndexOf(',') > 0)
-            {
-                throw new ArgumentException("Role names cannot contain commas.");
-            }
-
             if (RoleExists(rolename))
             {
                 throw new ProviderException("Role name already exists.");
@@ -209,12 +171,6 @@ namespace SQLiteProvider
                 conn.Close();
             }
         }
-
-
-        //
-        // RoleProvider.DeleteRole
-        //
-
         public override bool DeleteRole(string rolename, bool throwOnPopulatedRole)
         {
             if (!RoleExists(rolename))
@@ -270,12 +226,6 @@ namespace SQLiteProvider
 
             return true;
         }
-
-
-        //
-        // RoleProvider.GetAllRoles
-        //
-
         public override string[] GetAllRoles()
         {
             List<String> names = new List<string>();
@@ -310,12 +260,6 @@ namespace SQLiteProvider
 
             return names.ToArray();
         }
-
-
-        //
-        // RoleProvider.GetRolesForUser
-        //
-
         public override string[] GetRolesForUser(string username)
         {
             List<string> roles = new List<string>();
@@ -352,12 +296,6 @@ namespace SQLiteProvider
 
             return roles.ToArray();
         }
-
-
-        //
-        // RoleProvider.GetUsersInRole
-        //
-
         public override string[] GetUsersInRole(string rolename)
         {
             List<String> users = new List<string>();
@@ -392,12 +330,6 @@ namespace SQLiteProvider
             }
             return users.ToArray();
         }
-
-
-        //
-        // RoleProvider.IsUserInRole
-        //
-
         public override bool IsUserInRole(string username, string rolename)
         {
             long count = 0;
@@ -425,12 +357,6 @@ namespace SQLiteProvider
 
             return (count != 0);
         }
-
-
-        //
-        // RoleProvider.RemoveUsersFromRoles
-        //
-
         public override void RemoveUsersFromRoles(string[] usernames, string[] rolenames)
         {
             foreach (string rolename in rolenames)
@@ -495,12 +421,6 @@ namespace SQLiteProvider
                 conn.Close();
             }
         }
-
-
-        //
-        // RoleProvider.RoleExists
-        //
-
         public override bool RoleExists(string rolename)
         {
             long count = 0;
@@ -529,11 +449,6 @@ namespace SQLiteProvider
 
             return (count != 0);
         }
-
-        //
-        // RoleProvider.FindUsersInRole
-        //
-
         public override string[] FindUsersInRole(string rolename, string usernameToMatch)
         {
             SQLiteConnection conn = new SQLiteConnection(connectionString);
@@ -570,8 +485,6 @@ namespace SQLiteProvider
 
             return users.ToArray();
         }
-
-
 
     }
 }

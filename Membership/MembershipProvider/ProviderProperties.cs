@@ -20,13 +20,17 @@ namespace SQLiteProvider
 
     public sealed partial class SQLiteMembershipProvider : MembershipProvider
     {
+        private Object _appLock = new Object();
         public override string ApplicationName
         {
             get { return _ApplicationName; }
             set
             {
-                _ApplicationName = value;
-                _AppID = ProviderUtility.GetApplicationID(connectionString, value);
+                lock (_appLock)
+                {
+                    _ApplicationName = value;
+                    _AppID = ProviderUtility.GetApplicationID(connectionString, value);
+                }
             }
         }
         public override bool EnablePasswordReset
