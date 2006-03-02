@@ -55,24 +55,18 @@ Create Table SiteMapNodeRoles(
 );
 
 
---Create Table Profile(
---	ProfileID INTEGER PRIMARY KEY,
---	UserID integer NOT NULL,
---	AppID integer NOT NULL,
---	LastUpdatedDate Datetime,
---	LastActivityDate Datetime
---);
---
---Create Table ProfileData(
---	ItemID INTEGER PRIMARY KEY,
---	ProfileID integer NOT NULL,
---	ItemData BLOB,
---	ItemName text NOT NULL,
---	ItemFormat text NOT NULL
---);
---
---
--- -- Views
---Create View UserProfile As 
---Select Profile.ProfileID as ProfileID, User.UserName as UserName, Profile.LastActivityDate as LastActivityDate, Profile.LastUpdatedDate as LastUpdatedDate, User.AppID as AppID from Profile
---Inner Join User On Profile.UserID = User.UserID and Profile.AppID = User.AppID;
+Create Table Profile(
+	ProfileID INTEGER PRIMARY KEY,
+	UserName text NOT NULL,
+	AppID integer NOT NULL,
+	LastUpdatedDate Datetime,
+	LastActivityDate Datetime
+);
+
+Create Table ProfileData(
+	ItemID INTEGER PRIMARY KEY,
+	ProfileID integer NOT NULL,
+	ItemData BLOB,
+	ItemName text NOT NULL,
+	ItemFormat text NOT NULL
+);

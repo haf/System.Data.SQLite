@@ -12,12 +12,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web.Configuration;
 
-
-
 namespace SQLiteProvider
 {
 
-    public sealed partial class SQLiteMembershipProvider : MembershipProvider
+    public sealed partial class SQLiteMembership : MembershipProvider
     {
         private bool _initialized = false;
         private Object _InitLock = new Object();
@@ -26,7 +24,7 @@ namespace SQLiteProvider
             bool te = _initialized;
             if (te)
                 return;
-
+            
             lock (_InitLock)
             {
 
@@ -60,7 +58,7 @@ namespace SQLiteProvider
                 string temp_format = Convert.ToString(ConfigAsString(config["passwordFormat"], "Hashed"));
                 try
                 {
-                    _PasswordFormat = (MembershipPasswordFormat)Enum.Parse(MembershipPasswordFormat, temp_format);
+                    _PasswordFormat = (MembershipPasswordFormat)Enum.Parse(typeof(MembershipPasswordFormat), temp_format);
                 }
                 catch
                 {

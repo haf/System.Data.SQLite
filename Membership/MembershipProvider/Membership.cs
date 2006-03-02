@@ -19,7 +19,7 @@ using System.Web.Configuration;
 namespace SQLiteProvider
 {
 
-    public sealed partial class SQLiteMembershipProvider : MembershipProvider
+    public sealed partial class SQLiteMembership : MembershipProvider
     {
 
         //
@@ -27,7 +27,7 @@ namespace SQLiteProvider
         //
 
         private int newPasswordLength = 8;
-        private string eventSource = "SQLiteMembershipProvider";
+        private string eventSource = "SQLiteMembership";
 
         private string connectionString;
         private bool _WriteExceptionsToEventLog;

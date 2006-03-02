@@ -15,11 +15,11 @@ using System.Globalization;
 namespace SQLiteProvider
 {
 
-    public sealed partial class SQLiteRoleProvider : RoleProvider
+    public sealed partial class SQLiteRole : RoleProvider
     {
 
 
-        private string eventSource = "SQLiteRoleProvider";
+        private string eventSource = "SQLiteRole";
 
         private string connectionString;
         private bool _WriteExceptionsToEventLog = false;

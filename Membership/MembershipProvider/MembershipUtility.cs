@@ -18,7 +18,7 @@ using System.Web.Configuration;
 namespace SQLiteProvider
 {
 
-    public sealed partial class SQLiteMembershipProvider : MembershipProvider
+    public sealed partial class SQLiteMembership : MembershipProvider
     {
         //
         // CheckPassword
