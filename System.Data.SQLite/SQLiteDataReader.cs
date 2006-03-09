@@ -421,16 +421,9 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Schema information in SQLite is an iffy-business.  We've extended the native SQLite3.DLL to include a special pragma called
-    /// PRAGMA real_column_names
-    /// When enabled, the pragma causes all column aliases to be ignored, and the full Database.Table.ColumnName to be returned for
-    /// each column of a SELECT statement.  Using this information it is then possible to query each database and table for the
-    /// matching column, and associate it with the active statement.
+    /// Schema information in SQLite is difficult to map into .NET conventions, so a lot of work must be done
+    /// to gather the necessary information so it can be represented in an ADO.NET manner.
     /// </summary>
-    /// <remarks>
-    /// The current connection is cloned for the sake of executing this statement, so as to avoid any possibility of corrupting the
-    /// original connection's existing statements or state.  Any attached databases are re-attached to the new connection.
-    /// </remarks>
     /// <returns>Returns a DataTable containing the schema information for the active SELECT statement being processed.</returns>
     public override DataTable GetSchemaTable()
     {

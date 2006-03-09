@@ -255,21 +255,12 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
   return rc;
 }
 
+// Called by our code modification to pager.c to free the cryptblock associated with 
+// a pager instance.
 void sqlite3pager_free_codecarg(void *pArg)
 {
-  LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)pArg;
-
-  if (pBlock)
-  {
-    if (pBlock->hReadKey)
-      CryptDestroyKey(pBlock->hReadKey);
-    if (pBlock->hWriteKey)
-      CryptDestroyKey(pBlock->hWriteKey);
-
-    if (pBlock->pvCrypt)
-      sqliteFree(pBlock->pvCrypt);
-  }
-  sqliteFree(pBlock);
+  if (pArg)
+    DestroyCryptBlock((LPCRYPTBLOCK)pArg);
 }
 
 // Once a password has been supplied and a key created, we don't keep the 

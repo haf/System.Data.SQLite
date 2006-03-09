@@ -106,11 +106,11 @@ namespace System.Data.SQLite
     /// <summary>
     /// State of the current connection
     /// </summary>
-    private ConnectionState     _connectionState;
+    private ConnectionState      _connectionState;
     /// <summary>
     /// The connection string
     /// </summary>
-    private string              _connectionString;
+    private string               _connectionString;
     /// <summary>
     /// Nesting level of the transactions open on the connection
     /// </summary>
@@ -130,11 +130,11 @@ namespace System.Data.SQLite
     /// <summary>
     /// The database filename minus path and extension
     /// </summary>
-    private string                _dataSource;
+    private string               _dataSource;
     /// <summary>
     /// Temporary password storage, emptied after the database has been opened
     /// </summary>
-    private byte[]                _password;
+    private byte[]               _password;
     /// <event/>
     /// <summary>
     /// This event is raised whenever the database is opened or closed.
@@ -934,8 +934,6 @@ namespace System.Data.SQLite
 
       tbl.BeginLoadData();
 
-      // TODO: Fixup the regular expressions to support only the SQLite stuff, they were originally cloned
-      // from JET's DataSourceInformation return result.
       row = tbl.NewRow();
       row.ItemArray = new object[] {
         null,

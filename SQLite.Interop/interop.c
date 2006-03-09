@@ -1,10 +1,3 @@
-/*
-   This interop file must be included at or near the top of the select.c file of the SQLite3 source distribution.
-
-   generateColumnNames() in the select.c must be renamed to _generateColumnNames
-
-*/
-
 #include "src/sqliteint.h"
 #include "src\os.h"
 #include <tchar.h>
@@ -708,13 +701,5 @@ __declspec(dllexport) int sqlite3_table_column_metadata_interop(sqlite3 *db, con
 
   return n;
 }
-
-//__declspec(dllexport) void WINAPI sqlite3_realcolnames(sqlite3 *db, int bOn)
-//{
-//  if (bOn)
-//    db->flags |= 0x01000000;
-//  else
-//    db->flags &= (~0x01000000);
-//}
 
 #endif // OS_WIN
