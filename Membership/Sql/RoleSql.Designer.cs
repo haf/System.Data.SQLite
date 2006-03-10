@@ -107,7 +107,7 @@ namespace SQLiteProvider {
         ///Where
         ///UserID = (Select UserID from User where Username = $Username and AppID = $AppID)
         ///AND
-        ///RoleID = (Select RoleID from Role Rolename = $Rolename AND AppID = $AppID);
+        ///RoleID = (Select RoleID from Role Where Rolename = $Rolename AND AppID = $AppID);
         ///.
         /// </summary>
         internal static string DeleteUserFromRole {

@@ -31,7 +31,8 @@ namespace SQLiteProvider
             }
             else
             {
-                throw e;
+                string msg = String.Format("An exception occured during {0} in {1}. \n Message:{2}", action, source, e.Message );
+                throw new ProviderException(msg, e);
             }
         }
         public static long GetApplicationID(String ConnString, string AppName)
