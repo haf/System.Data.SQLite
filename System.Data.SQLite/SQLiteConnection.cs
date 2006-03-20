@@ -645,7 +645,10 @@ namespace System.Data.SQLite
 
       if (String.Compare(fileName, ":MEMORY:", true, CultureInfo.InvariantCulture) == 0)
         fileName = ":memory:";
-
+#if PLATFORM_COMPACTFRAMEWORK
+      else if (fileName.StartsWith(".\\"))
+        fileName = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
+#endif
       try
       {
         bool bUTF16 = (Convert.ToBoolean(FindKey(opts, "UseUTF16Encoding", "False"), CultureInfo.InvariantCulture) == true);
