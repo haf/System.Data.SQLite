@@ -152,6 +152,9 @@ namespace System.Data.SQLite
         case TypeAffinity.Int64:
           return Convert.ChangeType(GetInt64(stmt, index), t, null);
         default:
+          if (typ.Type == DbType.Guid)
+            return new Guid(GetText(stmt, index));
+
           return GetText(stmt, index);
       }
     }
