@@ -478,8 +478,8 @@ namespace System.Data.SQLite
         // Default settings for the column
         row[SchemaTableColumn.ColumnName] = GetName(n);
         row[SchemaTableColumn.ColumnOrdinal] = n;
-        row[SchemaTableColumn.ColumnSize] = 0;
-        row[SchemaTableColumn.NumericPrecision] = 0;
+        row[SchemaTableColumn.ColumnSize] = SQLiteConvert.DbTypeToColumnSize(GetSQLiteType(n).Type);
+        row[SchemaTableColumn.NumericPrecision] = 255;
         row[SchemaTableColumn.NumericScale] = 0;
         row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
         row[SchemaTableColumn.IsLong] = (GetSQLiteType(n).Type == DbType.Binary);

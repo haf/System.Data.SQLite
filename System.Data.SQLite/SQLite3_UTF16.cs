@@ -43,7 +43,7 @@ namespace System.Data.SQLite
 
     internal override void Open(string strFilename)
     {
-      if (_sql != 0) return;
+      if (_sql != IntPtr.Zero) return;
       int n = UnsafeNativeMethods.sqlite3_open16_interop(strFilename, out _sql);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
 
@@ -58,7 +58,7 @@ namespace System.Data.SQLite
 
     internal override SQLiteStatement Prepare(string strSql, SQLiteStatement previous, out string strRemain)
     {
-      int stmt;
+      IntPtr stmt;
       IntPtr ptr;
       int len;
 
@@ -146,9 +146,9 @@ namespace System.Data.SQLite
       return ToString(UnsafeNativeMethods.sqlite3_column_table_name16_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
-    internal override int CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal)
+    internal override IntPtr CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal)
     {
-      int nCookie;
+      IntPtr nCookie;
 
       int n = UnsafeNativeMethods.sqlite3_create_function16_interop(_sql, strFunction, nArgs, 4, func, funcstep, funcfinal, out nCookie);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
@@ -156,9 +156,9 @@ namespace System.Data.SQLite
       return nCookie;
     }
 
-    internal override int CreateCollation(string strCollation, SQLiteCollation func)
+    internal override IntPtr CreateCollation(string strCollation, SQLiteCollation func)
     {
-      int nCookie;
+      IntPtr nCookie;
 
       int n = UnsafeNativeMethods.sqlite3_create_collation16_interop(_sql, strCollation, 4, 0, func, out nCookie);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
@@ -166,20 +166,20 @@ namespace System.Data.SQLite
       return nCookie;
     }
 
-    internal override string GetParamValueText(int ptr)
+    internal override string GetParamValueText(IntPtr ptr)
     {
       int len;
       return ToString(UnsafeNativeMethods.sqlite3_value_text16_interop(ptr, out len), len);
     }
 
-    internal override void ReturnError(int context, string value)
+    internal override void ReturnError(IntPtr context, string value)
     {
       UnsafeNativeMethods.sqlite3_result_error16_interop(context, value, value.Length);
     }
 
-    internal override void ReturnText(int context, string value)
+    internal override void ReturnText(IntPtr context, string value)
     {
-      UnsafeNativeMethods.sqlite3_result_text16_interop(context, value, value.Length, -1);
+      UnsafeNativeMethods.sqlite3_result_text16_interop(context, value, value.Length, (IntPtr)(-1));
     }
   }
 }

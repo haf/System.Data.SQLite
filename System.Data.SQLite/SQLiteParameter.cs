@@ -258,6 +258,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Returns the datatype of the parameter
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DbProviderSpecificTypeProperty(true)]
+#endif
     public override DbType DbType
     {
       get

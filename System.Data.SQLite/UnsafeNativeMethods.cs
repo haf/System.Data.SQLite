@@ -36,211 +36,208 @@ namespace System.Data.SQLite
     internal static extern void sqlite3_free_interop(IntPtr p);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_open_interop(byte[] utf8Filename, out int db);
+    internal static extern int sqlite3_open_interop(byte[] utf8Filename, out IntPtr db);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_interrupt_interop(int db);
+    internal static extern void sqlite3_interrupt_interop(IntPtr db);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_close_interop(int db);
+    internal static extern int sqlite3_close_interop(IntPtr db);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_exec_interop(int db, byte[] strSql, int pvCallback, int pvParam, out IntPtr errMsg, out int len);
+    internal static extern int sqlite3_exec_interop(IntPtr db, byte[] strSql, IntPtr pvCallback, IntPtr pvParam, out IntPtr errMsg, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_errmsg_interop(int db, out int len);
+    internal static extern IntPtr sqlite3_errmsg_interop(IntPtr db, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_changes_interop(int db);
+    internal static extern int sqlite3_changes_interop(IntPtr db);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_busy_timeout_interop(int db, int ms);
+    internal static extern int sqlite3_busy_timeout_interop(IntPtr db, int ms);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_prepare_interop(int db, byte[] strSql, int nBytes, out int stmt, out IntPtr ptrRemain, out int nRemain);
+    internal static extern int sqlite3_prepare_interop(IntPtr db, byte[] strSql, int nBytes, out IntPtr stmt, out IntPtr ptrRemain, out int nRemain);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_bind_blob_interop(int stmt, int index, Byte[] value, int nSize, int nTransient);
+    internal static extern int sqlite3_bind_blob_interop(IntPtr stmt, int index, Byte[] value, int nSize, IntPtr nTransient);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_bind_double_interop(int stmt, int index, ref double value);
+    internal static extern int sqlite3_bind_double_interop(IntPtr stmt, int index, ref double value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_bind_int_interop(int stmt, int index, int value);
+    internal static extern int sqlite3_bind_int_interop(IntPtr stmt, int index, int value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_bind_int64_interop(int stmt, int index, ref long value);
+    internal static extern int sqlite3_bind_int64_interop(IntPtr stmt, int index, ref long value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_bind_null_interop(int stmt, int index);
+    internal static extern int sqlite3_bind_null_interop(IntPtr stmt, int index);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_bind_text_interop(int stmt, int index, byte[] value, int nlen, int pvReserved);
+    internal static extern int sqlite3_bind_text_interop(IntPtr stmt, int index, byte[] value, int nlen, IntPtr pvReserved);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_bind_parameter_count_interop(int stmt);
+    internal static extern int sqlite3_bind_parameter_count_interop(IntPtr stmt);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_bind_parameter_name_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_bind_parameter_name_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_bind_parameter_index_interop(int stmt, byte[] strName);
+    internal static extern int sqlite3_bind_parameter_index_interop(IntPtr stmt, byte[] strName);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_column_count_interop(int stmt);
+    internal static extern int sqlite3_column_count_interop(IntPtr stmt);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_name_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_name_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_decltype_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_decltype_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_step_interop(int stmt);
+    internal static extern int sqlite3_step_interop(IntPtr stmt);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_column_double_interop(int stmt, int index, out double value);
+    internal static extern void sqlite3_column_double_interop(IntPtr stmt, int index, out double value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_column_int_interop(int stmt, int index);
+    internal static extern int sqlite3_column_int_interop(IntPtr stmt, int index);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_column_int64_interop(int stmt, int index, out long value);
+    internal static extern void sqlite3_column_int64_interop(IntPtr stmt, int index, out long value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_text_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_text_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_blob_interop(int stmt, int index);
+    internal static extern IntPtr sqlite3_column_blob_interop(IntPtr stmt, int index);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_column_bytes_interop(int stmt, int index);
+    internal static extern int sqlite3_column_bytes_interop(IntPtr stmt, int index);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern TypeAffinity sqlite3_column_type_interop(int stmt, int index);
+    internal static extern TypeAffinity sqlite3_column_type_interop(IntPtr stmt, int index);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_finalize_interop(int stmt);
+    internal static extern int sqlite3_finalize_interop(IntPtr stmt);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_reset_interop(int stmt);
+    internal static extern int sqlite3_reset_interop(IntPtr stmt);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_create_collation_interop(int db, byte[] strName, int nType, int nArgs, SQLiteCollation func, out int nCookie);
+    internal static extern int sqlite3_create_collation_interop(IntPtr db, byte[] strName, int nType, int nArgs, SQLiteCollation func, out IntPtr nCookie);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_create_function_interop(int db, byte[] strName, int nArgs, int nType, SQLiteCallback func, SQLiteCallback fstep, SQLiteCallback ffinal, out int nCookie);
+    internal static extern int sqlite3_create_function_interop(IntPtr db, byte[] strName, int nArgs, int nType, SQLiteCallback func, SQLiteCallback fstep, SQLiteCallback ffinal, out IntPtr nCookie);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_function_free_callbackcookie(int nCookie);
+    internal static extern void sqlite3_function_free_callbackcookie(IntPtr nCookie);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_aggregate_count_interop(int context);
+    internal static extern int sqlite3_aggregate_count_interop(IntPtr context);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_value_blob_interop(int p);
+    internal static extern IntPtr sqlite3_value_blob_interop(IntPtr p);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_value_bytes_interop(int p);
+    internal static extern int sqlite3_value_bytes_interop(IntPtr p);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_value_double_interop(int p, out double value);
+    internal static extern void sqlite3_value_double_interop(IntPtr p, out double value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_value_int_interop(int p);
+    internal static extern int sqlite3_value_int_interop(IntPtr p);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_value_int64_interop(int p, out Int64 value);
+    internal static extern void sqlite3_value_int64_interop(IntPtr p, out Int64 value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_value_text_interop(int p, out int len);
+    internal static extern IntPtr sqlite3_value_text_interop(IntPtr p, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern TypeAffinity sqlite3_value_type_interop(int p);
+    internal static extern TypeAffinity sqlite3_value_type_interop(IntPtr p);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_blob_interop(int context, byte[] value, int nSize, int pvReserved);
+    internal static extern void sqlite3_result_blob_interop(IntPtr context, byte[] value, int nSize, IntPtr pvReserved);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_double_interop(int context, ref double value);
+    internal static extern void sqlite3_result_double_interop(IntPtr context, ref double value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_error_interop(int context, byte[] strErr, int nLen);
+    internal static extern void sqlite3_result_error_interop(IntPtr context, byte[] strErr, int nLen);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_int_interop(int context, int value);
+    internal static extern void sqlite3_result_int_interop(IntPtr context, int value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_int64_interop(int context, ref Int64 value);
+    internal static extern void sqlite3_result_int64_interop(IntPtr context, ref Int64 value);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_null_interop(int context);
+    internal static extern void sqlite3_result_null_interop(IntPtr context);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_text_interop(int context, byte[] value, int nLen, int pvReserved);
+    internal static extern void sqlite3_result_text_interop(IntPtr context, byte[] value, int nLen, IntPtr pvReserved);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_aggregate_context_interop(int context, int nBytes);
+    internal static extern IntPtr sqlite3_aggregate_context_interop(IntPtr context, int nBytes);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_realcolnames(int db, int bset);
+    internal static extern int sqlite3_table_column_metadata_interop(IntPtr db, byte[] dbName, byte[] tblName, byte[] colName, out IntPtr ptrDataType, out IntPtr ptrCollSeq, out int notNull, out int primaryKey, out int autoInc, out int dtLen, out int csLen);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_table_column_metadata_interop(int db, byte[] dbName, byte[] tblName, byte[] colName, out IntPtr ptrDataType, out IntPtr ptrCollSeq, out int notNull, out int primaryKey, out int autoInc, out int dtLen, out int csLen);
+    internal static extern IntPtr sqlite3_column_database_name_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_database_name_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_database_name16_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_database_name16_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_table_name_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_table_name_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_table_name16_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_table_name16_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_origin_name_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_origin_name_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_origin_name16_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_origin_name16_interop(int stmt, int index, out int len);
-
-    [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_text16_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_text16_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-    internal static extern int sqlite3_open16_interop(string utf16Filename, out int db);
+    internal static extern int sqlite3_open16_interop(string utf16Filename, out IntPtr db);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_errmsg16_interop(int db, out int len);
+    internal static extern IntPtr sqlite3_errmsg16_interop(IntPtr db, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-    internal static extern int sqlite3_prepare16_interop(int db, string strSql, int sqlLen, out int stmt, out IntPtr ptrRemain, out int len);
+    internal static extern int sqlite3_prepare16_interop(IntPtr db, string strSql, int sqlLen, out IntPtr stmt, out IntPtr ptrRemain, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-    internal static extern int sqlite3_bind_text16_interop(int stmt, int index, string value, int nlen, int nTransient);
+    internal static extern int sqlite3_bind_text16_interop(IntPtr stmt, int index, string value, int nlen, int nTransient);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_name16_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_name16_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_column_decltype16_interop(int stmt, int index, out int len);
+    internal static extern IntPtr sqlite3_column_decltype16_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-    internal static extern int sqlite3_create_collation16_interop(int db, string strName, int nType, int nArgs, SQLiteCollation func, out int nCookie);
+    internal static extern int sqlite3_create_collation16_interop(IntPtr db, string strName, int nType, int nArgs, SQLiteCollation func, out IntPtr nCookie);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-    internal static extern int sqlite3_create_function16_interop(int db, string strName, int nArgs, int nType, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal, out int nCookie);
+    internal static extern int sqlite3_create_function16_interop(IntPtr db, string strName, int nArgs, int nType, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal, out IntPtr nCookie);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_value_text16_interop(int p, out int len);
+    internal static extern IntPtr sqlite3_value_text16_interop(IntPtr p, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-    internal static extern void sqlite3_result_error16_interop(int context, string strName, int nLen);
+    internal static extern void sqlite3_result_error16_interop(IntPtr context, string strName, int nLen);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-    internal static extern void sqlite3_result_text16_interop(int context, string strName, int nLen, int pvReserved);
+    internal static extern void sqlite3_result_text16_interop(IntPtr context, string strName, int nLen, IntPtr pvReserved);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode, SetLastError = true)]
     internal static extern int sqlite3_encryptfile(string fileName);
@@ -258,9 +255,9 @@ namespace System.Data.SQLite
     internal static extern int sqlite3_decompressfile(string fileName);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_key_interop(int db, byte[] key, int keylen);
+    internal static extern int sqlite3_key_interop(IntPtr db, byte[] key, int keylen);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_rekey_interop(int db, byte[] key, int keylen);
+    internal static extern int sqlite3_rekey_interop(IntPtr db, byte[] key, int keylen);
   }
 }

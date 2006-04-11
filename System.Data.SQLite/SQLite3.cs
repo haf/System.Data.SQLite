@@ -20,7 +20,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The opaque pointer returned to us by the sqlite provider
     /// </summary>
-    protected int              _sql;
+    protected IntPtr              _sql;
     /// <summary>
     /// The user-defined functions registered on this connection
     /// </summary>
@@ -38,13 +38,13 @@ namespace System.Data.SQLite
 
     internal override void Close()
     {
-      if (_sql != 0)
+      if (_sql != IntPtr.Zero)
       {
         int n = UnsafeNativeMethods.sqlite3_close_interop(_sql);
         if (n > 0) throw new SQLiteException(n, SQLiteLastError());
         SQLiteFunction.UnbindFunctions(this, _functionsArray);
       }
-      _sql = 0;
+      _sql = IntPtr.Zero;
     }
 
     internal override void Cancel()
@@ -71,7 +71,7 @@ namespace System.Data.SQLite
 
     internal override void Open(string strFilename)
     {
-      if (_sql != 0) return;
+      if (_sql != IntPtr.Zero) return;
       int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), out _sql);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
 
@@ -90,7 +90,7 @@ namespace System.Data.SQLite
       string str = strSql;
       int len;
 
-      int n = UnsafeNativeMethods.sqlite3_exec_interop(_sql, ToUTF8(strSql), 0, 0, out p, out len);
+      int n = UnsafeNativeMethods.sqlite3_exec_interop(_sql, ToUTF8(strSql), IntPtr.Zero, IntPtr.Zero, out p, out len);
       if (p != IntPtr.Zero)
       {
         str = base.ToString(p, len);
@@ -150,12 +150,12 @@ namespace System.Data.SQLite
 
     internal override void FinalizeStatement(SQLiteStatement stmt)
     {
-      if (stmt._sqlite_stmt > 0)
+      if (stmt._sqlite_stmt != IntPtr.Zero)
       {
         int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt._sqlite_stmt);
         if (n > 0) throw new SQLiteException(n, SQLiteLastError());
       }
-      stmt._sqlite_stmt = 0;
+      stmt._sqlite_stmt = IntPtr.Zero;
     }
 
     internal override int Reset(SQLiteStatement stmt)
@@ -176,7 +176,7 @@ namespace System.Data.SQLite
 
           // Reassign a new statement pointer to the old statement and clear the temporary one
           stmt._sqlite_stmt = tmp._sqlite_stmt;
-          tmp._sqlite_stmt = 0;
+          tmp._sqlite_stmt = IntPtr.Zero;
 
           // Reapply parameters
           stmt.BindParameters();
@@ -200,7 +200,7 @@ namespace System.Data.SQLite
 
     internal override SQLiteStatement Prepare(string strSql, SQLiteStatement previous, out string strRemain)
     {
-      int stmt;
+      IntPtr stmt;
       IntPtr ptr;
       int len;
 
@@ -212,7 +212,7 @@ namespace System.Data.SQLite
       strRemain = ToString(ptr, len);
 
       SQLiteStatement cmd = null;
-      if (stmt > 0) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
+      if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
 
       return cmd;
     }
@@ -238,20 +238,20 @@ namespace System.Data.SQLite
     internal override void Bind_Text(SQLiteStatement stmt, int index, string value)
     {
       byte[] b = ToUTF8(value);
-      int n = UnsafeNativeMethods.sqlite3_bind_text_interop(stmt._sqlite_stmt, index, b, b.Length - 1, -1);
+      int n = UnsafeNativeMethods.sqlite3_bind_text_interop(stmt._sqlite_stmt, index, b, b.Length - 1, (IntPtr)(-1));
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
 
     internal override void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt)
     {
       byte[] b = ToUTF8(dt);
-      int n = UnsafeNativeMethods.sqlite3_bind_text_interop(stmt._sqlite_stmt, index, b, b.Length - 1, -1);
+      int n = UnsafeNativeMethods.sqlite3_bind_text_interop(stmt._sqlite_stmt, index, b, b.Length - 1, (IntPtr)(-1));
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
 
     internal override void Bind_Blob(SQLiteStatement stmt, int index, byte[] blobData)
     {
-      int n = UnsafeNativeMethods.sqlite3_bind_blob_interop(stmt._sqlite_stmt, index, blobData, blobData.Length, -1);
+      int n = UnsafeNativeMethods.sqlite3_bind_blob_interop(stmt._sqlite_stmt, index, blobData, blobData.Length, (IntPtr)(-1));
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
 
@@ -439,14 +439,14 @@ namespace System.Data.SQLite
       return (UnsafeNativeMethods.sqlite3_column_type_interop(stmt._sqlite_stmt, index) == TypeAffinity.Null);
     }
 
-    internal override int AggregateCount(int context)
+    internal override int AggregateCount(IntPtr context)
     {
       return UnsafeNativeMethods.sqlite3_aggregate_count_interop(context);
     }
 
-    internal override int CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal)
+    internal override IntPtr CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal)
     {
-      int nCookie;
+      IntPtr nCookie;
 
       int n = UnsafeNativeMethods.sqlite3_create_function_interop(_sql, ToUTF8(strFunction), nArgs, 1, func, funcstep, funcfinal, out nCookie);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
@@ -454,9 +454,9 @@ namespace System.Data.SQLite
       return nCookie;
     }
 
-    internal override int CreateCollation(string strCollation, SQLiteCollation func)
+    internal override IntPtr CreateCollation(string strCollation, SQLiteCollation func)
     {
-      int nCookie;
+      IntPtr nCookie;
 
       int n = UnsafeNativeMethods.sqlite3_create_collation_interop(_sql, ToUTF8(strCollation), 1, 0, func, out nCookie);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
@@ -464,12 +464,12 @@ namespace System.Data.SQLite
       return nCookie;
     }
 
-    internal override void FreeFunction(int nCookie)
+    internal override void FreeFunction(IntPtr nCookie)
     {
       UnsafeNativeMethods.sqlite3_function_free_callbackcookie(nCookie);
     }
 
-    internal override long GetParamValueBytes(int p, int nDataOffset, byte[] bDest, int nStart, int nLength)
+    internal override long GetParamValueBytes(IntPtr p, int nDataOffset, byte[] bDest, int nStart, int nLength)
     {
       IntPtr ptr;
       int nlen;
@@ -490,72 +490,72 @@ namespace System.Data.SQLite
       return nCopied;
     }
 
-    internal override double GetParamValueDouble(int ptr)
+    internal override double GetParamValueDouble(IntPtr ptr)
     {
       double value;
       UnsafeNativeMethods.sqlite3_value_double_interop(ptr, out value);
       return value;
     }
 
-    internal override int GetParamValueInt32(int ptr)
+    internal override int GetParamValueInt32(IntPtr ptr)
     {
       return UnsafeNativeMethods.sqlite3_value_int_interop(ptr);
     }
 
-    internal override long GetParamValueInt64(int ptr)
+    internal override long GetParamValueInt64(IntPtr ptr)
     {
       Int64 value;
       UnsafeNativeMethods.sqlite3_value_int64_interop(ptr, out value);
       return value;
     }
 
-    internal override string GetParamValueText(int ptr)
+    internal override string GetParamValueText(IntPtr ptr)
     {
       int len;
       return ToString(UnsafeNativeMethods.sqlite3_value_text_interop(ptr, out len), len);
     }
 
-    internal override TypeAffinity GetParamValueType(int ptr)
+    internal override TypeAffinity GetParamValueType(IntPtr ptr)
     {
       return UnsafeNativeMethods.sqlite3_value_type_interop(ptr);
     }
 
-    internal override void ReturnBlob(int context, byte[] value)
+    internal override void ReturnBlob(IntPtr context, byte[] value)
     {
-      UnsafeNativeMethods.sqlite3_result_blob_interop(context, value, value.Length, -1);
+      UnsafeNativeMethods.sqlite3_result_blob_interop(context, value, value.Length, (IntPtr)(-1));
     }
 
-    internal override void ReturnDouble(int context, double value)
+    internal override void ReturnDouble(IntPtr context, double value)
     {
       UnsafeNativeMethods.sqlite3_result_double_interop(context, ref value);
     }
 
-    internal override void ReturnError(int context, string value)
+    internal override void ReturnError(IntPtr context, string value)
     {
       UnsafeNativeMethods.sqlite3_result_error_interop(context, ToUTF8(value), value.Length);
     }
 
-    internal override void ReturnInt32(int context, int value)
+    internal override void ReturnInt32(IntPtr context, int value)
     {
       UnsafeNativeMethods.sqlite3_result_int_interop(context, value);
     }
 
-    internal override void ReturnInt64(int context, long value)
+    internal override void ReturnInt64(IntPtr context, long value)
     {
       UnsafeNativeMethods.sqlite3_result_int64_interop(context, ref value);
     }
 
-    internal override void ReturnNull(int context)
+    internal override void ReturnNull(IntPtr context)
     {
       UnsafeNativeMethods.sqlite3_result_null_interop(context);
     }
 
-    internal override void ReturnText(int context, string value)
+    internal override void ReturnText(IntPtr context, string value)
     {
-      UnsafeNativeMethods.sqlite3_result_text_interop(context, ToUTF8(value), value.Length, -1);
+      UnsafeNativeMethods.sqlite3_result_text_interop(context, ToUTF8(value), value.Length, (IntPtr)(-1));
     }
 
-    internal override int AggregateContext(int context)
+    internal override IntPtr AggregateContext(IntPtr context)
     {
       return UnsafeNativeMethods.sqlite3_aggregate_context_interop(context, 1);
     }

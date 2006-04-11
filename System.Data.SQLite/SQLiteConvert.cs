@@ -408,6 +408,45 @@ namespace System.Data.SQLite
     };
 
     /// <summary>
+    /// Returns the ColumnSize for the given DbType
+    /// </summary>
+    /// <param name="typ">The DbType to get the size of</param>
+    /// <returns></returns>
+    internal static int DbTypeToColumnSize(DbType typ)
+    {
+      return _dbtypetocolumnsize[(int)typ];
+    }
+
+    private static int[] _dbtypetocolumnsize = {
+      2147483647,   // 0
+      2147483647,   // 1
+      1,     // 2
+      1,     // 3
+      8,  // 4
+      8, // 5
+      8, // 6
+      8,  // 7
+      8,   // 8
+      16,     // 9
+      2,
+      4,
+      8,
+      2147483647,
+      1,
+      4,
+      2147483647,
+      8,
+      2,
+      4,
+      8,
+      8,
+      2147483647,
+      2147483647,
+      2147483647,
+      2147483647,   // 25 (Xml)
+    };
+
+    /// <summary>
     /// Convert a DbType to a Type
     /// </summary>
     /// <param name="typ">The DbType to convert from</param>

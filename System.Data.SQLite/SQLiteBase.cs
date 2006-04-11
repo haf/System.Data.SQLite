@@ -159,27 +159,27 @@ namespace System.Data.SQLite
       }
     }
 
-    internal abstract int  CreateCollation(string strCollation, SQLiteCollation func);
-    internal abstract int  CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal);
-    internal abstract void FreeFunction(int nCookie);
+    internal abstract IntPtr  CreateCollation(string strCollation, SQLiteCollation func);
+    internal abstract IntPtr  CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal);
+    internal abstract void FreeFunction(IntPtr cookie);
 
-    internal abstract int AggregateCount(int context);
-    internal abstract int AggregateContext(int context);
+    internal abstract int AggregateCount(IntPtr context);
+    internal abstract IntPtr AggregateContext(IntPtr context);
 
-    internal abstract long   GetParamValueBytes(int ptr, int nDataOffset, byte[] bDest, int nStart, int nLength);
-    internal abstract double GetParamValueDouble(int ptr);
-    internal abstract int    GetParamValueInt32(int ptr);
-    internal abstract Int64  GetParamValueInt64(int ptr);
-    internal abstract string GetParamValueText(int ptr);
-    internal abstract TypeAffinity GetParamValueType(int ptr);
+    internal abstract long   GetParamValueBytes(IntPtr ptr, int nDataOffset, byte[] bDest, int nStart, int nLength);
+    internal abstract double GetParamValueDouble(IntPtr ptr);
+    internal abstract int    GetParamValueInt32(IntPtr ptr);
+    internal abstract Int64  GetParamValueInt64(IntPtr ptr);
+    internal abstract string GetParamValueText(IntPtr ptr);
+    internal abstract TypeAffinity GetParamValueType(IntPtr ptr);
 
-    internal abstract void ReturnBlob(int context, byte[] value);
-    internal abstract void ReturnDouble(int context, double value);
-    internal abstract void ReturnError(int context, string value);
-    internal abstract void ReturnInt32(int context, Int32 value);
-    internal abstract void ReturnInt64(int context, Int64 value);
-    internal abstract void ReturnNull(int context);
-    internal abstract void ReturnText(int context, string value);
+    internal abstract void ReturnBlob(IntPtr context, byte[] value);
+    internal abstract void ReturnDouble(IntPtr context, double value);
+    internal abstract void ReturnError(IntPtr context, string value);
+    internal abstract void ReturnInt32(IntPtr context, Int32 value);
+    internal abstract void ReturnInt64(IntPtr context, Int64 value);
+    internal abstract void ReturnNull(IntPtr context);
+    internal abstract void ReturnText(IntPtr context, string value);
 
     internal abstract void SetPassword(byte[] passwordBytes);
     internal abstract void ChangePassword(byte[] newPasswordBytes);

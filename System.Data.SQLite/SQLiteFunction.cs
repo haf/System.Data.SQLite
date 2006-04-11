@@ -41,7 +41,7 @@ namespace System.Data.SQLite
   /// <param name="context">Raw context pointer for the user function</param>
   /// <param name="nArgs">Count of arguments to the function</param>
   /// <param name="argsptr">A pointer to the array of argument pointers</param>
-  internal delegate void SQLiteCallback(int context, int nArgs, IntPtr argsptr);
+  internal delegate void SQLiteCallback(IntPtr context, int nArgs, IntPtr argsptr);
   /// <summary>
   /// Internal callback delegate for implementing collation sequences
   /// </summary>
@@ -78,11 +78,11 @@ namespace System.Data.SQLite
     /// <summary>
     /// Used internally to keep track of memory allocated for aggregate functions
     /// </summary>
-    private int                     _interopCookie;
+    private IntPtr                     _interopCookie;
     /// <summary>
     /// Internal array used to keep track of aggregate function context data
     /// </summary>
-    private SortedList<int, object> _contextDataList;
+    private Hashtable _contextDataList;
 
     /// <summary>
     /// Holds a reference to the callback function for user functions
@@ -111,7 +111,7 @@ namespace System.Data.SQLite
     /// </summary>
     protected SQLiteFunction()
     {
-      _contextDataList = new SortedList<int, object>();
+      _contextDataList = new Hashtable();
     }
 
     /// <summary>
@@ -202,7 +202,7 @@ namespace System.Data.SQLite
     internal object[] ConvertParams(int nArgs, IntPtr argsptr)
     {
       object[] parms = new object[nArgs];
-      int[] argint = new int[nArgs];
+      IntPtr[] argint = new IntPtr[nArgs];
       //string s;
       //DateTime dt;
 
@@ -251,7 +251,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="context">The context the return value applies to</param>
     /// <param name="returnValue">The parameter to return to SQLite</param>
-    void SetReturnValue(int context, object returnValue)
+    void SetReturnValue(IntPtr context, object returnValue)
     {
       if (returnValue == null || returnValue == DBNull.Value)
       {
@@ -302,7 +302,7 @@ namespace System.Data.SQLite
     /// <param name="context">A raw context pointer</param>
     /// <param name="nArgs">Number of arguments passed in</param>
     /// <param name="argsptr">A pointer to the array of arguments</param>
-    internal void ScalarCallback(int context, int nArgs, IntPtr argsptr)
+    internal void ScalarCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
       SetReturnValue(context, Invoke(ConvertParams(nArgs, argsptr)));
     }
@@ -332,10 +332,10 @@ namespace System.Data.SQLite
     /// <param name="context">A raw context pointer</param>
     /// <param name="nArgs">Number of arguments passed in</param>
     /// <param name="argsptr">A pointer to the array of arguments</param>
-    internal void StepCallback(int context, int nArgs, IntPtr argsptr)
+    internal void StepCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
       int n = _base.AggregateCount(context);
-      int nAux;
+      IntPtr nAux;
       object obj = null;
 
       nAux = _base.AggregateContext(context);
@@ -351,9 +351,9 @@ namespace System.Data.SQLite
     /// <param name="context">A raw context pointer</param>
     /// <param name="nArgs">Not used, always zero</param>
     /// <param name="argsptr">Not used, always zero</param>
-    internal void FinalCallback(int context, int nArgs, IntPtr argsptr)
+    internal void FinalCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
-      int n = _base.AggregateContext(context);
+      IntPtr n = _base.AggregateContext(context);
       object obj = null;
 
       if (_contextDataList.ContainsKey(n))
@@ -386,7 +386,7 @@ namespace System.Data.SQLite
 
       IDisposable disp;
 
-      foreach (KeyValuePair<int, object> kv in _contextDataList)
+      foreach (KeyValuePair<IntPtr, object> kv in _contextDataList)
       {
         disp = kv.Value as IDisposable;
         if (disp != null)
