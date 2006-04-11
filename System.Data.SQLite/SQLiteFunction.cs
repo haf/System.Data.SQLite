@@ -82,7 +82,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Internal array used to keep track of aggregate function context data
     /// </summary>
-    private Hashtable _contextDataList;
+    private Dictionary<long, object> _contextDataList;
 
     /// <summary>
     /// Holds a reference to the callback function for user functions
@@ -111,7 +111,7 @@ namespace System.Data.SQLite
     /// </summary>
     protected SQLiteFunction()
     {
-      _contextDataList = new Hashtable();
+      _contextDataList = new Dictionary<long, object>();
     }
 
     /// <summary>
@@ -335,10 +335,10 @@ namespace System.Data.SQLite
     internal void StepCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
       int n = _base.AggregateCount(context);
-      IntPtr nAux;
+      long nAux;
       object obj = null;
 
-      nAux = _base.AggregateContext(context);
+      nAux = (long)_base.AggregateContext(context);
       if (n > 1) obj = _contextDataList[nAux];
 
       Step(ConvertParams(nArgs, argsptr), n, ref obj);
@@ -353,7 +353,7 @@ namespace System.Data.SQLite
     /// <param name="argsptr">Not used, always zero</param>
     internal void FinalCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
-      IntPtr n = _base.AggregateContext(context);
+      long n = (long)_base.AggregateContext(context);
       object obj = null;
 
       if (_contextDataList.ContainsKey(n))
@@ -386,7 +386,7 @@ namespace System.Data.SQLite
 
       IDisposable disp;
 
-      foreach (KeyValuePair<IntPtr, object> kv in _contextDataList)
+      foreach (KeyValuePair<long, object> kv in _contextDataList)
       {
         disp = kv.Value as IDisposable;
         if (disp != null)
