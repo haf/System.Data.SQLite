@@ -11,7 +11,7 @@
 *************************************************************************
 ** A TCL Interface to SQLite
 **
-** $Id: tclsqlite.c,v 1.19 2006/02/11 14:43:40 rmsimpson Exp $
+** $Id: tclsqlite.c,v 1.20 2006/04/11 18:06:58 rmsimpson Exp $
 */
 #ifndef NO_TCL     /* Omit this whole file if TCL is unavailable */
 
@@ -23,15 +23,6 @@
 #include <assert.h>
 #include <ctype.h>
 
-/*
- * Windows needs to know which symbols to export.  Unix does not.
- * BUILD_sqlite should be undefined for Unix.
- */
-
-#ifdef BUILD_sqlite
-#undef TCL_STORAGE_CLASS
-#define TCL_STORAGE_CLASS DLLEXPORT
-#endif /* BUILD_sqlite */
 
 #define NUM_PREPARED_STMTS 10
 #define MAX_PREPARED_STMTS 100
@@ -1094,9 +1085,10 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     azCol = malloc( sizeof(azCol[0])*(nCol+1) );
     if( azCol==0 ) {
       Tcl_AppendResult(interp, "Error: can't malloc()", 0);
+      fclose(in);
       return TCL_ERROR;
     }
-    sqlite3_exec(pDb->db, "BEGIN", 0, 0, 0);
+    (void)sqlite3_exec(pDb->db, "BEGIN", 0, 0, 0);
     zCommit = "COMMIT";
     while( (zLine = local_getline(0, in))!=0 ){
       char *z;
@@ -1144,7 +1136,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     free(azCol);
     fclose(in);
     sqlite3_finalize(pStmt);
-    sqlite3_exec(pDb->db, zCommit, 0, 0, 0);
+    (void)sqlite3_exec(pDb->db, zCommit, 0, 0, 0);
 
     if( zCommit[0] == 'C' ){
       /* success, set result as number of lines processed */
@@ -1855,7 +1847,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
     inTrans = !sqlite3_get_autocommit(pDb->db);
     if( !inTrans ){
-      sqlite3_exec(pDb->db, zBegin, 0, 0, 0);
+      (void)sqlite3_exec(pDb->db, zBegin, 0, 0, 0);
     }
     rc = Tcl_EvalObjEx(interp, pScript, 0);
     if( !inTrans ){
@@ -1865,7 +1857,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
       } else {
         zEnd = "COMMIT";
       }
-      sqlite3_exec(pDb->db, zEnd, 0, 0, 0);
+      (void)sqlite3_exec(pDb->db, zEnd, 0, 0, 0);
     }
     break;
   }
@@ -2078,7 +2070,7 @@ static int DbMain(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 ** used to open a new SQLite database.  See the DbMain() routine above
 ** for additional information.
 */
-EXTERN int Sqlite3_Init(Tcl_Interp *interp){
+extern int Sqlite3_Init(Tcl_Interp *interp){
   Tcl_InitStubs(interp, "8.4", 0);
   Tcl_CreateObjCommand(interp, "sqlite3", (Tcl_ObjCmdProc*)DbMain, 0, 0);
   Tcl_PkgProvide(interp, "sqlite3", PACKAGE_VERSION);
@@ -2086,15 +2078,15 @@ EXTERN int Sqlite3_Init(Tcl_Interp *interp){
   Tcl_PkgProvide(interp, "sqlite", PACKAGE_VERSION);
   return TCL_OK;
 }
-EXTERN int Tclsqlite3_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
-EXTERN int Sqlite3_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
-EXTERN int Tclsqlite3_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
+extern int Tclsqlite3_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
+extern int Sqlite3_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
+extern int Tclsqlite3_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
 
 #ifndef SQLITE_3_SUFFIX_ONLY
-EXTERN int Sqlite_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
-EXTERN int Tclsqlite_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
-EXTERN int Sqlite_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
-EXTERN int Tclsqlite_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
+extern int Sqlite_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
+extern int Tclsqlite_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
+extern int Sqlite_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
+extern int Tclsqlite_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
 #endif
 
 #ifdef TCLSH

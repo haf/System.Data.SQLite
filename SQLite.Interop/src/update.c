@@ -12,7 +12,7 @@
 ** This file contains C code routines that are called by the parser
 ** to handle UPDATE statements.
 **
-** $Id: update.c,v 1.19 2006/02/11 14:43:40 rmsimpson Exp $
+** $Id: update.c,v 1.20 2006/04/11 18:06:58 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 
@@ -431,7 +431,7 @@ void sqlite3Update(
 
     /* Delete the old indices for the current record.
     */
-    sqlite3GenerateRowIndexDelete(db, v, pTab, iCur, aIdxUsed);
+    sqlite3GenerateRowIndexDelete(v, pTab, iCur, aIdxUsed);
 
     /* If changing the record number, delete the old record.
     */

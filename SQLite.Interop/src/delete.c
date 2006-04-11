@@ -12,7 +12,7 @@
 ** This file contains C code routines that are called by the parser
 ** in order to generate code for DELETE FROM statements.
 **
-** $Id: delete.c,v 1.19 2006/02/11 14:43:38 rmsimpson Exp $
+** $Id: delete.c,v 1.20 2006/04/11 18:06:57 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 
@@ -382,7 +382,7 @@ void sqlite3GenerateRowDelete(
 ){
   int addr;
   addr = sqlite3VdbeAddOp(v, OP_NotExists, iCur, 0);
-  sqlite3GenerateRowIndexDelete(db, v, pTab, iCur, 0);
+  sqlite3GenerateRowIndexDelete(v, pTab, iCur, 0);
   sqlite3VdbeAddOp(v, OP_Delete, iCur, (count?OPFLAG_NCHANGE:0));
   if( count ){
     sqlite3VdbeChangeP3(v, -1, pTab->zName, P3_STATIC);
@@ -407,7 +407,6 @@ void sqlite3GenerateRowDelete(
 **       deleted.
 */
 void sqlite3GenerateRowIndexDelete(
-  sqlite3 *db,       /* The database containing the index */
   Vdbe *v,           /* Generate code into this VDBE */
   Table *pTab,       /* Table containing the row to be deleted */
   int iCur,          /* Cursor number for the table */
