@@ -10,6 +10,9 @@
 #include <windows.h>
 #include <wincrypt.h>
 
+// Extra padding before and after the cryptographic buffer
+#define CRYPT_OFFSET 8
+
 typedef struct _CRYPTBLOCK
 {
   HCRYPTKEY hReadKey;     // Key used to read from the database and write to the journal
@@ -75,14 +78,10 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
     pBlock->pvCrypt = NULL;
   }
 
-  // Figure out if this cryptographic key requires extra buffer space, and if so, allocate 
-  // enough room for it
+  // Figure out how big to make our spare crypt block
   if (CryptEncrypt(hKey, 0, TRUE, 0, NULL, &pBlock->dwCryptSize, pBlock->dwCryptSize * 2))
   {
-    if (pBlock->dwCryptSize > pBlock->dwPageSize)
-    {
-      pBlock->pvCrypt = sqliteMalloc(pBlock->dwCryptSize);
-    }
+    pBlock->pvCrypt = sqliteMalloc(pBlock->dwCryptSize + (CRYPT_OFFSET * 2));
   }
   return pBlock;
 }
@@ -113,13 +112,13 @@ static void DestroyCryptBlock(LPCRYPTBLOCK pBlock)
 }
 
 // Encrypt/Decrypt functionality, called by pager.c
-void sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
+void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
 {
   LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)pArg;
   DWORD dwPageSize;
   LPVOID pvTemp;
 
-  if (!pBlock) return;
+  if (!pBlock) return data;
 
   // Make sure the page size for the pager is still the same as the page size
   // for the cryptblock.  If the user changed it, we need to adjust!
@@ -134,32 +133,47 @@ void sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
     }
   }
 
-  /* Block ciphers often need to write extra padding beyond the 
-  data block.  We don't have that luxury for a given page of data so
-  we must copy the page data to a buffer that IS large enough to hold
-  the padding.  We then encrypt the block and write the buffer back to
-  the page without the unnecessary padding.
-  We only use the special block of memory if its absolutely necessary. */
-  if (pBlock->pvCrypt)
-  {
-    CopyMemory(pBlock->pvCrypt, data, pBlock->dwPageSize);
-    pvTemp = data;
-    data = pBlock->pvCrypt;
-  }
-
   switch(nMode)
   {
   case 0: // Undo a "case 7" journal file encryption
   case 2: // Reload a page
   case 3: // Load a page
     if (!pBlock->hReadKey) break;
+
+    /* Block ciphers often need to write extra padding beyond the 
+    data block.  We don't have that luxury for a given page of data so
+    we must copy the page data to a buffer that IS large enough to hold
+    the padding.  We then encrypt the block and write the buffer back to
+    the page without the unnecessary padding.
+    We only use the special block of memory if its absolutely necessary. */
+    if (pBlock->dwCryptSize != pBlock->dwPageSize)
+    {
+      CopyMemory(((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET, data, pBlock->dwPageSize);
+      pvTemp = data;
+      data = ((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET;
+    }
+
+
     dwPageSize = pBlock->dwCryptSize;
     CryptDecrypt(pBlock->hReadKey, 0, TRUE, 0, (LPBYTE)data, &dwPageSize);
+
+    // If the encryption algorithm required extra padding and we were forced to encrypt or
+    // decrypt a copy of the page data to a temp buffer, then write the contents of the temp
+    // buffer back to the page data minus any padding applied.
+    if (pBlock->dwCryptSize != pBlock->dwPageSize)
+    {
+      CopyMemory(pvTemp, data, pBlock->dwPageSize);
+      data = pvTemp;
+    }
     break;
   case 6: // Encrypt a page for the main database file
     if (!pBlock->hWriteKey) break;
+
+    CopyMemory(((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET, data, pBlock->dwPageSize);
+    data = ((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET;
+
     dwPageSize = pBlock->dwPageSize;
-    CryptEncrypt(pBlock->hWriteKey, 0, TRUE, 0, (LPBYTE)data, &dwPageSize, pBlock->dwCryptSize);
+    CryptEncrypt(pBlock->hWriteKey, 0, TRUE, 0, ((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET, &dwPageSize, pBlock->dwCryptSize);
     break;
   case 7: // Encrypt a page for the journal file
     /* Under normal circumstances, the readkey is the same as the writekey.  However,
@@ -171,18 +185,16 @@ void sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
     read the original data.
     */
     if (!pBlock->hReadKey) break;
+
+    CopyMemory(((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET, data, pBlock->dwPageSize);
+    data = ((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET;
+
     dwPageSize = pBlock->dwPageSize;
-    CryptEncrypt(pBlock->hReadKey, 0, TRUE, 0, (LPBYTE)data, &dwPageSize, pBlock->dwCryptSize);
+    CryptEncrypt(pBlock->hReadKey, 0, TRUE, 0, ((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET, &dwPageSize, pBlock->dwCryptSize);
     break;
   }
 
-  // If the encryption algorithm required extra padding and we were forced to encrypt or
-  // decrypt a copy of the page data to a temp buffer, then write the contents of the temp
-  // buffer back to the page data minus any padding applied.
-  if (pBlock->pvCrypt)
-  {
-    CopyMemory(pvTemp, data, pBlock->dwPageSize);
-  }
+  return data;
 }
 
 // Derive an encryption key from a user-supplied buffer
