@@ -39,7 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GACWrap.cs" />
+    <Compile Include="GACWrap.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="InstallDesigner.cs">
       <SubType>Form</SubType>
     </Compile>

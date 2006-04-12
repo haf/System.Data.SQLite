@@ -17,6 +17,7 @@ namespace install
   using System.IO;
   using System.GACManagedAccess;
   using System.Xml;
+  using System.Diagnostics;
 
   public partial class InstallDesigner : Form
   {
@@ -273,6 +274,61 @@ namespace install
             }
           }
         }
+
+        for (int n = 0; n < 2; n++)
+        {
+          // Add factory support to the machine.config file.
+          try
+          {
+            string xmlFileName = Environment.ExpandEnvironmentVariables(String.Format("%WinDir%\\Microsoft.NET\\{0}\\v2.0.50727\\CONFIG\\machine.config", (n == 0) ? "Framework" : "Framework64"));
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.PreserveWhitespace = true;
+            xmlDoc.Load(xmlFileName);
+
+
+            XmlNode xmlNode = xmlDoc.SelectSingleNode("configuration/system.data/DbProviderFactories/add[@invariant=\"System.Data.SQLite\"]");
+            if (xmlNode == null)
+            {
+              XmlNode xmlConfig = xmlDoc.SelectSingleNode("configuration");
+              if (xmlConfig != null)
+              {
+                XmlNode xmlData = xmlConfig.SelectSingleNode("system.data");
+                if (xmlData == null)
+                {
+                  xmlData = xmlDoc.CreateNode(XmlNodeType.Element, "system.data", "");
+                  xmlConfig.AppendChild(xmlData);
+                }
+                XmlNode xmlParent = xmlData.SelectSingleNode("DbProviderFactories");
+                if (xmlParent == null)
+                {
+                  xmlParent = xmlDoc.CreateNode(XmlNodeType.Element, "DbProviderFactories", "");
+                  xmlData.AppendChild(xmlParent);
+                }
+
+                //xmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "remove", "");
+                //xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("invariant"));
+                //xmlParent.AppendChild(xmlNode);
+                //xmlNode.Attributes.GetNamedItem("invariant").Value = "System.Data.SQLite";
+
+                xmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "add", "");
+                xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("name"));
+                xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("invariant"));
+                xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("description"));
+                xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("type"));
+                xmlParent.AppendChild(xmlNode);
+              }
+            }
+            xmlNode.Attributes.GetNamedItem("name").Value = "SQLite Data Provider";
+            xmlNode.Attributes.GetNamedItem("invariant").Value = "System.Data.SQLite";
+            xmlNode.Attributes.GetNamedItem("description").Value = ".Net Framework Data Provider for SQLite";
+            xmlNode.Attributes.GetNamedItem("type").Value = "System.Data.SQLite.SQLiteFactory, " + SQLite.GetName().FullName;
+
+            xmlDoc.Save(xmlFileName);
+          }
+          catch
+          {
+          }
+        }
       }
       else // No checkboxes are checked, remove some global settings
       {
@@ -305,6 +361,32 @@ namespace install
               catch
               {
               }
+            }
+          }
+
+          for (int n = 0; n < 2; n++)
+          {
+            try
+            {
+              // Remove any entries in the machine.config if they're still there
+              string xmlFileName = Environment.ExpandEnvironmentVariables(String.Format("%WinDir%\\Microsoft.NET\\{0}\\v2.0.50727\\CONFIG\\machine.config", (n == 0) ? "Framework" : "Framework64"));
+              XmlDocument xmlDoc = new XmlDocument();
+              xmlDoc.PreserveWhitespace = true;
+              xmlDoc.Load(xmlFileName);
+
+              XmlNode xmlNode = xmlDoc.SelectSingleNode("configuration/system.data/DbProviderFactories/add[@invariant=\"System.Data.SQLite\"]");
+
+              if (xmlNode != null)
+                xmlNode.ParentNode.RemoveChild(xmlNode);
+
+              xmlNode = xmlDoc.SelectSingleNode("configuration/system.data/DbProviderFactories/remove[@invariant=\"System.Data.SQLite\"]");
+              if (xmlNode != null)
+                xmlNode.ParentNode.RemoveChild(xmlNode);
+
+              xmlDoc.Save(xmlFileName);
+            }
+            catch
+            {
             }
           }
         }
@@ -340,9 +422,17 @@ namespace install
         }
         else // Install SQLite into the GAC
         {
-
           AssemblyCache.InstallAssembly(SQLiteLocation, null, AssemblyCommitFlags.Default);
           AssemblyCache.InstallAssembly(Path.GetFullPath("SQLite.Designer.DLL"), null, AssemblyCommitFlags.Default);
+
+          try
+          {
+            AssemblyCache.InstallAssembly(Path.Combine(Path.GetDirectoryName(SQLiteLocation), "x64\\System.Data.SQLite.DLL"), null, AssemblyCommitFlags.Default);
+            AssemblyCache.InstallAssembly(Path.Combine(Path.GetDirectoryName(SQLiteLocation), "itanium\\System.Data.SQLite.DLL"), null, AssemblyCommitFlags.Default);
+          }
+          catch
+          {
+          }
         }
       }
       catch
@@ -477,6 +567,24 @@ namespace install
         }
       }
 
+      //try
+      //{
+      //  using (RegistryKey key = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", true))
+      //  {
+      //    string libpath = (string)key.GetValue("LIB");
+      //    string path = Path.GetDirectoryName(SQLiteLocation);
+
+      //    if (libpath.IndexOf(path, StringComparison.InvariantCultureIgnoreCase) == -1)
+      //    {
+      //      libpath += (";" + path);
+      //      key.SetValue("LIB", libpath);
+      //    }
+      //  }
+      //}
+      //catch
+      //{
+      //}
+
       for (int n = 0; n < compactFrameworks.Length; n++)
       {
         using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\DataProviders", compactFrameworks[n]), true))
@@ -520,58 +628,10 @@ namespace install
         }
       }
 #endif
-
-      // We used to add factory support to the machine.config -- but its not desirable.
-      // Now, we use the development environment's config file instead.
-      string xmlFileName;
-      XmlDocument xmlDoc = GetConfig(keyname, out xmlFileName);
-
-      if (xmlDoc == null) return;
-
-      XmlNode xmlNode = xmlDoc.SelectSingleNode("configuration/system.data/DbProviderFactories/add[@invariant=\"System.Data.SQLite\"]");
-      if (xmlNode == null)
-      {
-        XmlNode xmlConfig = xmlDoc.SelectSingleNode("configuration");
-        if (xmlConfig != null)
-        {
-          XmlNode xmlData = xmlConfig.SelectSingleNode("system.data");
-          if (xmlData == null)
-          {
-            xmlData = xmlDoc.CreateNode(XmlNodeType.Element, "system.data", "");
-            xmlConfig.AppendChild(xmlData);
-          }
-          XmlNode xmlParent = xmlData.SelectSingleNode("DbProviderFactories");
-          if (xmlParent == null)
-          {
-            xmlParent = xmlDoc.CreateNode(XmlNodeType.Element, "DbProviderFactories", "");
-            xmlData.AppendChild(xmlParent);
-          }
-
-          //xmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "remove", "");
-          //xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("invariant"));
-          //xmlParent.AppendChild(xmlNode);
-          //xmlNode.Attributes.GetNamedItem("invariant").Value = "System.Data.SQLite";
-
-          xmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "add", "");
-          xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("name"));
-          xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("invariant"));
-          xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("description"));
-          xmlNode.Attributes.SetNamedItem(xmlDoc.CreateAttribute("type"));
-          xmlParent.AppendChild(xmlNode);
-        }
-      }
-      xmlNode.Attributes.GetNamedItem("name").Value = "SQLite Data Provider";
-      xmlNode.Attributes.GetNamedItem("invariant").Value = "System.Data.SQLite";
-      xmlNode.Attributes.GetNamedItem("description").Value = ".Net Framework Data Provider for SQLite";
-      xmlNode.Attributes.GetNamedItem("type").Value = "System.Data.SQLite.SQLiteFactory, " + SQLite.GetName().FullName;
-
-      xmlDoc.Save(xmlFileName);
     }
 
     private XmlDocument GetConfig(string keyname, out string xmlFileName)
     {
-      // xmlFileName = Environment.ExpandEnvironmentVariables("%WinDir%\\Microsoft.NET\\Framework\\v2.0.50727\\CONFIG\\machine.config");
-
       try
       {
         using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}", keyname, _regRoot), true))
@@ -608,6 +668,15 @@ namespace install
         {
           if (key != null) key.DeleteSubKeyTree(source.ToString("B"));
         }
+
+        //using (RegistryKey key = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", true))
+        //{
+        //  string libpath = (string)key.GetValue("LIB");
+        //  string path = ";" + Path.GetDirectoryName(SQLiteLocation);
+
+        //  libpath = libpath.Replace(path, "");
+        //  key.SetValue("LIB", libpath);
+        //}
       }
       catch
       {
@@ -620,23 +689,6 @@ namespace install
       if (xmlDoc == null) return;
 
       XmlNode xmlNode = xmlDoc.SelectSingleNode("configuration/system.data/DbProviderFactories/add[@invariant=\"System.Data.SQLite\"]");
-      if (xmlNode != null)
-        xmlNode.ParentNode.RemoveChild(xmlNode);
-
-      xmlNode = xmlDoc.SelectSingleNode("configuration/system.data/DbProviderFactories/remove[@invariant=\"System.Data.SQLite\"]");
-      if (xmlNode != null)
-        xmlNode.ParentNode.RemoveChild(xmlNode);
-
-      xmlDoc.Save(xmlFileName);
-      
-      // Remove any entries in the machine.config if they're still there
-      xmlFileName = Environment.ExpandEnvironmentVariables("%WinDir%\\Microsoft.NET\\Framework\\v2.0.50727\\CONFIG\\machine.config");
-      xmlDoc = new XmlDocument();
-      xmlDoc.PreserveWhitespace = true;
-      xmlDoc.Load(xmlFileName);
-
-      xmlNode = xmlDoc.SelectSingleNode("configuration/system.data/DbProviderFactories/add[@invariant=\"System.Data.SQLite\"]");
-      
       if (xmlNode != null)
         xmlNode.ParentNode.RemoveChild(xmlNode);
 
