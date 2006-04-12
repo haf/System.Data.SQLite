@@ -558,6 +558,8 @@ namespace System.Data.SQLite
       new SQLiteTypeNames("NVARCHAR", DbType.String),
       new SQLiteTypeNames("CHAR", DbType.String),
       new SQLiteTypeNames("TEXT", DbType.String),
+      new SQLiteTypeNames("NTEXT", DbType.String),
+      new SQLiteTypeNames("STRING", DbType.String),
       new SQLiteTypeNames("DOUBLE", DbType.Double),
       new SQLiteTypeNames("FLOAT", DbType.Double),
       new SQLiteTypeNames("REAL", DbType.Single),          
