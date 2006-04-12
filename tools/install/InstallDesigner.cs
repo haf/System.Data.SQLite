@@ -439,6 +439,8 @@ namespace install
       {
         throw;
       }
+
+      FixXmlLibPaths(install);
     }
 
     private void ReplaceJet(string keyname)
@@ -721,6 +723,175 @@ namespace install
       {
         keyDest.SetValue(values[n], keySource.GetValue(values[n]), keySource.GetValueKind(values[n]));
       }
+    }
+
+    private void FixXmlLibPaths(bool install)
+    {
+      string installDir = null;
+      RegistryKey key = null;
+
+      try
+      {
+        key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\VisualStudio\\8.0");
+        if (key != null)
+        {
+          try
+          {
+            installDir = (string)key.GetValue("InstallDir");
+          }
+          catch
+          {
+          }
+          finally
+          {
+            if (String.IsNullOrEmpty(installDir))
+            {
+              ((IDisposable)key).Dispose();
+              key = null;
+            }
+          }
+        }
+
+        if (key == null)
+        {
+          key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\VCExpress\\8.0");
+          if (key == null) return;
+        }
+
+        try
+        {
+          installDir = (string)key.GetValue("InstallDir");
+        }
+        catch
+        {
+        }
+      }
+      finally
+      {
+        if (key != null) ((IDisposable)key).Dispose();
+      }
+
+      if (String.IsNullOrEmpty(installDir)) return;
+
+      installDir = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(installDir))), "VC");
+
+      string currentDir;
+      string[] lookIn = new string[] { "vcpackages", "bin\\amd64", "bin\\ia64" };
+      string sqlitePath = Path.GetDirectoryName(SQLiteLocation);
+
+      foreach (string subfolder in lookIn)
+      {
+        currentDir = Path.Combine(installDir, subfolder);
+        FixXmlLibPaths(currentDir, "VCProjectEngine.DLL*.config", sqlitePath, install);
+        FixXmlLibPaths(currentDir, "AMD64.VCPlatform.config", Path.Combine(sqlitePath, "x64"), install);
+        FixXmlLibPaths(currentDir, "Itanium.VCPlatform.config", Path.Combine(sqlitePath, "itanium"), install);
+        FixXmlLibPaths(currentDir, "WCE.VCPlatform.config", Path.Combine(sqlitePath, "CompactFramework"), install);
+      }
+
+      FixLocalUserPaths(install);
+    }
+
+    private void FixLocalUserPaths(bool install)
+    {
+      string file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\VisualStudio\\8.0\\VCComponents.dat");
+      StringBuilder output = new StringBuilder();
+      string line;
+      string sqlitePath = Path.GetDirectoryName(SQLiteLocation);
+      string currPath = sqlitePath;
+
+      try
+      {
+        using (StreamReader rd = new StreamReader(file))
+        {
+          while (rd.EndOfStream == false)
+          {
+            line = rd.ReadLine();
+            line = line.Trim();
+            if (String.IsNullOrEmpty(line)) continue;
+            if (line[0] == '[')
+            {
+              if (line.IndexOf("Win32", StringComparison.InvariantCultureIgnoreCase) != -1)
+                currPath = sqlitePath;
+              else if (line.IndexOf("x64", StringComparison.InvariantCultureIgnoreCase) != -1)
+                currPath = Path.Combine(sqlitePath, "x64");
+              else if (line.IndexOf("Itanium", StringComparison.InvariantCultureIgnoreCase) != -1)
+                currPath = Path.Combine(sqlitePath, "x64");
+              else if (line.IndexOf("ARM", StringComparison.InvariantCultureIgnoreCase) != -1)
+                currPath = Path.Combine(sqlitePath, "CompactFramework");
+            }
+            else if (line.StartsWith("Reference Dirs", StringComparison.InvariantCultureIgnoreCase) == true)
+            {
+              int n = line.IndexOf(";" + currPath, StringComparison.InvariantCultureIgnoreCase);
+              if (n > -1) line = line.Remove(n, currPath.Length + 1);
+
+              if (install)
+              {
+                if (line[line.Length - 1] == '=')
+                  line += currPath;
+                else
+                  line += (";" + currPath);
+              }
+            }
+
+            output.AppendLine(line);
+          }
+          rd.Close();
+        }
+
+        File.Delete(file);
+        using (StreamWriter writer = new StreamWriter(file, false, Encoding.Unicode))
+        {          
+          writer.Write(output.ToString());
+          writer.Close();
+        }
+      }
+      catch
+      {
+      }
+    }
+
+    private void FixXmlLibPaths(string path, string lookFor, string sqlitePath, bool install)
+    {
+      // Win32
+      string[] files = Directory.GetFiles(path, lookFor);
+      if (files.Length > 0)
+      {
+        foreach (string file in files)
+        {
+          FixXmlLibPath(file, sqlitePath, install);
+        }
+      }
+    }
+
+    private void FixXmlLibPath(string fileName, string sqlitePath, bool install)
+    {
+      XmlDocument xmlDoc = new XmlDocument();
+      xmlDoc.PreserveWhitespace = true;
+      xmlDoc.Load(fileName);
+      
+      XmlNodeList xmlNodes = xmlDoc.SelectNodes("VCPlatformConfigurationFile/Platform/Directories");
+      if (xmlNodes == null) return;
+
+      foreach(XmlNode xmlNode in xmlNodes)
+      {
+        string libpath = xmlNode.Attributes.GetNamedItem("Reference").Value;
+        if (String.Compare(libpath, sqlitePath, true) == 0)
+          libpath = "";
+        else
+        {
+          int n = libpath.IndexOf(";" + sqlitePath, StringComparison.InvariantCultureIgnoreCase);
+          if (n > -1) libpath = libpath.Remove(n, sqlitePath.Length + 1);
+        }
+
+        if (install)
+        {
+          if (String.IsNullOrEmpty(libpath)) libpath = sqlitePath;
+          else libpath += (";" + sqlitePath);
+        }
+        xmlNode.Attributes.GetNamedItem("Reference").Value = libpath;
+      }
+
+      xmlDoc.Save(fileName);
     }
   }
 }
