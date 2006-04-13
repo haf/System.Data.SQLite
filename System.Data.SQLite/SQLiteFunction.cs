@@ -202,44 +202,42 @@ namespace System.Data.SQLite
     internal object[] ConvertParams(int nArgs, IntPtr argsptr)
     {
       object[] parms = new object[nArgs];
+#if !PLATFORM_COMPACTFRAMEWORK
       IntPtr[] argint = new IntPtr[nArgs];
-      //string s;
-      //DateTime dt;
-
+#else
+      int[] argint = new int[nArgs];
+#endif
       Marshal.Copy(argsptr, argint, 0, nArgs);
 
       for (int n = 0; n < nArgs; n++)
       {
-        switch (_base.GetParamValueType(argint[n]))
+        switch (_base.GetParamValueType((IntPtr)argint[n]))
         {
           case TypeAffinity.Null:
             parms[n] = DBNull.Value;
             break;
           case TypeAffinity.Int64:
-            parms[n] = _base.GetParamValueInt64(argint[n]);
+            parms[n] = _base.GetParamValueInt64((IntPtr)argint[n]);
             break;
           case TypeAffinity.Double:
-            parms[n] = _base.GetParamValueDouble(argint[n]);
+            parms[n] = _base.GetParamValueDouble((IntPtr)argint[n]);
             break;
           case TypeAffinity.Text:
-            parms[n] = _base.GetParamValueText(argint[n]);
-            //s = _base.GetParamValueText(argint[n]);
-            //if (_base.TryToDateTime(s, out dt) == true) parms[n] = dt;
-            //else parms[n] = s;
+            parms[n] = _base.GetParamValueText((IntPtr)argint[n]);
             break;
           case TypeAffinity.Blob:
             {
               int x;
               byte[] blob;
 
-              x = (int)_base.GetParamValueBytes(argint[n], 0, null, 0, 0);
+              x = (int)_base.GetParamValueBytes((IntPtr)argint[n], 0, null, 0, 0);
               blob = new byte[x];
-              _base.GetParamValueBytes(argint[n], 0, blob, 0, x);
+              _base.GetParamValueBytes((IntPtr)argint[n], 0, blob, 0, x);
               parms[n] = blob;
             }
             break;
           case TypeAffinity.DateTime: // Never happens here but what the heck, maybe it will one day.
-            parms[n] = _base.ToDateTime(_base.GetParamValueText(argint[n]));
+            parms[n] = _base.ToDateTime(_base.GetParamValueText((IntPtr)argint[n]));
             break;
         }
       }

@@ -1039,7 +1039,7 @@ namespace System.Data.SQLite
                         row["COLUMN_HASDEFAULT"] = (schemaRow[SchemaTableOptionalColumn.DefaultValue] != DBNull.Value);
                         row["COLUMN_DEFAULT"] = schemaRow[SchemaTableOptionalColumn.DefaultValue];
                         row["IS_NULLABLE"] = schemaRow[SchemaTableColumn.AllowDBNull];
-                        row["DATA_TYPE"] = SQLiteConvert.DbTypeToType((DbType)schemaRow[SchemaTableColumn.ProviderType]).ToString();
+                        row["DATA_TYPE"] = schemaRow["DataTypeName"]; // SQLiteConvert.DbTypeToType((DbType)schemaRow[SchemaTableColumn.ProviderType]).ToString();
                         row["CHARACTER_MAXIMUM_LENGTH"] = schemaRow[SchemaTableColumn.ColumnSize];
                         row["TABLE_SCHEMA"] = schemaRow[SchemaTableColumn.BaseSchemaName];
                         row["PRIMARY_KEY"] = schemaRow[SchemaTableColumn.IsKey];

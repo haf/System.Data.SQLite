@@ -468,6 +468,7 @@ namespace System.Data.SQLite
       tbl.Columns.Add(SchemaTableOptionalColumn.IsReadOnly, typeof(Boolean));
       tbl.Columns.Add(SchemaTableOptionalColumn.ProviderSpecificDataType, typeof(Type));
       tbl.Columns.Add(SchemaTableOptionalColumn.DefaultValue, typeof(object));
+      tbl.Columns.Add("DataTypeName", typeof(string));
 
       tbl.BeginLoadData();
 
@@ -478,9 +479,9 @@ namespace System.Data.SQLite
         // Default settings for the column
         row[SchemaTableColumn.ColumnName] = GetName(n);
         row[SchemaTableColumn.ColumnOrdinal] = n;
-        row[SchemaTableColumn.ColumnSize] = SQLiteConvert.DbTypeToColumnSize(GetSQLiteType(n).Type);
+//        row[SchemaTableColumn.ColumnSize] = SQLiteConvert.DbTypeToColumnSize(GetSQLiteType(n).Type);
         row[SchemaTableColumn.NumericPrecision] = 255;
-        row[SchemaTableColumn.NumericScale] = 0;
+        row[SchemaTableColumn.NumericScale] = 255;
         row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
         row[SchemaTableColumn.IsLong] = (GetSQLiteType(n).Type == DbType.Binary);
         row[SchemaTableColumn.AllowDBNull] = true;
@@ -491,15 +492,20 @@ namespace System.Data.SQLite
         row[SchemaTableOptionalColumn.IsAutoIncrement] = false;
         row[SchemaTableOptionalColumn.IsReadOnly] = false;
         row[SchemaTableColumn.DataType] = GetFieldType(n);
+        row[SchemaTableOptionalColumn.IsHidden] = false;
 
         strColumn = _command.Connection._sql.ColumnOriginalName(_activeStatement, n);
         if (String.IsNullOrEmpty(strColumn) == false) row[SchemaTableColumn.BaseColumnName] = strColumn;
+        
+        row[SchemaTableColumn.IsExpression] = String.IsNullOrEmpty(strColumn);
+        row[SchemaTableColumn.IsAliased] = (String.Compare(GetName(n), strColumn, true, CultureInfo.InvariantCulture) != 0);
 
         temp = _command.Connection._sql.ColumnTableName(_activeStatement, n);
         if (String.IsNullOrEmpty(temp) == false) row[SchemaTableColumn.BaseTableName] = temp;
 
         temp = _command.Connection._sql.ColumnDatabaseName(_activeStatement, n);
         if (String.IsNullOrEmpty(temp) == false) row[SchemaTableOptionalColumn.BaseCatalogName] = temp;
+
 
         // If we have a table-bound column, extract the extra information from it
         if (String.IsNullOrEmpty(strColumn) == false)
@@ -532,6 +538,8 @@ namespace System.Data.SQLite
             if (arSize.Length > 1)
               row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
           }
+
+          row["DataTypeName"] = dataType;
 
           if (wantDefaultValue)
           {

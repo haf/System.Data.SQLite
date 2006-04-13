@@ -10,6 +10,7 @@ namespace System.Data.SQLite
   using System;
   using System.Data;
   using System.Data.Common;
+  using System.ComponentModel;
 
   /// <summary>
   /// SQLite implementation of DbParameter.
@@ -41,7 +42,8 @@ namespace System.Data.SQLite
     /// </summary>
     private int            _dataSize;
 
-    private bool _nullMapping;
+    private bool           _nullable;
+    private bool           _nullMapping;
 
     /// <summary>
     /// Default constructor
@@ -185,6 +187,7 @@ namespace System.Data.SQLite
       _objValue = null;
       _dataSize = parameterSize;
       _nullMapping = false;
+      _nullable = true;
     }
 
     /// <summary>
@@ -242,16 +245,17 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns True.
+    /// Whether or not the parameter can contain a null value
     /// </summary>
     public override bool IsNullable
     {
       get
       {
-        return true;
+        return _nullable;
       }
       set 
       {
+        _nullable = value;
       }
     }
 
@@ -260,6 +264,7 @@ namespace System.Data.SQLite
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
     [DbProviderSpecificTypeProperty(true)]
+    [RefreshProperties(RefreshProperties.All)]
 #endif
     public override DbType DbType
     {
@@ -310,12 +315,14 @@ namespace System.Data.SQLite
     /// </summary>
     public override void ResetDbType()
     {
-      throw new NotImplementedException();
     }
 
     /// <summary>
     /// Returns the size of the parameter
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DefaultValue((int)0)]
+#endif
     public override int Size
     {
       get
@@ -376,6 +383,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets and sets the parameter value.  If no datatype was specified, the datatype will assume the type from the value given.
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [TypeConverter(typeof(StringConverter)), RefreshProperties(RefreshProperties.All)]
+#endif
     public override object Value
     {
       get

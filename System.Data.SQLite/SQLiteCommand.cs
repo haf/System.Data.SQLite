@@ -263,6 +263,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// The amount of time to wait for the connection to become available before erroring out
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DefaultValue((int)30)]
+#endif
     public override int CommandTimeout
     {
       get
