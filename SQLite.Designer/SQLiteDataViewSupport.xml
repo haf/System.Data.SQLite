@@ -35,6 +35,7 @@
 						<Children>
               <Selection type="Table" filter="TYPE='TABLE'">
                 <SelectionNode nid="Table">
+                  <Icon name="Table"/>
                   <Children>
                     <SubHierarchyRef name="Table children"/>
                   </Children>
@@ -51,6 +52,7 @@
             <Children>
               <Selection type="Table" filter="TYPE='SYSTEM_TABLE'">
                 <SelectionNode nid="Table">
+                  <Icon name="Table"/>
                   <Children>
                     <SubHierarchyRef name="Table children"/>
                   </Children>

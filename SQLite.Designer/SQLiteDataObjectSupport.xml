@@ -110,18 +110,22 @@
 						</Concept>
 					</Concepts>
 				</Property>
-				<Property name="SystemType" type="System.String" itemName="data_type">
-					<Concepts>
-            <Concept name="FrameworkDataType"/>
+        <Property name="SystemType" type="System.String" itemName="data_type">
+          <Concepts>
+            <Concept name="UserDataType"/>
+            <Concept name="NativeDataType"/>
             <Concept name="ProviderDataType">
-              <Conversion mapper="SQLite.Designer.SQLiteObjectConceptMapper"/>
+              <Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
             </Concept>
             <Concept name="ProviderDbType">
-              <Conversion mapper="SQLite.Designer.SQLiteObjectConceptMapper"/>
+              <Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
+            </Concept>
+            <Concept name="FrameworkDataType">
+              <Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
             </Concept>
           </Concepts>
-				</Property>
-				<Property name="Length" type="System.Int32" itemName='character_maximum_length'>
+        </Property>
+        <Property name="Length" type="System.Int32" itemName='character_maximum_length'>
 					<Concepts>
 						<Concept name="Length"/>
 					</Concepts>
@@ -274,22 +278,22 @@
 						</Concept>
 					</Concepts>
 				</Property>
-				<Property name="SystemType" type="System.String" itemName="data_type">
-					<Concepts>
-						<Concept name="UserDataType"/>
-						<Concept name="NativeDataType"/>
-						<Concept name="ProviderDataType">
-							<Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
-						</Concept>
-						<Concept name="ProviderDbType">
-							<Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
-						</Concept>
-						<Concept name="FrameworkDataType">
-							<Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
-						</Concept>
-					</Concepts>
-				</Property>
-				<Property name="Length" type="System.Int32" itemName='character_maximum_length'>
+        <Property name="SystemType" type="System.String" itemName="data_type">
+          <Concepts>
+            <Concept name="UserDataType"/>
+            <Concept name="NativeDataType"/>
+            <Concept name="ProviderDataType">
+              <Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
+            </Concept>
+            <Concept name="ProviderDbType">
+              <Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
+            </Concept>
+            <Concept name="FrameworkDataType">
+              <Conversion mapper="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectConceptMapper"/>
+            </Concept>
+          </Concepts>
+        </Property>
+        <Property name="Length" type="System.Int32" itemName='character_maximum_length'>
 					<Concepts>
 						<Concept name="Length"/>
 					</Concepts>

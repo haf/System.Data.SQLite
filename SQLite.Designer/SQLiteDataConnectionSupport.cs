@@ -8,8 +8,6 @@
 namespace SQLite.Designer
 {
   using System;
-  using System.Collections.Generic;
-  using System.Text;
   using Microsoft.VisualStudio.Data;
   using Microsoft.VisualStudio.OLE.Interop;
   using Microsoft.VisualStudio.Data.AdoDotNet;

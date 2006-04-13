@@ -87,7 +87,6 @@
     <Compile Include="SQLiteDataSourceInformation.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="SQLiteDataViewSupport.cs" />
-    <Compile Include="SQLiteObjectConceptMapper.cs" />
     <Compile Include="SQLitePackage.cs" />
     <Compile Include="SQLiteProviderObjectFactory.cs" />
     <Compile Include="VSPackage.Designer.cs">
