@@ -23,6 +23,29 @@
     </div>
     <div id="nstext">
       <h1 class="dtH1">Version History</h1>
+    <p><b>1.0.28.0 - April 14, 2006</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.5</li>
+      <li>You can now specify a relative path in the Compact Framework's "Data Source" by
+        prefixing the file with ".\".&nbsp; i.e. "Data Source=.\\mydb.db3"</li>
+      <li>Several more changes and enhancements to schemas for better compatibility.</li>
+      <li>Fixed several bugs with the 64-bit builds of the provider.&nbsp; The x64 binary
+        is now optimized.</li>
+      <li>Design-time installer now tries to install the 64-bit builds into the GAC along
+        with the 32-bit build.</li>
+      <li>Fixed a bug in the SQLiteDataReader.GetSchemaTable() function when used with tables
+        containing apostrophes.</li>
+      <li>Fixed an XSD-related bug whereby the XSD utility was unable to locate the provider
+        and could not generate typed datasets.</li>
+      <li>Added NTEXT and STRING datatypes to the list of recognized keywords (used for
+        schema retrieval).</li>
+      <li>Due to the XSD bug and other potential problems related to external build utilities,
+        changes to the installation of the designer have had to be made.&nbsp; The installer
+        used to write the DbProviderFactories XML into the devenv.exe.config file and its
+        express cousins, but now has to write instead to the machine.config.</li>
+      <li>Installer writes to both the 32-bit machine.config and the 64-bit machine.config
+        if it exists.&nbsp;</li>
+    </ul>
     <p><b>1.0.27.1 - February 28, 2006</b></p>
     <ul>
     <li>Fixed a bug when doing data binding in Compact Framework projects that prevented
