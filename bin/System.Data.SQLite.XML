@@ -438,7 +438,7 @@
             <param name="parameterType">The data type</param>
             <returns>A SQLiteParameter object</returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteParameterCollection.Add(System.Data.Common.DbParameter)">
+        <member name="M:System.Data.SQLite.SQLiteParameterCollection.Add(System.Data.SQLite.SQLiteParameter)">
             <summary>
             Adds a parameter to the collection
             </summary>
@@ -460,7 +460,7 @@
             <param name="value">The initial value of the parameter</param>
             <returns>Returns the SQLiteParameter object created during the call.</returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteParameterCollection.AddRange(System.Data.Common.DbParameter[])">
+        <member name="M:System.Data.SQLite.SQLiteParameterCollection.AddRange(System.Data.SQLite.SQLiteParameter[])">
             <summary>
             Adds an array of parameters to the collection
             </summary>
@@ -641,7 +641,7 @@
             The source column for the parameter
             </summary>
         </member>
-        <member name="F:System.Data.SQLite.SQLiteParameter._columnName">
+        <member name="F:System.Data.SQLite.SQLiteParameter._parameterName">
             <summary>
             The column name
             </summary>
@@ -761,7 +761,22 @@
             <param name="scale">Ignored</param>
             <param name="sourceColumn">The source column</param>
             <param name="rowVersion">The row version information</param>
-            <param name="value">The initial value to assign the parameter</param>
+            <param name="value">The initial value to assign the parameter</param>   
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteParameter.#ctor(System.String,System.Data.DbType,System.Int32,System.Data.ParameterDirection,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Boolean,System.Object)">
+            <summary>
+            Constructs a named parameter, yet another flavor
+            </summary>
+            <param name="parameterName">The name of the parameter</param>
+            <param name="parameterType">The data type</param>
+            <param name="parameterSize">The size of the parameter</param>
+            <param name="direction">Only input parameters are supported in SQLite</param>
+            <param name="precision">Ignored</param>
+            <param name="scale">Ignored</param>
+            <param name="sourceColumn">The source column</param>
+            <param name="rowVersion">The row version information</param>
+            <param name="sourceColumnNullMapping">Whether or not this parameter is for comparing NULL's</param>
+            <param name="value">The intial value to assign the parameter</param>
         </member>
         <member name="M:System.Data.SQLite.SQLiteParameter.#ctor(System.Data.DbType,System.Int32)">
             <summary>
@@ -800,7 +815,7 @@
         </member>
         <member name="P:System.Data.SQLite.SQLiteParameter.IsNullable">
             <summary>
-            Returns True.
+            Whether or not the parameter can contain a null value
             </summary>
         </member>
         <member name="P:System.Data.SQLite.SQLiteParameter.DbType">
@@ -990,6 +1005,13 @@
             </summary>
             <param name="typ">The native type to convert</param>
             <returns>The corresponding (closest match) DbType</returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.DbTypeToColumnSize(System.Data.DbType)">
+            <summary>
+            Returns the ColumnSize for the given DbType
+            </summary>
+            <param name="typ">The DbType to get the size of</param>
+            <returns></returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConvert.DbTypeToType(System.Data.DbType)">
             <summary>
@@ -1338,14 +1360,14 @@
             <param name="argsptr">A pointer to the array of arguments</param>
             <returns>An object array of the arguments once they've been converted to .NET values</returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteFunction.SetReturnValue(System.Int32,System.Object)">
+        <member name="M:System.Data.SQLite.SQLiteFunction.SetReturnValue(System.IntPtr,System.Object)">
             <summary>
             Takes the return value from Invoke() and Final() and figures out how to return it to SQLite's context.
             </summary>
             <param name="context">The context the return value applies to</param>
             <param name="returnValue">The parameter to return to SQLite</param>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteFunction.ScalarCallback(System.Int32,System.Int32,System.IntPtr)">
+        <member name="M:System.Data.SQLite.SQLiteFunction.ScalarCallback(System.IntPtr,System.Int32,System.IntPtr)">
             <summary>
             Internal scalar callback function, which wraps the raw context pointer and calls the virtual Invoke() method.
             </summary>
@@ -1364,7 +1386,7 @@
             <returns>Returns -1 if the first string is less than the second.  0 if they are equal, or 1 if the first string is greater
             than the second.</returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteFunction.StepCallback(System.Int32,System.Int32,System.IntPtr)">
+        <member name="M:System.Data.SQLite.SQLiteFunction.StepCallback(System.IntPtr,System.Int32,System.IntPtr)">
             <summary>
             The internal aggregate Step function callback, which wraps the raw context pointer and calls the virtual Step() method.
             </summary>
@@ -1377,7 +1399,7 @@
             <param name="nArgs">Number of arguments passed in</param>
             <param name="argsptr">A pointer to the array of arguments</param>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteFunction.FinalCallback(System.Int32,System.Int32,System.IntPtr)">
+        <member name="M:System.Data.SQLite.SQLiteFunction.FinalCallback(System.IntPtr,System.Int32,System.IntPtr)">
             <summary>
             An internal aggregate Final function callback, which wraps the context pointer and calls the virtual Final() method.
             </summary>
@@ -2578,7 +2600,7 @@
             Command this statement belongs to (if any)
             </summary>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteStatement.#ctor(System.Data.SQLite.SQLiteBase,System.Int32,System.String,System.Data.SQLite.SQLiteStatement)">
+        <member name="M:System.Data.SQLite.SQLiteStatement.#ctor(System.Data.SQLite.SQLiteBase,System.IntPtr,System.String,System.Data.SQLite.SQLiteStatement)">
             <summary>
             Initializes the statement and attempts to get all information about parameters in the statement
             </summary>
@@ -2928,16 +2950,9 @@
         </member>
         <member name="M:System.Data.SQLite.SQLiteDataReader.GetSchemaTable">
             <summary>
-            Schema information in SQLite is an iffy-business.  We've extended the native SQLite3.DLL to include a special pragma called
-            PRAGMA real_column_names
-            When enabled, the pragma causes all column aliases to be ignored, and the full Database.Table.ColumnName to be returned for
-            each column of a SELECT statement.  Using this information it is then possible to query each database and table for the
-            matching column, and associate it with the active statement.
+            Schema information in SQLite is difficult to map into .NET conventions, so a lot of work must be done
+            to gather the necessary information so it can be represented in an ADO.NET manner.
             </summary>
-            <remarks>
-            The current connection is cloned for the sake of executing this statement, so as to avoid any possibility of corrupting the
-            original connection's existing statements or state.  Any attached databases are re-attached to the new connection.
-            </remarks>
             <returns>Returns a DataTable containing the schema information for the active SELECT statement being processed.</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteDataReader.GetString(System.Int32)">

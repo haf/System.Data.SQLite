@@ -11,14 +11,10 @@ namespace System.Data.SQLite
   using System.Data;
   using System.Data.Common;
   using System.ComponentModel;
-  using System.Globalization;
 
   /// <summary>
   /// SQLite implementation of DbParameter.
   /// </summary>
-#if !PLATFORM_COMPACTFRAMEWORK
-  [TypeConverter(typeof(SQLiteParameterConverter))]
-#endif
   public sealed class SQLiteParameter : DbParameter, ICloneable
   {
     /// <summary>
@@ -40,7 +36,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The column name
     /// </summary>
-    private string         _columnName;
+    private string         _parameterName;
     /// <summary>
     /// The data size, unused by SQLite
     /// </summary>
@@ -184,7 +180,7 @@ namespace System.Data.SQLite
     /// <param name="rowVersion">The row version information</param>
     public SQLiteParameter(string parameterName, DbType parameterType, int parameterSize, string sourceColumn, DataRowVersion rowVersion)      
     {
-      _columnName = parameterName;
+      _parameterName = parameterName;
       _dbType = (int)parameterType;
       _sourceColumn = sourceColumn;
       _rowVersion = rowVersion;
@@ -192,6 +188,12 @@ namespace System.Data.SQLite
       _dataSize = parameterSize;
       _nullMapping = false;
       _nullable = true;
+    }
+
+    private SQLiteParameter(SQLiteParameter source)
+      : this(source.ParameterName, (DbType)source._dbType, 0, source.Direction, source.IsNullable, 0, 0, source.SourceColumn, source.SourceVersion, source.Value)
+    {
+      _nullMapping = source._nullMapping;
     }
 
     /// <summary>
@@ -333,11 +335,11 @@ namespace System.Data.SQLite
     {
       get
       {
-        return _columnName;
+        return _parameterName;
       }
       set
       {
-        _columnName = value;
+        _parameterName = value;
       }
     }
 
@@ -437,65 +439,9 @@ namespace System.Data.SQLite
     /// <returns>A new, unassociated SQLiteParameter</returns>
     public object Clone()
     {
-      SQLiteParameter newparam = new SQLiteParameter(ParameterName, this.DbType, Size, Direction, IsNullable, 0, 0, SourceColumn, SourceVersion, Value);
+      SQLiteParameter newparam = new SQLiteParameter(this);
 
       return newparam;
     }
-
-#if !PLATFORM_COMPACT_FRAMEWORK
-    internal sealed class SQLiteParameterConverter : ExpandableObjectConverter
-    {
-      public SQLiteParameterConverter()
-      {
-      }
-
-      public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-      {
-        if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType)
-        {
-          return true;
-        }
-
-        return base.CanConvertTo(context, destinationType);
-      }
-
-      public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
-      {
-        if (destinationType == null)
-        {
-          throw new ArgumentNullException();
-        }
-
-        if ((typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType) && (value is SQLiteParameter))
-        {
-          return ConvertToInstanceDescriptor(value as SQLiteParameter);
-        }
-
-        return base.ConvertTo(context, culture, value, destinationType);
-      }
-
-      private System.ComponentModel.Design.Serialization.InstanceDescriptor ConvertToInstanceDescriptor(SQLiteParameter parameter)
-      {
-        Type[] types = null;
-        object[] parms = null;
-
-        if (parameter.SourceColumnNullMapping == true)
-        {
-          // (string parameterName, DbType parameterType, int parameterSize, ParameterDirection direction, byte precision, byte scale, string sourceColumn, DataRowVersion rowVersion, bool sourceColumnNullMapping, object value)
-          types = new Type[] { typeof(string), typeof(DbType), typeof(int), typeof(ParameterDirection), typeof(byte), typeof(byte), typeof(string), typeof(DataRowVersion), typeof(bool), typeof(object) };
-          parms = new object[] { parameter.ParameterName, (DbType)parameter._dbType, 0, parameter.Direction, 0, 0, parameter.SourceColumn, parameter.SourceVersion, parameter.SourceColumnNullMapping, parameter.Value };
-        }
-        else
-        {
-          // (string parameterName, DbType parameterType, int parameterSize, ParameterDirection direction, bool isNullable, byte precision, byte scale, string sourceColumn, DataRowVersion rowVersion, object value)
-          types = new Type[] { typeof(string), typeof(DbType), typeof(int), typeof(ParameterDirection), typeof(bool), typeof(byte), typeof(byte), typeof(string), typeof(DataRowVersion), typeof(object) };
-          parms = new object[] { parameter.ParameterName, (DbType)parameter._dbType, parameter.Direction, parameter.IsNullable, 0, 0, parameter.SourceColumn, parameter.SourceVersion, parameter.Value };
-        }
-
-        System.Reflection.ConstructorInfo info = typeof(SQLiteParameter).GetConstructor(types);
-        return new System.ComponentModel.Design.Serialization.InstanceDescriptor(info, parms);
-      }
-    }
-#endif
   }
 }
