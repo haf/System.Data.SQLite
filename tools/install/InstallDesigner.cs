@@ -781,11 +781,17 @@ namespace install
 
       foreach (string subfolder in lookIn)
       {
-        currentDir = Path.Combine(installDir, subfolder);
-        FixXmlLibPaths(currentDir, "VCProjectEngine.DLL*.config", sqlitePath, install);
-        FixXmlLibPaths(currentDir, "AMD64.VCPlatform.config", Path.Combine(sqlitePath, "x64"), install);
-        FixXmlLibPaths(currentDir, "Itanium.VCPlatform.config", Path.Combine(sqlitePath, "itanium"), install);
-        FixXmlLibPaths(currentDir, "WCE.VCPlatform.config", Path.Combine(sqlitePath, "CompactFramework"), install);
+        try
+        {
+          currentDir = Path.Combine(installDir, subfolder);
+          FixXmlLibPaths(currentDir, "VCProjectEngine.DLL*.config", sqlitePath, install);
+          FixXmlLibPaths(currentDir, "AMD64.VCPlatform.config", Path.Combine(sqlitePath, "x64"), install);
+          FixXmlLibPaths(currentDir, "Itanium.VCPlatform.config", Path.Combine(sqlitePath, "itanium"), install);
+          FixXmlLibPaths(currentDir, "WCE.VCPlatform.config", Path.Combine(sqlitePath, "CompactFramework"), install);
+        }
+        catch
+        {
+        }
       }
 
       FixLocalUserPaths(install);
