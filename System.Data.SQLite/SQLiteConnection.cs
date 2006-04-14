@@ -878,8 +878,34 @@ namespace System.Data.SQLite
           return Schema_ForeignKeys(parms[0], parms[2], parms[3]);
         case "CATALOGS":
           return Schema_Catalogs(parms[0]);
+        case "RESERVEDWORDS":
+          return Schema_ReservedWords();
       }
       throw new NotSupportedException();
+    }
+
+    private static DataTable Schema_ReservedWords()
+    {
+      DataTable tbl = new DataTable("MetaDataCollections");
+
+      tbl.Locale = CultureInfo.InvariantCulture;
+      tbl.Columns.Add("ReservedWord", typeof(string));
+      tbl.Columns.Add("MaximumVersion", typeof(string));
+      tbl.Columns.Add("MinimumVersion", typeof(string));
+
+      tbl.BeginLoadData();
+      DataRow row;
+      foreach (string word in SR.Keywords.Split(new char[] { ',' }))
+      {
+        row = tbl.NewRow();
+        row[0] = word;
+        tbl.Rows.Add(row);
+      }
+
+      tbl.AcceptChanges();
+      tbl.EndLoadData();
+
+      return tbl;
     }
 
     /// <summary>

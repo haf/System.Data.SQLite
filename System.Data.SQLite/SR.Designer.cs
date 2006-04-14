@@ -19,13 +19,16 @@ namespace System.Data.SQLite {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "2.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class SR {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal SR() {
         }
         
@@ -61,21 +64,30 @@ namespace System.Data.SQLite {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; standalone=&quot;yes&quot;?&gt;
         ///&lt;DocumentElement&gt;
         ///  &lt;DataTypes&gt;
-        ///    &lt;TypeName&gt;System.Int16&lt;/TypeName&gt;
+        ///    &lt;TypeName&gt;smallint&lt;/TypeName&gt;
         ///    &lt;ProviderDbType&gt;10&lt;/ProviderDbType&gt;
         ///    &lt;ColumnSize&gt;5&lt;/ColumnSize&gt;
         ///    &lt;DataType&gt;System.Int16&lt;/DataType&gt;
+        ///    &lt;CreateFormat&gt;smallint&lt;/CreateFormat&gt;
         ///    &lt;IsAutoIncrementable&gt;false&lt;/IsAutoIncrementable&gt;
         ///    &lt;IsCaseSensitive&gt;false&lt;/IsCaseSensitive&gt;
         ///    &lt;IsFixedLength&gt;true&lt;/IsFixedLength&gt;
         ///    &lt;IsFixedPrecisionScale&gt;true&lt;/IsFixedPrecisionScale&gt;
         ///    &lt;IsLong&gt;false&lt;/IsLong&gt;
-        ///    &lt;IsNullable&gt;true&lt;/IsNullable&gt;
-        ///    &lt;IsSearchable&gt;true&lt;/Is [rest of string was truncated]&quot;;.
+        ///    &lt;IsNullable&gt;true&lt;/ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DataTypes {
             get {
                 return ResourceManager.GetString("DataTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ALL,ALTER,AND,AS,AUTOINCREMENT,BETWEEN,BY,CASE,CHECK,COLLATE,COMMIT,CONSTRAINT,CREATE,CROSS,DEFAULT,DEFERRABLE,DELETE,DISTINCT,DROP,ELSE,ESCAPE,EXCEPT,FOREIGN,FROM,FULL,GROUP,HAVING,IN,INDEX,INNER,INSERT,INTERSECT,INTO,IS,ISNULL,JOIN,LEFT,LIMIT,NATURAL,NOT,NOTNULL,NULL,ON,OR,ORDER,OUTER,PRIMARY,REFERENCES,RIGHT,ROLLBACK,SELECT,SET,TABLE,THEN,TO,TRANSACTION,UNION,UNIQUE,UPDATE,USING,VALUES,WHEN,WHERE.
+        /// </summary>
+        internal static string Keywords {
+            get {
+                return ResourceManager.GetString("Keywords", resourceCulture);
             }
         }
         

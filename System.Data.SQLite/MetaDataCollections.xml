@@ -16,6 +16,11 @@
     <NumberOfIdentifierParts>0</NumberOfIdentifierParts>
   </MetaDataCollections>
   <MetaDataCollections>
+    <CollectionName>ReservedWords</CollectionName>
+    <NumberOfRestrictions>0</NumberOfRestrictions>
+    <NumberOfIdentifierParts>0</NumberOfIdentifierParts>
+  </MetaDataCollections>
+  <MetaDataCollections>
     <CollectionName>Catalogs</CollectionName>
     <NumberOfRestrictions>1</NumberOfRestrictions>
     <NumberOfIdentifierParts>1</NumberOfIdentifierParts>
