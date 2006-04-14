@@ -138,7 +138,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="parameter">The parameter to add</param>
     /// <returns>A zero-based index of where the parameter is located in the array</returns>
-    public int Add(DbParameter parameter)
+    public int Add(SQLiteParameter parameter)
     {
       int n = -1;
 
@@ -163,6 +163,9 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="value">The parameter to add</param>
     /// <returns>A zero-based index of where the parameter is located in the array</returns>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
     public override int Add(object value)
     {
       return Add((SQLiteParameter)value);
@@ -186,7 +189,7 @@ namespace System.Data.SQLite
     /// Adds an array of parameters to the collection
     /// </summary>
     /// <param name="values">The array of parameters to add</param>
-    public void AddRange(DbParameter[] values)
+    public void AddRange(SQLiteParameter[] values)
     {
       int x = values.Length;
       for (int n = 0; n < x; n++)
