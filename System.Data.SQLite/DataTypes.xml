@@ -19,7 +19,7 @@
   </DataTypes>
   <DataTypes>
     <TypeName>int</TypeName>
-    <ProviderDbType>8</ProviderDbType>
+    <ProviderDbType>11</ProviderDbType>
     <ColumnSize>10</ColumnSize>
     <DataType>System.Int32</DataType>
     <CreateFormat>int</CreateFormat>
