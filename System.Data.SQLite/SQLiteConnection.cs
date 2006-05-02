@@ -680,10 +680,11 @@ namespace System.Data.SQLite
 
         _dataSource = System.IO.Path.GetFileNameWithoutExtension(fileName);
 
-        _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Synchronous={0}", FindKey(opts, "Synchronous", "Normal")));
-        _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Cache_Size={0}", FindKey(opts, "Cache Size", "2000")));
         if (fileName != ":memory:")
           _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Page_Size={0}", FindKey(opts, "Page Size", "1024")));
+
+        _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Synchronous={0}", FindKey(opts, "Synchronous", "Normal")));
+        _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Cache_Size={0}", FindKey(opts, "Cache Size", "2000")));
 
 #if !PLATFORM_COMPACTFRAMEWORK
         if (FindKey(opts, "Enlist", "Y").ToUpper()[0] == 'Y' && Transactions.Transaction.Current != null)

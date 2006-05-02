@@ -58,11 +58,18 @@ namespace System.Data.SQLite
 
     internal override SQLiteStatement Prepare(string strSql, SQLiteStatement previous, out string strRemain)
     {
-      IntPtr stmt;
-      IntPtr ptr;
-      int len;
+      IntPtr stmt = IntPtr.Zero;
+      IntPtr ptr = IntPtr.Zero;
+      int len = 0;
+      int n = 17;
+      int retries = 0;
 
-      int n = UnsafeNativeMethods.sqlite3_prepare16_interop(_sql, strSql, strSql.Length, out stmt, out ptr, out len);
+      while (n == 17 && retries < 3)
+      {
+        n = UnsafeNativeMethods.sqlite3_prepare16_interop(_sql, strSql, strSql.Length, out stmt, out ptr, out len);
+        retries++;
+      }
+
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
 
       strRemain = ToString(ptr, len);

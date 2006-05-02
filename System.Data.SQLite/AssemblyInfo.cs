@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 #if !PLATFORM_COMPACTFRAMEWORK
 using System.Runtime.ConstrainedExecution;
@@ -18,6 +19,8 @@ using System.Runtime.ConstrainedExecution;
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+
 #if PLATFORM_COMPACTFRAMEWORK
 [assembly: AssemblyFlags(AssemblyNameFlags.Retargetable)]
 #endif

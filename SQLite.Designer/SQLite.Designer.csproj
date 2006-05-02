@@ -122,7 +122,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="C:\Program Files (x86)\Visual Studio 2005 SDK\2006.03\VisualStudioIntegration\Tools\Build\Microsoft.VsSDK.targets" />
+  <Import Project="C:\Program Files\Visual Studio 2005 SDK\2006.04\VisualStudioIntegration\Tools\Build\Microsoft.VsSDK.targets" />
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
