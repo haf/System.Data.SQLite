@@ -1335,7 +1335,7 @@ namespace System.Data.SQLite
             if (String.Compare(rd.GetString(1), strView, true, CultureInfo.InvariantCulture) == 0
               || String.IsNullOrEmpty(strView))
             {
-              strItem = rd.GetString(4);
+              strItem = rd.GetString(4).Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ');
               nPos = Globalization.CultureInfo.InvariantCulture.CompareInfo.IndexOf(strItem, " AS ", CompareOptions.IgnoreCase);
               if (nPos > -1)
               {
