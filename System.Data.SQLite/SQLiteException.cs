@@ -144,8 +144,10 @@ namespace System.Data.SQLite
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
   [Serializable]
-#endif
+  public sealed class SQLiteException : DbException
+#else
   public sealed class SQLiteException : Exception
+#endif
   {
     private SQLiteErrorCode _errorCode;
 
@@ -196,7 +198,11 @@ namespace System.Data.SQLite
     /// <summary>
     /// Retrieves the underlying SQLite error code for this exception
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    public new SQLiteErrorCode ErrorCode
+#else
     public SQLiteErrorCode ErrorCode
+#endif
     {
       get { return _errorCode; }
     }
