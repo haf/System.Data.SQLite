@@ -19,7 +19,6 @@ using System.Runtime.ConstrainedExecution;
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 #if PLATFORM_COMPACTFRAMEWORK
 [assembly: AssemblyFlags(AssemblyNameFlags.Retargetable)]
@@ -34,6 +33,7 @@ using System.Runtime.ConstrainedExecution;
 
 #if !PLATFORM_COMPACTFRAMEWORK
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 #endif
 
 // Version information for an assembly consists of the following four values:
