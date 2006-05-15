@@ -506,6 +506,8 @@ namespace System.Data.SQLite
         temp = _command.Connection._sql.ColumnDatabaseName(_activeStatement, n);
         if (String.IsNullOrEmpty(temp) == false) row[SchemaTableOptionalColumn.BaseCatalogName] = temp;
 
+        if (GetSQLiteType(n).Type != DbType.String && GetSQLiteType(n).Type != DbType.Binary)
+          row[SchemaTableColumn.ColumnSize] = System.Runtime.InteropServices.Marshal.SizeOf(GetFieldType(n));
 
         // If we have a table-bound column, extract the extra information from it
         if (String.IsNullOrEmpty(strColumn) == false)
@@ -536,7 +538,19 @@ namespace System.Data.SQLite
             dataType = arSize[0];
             arSize = arSize[1].Split(')');
             if (arSize.Length > 1)
-              row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
+            {
+              arSize = arSize[0].Split(',', '.');
+              if (GetSQLiteType(n).Type == DbType.String || GetSQLiteType(n).Type == DbType.Binary)
+              {
+                row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
+              }
+              else
+              {
+                row[SchemaTableColumn.NumericPrecision] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
+                if (arSize.Length > 1)
+                  row[SchemaTableColumn.NumericScale] = Convert.ToInt32(arSize[1], CultureInfo.InvariantCulture);
+              }
+            }
           }
 
           row["DataTypeName"] = dataType;
