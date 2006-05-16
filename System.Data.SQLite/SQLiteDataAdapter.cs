@@ -17,7 +17,7 @@ namespace System.Data.SQLite
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
   [DefaultEvent("RowUpdated")]
-  [ToolboxItem("SQLite.Designer.SQLiteDataAdapterToolboxItem, SQLite.Designer, Version=1.0.28.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139")]
+  [ToolboxItem("SQLite.Designer.SQLiteDataAdapterToolboxItem, SQLite.Designer, Version=1.0.29.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139")]
   [Designer("Microsoft.VSDesigner.Data.VS.SqlDataAdapterDesigner, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
   public sealed class SQLiteDataAdapter : DbDataAdapter

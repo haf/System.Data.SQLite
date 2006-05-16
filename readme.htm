@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.28.0 Apr 14, 2006<br>
+    Version 1.0.29.0 May 16, 2006<br>
     Using SQLite 3.3.5<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -119,6 +119,13 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.29.0 - May 16, 2006</b></p>
+    <ul>
+    <li>Fixed a bug in the Views schema information which caused multi-line view definition statements not to be parsed</li>
+    <li>Fixed a parsing bug in SQLiteDataReader.GetSchemaTable() to account for numeric(x,y) datatypes with specified precision and scale</li>
+    <li>Fixed a bug in SQLiteConnection.Open() which tried to automatically enlist in an ambient transaction but had not yet set the state of the database to Opened, thereby causing a transaction fault</li>
+    <li>Changed SQLiteException to inherit from DbException on the full framework</li>
+    </ul>
     <p><b>1.0.28.0 - April 14, 2006</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.5</li>
