@@ -479,7 +479,7 @@ namespace System.Data.SQLite
         // Default settings for the column
         row[SchemaTableColumn.ColumnName] = GetName(n);
         row[SchemaTableColumn.ColumnOrdinal] = n;
-//        row[SchemaTableColumn.ColumnSize] = SQLiteConvert.DbTypeToColumnSize(GetSQLiteType(n).Type);
+        row[SchemaTableColumn.ColumnSize] = SQLiteConvert.DbTypeToColumnSize(GetSQLiteType(n).Type);
         row[SchemaTableColumn.NumericPrecision] = 255;
         row[SchemaTableColumn.NumericScale] = 255;
         row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
@@ -505,9 +505,6 @@ namespace System.Data.SQLite
 
         temp = _command.Connection._sql.ColumnDatabaseName(_activeStatement, n);
         if (String.IsNullOrEmpty(temp) == false) row[SchemaTableOptionalColumn.BaseCatalogName] = temp;
-
-        if (GetSQLiteType(n).Type != DbType.String && GetSQLiteType(n).Type != DbType.Binary)
-          row[SchemaTableColumn.ColumnSize] = System.Runtime.InteropServices.Marshal.SizeOf(GetFieldType(n));
 
         // If we have a table-bound column, extract the extra information from it
         if (String.IsNullOrEmpty(strColumn) == false)
