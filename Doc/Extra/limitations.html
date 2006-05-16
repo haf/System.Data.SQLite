@@ -24,9 +24,7 @@
     <div id="nstext">
       <h1 class="dtH1">Limitations of this ADO.NET SQLite Data Provider</h1>
       <p>As providers go, this one doesn't have many restrictions. SQLite has no 
-        support for row-level or table-level locks. Therefore when a DataReader is 
-        active the database cannot be written to, and when the database is open for 
-        writing no DataReaders can be open. The SQLite.NET provider attempts to retry 
+        support for row-level or table-level locks. When a connection locks the database for writing, no other connection or process may read or write to the database until the write operation is complete.  The SQLite.NET provider attempts to retry 
         internally if a database is locked, up to the CommandTimeout property of the 
         command in question.</p>
       <p>SQLite is inherently type-less, and only understands a few basic datatypes 
