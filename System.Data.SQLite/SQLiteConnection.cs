@@ -1172,7 +1172,12 @@ namespace System.Data.SQLite
                   row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
                   row["UNIQUE"] = true;
 
-                  tbl.Rows.Add(row);
+                  if (String.Compare((string)row["INDEX_NAME"], strIndex, true, CultureInfo.InvariantCulture) == 0
+                  || strIndex == null)
+                  {
+                    tbl.Rows.Add(row);
+                  }
+
                   primaryKeys.Clear();
                 }
               }
@@ -1508,7 +1513,8 @@ namespace System.Data.SQLite
                   row["INDEX_NAME"] = row["CONSTRAINT_NAME"];
                   row["ORDINAL_POSITION"] = primaryKeys[0].Key;
 
-                  tbl.Rows.Add(row);
+                  if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, (string)row["INDEX_NAME"], true, CultureInfo.InvariantCulture) == 0)
+                    tbl.Rows.Add(row);
                 }
               }
 
