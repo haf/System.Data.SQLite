@@ -659,6 +659,8 @@ namespace System.Data.SQLite
         else
           _sql = new SQLite3(dateFormat);
 
+        fileName = ExpandFileName(fileName);
+
         try
         {
           if (IO.File.Exists(fileName) == false)
@@ -785,6 +787,35 @@ namespace System.Data.SQLite
       _password = databasePassword;
     }
 
+    private const string _dataDirectory = "|DataDirectory|";
+
+    private string ExpandFileName(string sourceFile)
+    {
+      if (String.IsNullOrEmpty(sourceFile)) return sourceFile;
+
+      if (sourceFile.StartsWith(_dataDirectory, StringComparison.OrdinalIgnoreCase))
+      {
+        string dataDirectory;
+
+#if PLATFORM_COMPACTFRAMEWORK
+        dataDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase);
+#else
+        dataDirectory = AppDomain.CurrentDomain.GetData("DataDirectory") as string;
+        if (String.IsNullOrEmpty(dataDirectory))
+          dataDirectory = AppDomain.CurrentDomain.BaseDirectory;
+#endif
+
+        if (sourceFile.Length > _dataDirectory.Length)
+        {
+          if (sourceFile[_dataDirectory.Length] == System.IO.Path.DirectorySeparatorChar ||
+              sourceFile[_dataDirectory.Length] == System.IO.Path.AltDirectorySeparatorChar)
+            sourceFile = sourceFile.Remove(_dataDirectory.Length, 1);
+        }
+        sourceFile = System.IO.Path.Combine(dataDirectory, sourceFile.Substring(_dataDirectory.Length));
+      }
+
+      return sourceFile;
+    }
     ///<overloads>
     /// The following commands are used to extract schema information out of the database.  Valid schema types are:
     /// <list type="bullet">
