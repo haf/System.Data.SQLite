@@ -180,6 +180,7 @@ namespace System.Data.SQLite
     /// <param name="typ">The type we want to get out of the column</param>
     private void VerifyType(int i, DbType typ)
     {
+      CheckClosed();
       CheckValidRow();
       SQLiteType t = GetSQLiteType(i);
 
@@ -340,6 +341,7 @@ namespace System.Data.SQLite
     /// <returns>Type</returns>
     public override Type GetFieldType(int i)
     {
+      CheckClosed();
       return SQLiteConvert.SQLiteTypeToType(GetSQLiteType(i));
     }
 
@@ -640,6 +642,8 @@ namespace System.Data.SQLite
     /// <returns>object</returns>
     public override object GetValue(int i)
     {
+      CheckClosed();
+
       SQLiteType typ = GetSQLiteType(i);
 
       return _activeStatement._sql.GetValue(_activeStatement, i, ref typ);
@@ -652,12 +656,17 @@ namespace System.Data.SQLite
     /// <returns>The number of columns retrieved</returns>
     public override int GetValues(object[] values)
     {
+      CheckClosed();
+
+      SQLiteType typ;
       int nMax = _fieldCount;
       if (values.Length < nMax) nMax = values.Length;
 
+
       for (int n = 0; n < nMax; n++)
       {
-        values.SetValue(GetValue(n), n);
+        typ = GetSQLiteType(n);
+        values[n] = _activeStatement._sql.GetValue(_activeStatement, n, ref typ);
       }
 
       return nMax;
@@ -785,7 +794,6 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteType structure</returns>
     private SQLiteType GetSQLiteType(int i)
     {
-      CheckClosed();
       if (_fieldTypeArray == null) _fieldTypeArray = new SQLiteType[_fieldCount];
 
       if (_fieldTypeArray[i].Affinity == TypeAffinity.Uninitialized || _fieldTypeArray[i].Affinity == TypeAffinity.Null)
