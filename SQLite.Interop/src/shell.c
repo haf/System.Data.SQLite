@@ -12,7 +12,7 @@
 ** This file contains code to implement the "sqlite" command line
 ** utility for accessing SQLite databases.
 **
-** $Id: shell.c,v 1.20 2006/04/11 18:06:58 rmsimpson Exp $
+** $Id: shell.c,v 1.21 2006/06/08 04:19:53 rmsimpson Exp $
 */
 #include <stdlib.h>
 #include <string.h>
@@ -197,7 +197,7 @@ static char *one_input_line(const char *zPrior, FILE *in){
   }
   zResult = readline(zPrompt);
 #if defined(HAVE_READLINE) && HAVE_READLINE==1
-  if( zResult ) add_history(zResult);
+  if( zResult && *zResult ) add_history(zResult);
 #endif
   return zResult;
 }
@@ -1471,6 +1471,10 @@ static void process_input(struct callback_data *p, FILE *in){
       if( zLine[i]!=0 ){
         nSql = strlen(zLine);
         zSql = malloc( nSql+1 );
+        if( zSql==0 ){
+          fprintf(stderr, "out of memory\n");
+          exit(1);
+        }
         strcpy(zSql, zLine);
       }
     }else{
@@ -1736,7 +1740,7 @@ int main(int argc, char **argv){
       data.echoOn = 1;
     }else if( strcmp(z,"-version")==0 ){
       printf("%s\n", sqlite3_libversion());
-      return 1;
+      return 0;
     }else if( strcmp(z,"-help")==0 ){
       usage(1);
     }else{

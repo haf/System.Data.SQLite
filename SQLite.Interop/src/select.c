@@ -12,7 +12,7 @@
 ** This file contains C code routines that are called by the parser
 ** to handle SELECT statements in SQLite.
 **
-** $Id: select.c,v 1.21 2006/04/11 18:06:57 rmsimpson Exp $
+** $Id: select.c,v 1.22 2006/06/08 04:19:52 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 
@@ -805,6 +805,7 @@ static const char *columnType(
   assert( pExpr->op!=TK_AS );
 
   switch( pExpr->op ){
+    case TK_AGG_COLUMN:
     case TK_COLUMN: {
       /* The expression is a column. Locate the table the column is being
       ** extracted from in NameContext.pSrcList. This table may be real
@@ -2485,11 +2486,6 @@ static int processOrderGroupBy(
     if( sqlite3ExprResolveNames(pNC, pE) ){
       return 1;
     }
-    if( sqlite3ExprIsConstant(pE) ){
-      sqlite3ErrorMsg(pParse,
-          "%s BY terms must not be non-integer constants", zType);
-      return 1;
-    }
   }
   return 0;
 }
@@ -2936,16 +2932,16 @@ int sqlite3Select(
     addrSortIndex = -1;
   }
 
-  /* Set the limiter.
-  */
-  iEnd = sqlite3VdbeMakeLabel(v);
-  computeLimitRegisters(pParse, p, iEnd);
-
   /* If the output is destined for a temporary table, open that table.
   */
   if( eDest==SRT_VirtualTab ){
     sqlite3VdbeAddOp(v, OP_OpenVirtual, iParm, pEList->nExpr);
   }
+
+  /* Set the limiter.
+  */
+  iEnd = sqlite3VdbeMakeLabel(v);
+  computeLimitRegisters(pParse, p, iEnd);
 
   /* Open a virtual index to use for the distinct set.
   */
