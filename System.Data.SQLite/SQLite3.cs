@@ -219,7 +219,7 @@ namespace System.Data.SQLite
 
           if (n > 0) throw new SQLiteException(n, SQLiteLastError());
 
-          strRemain = ToString(ptr, len);
+          strRemain = UTF8ToString(ptr, len);
 
           SQLiteStatement cmd = null;
           if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
