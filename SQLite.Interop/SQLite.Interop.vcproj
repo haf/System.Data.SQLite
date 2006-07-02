@@ -111,7 +111,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -190,7 +190,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\CompactFramework\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\CompactFramework\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
@@ -287,7 +287,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -376,7 +376,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) $(TargetPath)&#x0D;&#x0A;sn -Ra $(TargetPath) ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.snk&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration

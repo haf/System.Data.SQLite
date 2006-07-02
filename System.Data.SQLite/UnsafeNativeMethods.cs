@@ -57,7 +57,7 @@ namespace System.Data.SQLite
     internal static extern int sqlite3_busy_timeout_interop(IntPtr db, int ms);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_prepare_interop(IntPtr db, byte[] strSql, int nBytes, out IntPtr stmt, out IntPtr ptrRemain, out int nRemain);
+    internal static extern int sqlite3_prepare_interop(IntPtr db, IntPtr pSql, int nBytes, out IntPtr stmt, out IntPtr ptrRemain, out int nRemain);
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_bind_blob_interop(IntPtr stmt, int index, Byte[] value, int nSize, IntPtr nTransient);
@@ -213,7 +213,7 @@ namespace System.Data.SQLite
     internal static extern IntPtr sqlite3_errmsg16_interop(IntPtr db, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-    internal static extern int sqlite3_prepare16_interop(IntPtr db, string strSql, int sqlLen, out IntPtr stmt, out IntPtr ptrRemain, out int len);
+    internal static extern int sqlite3_prepare16_interop(IntPtr db, IntPtr pSql, int sqlLen, out IntPtr stmt, out IntPtr ptrRemain, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
     internal static extern int sqlite3_bind_text16_interop(IntPtr stmt, int index, string value, int nlen, int nTransient);
@@ -259,5 +259,14 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_rekey_interop(IntPtr db, byte[] key, int keylen);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_update_hook_interop(IntPtr db, SQLiteUpdateCallback func);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_commit_hook_interop(IntPtr db, SQLiteCommitCallback func);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_rollback_hook_interop(IntPtr db, SQLiteRollbackCallback func);
   }
 }

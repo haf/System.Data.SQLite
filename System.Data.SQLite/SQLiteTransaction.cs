@@ -33,10 +33,15 @@ namespace System.Data.SQLite
       {
         try
         {
-          if (!deferredLock)
-            connection._sql.Execute("BEGIN IMMEDIATE");
-          else
-            connection._sql.Execute("BEGIN");
+          using (SQLiteCommand cmd = _cnn.CreateCommand())
+          {
+            if (!deferredLock)
+              cmd.CommandText = "BEGIN IMMEDIATE";
+            else
+              cmd.CommandText = "BEGIN";
+
+            cmd.ExecuteNonQuery();
+          }
         }
         catch (SQLiteException)
         {
@@ -58,7 +63,11 @@ namespace System.Data.SQLite
       {
         try
         {
-          _cnn._sql.Execute("COMMIT");
+          using (SQLiteCommand cmd = _cnn.CreateCommand())
+          {
+            cmd.CommandText = "COMMIT";
+            cmd.ExecuteNonQuery();
+          }
         }
         finally
         {
@@ -115,7 +124,11 @@ namespace System.Data.SQLite
 
       try
       {
-        _cnn._sql.Execute("ROLLBACK");
+        using (SQLiteCommand cmd = _cnn.CreateCommand())
+        {
+          cmd.CommandText = "ROLLBACK";
+          cmd.ExecuteNonQuery();
+        }
         _cnn._transactionLevel = 0;
       }
       finally

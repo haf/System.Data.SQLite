@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.29.0 May 16, 2006<br>
-    Using SQLite 3.3.5<br>
+    Version 1.0.30.0 July 2, 2006<br>
+    Using SQLite 3.3.6<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     <br>
@@ -119,6 +119,22 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.30.0 - July 2, 2006</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.6</li>
+      <li>Added support for the |DataDirectory| keyword in the Data Source filename string.&nbsp;
+      </li>
+      <li>Added hook notification support to SQLiteConnection.&nbsp; Specifically, there
+      are three new events on the SQLiteConnection object which are raised when an update/insert/delete
+      occurs and when transactions are committed and rolled back.</li><li>Changed SQLiteTransaction to default to BEGIN IMMEDIATE instead of just BEGIN,
+    which solves a multithreaded race condition.&nbsp;</li>
+      <li>Changed SQLiteDataReader to better support SQLite's typelessness.&nbsp; The data
+        reader no longer caches column affinity, but re-evaluates it for each column/row.</li>
+      <li>Fixed a bug in Prepare() which caused an intermittant fault due to the code accessing
+        the memory of an unpinned variable.&nbsp;</li>
+      <li>Fixed a multithreaded lock-retry bug in in SQLiteConnection.Open() and in
+    SQLiteTransaction, which failed to use a command timeout before giving up.</li>
+    </ul>
     <p><b>1.0.29.0 - May 16, 2006</b></p>
     <ul>
     <li>Fixed a bug in the Views schema information which caused multi-line view definition statements not to be parsed</li>

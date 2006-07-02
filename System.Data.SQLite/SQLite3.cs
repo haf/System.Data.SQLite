@@ -84,20 +84,20 @@ namespace System.Data.SQLite
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
 
-    internal override void Execute(string strSql)
-    {
-      IntPtr p;
-      string str = strSql;
-      int len;
+    //internal override void Execute(string strSql)
+    //{
+    //  IntPtr p;
+    //  string str = strSql;
+    //  int len;
 
-      int n = UnsafeNativeMethods.sqlite3_exec_interop(_sql, ToUTF8(strSql), IntPtr.Zero, IntPtr.Zero, out p, out len);
-      if (p != IntPtr.Zero)
-      {
-        str = base.ToString(p, len);
-        UnsafeNativeMethods.sqlite3_free_interop(p);
-      }
-      if (n > 0) throw new SQLiteException(n, str);
-    }
+    //  int n = UnsafeNativeMethods.sqlite3_exec_interop(_sql, ToUTF8(strSql), IntPtr.Zero, IntPtr.Zero, out p, out len);
+    //  if (p != IntPtr.Zero)
+    //  {
+    //    str = base.ToString(p, len);
+    //    UnsafeNativeMethods.sqlite3_free_interop(p);
+    //  }
+    //  if (n > 0) throw new SQLiteException(n, str);
+    //}
 
     internal override bool Step(SQLiteStatement stmt)
     {
@@ -203,24 +203,30 @@ namespace System.Data.SQLite
       IntPtr stmt = IntPtr.Zero;
       IntPtr ptr = IntPtr.Zero;
       int len = 0;
-      byte[] b = ToUTF8(strSql);
       int n = 17;
       int retries = 0;
+      byte[] b = ToUTF8(strSql);
 
-      while (n == 17 && retries < 3)
+      unsafe
       {
-        n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, b, b.Length - 1, out stmt, out ptr, out len);
-        retries++;
+        fixed (byte* psql = b)
+        {
+          while (n == 17 && retries < 3)
+          {
+            n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, (IntPtr)psql, b.Length - 1, out stmt, out ptr, out len);
+            retries++;
+          }
+
+          if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+
+          strRemain = ToString(ptr, len);
+
+          SQLiteStatement cmd = null;
+          if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
+
+          return cmd;
+        }
       }
-
-      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
-
-      strRemain = ToString(ptr, len);
-
-      SQLiteStatement cmd = null;
-      if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
-
-      return cmd;
     }
 
     internal override void Bind_Double(SQLiteStatement stmt, int index, double value)
@@ -294,11 +300,17 @@ namespace System.Data.SQLite
       return ToString(UnsafeNativeMethods.sqlite3_column_name_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
+    internal override TypeAffinity ColumnAffinity(SQLiteStatement stmt, int index)
+    {
+      return UnsafeNativeMethods.sqlite3_column_type_interop(stmt._sqlite_stmt, index);
+    }
+
     internal override string ColumnType(SQLiteStatement stmt, int index, out TypeAffinity nAffinity)
     {
       int len;
       IntPtr p = UnsafeNativeMethods.sqlite3_column_decltype_interop(stmt._sqlite_stmt, index, out len);
-      nAffinity = UnsafeNativeMethods.sqlite3_column_type_interop(stmt._sqlite_stmt, index);
+      nAffinity = ColumnAffinity(stmt, index);
+
       if (p != IntPtr.Zero) return ToString(p, len);
       else
       {
@@ -442,7 +454,7 @@ namespace System.Data.SQLite
 
     internal override bool IsNull(SQLiteStatement stmt, int index)
     {
-      return (UnsafeNativeMethods.sqlite3_column_type_interop(stmt._sqlite_stmt, index) == TypeAffinity.Null);
+      return (ColumnAffinity(stmt, index) == TypeAffinity.Null);
     }
 
     internal override int AggregateCount(IntPtr context)
@@ -566,11 +578,6 @@ namespace System.Data.SQLite
       return UnsafeNativeMethods.sqlite3_aggregate_context_interop(context, 1);
     }
 
-    //internal override void SetRealColNames(bool bOn)
-    //{
-    //  UnsafeNativeMethods.sqlite3_realcolnames(_sql, Convert.ToInt32(bOn));
-    //}
-
     internal override void SetPassword(byte[] passwordBytes)
     {
       int n = UnsafeNativeMethods.sqlite3_key_interop(_sql, passwordBytes, passwordBytes.Length);
@@ -581,6 +588,21 @@ namespace System.Data.SQLite
     {
       int n = UnsafeNativeMethods.sqlite3_rekey_interop(_sql, newPasswordBytes, (newPasswordBytes == null) ? 0 : newPasswordBytes.Length);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+    }
+
+    internal override void SetUpdateHook(SQLiteUpdateCallback func)
+    {
+      UnsafeNativeMethods.sqlite3_update_hook_interop(_sql, func);
+    }
+
+    internal override void SetCommitHook(SQLiteCommitCallback func)
+    {
+      UnsafeNativeMethods.sqlite3_commit_hook_interop(_sql, func);
+    }
+
+    internal override void SetRollbackHook(SQLiteRollbackCallback func)
+    {
+      UnsafeNativeMethods.sqlite3_rollback_hook_interop(_sql, func);
     }
   }
 }

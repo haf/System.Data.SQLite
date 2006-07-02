@@ -182,12 +182,9 @@ namespace System.Data.SQLite
     {
       CheckClosed();
       CheckValidRow();
-      SQLiteType t = GetSQLiteType(i);
+      TypeAffinity affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
 
-      if (t.Type == typ) return;
-
-        // Coercable type, usually a literal of some kind
-      switch (_fieldTypeArray[i].Affinity)
+      switch (affinity)
       {
         case TypeAffinity.Int64:
           if (typ == DbType.Int16) return;

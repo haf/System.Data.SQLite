@@ -190,6 +190,17 @@ namespace System.Data.SQLite
     /// <returns>A string containing the translated character(s)</returns>
     public virtual string ToString(IntPtr nativestring, int nativestringlen)
     {
+      return UTF8ToString(nativestring, nativestringlen);
+    }
+
+    /// <summary>
+    /// Converts a UTF-8 encoded IntPtr of the specified length into a .NET string
+    /// </summary>
+    /// <param name="nativestring">The pointer to the memory where the UTF-8 string is encoded</param>
+    /// <param name="nativestringlen">The number of bytes to decode</param>
+    /// <returns>A string containing the translated character(s)</returns>
+    public virtual string UTF8ToString(IntPtr nativestring, int nativestringlen)
+    {
       if (nativestringlen == 0) return "";
 
       byte[] byteArray = new byte[nativestringlen];
@@ -198,6 +209,7 @@ namespace System.Data.SQLite
 
       return _utf8.GetString(byteArray, 0, nativestringlen);
     }
+
 
     #endregion
 

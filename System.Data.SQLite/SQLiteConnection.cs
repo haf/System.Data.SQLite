@@ -15,25 +15,6 @@ namespace System.Data.SQLite
   using System.ComponentModel;
 
   /// <summary>
-  /// The I/O file cache flushing behavior for the connection
-  /// </summary>
-  public enum SynchronizationModes
-  {
-    /// <summary>
-    /// Normal file flushing at critical sections of the code
-    /// </summary>
-    Normal = 0,
-    /// <summary>
-    /// Full file flushing after every write operation
-    /// </summary>
-    Full = 1,
-    /// <summary>
-    /// Use the default operating system's file flushing, SQLite does not explicitly flush the file buffers after writing
-    /// </summary>
-    Off = 2,
-  }
-
-  /// <summary>
   /// SQLite implentation of DbConnection.
   /// </summary>
   /// <remarks>
@@ -135,11 +116,119 @@ namespace System.Data.SQLite
     /// Temporary password storage, emptied after the database has been opened
     /// </summary>
     private byte[]               _password;
-    /// <event/>
+
+    private event SQLiteUpdateEventHandler _updateHandler;
+    private event SQLiteCommitHandler      _commitHandler;
+    private event EventHandler             _rollbackHandler;
+
+    private SQLiteUpdateCallback   _updateCallback;
+    private SQLiteCommitCallback   _commitCallback;
+    private SQLiteRollbackCallback _rollbackCallback;
+
     /// <summary>
     /// This event is raised whenever the database is opened or closed.
     /// </summary>
     public override event StateChangeEventHandler StateChange;
+
+    /// <summary>
+    /// This event is raised whenever SQLite makes an update/delete/insert into the database on
+    /// this connection.  It only applies to the given connection.
+    /// </summary>
+    public event SQLiteUpdateEventHandler Update
+    {
+      add
+      {
+        if (_updateHandler == null)
+        {
+          _updateCallback = new SQLiteUpdateCallback(UpdateCallback);
+          _sql.SetUpdateHook(_updateCallback);
+        }
+        _updateHandler += value;
+      }
+      remove
+      {
+        _updateHandler -= value;
+        if (_updateHandler == null)
+        {
+          _sql.SetUpdateHook(null);
+          _updateCallback = null;
+        }
+      }
+    }
+
+    private void UpdateCallback(int type, IntPtr database, int databaseLen, IntPtr table, int tableLen, Int64 rowid)
+    {
+      _updateHandler(this, new UpdateEventArgs(
+        _sql.UTF8ToString(database, databaseLen),
+        _sql.UTF8ToString(table, tableLen),
+        (UpdateEventType)type,
+        rowid));
+    }
+
+    /// <summary>
+    /// This event is raised whenever SQLite is committing a transaction.
+    /// Return non-zero to trigger a rollback
+    /// </summary>
+    public event SQLiteCommitHandler Commit
+    {
+      add
+      {
+        if (_commitHandler == null)
+        {
+          _commitCallback = new SQLiteCommitCallback(CommitCallback);
+          _sql.SetCommitHook(_commitCallback);
+        }
+        _commitHandler += value;
+      }
+      remove
+      {
+        _commitHandler -= value;
+        if (_commitHandler == null)
+        {
+          _sql.SetCommitHook(null);
+          _commitCallback = null;
+        }
+      }
+    }
+
+    /// <summary>
+    /// This event is raised whenever SQLite is committing a transaction.
+    /// Return non-zero to trigger a rollback
+    /// </summary>
+    public event EventHandler RollBack
+    {
+      add
+      {
+        if (_rollbackHandler == null)
+        {
+          _rollbackCallback = new SQLiteRollbackCallback(RollbackCallback);
+          _sql.SetRollbackHook(_rollbackCallback);
+        }
+        _rollbackHandler += value;
+      }
+      remove
+      {
+        _rollbackHandler -= value;
+        if (_rollbackHandler == null)
+        {
+          _sql.SetRollbackHook(null);
+          _rollbackCallback = null;
+        }
+      }
+    }
+
+
+    private int CommitCallback()
+    {
+      CommitEventArgs e = new CommitEventArgs();
+      _commitHandler(this, e);
+      return (e.AbortTransaction == true) ? 1 : 0;
+    }
+
+    private void RollbackCallback()
+    {
+      _rollbackHandler(this, EventArgs.Empty);
+    }
 
     ///<overloads>
     /// Constructs a new SQLiteConnection object
@@ -191,7 +280,11 @@ namespace System.Data.SQLite
             if (String.Compare(str, "main", true, CultureInfo.InvariantCulture) != 0
               && String.Compare(str, "temp", true, CultureInfo.InvariantCulture) != 0)
             {
-              _sql.Execute(String.Format(CultureInfo.InvariantCulture, "ATTACH DATABASE '{0}' AS [{1}]", row[1], row[0]));
+              using (SQLiteCommand cmd = CreateCommand())
+              {
+                cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "ATTACH DATABASE '{0}' AS [{1}]", row[1], row[0]);
+                cmd.ExecuteNonQuery();
+              }
             }
           }
         }
@@ -263,59 +356,6 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// On NTFS volumes, this function turns on the EFS (Encrypted File System) attribute
-    /// for the given file, which causes the file to be encrypted.
-    /// For a full description of EFS, see the MSDN documentation.
-    /// </summary>
-    /// <remarks>
-    /// Requires Win2K and above, plus a valid EFS certificate (which is beyond the scope
-    /// of this function description).
-    /// </remarks>
-    /// <param name="databaseFileName">The file to encrypt</param>
-    [Obsolete("Define a password in the ConnectionString, call SetPassword() on a new open database, or call ChangePassword({password}) on an existing open database to encrypt the database file.")]
-    static public void EncryptFile(string databaseFileName)
-    {
-      int n = UnsafeNativeMethods.sqlite3_encryptfile(databaseFileName);
-      if (n == 0) throw new System.ComponentModel.Win32Exception();
-    }
-
-    /// <summary>
-    /// On NTFS volumes, this function removes the encryption attribute from the file,
-    /// causing the file to be decrypted.  See the MSDN documentation for full details on
-    /// EFS (Encrypted File System).
-    /// </summary>
-    /// <remarks>
-    /// Requires Win2K and above, plus a valid EFS certificate (which is beyond the scope
-    /// of this function description).
-    /// </remarks>
-    /// <param name="databaseFileName">The file to decrypt</param>
-    [Obsolete("Call ChangePassword(null) on an open connection to decrypt an encrypted database file.")]
-    static public void DecryptFile(string databaseFileName)
-    {
-      int n = UnsafeNativeMethods.sqlite3_decryptfile(databaseFileName);
-      if (n == 0) throw new System.ComponentModel.Win32Exception();
-    }
-
-    /// <summary>
-    /// Returns true if the file is encrypted, or false otherwise.
-    /// </summary>
-    /// <remarks>
-    /// Requires Win2K and above, plus a valid EFS certificate (which is beyond the scope
-    /// of this function description).
-    /// </remarks>
-    /// <param name="databaseFileName">The file to check</param>
-    /// <returns>true if the file is encrypted</returns>
-    [Obsolete("EFS file encryption will be removed from future versions of this library")]
-    static public bool IsEncrypted(string databaseFileName)
-    {
-      int status;
-      int n = UnsafeNativeMethods.sqlite3_encryptedstatus(databaseFileName, out status);
-      if (n == 0) throw new System.ComponentModel.Win32Exception();
-
-      return (status == 1);
-    }
-
-    /// <summary>
     /// Raises the state change event when the state of the connection changes
     /// </summary>
     /// <param name="newState">The new state.  If it is different from the previous state, an event is raised.</param>
@@ -366,7 +406,7 @@ namespace System.Data.SQLite
     /// <returns>Returns a SQLiteTransaction object.</returns>
     public new SQLiteTransaction BeginTransaction(IsolationLevel isolationLevel)
     {
-      return BeginTransaction(true);
+      return BeginTransaction(false);
     }
 
     /// <summary>
@@ -375,7 +415,7 @@ namespace System.Data.SQLite
     /// <returns>Returns a SQLiteTransaction object.</returns>
     public new SQLiteTransaction BeginTransaction()
     {
-      return BeginTransaction(true);
+      return BeginTransaction(false);
     }
 
     /// <summary>
@@ -385,7 +425,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
     {
-      return BeginTransaction(isolationLevel, true);
+      return BeginTransaction(isolationLevel, false);
     }
 
     /// <summary>
@@ -682,12 +722,36 @@ namespace System.Data.SQLite
 
         _dataSource = System.IO.Path.GetFileNameWithoutExtension(fileName);
 
-        _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Synchronous={0}", FindKey(opts, "Synchronous", "Normal")));
-        _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Cache_Size={0}", FindKey(opts, "Cache Size", "2000")));
-        if (fileName != ":memory:")
-          _sql.Execute(String.Format(CultureInfo.InvariantCulture, "PRAGMA Page_Size={0}", FindKey(opts, "Page Size", "1024")));
-
         OnStateChange(ConnectionState.Open);
+
+        using (SQLiteCommand cmd = CreateCommand())
+        {
+          string defValue;
+
+          defValue = FindKey(opts, "Synchronous", "Normal");
+          if (String.Compare(defValue, "Normal", true, CultureInfo.InvariantCulture) != 0)
+          {
+            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA Synchronous={0}", defValue);
+            cmd.ExecuteNonQuery();
+          }
+
+          defValue = FindKey(opts, "Cache Size", "2000");
+          if (Convert.ToInt32(defValue) != 2000)
+          {
+            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA Cache_Size={0}", defValue);
+            cmd.ExecuteNonQuery();
+          }
+
+          if (fileName != ":memory:")
+          {
+            defValue = FindKey(opts, "Page Size", "1024");
+            if (Convert.ToInt32(defValue) != 1024)
+            {
+              cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA Page_Size={0}", defValue);
+              cmd.ExecuteNonQuery();
+            }
+          }
+        }
 
 #if !PLATFORM_COMPACTFRAMEWORK
         if (FindKey(opts, "Enlist", "Y").ToUpper()[0] == 'Y' && Transactions.Transaction.Current != null)
@@ -789,6 +853,11 @@ namespace System.Data.SQLite
 
     private const string _dataDirectory = "|DataDirectory|";
 
+    /// <summary>
+    /// Expand the filename of the data source, resolving the |DataDirectory| macro as appropriate.
+    /// </summary>
+    /// <param name="sourceFile">The database filename to expand</param>
+    /// <returns>The expanded path and filename of the filename</returns>
     private string ExpandFileName(string sourceFile)
     {
       if (String.IsNullOrEmpty(sourceFile)) return sourceFile;
@@ -1771,4 +1840,113 @@ namespace System.Data.SQLite
       return tbl;
     }
   }
+
+  /// <summary>
+  /// The I/O file cache flushing behavior for the connection
+  /// </summary>
+  public enum SynchronizationModes
+  {
+    /// <summary>
+    /// Normal file flushing at critical sections of the code
+    /// </summary>
+    Normal = 0,
+    /// <summary>
+    /// Full file flushing after every write operation
+    /// </summary>
+    Full = 1,
+    /// <summary>
+    /// Use the default operating system's file flushing, SQLite does not explicitly flush the file buffers after writing
+    /// </summary>
+    Off = 2,
+  }
+
+  internal delegate void SQLiteUpdateCallback(int type, IntPtr database, int databaseLen, IntPtr table, int tableLen, Int64 rowid);
+  internal delegate int SQLiteCommitCallback();
+  internal delegate void SQLiteRollbackCallback();
+
+  /// <summary>
+  /// Raised when a transaction is about to be committed.  To roll back a transaction, set the 
+  /// rollbackTrans boolean value to true.
+  /// </summary>
+  /// <param name="sender">The connection committing the transaction</param>
+  /// <param name="e">Event arguments on the transaction</param>
+  public delegate void SQLiteCommitHandler(object sender, CommitEventArgs e);
+
+  /// <summary>
+  /// Raised when data is inserted, updated and deleted on a given connection
+  /// </summary>
+  /// <param name="sender">The connection committing the transaction</param>
+  /// <param name="e">The event parameters which triggered the event</param>
+  public delegate void SQLiteUpdateEventHandler(object sender, UpdateEventArgs e);
+
+  /// <summary>
+  /// Whenever an update event is triggered on a connection, this enum will indicate
+  /// exactly what type of operation is being performed.
+  /// </summary>
+  public enum UpdateEventType
+  {
+    /// <summary>
+    /// A row is being deleted from the given database and table
+    /// </summary>
+    Delete = 9,
+    /// <summary>
+    /// A row is being inserted into the table.
+    /// </summary>
+    Insert = 18,
+    /// <summary>
+    /// A row is being updated in the table.
+    /// </summary>
+    Update = 23,
+  }
+
+  /// <summary>
+  /// Passed during an Update callback, these event arguments detail the type of update operation being performed
+  /// on the given connection.
+  /// </summary>
+  public class UpdateEventArgs : EventArgs
+  {
+    /// <summary>
+    /// The name of the database being updated (usually "main" but can be any attached or temporary database)
+    /// </summary>
+    public readonly string Database;
+
+    /// <summary>
+    /// The name of the table being updated
+    /// </summary>
+    public readonly string Table;
+
+    /// <summary>
+    /// The type of update being performed (insert/update/delete)
+    /// </summary>
+    public readonly UpdateEventType Event;
+
+    /// <summary>
+    /// The RowId affected by this update.
+    /// </summary>
+    public readonly Int64 RowId;
+
+    internal UpdateEventArgs(string database, string table, UpdateEventType eventType, Int64 rowid)
+    {
+      Database = database;
+      Table = table;
+      Event = eventType;
+      RowId = rowid;
+    }
+  }
+
+  /// <summary>
+  /// Event arguments raised when a transaction is being committed
+  /// </summary>
+  public class CommitEventArgs : EventArgs
+  {
+    internal CommitEventArgs()
+    {
+    }
+
+    /// <summary>
+    /// Set to true to abort the transaction and trigger a rollback
+    /// </summary>
+    public bool AbortTransaction;
+  }
+
 }

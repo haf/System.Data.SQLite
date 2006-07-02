@@ -235,7 +235,7 @@ namespace System.Data.SQLite
       "The database file is locked",
       "A table in the database is locked",
       "malloc() failed",
-      "Atempt to write a read-only database",
+      "Attempt to write a read-only database",
       "Operation terminated by sqlite3_interrupt()",
       "Some kind of disk I/O error occurred",
       "The database disk image is malformed",

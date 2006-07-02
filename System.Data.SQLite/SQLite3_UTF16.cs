@@ -56,29 +56,6 @@ namespace System.Data.SQLite
       return ToString(UnsafeNativeMethods.sqlite3_errmsg16_interop(_sql, out len), len);
     }
 
-    internal override SQLiteStatement Prepare(string strSql, SQLiteStatement previous, out string strRemain)
-    {
-      IntPtr stmt = IntPtr.Zero;
-      IntPtr ptr = IntPtr.Zero;
-      int len = 0;
-      int n = 17;
-      int retries = 0;
-
-      while (n == 17 && retries < 3)
-      {
-        n = UnsafeNativeMethods.sqlite3_prepare16_interop(_sql, strSql, strSql.Length, out stmt, out ptr, out len);
-        retries++;
-      }
-
-      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
-
-      strRemain = ToString(ptr, len);
-
-      SQLiteStatement cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
-
-      return cmd;
-    }
-
     internal override void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt)
     {
       Bind_Text(stmt, index, ToString(dt));

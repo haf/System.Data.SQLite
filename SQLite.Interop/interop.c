@@ -17,9 +17,9 @@
 typedef void (WINAPI *SQLITEUSERFUNC)(void *, int, void **);
 typedef int  (WINAPI *SQLITECOLLATION)(int, const void *, int, const void*);
 
-typedef int (WINAPI *ENCRYPTFILEW)(const wchar_t *);
-typedef int (WINAPI *ENCRYPTEDSTATUSW)(const wchar_t *, unsigned long *);
-typedef int (WINAPI *DECRYPTFILEW)(const wchar_t *, unsigned long);
+typedef void (WINAPI *SQLITEUPDATEHOOK)(int, const char *, int, const char *, int, sqlite_int64);
+typedef int  (WINAPI *SQLITECOMMITHOOK)();
+typedef void (WINAPI *SQLITEROLLBACKHOOK)();
 
 typedef HANDLE (WINAPI *CREATEFILEW)(
     LPCWSTR,
@@ -58,84 +58,6 @@ void sqlite3_interop_final(sqlite3_context *pctx)
 __declspec(dllexport) void WINAPI sqlite3_sleep_interop(int milliseconds)
 {
   Sleep(milliseconds);
-}
-
-__declspec(dllexport) int sqlite3_encryptfile(const wchar_t *pwszFilename)
-{
-  HMODULE hMod = LoadLibrary(_T("ADVAPI32"));
-  ENCRYPTFILEW pfunc;
-  int n;
-
-  if (hMod == NULL)
-  {
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return 0;
-  }
-  
-  pfunc = (ENCRYPTFILEW)GetProcAddress(hMod, _T("EncryptFileW"));
-  if (pfunc == NULL)
-  {
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return 0;
-  }
-
-  n = pfunc(pwszFilename);
-
-  FreeLibrary(hMod);
-
-  return n;
-}
-
-__declspec(dllexport) int sqlite3_decryptfile(const wchar_t *pwszFilename)
-{
-  HMODULE hMod = LoadLibrary(_T("ADVAPI32"));
-  DECRYPTFILEW pfunc;
-  int n;
-
-  if (hMod == NULL)
-  {
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return 0;
-  }
-
-  pfunc = (DECRYPTFILEW)GetProcAddress(hMod, _T("DecryptFileW"));
-  if (pfunc == NULL)
-  {
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return 0;
-  }
-
-  n = pfunc(pwszFilename, 0);
-
-  FreeLibrary(hMod);
-
-  return n;
-}
-
-__declspec(dllexport) unsigned long sqlite3_encryptedstatus(const wchar_t *pwszFilename, unsigned long *pdwStatus)
-{
-  HMODULE hMod = LoadLibrary(_T("ADVAPI32"));
-  ENCRYPTEDSTATUSW pfunc;
-  int n;
-
-  if (hMod == NULL)
-  {
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return 0;
-  }
-
-  pfunc = (ENCRYPTEDSTATUSW)GetProcAddress(hMod, _T("FileEncryptionStatusW"));
-  if (pfunc == NULL)
-  {
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return 0;
-  }
-
-  n = pfunc(pwszFilename, pdwStatus);
-
-  FreeLibrary(hMod);
-
-  return n;
 }
 
 int SetCompression(const wchar_t *pwszFilename, unsigned short ufLevel)
@@ -693,13 +615,45 @@ __declspec(dllexport) const void * WINAPI sqlite3_column_origin_name16_interop(s
   return pval;
 }
 
-__declspec(dllexport) int sqlite3_table_column_metadata_interop(sqlite3 *db, const char *zDbName, const char *zTableName, const char *zColumnName, char **pzDataType, char **pzCollSeq, int *pNotNull, int *pPrimaryKey, int *pAutoinc, int *pdtLen, int *pcsLen)
+__declspec(dllexport) int WINAPI sqlite3_table_column_metadata_interop(sqlite3 *db, const char *zDbName, const char *zTableName, const char *zColumnName, char **pzDataType, char **pzCollSeq, int *pNotNull, int *pPrimaryKey, int *pAutoinc, int *pdtLen, int *pcsLen)
 {
   int n = sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc);
   *pdtLen = (*pzDataType != 0) ? strlen(*pzDataType) : 0;
   *pcsLen = (*pzCollSeq != 0) ? strlen(*pzCollSeq) : 0;
 
   return n;
+}
+
+void sqlite3_update_callback(void *pArg, int type, const char *pDatabase, const char *pTable, sqlite_int64 rowid)
+{
+  SQLITEUPDATEHOOK func = (SQLITEUPDATEHOOK)pArg;
+
+  func(type, pDatabase, lstrlenA(pDatabase), pTable, lstrlenA(pTable), rowid);
+}
+
+int sqlite3_commit_callback(void *pArg)
+{
+  return ((SQLITECOMMITHOOK)pArg)();
+}
+
+void sqlite3_rollback_callback(void *pArg)
+{
+  ((SQLITEROLLBACKHOOK)pArg)();
+}
+
+__declspec(dllexport) void * WINAPI sqlite3_update_hook_interop(sqlite3 *pDb, SQLITEUPDATEHOOK func)
+{
+  return sqlite3_update_hook(pDb, sqlite3_update_callback, func);
+}
+
+__declspec(dllexport) void * WINAPI sqlite3_commit_hook_interop(sqlite3 *pDb, SQLITECOMMITHOOK func)
+{
+  return sqlite3_commit_hook(pDb, sqlite3_commit_callback, func);
+}
+
+__declspec(dllexport) void * WINAPI sqlite3_rollback_hook_interop(sqlite3 *pDb, SQLITEROLLBACKHOOK func)
+{
+  return sqlite3_rollback_hook(pDb, sqlite3_rollback_callback, func);
 }
 
 #endif // OS_WIN

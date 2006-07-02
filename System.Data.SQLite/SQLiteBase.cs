@@ -52,12 +52,6 @@ namespace System.Data.SQLite
     /// <param name="nTimeoutMS">The number of milliseconds to wait before returning SQLITE_BUSY</param>
     internal abstract void   SetTimeout(int nTimeoutMS);
     /// <summary>
-    /// Quick execute of a SQL command.  This is only executed internally, usually by SQLiteConnection when the connection
-    /// is first opened to set the necessary startup pragmas.
-    /// </summary>
-    /// <param name="strSql">The SQL command text to execute</param>
-    internal abstract void   Execute(string strSql);
-    /// <summary>
     /// Returns the text of the last error issued by SQLite
     /// </summary>
     /// <returns></returns>
@@ -108,6 +102,7 @@ namespace System.Data.SQLite
 
     internal abstract int    ColumnCount(SQLiteStatement stmt);
     internal abstract string ColumnName(SQLiteStatement stmt, int index);
+    internal abstract TypeAffinity ColumnAffinity(SQLiteStatement stmt, int index);
     internal abstract string ColumnType(SQLiteStatement stmt, int index, out TypeAffinity nAffinity);
     internal abstract int    ColumnIndex(SQLiteStatement stmt, string columnName);
     internal abstract string ColumnOriginalName(SQLiteStatement stmt, int index);
@@ -183,6 +178,10 @@ namespace System.Data.SQLite
 
     internal abstract void SetPassword(byte[] passwordBytes);
     internal abstract void ChangePassword(byte[] newPasswordBytes);
+
+    internal abstract void SetUpdateHook(SQLiteUpdateCallback func);
+    internal abstract void SetCommitHook(SQLiteCommitCallback func);
+    internal abstract void SetRollbackHook(SQLiteRollbackCallback func);
 
     protected virtual void Dispose(bool bDisposing)
     {
