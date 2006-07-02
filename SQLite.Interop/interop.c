@@ -628,7 +628,7 @@ void sqlite3_update_callback(void *pArg, int type, const char *pDatabase, const 
 {
   SQLITEUPDATEHOOK func = (SQLITEUPDATEHOOK)pArg;
 
-  func(type, pDatabase, lstrlenA(pDatabase), pTable, lstrlenA(pTable), rowid);
+  func(type, pDatabase, strlen(pDatabase), pTable, strlen(pTable), rowid);
 }
 
 int sqlite3_commit_callback(void *pArg)
