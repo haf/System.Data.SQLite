@@ -210,6 +210,14 @@
             <param name="nativestringlen">The number of bytes to decode</param>
             <returns>A string containing the translated character(s)</returns>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.UTF8ToString(System.IntPtr,System.Int32)">
+            <summary>
+            Converts a UTF-8 encoded IntPtr of the specified length into a .NET string
+            </summary>
+            <param name="nativestring">The pointer to the memory where the UTF-8 string is encoded</param>
+            <param name="nativestringlen">The number of bytes to decode</param>
+            <returns>A string containing the translated character(s)</returns>
+        </member>
         <member name="M:System.Data.SQLite.SQLiteConvert.ToDateTime(System.String)">
             <summary>
             Converts a string into a DateTime, using the current DateTimeFormat specified for the connection when it was opened.
@@ -1517,13 +1525,6 @@
             </summary>
             <param name="nTimeoutMS">The number of milliseconds to wait before returning SQLITE_BUSY</param>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteBase.Execute(System.String)">
-            <summary>
-            Quick execute of a SQL command.  This is only executed internally, usually by SQLiteConnection when the connection
-            is first opened to set the necessary startup pragmas.
-            </summary>
-            <param name="strSql">The SQL command text to execute</param>
-        </member>
         <member name="M:System.Data.SQLite.SQLiteBase.SQLiteLastError">
             <summary>
             Returns the text of the last error issued by SQLite
@@ -2179,26 +2180,6 @@
             Retrieves the underlying SQLite error code for this exception
             </summary>
         </member>
-        <member name="T:System.Data.SQLite.SynchronizationModes">
-            <summary>
-            The I/O file cache flushing behavior for the connection
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SynchronizationModes.Normal">
-            <summary>
-            Normal file flushing at critical sections of the code
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SynchronizationModes.Full">
-            <summary>
-            Full file flushing after every write operation
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SynchronizationModes.Off">
-            <summary>
-            Use the default operating system's file flushing, SQLite does not explicitly flush the file buffers after writing
-            </summary>
-        </member>
         <member name="T:System.Data.SQLite.SQLiteConnection">
             <summary>
             SQLite implentation of DbConnection.
@@ -2365,41 +2346,6 @@
             </summary>
             <param name="databaseFileName">The file to decompress</param>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteConnection.EncryptFile(System.String)">
-            <summary>
-            On NTFS volumes, this function turns on the EFS (Encrypted File System) attribute
-            for the given file, which causes the file to be encrypted.
-            For a full description of EFS, see the MSDN documentation.
-            </summary>
-            <remarks>
-            Requires Win2K and above, plus a valid EFS certificate (which is beyond the scope
-            of this function description).
-            </remarks>
-            <param name="databaseFileName">The file to encrypt</param>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteConnection.DecryptFile(System.String)">
-            <summary>
-            On NTFS volumes, this function removes the encryption attribute from the file,
-            causing the file to be decrypted.  See the MSDN documentation for full details on
-            EFS (Encrypted File System).
-            </summary>
-            <remarks>
-            Requires Win2K and above, plus a valid EFS certificate (which is beyond the scope
-            of this function description).
-            </remarks>
-            <param name="databaseFileName">The file to decrypt</param>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteConnection.IsEncrypted(System.String)">
-            <summary>
-            Returns true if the file is encrypted, or false otherwise.
-            </summary>
-            <remarks>
-            Requires Win2K and above, plus a valid EFS certificate (which is beyond the scope
-            of this function description).
-            </remarks>
-            <param name="databaseFileName">The file to check</param>
-            <returns>true if the file is encrypted</returns>
-        </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.OnStateChange(System.Data.ConnectionState)">
             <summary>
             Raises the state change event when the state of the connection changes
@@ -2527,6 +2473,13 @@
             unusable for any operation until the password has been set.
             </summary>
             <param name="databasePassword">The password for the database</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.ExpandFileName(System.String)">
+            <summary>
+            Expand the filename of the data source, resolving the |DataDirectory| macro as appropriate.
+            </summary>
+            <param name="sourceFile">The database filename to expand</param>
+            <returns>The expanded path and filename of the filename</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.GetSchema">
             <overloads>
@@ -2667,9 +2620,26 @@
             <returns>A DataTable with the results of the query</returns>
         </member>
         <member name="E:System.Data.SQLite.SQLiteConnection.StateChange">
-            <event/>
             <summary>
             This event is raised whenever the database is opened or closed.
+            </summary>
+        </member>
+        <member name="E:System.Data.SQLite.SQLiteConnection.Update">
+            <summary>
+            This event is raised whenever SQLite makes an update/delete/insert into the database on
+            this connection.  It only applies to the given connection.
+            </summary>
+        </member>
+        <member name="E:System.Data.SQLite.SQLiteConnection.Commit">
+            <summary>
+            This event is raised whenever SQLite is committing a transaction.
+            Return non-zero to trigger a rollback
+            </summary>
+        </member>
+        <member name="E:System.Data.SQLite.SQLiteConnection.RollBack">
+            <summary>
+            This event is raised whenever SQLite is committing a transaction.
+            Return non-zero to trigger a rollback
             </summary>
         </member>
         <member name="P:System.Data.SQLite.SQLiteConnection.ConnectionString">
@@ -2759,6 +2729,98 @@
         <member name="P:System.Data.SQLite.SQLiteConnection.State">
             <summary>
             Returns the state of the connection.
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SynchronizationModes">
+            <summary>
+            The I/O file cache flushing behavior for the connection
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SynchronizationModes.Normal">
+            <summary>
+            Normal file flushing at critical sections of the code
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SynchronizationModes.Full">
+            <summary>
+            Full file flushing after every write operation
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SynchronizationModes.Off">
+            <summary>
+            Use the default operating system's file flushing, SQLite does not explicitly flush the file buffers after writing
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteCommitHandler">
+            <summary>
+            Raised when a transaction is about to be committed.  To roll back a transaction, set the 
+            rollbackTrans boolean value to true.
+            </summary>
+            <param name="sender">The connection committing the transaction</param>
+            <param name="e">Event arguments on the transaction</param>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteUpdateEventHandler">
+            <summary>
+            Raised when data is inserted, updated and deleted on a given connection
+            </summary>
+            <param name="sender">The connection committing the transaction</param>
+            <param name="e">The event parameters which triggered the event</param>
+        </member>
+        <member name="T:System.Data.SQLite.UpdateEventType">
+            <summary>
+            Whenever an update event is triggered on a connection, this enum will indicate
+            exactly what type of operation is being performed.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UpdateEventType.Delete">
+            <summary>
+            A row is being deleted from the given database and table
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UpdateEventType.Insert">
+            <summary>
+            A row is being inserted into the table.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UpdateEventType.Update">
+            <summary>
+            A row is being updated in the table.
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.UpdateEventArgs">
+            <summary>
+            Passed during an Update callback, these event arguments detail the type of update operation being performed
+            on the given connection.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UpdateEventArgs.Database">
+            <summary>
+            The name of the database being updated (usually "main" but can be any attached or temporary database)
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UpdateEventArgs.Table">
+            <summary>
+            The name of the table being updated
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UpdateEventArgs.Event">
+            <summary>
+            The type of update being performed (insert/update/delete)
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UpdateEventArgs.RowId">
+            <summary>
+            The RowId affected by this update.
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.CommitEventArgs">
+            <summary>
+            Event arguments raised when a transaction is being committed
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CommitEventArgs.AbortTransaction">
+            <summary>
+            Set to true to abort the transaction and trigger a rollback
             </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLiteStatement">
