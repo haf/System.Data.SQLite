@@ -54,7 +54,7 @@
     <Reference Include="System.Data">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Data.SQLite, Version=1.0.24.5, Culture=neutral, PublicKeyToken=1fdb50b1b62b4c84, processorArchitecture=x86">
+    <Reference Include="System.Data.SQLite, Version=1.0.30.0, Culture=neutral, PublicKeyToken=1fdb50b1b62b4c84, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
