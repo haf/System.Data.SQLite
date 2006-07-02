@@ -49,6 +49,21 @@ namespace test
   }
 
   /// <summary>
+  /// Sample regular expression function.  Example Usage:
+  /// SELECT * FROM foo WHERE name REGEXP '$bar'
+  /// SELECT * FROM foo WHERE REGEXP('$bar', name)
+  /// 
+  /// </summary>
+  [SQLiteFunction(Name = "REGEXP", Arguments = 2, FuncType = FunctionType.Scalar)]
+  class MyRegEx : SQLiteFunction
+  {
+    public override object Invoke(object[] args)
+    {
+      return System.Text.RegularExpressions.Regex.IsMatch(Convert.ToString(args[1]), Convert.ToString(args[0]));
+    }
+  }
+
+  /// <summary>
   /// User-defined collating sequence.
   /// </summary>
   [SQLiteFunction(Name = "MYSEQUENCE", FuncType = FunctionType.Collation)]
@@ -157,7 +172,7 @@ namespace test
           object o = cmd.ExecuteScalar();
           throw new InvalidOperationException("Transaction failed! The table exists!");
         }
-        catch(SQLiteException e)
+        catch(SQLiteException)
         {
           return; // Succeeded, the table should not have existed
         }

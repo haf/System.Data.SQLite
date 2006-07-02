@@ -11,19 +11,34 @@ namespace test
     static void Main(string[] args)
     {
       DbProviderFactory fact;
-      DbConnection cnn;
+      fact = DbProviderFactories.GetFactory("System.Data.SQLite");
 
       System.IO.File.Delete("test.db3");
-
-      using (cnn = new SQLiteConnection())
+      using (DbConnection cnn = fact.CreateConnection())
       {
-        fact = DbProviderFactories.GetFactory("System.Data.SQLite");
         cnn.ConnectionString = "Data Source=test.db3";
         cnn.Open();
+
+        //cnn.Update += new SQLiteUpdateEventHandler(cnn_Updated);
+        //cnn.Commit += new SQLiteCommitHandler(cnn_Commit);
+        //cnn.RollBack += new EventHandler(cnn_RollBack);
+
         TestCases.Run(fact, cnn);
       }
 
       Console.ReadKey();
+    }
+
+    static void cnn_RollBack(object sender, EventArgs e)
+    {
+    }
+
+    static void cnn_Commit(object sender, CommitEventArgs e)
+    {
+    }
+
+    static void cnn_Updated(object sender, UpdateEventArgs e)
+    {
     }
   }
 }
