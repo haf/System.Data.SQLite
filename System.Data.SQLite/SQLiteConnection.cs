@@ -1440,7 +1440,7 @@ namespace System.Data.SQLite
             if (String.Compare(rd.GetString(1), strView, true, CultureInfo.InvariantCulture) == 0
               || String.IsNullOrEmpty(strView))
             {
-              strItem = rd.GetString(4);
+              strItem = rd.GetString(4).Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ');
               nPos = Globalization.CultureInfo.InvariantCulture.CompareInfo.IndexOf(strItem, " AS ", CompareOptions.IgnoreCase);
               if (nPos > -1)
               {
@@ -1702,7 +1702,7 @@ namespace System.Data.SQLite
             {
               using (SQLiteCommand cmdViewSelect = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdViews.GetString(2)), this))
               {
-                strSql = rdViews.GetString(4);
+                strSql = rdViews.GetString(4).Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' '); 
                 n = CultureInfo.InvariantCulture.CompareInfo.IndexOf(strSql, " AS ", CompareOptions.IgnoreCase);
                 if (n < 0)
                   continue;
