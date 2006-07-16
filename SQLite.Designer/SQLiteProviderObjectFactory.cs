@@ -28,10 +28,10 @@ namespace SQLite.Designer
       if (objType == typeof(DataConnectionSupport))
         return new SQLiteDataConnectionSupport();
 
-      if (objType == typeof(IDataConnectionProperties))
+      if (objType == typeof(IDataConnectionProperties) || objType == typeof(DataConnectionProperties))
         return new SQLiteConnectionProperties();
 
-      if (objType == typeof(IDataConnectionUIControl))
+      if (objType == typeof(IDataConnectionUIControl) || objType == typeof(DataConnectionUIControl))
         return new SQLiteConnectionUIControl();
 
       return base.CreateObject(objType);

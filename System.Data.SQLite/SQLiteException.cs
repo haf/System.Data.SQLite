@@ -17,6 +17,124 @@ namespace System.Data.SQLite
 #endif
 
   /// <summary>
+  /// SQLite exception class.
+  /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+  [Serializable]
+  public sealed class SQLiteException : DbException
+#else
+  public sealed class SQLiteException : Exception
+#endif
+  {
+    private SQLiteErrorCode _errorCode;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    private SQLiteException(SerializationInfo info, StreamingContext context)
+      : base(info, context)
+    {
+    }
+#endif
+
+    /// <summary>
+    /// Public constructor for generating a SQLite error given the base error code
+    /// </summary>
+    /// <param name="errorCode">The SQLite error code to report</param>
+    /// <param name="extendedInformation">Extra text to go along with the error message text</param>
+    public SQLiteException(int errorCode, string extendedInformation)
+      : base(GetStockErrorMessage(errorCode, extendedInformation))
+    {
+      _errorCode = (SQLiteErrorCode)errorCode;
+    }
+
+    /// <summary>
+    /// Various public constructors that just pass along to the base Exception
+    /// </summary>
+    /// <param name="message">Passed verbatim to Exception</param>
+    public SQLiteException(string message)
+      : base(message)
+    {
+    }
+
+    /// <summary>
+    /// Various public constructors that just pass along to the base Exception
+    /// </summary>
+    public SQLiteException()
+    {
+    }
+
+    /// <summary>
+    /// Various public constructors that just pass along to the base Exception
+    /// <param name="message">Passed to Exception</param>
+    /// <param name="innerException">Passed to Exception</param>
+    /// </summary>
+    public SQLiteException(string message, Exception innerException)
+      : base(message, innerException)
+    {
+    }
+
+    /// <summary>
+    /// Retrieves the underlying SQLite error code for this exception
+    /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    public new SQLiteErrorCode ErrorCode
+#else
+    public SQLiteErrorCode ErrorCode
+#endif
+    {
+      get { return _errorCode; }
+    }
+
+    /// <summary>
+    /// Initializes the exception class with the SQLite error code.
+    /// </summary>
+    /// <param name="errorCode">The SQLite error code</param>
+    /// <param name="errorMessage">A detailed error message</param>
+    /// <returns>An error message string</returns>
+    private static string GetStockErrorMessage(int errorCode, string errorMessage)
+    {
+      if (errorMessage == null) errorMessage = "";
+
+      if (errorMessage.Length > 0)
+        errorMessage = "\r\n" + errorMessage;
+
+      if (errorCode < 0 || errorCode >= _errorMessages.Length)
+        errorCode = 1;
+
+      return _errorMessages[errorCode] + errorMessage;
+    }
+
+    private static string[] _errorMessages = {
+      "SQLite OK",
+      "SQLite error",
+      "An internal logic error in SQLite",
+      "Access permission denied",
+      "Callback routine requested an abort",
+      "The database file is locked",
+      "A table in the database is locked",
+      "malloc() failed",
+      "Attempt to write a read-only database",
+      "Operation terminated by sqlite3_interrupt()",
+      "Some kind of disk I/O error occurred",
+      "The database disk image is malformed",
+      "Table or record not found",
+      "Insertion failed because the database is full",
+      "Unable to open the database file",
+      "Database lock protocol error",
+      "Database is empty",
+      "The database schema changed",
+      "Too much data for one row of a table",
+      "Abort due to constraint violation",
+      "Data type mismatch",
+      "Library used incorrectly",
+      "Uses OS features not supported on host",
+      "Authorization denied",
+      "Auxiliary database format error",
+      "2nd parameter to sqlite3_bind() out of range",
+      "File opened that is not a database file",
+    };
+  }
+
+  /// <summary>
   /// SQLite error codes
   /// </summary>
   public enum SQLiteErrorCode
@@ -137,123 +255,5 @@ namespace System.Data.SQLite
     /// sqlite3_step() has finished executing
     /// </summary>
     Done = 101,
-  }
-
-  /// <summary>
-  /// SQLite exception class.
-  /// </summary>
-#if !PLATFORM_COMPACTFRAMEWORK
-  [Serializable]
-  public sealed class SQLiteException : DbException
-#else
-  public sealed class SQLiteException : Exception
-#endif
-  {
-    private SQLiteErrorCode _errorCode;
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    private SQLiteException(SerializationInfo info, StreamingContext context)
-      : base(info, context)
-    {
-    }
-#endif
-
-    /// <summary>
-    /// Public constructor for generating a SQLite error given the base error code
-    /// </summary>
-    /// <param name="errorCode">The SQLite error code to report</param>
-    /// <param name="extendedInformation">Extra text to go along with the error message text</param>
-    public SQLiteException(int errorCode, string extendedInformation)
-      : base(GetStockErrorMessage(errorCode, extendedInformation))
-    {
-      _errorCode = (SQLiteErrorCode)errorCode;
-    }
-
-    /// <summary>
-    /// Various public constructors that just pass along to the base Exception
-    /// </summary>
-    /// <param name="message">Passed verbatim to Exception</param>
-    public SQLiteException(string message)
-      : base(message)
-    {
-    }
-
-    /// <summary>
-    /// Various public constructors that just pass along to the base Exception
-    /// </summary>
-    public SQLiteException()
-    {
-    }
-
-    /// <summary>
-    /// Various public constructors that just pass along to the base Exception
-    /// <param name="message">Passed to Exception</param>
-    /// <param name="innerException">Passed to Exception</param>
-    /// </summary>
-    public SQLiteException(string message, Exception innerException)
-      : base(message, innerException)
-    {
-    }
-
-    /// <summary>
-    /// Retrieves the underlying SQLite error code for this exception
-    /// </summary>
-#if !PLATFORM_COMPACTFRAMEWORK
-    public new SQLiteErrorCode ErrorCode
-#else
-    public SQLiteErrorCode ErrorCode
-#endif
-    {
-      get { return _errorCode; }
-    }
-
-    /// <summary>
-    /// Initializes the exception class with the SQLite error code.
-    /// </summary>
-    /// <param name="errorCode">The SQLite error code</param>
-    /// <param name="errorMessage">A detailed error message</param>
-    /// <returns>An error message string</returns>
-    private static string GetStockErrorMessage(int errorCode, string errorMessage)
-    {
-      if (errorMessage == null) errorMessage = "";
-
-      if (errorMessage.Length > 0)
-        errorMessage = "\r\n" + errorMessage;
-
-      if (errorCode < 0 || errorCode >= _errorMessages.Length)
-        errorCode = 1;
-
-      return _errorMessages[errorCode] + errorMessage;
-    }
-
-    private static string[] _errorMessages = {
-      "SQLite OK",
-      "SQLite error",
-      "An internal logic error in SQLite",
-      "Access permission denied",
-      "Callback routine requested an abort",
-      "The database file is locked",
-      "A table in the database is locked",
-      "malloc() failed",
-      "Attempt to write a read-only database",
-      "Operation terminated by sqlite3_interrupt()",
-      "Some kind of disk I/O error occurred",
-      "The database disk image is malformed",
-      "Table or record not found",
-      "Insertion failed because the database is full",
-      "Unable to open the database file",
-      "Database lock protocol error",
-      "Database is empty",
-      "The database schema changed",
-      "Too much data for one row of a table",
-      "Abort due to constraint violation",
-      "Data type mismatch",
-      "Library used incorrectly",
-      "Uses OS features not supported on host",
-      "Authorization denied",
-      "Auxiliary database format error",
-      "2nd parameter to sqlite3_bind() out of range",
-      "File opened that is not a database file",
-    };
   }
 }

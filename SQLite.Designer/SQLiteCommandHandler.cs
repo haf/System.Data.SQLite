@@ -12,6 +12,7 @@ namespace SQLite.Designer
   using System.Windows.Forms.Design;
   using Microsoft.VisualStudio.Shell.Interop;
   using Microsoft.VisualStudio;
+  using System.Data.Common;
 
   enum cmdid
   {
@@ -141,7 +142,7 @@ namespace SQLite.Designer
             Vacuum();
             break;
           case cmdid.Rekey:
-            ChangePassword();
+            ChangePassword(itemId);
             break;
           default:
             returnValue = base.ExecuteCommand(itemId, command, executionOption, arguments);
@@ -268,11 +269,37 @@ namespace SQLite.Designer
       DataViewHierarchyAccessor.Connection.Command.ExecuteWithoutResults("VACUUM", (int)System.Data.CommandType.Text, null, 0);
     }
 
-    private void ChangePassword()
+    private void ChangePassword(int itemId)
     {
-      // TODO: Implement this command, but we have to use reflection because we don't have a design-time reference to the SQLite object
-     // System.Data.SQLite.SQLiteConnection cnn = DataViewHierarchyAccessor.Connection.ConnectionSupport.ProviderObject as System.Data.SQLite.SQLiteConnection;
-     // if (cnn == null) return;
+      DataConnection dataConn = DataViewHierarchyAccessor.Connection;
+      DbConnection cnn = DataViewHierarchyAccessor.Connection.ConnectionSupport.ProviderObject as DbConnection;
+      if (cnn == null) return;
+
+      SQLiteConnectionProperties props = new SQLiteConnectionProperties(cnn.ConnectionString);
+
+      using (ChangePasswordDialog dlg = new ChangePasswordDialog(props))
+      {
+        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+        {
+          if (String.IsNullOrEmpty(dlg.Password))
+            props.Remove("Password");
+          else
+            props["Password"] = dlg.Password;
+
+          System.Reflection.MethodInfo method = cnn.GetType().GetMethod("ChangePassword", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.InvokeMethod, null, new Type[] { typeof(string) }, null);
+
+          if (method != null)
+          {
+            method.Invoke(cnn, new object[] { dlg.Password });
+
+            dataConn.Close();
+            dataConn.DisplayConnectionString = props.ToDisplayString();
+            dataConn.Open();
+
+            Refresh(itemId);
+          }
+        }
+      }
     }
 
     private void Refresh(int itemId)

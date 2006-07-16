@@ -68,5 +68,32 @@ namespace SQLite.Designer {
                 return ResourceManager.GetString("400", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The database and its metadata will be un-encrypted.  No password will be required to open the database and view its contents..
+        /// </summary>
+        internal static string Decrypt {
+            get {
+                return ResourceManager.GetString("Decrypt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The database and its metadata will be encrypted using the supplied password as a hash..
+        /// </summary>
+        internal static string Encrypt {
+            get {
+                return ResourceManager.GetString("Encrypt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The database and its metadata will be re-encrypted using the supplied password as a hash..
+        /// </summary>
+        internal static string ReEncrypt {
+            get {
+                return ResourceManager.GetString("ReEncrypt", resourceCulture);
+            }
+        }
     }
 }

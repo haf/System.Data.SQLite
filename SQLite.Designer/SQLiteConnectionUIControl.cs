@@ -64,17 +64,26 @@ namespace SQLite.Designer
 
     private void passwordTextBox_Leave(object sender, EventArgs e)
     {
-      ConnectionProperties["Password"] = passwordTextBox.Text;
+      if (String.IsNullOrEmpty(passwordTextBox.Text))
+        ConnectionProperties.Remove("Password");
+      else
+        ConnectionProperties["Password"] = passwordTextBox.Text;
     }
 
     private void encoding_Changed(object sender, EventArgs e)
     {
-      ConnectionProperties["UseUTF16Encoding"] = utf16RadioButton.Checked;
+      if (utf8RadioButton.Checked == true)
+        ConnectionProperties.Remove("UseUTF16Encoding");
+      else
+        ConnectionProperties["UseUTF16Encoding"] = utf16RadioButton.Checked;
     }
 
     private void datetime_Changed(object sender, EventArgs e)
     {
-      ConnectionProperties["DateTimeFormat"] = (iso8601RadioButton.Checked == true) ? "ISO8601" : "Ticks";
+      if (iso8601RadioButton.Checked == true)
+        ConnectionProperties.Remove("DateTimeFormat");
+      else
+        ConnectionProperties["DateTimeFormat"] = "Ticks";
     }
 
     private void sync_Changed(object sender, EventArgs e)
@@ -83,7 +92,10 @@ namespace SQLite.Designer
       if (fullRadioButton.Checked == true) sync = "Full";
       else if (offRadioButton.Checked == true) sync = "Off";
 
-      ConnectionProperties["Synchronous"] = sync;
+      if (sync == "Normal")
+        ConnectionProperties.Remove("Synchronous");
+      else
+        ConnectionProperties["Synchronous"] = sync;
     }
 
     private void pageSizeTextBox_Leave(object sender, EventArgs e)

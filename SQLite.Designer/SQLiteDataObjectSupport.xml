@@ -110,6 +110,7 @@
 						</Concept>
 					</Concepts>
 				</Property>
+        <Property name="DataType" type="System.String" itemName="data_type" />
         <Property name="SystemType" type="System.String" itemName="data_type">
           <Concepts>
             <Concept name="UserDataType"/>

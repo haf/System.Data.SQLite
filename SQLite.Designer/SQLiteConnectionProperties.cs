@@ -38,6 +38,14 @@ namespace SQLite.Designer
       }
     }
 
+    public override bool EquivalentTo(DataConnectionProperties connectionProperties)
+    {
+      SQLiteConnectionProperties props = connectionProperties as SQLiteConnectionProperties;
+
+      if (props == null) return false;
+
+      return (String.Compare((string)this["Data Source"], (string)props["Data Source"], true) == 0);
+    }
     // Provides automatic locating and loading of the SQLite assembly if its not registered in the GAC.
     // However, if it's not registered in the GAC, then certain design-time elements will fail.
     //

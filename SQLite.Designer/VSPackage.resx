@@ -120,4 +120,13 @@
   <data name="400" xml:space="preserve">
     <value>MHM2ZQETQKDTJEPTC1MTQCZ1R1KQEMAPZHETDZPZI9RPJ0E0DHAHKCHZPKQ8AQZICADHKIZ1JAQED8IDEHZPZKZEIKAQERHPRCQMAMRKDEZZQRDRDHJEZIKECZPDIIKC</value>
   </data>
+  <data name="Decrypt" xml:space="preserve">
+    <value>The database and its metadata will be un-encrypted.  No password will be required to open the database and view its contents.</value>
+  </data>
+  <data name="Encrypt" xml:space="preserve">
+    <value>The database and its metadata will be encrypted using the supplied password as a hash.</value>
+  </data>
+  <data name="ReEncrypt" xml:space="preserve">
+    <value>The database and its metadata will be re-encrypted using the supplied password as a hash.</value>
+  </data>
 </root>

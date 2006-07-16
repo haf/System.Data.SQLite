@@ -67,6 +67,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangePasswordDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangePasswordDialog.Designer.cs">
+      <DependentUpon>ChangePasswordDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="SQLiteAdapterDesigner.cs">
     </Compile>
     <Compile Include="SQLiteCommandDesigner.cs">
@@ -105,6 +111,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ChangePasswordDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ChangePasswordDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SQLiteConnectionUIControl.resx">
       <SubType>Designer</SubType>
       <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>
@@ -122,7 +132,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="C:\Program Files\Visual Studio 2005 SDK\2006.04\VisualStudioIntegration\Tools\Build\Microsoft.VsSDK.targets" />
+  <Import Project="C:\Program Files (x86)\Visual Studio 2005 SDK\2006.04\VisualStudioIntegration\Tools\Build\Microsoft.VsSDK.targets" />
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>

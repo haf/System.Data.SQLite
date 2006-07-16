@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.30.1 July 2, 2006<br>
+    Version 1.0.31.0 July 16, 2006<br>
     Using SQLite 3.3.6<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -47,10 +47,10 @@
       in the schema.&nbsp; When cloning a connection, all attached databases are 
       automatically re-attached to the new connection.
       <LI>
-        DbConnection.GetSchema(...) support includes the <I>MetaDataCollections</I>, <I>DataSourceInformation</I>,
-        <I>Columns</I>, <I>Tables</I>, <I>Views, ViewColumns, </I><I>Catalogs, </I><I>Indexes, 
+        DbConnection.GetSchema(...) support includes <I>ReservedWords, MetaDataCollections</I>, <I>DataSourceInformation</I>,
+        <I>DataTypes, Columns</I>, <I>Tables</I>, <I>Views, ViewColumns, </I><I>Catalogs, </I><I>Indexes, 
           IndexColumns </I>and <EM>ForeignKeys</EM>
-      keywords.
+      .
       <LI>
       Enhanced DbDataReader.GetSchemaTable() functionality returns catalog, namespace 
       and detailed schema information even for complex queries.
@@ -119,6 +119,16 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.31.0 - July 16, 2006</b></p>
+    <ul>
+    <li>Re-applied the view parsing bugfix in 1.0.29.0 that was accidentally reverted
+      out of the 30 build.</li><li>Fixed SQLiteCommand.ExecuteScalar() to return null instead of DbNull.Value
+    when no rows were returned.</li>
+      <li>Design-time installer now installs the package-based designer on full Visual Studio
+        versions.&nbsp; Express editions continue to use the packageless designer.</li>
+      <li>In Visual Studio (not Express), you can now right-click a SQLite connection in
+        the Server Explorer and vacuum the database and change the encryption password.</li>
+    </ul>
     <p><b>1.0.30.1 - July 2, 2006</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.6</li>

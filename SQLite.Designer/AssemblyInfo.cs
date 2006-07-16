@@ -32,8 +32,8 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.29.0")]
-[assembly: AssemblyFileVersion("1.0.29.0")]
+[assembly: AssemblyVersion("1.0.31.0")]
+[assembly: AssemblyFileVersion("1.0.31.0")]
 [assembly: AssemblyDelaySignAttribute(false)]
 [assembly: AssemblyKeyFileAttribute("..\\System.Data.SQLite\\System.Data.SQLite.snk")]
 [assembly: AssemblyKeyNameAttribute("")]

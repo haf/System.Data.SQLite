@@ -558,19 +558,17 @@ namespace System.Data.SQLite
               row[SchemaTableOptionalColumn.BaseCatalogName],
               row[SchemaTableColumn.BaseTableName]
               ), _command.Connection))
+            using (DbDataReader rdTable = cmdTable.ExecuteReader())
             {
-              using (DbDataReader rdTable = cmdTable.ExecuteReader())
+              // Find the matching column
+              while (rdTable.Read())
               {
-                // Find the matching column
-                while (rdTable.Read())
+                if (String.Compare((string)row[SchemaTableColumn.BaseColumnName], rdTable.GetString(1), true, CultureInfo.InvariantCulture) == 0)
                 {
-                  if (String.Compare((string)row[SchemaTableColumn.BaseColumnName], rdTable.GetString(1), true, CultureInfo.InvariantCulture) == 0)
-                  {
-                    if (rdTable.IsDBNull(4) == false)
-                      row[SchemaTableOptionalColumn.DefaultValue] = rdTable[4];
+                  if (rdTable.IsDBNull(4) == false)
+                    row[SchemaTableOptionalColumn.DefaultValue] = rdTable[4];
 
-                    break;
-                  }
+                  break;
                 }
               }
             }

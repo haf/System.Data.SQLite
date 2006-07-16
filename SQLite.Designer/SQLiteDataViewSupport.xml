@@ -202,8 +202,8 @@
       </Identifier>
       <Properties>
         <Property name="Ordinal"/>
-        <Property name="SystemType">
-          <DisplayName>System Type</DisplayName>
+        <Property name="DataType">
+          <DisplayName>Data Type</DisplayName>
         </Property>
         <Property name="Nullable">
           <DisplayName>Allow Nulls</DisplayName>
@@ -262,8 +262,8 @@
       <Properties>
         <Property name="Ordinal"/>
         <Property name="Length"/>
-        <Property name="SystemType">
-          <DisplayName>System Type</DisplayName>
+        <Property name="DataType">
+          <DisplayName>Data Type</DisplayName>
         </Property>
         <Property name="Nullable">
           <DisplayName>Allow Nulls</DisplayName>
