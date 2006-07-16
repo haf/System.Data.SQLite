@@ -519,6 +519,8 @@ namespace install
 
     private void Install(string keyname, Guid provider, Guid source)
     {
+      bool usePackage = (keyname == "VisualStudio");
+
       using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
       {
         using (RegistryKey subkey = key.CreateSubKey(provider.ToString("B"), RegistryKeyPermissionCheck.ReadWriteSubTree))
@@ -528,30 +530,29 @@ namespace install
           subkey.SetValue("Technology", "{77AB9A9D-78B9-4ba7-91AC-873F5338F1D2}");
           subkey.SetValue("CodeBase", Path.GetFullPath("SQLite.Designer.DLL"));
           
-#if USEPACKAGE
+
+          if (usePackage)
            subkey.SetValue("FactoryService", "{DCBE6C8D-0E57-4099-A183-98FF74C64D9D}");
-#endif
+
           using (RegistryKey subsubkey = subkey.CreateSubKey("SupportedObjects", RegistryKeyPermissionCheck.ReadWriteSubTree))
           {
             using (RegistryKey subsubsubkey = subsubkey.CreateSubKey("DataConnectionUIControl", RegistryKeyPermissionCheck.ReadWriteSubTree))
             {
-#if !USEPACKAGE
-              subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteConnectionUIControl");
-#endif
+              if (!usePackage)
+                subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteConnectionUIControl");
             }
             using (RegistryKey subsubsubkey = subsubkey.CreateSubKey("DataConnectionProperties", RegistryKeyPermissionCheck.ReadWriteSubTree))
             {
-#if !USEPACKAGE
-              subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteConnectionProperties");
-#endif
+              if (!usePackage)
+                subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteConnectionProperties");
             }
+
             subsubkey.CreateSubKey("DataObjectSupport").Close();
             subsubkey.CreateSubKey("DataViewSupport").Close();
             using (RegistryKey subsubsubkey = subsubkey.CreateSubKey("DataConnectionSupport", RegistryKeyPermissionCheck.ReadWriteSubTree))
             {
-#if !USEPACKAGE
-              subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteDataConnectionSupport");
-#endif
+              if (!usePackage)
+                subsubsubkey.SetValue(null, "SQLite.Designer.SQLiteDataConnectionSupport");
             }
           }
         }
@@ -603,33 +604,38 @@ namespace install
         }
       }
 
-
-#if USEPACKAGE
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\Packages", keyname), true))
+      if (usePackage)
       {
-        using (RegistryKey subkey = key.CreateSubKey("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}", RegistryKeyPermissionCheck.ReadWriteSubTree))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Packages", keyname, _regRoot), true))
         {
-          subkey.SetValue(null, "SQLite Designer Package");
-          subkey.SetValue("Class", "SQLite.Designer.SQLitePackage");
-          subkey.SetValue("CodeBase", Path.GetFullPath("SQLite.Designer.DLL"));
-          subkey.SetValue("ID", 400);
-          subkey.SetValue("InprocServer32", "mscoree.dll");
-          subkey.SetValue("CompanyName", "Black Castle Software, LLC");
-          subkey.SetValue("MinEdition", "standard");
-          subkey.SetValue("ProductName", "SQLite Data Provider");
-          subkey.SetValue("ProductVersion", "1.0");
+          using (RegistryKey subkey = key.CreateSubKey("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}", RegistryKeyPermissionCheck.ReadWriteSubTree))
+          {
+            subkey.SetValue(null, "SQLite Designer Package");
+            subkey.SetValue("Class", "SQLite.Designer.SQLitePackage");
+            subkey.SetValue("CodeBase", Path.GetFullPath("SQLite.Designer.DLL"));
+            subkey.SetValue("ID", 400);
+            subkey.SetValue("InprocServer32", "mscoree.dll");
+            subkey.SetValue("CompanyName", "Black Castle Software, LLC");
+            subkey.SetValue("MinEdition", "standard");
+            subkey.SetValue("ProductName", "SQLite Data Provider");
+            subkey.SetValue("ProductVersion", "1.0");
+          }
+        }
+
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Menus", keyname, _regRoot), true))
+        {
+          key.SetValue("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}", ", 1000, 1");
+        }
+
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Services", keyname, _regRoot), true))
+        {
+          using (RegistryKey subkey = key.CreateSubKey("{DCBE6C8D-0E57-4099-A183-98FF74C64D9D}", RegistryKeyPermissionCheck.ReadWriteSubTree))
+          {
+            subkey.SetValue(null, "{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}");
+            subkey.SetValue("Name", "SQLite Provider Object Factory");
+          }
         }
       }
-
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\8.0\\Services", keyname), true))
-      {
-        using (RegistryKey subkey = key.CreateSubKey("{DCBE6C8D-0E57-4099-A183-98FF74C64D9D}", RegistryKeyPermissionCheck.ReadWriteSubTree))
-        {
-          subkey.SetValue(null, "{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}");
-          subkey.SetValue("Name", "SQLite Provider Object Factory");
-        }
-      }
-#endif
     }
 
     private XmlDocument GetConfig(string keyname, out string xmlFileName)
@@ -669,6 +675,21 @@ namespace install
         using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
         {
           if (key != null) key.DeleteSubKeyTree(source.ToString("B"));
+        }
+
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Packages", keyname, _regRoot), true))
+        {
+          if (key != null) key.DeleteSubKeyTree("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}");
+        }
+
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Services", keyname, _regRoot), true))
+        {
+          if (key != null) key.DeleteSubKeyTree("{DCBE6C8D-0E57-4099-A183-98FF74C64D9D}");
+        }
+
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Menus", keyname, _regRoot), true))
+        {
+          key.DeleteValue("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}");
         }
 
         //using (RegistryKey key = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", true))
