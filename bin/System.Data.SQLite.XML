@@ -1987,6 +1987,49 @@
               &lt;MetaDataC [rest of string was truncated]&quot;;.
              </summary>
         </member>
+        <member name="T:System.Data.SQLite.SQLiteException">
+            <summary>
+            SQLite exception class.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteException.#ctor(System.Int32,System.String)">
+            <summary>
+            Public constructor for generating a SQLite error given the base error code
+            </summary>
+            <param name="errorCode">The SQLite error code to report</param>
+            <param name="extendedInformation">Extra text to go along with the error message text</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteException.#ctor(System.String)">
+            <summary>
+            Various public constructors that just pass along to the base Exception
+            </summary>
+            <param name="message">Passed verbatim to Exception</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteException.#ctor">
+            <summary>
+            Various public constructors that just pass along to the base Exception
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteException.#ctor(System.String,System.Exception)">
+            <summary>
+            Various public constructors that just pass along to the base Exception
+            <param name="message">Passed to Exception</param>
+            <param name="innerException">Passed to Exception</param>
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteException.GetStockErrorMessage(System.Int32,System.String)">
+            <summary>
+            Initializes the exception class with the SQLite error code.
+            </summary>
+            <param name="errorCode">The SQLite error code</param>
+            <param name="errorMessage">A detailed error message</param>
+            <returns>An error message string</returns>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteException.ErrorCode">
+            <summary>
+            Retrieves the underlying SQLite error code for this exception
+            </summary>
+        </member>
         <member name="T:System.Data.SQLite.SQLiteErrorCode">
             <summary>
             SQLite error codes
@@ -2135,49 +2178,6 @@
         <member name="F:System.Data.SQLite.SQLiteErrorCode.Done">
             <summary>
             sqlite3_step() has finished executing
-            </summary>
-        </member>
-        <member name="T:System.Data.SQLite.SQLiteException">
-            <summary>
-            SQLite exception class.
-            </summary>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteException.#ctor(System.Int32,System.String)">
-            <summary>
-            Public constructor for generating a SQLite error given the base error code
-            </summary>
-            <param name="errorCode">The SQLite error code to report</param>
-            <param name="extendedInformation">Extra text to go along with the error message text</param>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteException.#ctor(System.String)">
-            <summary>
-            Various public constructors that just pass along to the base Exception
-            </summary>
-            <param name="message">Passed verbatim to Exception</param>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteException.#ctor">
-            <summary>
-            Various public constructors that just pass along to the base Exception
-            </summary>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteException.#ctor(System.String,System.Exception)">
-            <summary>
-            Various public constructors that just pass along to the base Exception
-            <param name="message">Passed to Exception</param>
-            <param name="innerException">Passed to Exception</param>
-            </summary>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteException.GetStockErrorMessage(System.Int32,System.String)">
-            <summary>
-            Initializes the exception class with the SQLite error code.
-            </summary>
-            <param name="errorCode">The SQLite error code</param>
-            <param name="errorMessage">A detailed error message</param>
-            <returns>An error message string</returns>
-        </member>
-        <member name="P:System.Data.SQLite.SQLiteException.ErrorCode">
-            <summary>
-            Retrieves the underlying SQLite error code for this exception
             </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLiteConnection">
