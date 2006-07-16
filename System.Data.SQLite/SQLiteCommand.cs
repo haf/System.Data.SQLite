@@ -17,7 +17,7 @@ namespace System.Data.SQLite
   /// SQLite implementation of DbCommand.
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
-  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.29.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
+  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.31.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
 #endif
   public sealed class SQLiteCommand : DbCommand, ICloneable
   {
@@ -164,6 +164,9 @@ namespace System.Data.SQLite
     /// </summary>
     internal void ClearCommands()
     {
+      if (_activeReader != null)
+        _activeReader.Close();
+
       if (_statementList == null) return;
 
       int x = _statementList.Count;
@@ -544,8 +547,6 @@ namespace System.Data.SQLite
         }
         _cnn._sql.Reset(stmt);
       }
-
-      if (ret == null) ret = DBNull.Value;
 
       return ret;
     }
