@@ -597,6 +597,25 @@
     <IsBestMatch>false</IsBestMatch>
   </DataTypes>
   <DataTypes>
+    <TypeName>nchar</TypeName>
+    <ProviderDbType>16</ProviderDbType>
+    <ColumnSize>2147483647</ColumnSize>
+    <CreateParameters>max length</CreateParameters>
+    <DataType>System.String</DataType>
+    <CreateFormat>char({0})</CreateFormat>
+    <IsAutoIncrementable>false</IsAutoIncrementable>
+    <IsCaseSensitive>false</IsCaseSensitive>
+    <IsFixedLength>false</IsFixedLength>
+    <IsFixedPrecisionScale>false</IsFixedPrecisionScale>
+    <IsLong>false</IsLong>
+    <IsNullable>true</IsNullable>
+    <IsSearchable>true</IsSearchable>
+    <IsSearchableWithLike>true</IsSearchableWithLike>
+    <LiteralPrefix>'</LiteralPrefix>
+    <LiteralSuffix>'</LiteralSuffix>
+    <IsBestMatch>false</IsBestMatch>
+  </DataTypes>
+  <DataTypes>
     <TypeName>datetime</TypeName>
     <ProviderDbType>6</ProviderDbType>
     <ColumnSize>23</ColumnSize>

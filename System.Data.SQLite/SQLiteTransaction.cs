@@ -108,11 +108,11 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Gets the isolation level of the transaction.  SQLite does not support isolation levels, so this always returns Unspecified.
+    /// Gets the isolation level of the transaction.  SQLite only supports Serializable transactions.
     /// </summary>
     public override IsolationLevel IsolationLevel
     {
-      get { return IsolationLevel.Unspecified; }
+      get { return IsolationLevel.Serializable; }
     }
 
     /// <summary>

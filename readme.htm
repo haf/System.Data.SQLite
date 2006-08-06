@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.31.0 July 16, 2006<br>
+    Version 1.0.32.0 August 6, 2006<br>
     Using SQLite 3.3.6<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -119,6 +119,15 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.32.0 - August 6, 2006</b></p>
+    <ul>
+    <li>Added AllowPartiallyTrustedCallers attribute to the assembly</li><li>Added the missing "nchar" type</li>
+      <li>Added support for binary Guid's.&nbsp; Guids are now stored as binary by default
+        when using parameterized queries.&nbsp; Text guids are still fully supported.</li>
+      <li>Fixed a TransactionScope() error that caused the transaction not to be completed.</li>
+      <li>Enhanced parameter names so that if they are added to the Parameters collection
+        without their prefix character (@ : or $) they are still properly mapped.&nbsp;</li>
+    </ul>
     <p><b>1.0.31.0 - July 16, 2006</b></p>
     <ul>
     <li>Re-applied the view parsing bugfix in 1.0.29.0 that was accidentally reverted

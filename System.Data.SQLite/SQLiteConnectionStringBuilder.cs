@@ -162,6 +162,7 @@ namespace System.Data.SQLite
     /// Gets/sets the database encryption password
     /// </summary>
     [Browsable(true)]
+    [PasswordPropertyText(true)]
     public string Password
     {
       get

@@ -39,7 +39,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Not implemented, this function does nothing.
+    /// Minimal amount of parameter processing.  Primarily sets the DbType for the parameter equal to the provider type in the schema
     /// </summary>
     /// <param name="parameter">The parameter to use in applying custom behaviors to a row</param>
     /// <param name="row">The row to apply the parameter to</param>
@@ -51,11 +51,8 @@ namespace System.Data.SQLite
       param.DbType = (DbType)row[SchemaTableColumn.ProviderType];
     }
 
-    /// <overloads>
-    /// Not implemented.  Throws a NotImplementedException() if called.
-    /// </overloads>
     /// <summary>
-    /// Not implemented.
+    /// Returns a valid named parameter
     /// </summary>
     /// <param name="parameterName">The name of the parameter</param>
     /// <returns>Error</returns>
@@ -65,7 +62,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Not implemented.
+    /// Returns a named parameter for the given ordinal
     /// </summary>
     /// <param name="parameterOrdinal">The i of the parameter</param>
     /// <returns>Error</returns>
@@ -78,7 +75,7 @@ namespace System.Data.SQLite
     /// Returns a placeholder character for the specified parameter i.
     /// </summary>
     /// <param name="parameterOrdinal">The index of the parameter to provide a placeholder for</param>
-    /// <returns>Returns a "?" character, used for all placeholders.</returns>
+    /// <returns>Returns a named parameter</returns>
     protected override string GetParameterPlaceholder(int parameterOrdinal)
     {
       return GetParameterName(parameterOrdinal);

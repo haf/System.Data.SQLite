@@ -20,13 +20,13 @@ namespace System.Data.SQLite
     internal SQLiteEnlistment(SQLiteConnection cnn)
     {
       _transaction = cnn.BeginTransaction();
-      _transaction.Connection._enlisted = true;
     }
 
     #region IEnlistmentNotification Members
 
     public void Commit(Enlistment enlistment)
     {
+      _transaction.Connection._enlistment = null;
       try
       {
         _transaction.IsValid();
@@ -37,7 +37,6 @@ namespace System.Data.SQLite
       }
       finally
       {
-        _transaction.Connection._enlisted = false;
         _transaction = null;
       }
     }
@@ -58,12 +57,12 @@ namespace System.Data.SQLite
         preparingEnlistment.ForceRollback(e);
         return;
       }
-      preparingEnlistment.Done();
+      preparingEnlistment.Prepared();
     }
 
     public void Rollback(Enlistment enlistment)
     {
-      _transaction.Connection._enlisted = false;
+      _transaction.Connection._enlistment = null;
       try
       {
         _transaction.Rollback();

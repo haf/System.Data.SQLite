@@ -178,7 +178,7 @@ namespace System.Data.SQLite
     /// </returns>
     /// <param name="i">The index of the column to type-check</param>
     /// <param name="typ">The type we want to get out of the column</param>
-    private void VerifyType(int i, DbType typ)
+    private TypeAffinity VerifyType(int i, DbType typ)
     {
       CheckClosed();
       CheckValidRow();
@@ -187,27 +187,28 @@ namespace System.Data.SQLite
       switch (affinity)
       {
         case TypeAffinity.Int64:
-          if (typ == DbType.Int16) return;
-          if (typ == DbType.Int32) return;
-          if (typ == DbType.Int64) return;
-          if (typ == DbType.Boolean) return;
-          if (typ == DbType.Byte) return;
+          if (typ == DbType.Int16) return affinity;
+          if (typ == DbType.Int32) return affinity;
+          if (typ == DbType.Int64) return affinity;
+          if (typ == DbType.Boolean) return affinity;
+          if (typ == DbType.Byte) return affinity;
           break;
         case TypeAffinity.Double:
-          if (typ == DbType.Single) return;
-          if (typ == DbType.Double) return;
-          if (typ == DbType.Decimal) return;
+          if (typ == DbType.Single) return affinity;
+          if (typ == DbType.Double) return affinity;
+          if (typ == DbType.Decimal) return affinity;
           break;
         case TypeAffinity.Text:
-          if (typ == DbType.SByte) return;
-          if (typ == DbType.String) return;
-          if (typ == DbType.SByte) return;
-          if (typ == DbType.Guid) return;
-          if (typ == DbType.DateTime) return;
+          if (typ == DbType.SByte) return affinity;
+          if (typ == DbType.String) return affinity;
+          if (typ == DbType.SByte) return affinity;
+          if (typ == DbType.Guid) return affinity;
+          if (typ == DbType.DateTime) return affinity;
           break;
         case TypeAffinity.Blob:
-          if (typ == DbType.String) return;
-          if (typ == DbType.Binary) return;
+          if (typ == DbType.Guid) return affinity;
+          if (typ == DbType.String) return affinity;
+          if (typ == DbType.Binary) return affinity;
           break;
       }
 
@@ -360,8 +361,15 @@ namespace System.Data.SQLite
     /// <returns>Guid</returns>
     public override Guid GetGuid(int i)
     {
-      VerifyType(i, DbType.Guid);
-      return new Guid(_activeStatement._sql.GetText(_activeStatement, i));
+      TypeAffinity affinity = VerifyType(i, DbType.Guid);
+      if (affinity == TypeAffinity.Blob)
+      {
+        byte[] buffer = new byte[16];
+        _activeStatement._sql.GetBytes(_activeStatement, i, 0, buffer, 0, 16);
+        return new Guid(buffer);
+      }
+      else
+        return new Guid(_activeStatement._sql.GetText(_activeStatement, i));
     }
 
     /// <summary>

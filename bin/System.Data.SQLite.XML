@@ -375,7 +375,7 @@
         </member>
         <member name="P:System.Data.SQLite.SQLiteTransaction.IsolationLevel">
             <summary>
-            Gets the isolation level of the transaction.  SQLite does not support isolation levels, so this always returns Unspecified.
+            Gets the isolation level of the transaction.  SQLite only supports Serializable transactions.
             </summary>
         </member>
         <member name="T:System.Data.SQLite.FunctionType">
@@ -2265,7 +2265,7 @@
             Nesting level of the transactions open on the connection
             </summary>
         </member>
-        <member name="F:System.Data.SQLite.SQLiteConnection._enlisted">
+        <member name="F:System.Data.SQLite.SQLiteConnection._enlistment">
             <summary>
             Whether or not the connection is enlisted in a distrubuted transaction
             </summary>
@@ -2375,7 +2375,7 @@
             <summary>
             Creates a new SQLiteTransaction if one isn't already active on the connection.
             </summary>
-            <param name="isolationLevel">SQLite doesn't support varying isolation levels, so this parameter is ignored.</param>
+            <param name="isolationLevel">SQLite supports only serializable transactions.</param>
             <returns>Returns a SQLiteTransaction object.</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.BeginTransaction">
@@ -2987,7 +2987,7 @@
         </member>
         <member name="M:System.Data.SQLite.SQLiteCommandBuilder.ApplyParameterInfo(System.Data.Common.DbParameter,System.Data.DataRow,System.Data.StatementType,System.Boolean)">
             <summary>
-            Not implemented, this function does nothing.
+            Minimal amount of parameter processing.  Primarily sets the DbType for the parameter equal to the provider type in the schema
             </summary>
             <param name="parameter">The parameter to use in applying custom behaviors to a row</param>
             <param name="row">The row to apply the parameter to</param>
@@ -2995,18 +2995,15 @@
             <param name="whereClause">Whether the application of the parameter is part of a WHERE clause</param>
         </member>
         <member name="M:System.Data.SQLite.SQLiteCommandBuilder.GetParameterName(System.String)">
-            <overloads>
-            Not implemented.  Throws a NotImplementedException() if called.
-            </overloads>
             <summary>
-            Not implemented.
+            Returns a valid named parameter
             </summary>
             <param name="parameterName">The name of the parameter</param>
             <returns>Error</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteCommandBuilder.GetParameterName(System.Int32)">
             <summary>
-            Not implemented.
+            Returns a named parameter for the given ordinal
             </summary>
             <param name="parameterOrdinal">The i of the parameter</param>
             <returns>Error</returns>
@@ -3016,7 +3013,7 @@
             Returns a placeholder character for the specified parameter i.
             </summary>
             <param name="parameterOrdinal">The index of the parameter to provide a placeholder for</param>
-            <returns>Returns a "?" character, used for all placeholders.</returns>
+            <returns>Returns a named parameter</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteCommandBuilder.SetRowUpdatingHandler(System.Data.Common.DbDataAdapter)">
             <summary>

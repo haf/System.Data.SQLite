@@ -96,11 +96,18 @@ namespace System.Data.SQLite
     internal bool MapParameter(string s, SQLiteParameter p)
     {
       if (_paramNames == null) return false;
+      
+      int startAt = 0;
+      if (s.Length > 0)
+      {
+        if (":$@;".IndexOf(s[0]) == -1)
+          startAt = 1;
+      }
 
       int x = _paramNames.Length;
       for (int n = 0; n < x; n++)
       {
-        if (String.Compare(_paramNames[n], s, true, CultureInfo.InvariantCulture) == 0)
+        if (String.Compare(_paramNames[n], startAt, s, 0, Math.Max(_paramNames[n].Length - startAt, s.Length), true, CultureInfo.InvariantCulture) == 0)
         {
           _paramValues[n] = p;
           return true;
@@ -151,6 +158,7 @@ namespace System.Data.SQLite
         throw new SQLiteException((int)SQLiteErrorCode.Error, "Insufficient parameters supplied to the command");
 
       object obj = param.Value;
+      DbType objType = param.DbType;
 
       if (Convert.IsDBNull(obj) || obj == null)
       {
@@ -158,7 +166,10 @@ namespace System.Data.SQLite
         return;
       }
 
-      switch (param.DbType)
+      if (objType == DbType.Object)
+        objType = SQLiteConvert.TypeToDbType(obj.GetType());
+
+      switch (objType)
       {
         case DbType.Date:
         case DbType.Time:
@@ -186,6 +197,9 @@ namespace System.Data.SQLite
           break;
         case DbType.Binary:
           _sql.Bind_Blob(this, index, (byte[])obj);
+          break;
+        case DbType.Guid:
+          _sql.Bind_Blob(this, index, ((Guid)obj).ToByteArray());
           break;
         default:
           _sql.Bind_Text(this, index, obj.ToString());

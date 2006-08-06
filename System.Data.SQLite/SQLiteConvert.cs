@@ -507,7 +507,7 @@ namespace System.Data.SQLite
       TypeCode tc = Type.GetTypeCode(typ);
       if (tc == TypeCode.Object)
       {
-        if (typ == typeof(byte[]))
+        if (typ == typeof(byte[]) || typ == typeof(Guid))
           return TypeAffinity.Blob;
         else
           return TypeAffinity.Text;
@@ -569,6 +569,7 @@ namespace System.Data.SQLite
       new SQLiteTypeNames("VARCHAR", DbType.String),
       new SQLiteTypeNames("NVARCHAR", DbType.String),
       new SQLiteTypeNames("CHAR", DbType.String),
+      new SQLiteTypeNames("NCHAR", DbType.String),
       new SQLiteTypeNames("TEXT", DbType.String),
       new SQLiteTypeNames("NTEXT", DbType.String),
       new SQLiteTypeNames("STRING", DbType.String),

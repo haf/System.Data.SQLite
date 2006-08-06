@@ -89,6 +89,9 @@ namespace test
       try { TransactionTest(cnn); Console.WriteLine("SUCCESS - Transaction Enlistment"); }
       catch (Exception) { Console.WriteLine("FAIL - Transaction Enlistment"); }
 
+      try { GuidTest(cnn); Console.WriteLine("SUCCESS - Guid Test"); }
+      catch (Exception) { Console.WriteLine("FAIL - Guid Test"); }
+
       try { InsertTable(cnn); Console.WriteLine("SUCCESS - InsertTable"); }
       catch (Exception) { Console.WriteLine("FAIL - InsertTable"); }
 
@@ -207,6 +210,39 @@ namespace test
       }
     }
 
+    internal static void GuidTest(DbConnection cnn)
+    {
+      using (DbCommand cmd = cnn.CreateCommand())
+      {
+        Guid guid = Guid.NewGuid();
+
+        cmd.CommandText = "CREATE TABLE GuidTest(MyGuid GUID)";
+        cmd.ExecuteNonQuery();
+
+        // Insert a guid as a default binary representation
+        cmd.CommandText = "INSERT INTO GuidTest(MyGuid) VALUES(@b)";
+        ((SQLiteParameterCollection)cmd.Parameters).AddWithValue("@b", guid);
+
+        // Insert a guid as text
+        cmd.ExecuteNonQuery();
+        cmd.Parameters[0].Value = guid.ToString();
+        cmd.Parameters[0].DbType = DbType.String;
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "SELECT MyGuid FROM GuidTest";
+        using (DbDataReader reader = cmd.ExecuteReader())
+        {
+          reader.Read();
+          if (reader.GetFieldType(0) != typeof(Guid)) throw new ArgumentException("Column is not a Guid");
+          if (reader.GetGuid(0) != guid) throw new ArgumentException("Guids don't match!");
+
+          reader.Read();
+          if (reader.GetFieldType(0) != typeof(Guid)) throw new ArgumentException("Column is not a Guid");
+          if (reader.GetGuid(0) != guid) throw new ArgumentException("Guids don't match!");
+        }
+      }
+    }
+ 
     internal static void VerifyInsert(DbConnection cnn)
     {
       using (DbCommand cmd = cnn.CreateCommand())

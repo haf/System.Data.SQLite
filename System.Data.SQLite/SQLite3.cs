@@ -209,7 +209,7 @@ namespace System.Data.SQLite
 
       unsafe
       {
-        fixed (byte* psql = b)
+        fixed (byte* psql = &b[0])
         {
           while (n == 17 && retries < 3)
           {

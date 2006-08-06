@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
+using System.Security;
 
 #if !PLATFORM_COMPACTFRAMEWORK
 using System.Runtime.ConstrainedExecution;
@@ -32,6 +33,7 @@ using System.Runtime.ConstrainedExecution;
 [assembly: CLSCompliant(true)]
 
 #if !PLATFORM_COMPACTFRAMEWORK
+[assembly: AllowPartiallyTrustedCallers]
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 #endif
@@ -45,7 +47,7 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.31.0")]
+[assembly: AssemblyVersion("1.0.32.0")]
 #if !PLATFORM_COMPACTFRAMEWORK
-[assembly: AssemblyFileVersion("1.0.31.0")]
+[assembly: AssemblyFileVersion("1.0.32.0")]
 #endif

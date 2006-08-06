@@ -136,9 +136,16 @@ namespace System.Data.SQLite
       switch (TypeToAffinity(t))
       {
         case TypeAffinity.Blob:
+          if (typ.Type == DbType.Guid && typ.Affinity == TypeAffinity.Text)
+            return new Guid(GetText(stmt, index));
+
           int n = (int)GetBytes(stmt, index, 0, null, 0, 0);
           byte[] b = new byte[n];
           GetBytes(stmt, index, 0, b, 0, n);
+
+          if (typ.Type == DbType.Guid && n == 16)
+            return new Guid(b);
+
           return b;
         case TypeAffinity.DateTime:
           return GetDateTime(stmt, index);
@@ -147,9 +154,6 @@ namespace System.Data.SQLite
         case TypeAffinity.Int64:
           return Convert.ChangeType(GetInt64(stmt, index), t, null);
         default:
-          if (typ.Type == DbType.Guid)
-            return new Guid(GetText(stmt, index));
-
           return GetText(stmt, index);
       }
     }

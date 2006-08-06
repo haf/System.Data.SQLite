@@ -96,10 +96,12 @@ namespace System.Data.SQLite
     /// Nesting level of the transactions open on the connection
     /// </summary>
     internal int                 _transactionLevel;
+#if !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
     /// Whether or not the connection is enlisted in a distrubuted transaction
     /// </summary>
-    internal bool                _enlisted;
+    internal System.Transactions.Transaction _enlistment;
+#endif
     /// <summary>
     /// The base SQLite object to interop with
     /// </summary>
@@ -250,7 +252,6 @@ namespace System.Data.SQLite
       _connectionState = ConnectionState.Closed;
       _connectionString = "";
       _transactionLevel = 0;
-      _enlisted = false;
       _commandList = new List<SQLiteCommand>();
 
       if (connectionString != null)
@@ -402,7 +403,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Creates a new SQLiteTransaction if one isn't already active on the connection.
     /// </summary>
-    /// <param name="isolationLevel">SQLite doesn't support varying isolation levels, so this parameter is ignored.</param>
+    /// <param name="isolationLevel">SQLite supports only serializable transactions.</param>
     /// <returns>Returns a SQLiteTransaction object.</returns>
     public new SQLiteTransaction BeginTransaction(IsolationLevel isolationLevel)
     {
@@ -449,10 +450,11 @@ namespace System.Data.SQLite
         {
           _commandList[n].ClearCommands();
         }
-        _sql.Close();
-      }
+        _commandList.Clear();
 
-      _sql = null;
+        _sql.Close();
+        _sql = null;
+      }
 
       OnStateChange(ConnectionState.Closed);
     }
@@ -635,10 +637,12 @@ namespace System.Data.SQLite
       if (_transactionLevel > 0 && transaction != null)
         throw new ArgumentException("Unable to enlist in transaction, a local transaction already exists");
 
-      if (_enlisted == true)
+      if (_enlistment != null && transaction != _enlistment)
         throw new ArgumentException("Already enlisted in a transaction");
 
       transaction.EnlistVolatile(new SQLiteEnlistment(this), System.Transactions.EnlistmentOptions.None);
+
+      _enlistment = transaction;
     }
 #endif
 
