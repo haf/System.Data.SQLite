@@ -19,7 +19,7 @@
 				<!-- We can always specify data from the root object -->
 				<InitialDisplayName>SQLite [{Root.Server}]</InitialDisplayName>
 				<CommandBindings>
-          <CommandBinding name="NewTable" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12294" handler="SQLite.Designer.SQLiteCommandHandler"/>
+          <CommandBinding name="NewTable" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13600" handler="SQLite.Designer.SQLiteCommandHandler"/>
           <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
           <CommandBinding name="Vacuum"   guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="262" handler="SQLite.Designer.SQLiteCommandHandler"/>
           <CommandBinding name="Rekey"    guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="263" handler="SQLite.Designer.SQLiteCommandHandler"/>
@@ -29,7 +29,7 @@
 					<StaticNode nid="Tables">
             <DisplayName>Tables</DisplayName>
 						<CommandBindings>
-              <CommandBinding name="NewTable" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12294" handler="SQLite.Designer.SQLiteCommandHandler"/>
+              <CommandBinding name="NewTable" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13600" handler="SQLite.Designer.SQLiteCommandHandler"/>
               <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
             </CommandBindings>
 						<Children>
@@ -65,6 +65,7 @@
             <DisplayName>Views</DisplayName>
 						<CommandBindings>
               <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
+              <CommandBinding name="NewView" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13601" handler="SQLite.Designer.SQLiteCommandHandler" />
             </CommandBindings>
 						<Children>
 							<Selection type="View">
@@ -185,7 +186,7 @@
         <CommandBinding name="DropView" guid="5efc7975-14bc-11cf-9b2b-00aa00573819" cmdid="17" handler="SQLite.Designer.SQLiteCommandHandler">
           <Parameter value="View"/>
         </CommandBinding>
-      </CommandBindings>
+        </CommandBindings>
     </TypeExtension>
     
     <TypeExtension name="ViewColumn">

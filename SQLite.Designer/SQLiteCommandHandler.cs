@@ -12,11 +12,14 @@ namespace SQLite.Designer
   using System.Windows.Forms.Design;
   using Microsoft.VisualStudio.Shell.Interop;
   using Microsoft.VisualStudio;
+  using Microsoft.VisualStudio.OLE.Interop;
   using System.Data.Common;
+  using SQLite.Designer.Editors;
 
   enum cmdid
   {
-    CreateTable = 0x3006,
+    CreateTable = 0x3520,
+    CreateView = 0x3521,
     Alter = 0x3003,
     Delete = 17,
     Vacuum = 262,
@@ -25,10 +28,12 @@ namespace SQLite.Designer
 
   internal sealed class SQLiteCommandHandler : DataViewCommandHandler
   {
-    private static readonly Guid guidDataCmdSet = new Guid("501822E1-B5AF-11d0-B4DC-00A0C91506EF");
-    private static readonly Guid guidSQLiteCmdSet = new Guid("814658EE-A28E-4b97-BC33-4B1BC81EBECB");
-    private static readonly Guid guidIFCmdId = new Guid("{74d21311-2aee-11d1-8bfb-00a0c90f26f7}");
-   
+    internal static readonly Guid guidDataCmdSet = new Guid("501822E1-B5AF-11d0-B4DC-00A0C91506EF");
+    internal static readonly Guid guidSQLiteCmdSet = new Guid("814658EE-A28E-4b97-BC33-4B1BC81EBECB");
+    internal static readonly Guid guidIFCmdId = new Guid("{74d21311-2aee-11d1-8bfb-00a0c90f26f7}");
+    internal static readonly Guid guidDavinci = new Guid("{732abe75-cd80-11d0-a2db-00aa00a3efff}");
+    internal static readonly Guid guidDavinciGrp = new Guid("{732abe74-cd80-11d0-a2db-00aa00a3efff}");
+
     public SQLiteCommandHandler()
     {
     }
@@ -68,6 +73,12 @@ namespace SQLite.Designer
             status.Visible = true;
             status.Enabled = (SystemTableSelected == false && SystemIndexSelected == false);
             return status;
+          //case cmdid.CreateTable:
+          //case cmdid.CreateView:
+          //  status.Supported = true;
+          //  status.Visible = true;
+          //  status.Enabled = true;
+          //  return status;
         }
       }
       base.GetCommandStatus(itemIds, command, textType, status);
@@ -135,9 +146,6 @@ namespace SQLite.Designer
       {
         switch ((cmdid)command.CommandId)
         {
-          case cmdid.CreateTable:
-            CreateTable();
-            break;
           case cmdid.Vacuum:
             Vacuum();
             break;
@@ -173,6 +181,12 @@ namespace SQLite.Designer
       {
         switch ((cmdid)command.CommandId)
         {
+          case cmdid.CreateTable:
+            CreateTable(itemId);
+            break;
+          case cmdid.CreateView:
+            CreateView(itemId);
+            break;
           case cmdid.Alter:
             switch ((string)args[0])
             {
@@ -193,7 +207,38 @@ namespace SQLite.Designer
       return returnValue;
     }
 
-    private void CreateTable()
+    private void CreateTable(int itemId)
+    {
+      Microsoft.VisualStudio.OLE.Interop.IServiceProvider provider = DataViewHierarchyAccessor.ServiceProvider as Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+      IVsUIShell shell = DataViewHierarchyAccessor.ServiceProvider.GetService(typeof(IVsUIShell)) as IVsUIShell;
+      IVsUIHierarchy hier = DataViewHierarchyAccessor.Hierarchy;
+      IVsWindowFrame frame;
+
+      if (shell != null)
+      {
+        TableDesignerDoc form = new TableDesignerDoc(DataViewHierarchyAccessor.Connection, null);
+        IntPtr formptr = System.Runtime.InteropServices.Marshal.GetIUnknownForObject(form);
+        Guid empty = Guid.Empty;
+        FakeHierarchy fake = new FakeHierarchy(form, hier);
+
+        int code = shell.CreateDocumentWindow(
+          0, // (uint)(__VSCREATEDOCWIN.CDW_fCreateNewWindow | __VSCREATEDOCWIN.CDW_RDTFLAGS_MASK) | (uint)(_VSRDTFLAGS.RDT_CanBuildFromMemory | _VSRDTFLAGS.RDT_NonCreatable | _VSRDTFLAGS.RDT_VirtualDocument | _VSRDTFLAGS.RDT_DontAddToMRU),
+          form.Name, fake, (uint)itemId, formptr, formptr, ref empty, null, ref empty, provider, "SQLite:", form.Name, null, out frame);
+
+        if (frame != null)
+        {
+          object ret;
+          int prop = (int)__VSFPROPID.VSFPROPID_Caption;
+          
+          code = frame.GetProperty(prop, out ret);
+
+          code = frame.Show();
+        }
+      }
+      // TODO: Implement this command
+    }
+
+    private void CreateView(int itemId)
     {
       // TODO: Implement this command
     }
