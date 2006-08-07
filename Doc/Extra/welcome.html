@@ -1,28 +1,60 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<html dir="LTR" xmlns="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:MSHelp="http://msdn.microsoft.com/mshelp" xmlns:tool="http://www.microsoft.com/tooltip" xmlns:ndoc="urn:ndoc-preprocess">
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
     <title>Introduction</title>
-    <meta name="GENERATOR" content="Microsoft Visual Studio .NET 7.1">
-    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
-    <link rel="stylesheet" type="text/css" href="MSDN.css">
+    <link rel="stylesheet" type="text/css" href="ndoc.css"> </link>
+    <link rel="stylesheet" type="text/css" href="user.css"> </link>
+    <script type="text/javascript" src="ndoc.js"> </script>
   </head>
-  <body id="bodyID" class="dtBODY">
-    <div id="nsbanner">
-      <div id="bannerrow1">
-        <table class="bannerparthead" cellspacing="0" ID="Table1">
-          <tr id="hdr">
-            <td class="runninghead">SQLite.NET Class Library</td>
-            <td class="product">
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div id="TitleRow">
-        <h1 class="dtH1">SQLite.NET Class Library Documentation</h1>
-      </div>
+  <body style="display: none;">
+    <input type="hidden" id="userDataCache" class="userDataStyle" />
+    <input type="hidden" id="hiddenScrollOffset" />
+    <img id="dropDownImage" style="display:none; height:0; width:0;" src="drpdown.gif" />
+    <img id="dropDownHoverImage" style="display:none; height:0; width:0;" src="drpdown_orange.gif" />
+    <img id="collapseImage" style="display:none; height:0; width:0;" src="collapse.gif" />
+    <img id="expandImage" style="display:none; height:0; width:0;" src="exp.gif" />
+    <img id="collapseAllImage" style="display:none; height:0; width:0;" src="collall.gif" />
+    <img id="expandAllImage" style="display:none; height:0; width:0;" src="expall.gif" />
+    <img id="copyImage" style="display:none; height:0; width:0;" src="copycode.gif" />
+    <img id="copyHoverImage" style="display:none; height:0; width:0;" src="copycodeHighlight.gif" />
+    <div id="header">
+      <table width="100%" id="topTable">
+        <tr id="headerTableRow1">
+          <td align="left">
+            <span id="runningHeaderText">SQLite ADO.NET 2.0 Provider</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow2">
+          <td align="left">
+            <span id="nsrTitle">SQLite.NET Class Library Documentation</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow3" style="display:none">
+          <td>
+            <a id="seeAlsoSectionLink" href="#seeAlsoToggle" onclick="OpenSection(seeAlsoToggle)">See Also</a>
+            <a id="exampleSectionLink" href="#codeExampleToggle" onclick="OpenSection(codeExampleToggle)">Example</a>
+          </td>
+        </tr>
+     </table>
+      <table width="100%" id="bottomTable" cellspacing="0" cellpadding="0" style="display:none">
+        <tr>
+          <td>
+            <span onclick="ExpandCollapseAll(toggleAllImage)" style="cursor:default;" onkeypress="ExpandCollapseAll_CheckKey(toggleAllImage)" tabindex="0">
+              <img ID="toggleAllImage" class="toggleAll" src="collall.gif" />
+              <label id="collapseAllLabel" for="toggleAllImage" style="display: none;">
+							Collapse All
+						</label>
+              <label id="expandAllLabel" for="toggleAllImage" style="display: none;">
+							Expand All
+						</label>
+            </span>
+          </td>
+        </tr>
+      </table>
     </div>
-    <div id="nstext">
-      <h1 class="dtH1">About SQLite.NET</h1>
+    <div id="mainSection">
+    <div id="mainBody">
+      <h1 class="heading">About SQLite.NET</h1>
       <p>This class library is an ADO.NET 2.0 wrapper around the popular (and free!) 
         SQLite database engine. For information on SQL syntax, features of SQLite and a 
         good understanding of how it works and what it does, I highly recommend heading 
@@ -35,13 +67,13 @@
       <DIV>
         <br>
       </DIV>
-      <h1 class="dtH1">What's New?</h1>
+      <h1 class="heading">What's New?</h1>
       <p><a href="version.html">Click here to see the version history of this SQLite.NET 
           provider</a></p>
       <DIV>
         <br>
       </DIV>
-      <h1 class="dtH1">What's Coming Up?</h1>
+      <h1 class="heading">What's Coming Up?</h1>
       <p>There's a few things I'm aiming to do in the near future:&nbsp;</p>
       <DIV>
         <ul>
@@ -54,7 +86,7 @@
           </ul>
       </DIV>
       <br>
-      <h1 class="dtH1">Using this library</h1>
+      <h1 class="heading">Using this library</h1>
       <p>The following are links to information on various aspects of the library and 
         how to use it in your application(s)
       </p>
@@ -65,7 +97,7 @@
       <p><a href="limitations.html">Limitations of the SQLite.NET provider and the SQLite 
           engine (compared to other providers and engines)</a></p>
       <br>
-      <h1 class="dtH1">SQLite.NET Provider Features</h1>
+      <h1 class="heading">SQLite.NET Provider Features</h1>
       <p>This SQLite provider implements every feature of the underlying SQLite 
         database engine without omission. Here's a brief summary:</p>
       <UL>
@@ -123,7 +155,7 @@
           Public Domain.&nbsp; 100% free for commercial and non-commercial use.&nbsp;</li>
       </UL>
       <br>
-      <h1 class="dtH1">Distributing the Binaries</h1>
+      <h1 class="heading">Distributing the Binaries</h1>
       <p><b>System.Data.SQLite.DLL</b> is a mixed assembly signed with a strong name 
         in case you want to add it to the Global Assembly Cache (GAC). This is the only DLL required to be redistributed with 
         your SQLite.NET application(s).&nbsp; It 
@@ -132,15 +164,14 @@
         Framework library is signed with a separate strong name, but all the other
         versions share the same strong name so they can be interchanged where appropriate without
         any change to your application.</p>
-      <hr>
+      <hr />
       <div id="footer">
         <p>
-          <a href="mailto:robert@blackcastlesoft.com?subject=SQLite.NET%20Class%20Library%20Documentation%20Feedback:%20Welcome">
-            Send comments on this topic.</a>
+          <a href="mailto:robert@blackcastlesoft.com?subject=SQLite%20ADO.NET%202.0%20Provider%201.0.0.0%20Documentation%20Feedback:%20Welcome">Send comments on this topic.</a>
         </p>
-        <p>
-        </p>
-      </div>
+        <p />
+        <p />
+      </div><!--[if gte IE 5]><tool:tip element="seeAlsoToolTip" avoidmouse="false" /><tool:tip element="languageFilterToolTip" avoidmouse="false" /><![endif]-->    </div>
     </div>
   </body>
 </html>

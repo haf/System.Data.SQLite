@@ -1,28 +1,60 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<html dir="LTR" xmlns="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:MSHelp="http://msdn.microsoft.com/mshelp" xmlns:tool="http://www.microsoft.com/tooltip" xmlns:ndoc="urn:ndoc-preprocess">
   <head>
-    <title>Getting Started</title>
-    <meta name="GENERATOR" content="Microsoft Visual Studio .NET 7.1">
-    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
-    <link rel="stylesheet" type="text/css" href="MSDN.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
+    <title>Provider Limitations</title>
+    <link rel="stylesheet" type="text/css" href="ndoc.css"> </link>
+    <link rel="stylesheet" type="text/css" href="user.css"> </link>
+    <script type="text/javascript" src="ndoc.js"> </script>
   </head>
-  <body id="bodyID" class="dtBODY">
-    <div id="nsbanner">
-      <div id="bannerrow1">
-        <table class="bannerparthead" cellspacing="0" ID="Table1">
-          <tr id="hdr">
-            <td class="runninghead">Provider Limitations</td>
-            <td class="product">
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div id="TitleRow">
-        <h1 class="dtH1">SQLite.NET Class Library Documentation</h1>
-      </div>
+  <body style="display: none;">
+    <input type="hidden" id="userDataCache" class="userDataStyle" />
+    <input type="hidden" id="hiddenScrollOffset" />
+    <img id="dropDownImage" style="display:none; height:0; width:0;" src="drpdown.gif" />
+    <img id="dropDownHoverImage" style="display:none; height:0; width:0;" src="drpdown_orange.gif" />
+    <img id="collapseImage" style="display:none; height:0; width:0;" src="collapse.gif" />
+    <img id="expandImage" style="display:none; height:0; width:0;" src="exp.gif" />
+    <img id="collapseAllImage" style="display:none; height:0; width:0;" src="collall.gif" />
+    <img id="expandAllImage" style="display:none; height:0; width:0;" src="expall.gif" />
+    <img id="copyImage" style="display:none; height:0; width:0;" src="copycode.gif" />
+    <img id="copyHoverImage" style="display:none; height:0; width:0;" src="copycodeHighlight.gif" />
+    <div id="header">
+      <table width="100%" id="topTable">
+        <tr id="headerTableRow1">
+          <td align="left">
+            <span id="runningHeaderText">Provider Limitations</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow2">
+          <td align="left">
+            <span id="nsrTitle">SQLite.NET Class Library Documentation</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow3" style="display:none">
+          <td>
+            <a id="seeAlsoSectionLink" href="#seeAlsoToggle" onclick="OpenSection(seeAlsoToggle)">See Also</a>
+            <a id="exampleSectionLink" href="#codeExampleToggle" onclick="OpenSection(codeExampleToggle)">Example</a>
+          </td>
+        </tr>
+     </table>
+      <table width="100%" id="bottomTable" cellspacing="0" cellpadding="0" style="display:none">
+        <tr>
+          <td>
+            <span onclick="ExpandCollapseAll(toggleAllImage)" style="cursor:default;" onkeypress="ExpandCollapseAll_CheckKey(toggleAllImage)" tabindex="0">
+              <img ID="toggleAllImage" class="toggleAll" src="collall.gif" />
+              <label id="collapseAllLabel" for="toggleAllImage" style="display: none;">
+							Collapse All
+						</label>
+              <label id="expandAllLabel" for="toggleAllImage" style="display: none;">
+							Expand All
+						</label>
+            </span>
+          </td>
+        </tr>
+      </table>
     </div>
-    <div id="nstext">
-      <h1 class="dtH1">Limitations of this ADO.NET SQLite Data Provider</h1>
+    <div id="mainSection">
+    <div id="mainBody">
+      <h1 class="heading">Limitations of this ADO.NET SQLite Data Provider</h1>
       <p>As providers go, this one doesn't have many restrictions. SQLite has no 
         support for row-level or table-level locks. When a connection locks the database for writing, no other connection or process may read or write to the database until the write operation is complete.  The SQLite.NET provider attempts to retry 
         internally if a database is locked, up to the CommandTimeout property of the 
@@ -41,7 +73,7 @@
         you want to write to the database! If you hold open a transaction, all readers 
         will be blocked until the transaction is closed!</p>
       <p></p>
-      <h4 class="dtH4">Thread Safety</h4>
+      <h4 class="subHeading">Thread Safety</h4>
       <p>Multi-threading in SQLite must be done carefully. Here are the restrictions:</p>
       <ul>
         <li>
@@ -73,7 +105,7 @@
         write. Whichever thread got its lock first will be the one to execute, and the 
         other thread will block until the CommandTimeout value elapses or the other 
         thread finishes.</p>
-      <hr>
+      <hr/>
       <div id="footer">
         <p>
           <a href="mailto:robert@blackcastlesoft.com?subject=SQLite.NET%20Class%20Library%20Documentation%20Feedback:%20Limitations">
@@ -82,6 +114,7 @@
         <p>
         </p>
       </div>
+    </div>
     </div>
   </body>
 </html>

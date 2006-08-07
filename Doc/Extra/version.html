@@ -1,28 +1,97 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<html dir="LTR" xmlns="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:MSHelp="http://msdn.microsoft.com/mshelp" xmlns:tool="http://www.microsoft.com/tooltip" xmlns:ndoc="urn:ndoc-preprocess">
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
     <title>Version History</title>
-    <meta name="GENERATOR" content="Microsoft Visual Studio .NET 7.1">
-    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
-    <link rel="stylesheet" type="text/css" href="MSDN.css">
+    <link rel="stylesheet" type="text/css" href="ndoc.css"> </link>
+    <link rel="stylesheet" type="text/css" href="user.css"> </link>
+    <script type="text/javascript" src="ndoc.js"> </script>
   </head>
-  <body id="bodyID" class="dtBODY">
-    <div id="nsbanner">
-      <div id="bannerrow1">
-        <table class="bannerparthead" cellspacing="0" ID="Table1">
-          <tr id="hdr">
-            <td class="runninghead">Provider History</td>
-            <td class="product">
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div id="TitleRow">
-        <h1 class="dtH1">SQLite.NET Class Library Documentation</h1>
-      </div>
+  <body style="display: none;">
+    <input type="hidden" id="userDataCache" class="userDataStyle" />
+    <input type="hidden" id="hiddenScrollOffset" />
+    <img id="dropDownImage" style="display:none; height:0; width:0;" src="drpdown.gif" />
+    <img id="dropDownHoverImage" style="display:none; height:0; width:0;" src="drpdown_orange.gif" />
+    <img id="collapseImage" style="display:none; height:0; width:0;" src="collapse.gif" />
+    <img id="expandImage" style="display:none; height:0; width:0;" src="exp.gif" />
+    <img id="collapseAllImage" style="display:none; height:0; width:0;" src="collall.gif" />
+    <img id="expandAllImage" style="display:none; height:0; width:0;" src="expall.gif" />
+    <img id="copyImage" style="display:none; height:0; width:0;" src="copycode.gif" />
+    <img id="copyHoverImage" style="display:none; height:0; width:0;" src="copycodeHighlight.gif" />
+    <div id="header">
+      <table width="100%" id="topTable">
+        <tr id="headerTableRow1">
+          <td align="left">
+            <span id="runningHeaderText">Version History</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow2">
+          <td align="left">
+            <span id="nsrTitle">SQLite.NET Class Library Documentation</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow3" style="display:none">
+          <td>
+            <a id="seeAlsoSectionLink" href="#seeAlsoToggle" onclick="OpenSection(seeAlsoToggle)">See Also</a>
+            <a id="exampleSectionLink" href="#codeExampleToggle" onclick="OpenSection(codeExampleToggle)">Example</a>
+          </td>
+        </tr>
+     </table>
+      <table width="100%" id="bottomTable" cellspacing="0" cellpadding="0" style="display:none">
+        <tr>
+          <td>
+            <span onclick="ExpandCollapseAll(toggleAllImage)" style="cursor:default;" onkeypress="ExpandCollapseAll_CheckKey(toggleAllImage)" tabindex="0">
+              <img ID="toggleAllImage" class="toggleAll" src="collall.gif" />
+              <label id="collapseAllLabel" for="toggleAllImage" style="display: none;">
+							Collapse All
+						</label>
+              <label id="expandAllLabel" for="toggleAllImage" style="display: none;">
+							Expand All
+						</label>
+            </span>
+          </td>
+        </tr>
+      </table>
     </div>
-    <div id="nstext">
-      <h1 class="dtH1">Version History</h1>
+    <div id="mainSection">
+    <div id="mainBody">
+
+      <h1 class="heading">Version History</h1>
+ <p><b>1.0.32.0 - August 6, 2006</b></p>
+    <ul>
+    <li>Added AllowPartiallyTrustedCallers attribute to the assembly</li><li>Added the missing "nchar" type</li>
+      <li>Added support for binary Guid's.&nbsp; Guids are now stored as binary by default
+        when using parameterized queries.&nbsp; Text guids are still fully supported.</li>
+      <li>Fixed a TransactionScope() error that caused the transaction not to be completed.</li>
+      <li>Enhanced parameter names so that if they are added to the Parameters collection
+        without their prefix character (@ : or $) they are still properly mapped.&nbsp;</li>
+    </ul>
+        <p><b>1.0.31.0 - July 16, 2006</b></p>
+    <ul>
+    <li>Re-applied the view parsing bugfix in 1.0.29.0 that was accidentally reverted
+      out of the 30 build.</li><li>Fixed SQLiteCommand.ExecuteScalar() to return null instead of DbNull.Value
+    when no rows were returned.</li>
+      <li>Design-time installer now installs the package-based designer on full Visual Studio
+        versions.&nbsp; Express editions continue to use the packageless designer.</li>
+      <li>In Visual Studio (not Express), you can now right-click a SQLite connection in
+        the Server Explorer and vacuum the database and change the encryption password.</li>
+    </ul>
+    <p><b>1.0.30.1 - July 2, 2006</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.6</li>
+      <li>Added support for the |DataDirectory| keyword in the Data Source filename string.&nbsp;
+      </li>
+      <li>Added hook notification support to SQLiteConnection.&nbsp; Specifically, there
+      are three new events on the SQLiteConnection object which are raised when an update/insert/delete
+      occurs and when transactions are committed and rolled back.</li><li>Changed SQLiteTransaction to default to BEGIN IMMEDIATE instead of just BEGIN,
+    which solves a multithreaded race condition.&nbsp;</li>
+      <li>Changed SQLiteDataReader to better support SQLite's typelessness.&nbsp; The data
+        reader no longer caches column affinity, but re-evaluates it for each column/row.</li>
+      <li>Fixed a bug in Prepare() which caused an intermittant fault due to the code accessing
+        the memory of an unpinned variable.&nbsp;</li>
+      <li>Fixed a multithreaded lock-retry bug in in SQLiteConnection.Open() and in
+    SQLiteTransaction, which failed to use a command timeout before giving up.</li>
+    </ul>
+
     <p><b>1.0.29.0 - May 16, 2006</b></p>
     <ul>
     <li>Fixed a bug in the Views schema information which caused multi-line view definition statements not to be parsed</li>
@@ -536,7 +605,7 @@
           Added support for user-defined collations.
         </LI>
       </UL>
-      <hr>
+      <hr />
       <div id="footer">
         <p>
           <a href="mailto:robert@blackcastlesoft.com?subject=SQLite.NET%20Class%20Library%20Documentation%20Feedback:%20Version%20History">
@@ -545,6 +614,7 @@
         <p>
         </p>
       </div>
+    </div>
     </div>
   </body>
 </html>
