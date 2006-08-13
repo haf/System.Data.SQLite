@@ -450,7 +450,6 @@ namespace System.Data.SQLite
         {
           _commandList[n].ClearCommands();
         }
-        _commandList.Clear();
 
         _sql.Close();
         _sql = null;

@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.32.0 August 6, 2006<br>
-    Using SQLite 3.3.6<br>
+    Version 1.0.33.0 August 14, 2006<br>
+    Using SQLite 3.3.7<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     <br>
@@ -119,6 +119,12 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.33.0 - August 14, 2006</b></p>
+    <ul>
+    <li>Fixed a bug in SQLiteConnection that caused it to "forget" about commands bound
+      to it and occasionally throw an error when a database is closed and opened repeatedly.&nbsp;
+    </li>
+    </ul>
     <p><b>1.0.32.0 - August 6, 2006</b></p>
     <ul>
     <li>Added AllowPartiallyTrustedCallers attribute to the assembly</li><li>Added the missing "nchar" type</li>
