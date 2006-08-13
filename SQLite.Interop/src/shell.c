@@ -12,7 +12,7 @@
 ** This file contains code to implement the "sqlite" command line
 ** utility for accessing SQLite databases.
 **
-** $Id: shell.c,v 1.22 2006/06/08 04:24:32 rmsimpson Exp $
+** $Id: shell.c,v 1.23 2006/08/13 15:56:08 rmsimpson Exp $
 */
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +21,7 @@
 #include "sqlite3.h"
 #include <ctype.h>
 
-#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__)
+#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__) && !defined(__OS2__)
 # include <signal.h>
 # include <pwd.h>
 # include <unistd.h>
@@ -35,6 +35,10 @@
 # include <extras.h>
 # include <Files.h>
 # include <Folders.h>
+#endif
+
+#ifdef __OS2__
+# include <unistd.h>
 #endif
 
 #if defined(HAVE_READLINE) && HAVE_READLINE==1
@@ -384,12 +388,12 @@ static int callback(void *pArg, int nArg, char **azArg, char **azCol){
       int w = 5;
       if( azArg==0 ) break;
       for(i=0; i<nArg; i++){
-        int len = strlen(azCol[i]);
+        int len = strlen(azCol[i] ? azCol[i] : "");
         if( len>w ) w = len;
       }
       if( p->cnt++>0 ) fprintf(p->out,"\n");
       for(i=0; i<nArg; i++){
-        fprintf(p->out,"%*s = %s\n", w, azCol[i], 
+        fprintf(p->out,"%*s = %s\n", w, azCol[i],
                 azArg[i] ? azArg[i] : p->nullvalue);
       }
       break;
@@ -486,7 +490,7 @@ static int callback(void *pArg, int nArg, char **azArg, char **azCol){
     case MODE_Tcl: {
       if( p->cnt++==0 && p->showHeader ){
         for(i=0; i<nArg; i++){
-          output_c_string(p->out,azCol[i]);
+          output_c_string(p->out,azCol[i] ? azCol[i] : "");
           fprintf(p->out, "%s", p->separator);
         }
         fprintf(p->out,"\n");
@@ -502,7 +506,7 @@ static int callback(void *pArg, int nArg, char **azArg, char **azCol){
     case MODE_Csv: {
       if( p->cnt++==0 && p->showHeader ){
         for(i=0; i<nArg; i++){
-          output_csv(p, azCol[i], i<nArg-1);
+          output_csv(p, azCol[i] ? azCol[i] : "", i<nArg-1);
         }
         fprintf(p->out,"\n");
       }
@@ -759,6 +763,9 @@ static char zHelp[] =
   ".help                  Show this message\n"
   ".import FILE TABLE     Import data from FILE into TABLE\n"
   ".indices TABLE         Show names of all indices on TABLE\n"
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
+  ".load FILE ?ENTRY?     Load an extension library\n"
+#endif
   ".mode MODE ?TABLE?     Set output mode where MODE is one of:\n"
   "                         csv      Comma-separated values\n"
   "                         column   Left-aligned columns.  (See .width)\n"
@@ -800,6 +807,9 @@ static void open_db(struct callback_data *p){
           p->zDbFilename, sqlite3_errmsg(db));
       exit(1);
     }
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
+    sqlite3_enable_load_extension(p->db, 1);
+#endif
   }
 }
 
@@ -1032,6 +1042,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     FILE *in;                   /* The input file */
     int lineno = 0;             /* Line number of input file */
 
+    open_db(p);
     nSep = strlen(p->separator);
     if( nSep==0 ){
       fprintf(stderr, "non-null separator required for import\n");
@@ -1143,6 +1154,22 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       sqlite3_free(zErrMsg);
     }
   }else
+
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
+  if( c=='l' && strncmp(azArg[0], "load", n)==0 && nArg>=2 ){
+    const char *zFile, *zProc;
+    char *zErrMsg = 0;
+    int rc;
+    zFile = azArg[1];
+    zProc = nArg>=3 ? azArg[2] : 0;
+    open_db(p);
+    rc = sqlite3_load_extension(p->db, zFile, zProc, &zErrMsg);
+    if( rc!=SQLITE_OK ){
+      fprintf(stderr, "%s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+    }
+  }else
+#endif
 
   if( c=='m' && strncmp(azArg[0], "mode", n)==0 && nArg>=2 ){
     int n2 = strlen(azArg[1]);
@@ -1523,7 +1550,7 @@ static void process_input(struct callback_data *p, FILE *in){
 static char *find_home_dir(void){
   char *home_dir = NULL;
 
-#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__)
+#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__) && !defined(__OS2__)
   struct passwd *pwent;
   uid_t uid = getuid();
   if( (pwent=getpwuid(uid)) != NULL) {
@@ -1543,7 +1570,7 @@ static char *find_home_dir(void){
     }
   }
 
-#if defined(_WIN32) || defined(WIN32)
+#if defined(_WIN32) || defined(WIN32) || defined(__OS2__)
   if (!home_dir) {
     home_dir = "c:";
   }
@@ -1787,12 +1814,18 @@ int main(int argc, char **argv){
       if( zHistory ){
         stifle_history(100);
         write_history(zHistory);
+        free(zHistory);
       }
+      free(zHome);
     }else{
       process_input(&data, stdin);
     }
   }
   set_table_name(&data, 0);
-  if( db ) sqlite3_close(db);
+  if( db ){
+    if( sqlite3_close(db)!=SQLITE_OK ){
+      fprintf(stderr,"error closing database: %s\n", sqlite3_errmsg(db));
+    }
+  }
   return 0;
 }

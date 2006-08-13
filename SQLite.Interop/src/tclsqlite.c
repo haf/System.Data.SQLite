@@ -11,7 +11,7 @@
 *************************************************************************
 ** A TCL Interface to SQLite
 **
-** $Id: tclsqlite.c,v 1.22 2006/06/08 04:24:32 rmsimpson Exp $
+** $Id: tclsqlite.c,v 1.23 2006/08/13 15:56:08 rmsimpson Exp $
 */
 #ifndef NO_TCL     /* Omit this whole file if TCL is unavailable */
 
@@ -23,6 +23,14 @@
 #include <assert.h>
 #include <ctype.h>
 
+/*
+ * Windows needs to know which symbols to export.  Unix does not.
+ * BUILD_sqlite should be undefined for Unix.
+ */
+#ifdef BUILD_sqlite
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLEXPORT
+#endif /* BUILD_sqlite */
 
 #define NUM_PREPARED_STMTS 10
 #define MAX_PREPARED_STMTS 100
@@ -543,6 +551,8 @@ static int auth_callback(
     case SQLITE_ALTER_TABLE       : zCode="SQLITE_ALTER_TABLE"; break;
     case SQLITE_REINDEX           : zCode="SQLITE_REINDEX"; break;
     case SQLITE_ANALYZE           : zCode="SQLITE_ANALYZE"; break;
+    case SQLITE_CREATE_VTABLE     : zCode="SQLITE_CREATE_VTABLE"; break;
+    case SQLITE_DROP_VTABLE       : zCode="SQLITE_DROP_VTABLE"; break;
     default                       : zCode="????"; break;
   }
   Tcl_DStringInit(&str);
@@ -657,24 +667,25 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     "authorizer",         "busy",              "cache",
     "changes",            "close",             "collate",
     "collation_needed",   "commit_hook",       "complete",
-    "copy",               "errorcode",         "eval",
-    "exists",             "function",          "last_insert_rowid",
-    "nullvalue",          "onecolumn",         "profile",
-    "progress",           "rekey",             "rollback_hook",
-    "timeout",            "total_changes",     "trace",
-    "transaction",        "update_hook",       "version",
-    0                    
+    "copy",               "enable_load_extension","errorcode",
+    "eval",               "exists",            "function",
+    "interrupt",          "last_insert_rowid", "nullvalue",
+    "onecolumn",          "profile",           "progress",
+    "rekey",              "rollback_hook",     "timeout",
+    "total_changes",      "trace",             "transaction",
+    "update_hook",        "version",           0
   };
   enum DB_enum {
     DB_AUTHORIZER,        DB_BUSY,             DB_CACHE,
     DB_CHANGES,           DB_CLOSE,            DB_COLLATE,
     DB_COLLATION_NEEDED,  DB_COMMIT_HOOK,      DB_COMPLETE,
-    DB_COPY,              DB_ERRORCODE,        DB_EVAL,
-    DB_EXISTS,            DB_FUNCTION,         DB_LAST_INSERT_ROWID,
-    DB_NULLVALUE,         DB_ONECOLUMN,        DB_PROFILE,
-    DB_PROGRESS,          DB_REKEY,            DB_ROLLBACK_HOOK,
-    DB_TIMEOUT,           DB_TOTAL_CHANGES,    DB_TRACE,
-    DB_TRANSACTION,       DB_UPDATE_HOOK,      DB_VERSION
+    DB_COPY,              DB_ENABLE_LOAD_EXTENSION,DB_ERRORCODE,
+    DB_EVAL,              DB_EXISTS,           DB_FUNCTION,
+    DB_INTERRUPT,         DB_LAST_INSERT_ROWID,DB_NULLVALUE,
+    DB_ONECOLUMN,         DB_PROFILE,          DB_PROGRESS,
+    DB_REKEY,             DB_ROLLBACK_HOOK,    DB_TIMEOUT,
+    DB_TOTAL_CHANGES,     DB_TRACE,            DB_TRANSACTION,
+    DB_UPDATE_HOOK,       DB_VERSION,          
   };
   /* don't leave trailing commas on DB_enum, it confuses the AIX xlc compiler */
 
@@ -1155,6 +1166,25 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   }
 
   /*
+  **    $db enable_load_extension BOOLEAN
+  **
+  ** Turn the extension loading feature on or off.  It if off by
+  ** default.
+  */
+  case DB_ENABLE_LOAD_EXTENSION: {
+    int onoff;
+    if( objc!=3 ){
+      Tcl_WrongNumArgs(interp, 2, objv, "BOOLEAN");
+      return TCL_ERROR;
+    }
+    if( Tcl_GetBooleanFromObj(interp, objv[2], &onoff) ){
+      return TCL_ERROR;
+    }
+    sqlite3_enable_load_extension(pDb->db, onoff);
+    break;
+  }
+
+  /*
   **    $db errorcode
   **
   ** Return the numeric error code that was returned by the most recent
@@ -1538,6 +1568,8 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         Tcl_SetObjResult(interp, pRet);
       }
       Tcl_DecrRefCount(pRet);
+    }else if( rc==TCL_OK ){
+      Tcl_ResetResult(interp);
     }
     break;
   }
@@ -1579,6 +1611,17 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   }
 
   /*
+  **     $db interrupt
+  **
+  ** Interrupt the execution of the inner-most SQL interpreter.  This
+  ** causes the SQL statement to return an error of SQLITE_INTERRUPT.
+  */
+  case DB_INTERRUPT: {
+    sqlite3_interrupt(pDb->db);
+    break;
+  }
+
+  /*
   **     $db nullvalue ?STRING?
   **
   ** Change text used when a NULL comes back from the database. If ?STRING?
@@ -1616,14 +1659,14 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   */
   case DB_LAST_INSERT_ROWID: {
     Tcl_Obj *pResult;
-    int rowid;
+    Tcl_WideInt rowid;
     if( objc!=2 ){
       Tcl_WrongNumArgs(interp, 2, objv, "");
       return TCL_ERROR;
     }
     rowid = sqlite3_last_insert_rowid(pDb->db);
     pResult = Tcl_GetObjResult(interp);
-    Tcl_SetIntObj(pResult, rowid);
+    Tcl_SetWideIntObj(pResult, rowid);
     break;
   }
 
@@ -2072,7 +2115,7 @@ static int DbMain(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 ** used to open a new SQLite database.  See the DbMain() routine above
 ** for additional information.
 */
-extern int Sqlite3_Init(Tcl_Interp *interp){
+EXTERN int Sqlite3_Init(Tcl_Interp *interp){
   Tcl_InitStubs(interp, "8.4", 0);
   Tcl_CreateObjCommand(interp, "sqlite3", (Tcl_ObjCmdProc*)DbMain, 0, 0);
   Tcl_PkgProvide(interp, "sqlite3", PACKAGE_VERSION);
@@ -2080,15 +2123,15 @@ extern int Sqlite3_Init(Tcl_Interp *interp){
   Tcl_PkgProvide(interp, "sqlite", PACKAGE_VERSION);
   return TCL_OK;
 }
-extern int Tclsqlite3_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
-extern int Sqlite3_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
-extern int Tclsqlite3_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
+EXTERN int Tclsqlite3_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
+EXTERN int Sqlite3_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
+EXTERN int Tclsqlite3_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
 
 #ifndef SQLITE_3_SUFFIX_ONLY
-extern int Sqlite_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
-extern int Tclsqlite_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
-extern int Sqlite_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
-extern int Tclsqlite_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
+EXTERN int Sqlite_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
+EXTERN int Tclsqlite_Init(Tcl_Interp *interp){ return Sqlite3_Init(interp); }
+EXTERN int Sqlite_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
+EXTERN int Tclsqlite_SafeInit(Tcl_Interp *interp){ return TCL_OK; }
 #endif
 
 #ifdef TCLSH
@@ -2151,9 +2194,12 @@ int TCLSH_MAIN(int argc, char **argv){
     extern int Sqlitetest5_Init(Tcl_Interp*);
     extern int Sqlitetest6_Init(Tcl_Interp*);
     extern int Sqlitetest7_Init(Tcl_Interp*);
+    extern int Sqlitetest8_Init(Tcl_Interp*);
     extern int Md5_Init(Tcl_Interp*);
     extern int Sqlitetestsse_Init(Tcl_Interp*);
     extern int Sqlitetestasync_Init(Tcl_Interp*);
+    extern int Sqlitetesttclvar_Init(Tcl_Interp*);
+    extern int Sqlitetestschema_Init(Tcl_Interp*);
 
     Sqlitetest1_Init(interp);
     Sqlitetest2_Init(interp);
@@ -2162,7 +2208,10 @@ int TCLSH_MAIN(int argc, char **argv){
     Sqlitetest5_Init(interp);
     Sqlitetest6_Init(interp);
     Sqlitetest7_Init(interp);
+    Sqlitetest8_Init(interp);
     Sqlitetestasync_Init(interp);
+    Sqlitetesttclvar_Init(interp);
+    Sqlitetestschema_Init(interp);
     Md5_Init(interp);
 #ifdef SQLITE_SSE
     Sqlitetestsse_Init(interp);

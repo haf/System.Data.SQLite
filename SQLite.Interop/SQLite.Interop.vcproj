@@ -785,6 +785,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\loadext.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\main.c"
 				>
 			</File>
@@ -938,6 +942,10 @@
 			</File>
 			<File
 				RelativePath=".\src\vdbemem.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\vtab.c"
 				>
 			</File>
 			<File
