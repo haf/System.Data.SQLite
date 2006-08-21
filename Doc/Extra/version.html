@@ -56,7 +56,14 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
- <p><b>1.0.32.0 - August 6, 2006</b></p>
+     <p><b>1.0.33.0 - August 21, 2006</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.7</li>
+      <li>Fixed a bug in SQLiteConnection that caused it to "forget" about commands bound
+      to it and occasionally throw an error when a database is closed and opened repeatedly.&nbsp;
+      </li>
+    </ul>
+<p><b>1.0.32.0 - August 6, 2006</b></p>
     <ul>
     <li>Added AllowPartiallyTrustedCallers attribute to the assembly</li><li>Added the missing "nchar" type</li>
       <li>Added support for binary Guid's.&nbsp; Guids are now stored as binary by default
