@@ -422,16 +422,28 @@ namespace install
         }
         else // Install SQLite into the GAC
         {
-          AssemblyCache.InstallAssembly(SQLiteLocation, null, AssemblyCommitFlags.Default);
-          AssemblyCache.InstallAssembly(Path.GetFullPath("SQLite.Designer.DLL"), null, AssemblyCommitFlags.Default);
+          byte[] cfdt = Properties.Resources.System_Data_SQLite;
+          string tempPath = Path.GetTempPath();
+          tempPath = Path.Combine(tempPath, "System.Data.SQLite.DLL");
+          using (FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+          {
+            fs.Write(cfdt, 0, cfdt.Length);
+          }
 
           try
           {
+            AssemblyCache.InstallAssembly(tempPath, null, AssemblyCommitFlags.Default);
             AssemblyCache.InstallAssembly(Path.Combine(Path.GetDirectoryName(SQLiteLocation), "x64\\System.Data.SQLite.DLL"), null, AssemblyCommitFlags.Default);
             AssemblyCache.InstallAssembly(Path.Combine(Path.GetDirectoryName(SQLiteLocation), "itanium\\System.Data.SQLite.DLL"), null, AssemblyCommitFlags.Default);
           }
           catch
           {
+          }
+          finally
+          {
+            File.Delete(tempPath);
+            AssemblyCache.InstallAssembly(Path.GetFullPath("SQLite.Designer.DLL"), null, AssemblyCommitFlags.Default);
+            AssemblyCache.InstallAssembly(SQLiteLocation, null, AssemblyCommitFlags.Default);
           }
         }
       }

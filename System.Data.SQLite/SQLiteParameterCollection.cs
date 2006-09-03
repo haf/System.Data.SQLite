@@ -360,7 +360,7 @@ namespace System.Data.SQLite
     /// <param name="parameterName">The name of the parameter to remove</param>
     public override void RemoveAt(string parameterName)
     {
-      Remove(IndexOf(parameterName));
+      RemoveAt(IndexOf(parameterName));
     }
 
     /// <summary>

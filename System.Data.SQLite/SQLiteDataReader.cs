@@ -192,6 +192,7 @@ namespace System.Data.SQLite
           if (typ == DbType.Int64) return affinity;
           if (typ == DbType.Boolean) return affinity;
           if (typ == DbType.Byte) return affinity;
+          if (typ == DbType.DateTime && _command.Connection._sql._datetimeFormat == SQLiteDateFormats.Ticks) return affinity;
           break;
         case TypeAffinity.Double:
           if (typ == DbType.Single) return affinity;
@@ -648,7 +649,7 @@ namespace System.Data.SQLite
       CheckClosed();
 
       SQLiteType typ = GetSQLiteType(i);
-
+      typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
       return _activeStatement._sql.GetValue(_activeStatement, i, ref typ);
     }
 
@@ -669,6 +670,7 @@ namespace System.Data.SQLite
       for (int n = 0; n < nMax; n++)
       {
         typ = GetSQLiteType(n);
+        typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, n);
         values[n] = _activeStatement._sql.GetValue(_activeStatement, n, ref typ);
       }
 

@@ -56,6 +56,18 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
+    <p><b>1.0.34.0 - September 4, 2006</b></p>
+    <ul>
+    <li>Fixed a bug in SQLiteParameterCollection.RemoveAt(namedparam)</li>
+    <li>Fixed a bug in SQLiteDataReader introduced in 1.0.30 that broke DateTimes using the Ticks option in the connection string.</li>
+      <li>Fixed a bug in the recent changes to guid behavior wherein using a datareader's
+        indexer to fetch a guid from a column containing both binary and text guids would
+        sometimes return a byte array instead of a guid.</li>
+      <li>Enacted a workaround involving typed datasets in Compact Framework projects in
+        which it took an excessive amount of time to open a form and generated a lot of
+        temporary files in the user's Local Settings\Application Data\Microsoft\VisualStudio\8.0\Assembly
+        References folder.</li>
+    </ul>
      <p><b>1.0.33.0 - August 21, 2006</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.7</li>

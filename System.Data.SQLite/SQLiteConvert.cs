@@ -140,7 +140,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The default DateTime format for this instance
     /// </summary>
-    private SQLiteDateFormats _datetimeFormat;
+    internal SQLiteDateFormats _datetimeFormat;
     /// <summary>
     /// Initializes the conversion class
     /// </summary>

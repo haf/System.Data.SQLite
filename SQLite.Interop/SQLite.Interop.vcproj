@@ -143,10 +143,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				AdditionalOptions="/GS-"
-				Optimization="3"
-				FavorSizeOrSpeed="1"
 				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA"
-				ExceptionHandling="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -163,10 +160,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
-				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
 				OutputFile="../bin/CompactFramework/System.Data.SQLite.DLL"
 				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames="oldnames.lib"
+				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
 				AddModuleNamesToAssembly=""
 				EmbedManagedResourceFile=""
@@ -492,8 +488,6 @@
 				Optimization="0"
 				FavorSizeOrSpeed="0"
 				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;;SQLITE_ENABLE_COLUMN_METADATA"
-				RuntimeLibrary="3"
-				EnableFunctionLevelLinking="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -514,7 +508,7 @@
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
 				OutputFile="../bin/CompactFramework/$(InputName).DLL"
 				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames="oldnames.lib"
+				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
 				AddModuleNamesToAssembly=""
 				EmbedManagedResourceFile=""

@@ -472,8 +472,12 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
   // If this is a CE file, then change the processor to x86
   if (pNT)
   {
-    if (pNT->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
+    if (pNT->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CE_GUI 
+      || pNT->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM)
+    {
       pNT->FileHeader.Machine = IMAGE_FILE_MACHINE_I386;
+      pNT->OptionalHeader.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI;
+    }
   }
 
   if (pCor->Flags & 0x08)
