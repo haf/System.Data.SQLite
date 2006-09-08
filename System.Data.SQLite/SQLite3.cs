@@ -206,6 +206,8 @@ namespace System.Data.SQLite
       int n = 17;
       int retries = 0;
       byte[] b = ToUTF8(strSql);
+      string typedefs = null;
+      SQLiteStatement cmd = null;
 
       unsafe
       {
@@ -215,13 +217,37 @@ namespace System.Data.SQLite
           {
             n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, (IntPtr)psql, b.Length - 1, out stmt, out ptr, out len);
             retries++;
+
+            if (n == 1)
+            {
+              if (String.Compare(SQLiteLastError(), "near \"TYPES\": syntax error", StringComparison.OrdinalIgnoreCase) == 0)
+              {
+                int pos = strSql.IndexOf(';');
+                if (pos == -1) pos = strSql.Length - 1;
+
+                typedefs = strSql.Substring(0, pos + 1);
+                strSql = strSql.Substring(pos + 1);
+
+                strRemain = "";
+
+                while (cmd == null && strSql.Length > 0)
+                {
+                  cmd = Prepare(strSql, previous, out strRemain);
+                  strSql = strRemain;
+                }
+
+                if (cmd != null)
+                  cmd.SetTypes(typedefs);
+
+                return cmd;
+              }
+            }
           }
 
           if (n > 0) throw new SQLiteException(n, SQLiteLastError());
 
           strRemain = UTF8ToString(ptr, len);
 
-          SQLiteStatement cmd = null;
           if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
 
           return cmd;
@@ -314,6 +340,13 @@ namespace System.Data.SQLite
       if (p != IntPtr.Zero) return ToString(p, len);
       else
       {
+        string[] ar = stmt.TypeDefinitions;
+        if (ar != null)
+        {
+          if (index < ar.Length)
+            return ar[index];
+        }
+
         switch (nAffinity)
         {
           case TypeAffinity.Int64:

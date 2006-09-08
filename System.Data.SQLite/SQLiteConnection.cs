@@ -51,6 +51,12 @@ namespace System.Data.SQLite
   /// <description>ISO8601</description>
   /// </item>
   /// <item>
+  /// <description>BinaryGUID</description>
+  /// <description><b>True</b> - Store GUID columns in binary form<br/><b>False</b> - Store GUID columns as text</description>
+  /// <description>N</description>
+  /// <description>True</description>
+  /// </item>
+  /// <item>
   /// <description>Cache Size</description>
   /// <description>{size in bytes}</description>
   /// <description>N</description>
@@ -118,6 +124,8 @@ namespace System.Data.SQLite
     /// Temporary password storage, emptied after the database has been opened
     /// </summary>
     private byte[]               _password;
+
+    internal bool _binaryGuid;
 
     private event SQLiteUpdateEventHandler _updateHandler;
     private event SQLiteCommitHandler      _commitHandler;
@@ -494,6 +502,12 @@ namespace System.Data.SQLite
     /// <description>ISO8601</description>
     /// </item>
     /// <item>
+    /// <description>BinaryGUID</description>
+    /// <description><b>Yes/On/1</b> - Store GUID columns in binary form<br/><b>No/Off/0</b> - Store GUID columns as text</description>
+    /// <description>N</description>
+    /// <description>On</description>
+    /// </item>
+    /// <item>
     /// <description>Cache Size</description>
     /// <description>{size in bytes}</description>
     /// <description>N</description>
@@ -714,6 +728,8 @@ namespace System.Data.SQLite
         }
 
         _sql.Open(fileName);
+
+        _binaryGuid = (Convert.ToBoolean(FindKey(opts, "BinaryGUID", "True"), CultureInfo.InvariantCulture) == true);
 
         string password = FindKey(opts, "Password", null);
 

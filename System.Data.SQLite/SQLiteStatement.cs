@@ -45,6 +45,8 @@ namespace System.Data.SQLite
     /// </summary>
     internal SQLiteCommand     _command;
 
+    private string[] _types;
+
     /// <summary>
     /// Initializes the statement and attempts to get all information about parameters in the statement
     /// </summary>
@@ -199,11 +201,45 @@ namespace System.Data.SQLite
           _sql.Bind_Blob(this, index, (byte[])obj);
           break;
         case DbType.Guid:
-          _sql.Bind_Blob(this, index, ((Guid)obj).ToByteArray());
+          if (_command.Connection._binaryGuid == true)
+            _sql.Bind_Blob(this, index, ((Guid)obj).ToByteArray());
+          else
+            _sql.Bind_Text(this, index, obj.ToString());
+
           break;
         default:
           _sql.Bind_Text(this, index, obj.ToString());
           break;
+      }
+    }
+
+    internal string[] TypeDefinitions
+    {
+      get { return _types; }
+    }
+
+    internal void SetTypes(string typedefs)
+    {
+      int pos = typedefs.IndexOf("TYPES", 0, StringComparison.OrdinalIgnoreCase);
+      if (pos == -1) throw new ArgumentOutOfRangeException();
+
+      string[] types = typedefs.Substring(pos + 6).Replace(" ", "").Replace(";", "").Replace("\"", "").Replace("[", "").Replace("]", "").Split(',', '\r', '\n', '\t');
+
+      int cols = 0;
+      int n;
+      for (n = 0; n < types.Length; n++)
+      {
+        if (String.IsNullOrEmpty(types[n]) == false)
+          cols++;
+      }
+
+      _types = new string[cols];
+
+      cols = 0;
+      for (n = 0; n < types.Length; n++)
+      {
+        if (String.IsNullOrEmpty(types[n]) == false)
+          _types[cols++] = types[n];
       }
     }
   }

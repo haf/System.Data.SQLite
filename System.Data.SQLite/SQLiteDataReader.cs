@@ -514,11 +514,11 @@ namespace System.Data.SQLite
         temp = _command.Connection._sql.ColumnDatabaseName(_activeStatement, n);
         if (String.IsNullOrEmpty(temp) == false) row[SchemaTableOptionalColumn.BaseCatalogName] = temp;
 
+        string dataType = null;
         // If we have a table-bound column, extract the extra information from it
         if (String.IsNullOrEmpty(strColumn) == false)
         {
           string collSeq;
-          string dataType;
           bool bNotNull;
           bool bPrimaryKey;
           bool bAutoIncrement;
@@ -557,8 +557,6 @@ namespace System.Data.SQLite
               }
             }
           }
-
-          row["DataTypeName"] = dataType;
 
           if (wantDefaultValue)
           {
@@ -619,6 +617,16 @@ namespace System.Data.SQLite
             }
           }
         }
+        
+        if (String.IsNullOrEmpty(dataType))
+        {
+          TypeAffinity affin;
+          dataType = _activeStatement._sql.ColumnType(_activeStatement, n, out affin);
+        }
+
+        if (String.IsNullOrEmpty(dataType) == false)
+          row["DataTypeName"] = dataType;
+
         tbl.Rows.Add(row);
       }
 
