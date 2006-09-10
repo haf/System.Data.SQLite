@@ -183,7 +183,7 @@ namespace System.Data.SQLite
     /// </summary>
     internal SQLiteStatement BuildNextCommand()
     {
-      SQLiteStatement stmt;
+      SQLiteStatement stmt = null;
 
       try
       {
@@ -198,6 +198,7 @@ namespace System.Data.SQLite
             _statementList = new List<SQLiteStatement>();
 
           _statementList.Add(stmt);
+
           _parameterCollection.MapParameters(stmt);
           stmt.BindParameters();
         }        
@@ -205,7 +206,14 @@ namespace System.Data.SQLite
       }
       catch (Exception)
       {
-        ClearCommands();
+        if (stmt != null)
+        {
+          if (_statementList.Contains(stmt))
+            _statementList.Remove(stmt);
+
+          stmt.Dispose();
+        }
+
         throw;
       }
     }

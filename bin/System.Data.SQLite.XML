@@ -2218,6 +2218,12 @@
             <description>ISO8601</description>
             </item>
             <item>
+            <description>BinaryGUID</description>
+            <description><b>True</b> - Store GUID columns in binary form<br/><b>False</b> - Store GUID columns as text</description>
+            <description>N</description>
+            <description>True</description>
+            </item>
+            <item>
             <description>Cache Size</description>
             <description>{size in bytes}</description>
             <description>N</description>
@@ -2677,6 +2683,12 @@
             <description><b>Ticks</b> - Use DateTime.Ticks<br/><b>ISO8601</b> - Use ISO8601 DateTime format</description>
             <description>N</description>
             <description>ISO8601</description>
+            </item>
+            <item>
+            <description>BinaryGUID</description>
+            <description><b>Yes/On/1</b> - Store GUID columns in binary form<br/><b>No/Off/0</b> - Store GUID columns as text</description>
+            <description>N</description>
+            <description>On</description>
             </item>
             <item>
             <description>Cache Size</description>

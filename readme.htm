@@ -5,10 +5,11 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.34.0 September 4, 2006<br>
+    Version 1.0.35.0 September 10, 2006<br>
     Using SQLite 3.3.7<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
+    Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
     <br>
     The latest version can be downloaded <a href="http://sourceforge.net/projects/sqlite-dotnet2">
       here</a>
@@ -119,6 +120,18 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.35.0 - September 10, 2006</b></p>
+    <ul>
+    <li>Fixed an infinite loop bug in SQLiteCommand caused when multiple semi-colon separated
+      statements in a single command are executed via datareader and one of the statements
+      contains a syntax error preventing it from being prepared.&nbsp;</li><li>Added the TYPES preparser keyword to be placed before a SELECT statement to
+    aid the wrapper in converting expressions in a subsequent select clause into more
+    robust types.&nbsp; Documentation yet to be integrated, but available on the forums.</li>
+      <li>Added a new connectionstring parameter "BinaryGUID=true/false" (default is "true").&nbsp;
+        When true, guid types are stored in the database as binary blobs to save space.&nbsp;
+        Binary has been the default format since 1.0.32.0 but this parameter eases backward
+        compatibility.</li>
+    </ul>
     <p><b>1.0.34.0 - September 4, 2006</b></p>
     <ul>
     <li>Fixed a bug in SQLiteParameterCollection.RemoveAt(namedparam)</li>
