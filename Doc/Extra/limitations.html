@@ -63,7 +63,8 @@
         natively. They are (in .NET-speak) Int64, Double, String and Blob. The 
         SQLite.NET provider will use the database schema information it can glean to 
         enforce type-ness, but it is an inexact science.</p>
-      <p>Nested transactions and hierarchical DataReaders are not supported. In the 
+      <p>
+        Hierarchical DataReaders are not supported. In the 
         case of transactions, any SQLiteCommand created on a connection will (when 
         executed) automatically join a transaction in progress, regardless of whether 
         that transaction was created before or after the command.</p>

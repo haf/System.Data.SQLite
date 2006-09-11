@@ -214,6 +214,9 @@ namespace System.Data.SQLite
           stmt.Dispose();
         }
 
+        // If we threw an error compiling the statement, we cannot continue on so set the remaining text to null.
+        _remainingText = null;
+
         throw;
       }
     }

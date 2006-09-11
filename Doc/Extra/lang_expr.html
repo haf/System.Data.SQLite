@@ -60,7 +60,7 @@
       <p>
         <table cellpadding="10">
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               <i><font color="#ff3434">expr</font></i> ::=</td>
             <td>
               <b><font color="#2c2cf0"></font></b><i><font color="#ff3434">expr</font></i><b><font
@@ -134,7 +134,7 @@
                                   )</big></font></b></td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               <i><font color="#ff3434">like-op</font></i> ::=</td>
             <td>
               <b><font color="#2c2cf0">LIKE </font></b><big>|</big><b><font color="#2c2cf0"> GLOB
@@ -151,16 +151,14 @@
         SQLite understands the following binary operators, in order from highest to lowest
         precedence:</p>
       <blockquote>
-        <pre>
-<font color="#2c2cf0"><big>|| * / % + - &lt;&lt; &gt;&gt; &amp; | &lt; &lt;= &gt;
+        <pre><font color="#2c2cf0"><big>|| * / % + - &lt;&lt; &gt;&gt; &amp; | &lt; &lt;= &gt;
   &gt;= = == != &lt;&gt; </big>IN AND OR</font>
 </pre>
       </blockquote>
       <p>
         Supported unary operators are these:</p>
       <blockquote>
-        <pre>
-<font color="#2c2cf0"><big>- + ! ~ NOT</big></font>
+        <pre><font color="#2c2cf0"><big>- + ! ~ NOT</big></font>
 </pre>
       </blockquote>
       <p>
@@ -189,8 +187,7 @@
         string literals containing hexadecimal data and preceded by a single "x" or "X"
         character. For example:</p>
       <blockquote>
-        <pre>
-X'53514697465'
+        <pre>X'53514697465'
 </pre>
       </blockquote>
       <p>
@@ -204,7 +201,7 @@ X'53514697465'
       <p>
         <table>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               <b>?</b><i>NNN</i></td>
             <td width="20">
             </td>
@@ -213,7 +210,7 @@ X'53514697465'
               NNN must be between 1 and 999.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               <b>?</b></td>
             <td width="20">
             </td>
@@ -222,7 +219,7 @@ X'53514697465'
               parameter.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               <b>:</b><i>AAAA</i></td>
             <td width="20">
             </td>
@@ -232,7 +229,7 @@ X'53514697465'
               number. To avoid confusion, it is best to avoid mixing named and numbered parameters.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               <b>@</b><i>AAAA</i></td>
             <td width="20">
             </td>
@@ -240,7 +237,7 @@ X'53514697465'
               An "at" sign works exactly like a colon.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               <b>$</b><i>AAAA</i></td>
             <td width="20">
             </td>
@@ -368,7 +365,7 @@ X'53514697465'
               Return the absolute value of argument <i>X</i>.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               coalesce(<i>X</i>,<i>Y</i>,...)</td>
             <td valign="top">
               Return a copy of the first non-NULL argument. If all arguments are NULL then NULL
@@ -376,7 +373,7 @@ X'53514697465'
           </tr>
           <tr>
             <a name="globFunc"></a>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               glob(<i>X</i>,<i>Y</i>)</td>
             <td valign="top">
               This function is used to implement the "<b>X GLOB Y</b>" syntax of SQLite. The <a
@@ -385,14 +382,14 @@ X'53514697465'
                 href="#globFunc">GLOB</a> operator.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               ifnull(<i>X</i>,<i>Y</i>)</td>
             <td valign="top">
               Return a copy of the first non-NULL argument. If both arguments are NULL then NULL
               is returned. This behaves the same as <b>coalesce()</b> above.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               last_insert_rowid()</td>
             <td valign="top">
               Return the ROWID of the last row insert from this connection to the database. This
@@ -400,7 +397,7 @@ X'53514697465'
               API function.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               length(<i>X</i>)</td>
             <td valign="top">
               Return the string length of <i>X</i> in characters. If SQLite is configured to support
@@ -408,7 +405,7 @@ X'53514697465'
           </tr>
           <tr>
             <a name="likeFunc"></a>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               like(<i>X</i>,<i>Y</i> [,<i>Z</i>])</td>
             <td valign="top">
               This function is used to implement the "<b>X LIKE Y [ESCAPE Z]</b>" syntax of SQL.
@@ -421,7 +418,7 @@ X'53514697465'
               operator depending on whether or not an ESCAPE clause was specified.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               load_extension(<i>X</i>)<br />
               load_extension(<i>X</i>,<i>Y</i>)</td>
             <td valign="top">
@@ -432,7 +429,7 @@ X'53514697465'
             </td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               lower(<i>X</i>)</td>
             <td valign="top">
               Return a copy of string <i>X</i> will all characters converted to lower case. The
@@ -440,7 +437,7 @@ X'53514697465'
               this function might not work correctly on UTF-8 characters.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               max(<i>X</i>,<i>Y</i>,...)</td>
             <td valign="top">
               Return the argument with the maximum value. Arguments may be strings in addition
@@ -449,7 +446,7 @@ X'53514697465'
               an aggregate function if given only a single argument.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               min(<i>X</i>,<i>Y</i>,...)</td>
             <td valign="top">
               Return the argument with the minimum value. Arguments may be strings in addition
@@ -458,13 +455,13 @@ X'53514697465'
               an aggregate function if given only a single argument.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               nullif(<i>X</i>,<i>Y</i>)</td>
             <td valign="top">
               Return the first argument if the arguments are different, otherwise return NULL.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               quote(<i>X</i>)</td>
             <td valign="top">
               This routine returns a string which is the value of its argument suitable for inclusion
@@ -476,13 +473,13 @@ X'53514697465'
             </td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               random(*)</td>
             <td valign="top">
               Return a pseudo-random integer between -9223372036854775808 and +9223372036854775807.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               round(<i>X</i>)<br />
               round(<i>X</i>,<i>Y</i>)</td>
             <td valign="top">
@@ -490,7 +487,7 @@ X'53514697465'
               If the <i>Y</i> argument is omitted, 0 is assumed.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               soundex(<i>X</i>)</td>
             <td valign="top">
               Compute the soundex encoding of the string <i>X</i>. The string "?000" is returned
@@ -498,13 +495,13 @@ X'53514697465'
               only available the -DSQLITE_SOUNDEX=1 compiler option is used when SQLite is built.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               sqlite_version(*)</td>
             <td valign="top">
               Return the version string for the SQLite library that is running. Example: "2.8.0"</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               substr(<i>X</i>,<i>Y</i>,<i>Z</i>)</td>
             <td valign="top">
               Return a substring of input string <i>X</i> that begins with the <i>Y</i>-th character
@@ -514,7 +511,7 @@ X'53514697465'
               UTF-8, then characters indices refer to actual UTF-8 characters, not bytes.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               typeof(<i>X</i>)</td>
             <td valign="top">
               Return the type of the expression <i>X</i>. The only return values are "null", "integer",
@@ -523,7 +520,7 @@ X'53514697465'
                 Datatypes in SQLite Version 3</a>.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               upper(<i>X</i>)</td>
             <td valign="top">
               Return a copy of input string <i>X</i> converted to all upper-case letters. The
@@ -531,11 +528,7 @@ X'53514697465'
               means it may not work correctly on UTF-8 strings.</td>
           </tr>
         </table>
-        <b>Date And Time Functions</b>
       </p>
-      <p>
-        Date and time functions are documented in the <a href="http://www.sqlite.org/cvstrac/wiki?p=DateAndTimeFunctions">
-          SQLite Wiki</a>.</p>
       <p>
         <a name="aggregatefunctions"></a><b>Aggregate Functions</b>
       </p>
@@ -564,7 +557,7 @@ X'53514697465'
             </td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               count(<i>X</i>)<br />
               count(*)</td>
             <td valign="top">
@@ -573,14 +566,14 @@ X'53514697465'
               the group.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               max(<i>X</i>)</td>
             <td valign="top">
               Return the maximum value of all values in the group. The usual sort order is used
               to determine the maximum.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               min(<i>X</i>)</td>
             <td valign="top">
               Return the minimum non-NULL value of all values in the group. The usual sort order
@@ -588,7 +581,7 @@ X'53514697465'
               are NULL.</td>
           </tr>
           <tr>
-            <td align="right" valign="top">
+            <td align="right" width="1%" nowrap>
               sum(<i>X</i>)<br />
               total(<i>X</i>)</td>
             <td valign="top">
@@ -613,9 +606,7 @@ X'53514697465'
           </tr>
         </table>
       </p>
-      <p>
       <hr>
-        &nbsp;</p>
       <div id="footer">
         <p>
           &nbsp;</p>

@@ -56,6 +56,24 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
+    <p><b>1.0.35.1 - September 12, 2006</b></p>
+    <ul>
+    <li>Fixed the TYPES keyword to work when UseUTF16Encoding is true.</li>
+    <li>Fix another bug revealed in 1.0.35.0 regarding infinite loops when the 2nd or subsequent statements of a semi-colon separated command cannot be parsed.</li>
+      <li>Updated the help documentation.&nbsp;</li>
+    </ul>
+    <p><b>1.0.35.0 - September 10, 2006</b></p>
+    <ul>
+    <li>Fixed an infinite loop bug in SQLiteCommand caused when multiple semi-colon separated
+      statements in a single command are executed via datareader and one of the statements
+      contains a syntax error preventing it from being prepared.&nbsp;</li><li>Added the TYPES preparser keyword to be placed before a SELECT statement to
+    aid the wrapper in converting expressions in a subsequent select clause into more
+    robust types.&nbsp; Documentation yet to be integrated, but available on the forums.</li>
+      <li>Added a new connectionstring parameter "BinaryGUID=true/false" (default is "true").&nbsp;
+        When true, guid types are stored in the database as binary blobs to save space.&nbsp;
+        Binary has been the default format since 1.0.32.0 but this parameter eases backward
+        compatibility.</li>
+    </ul>
     <p><b>1.0.34.0 - September 4, 2006</b></p>
     <ul>
     <li>Fixed a bug in SQLiteParameterCollection.RemoveAt(namedparam)</li>

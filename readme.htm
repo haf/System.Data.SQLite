@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.35.0 September 10, 2006<br>
+    Version 1.0.35.1 September 12, 2006<br>
     Using SQLite 3.3.7<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -120,6 +120,12 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.35.1 - September 12, 2006</b></p>
+    <ul>
+    <li>Fixed the TYPES keyword to work when UseUTF16Encoding is true.</li>
+    <li>Fix another bug revealed in 1.0.35.0 regarding infinite loops when the 2nd or subsequent statements of a semi-colon separated command cannot be parsed.</li>
+      <li>Updated the help documentation.&nbsp;</li>
+    </ul>
     <p><b>1.0.35.0 - September 10, 2006</b></p>
     <ul>
     <li>Fixed an infinite loop bug in SQLiteCommand caused when multiple semi-colon separated
