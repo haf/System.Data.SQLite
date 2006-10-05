@@ -89,29 +89,6 @@ namespace System.Data.SQLite
       return ToString(UnsafeNativeMethods.sqlite3_column_text16_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
-    internal override string ColumnType(SQLiteStatement stmt, int index, out TypeAffinity nAffinity)
-    {
-      int len;
-      IntPtr p = UnsafeNativeMethods.sqlite3_column_decltype16_interop(stmt._sqlite_stmt, index, out len);
-      nAffinity = UnsafeNativeMethods.sqlite3_column_type_interop(stmt._sqlite_stmt, index);
-
-      if (p != IntPtr.Zero) return ToString(p, len);
-      else
-      {
-        switch (nAffinity)
-        {
-          case TypeAffinity.Int64:
-            return "BIGINT";
-          case TypeAffinity.Double:
-            return "DOUBLE";
-          case TypeAffinity.Blob:
-            return "BLOB";
-          default:
-            return "TEXT";
-        }
-      }
-    }
-
     internal override string ColumnOriginalName(SQLiteStatement stmt, int index)
     {
       int len;

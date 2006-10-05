@@ -337,7 +337,7 @@ namespace System.Data.SQLite
       IntPtr p = UnsafeNativeMethods.sqlite3_column_decltype_interop(stmt._sqlite_stmt, index, out len);
       nAffinity = ColumnAffinity(stmt, index);
 
-      if (p != IntPtr.Zero) return ToString(p, len);
+      if (p != IntPtr.Zero) return base.ToString(p, len);
       else
       {
         string[] ar = stmt.TypeDefinitions;

@@ -1,11 +1,11 @@
 // This code was automatically generated from assembly
-// C:\Src\SQLite.NET\System.Data.SQLite\bin\System.Data.SQLite.dll
+// C:\Src\SQLite.NET\bin\System.Data.SQLite.dll
 
 #include <windef.h>
 
 #pragma data_seg(".clr")
 #pragma comment(linker, "/SECTION:.clr,ER")
-  char __ph[127052] = {0}; // The number of bytes to reserve
+  char __ph[135432] = {0}; // The number of bytes to reserve
 #pragma data_seg()
 
 typedef BOOL (WINAPI *DLLMAIN)(HANDLE, DWORD, LPVOID);
