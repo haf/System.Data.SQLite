@@ -150,23 +150,31 @@ namespace test
     {
       using (TransactionScope scope = new TransactionScope())
       {
-        cnn.EnlistTransaction(Transaction.Current);
-
-        using (DbCommand cmd = cnn.CreateCommand())
+        using (DbConnection cnn2 = ((ICloneable)cnn).Clone() as DbConnection)
         {
-          cmd.CommandText = "CREATE TABLE VolatileTable (ID INTEGER PRIMARY KEY, MyValue VARCHAR(50))";
-          cmd.ExecuteNonQuery();
-          using (DbCommand cmd2 = cnn.CreateCommand())
+          using (DbCommand cmd = cnn2.CreateCommand())
           {
-            using (cmd2.Transaction = cnn.BeginTransaction())
+            // Created a table inside the transaction scope
+            cmd.CommandText = "CREATE TABLE VolatileTable (ID INTEGER PRIMARY KEY, MyValue VARCHAR(50))";
+            cmd.ExecuteNonQuery();
+
+            using (DbCommand cmd2 = cnn2.CreateCommand())
             {
-              cmd2.CommandText = "INSERT INTO VolatileTable (ID, MyValue) VALUES(1, 'Hello')";
-              cmd2.ExecuteNonQuery();
-              cmd2.Transaction.Commit();
+              using (cmd2.Transaction = cnn2.BeginTransaction())
+              {
+                // Inserting a value inside the table, inside a transaction which is inside the transaction scope
+                cmd2.CommandText = "INSERT INTO VolatileTable (ID, MyValue) VALUES(1, 'Hello')";
+                cmd2.ExecuteNonQuery();
+                cmd2.Transaction.Commit();
+              }
             }
           }
+          // Connection is disposed before the transactionscope leaves, thereby forcing the connection to stay open
         }
+        // Exit the transactionscope without committing it, causing a rollback of both the create table and the insert
       }
+
+      // Verify that the table does not exist
       using (DbCommand cmd = cnn.CreateCommand())
       {
         cmd.CommandText = "SELECT COUNT(*) FROM VolatileTable";

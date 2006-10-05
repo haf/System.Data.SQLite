@@ -106,7 +106,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Whether or not the connection is enlisted in a distrubuted transaction
     /// </summary>
-    internal System.Transactions.Transaction _enlistment;
+    internal SQLiteEnlistment _enlistment;
 #endif
     /// <summary>
     /// The base SQLite object to interop with
@@ -459,7 +459,26 @@ namespace System.Data.SQLite
           _commandList[n].ClearCommands();
         }
 
-        _sql.Close();
+        if (_enlistment != null)
+        {
+          // If the connection is enlisted in a transaction scope and the scope is still active,
+          // we cannot truly shut down this connection until the scope has completed.  Therefore make a 
+          // hidden connection temporarily to hold open the connection until the scope has completed.
+          SQLiteConnection cnn = new SQLiteConnection();
+          cnn._sql = _sql;
+          cnn._transactionLevel = _transactionLevel;
+          cnn._enlistment = _enlistment;
+          cnn._connectionState = _connectionState;
+          
+          cnn._enlistment._transaction._cnn = cnn;
+          cnn._enlistment._disposeConnection = true;
+        }
+        else
+        {
+          _sql.Close();
+        }
+
+        _enlistment = null;
         _sql = null;
       }
 
@@ -650,12 +669,10 @@ namespace System.Data.SQLite
       if (_transactionLevel > 0 && transaction != null)
         throw new ArgumentException("Unable to enlist in transaction, a local transaction already exists");
 
-      if (_enlistment != null && transaction != _enlistment)
+      if (_enlistment != null && transaction != _enlistment._scope)
         throw new ArgumentException("Already enlisted in a transaction");
 
-      transaction.EnlistVolatile(new SQLiteEnlistment(this), System.Transactions.EnlistmentOptions.None);
-
-      _enlistment = transaction;
+      _enlistment = new SQLiteEnlistment(this, transaction);
     }
 #endif
 

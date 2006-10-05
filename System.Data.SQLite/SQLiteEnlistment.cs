@@ -15,18 +15,26 @@ namespace System.Data.SQLite
 
   internal class SQLiteEnlistment : IEnlistmentNotification
   {
-    private SQLiteTransaction _transaction;
+    internal SQLiteTransaction _transaction;
+    internal Transaction _scope;
+    internal bool _disposeConnection;
 
-    internal SQLiteEnlistment(SQLiteConnection cnn)
+    internal SQLiteEnlistment(SQLiteConnection cnn, Transaction scope)
     {
       _transaction = cnn.BeginTransaction();
+      _scope = scope;
+      _disposeConnection = false;
+
+      _scope.EnlistVolatile(this, System.Transactions.EnlistmentOptions.None);
     }
 
     #region IEnlistmentNotification Members
 
     public void Commit(Enlistment enlistment)
     {
-      _transaction.Connection._enlistment = null;
+      SQLiteConnection cnn = _transaction.Connection;
+      cnn._enlistment = null;
+
       try
       {
         _transaction.IsValid();
@@ -37,7 +45,11 @@ namespace System.Data.SQLite
       }
       finally
       {
+        if (_disposeConnection)
+          cnn.Dispose();
+
         _transaction = null;
+        _scope = null;
       }
     }
 
@@ -62,7 +74,9 @@ namespace System.Data.SQLite
 
     public void Rollback(Enlistment enlistment)
     {
-      _transaction.Connection._enlistment = null;
+      SQLiteConnection cnn = _transaction.Connection;
+      cnn._enlistment = null;
+
       try
       {
         _transaction.Rollback();
@@ -70,7 +84,11 @@ namespace System.Data.SQLite
       }
       finally
       {
+        if (_disposeConnection)
+          cnn.Dispose();
+
         _transaction = null;
+        _scope = null;
       }
     }
 
