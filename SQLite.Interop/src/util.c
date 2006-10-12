@@ -14,7 +14,7 @@
 ** This file contains functions for allocating memory, comparing
 ** strings, and stuff like that.
 **
-** $Id: util.c,v 1.24 2006/08/13 15:56:09 rmsimpson Exp $
+** $Id: util.c,v 1.25 2006/10/12 21:34:22 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -1446,7 +1446,7 @@ int sqlite3ApiExit(sqlite3* db, int rc){
     sqlite3Error(db, SQLITE_NOMEM, 0);
     rc = SQLITE_NOMEM;
   }
-  return rc;
+  return rc & (db ? db->errMask : 0xff);
 }
 
 /* 

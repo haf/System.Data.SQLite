@@ -18,7 +18,7 @@
 ** file simultaneously, or one process from reading the database while
 ** another is writing.
 **
-** @(#) $Id: pager.c,v 1.24 2006/08/13 15:56:08 rmsimpson Exp $
+** @(#) $Id: pager.c,v 1.25 2006/10/12 21:34:21 rmsimpson Exp $
 */
 #ifndef SQLITE_OMIT_DISKIO
 #include "sqliteInt.h"
@@ -231,7 +231,6 @@ struct Pager {
   u8 fullSync;                /* Do extra syncs of the journal for robustness */
   u8 full_fsync;              /* Use F_FULLFSYNC when available */
   u8 state;                   /* PAGER_UNLOCK, _SHARED, _RESERVED, etc. */
-  u8 errCode;                 /* One of several kinds of errors */
   u8 tempFile;                /* zFilename is a temporary file */
   u8 readOnly;                /* True for a read-only database */
   u8 needSync;                /* True if an fsync() is needed on the journal */
@@ -239,6 +238,7 @@ struct Pager {
   u8 alwaysRollback;          /* Disable dont_rollback() for all pages */
   u8 memDb;                   /* True to inhibit all file I/O */
   u8 setMaster;               /* True if a m-j name has been written to jrnl */
+  int errCode;                /* One of several kinds of errors */
   int dbSize;                 /* Number of pages in the file */
   int origDbSize;             /* dbSize before the current change */
   int stmtSize;               /* Size of database (in pages) at stmt_begin() */
@@ -476,12 +476,13 @@ static u32 retrieve32bits(PgHdr *p, int offset){
 ** will immediately return the same error code.
 */
 static int pager_error(Pager *pPager, int rc){
+  int rc2 = rc & 0xff;
   assert( pPager->errCode==SQLITE_FULL || pPager->errCode==SQLITE_OK );
   if( 
-    rc==SQLITE_FULL ||
-    rc==SQLITE_IOERR ||
-    rc==SQLITE_CORRUPT ||
-    rc==SQLITE_PROTOCOL
+    rc2==SQLITE_FULL ||
+    rc2==SQLITE_IOERR ||
+    rc2==SQLITE_CORRUPT ||
+    rc2==SQLITE_PROTOCOL
   ){
     pPager->errCode = rc;
   }
@@ -1340,6 +1341,10 @@ static int pager_playback(Pager *pPager){
           pPager->journalOff = szJ;
           break;
         }else{
+          /* If we are unable to rollback a hot journal, then the database
+          ** is probably not recoverable.  Return CORRUPT.
+          */
+          rc = SQLITE_CORRUPT;
           goto end_playback;
         }
       }
@@ -1814,12 +1819,13 @@ void sqlite3pager_read_fileheader(Pager *pPager, int N, unsigned char *pDest){
 */
 int sqlite3pager_pagecount(Pager *pPager){
   i64 n;
+  int rc;
   assert( pPager!=0 );
   if( pPager->dbSize>=0 ){
     n = pPager->dbSize;
   } else {
-    if( sqlite3OsFileSize(pPager->fd, &n)!=SQLITE_OK ){
-      pager_error(pPager, SQLITE_IOERR);
+    if( (rc = sqlite3OsFileSize(pPager->fd, &n))!=SQLITE_OK ){
+      pager_error(pPager, rc);
       return 0;
     }
     if( n>0 && n<pPager->pageSize ){
@@ -2107,9 +2113,6 @@ int sqlite3pager_close(Pager *pPager){
   }
 #endif
   sqliteFree(pPager->aHash);
-#ifdef SQLITE_HAS_CODEC
-  sqlite3pager_free_codecarg(pPager->pCodecArg);
-#endif
   sqliteFree(pPager);
   return SQLITE_OK;
 }
@@ -2581,7 +2584,7 @@ int sqlite3pager_release_memory(int nReq){
         ** The error will be returned to the user (or users, in the case 
         ** of a shared pager cache) of the pager for which the error occured.
         */
-        assert( rc==SQLITE_IOERR || rc==SQLITE_FULL );
+        assert( (rc&0xff)==SQLITE_IOERR || rc==SQLITE_FULL );
         assert( p->state>=PAGER_RESERVED );
         pager_error(p, rc);
       }

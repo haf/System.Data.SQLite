@@ -11,7 +11,7 @@
 *************************************************************************
 ** This file contains code used to implement the PRAGMA command.
 **
-** $Id: pragma.c,v 1.23 2006/08/13 15:56:08 rmsimpson Exp $
+** $Id: pragma.c,v 1.24 2006/10/12 21:34:22 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -482,12 +482,19 @@ void sqlite3Pragma(
       sqlite3VdbeSetColName(v, 5, COLNAME_NAME, "pk", P3_STATIC);
       sqlite3ViewGetColumnNames(pParse, pTab);
       for(i=0, pCol=pTab->aCol; i<pTab->nCol; i++, pCol++){
+        const Token *pDflt;
+        static const Token noDflt =  { (unsigned char*)"", 0, 0 };
         sqlite3VdbeAddOp(v, OP_Integer, i, 0);
         sqlite3VdbeOp3(v, OP_String8, 0, 0, pCol->zName, 0);
         sqlite3VdbeOp3(v, OP_String8, 0, 0,
            pCol->zType ? pCol->zType : "", 0);
         sqlite3VdbeAddOp(v, OP_Integer, pCol->notNull, 0);
-        sqlite3ExprCode(pParse, pCol->pDflt);
+        pDflt = pCol->pDflt ? &pCol->pDflt->span : &noDflt;
+        if( pDflt->z ){
+          sqlite3VdbeOp3(v, OP_String8, 0, 0, (char*)pDflt->z, pDflt->n);
+        }else{
+          sqlite3VdbeAddOp(v, OP_Null, 0, 0);
+        }
         sqlite3VdbeAddOp(v, OP_Integer, pCol->isPrimKey, 0);
         sqlite3VdbeAddOp(v, OP_Callback, 6, 0);
       }
@@ -939,6 +946,22 @@ void sqlite3Pragma(
   if( sqlite3StrICmp(zLeft, "key")==0 ){
     sqlite3_key(db, zRight, strlen(zRight));
   }else
+#endif
+#if SQLITE_HAS_CODEC || defined(SQLITE_ENABLE_CEROD)
+  if( sqlite3StrICmp(zLeft, "activate_extensions")==0 ){
+#if SQLITE_HAS_CODEC
+    if( sqlite3StrNICmp(zRight, "see-", 4)==0 ){
+      extern void sqlite3_activate_see(const char*);
+      sqlite3_activate_see(&zRight[4]);
+    }
+#endif
+#ifdef SQLITE_ENABLE_CEROD
+    if( sqlite3StrNICmp(zRight, "cerod-", 6)==0 ){
+      extern void sqlite3_activate_cerod(const char*);
+      sqlite3_activate_cerod(&zRight[6]);
+    }
+#endif
+  }
 #endif
 
   {}

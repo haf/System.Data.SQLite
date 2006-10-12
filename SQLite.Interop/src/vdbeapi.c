@@ -254,6 +254,7 @@ int sqlite3_step(sqlite3_stmt *pStmt){
 
   sqlite3Error(p->db, rc, 0);
   p->rc = sqlite3ApiExit(p->db, p->rc);
+  assert( (rc&0xff)==rc );
   return rc;
 }
 
@@ -264,6 +265,27 @@ int sqlite3_step(sqlite3_stmt *pStmt){
 void *sqlite3_user_data(sqlite3_context *p){
   assert( p && p->pFunc );
   return p->pFunc->pUserData;
+}
+
+/*
+** The following is the implementation of an SQL function that always
+** fails with an error message stating that the function is used in the
+** wrong context.  The sqlite3_overload_function() API might construct
+** SQL function that use this routine so that the functions will exist
+** for name resolution but are actually overloaded by the xFindFunction
+** method of virtual tables.
+*/
+void sqlite3InvalidFunction(
+  sqlite3_context *context,  /* The function calling context */
+  int argc,                  /* Number of arguments to the function */
+  sqlite3_value **argv       /* Value of each argument */
+){
+  const char *zName = context->pFunc->zName;
+  char *zErr;
+  zErr = sqlite3MPrintf(
+      "unable to use function %s in the requested context", zName);
+  sqlite3_result_error(context, zErr, -1);
+  sqliteFree(zErr);
 }
 
 /*
@@ -815,6 +837,7 @@ int sqlite3_transfer_bindings(sqlite3_stmt *pFromStmt, sqlite3_stmt *pToStmt){
     rc = sqlite3VdbeMemMove(&pTo->aVar[i], &pFrom->aVar[i]);
     sqlite3MallocAllow();
   }
+  assert( rc==SQLITE_OK || rc==SQLITE_NOMEM );
   return rc;
 }
 

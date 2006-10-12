@@ -14,7 +14,7 @@
 ** other files are for internal use by SQLite and should not be
 ** accessed by users of the library.
 **
-** $Id: legacy.c,v 1.22 2006/08/13 15:55:01 rmsimpson Exp $
+** $Id: legacy.c,v 1.23 2006/10/12 21:34:21 rmsimpson Exp $
 */
 
 #include "sqliteInt.h"
@@ -131,5 +131,6 @@ exec_out:
     *pzErrMsg = 0;
   }
 
+  assert( (rc&db->errMask)==rc );
   return rc;
 }

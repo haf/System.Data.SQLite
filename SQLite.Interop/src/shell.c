@@ -12,7 +12,7 @@
 ** This file contains code to implement the "sqlite" command line
 ** utility for accessing SQLite databases.
 **
-** $Id: shell.c,v 1.23 2006/08/13 15:56:08 rmsimpson Exp $
+** $Id: shell.c,v 1.24 2006/10/12 21:34:22 rmsimpson Exp $
 */
 #include <stdlib.h>
 #include <string.h>
@@ -52,9 +52,13 @@
 # define stifle_history(X)
 #endif
 
+#if defined(_WIN32) || defined(WIN32)
+# include <io.h>
+#else
 /* Make sure isatty() has a prototype.
 */
 extern int isatty();
+#endif
 
 /*
 ** The following is the open SQLite database.  We make a pointer
@@ -235,7 +239,6 @@ struct callback_data {
                          ** .explain ON */
   char outfile[FILENAME_MAX]; /* Filename for *out */
   const char *zDbFilename;    /* name of the database file */
-  char *zKey;                 /* Encryption key */
 };
 
 /*
@@ -914,11 +917,16 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     if( nArg==1 ){
       run_schema_dump_query(p, 
         "SELECT name, type, sql FROM sqlite_master "
-        "WHERE sql NOT NULL AND type=='table'", 0
+        "WHERE sql NOT NULL AND type=='table' AND rootpage!=0", 0
       );
       run_schema_dump_query(p, 
         "SELECT name, type, sql FROM sqlite_master "
-        "WHERE sql NOT NULL AND type!='table' AND type!='meta'", 0
+        "WHERE sql NOT NULL AND "
+        "  AND type!='table' AND type!='meta'", 0
+      );
+      run_table_dump_query(p->out, p->db,
+        "SELECT sql FROM sqlite_master "
+        "WHERE sql NOT NULL AND rootpage==0 AND type='table'"
       );
     }else{
       int i;
@@ -927,11 +935,16 @@ static int do_meta_command(char *zLine, struct callback_data *p){
         run_schema_dump_query(p,
           "SELECT name, type, sql FROM sqlite_master "
           "WHERE tbl_name LIKE shellstatic() AND type=='table'"
-          "  AND sql NOT NULL", 0);
+          "  AND rootpage!=0 AND sql NOT NULL", 0);
         run_schema_dump_query(p,
           "SELECT name, type, sql FROM sqlite_master "
           "WHERE tbl_name LIKE shellstatic() AND type!='table'"
           "  AND type!='meta' AND sql NOT NULL", 0);
+        run_table_dump_query(p->out, p->db,
+          "SELECT sql FROM sqlite_master "
+          "WHERE sql NOT NULL AND rootpage==0 AND type='table'"
+          "  AND tbl_name LIKE shellstatic()"
+        );
         zShellStatic = 0;
       }
     }
@@ -1563,16 +1576,30 @@ static char *find_home_dir(void){
   home_dir = getcwd(home_path, _MAX_PATH);
 #endif
 
+#if defined(_WIN32) || defined(WIN32) || defined(__OS2__)
+  if (!home_dir) {
+    home_dir = getenv("USERPROFILE");
+  }
+#endif
+
   if (!home_dir) {
     home_dir = getenv("HOME");
-    if (!home_dir) {
-      home_dir = getenv("HOMEPATH"); /* Windows? */
-    }
   }
 
 #if defined(_WIN32) || defined(WIN32) || defined(__OS2__)
   if (!home_dir) {
-    home_dir = "c:";
+    char *zDrive, *zPath;
+    int n;
+    zDrive = getenv("HOMEDRIVE");
+    zPath = getenv("HOMEPATH");
+    if( zDrive && zPath ){
+      n = strlen(zDrive) + strlen(zPath) + 1;
+      home_dir = malloc( n );
+      if( home_dir==0 ) return 0;
+      sqlite3_snprintf(n, home_dir, "%s%s", zDrive, zPath);
+      return home_dir;
+    }
+    home_dir = "c:\\";
   }
 #endif
 
@@ -1639,12 +1666,14 @@ static const char zOptions[] =
   "   -separator 'x'       set output field separator (|)\n"
   "   -nullvalue 'text'    set text string for NULL values\n"
   "   -version             show SQLite version\n"
-  "   -help                show this text, also show dot-commands\n"
 ;
 static void usage(int showDetail){
-  fprintf(stderr, "Usage: %s [OPTIONS] FILENAME [SQL]\n", Argv0);
+  fprintf(stderr,
+      "Usage: %s [OPTIONS] FILENAME [SQL]\n"  
+      "FILENAME is the name of an SQLite database. A new database is created\n"
+      "if the file does not previously exist.\n", Argv0);
   if( showDetail ){
-    fprintf(stderr, "Options are:\n%s", zOptions);
+    fprintf(stderr, "OPTIONS include:\n%s", zOptions);
   }else{
     fprintf(stderr, "Use the -help option for additional information\n");
   }
@@ -1695,9 +1724,6 @@ int main(int argc, char **argv){
     }else if( strcmp(argv[i],"-init")==0 ){
       i++;
       zInitFile = argv[i];
-    }else if( strcmp(argv[i],"-key")==0 ){
-      i++;
-      data.zKey = sqlite3_mprintf("%s",argv[i]);
     }
   }
   if( i<argc ){
@@ -1743,7 +1769,7 @@ int main(int argc, char **argv){
   */
   for(i=1; i<argc && argv[i][0]=='-'; i++){
     char *z = argv[i];
-    if( strcmp(z,"-init")==0 || strcmp(z,"-key")==0 ){
+    if( strcmp(z,"-init")==0 ){
       i++;
     }else if( strcmp(z,"-html")==0 ){
       data.mode = MODE_Html;
@@ -1768,7 +1794,7 @@ int main(int argc, char **argv){
     }else if( strcmp(z,"-version")==0 ){
       printf("%s\n", sqlite3_libversion());
       return 0;
-    }else if( strcmp(z,"-help")==0 ){
+    }else if( strcmp(z,"-help")==0 || strcmp(z, "--help")==0 ){
       usage(1);
     }else{
       fprintf(stderr,"%s: unknown option: %s\n", Argv0, z);
