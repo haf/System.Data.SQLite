@@ -478,10 +478,22 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
       pNT->FileHeader.Machine = IMAGE_FILE_MACHINE_I386;
       pNT->OptionalHeader.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI;
     }
+
+    if (pNT->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI && (pCor->Flags & 0x08))
+    {
+      PIMAGE_SECTION_HEADER section = IMAGE_FIRST_SECTION(pNT);
+      for (UINT i=0; i < pNT->FileHeader.NumberOfSections; i++, section++)
+      {
+        if (section->SizeOfRawData < section->Misc.VirtualSize)
+        {
+          _tprintf(_T("\nWARNING: %s section has a RawData size of %X and a VirtualSize of %X, strong named image may not run on Windows CE\n"), section->Name, section->SizeOfRawData, section->Misc.VirtualSize);
+        }
+      }
+    }
   }
 
   if (pCor->Flags & 0x08)
-    _tprintf(_T("WARNING: %s must be re-signed before it can be used!\n"), pszNative);
+    _tprintf(_T("\nWARNING: %s must be re-signed before it can be used!\n"), pszNative);
 
   _tprintf(_T("Success!\n"));
 }
