@@ -224,7 +224,11 @@ const sqlite3_api_routines sqlite3_apis = {
 # include <windows.h>
 # define SQLITE_LIBRARY_TYPE     HANDLE
 # define SQLITE_OPEN_LIBRARY(A)  LoadLibrary(A)
+#ifdef _WIN32_WCE
+# define SQLITE_FIND_SYMBOL(A,B) GetProcAddressA(A,B)
+#else
 # define SQLITE_FIND_SYMBOL(A,B) GetProcAddress(A,B)
+#endif
 # define SQLITE_CLOSE_LIBRARY(A) FreeLibrary(A)
 #endif /* windows */
 
@@ -263,6 +267,11 @@ int sqlite3_load_extension(
   char *zErrmsg = 0;
   SQLITE_LIBRARY_TYPE *aHandle;
 
+#ifdef _WIN32_WCE
+  WCHAR zWideFile[MAX_PATH];
+  MultiByteToWideChar(CP_ACP, 0, zFile, -1, zWideFile, MAX_PATH);
+#endif
+
   /* Ticket #1863.  To avoid a creating security problems for older
   ** applications that relink against newer versions of SQLite, the
   ** ability to run load_extension is turned off by default.  One
@@ -280,7 +289,11 @@ int sqlite3_load_extension(
     zProc = "sqlite3_extension_init";
   }
 
+#ifdef _WIN32_WCE
+  handle = SQLITE_OPEN_LIBRARY(zWideFile);
+#else
   handle = SQLITE_OPEN_LIBRARY(zFile);
+#endif
   if( handle==0 ){
     if( pzErrMsg ){
       *pzErrMsg = sqlite3_mprintf("unable to open shared library [%s]", zFile);
