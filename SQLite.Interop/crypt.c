@@ -32,6 +32,10 @@ static void * sqlite3pager_get_codecarg(Pager *pPager)
   return (pPager->xCodec) ? pPager->pCodecArg: NULL;
 }
 
+void sqlite3_activate_see(const char *info)
+{
+}
+
 // Create a cryptographic context.  Use the enhanced provider because it is available on
 // most platforms
 static BOOL InitializeProvider()
