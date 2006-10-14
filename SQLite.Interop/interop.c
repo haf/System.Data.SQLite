@@ -3,17 +3,19 @@
 #include <tchar.h>
 
 #if NDEBUG
+
 #if _WIN32_WCE
 #include "merge.h"
-#else
-#include "merge_full.h"
-#endif // _WIN32_WCE
-#endif // NDEBUG
 
 // IMPORTANT: This placeholder is here for a reason!!!
 // On the Compact Framework the .data section of the DLL must have its RawDataSize larger than the VirtualSize!
 // If its not, strong name validation will fail and other bad things will happen.
 DWORD _ph[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+
+#else
+#include "merge_full.h"
+#endif // _WIN32_WCE
+#endif // NDEBUG
 
 #ifdef OS_WIN
 

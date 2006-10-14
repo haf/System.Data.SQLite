@@ -28,6 +28,15 @@ namespace System.Data.SQLite
       _scope.EnlistVolatile(this, System.Transactions.EnlistmentOptions.None);
     }
 
+    private void Cleanup(SQLiteConnection cnn)
+    {
+      if (_disposeConnection)
+        cnn.Dispose();
+
+      _transaction = null;
+      _scope = null;
+    }
+
     #region IEnlistmentNotification Members
 
     public void Commit(Enlistment enlistment)
@@ -45,11 +54,7 @@ namespace System.Data.SQLite
       }
       finally
       {
-        if (_disposeConnection)
-          cnn.Dispose();
-
-        _transaction = null;
-        _scope = null;
+        Cleanup(cnn);
       }
     }
 
@@ -84,11 +89,7 @@ namespace System.Data.SQLite
       }
       finally
       {
-        if (_disposeConnection)
-          cnn.Dispose();
-
-        _transaction = null;
-        _scope = null;
+        Cleanup(cnn);
       }
     }
 

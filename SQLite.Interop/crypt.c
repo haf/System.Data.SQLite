@@ -42,12 +42,9 @@ static BOOL InitializeProvider()
 {
   if (g_hProvider) return TRUE;
 
-  if (!CryptAcquireContext(&g_hProvider, NULL, MS_ENHANCED_PROV, PROV_RSA_FULL, 0))
+  if (!CryptAcquireContext(&g_hProvider, NULL, MS_ENHANCED_PROV, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
   {
-    if(!CryptAcquireContext(&g_hProvider, NULL, MS_ENHANCED_PROV, PROV_RSA_FULL, CRYPT_NEWKEYSET))
-    {
-      return FALSE;
-    }
+    return FALSE;
   }
   return TRUE;
 }
