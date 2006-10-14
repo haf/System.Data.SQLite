@@ -208,50 +208,53 @@ namespace System.Data.SQLite
       byte[] b = ToUTF8(strSql);
       string typedefs = null;
       SQLiteStatement cmd = null;
+      GCHandle handle = GCHandle.Alloc(b, GCHandleType.Pinned);
+      IntPtr psql = handle.AddrOfPinnedObject();
 
-      unsafe
+      try
       {
-        fixed (byte* psql = &b[0])
+        while (n == 17 && retries < 3)
         {
-          while (n == 17 && retries < 3)
+          n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, psql, b.Length - 1, out stmt, out ptr, out len);
+          retries++;
+
+          if (n == 1)
           {
-            n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, (IntPtr)psql, b.Length - 1, out stmt, out ptr, out len);
-            retries++;
-
-            if (n == 1)
+            if (String.Compare(SQLiteLastError(), "near \"TYPES\": syntax error", StringComparison.OrdinalIgnoreCase) == 0)
             {
-              if (String.Compare(SQLiteLastError(), "near \"TYPES\": syntax error", StringComparison.OrdinalIgnoreCase) == 0)
+              int pos = strSql.IndexOf(';');
+              if (pos == -1) pos = strSql.Length - 1;
+
+              typedefs = strSql.Substring(0, pos + 1);
+              strSql = strSql.Substring(pos + 1);
+
+              strRemain = "";
+
+              while (cmd == null && strSql.Length > 0)
               {
-                int pos = strSql.IndexOf(';');
-                if (pos == -1) pos = strSql.Length - 1;
-
-                typedefs = strSql.Substring(0, pos + 1);
-                strSql = strSql.Substring(pos + 1);
-
-                strRemain = "";
-
-                while (cmd == null && strSql.Length > 0)
-                {
-                  cmd = Prepare(strSql, previous, out strRemain);
-                  strSql = strRemain;
-                }
-
-                if (cmd != null)
-                  cmd.SetTypes(typedefs);
-
-                return cmd;
+                cmd = Prepare(strSql, previous, out strRemain);
+                strSql = strRemain;
               }
+
+              if (cmd != null)
+                cmd.SetTypes(typedefs);
+
+              return cmd;
             }
           }
-
-          if (n > 0) throw new SQLiteException(n, SQLiteLastError());
-
-          strRemain = UTF8ToString(ptr, len);
-
-          if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
-
-          return cmd;
         }
+
+        if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+
+        strRemain = UTF8ToString(ptr, len);
+
+        if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
+
+        return cmd;
+      }
+      finally
+      {
+        handle.Free();
       }
     }
 

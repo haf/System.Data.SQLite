@@ -459,6 +459,7 @@ namespace System.Data.SQLite
           _commandList[n].ClearCommands();
         }
 
+#if !PLATFORM_COMPACTFRAMEWORK
         if (_enlistment != null)
         {
           // If the connection is enlisted in a transaction scope and the scope is still active,
@@ -477,8 +478,10 @@ namespace System.Data.SQLite
         {
           _sql.Close();
         }
-
         _enlistment = null;
+#else
+        _sql.Close();
+#endif
         _sql = null;
       }
 

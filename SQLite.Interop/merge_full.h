@@ -1,17 +1,18 @@
 // This code was automatically generated from assembly
-// C:\Src\SQLite.NET\bin\System.Data.SQLite.dll
+// C:\src\SQLite.NET\System.Data.SQLite\bin\System.Data.SQLite.dll
 
 #include <windef.h>
 
 #pragma data_seg(".clr")
 #pragma comment(linker, "/SECTION:.clr,ER")
-  char __ph[135432] = {0}; // The number of bytes to reserve
+  char __ph[127232] = {0}; // The number of bytes to reserve
 #pragma data_seg()
 
 typedef BOOL (WINAPI *DLLMAIN)(HANDLE, DWORD, LPVOID);
 typedef struct EXTRA_STUFF
 {
   DWORD dwNativeEntryPoint;
+  DWORD dwReserved;
 } EXTRA_STUFF, *LPEXTRA_STUFF;
 
 __declspec(dllexport) BOOL WINAPI _CorDllMainStub(HANDLE hModule, DWORD dwReason, LPVOID pvReserved)
