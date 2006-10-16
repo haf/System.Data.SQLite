@@ -86,6 +86,9 @@ namespace test
       try { CreateTable(cnn); Console.WriteLine("SUCCESS - CreateTable"); }
       catch (Exception) { Console.WriteLine("FAIL - CreateTable"); }
 
+      try { FullTextTest(cnn); Console.WriteLine("SUCCESS - Full Text Search"); }
+      catch (Exception) { Console.WriteLine("FAIL - Full Text Search"); }
+
       try { TransactionTest(cnn); Console.WriteLine("SUCCESS - Transaction Enlistment"); }
       catch (Exception) { Console.WriteLine("FAIL - Transaction Enlistment"); }
 
@@ -146,6 +149,52 @@ namespace test
       Console.WriteLine("\r\nTests Finished.");
     }
 
+    internal static void FullTextTest(DbConnection cnn)
+    {
+      using (DbCommand cmd = cnn.CreateCommand())
+      {
+        cmd.CommandText = "CREATE VIRTUAL TABLE FullText USING FTS1(name, ingredients);";
+        cmd.ExecuteNonQuery();
+
+        string[] names = { "broccoli stew", "pumpkin stew", "broccoli pie", "pumpkin pie" };
+        string[] ingredients = { "broccoli peppers cheese tomatoes", "pumpkin onions garlic celery", "broccoli cheese onions flour", "pumpkin sugar flour butter" };
+        int n;
+
+        cmd.CommandText = "insert into FullText (name, ingredients) values (@name, @ingredient);";
+        DbParameter name = cmd.CreateParameter();
+        DbParameter ingredient = cmd.CreateParameter();
+
+        name.ParameterName = "@name";
+        ingredient.ParameterName = "@ingredient";
+
+        cmd.Parameters.Add(name);
+        cmd.Parameters.Add(ingredient);
+
+        for (n = 0; n < names.Length; n++)
+        {
+          name.Value = names[n];
+          ingredient.Value = ingredients[n];
+
+          cmd.ExecuteNonQuery();
+        }
+
+        cmd.CommandText = "select rowid, name, ingredients from FullText where name match 'pie';";
+
+        int[] rowids = { 3, 4 };
+        n = 0;
+
+        using (DbDataReader reader = cmd.ExecuteReader())
+        {
+          while (reader.Read())
+          {
+            if (reader.GetInt64(0) != rowids[n++])
+              throw new ArgumentException("Unexpected rowid returned");
+
+            if (n > rowids.Length) throw new ArgumentException("Too many rows returned");
+          }
+        }
+      }
+    }
     internal static void TransactionTest(DbConnection cnn)
     {
       using (TransactionScope scope = new TransactionScope())
