@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.36.0 September 12, 2006<br>
+    Version 1.0.36.0 October 16, 2006<br>
     Using SQLite 3.3.8<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -120,9 +120,12 @@
     <p></p>
     <p>
       <b>Version History</b></p>
-    <p><b>1.0.36.0 - October 14, 2006</b></p>
+    <p><b>1.0.36.0 - October 16, 2006</b></p>
     <ul>
-    <li>Fixed another bug retrieving data types when UseUtf16Encoding is true.  Side-effect of further merging the common code between the two base classes.</li><li>Fixed a bug with System.Transactions whereby a connection closed during a transaction scope cannot be rolled back nor committed.</li>
+    <li>Code merge with SQLite 3.3.8, including support for full-text search via the FTS1
+      extension.&nbsp;</li><li>Fixed a bug retrieving data types when UseUtf16Encoding is true.  Side-effect of further merging the common code between the two base classes.</li>
+      <li>Fixed a bug with System.Transactions whereby a connection closed/disposed within
+        a transaction scope is rolled back and cannot be committed.</li>
       <li>Implemented a workaround for a Compact Framework issue regarding strong-named
         assemblies containing a PE section with a raw size less than the virtual size.&nbsp;</li>
     </ul>
