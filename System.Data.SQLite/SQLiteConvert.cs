@@ -586,6 +586,7 @@ namespace System.Data.SQLite
       new SQLiteTypeNames("CURRENCY", DbType.Decimal),
       new SQLiteTypeNames("TIME", DbType.DateTime),
       new SQLiteTypeNames("DATE", DbType.DateTime),
+      new SQLiteTypeNames("SMALLDATE", DbType.DateTime),
       new SQLiteTypeNames("BLOB", DbType.Binary),
       new SQLiteTypeNames("BINARY", DbType.Binary),
       new SQLiteTypeNames("VARBINARY", DbType.Binary),
