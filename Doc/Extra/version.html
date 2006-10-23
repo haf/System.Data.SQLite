@@ -56,6 +56,17 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
+    <p><b>1.0.36.0 - October 23, 2006</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.8, including support for full-text search via the FTS1
+      extension.&nbsp;</li><li>Fixed a bug retrieving data types when UseUtf16Encoding is true.  Side-effect of further merging the common code between the two base classes.</li>
+      <li>Fixed a bug with System.Transactions whereby a connection closed/disposed within
+        a transaction scope is rolled back and cannot be committed.</li>
+      <li>Added more error checking and reporting to transactions to help user's isolate
+        the source of transaction failures.</li>
+      <li>Implemented a workaround for a Compact Framework issue regarding strong-named
+        assemblies containing a PE section with a raw size less than the virtual size.&nbsp;</li>
+    </ul>
     <p><b>1.0.35.1 - September 12, 2006</b></p>
     <ul>
     <li>Fixed the TYPES keyword to work when UseUTF16Encoding is true.</li>

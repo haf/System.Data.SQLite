@@ -562,6 +562,7 @@ namespace System.Data.SQLite
       new SQLiteTypeNames("IDENTITY", DbType.Int64),
       new SQLiteTypeNames("LONGTEXT", DbType.String),
       new SQLiteTypeNames("LONGCHAR", DbType.String),
+      new SQLiteTypeNames("LONGVARCHAR", DbType.String),
       new SQLiteTypeNames("LONG", DbType.Int64),
       new SQLiteTypeNames("TINYINT", DbType.Byte),
       new SQLiteTypeNames("INTEGER", DbType.Int64),

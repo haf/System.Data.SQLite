@@ -20,6 +20,7 @@ namespace System.Data.SQLite
     /// The connection to which this transaction is bound
     /// </summary>
     internal SQLiteConnection _cnn;
+    internal long _version; // Matches the version of the connection
 
     /// <summary>
     /// Constructs the transaction object, binding it to the supplied connection
@@ -29,6 +30,8 @@ namespace System.Data.SQLite
     internal SQLiteTransaction(SQLiteConnection connection, bool deferredLock)
     {
       _cnn = connection;
+      _version = _cnn._version;
+
       if (_cnn._transactionLevel++ == 0)
       {
         try
@@ -57,7 +60,7 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Commit()
     {
-      IsValid();
+      IsValid(true);
 
       if (--_cnn._transactionLevel == 0)
       {
@@ -101,8 +104,10 @@ namespace System.Data.SQLite
     /// </summary>
     protected override void Dispose(bool disposing)
     {
-      if (_cnn != null) 
+      if (IsValid(false))
         Rollback();
+
+      _cnn = null;
 
       base.Dispose(disposing);
     }
@@ -120,7 +125,7 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Rollback()
     {
-      IsValid();
+      IsValid(true);
 
       try
       {
@@ -137,16 +142,31 @@ namespace System.Data.SQLite
       }
     }
 
-    internal void IsValid()
+    internal bool IsValid(bool throwError)
     {
       if (_cnn == null)
-        throw new ArgumentNullException("No connection associated with this transaction");
+      {
+        if (throwError == true) throw new ArgumentNullException("No connection associated with this transaction");
+        else return false;
+      }
 
       if (_cnn._transactionLevel == 0)
       {
-        _cnn = null;
-        throw new SQLiteException((int)SQLiteErrorCode.Misuse, "No transactions active on this connection");
+        if (throwError == true) throw new SQLiteException((int)SQLiteErrorCode.Misuse, "No transaction is active on this connection");
+        else return false;
       }
+      if (_cnn._version != _version)
+      {
+        if (throwError == true) throw new SQLiteException((int)SQLiteErrorCode.Misuse, "The connection was closed and re-opened, changes were rolled back");
+        else return false;
+      }
+      if (_cnn.State != ConnectionState.Open)
+      {
+        if (throwError == true) throw new SQLiteException((int)SQLiteErrorCode.Misuse, "Connection was closed");
+        else return false;
+      }
+
+      return true;
     }
   }
 }

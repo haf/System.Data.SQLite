@@ -46,7 +46,7 @@ namespace System.Data.SQLite
 
       try
       {
-        _transaction.IsValid();
+        _transaction.IsValid(true);
         _transaction.Connection._transactionLevel = 1;
         _transaction.Commit();
 
@@ -65,16 +65,10 @@ namespace System.Data.SQLite
 
     public void Prepare(PreparingEnlistment preparingEnlistment)
     {
-      try
-      {
-        _transaction.IsValid();
-      }
-      catch(Exception e)
-      {
-        preparingEnlistment.ForceRollback(e);
-        return;
-      }
-      preparingEnlistment.Prepared();
+      if (_transaction.IsValid(false) == false)
+        preparingEnlistment.ForceRollback();
+      else
+        preparingEnlistment.Prepared();
     }
 
     public void Rollback(Enlistment enlistment)

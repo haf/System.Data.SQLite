@@ -640,5 +640,44 @@ namespace System.Data.SQLite
     {
       UnsafeNativeMethods.sqlite3_rollback_hook_interop(_sql, func);
     }
+
+    /// <summary>
+    /// Helper function to retrieve a column of data from an active statement.
+    /// </summary>
+    /// <param name="stmt">The statement being step()'d through</param>
+    /// <param name="index">The column index to retrieve</param>
+    /// <param name="typ">The type of data contained in the column.  If Uninitialized, this function will retrieve the datatype information.</param>
+    /// <returns>Returns the data in the column</returns>
+    internal override object GetValue(SQLiteStatement stmt, int index, ref SQLiteType typ)
+    {
+      if (typ.Affinity == 0) typ = SQLiteConvert.ColumnToType(stmt, index);
+      if (IsNull(stmt, index)) return DBNull.Value;
+
+      Type t = SQLiteConvert.SQLiteTypeToType(typ);
+
+      switch (TypeToAffinity(t))
+      {
+        case TypeAffinity.Blob:
+          if (typ.Type == DbType.Guid && typ.Affinity == TypeAffinity.Text)
+            return new Guid(GetText(stmt, index));
+
+          int n = (int)GetBytes(stmt, index, 0, null, 0, 0);
+          byte[] b = new byte[n];
+          GetBytes(stmt, index, 0, b, 0, n);
+
+          if (typ.Type == DbType.Guid && n == 16)
+            return new Guid(b);
+
+          return b;
+        case TypeAffinity.DateTime:
+          return GetDateTime(stmt, index);
+        case TypeAffinity.Double:
+          return Convert.ChangeType(GetDouble(stmt, index), t, null);
+        case TypeAffinity.Int64:
+          return Convert.ChangeType(GetInt64(stmt, index), t, null);
+        default:
+          return GetText(stmt, index);
+      }
+    }
   }
 }

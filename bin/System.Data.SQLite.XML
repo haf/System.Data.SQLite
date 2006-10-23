@@ -1563,15 +1563,6 @@
             <param name="stmt">The statement to reset</param>
             <returns>Returns -1 if the schema changed while resetting, 0 if the reset was sucessful or 6 (SQLITE_LOCKED) if the reset failed due to a lock</returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteBase.GetValue(System.Data.SQLite.SQLiteStatement,System.Int32,System.Data.SQLite.SQLiteType@)">
-            <summary>
-            Helper function to retrieve a column of data from an active statement.
-            </summary>
-            <param name="stmt">The statement being step()'d through</param>
-            <param name="index">The column index to retrieve</param>
-            <param name="typ">The type of data contained in the column.  If Uninitialized, this function will retrieve the datatype information.</param>
-            <returns>Returns the data in the column</returns>
-        </member>
         <member name="P:System.Data.SQLite.SQLiteBase.Version">
             <summary>
             Returns a string representing the active version of SQLite
@@ -1680,6 +1671,15 @@
             <summary>
             The user-defined functions registered on this connection
             </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLite3.GetValue(System.Data.SQLite.SQLiteStatement,System.Int32,System.Data.SQLite.SQLiteType@)">
+            <summary>
+            Helper function to retrieve a column of data from an active statement.
+            </summary>
+            <param name="stmt">The statement being step()'d through</param>
+            <param name="index">The column index to retrieve</param>
+            <param name="typ">The type of data contained in the column.  If Uninitialized, this function will retrieve the datatype information.</param>
+            <returns>Returns the data in the column</returns>
         </member>
         <member name="T:System.Data.SQLite.SQLiteParameterCollection">
             <summary>

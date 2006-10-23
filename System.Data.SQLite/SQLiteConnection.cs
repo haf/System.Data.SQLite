@@ -127,6 +127,8 @@ namespace System.Data.SQLite
 
     internal bool _binaryGuid;
 
+    internal long                _version;
+
     private event SQLiteUpdateEventHandler _updateHandler;
     private event SQLiteCommitHandler      _commitHandler;
     private event EventHandler             _rollbackHandler;
@@ -260,6 +262,7 @@ namespace System.Data.SQLite
       _connectionState = ConnectionState.Closed;
       _connectionString = "";
       _transactionLevel = 0;
+      _version = 0;
       _commandList = new List<SQLiteCommand>();
 
       if (connectionString != null)
@@ -458,6 +461,7 @@ namespace System.Data.SQLite
         {
           _commandList[n].ClearCommands();
         }
+        _commandList.Clear();
 
 #if !PLATFORM_COMPACTFRAMEWORK
         if (_enlistment != null)
@@ -470,6 +474,7 @@ namespace System.Data.SQLite
           cnn._transactionLevel = _transactionLevel;
           cnn._enlistment = _enlistment;
           cnn._connectionState = _connectionState;
+          cnn._version = _version;
           
           cnn._enlistment._transaction._cnn = cnn;
           cnn._enlistment._disposeConnection = true;
@@ -483,6 +488,7 @@ namespace System.Data.SQLite
         _sql.Close();
 #endif
         _sql = null;
+        _transactionLevel = 0;
       }
 
       OnStateChange(ConnectionState.Closed);
@@ -762,6 +768,7 @@ namespace System.Data.SQLite
         _dataSource = System.IO.Path.GetFileNameWithoutExtension(fileName);
 
         OnStateChange(ConnectionState.Open);
+        _version++;
 
         using (SQLiteCommand cmd = CreateCommand())
         {
@@ -1389,12 +1396,14 @@ namespace System.Data.SQLite
       tbl.Columns.Add("TABLE_SCHEMA", typeof(string));
       tbl.Columns.Add("TABLE_NAME", typeof(string));
       tbl.Columns.Add("TABLE_TYPE", typeof(string));
+      tbl.Columns.Add("TABLE_ID", typeof(long));
+      tbl.Columns.Add("TABLE_ROOTPAGE", typeof(int));
 
       tbl.BeginLoadData();
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'table'", strCatalog), this))
+      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT [type], [name], [tbl_name], [rootpage], [sql], [rowid] FROM [{0}].[sqlite_master] WHERE [type] LIKE 'table'", strCatalog), this))
       using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
       {
         while (rd.Read())
@@ -1414,6 +1423,8 @@ namespace System.Data.SQLite
               row["TABLE_CATALOG"] = strCatalog;
               row["TABLE_NAME"] = rd.GetString(2);
               row["TABLE_TYPE"] = strItem;
+              row["TABLE_ID"] = rd.GetInt64(5);
+              row["TABLE_ROOTPAGE"] = rd.GetInt32(3);
 
               tbl.Rows.Add(row);
             }
@@ -1500,6 +1511,7 @@ namespace System.Data.SQLite
       tbl.Locale = CultureInfo.InvariantCulture;
       tbl.Columns.Add("CATALOG_NAME", typeof(string));
       tbl.Columns.Add("DESCRIPTION", typeof(string));
+      tbl.Columns.Add("ID", typeof(long));
 
       tbl.BeginLoadData();
 
@@ -1515,6 +1527,7 @@ namespace System.Data.SQLite
 
             row["CATALOG_NAME"] = rd.GetString(1);
             row["DESCRIPTION"] = rd.GetString(2);
+            row["ID"] = rd.GetInt64(0);
 
             tbl.Rows.Add(row);
           }
