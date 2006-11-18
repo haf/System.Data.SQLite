@@ -268,5 +268,11 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_rollback_hook_interop(IntPtr db, SQLiteRollbackCallback func);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_cursor_rowid(IntPtr stmt, int cursor, out long rowid);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_table_cursor(IntPtr stmt, int db, int tableRootPage);
   }
 }

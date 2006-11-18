@@ -71,7 +71,8 @@
       <p>A SQLiteCommand object <b>can</b> be re-assigned a new SQLiteConnection object 
         as long as no DataReaders are active on the command.</p>
       <p>Opening a transaction is considered a write operation, so only use them when 
-        you want to write to the database! If you hold open a transaction, all readers 
+        you want to write to the database! If you hold open a transaction, all readers on other
+        connections
         will be blocked until the transaction is closed!</p>
       <p></p>
       <h4 class="subHeading">Thread Safety</h4>

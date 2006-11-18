@@ -1,5 +1,5 @@
-#include "src/sqliteint.h"
-#include "src\os.h"
+#include "src/btree.c"
+#include "src/vdbeint.h"
 #include <tchar.h>
 
 #if NDEBUG
@@ -661,6 +661,55 @@ __declspec(dllexport) void * WINAPI sqlite3_commit_hook_interop(sqlite3 *pDb, SQ
 __declspec(dllexport) void * WINAPI sqlite3_rollback_hook_interop(sqlite3 *pDb, SQLITEROLLBACKHOOK func)
 {
   return sqlite3_rollback_hook(pDb, sqlite3_rollback_callback, func);
+}
+
+__declspec(dllexport) int WINAPI sqlite3_table_cursor(sqlite3_stmt *pstmt, int iDb, Pgno tableRootPage)
+{
+  Vdbe *p = (Vdbe *)pstmt;
+  int n;
+
+  for (n = 0; n < p->nCursor && p->apCsr[n] != NULL; n++)
+  {
+    if (p->apCsr[n]->isTable == FALSE) continue;
+    if (p->apCsr[n]->iDb != iDb) continue;
+    if (p->apCsr[n]->pCursor->pgnoRoot == tableRootPage)
+      return n;
+  }
+  return -1;
+}
+
+__declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int cursor, sqlite_int64 *prowid)
+{
+  Vdbe *p = (Vdbe *)pstmt;
+  int rc = 0;
+  Cursor *pC;
+
+  if (cursor < 0 || cursor >= p->nCursor) return SQLITE_ERROR;
+  if (p->apCsr[cursor] == NULL) return SQLITE_ERROR;
+  pC = p->apCsr[cursor];
+
+  rc = sqlite3VdbeCursorMoveto(pC);
+  if( rc ) return rc;
+
+  if( pC->rowidIsValid )
+  {
+    *prowid = pC->lastRowid;
+  }
+  else if(pC->pseudoTable )
+  {
+    *prowid = keyToInt(pC->iKey);
+  }
+  else if(pC->nullRow || pC->pCursor==0)
+  {
+    return SQLITE_ERROR;
+  }
+  else
+  {
+    if (pC->pCursor == NULL) return SQLITE_ERROR;
+    sqlite3BtreeKeySize(pC->pCursor, prowid);
+    *prowid = keyToInt(*prowid);
+  }
+  return 0;
 }
 
 #endif // OS_WIN

@@ -63,6 +63,11 @@ namespace System.Data.SQLite
     internal bool           _disposeCommand;
 
     /// <summary>
+    /// An array of rowid's for the active statement if CommandBehavior.KeyInfo is specified
+    /// </summary>
+    private SQLiteKeyReader _keyInfo;
+
+    /// <summary>
     /// Internal constructor, initializes the datareader and sets up to begin executing statements
     /// </summary>
     /// <param name="cmd">The SQLiteCommand this data reader is for</param>
@@ -97,12 +102,18 @@ namespace System.Data.SQLite
       }
 
       // If the datareader's behavior includes closing the connection, then do so here.
-      if ((_commandBehavior & CommandBehavior.CloseConnection) != 0)
+      if ((_commandBehavior & CommandBehavior.CloseConnection) != 0 && _command.Connection != null)
         _command.Connection.Close();
 
       _command = null;
       _activeStatement = null;
       _fieldTypeArray = null;
+
+      if (_keyInfo != null)
+      {
+        _keyInfo.Dispose();
+        _keyInfo = null;
+      }
     }
 
     /// <summary>
@@ -161,6 +172,21 @@ namespace System.Data.SQLite
       get
       {
         CheckClosed();
+        if (_keyInfo == null)
+          return _fieldCount;
+
+        return _fieldCount + _keyInfo.Count;
+      }
+    }
+
+    /// <summary>
+    /// Returns the number of visible fielsd in the current resultset
+    /// </summary>
+    public override int VisibleFieldCount
+    {
+      get
+      {
+        CheckClosed();
         return _fieldCount;
       }
     }
@@ -182,7 +208,9 @@ namespace System.Data.SQLite
     {
       CheckClosed();
       CheckValidRow();
-      TypeAffinity affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
+      TypeAffinity affinity;
+
+      affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
 
       switch (affinity)
       {
@@ -193,6 +221,9 @@ namespace System.Data.SQLite
           if (typ == DbType.Boolean) return affinity;
           if (typ == DbType.Byte) return affinity;
           if (typ == DbType.DateTime && _command.Connection._sql._datetimeFormat == SQLiteDateFormats.Ticks) return affinity;
+          if (typ == DbType.Single) return affinity;
+          if (typ == DbType.Double) return affinity;
+          if (typ == DbType.Decimal) return affinity;
           break;
         case TypeAffinity.Double:
           if (typ == DbType.Single) return affinity;
@@ -223,6 +254,9 @@ namespace System.Data.SQLite
     /// <returns>bool</returns>
     public override bool GetBoolean(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetBoolean(i - VisibleFieldCount);
+
       VerifyType(i, DbType.Boolean);
       return Convert.ToBoolean(GetValue(i), CultureInfo.CurrentCulture);
     }
@@ -234,6 +268,9 @@ namespace System.Data.SQLite
     /// <returns>byte</returns>
     public override byte GetByte(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetByte(i - VisibleFieldCount);
+
       VerifyType(i, DbType.Byte);
       return Convert.ToByte(_activeStatement._sql.GetInt32(_activeStatement, i));
     }
@@ -252,6 +289,9 @@ namespace System.Data.SQLite
     /// </remarks>
     public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetBytes(i - VisibleFieldCount, fieldOffset, buffer, bufferoffset, length);
+
       VerifyType(i, DbType.Binary);
       return _activeStatement._sql.GetBytes(_activeStatement, i, (int)fieldOffset, buffer, bufferoffset, length);
     }
@@ -263,6 +303,9 @@ namespace System.Data.SQLite
     /// <returns>char</returns>
     public override char GetChar(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetChar(i - VisibleFieldCount);
+
       VerifyType(i, DbType.SByte);
       return Convert.ToChar(_activeStatement._sql.GetInt32(_activeStatement, i));
     }
@@ -281,6 +324,9 @@ namespace System.Data.SQLite
     /// </remarks>
     public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetChars(i - VisibleFieldCount, fieldoffset, buffer, bufferoffset, length);
+
       VerifyType(i, DbType.String);
       return _activeStatement._sql.GetChars(_activeStatement, i, (int)fieldoffset, buffer, bufferoffset, length);
     }
@@ -293,10 +339,12 @@ namespace System.Data.SQLite
     public override string GetDataTypeName(int i)
     {
       CheckClosed();
+
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetDataTypeName(i - VisibleFieldCount);
+
       SQLiteType typ = GetSQLiteType(i);
-
       if (typ.Type == DbType.Object) return SQLiteConvert.SQLiteTypeToType(typ).Name;
-
       return _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity);
     }
 
@@ -307,6 +355,9 @@ namespace System.Data.SQLite
     /// <returns>DateTime</returns>
     public override DateTime GetDateTime(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetDateTime(i - VisibleFieldCount);
+
       VerifyType(i, DbType.DateTime);
       return _activeStatement._sql.GetDateTime(_activeStatement, i);
     }
@@ -318,6 +369,9 @@ namespace System.Data.SQLite
     /// <returns>decimal</returns>
     public override decimal GetDecimal(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetDecimal(i - VisibleFieldCount);
+
       VerifyType(i, DbType.Decimal);
       return Convert.ToDecimal(_activeStatement._sql.GetDouble(_activeStatement, i));
     }
@@ -329,6 +383,9 @@ namespace System.Data.SQLite
     /// <returns>double</returns>
     public override double GetDouble(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetDouble(i - VisibleFieldCount);
+
       VerifyType(i, DbType.Double);
       return _activeStatement._sql.GetDouble(_activeStatement, i);
     }
@@ -341,6 +398,10 @@ namespace System.Data.SQLite
     public override Type GetFieldType(int i)
     {
       CheckClosed();
+
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetFieldType(i - VisibleFieldCount);
+
       return SQLiteConvert.SQLiteTypeToType(GetSQLiteType(i));
     }
 
@@ -351,6 +412,9 @@ namespace System.Data.SQLite
     /// <returns>float</returns>
     public override float GetFloat(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetFloat(i - VisibleFieldCount);
+
       VerifyType(i, DbType.Single);
       return Convert.ToSingle(_activeStatement._sql.GetDouble(_activeStatement, i));
     }
@@ -362,6 +426,9 @@ namespace System.Data.SQLite
     /// <returns>Guid</returns>
     public override Guid GetGuid(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetGuid(i - VisibleFieldCount);
+
       TypeAffinity affinity = VerifyType(i, DbType.Guid);
       if (affinity == TypeAffinity.Blob)
       {
@@ -380,6 +447,9 @@ namespace System.Data.SQLite
     /// <returns>Int16</returns>
     public override Int16 GetInt16(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetInt16(i - VisibleFieldCount);
+
       VerifyType(i, DbType.Int16);
       return Convert.ToInt16(_activeStatement._sql.GetInt32(_activeStatement, i));
     }
@@ -391,6 +461,9 @@ namespace System.Data.SQLite
     /// <returns>Int32</returns>
     public override Int32 GetInt32(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetInt32(i - VisibleFieldCount);
+
       VerifyType(i, DbType.Int32);
       return _activeStatement._sql.GetInt32(_activeStatement, i);
     }
@@ -402,6 +475,9 @@ namespace System.Data.SQLite
     /// <returns>Int64</returns>
     public override Int64 GetInt64(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetInt64(i - VisibleFieldCount);
+
       VerifyType(i, DbType.Int64);
       return _activeStatement._sql.GetInt64(_activeStatement, i);
     }
@@ -414,6 +490,9 @@ namespace System.Data.SQLite
     public override string GetName(int i)
     {
       CheckClosed();
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetName(i - VisibleFieldCount);
+
       return _activeStatement._sql.ColumnName(_activeStatement, i);
     }
 
@@ -425,7 +504,14 @@ namespace System.Data.SQLite
     public override int GetOrdinal(string name)
     {
       CheckClosed();
-      return _activeStatement._sql.ColumnIndex(_activeStatement, name);
+      int r = _activeStatement._sql.ColumnIndex(_activeStatement, name);
+      if (r == -1 && _keyInfo != null)
+      {
+        r = _keyInfo.GetOrdinal(name);
+        if (r > -1) r += VisibleFieldCount;
+      }
+
+      return r;
     }
 
     /// <summary>
@@ -435,7 +521,7 @@ namespace System.Data.SQLite
     /// <returns>Returns a DataTable containing the schema information for the active SELECT statement being processed.</returns>
     public override DataTable GetSchemaTable()
     {
-      return GetSchemaTable(true, true);
+      return GetSchemaTable(true, false);
     }
 
     internal DataTable GetSchemaTable(bool wantUniqueInfo, bool wantDefaultValue)
@@ -630,6 +716,9 @@ namespace System.Data.SQLite
         tbl.Rows.Add(row);
       }
 
+      if (_keyInfo != null)
+        _keyInfo.AppendSchemaTable(tbl);
+
       tbl.AcceptChanges();
       tbl.EndLoadData();
 
@@ -643,6 +732,9 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetString(int i)
     {
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetString(i - VisibleFieldCount);
+
       VerifyType(i, DbType.String);
       return _activeStatement._sql.GetText(_activeStatement, i);
     }
@@ -656,6 +748,9 @@ namespace System.Data.SQLite
     {
       CheckClosed();
 
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.GetValue(i - VisibleFieldCount);
+
       SQLiteType typ = GetSQLiteType(i);
       typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
       return _activeStatement._sql.GetValue(_activeStatement, i, ref typ);
@@ -668,18 +763,12 @@ namespace System.Data.SQLite
     /// <returns>The number of columns retrieved</returns>
     public override int GetValues(object[] values)
     {
-      CheckClosed();
-
-      SQLiteType typ;
-      int nMax = _fieldCount;
+      int nMax = FieldCount;
       if (values.Length < nMax) nMax = values.Length;
-
 
       for (int n = 0; n < nMax; n++)
       {
-        typ = GetSQLiteType(n);
-        typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, n);
-        values[n] = _activeStatement._sql.GetValue(_activeStatement, n, ref typ);
+        values[n] = GetValue(n);
       }
 
       return nMax;
@@ -713,6 +802,10 @@ namespace System.Data.SQLite
     public override bool IsDBNull(int i)
     {
       CheckClosed();
+
+      if (i >= VisibleFieldCount && _keyInfo != null)
+        return _keyInfo.IsDBNull(i - VisibleFieldCount);
+
       return _activeStatement._sql.IsNull(_activeStatement, i);
     }
 
@@ -796,6 +889,9 @@ namespace System.Data.SQLite
         _fieldCount = fieldCount;
         _fieldTypeArray = null;
 
+        if ((_commandBehavior & CommandBehavior.KeyInfo) != 0)
+          LoadKeyInfo();
+
         return true;
       }
     }
@@ -807,7 +903,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteType structure</returns>
     private SQLiteType GetSQLiteType(int i)
     {
-      if (_fieldTypeArray == null) _fieldTypeArray = new SQLiteType[_fieldCount];
+      if (_fieldTypeArray == null) _fieldTypeArray = new SQLiteType[VisibleFieldCount];
 
       if (_fieldTypeArray[i].Affinity == TypeAffinity.Uninitialized || _fieldTypeArray[i].Affinity == TypeAffinity.Null)
         _fieldTypeArray[i].Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out _fieldTypeArray[i].Affinity));
@@ -830,7 +926,12 @@ namespace System.Data.SQLite
       else if (_readingState == 0) // Actively reading rows
       {
         if (_activeStatement._sql.Step(_activeStatement) == true)
+        {
+          if (_keyInfo != null)
+            _keyInfo.Reset();
+
           return true;
+        }
 
         _readingState = 1; // Finished reading rows
       }
@@ -864,6 +965,14 @@ namespace System.Data.SQLite
     public override object this[int i]
     {
       get { return GetValue(i); }
+    }
+
+    private void LoadKeyInfo()
+    {
+      if (_keyInfo != null)
+        _keyInfo.Dispose();
+
+      _keyInfo = new SQLiteKeyReader(_command.Connection, this, _activeStatement);
     }
   }
 }

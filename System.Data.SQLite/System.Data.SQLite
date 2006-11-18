@@ -76,6 +76,7 @@
     <Compile Include="SQLiteFactory.cs" />
     <Compile Include="SQLiteFunction.cs" />
     <Compile Include="SQLiteFunctionAttribute.cs" />
+    <Compile Include="SQLiteKeyReader.cs" />
     <Compile Include="SQLiteMetaDataCollectionNames.cs" />
     <Compile Include="SQLiteParameter.cs" />
     <Compile Include="SQLiteParameterCollection.cs" />

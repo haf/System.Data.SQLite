@@ -84,25 +84,10 @@ namespace System.Data.SQLite
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
 
-    //internal override void Execute(string strSql)
-    //{
-    //  IntPtr p;
-    //  string str = strSql;
-    //  int len;
-
-    //  int n = UnsafeNativeMethods.sqlite3_exec_interop(_sql, ToUTF8(strSql), IntPtr.Zero, IntPtr.Zero, out p, out len);
-    //  if (p != IntPtr.Zero)
-    //  {
-    //    str = base.ToString(p, len);
-    //    UnsafeNativeMethods.sqlite3_free_interop(p);
-    //  }
-    //  if (n > 0) throw new SQLiteException(n, str);
-    //}
-
     internal override bool Step(SQLiteStatement stmt)
     {
       int n;
-      long dwtick = 0;
+      long timeout = 0;
       Random rnd = null;
 
       while (true)
@@ -127,13 +112,13 @@ namespace System.Data.SQLite
           else if (r == 6 && stmt._command != null) // SQLITE_LOCKED
           {
             // Keep trying
-            if (dwtick == 0) // First time we've encountered the lock
+            if (timeout == 0) // First time we've encountered the lock
             {
-              dwtick = DateTime.Now.Ticks + (stmt._command._commandTimeout * 10000000);
+              timeout = Environment.TickCount + (stmt._command._commandTimeout * 1000);
               rnd = new Random();
             }
             // If we've exceeded the command's timeout, give up and throw an error
-            if (DateTime.Now.Ticks - dwtick > 0)
+            if (Environment.TickCount - timeout > 0)
             {
               throw new SQLiteException(r, SQLiteLastError());
             }
@@ -606,7 +591,8 @@ namespace System.Data.SQLite
 
     internal override void ReturnText(IntPtr context, string value)
     {
-      UnsafeNativeMethods.sqlite3_result_text_interop(context, ToUTF8(value), value.Length, (IntPtr)(-1));
+      byte[] b = ToUTF8(value);
+      UnsafeNativeMethods.sqlite3_result_text_interop(context, ToUTF8(value), b.Length - 1, (IntPtr)(-1));
     }
 
     internal override IntPtr AggregateContext(IntPtr context)
@@ -678,6 +664,20 @@ namespace System.Data.SQLite
         default:
           return GetText(stmt, index);
       }
+    }
+
+    internal override int GetCursorForTable(SQLiteStatement stmt, int db, int rootPage)
+    {
+      return UnsafeNativeMethods.sqlite3_table_cursor(stmt._sqlite_stmt, db, rootPage);
+    }
+
+    internal override long GetRowIdForCursor(SQLiteStatement stmt, int cursor)
+    {
+      long rowid;
+      int rc = UnsafeNativeMethods.sqlite3_cursor_rowid(stmt._sqlite_stmt, cursor, out rowid);
+      if (rc == 0) return rowid;
+
+      return 0;
     }
   }
 }

@@ -378,6 +378,55 @@
             Gets the isolation level of the transaction.  SQLite only supports Serializable transactions.
             </summary>
         </member>
+        <member name="T:System.Data.SQLite.SQLiteKeyReader">
+            <summary>
+            This class provides key info for a given SQLite statement.
+            <remarks>
+            Providing key information for a given statement is non-trivial :(
+            </remarks>
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteKeyReader.#ctor(System.Data.SQLite.SQLiteConnection,System.Data.SQLite.SQLiteDataReader,System.Data.SQLite.SQLiteStatement)">
+            <summary>
+            This function does all the nasty work at determining what keys need to be returned for
+            a given statement.
+            </summary>
+            <param name="cnn"></param>
+            <param name="reader"></param>
+            <param name="stmt"></param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteKeyReader.Sync">
+            <summary>
+            Make sure all the subqueries are open and ready and sync'd with the current rowid
+            of the table they're supporting
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteKeyReader.Reset">
+            <summary>
+            Release any readers on any subqueries
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteKeyReader.AppendSchemaTable(System.Data.DataTable)">
+            <summary>
+            Append all the columns we've added to the original query to the schema
+            </summary>
+            <param name="tbl"></param>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteKeyReader.Count">
+            <summary>
+            How many additional columns of keyinfo we're holding
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteKeyReader.KeyInfo">
+            <summary>
+            Used to support CommandBehavior.KeyInfo
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteKeyReader.KeyQuery">
+            <summary>
+            A single sub-query for a given table/database.
+            </summary>
+        </member>
         <member name="T:System.Data.SQLite.FunctionType">
             <summary>
             The type of user-defined function to declare
@@ -697,6 +746,11 @@
             If set, then dispose of the command object when the reader is finished
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteDataReader._keyInfo">
+            <summary>
+            An array of rowid's for the active statement if CommandBehavior.KeyInfo is specified
+            </summary>
+        </member>
         <member name="M:System.Data.SQLite.SQLiteDataReader.#ctor(System.Data.SQLite.SQLiteCommand,System.Data.CommandBehavior)">
             <summary>
             Internal constructor, initializes the datareader and sets up to begin executing statements
@@ -940,6 +994,11 @@
         <member name="P:System.Data.SQLite.SQLiteDataReader.FieldCount">
             <summary>
             Returns the number of columns in the current resultset
+            </summary>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteDataReader.VisibleFieldCount">
+            <summary>
+            Returns the number of visible fielsd in the current resultset
             </summary>
         </member>
         <member name="P:System.Data.SQLite.SQLiteDataReader.HasRows">

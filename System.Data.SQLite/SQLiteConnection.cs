@@ -106,7 +106,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Whether or not the connection is enlisted in a distrubuted transaction
     /// </summary>
-    internal SQLiteEnlistment _enlistment;
+    internal SQLiteEnlistment    _enlistment;
 #endif
     /// <summary>
     /// The base SQLite object to interop with
@@ -125,7 +125,7 @@ namespace System.Data.SQLite
     /// </summary>
     private byte[]               _password;
 
-    internal bool _binaryGuid;
+    internal bool                _binaryGuid;
 
     internal long                _version;
 
@@ -461,7 +461,6 @@ namespace System.Data.SQLite
         {
           _commandList[n].ClearCommands();
         }
-        _commandList.Clear();
 
 #if !PLATFORM_COMPACTFRAMEWORK
         if (_enlistment != null)

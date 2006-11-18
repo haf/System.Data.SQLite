@@ -148,6 +148,9 @@ namespace System.Data.SQLite
     internal abstract void SetCommitHook(SQLiteCommitCallback func);
     internal abstract void SetRollbackHook(SQLiteRollbackCallback func);
 
+    internal abstract int GetCursorForTable(SQLiteStatement stmt, int database, int rootPage);
+    internal abstract long GetRowIdForCursor(SQLiteStatement stmt, int cursor);
+
     internal abstract object GetValue(SQLiteStatement stmt, int index, ref SQLiteType typ);
 
     protected virtual void Dispose(bool bDisposing)

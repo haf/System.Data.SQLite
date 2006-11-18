@@ -56,6 +56,23 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
+    <p><b>1.0.37.0 - November 19, 2006</b></p>
+    <ul>
+    <li>Added support for CommandBehavior.KeyInfo.&nbsp; 
+      When specified in a query, additional column(s) will be returned describing the
+      key(s) defined for the table(s) selected in the query.&nbsp; This is optimized when
+      INTEGER PRIMARY KEY is set for the given tables, but does additional work for other
+      kinds of primary keys.</li>
+      <li>Removed the default values from SQLiteDataReader.GetTableSchema(), to better follow
+        Sql Server's pattern and suppress schema errors when loading the records into a
+        dataset/datatable.</li>
+      <li>Allow integers to implicitly convert to double/decimal/single.</li></ul>
+    <p><b>1.0.36.1 - October 25, 2006</b></p>
+    <ul>
+    <li>Added support for LONGVARCHAR, SMALLDATE and SMALLDATETIME.  These were actually added in 1.0.36.0 but were undocumented.</li>
+    <li>Fixed the embedded helpfile which was accidentally built from old sources. </li>
+    <li>Fixed an unfortunate re-entry of a bug in the .36 codebase that caused the provider to "forget" about commands on a connection under certain circumstances.</li>
+    </ul>
     <p><b>1.0.36.0 - October 23, 2006</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.8, including support for full-text search via the FTS1
