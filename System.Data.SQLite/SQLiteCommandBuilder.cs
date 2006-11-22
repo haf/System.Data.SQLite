@@ -289,5 +289,53 @@ namespace System.Data.SQLite
         base.SchemaSeparator = value;
       }
     }
+
+    /// <summary>
+    /// Override helper, which can help the base command builder choose the right keys for the given query
+    /// </summary>
+    /// <param name="sourceCommand"></param>
+    /// <returns></returns>
+    protected override DataTable GetSchemaTable(DbCommand sourceCommand)
+    {
+      using (IDataReader reader = sourceCommand.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+      {
+        DataTable schema = reader.GetSchemaTable();
+
+        // If the query contains a primary key, turn off the IsUnique property
+        // for all the non-key columns
+        if (HasSchemaPrimaryKey(schema))
+          ResetIsUniqueSchemaColumn(schema);
+
+        // if table has no primary key we use unique columns as a fall back
+        return schema;
+      }
+    }
+
+    private bool HasSchemaPrimaryKey(DataTable schema)
+    {
+      DataColumn IsKeyColumn = schema.Columns[SchemaTableColumn.IsKey];
+      
+      foreach (DataRow schemaRow in schema.Rows)
+      {
+        if ((bool)schemaRow[IsKeyColumn] == true)
+          return true;
+      }
+
+      return false;
+    }
+
+    private void ResetIsUniqueSchemaColumn(DataTable schema)
+    {
+      DataColumn IsUniqueColumn = schema.Columns[SchemaTableColumn.IsUnique];
+      DataColumn IsKeyColumn = schema.Columns[SchemaTableColumn.IsKey];
+
+      foreach (DataRow schemaRow in schema.Rows)
+      {
+        if ((bool)schemaRow[IsKeyColumn] == false)
+          schemaRow[IsUniqueColumn] = false;
+      }
+
+      schema.AcceptChanges();
+    }
   }
 }

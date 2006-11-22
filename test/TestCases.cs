@@ -89,6 +89,9 @@ namespace test
       try { FullTextTest(cnn); Console.WriteLine("SUCCESS - Full Text Search"); }
       catch (Exception) { Console.WriteLine("FAIL - Full Text Search"); }
 
+      try { KeyInfoTest(fact, cnn); Console.WriteLine("SUCCESS - KeyInfo Fetch"); }
+      catch (Exception) { Console.WriteLine("FAIL - KeyInfo Fetch"); }
+
       try { TransactionTest(cnn); Console.WriteLine("SUCCESS - Transaction Enlistment"); }
       catch (Exception) { Console.WriteLine("FAIL - Transaction Enlistment"); }
 
@@ -119,8 +122,8 @@ namespace test
       try { ParameterizedInsertMissingParams(cnn); Console.WriteLine("FAIL - ParameterizedInsertMissingParams\r\n"); }
       catch (Exception) { Console.WriteLine("SUCCESS - ParameterizedInsertMissingParams\r\n"); }
 
-//      try { TimeoutTest(cnn); Console.WriteLine("SUCCESS - TimeoutTest"); }
-//      catch (Exception) { Console.WriteLine("FAIL - TimeoutTest"); }
+      //try { TimeoutTest(cnn); Console.WriteLine("SUCCESS - TimeoutTest"); }
+      //catch (Exception) { Console.WriteLine("FAIL - TimeoutTest"); }
 
       try { DataAdapter(fact, cnn, false); Console.WriteLine(""); }
       catch (Exception) { Console.WriteLine("FAIL - DataAdapter"); }
@@ -147,6 +150,74 @@ namespace test
       catch (Exception) { Console.WriteLine("FAIL - DropTable"); }
 
       Console.WriteLine("\r\nTests Finished.");
+    }
+
+    internal static void KeyInfoTest(DbProviderFactory fact, DbConnection cnn)
+    {
+      using (DbCommand cmd = cnn.CreateCommand())
+      {
+        // First test against integer primary key (optimized) keyinfo fetch
+        cmd.CommandText = "Create table keyinfotest (id integer primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "Select * from keyinfotest";
+        using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+        {
+          using (DataTable tbl = reader.GetSchemaTable())
+          {
+            if (tbl.Rows.Count != 3) throw new ArgumentOutOfRangeException("Wrong number of columns returned");
+          }
+        }
+
+        cmd.CommandText = "SELECT MyValue FROM keyinfotest";
+        using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+        {
+          using (DataTable tbl = reader.GetSchemaTable())
+          {
+            if (tbl.Rows.Count != 2) throw new ArgumentOutOfRangeException("Wrong number of columns returned");
+          }
+        }
+
+        cmd.CommandText = "DROP TABLE keyinfotest";
+        cmd.ExecuteNonQuery();
+
+        // Now test against non-integer primary key (unoptimized) subquery keyinfo fetch
+        cmd.CommandText = "Create table keyinfotest (id char primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "SELECT MyValue FROM keyinfotest";
+        using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+        {
+          using (DataTable tbl = reader.GetSchemaTable())
+          {
+            if (tbl.Rows.Count != 2) throw new ArgumentOutOfRangeException("Wrong number of columns returned");
+          }
+        }
+
+        cmd.CommandText = "Select * from keyinfotest";
+        using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+        {
+          using (DataTable tbl = reader.GetSchemaTable())
+          {
+            if (tbl.Rows.Count != 3) throw new ArgumentOutOfRangeException("Wrong number of columns returned");
+          }
+        }
+
+        // Make sure commandbuilder can generate an update command with the correct parameter count
+        using (DbDataAdapter adp = fact.CreateDataAdapter())
+        using (DbCommandBuilder builder = fact.CreateCommandBuilder())
+        {
+          adp.SelectCommand = cmd;
+          builder.DataAdapter = adp;
+          builder.ConflictOption = ConflictOption.OverwriteChanges;
+
+          using (DbCommand updatecmd = builder.GetUpdateCommand())
+          {
+            if (updatecmd.Parameters.Count != 4)
+              throw new ArgumentOutOfRangeException("Wrong number of parameters in update command!");
+          }
+        }
+      }
     }
 
     internal static void FullTextTest(DbConnection cnn)
@@ -726,6 +797,8 @@ namespace test
 
     // Open a reader and then attempt to write to test the writer's command timeout property
     // SQLite doesn't allow a write when a reader is active.
+    // *** NOTE AS OF 3.3.8 this test no longer blocks because SQLite now allows you to update table(s)
+    // while a reader is active on the same connection.  Therefore the timeout test is invalid
     internal static void TimeoutTest(DbConnection cnn)
     {
       using (DbCommand cmdRead = cnn.CreateCommand())
@@ -735,7 +808,7 @@ namespace test
         {
           using (DbCommand cmdwrite = cnn.CreateCommand())
           {
-            cmdwrite.CommandText = "UPDATE [TestCase] SET [ID] = [ID]";
+            cmdwrite.CommandText = "UPDATE [KeyInfoTest] SET [ID] = [ID]";
             cmdwrite.CommandTimeout = 5;
 
             int dwtick = Environment.TickCount;
@@ -748,7 +821,10 @@ namespace test
               dwtick = (Environment.TickCount - dwtick) / 1000;
               if (dwtick < 5 || dwtick > 6)
                 throw new ArgumentOutOfRangeException();
+
+              return;
             }
+            throw new ArgumentOutOfRangeException("Operation Completed successfully");
           }
         }
       }

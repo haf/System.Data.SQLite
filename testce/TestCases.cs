@@ -76,6 +76,12 @@ namespace test
       try { CreateTable(cnn); frm.WriteLine("SUCCESS - CreateTable"); }
       catch (Exception) { frm.WriteLine("FAIL - CreateTable"); }
 
+      try { FullTextTest(cnn); frm.WriteLine("SUCCESS - Full Text Search"); }
+      catch (Exception) { frm.WriteLine("FAIL - Full Text Search"); }
+
+      try { KeyInfoTest(cnn); frm.WriteLine("SUCCESS - KeyInfo Fetch"); }
+      catch (Exception) { frm.WriteLine("FAIL - KeyInfo Fetch"); }
+
       try { InsertTable(cnn); frm.WriteLine("SUCCESS - InsertTable"); }
       catch (Exception) { frm.WriteLine("FAIL - InsertTable"); }
 
@@ -125,6 +131,121 @@ namespace test
       catch (Exception) { frm.WriteLine("FAIL - DropTable"); }
 
       frm.WriteLine("\r\nTests Finished.");
+    }
+
+    internal static void KeyInfoTest(DbConnection cnn)
+    {
+      using (DbCommand cmd = cnn.CreateCommand())
+      {
+        // First test against integer primary key (optimized) keyinfo fetch
+        cmd.CommandText = "Create table keyinfotest (id integer primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "Select * from keyinfotest";
+        using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+        {
+          using (DataTable tbl = reader.GetSchemaTable())
+          {
+            if (tbl.Rows.Count != 3) throw new ArgumentOutOfRangeException("Wrong number of columns returned");
+          }
+        }
+
+        cmd.CommandText = "SELECT MyValue FROM keyinfotest";
+        using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+        {
+          using (DataTable tbl = reader.GetSchemaTable())
+          {
+            if (tbl.Rows.Count != 2) throw new ArgumentOutOfRangeException("Wrong number of columns returned");
+          }
+        }
+
+        cmd.CommandText = "DROP TABLE keyinfotest";
+        cmd.ExecuteNonQuery();
+
+        // Now test against non-integer primary key (unoptimized) subquery keyinfo fetch
+        cmd.CommandText = "Create table keyinfotest (id char primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "SELECT MyValue FROM keyinfotest";
+        using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+        {
+          using (DataTable tbl = reader.GetSchemaTable())
+          {
+            if (tbl.Rows.Count != 2) throw new ArgumentOutOfRangeException("Wrong number of columns returned");
+          }
+        }
+
+        cmd.CommandText = "Select * from keyinfotest";
+        using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+        {
+          using (DataTable tbl = reader.GetSchemaTable())
+          {
+            if (tbl.Rows.Count != 3) throw new ArgumentOutOfRangeException("Wrong number of columns returned");
+          }
+        }
+
+        // Make sure commandbuilder can generate an update command with the correct parameter count
+        using (DbDataAdapter adp = new SQLiteDataAdapter())
+        using (DbCommandBuilder builder = new SQLiteCommandBuilder())
+        {
+          adp.SelectCommand = cmd;
+          builder.DataAdapter = adp;
+          builder.ConflictOption = ConflictOption.OverwriteChanges;
+
+          using (DbCommand updatecmd = builder.GetUpdateCommand())
+          {
+            if (updatecmd.Parameters.Count != 4)
+              throw new ArgumentOutOfRangeException("Wrong number of parameters in update command!");
+          }
+        }
+      }
+    }
+
+    internal static void FullTextTest(DbConnection cnn)
+    {
+      using (DbCommand cmd = cnn.CreateCommand())
+      {
+        cmd.CommandText = "CREATE VIRTUAL TABLE FullText USING FTS1(name, ingredients);";
+        cmd.ExecuteNonQuery();
+
+        string[] names = { "broccoli stew", "pumpkin stew", "broccoli pie", "pumpkin pie" };
+        string[] ingredients = { "broccoli peppers cheese tomatoes", "pumpkin onions garlic celery", "broccoli cheese onions flour", "pumpkin sugar flour butter" };
+        int n;
+
+        cmd.CommandText = "insert into FullText (name, ingredients) values (@name, @ingredient);";
+        DbParameter name = cmd.CreateParameter();
+        DbParameter ingredient = cmd.CreateParameter();
+
+        name.ParameterName = "@name";
+        ingredient.ParameterName = "@ingredient";
+
+        cmd.Parameters.Add(name);
+        cmd.Parameters.Add(ingredient);
+
+        for (n = 0; n < names.Length; n++)
+        {
+          name.Value = names[n];
+          ingredient.Value = ingredients[n];
+
+          cmd.ExecuteNonQuery();
+        }
+
+        cmd.CommandText = "select rowid, name, ingredients from FullText where name match 'pie';";
+
+        int[] rowids = { 3, 4 };
+        n = 0;
+
+        using (DbDataReader reader = cmd.ExecuteReader())
+        {
+          while (reader.Read())
+          {
+            if (reader.GetInt64(0) != rowids[n++])
+              throw new ArgumentException("Unexpected rowid returned");
+
+            if (n > rowids.Length) throw new ArgumentException("Too many rows returned");
+          }
+        }
+      }
     }
 
     internal void CreateTable(DbConnection cnn)

@@ -142,6 +142,8 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				StringPooling="true"
+				ExceptionHandling="0"
 				BufferSecurityCheck="false"
 			/>
 			<Tool
@@ -232,7 +234,6 @@
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				FloatingPointModel="2"
 				RuntimeTypeInfo="false"
 			/>
 			<Tool
@@ -321,7 +322,6 @@
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				FloatingPointModel="2"
 				RuntimeTypeInfo="false"
 			/>
 			<Tool

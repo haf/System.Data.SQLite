@@ -97,13 +97,13 @@ namespace System.Data.SQLite
         }
         _command.ClearDataReader();
 
+        // If the datareader's behavior includes closing the connection, then do so here.
+        if ((_commandBehavior & CommandBehavior.CloseConnection) != 0 && _command.Connection != null)
+          _command.Connection.Close();
+
         if (_disposeCommand)
           ((IDisposable)_command).Dispose();
       }
-
-      // If the datareader's behavior includes closing the connection, then do so here.
-      if ((_commandBehavior & CommandBehavior.CloseConnection) != 0 && _command.Connection != null)
-        _command.Connection.Close();
 
       _command = null;
       _activeStatement = null;
@@ -696,7 +696,9 @@ namespace System.Data.SQLite
               {
                 if (String.Compare((string)rowColumnIndex["COLUMN_NAME"], strColumn, true, CultureInfo.InvariantCulture) == 0)
                 {
-                  if (tblIndexColumns.Rows.Count == 1) row[SchemaTableColumn.IsUnique] = rowIndexes["UNIQUE"];
+                  if (tblIndexColumns.Rows.Count == 1 && (bool)row[SchemaTableColumn.AllowDBNull] == false)
+                    row[SchemaTableColumn.IsUnique] = rowIndexes["UNIQUE"];
+
                   break;
                 }
               }

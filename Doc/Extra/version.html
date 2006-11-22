@@ -56,6 +56,12 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
+    <p><b>1.0.38.0 - November 22, 2006</b></p>
+    <ul>
+    <li>Fixed a bug when using CommandBehavior.KeyInfo whereby integer primary key columns may be duplicated in the results. </li>
+      <li>Enhanced the CommandBuilder so that update/delete statements are optimized when the affected table contains unique constraints and
+      a primary key is present.</li>
+      <li>Fixed a bug in the DataReader when used in conjunction with CommandBehavior.CloseConnection.</li></ul>
     <p><b>1.0.37.0 - November 19, 2006</b></p>
     <ul>
     <li>Added support for CommandBehavior.KeyInfo.&nbsp; 

@@ -5,7 +5,7 @@
 
 #pragma data_seg(".clr")
 #pragma comment(linker, "/SECTION:.clr,ER")
-  char __ph[136744] = {0}; // The number of bytes to reserve
+  char __ph[137404] = {0}; // The number of bytes to reserve
 #pragma data_seg()
 
 typedef BOOL (WINAPI *DLLMAIN)(HANDLE, DWORD, LPVOID);

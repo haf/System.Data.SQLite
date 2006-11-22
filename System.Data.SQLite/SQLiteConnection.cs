@@ -90,6 +90,8 @@ namespace System.Data.SQLite
   /// </remarks>
   public sealed class SQLiteConnection : DbConnection, ICloneable
   {
+    private const string _dataDirectory = "|DataDirectory|";
+
     /// <summary>
     /// State of the current connection
     /// </summary>
@@ -456,11 +458,12 @@ namespace System.Data.SQLite
     {
       if (_sql != null)
       {
-        int x = _commandList.Count;
-        for (int n = 0; n < x; n++)
-        {
-          _commandList[n].ClearCommands();
-        }
+        // Force any commands associated with this connection to release their unmanaged
+        // resources.  The commands are still valid and will automatically re-acquire the
+        // unmanaged resources the next time they are run -- provided this connection is
+        // re-opened before then.
+        foreach(SQLiteCommand cmd in _commandList)
+          cmd.ClearCommands();
 
 #if !PLATFORM_COMPACTFRAMEWORK
         if (_enlistment != null)
@@ -895,8 +898,6 @@ namespace System.Data.SQLite
 
       _password = databasePassword;
     }
-
-    private const string _dataDirectory = "|DataDirectory|";
 
     /// <summary>
     /// Expand the filename of the data source, resolving the |DataDirectory| macro as appropriate.
