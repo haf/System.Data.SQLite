@@ -3146,6 +3146,13 @@
             <param name="quotedIdentifier">The quoted (bracketed) identifier</param>
             <returns>The undecorated identifier</returns>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteCommandBuilder.GetSchemaTable(System.Data.Common.DbCommand)">
+            <summary>
+            Override helper, which can help the base command builder choose the right keys for the given query
+            </summary>
+            <param name="sourceCommand"></param>
+            <returns></returns>
+        </member>
         <member name="P:System.Data.SQLite.SQLiteCommandBuilder.DataAdapter">
             <summary>
             Gets/sets the DataAdapter for this CommandBuilder
