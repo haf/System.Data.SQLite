@@ -48,7 +48,8 @@
     <Compile Include="InstallDesigner.Designer.cs">
       <DependentUpon>InstallDesigner.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="Program.cs">
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="InstallDesigner.resx">
       <SubType>Designer</SubType>
@@ -75,6 +76,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="install.exe.manifest" />
     <None Include="Resources\System.Data.SQLite.DLL" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -85,4 +87,9 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>"$(DevEnvDir)..\..\SDK\v2.0\bin\mt.exe" -manifest "$(ProjectDir)$(TargetName).exe.manifest"  –outputresource:"$(TargetDir)$(TargetFileName)";#1
+
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>
