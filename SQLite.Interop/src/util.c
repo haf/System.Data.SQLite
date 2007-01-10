@@ -14,7 +14,7 @@
 ** This file contains functions for allocating memory, comparing
 ** strings, and stuff like that.
 **
-** $Id: util.c,v 1.25 2006/10/12 21:34:22 rmsimpson Exp $
+** $Id: util.c,v 1.26 2007/01/10 14:50:46 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"

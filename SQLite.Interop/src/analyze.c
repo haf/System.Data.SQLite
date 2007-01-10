@@ -11,7 +11,7 @@
 *************************************************************************
 ** This file contains code associated with the ANALYZE command.
 **
-** @(#) $Id: analyze.c,v 1.17 2006/10/12 21:34:20 rmsimpson Exp $
+** @(#) $Id: analyze.c,v 1.18 2007/01/10 14:50:45 rmsimpson Exp $
 */
 #ifndef SQLITE_OMIT_ANALYZE
 #include "sqliteInt.h"

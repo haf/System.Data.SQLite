@@ -218,32 +218,6 @@ const sqlite3_api_routines sqlite3_apis = {
 };
 
 /*
-** The windows implementation of shared-library loaders
-*/
-#if defined(_WIN32) || defined(WIN32) || defined(__MINGW32__) || defined(__BORLANDC__)
-# include <windows.h>
-# define SQLITE_LIBRARY_TYPE     HANDLE
-# define SQLITE_OPEN_LIBRARY(A)  LoadLibrary(A)
-#ifdef _WIN32_WCE
-# define SQLITE_FIND_SYMBOL(A,B) GetProcAddressA(A,B)
-#else
-# define SQLITE_FIND_SYMBOL(A,B) GetProcAddress(A,B)
-#endif
-# define SQLITE_CLOSE_LIBRARY(A) FreeLibrary(A)
-#endif /* windows */
-
-/*
-** The unix implementation of shared-library loaders
-*/
-#if defined(HAVE_DLOPEN) && !defined(SQLITE_LIBRARY_TYPE)
-# include <dlfcn.h>
-# define SQLITE_LIBRARY_TYPE     void*
-# define SQLITE_OPEN_LIBRARY(A)  dlopen(A, RTLD_NOW | RTLD_GLOBAL)
-# define SQLITE_FIND_SYMBOL(A,B) dlsym(A,B)
-# define SQLITE_CLOSE_LIBRARY(A) dlclose(A)
-#endif
-
-/*
 ** Attempt to load an SQLite extension library contained in the file
 ** zFile.  The entry point is zProc.  zProc may be 0 in which case a
 ** default entry point name (sqlite3_extension_init) is used.  Use
@@ -261,16 +235,10 @@ int sqlite3_load_extension(
   const char *zProc,    /* Entry point.  Use "sqlite3_extension_init" if 0 */
   char **pzErrMsg       /* Put error message here if not 0 */
 ){
-#ifdef SQLITE_LIBRARY_TYPE
-  SQLITE_LIBRARY_TYPE handle;
+  void *handle;
   int (*xInit)(sqlite3*,char**,const sqlite3_api_routines*);
   char *zErrmsg = 0;
-  SQLITE_LIBRARY_TYPE *aHandle;
-
-#ifdef _WIN32_WCE
-  WCHAR zWideFile[MAX_PATH];
-  MultiByteToWideChar(CP_ACP, 0, zFile, -1, zWideFile, MAX_PATH);
-#endif
+  void **aHandle;
 
   /* Ticket #1863.  To avoid a creating security problems for older
   ** applications that relink against newer versions of SQLite, the
@@ -289,11 +257,7 @@ int sqlite3_load_extension(
     zProc = "sqlite3_extension_init";
   }
 
-#ifdef _WIN32_WCE
-  handle = SQLITE_OPEN_LIBRARY(zWideFile);
-#else
-  handle = SQLITE_OPEN_LIBRARY(zFile);
-#endif
+  handle = sqlite3OsDlopen(zFile);
   if( handle==0 ){
     if( pzErrMsg ){
       *pzErrMsg = sqlite3_mprintf("unable to open shared library [%s]", zFile);
@@ -301,20 +265,20 @@ int sqlite3_load_extension(
     return SQLITE_ERROR;
   }
   xInit = (int(*)(sqlite3*,char**,const sqlite3_api_routines*))
-                   SQLITE_FIND_SYMBOL(handle, zProc);
+                   sqlite3OsDlsym(handle, zProc);
   if( xInit==0 ){
     if( pzErrMsg ){
        *pzErrMsg = sqlite3_mprintf("no entry point [%s] in shared library [%s]",
                                    zProc, zFile);
     }
-    SQLITE_CLOSE_LIBRARY(handle);
+    sqlite3OsDlclose(handle);
     return SQLITE_ERROR;
   }else if( xInit(db, &zErrmsg, &sqlite3_apis) ){
     if( pzErrMsg ){
       *pzErrMsg = sqlite3_mprintf("error during initialization: %s", zErrmsg);
     }
     sqlite3_free(zErrmsg);
-    SQLITE_CLOSE_LIBRARY(handle);
+    sqlite3OsDlclose(handle);
     return SQLITE_ERROR;
   }
 
@@ -330,14 +294,8 @@ int sqlite3_load_extension(
   sqliteFree(db->aExtension);
   db->aExtension = aHandle;
 
-  ((SQLITE_LIBRARY_TYPE*)db->aExtension)[db->nExtension-1] = handle;
+  db->aExtension[db->nExtension-1] = handle;
   return SQLITE_OK;
-#else
-  if( pzErrMsg ){
-    *pzErrMsg = sqlite3_mprintf("extension loading is disabled");
-  }
-  return SQLITE_ERROR;
-#endif
 }
 
 /*
@@ -345,13 +303,11 @@ int sqlite3_load_extension(
 ** to clean up loaded extensions
 */
 void sqlite3CloseExtensions(sqlite3 *db){
-#ifdef SQLITE_LIBRARY_TYPE
   int i;
   for(i=0; i<db->nExtension; i++){
-    SQLITE_CLOSE_LIBRARY(((SQLITE_LIBRARY_TYPE*)db->aExtension)[i]);
+    sqlite3OsDlclose(db->aExtension[i]);
   }
   sqliteFree(db->aExtension);
-#endif
 }
 
 /*

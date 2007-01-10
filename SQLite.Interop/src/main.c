@@ -14,7 +14,7 @@
 ** other files are for internal use by SQLite and should not be
 ** accessed by users of the library.
 **
-** $Id: main.c,v 1.25 2006/10/12 21:34:21 rmsimpson Exp $
+** $Id: main.c,v 1.26 2007/01/10 14:50:46 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -942,12 +942,19 @@ static int openDatabase(
   /* Load automatic extensions - extensions that have been registered
   ** using the sqlite3_automatic_extension() API.
   */
-  sqlite3AutoLoadExtensions(db);
+  (void)sqlite3AutoLoadExtensions(db);
 
 #ifdef SQLITE_ENABLE_FTS1
   {
     extern int sqlite3Fts1Init(sqlite3*);
     sqlite3Fts1Init(db);
+  }
+#endif
+
+#ifdef SQLITE_ENABLE_FTS2
+  {
+    extern int sqlite3Fts2Init(sqlite3*);
+    sqlite3Fts2Init(db);
   }
 #endif
 

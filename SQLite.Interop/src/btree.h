@@ -13,7 +13,7 @@
 ** subsystem.  See comments in the source code for a detailed description
 ** of what each interface routine does.
 **
-** @(#) $Id: btree.h,v 1.24 2006/10/12 21:34:21 rmsimpson Exp $
+** @(#) $Id: btree.h,v 1.25 2007/01/10 14:50:45 rmsimpson Exp $
 */
 #ifndef _BTREE_H_
 #define _BTREE_H_

@@ -11,7 +11,7 @@
 *************************************************************************
 ** A TCL Interface to SQLite
 **
-** $Id: tclsqlite.c,v 1.24 2006/10/12 21:34:22 rmsimpson Exp $
+** $Id: tclsqlite.c,v 1.25 2007/01/10 14:50:46 rmsimpson Exp $
 */
 #ifndef NO_TCL     /* Omit this whole file if TCL is unavailable */
 
@@ -1173,6 +1173,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   ** default.
   */
   case DB_ENABLE_LOAD_EXTENSION: {
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
     int onoff;
     if( objc!=3 ){
       Tcl_WrongNumArgs(interp, 2, objv, "BOOLEAN");
@@ -1183,6 +1184,11 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
     sqlite3_enable_load_extension(pDb->db, onoff);
     break;
+#else
+    Tcl_AppendResult(interp, "extension loading is turned off at compile-time",
+                     0);
+    return TCL_ERROR;
+#endif
   }
 
   /*
@@ -2055,7 +2061,7 @@ static int DbMain(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   sqlite3_open(zFile, &p->db);
   Tcl_DStringFree(&translatedFilename);
   if( SQLITE_OK!=sqlite3_errcode(p->db) ){
-    zErrMsg = strdup(sqlite3_errmsg(p->db));
+    zErrMsg = sqlite3_mprintf("%s", sqlite3_errmsg(p->db));
     sqlite3_close(p->db);
     p->db = 0;
   }
@@ -2065,7 +2071,7 @@ static int DbMain(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   if( p->db==0 ){
     Tcl_SetResult(interp, zErrMsg, TCL_VOLATILE);
     Tcl_Free((char*)p);
-    free(zErrMsg);
+    sqlite3_free(zErrMsg);
     return TCL_ERROR;
   }
   p->maxStmt = NUM_PREPARED_STMTS;
