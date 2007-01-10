@@ -462,8 +462,11 @@ namespace System.Data.SQLite
         // resources.  The commands are still valid and will automatically re-acquire the
         // unmanaged resources the next time they are run -- provided this connection is
         // re-opened before then.
-        foreach(SQLiteCommand cmd in _commandList)
-          cmd.ClearCommands();
+        lock (_commandList)
+        {
+          foreach (SQLiteCommand cmd in _commandList)
+            cmd.ClearCommands();
+        }
 
 #if !PLATFORM_COMPACTFRAMEWORK
         if (_enlistment != null)
@@ -1844,6 +1847,22 @@ namespace System.Data.SQLite
       tbl.AcceptChanges();
 
       return tbl;
+    }
+
+    internal void AddCommand(SQLiteCommand cmd)
+    {
+      lock (_commandList)
+      {
+        _commandList.Add(cmd);
+      }
+    }
+
+    internal void RemoveCommand(SQLiteCommand cmd)
+    {
+      lock (_commandList)
+      {
+        _commandList.Remove(cmd);
+      }
     }
   }
 
