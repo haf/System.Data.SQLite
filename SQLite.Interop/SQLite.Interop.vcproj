@@ -35,8 +35,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Fixing sources ..."
-				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;rem cd ..\System.Data.SQLite&#x0D;&#x0A;rem resgen /compile SR.resx&#x0D;&#x0A;rem csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;rem cd ..\SQLite.Interop&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -123,8 +122,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Preparing build ..."
-				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -141,10 +139,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
+				InlineFunctionExpansion="1"
 				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -208,8 +208,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Fixing sources ..."
-				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;rem cd ..\System.Data.SQLite&#x0D;&#x0A;rem resgen /compile SR.resx&#x0D;&#x0A;rem csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;rem cd ..\SQLite.Interop&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -296,8 +295,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Fixing sources ..."
-				CommandLine="CScript //nologo fixsource.vbs&#x0D;&#x0A;rem cd ..\System.Data.SQLite&#x0D;&#x0A;rem resgen /compile SR.resx&#x0D;&#x0A;rem csc /target:module /out:..\SQLite.Interop\SQlite.netmodule /debug- /o+  SQLite3.cs SQLite3_UTF16.cs SQLiteBase.cs SQLiteCommand.cs SQLiteCommandBuilder.cs SQLiteConnection.cs SQLiteConnectionStringBuilder.cs SQLiteConvert.cs SQLiteDataAdapter.cs SQLiteDataReader.cs SQLiteException.cs SQLiteFactory.cs SQLiteFunction.cs SQLiteFunctionAttribute.cs SQLiteParameter.cs SQLiteParameterCollection.cs SQLiteStatement.cs SQLiteTransaction.cs UnsafeNativeMethods.cs AssemblyInfo.cs SR.Designer.cs&#x0D;&#x0A;rem cd ..\SQLite.Interop&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -384,8 +382,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Fixing up sources ..."
-				CommandLine="CScript //nologo fixsource.vbs"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -466,8 +463,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Fixing up sources ..."
-				CommandLine="CScript //nologo fixsource.vbs"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -552,8 +548,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Fixing up sources ..."
-				CommandLine="CScript //nologo fixsource.vbs"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -635,8 +630,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Fixing up sources ..."
-				CommandLine="CScript //nologo fixsource.vbs"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -991,6 +985,14 @@
 			<File
 				RelativePath=".\src\util.c"
 				>
+				<FileConfiguration
+					Name="Release|Pocket PC 2003 (ARMV4)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\vacuum.c"

@@ -56,6 +56,16 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
+    <p><b>1.0.39.0 - January 10, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.10</li>
+      <li>Fixed a multi-threaded race condition bug in the garbage collector when commands
+        and/or connections are not properly disposed by the user.</li>
+      <li>Switched the encryption's internal deallocation code to use sqlite's built-in
+        aux functions instead of modifying the pager.c source to free the crypt block.&nbsp;
+        This eliminates the last of the code changes the provider makes to the original
+        sqlite engine sources.&nbsp; Props to Ralf Junker for pointing that out.</li>
+    </ul>
     <p><b>1.0.38.0 - November 22, 2006</b></p>
     <ul>
     <li>Fixed a bug when using CommandBehavior.KeyInfo whereby integer primary key columns may be duplicated in the results. </li>
