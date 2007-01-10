@@ -1,7 +1,3 @@
-#ifdef SQLITE_HAS_CODEC
-  void sqlite3pager_free_codecarg(void *pArg);
-#endif
-
 #include "src/pager.c"
 
 #ifndef SQLITE_OMIT_DISKIO
@@ -263,17 +259,12 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
   {
     LPCRYPTBLOCK pBlock = CreateCryptBlock(hKey, sqlite3BtreePager(db->aDb[nDb].pBt), NULL);
     sqlite3pager_set_codec(sqlite3BtreePager(db->aDb[nDb].pBt), sqlite3Codec, pBlock);
+    db->aDb[nDb].pAux = pBlock;
+    db->aDb[nDb].xFreeAux = DestroyCryptBlock;
+
     rc = SQLITE_OK;
   }
   return rc;
-}
-
-// Called by our code modification to pager.c to free the cryptblock associated with 
-// a pager instance.
-void sqlite3pager_free_codecarg(void *pArg)
-{
-  if (pArg)
-    DestroyCryptBlock((LPCRYPTBLOCK)pArg);
 }
 
 // Once a password has been supplied and a key created, we don't keep the 
@@ -314,6 +305,8 @@ __declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *
     pBlock = CreateCryptBlock(hKey, p, NULL);
     pBlock->hReadKey = 0; // Original database is not encrypted
     sqlite3pager_set_codec(sqlite3BtreePager(pbt), sqlite3Codec, pBlock);
+    db->aDb[0].pAux = pBlock;
+    db->aDb[0].xFreeAux = DestroyCryptBlock;
   }
   else // Change the writekey for an already-encrypted database
   {
@@ -381,6 +374,8 @@ __declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *
   if (!pBlock->hReadKey && !pBlock->hWriteKey)
   {
     sqlite3pager_set_codec(p, NULL, NULL);
+    db->aDb[0].pAux = NULL;
+    db->aDb[0].xFreeAux = NULL;
     DestroyCryptBlock(pBlock);
   }
 
