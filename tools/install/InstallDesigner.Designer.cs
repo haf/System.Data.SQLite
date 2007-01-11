@@ -128,6 +128,7 @@ namespace install
       this.Name = "InstallDesigner";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "SQLite Designer Installation";
+      this.TopMost = true;
       this.warningPanel.ResumeLayout(false);
       this.warningPanel.PerformLayout();
       this.ResumeLayout(false);
