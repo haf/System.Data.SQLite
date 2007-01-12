@@ -348,13 +348,13 @@ namespace System.Data.SQLite
         if (_cnn != null)
         {
           ClearCommands();
-          _cnn.AddCommand(this);
+          _cnn.RemoveCommand(this);
         }
 
         _cnn = value;
 
         if (_cnn != null)
-          _cnn.RemoveCommand(this);
+          _cnn.AddCommand(this);
       }
     }
 

@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.39.0 January 10, 2007<br>
+    Version 1.0.39.1 January 11, 2007<br>
     Using SQLite 3.3.10<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -119,6 +119,13 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.39.1 - January 11, 2007</b></p>
+    <ul>
+    <li>Fixed a really dumb mistake that for some reason didn't trigger any errors in
+      the testcases, whereby commands when associated with a connection were not adding
+      or removing themselves from an internal list of commands for that connection --
+      causing a "database is locked" error when trying to close the connection.</li>
+    </ul>
     <p><b>1.0.39.0 - January 10, 2007</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.10</li>
