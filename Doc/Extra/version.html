@@ -56,6 +56,13 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
+    <p><b>1.0.39.1 - January 11, 2007</b></p>
+    <ul>
+    <li>Fixed a really dumb mistake that for some reason didn't trigger any errors in
+      the testcases, whereby commands when associated with a connection were not adding
+      or removing themselves from an internal list of commands for that connection --
+      causing a "database is locked" error when trying to close the connection.</li>
+    </ul>
     <p><b>1.0.39.0 - January 10, 2007</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.10</li>
