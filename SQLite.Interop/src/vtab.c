@@ -11,7 +11,7 @@
 *************************************************************************
 ** This file contains code used to help implement virtual tables.
 **
-** $Id: vtab.c,v 1.3 2007/01/10 14:50:46 rmsimpson Exp $
+** $Id: vtab.c,v 1.4 2007/01/30 15:20:47 rmsimpson Exp $
 */
 #ifndef SQLITE_OMIT_VIRTUALTABLE
 #include "sqliteInt.h"
