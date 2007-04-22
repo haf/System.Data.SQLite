@@ -62,25 +62,16 @@ namespace System.Data.SQLite
     {
       IsValid(true);
 
-      if (--_cnn._transactionLevel == 0)
+      if (_cnn._transactionLevel - 1 == 0)
       {
-        try
+        using (SQLiteCommand cmd = _cnn.CreateCommand())
         {
-          using (SQLiteCommand cmd = _cnn.CreateCommand())
-          {
-            cmd.CommandText = "COMMIT";
-            cmd.ExecuteNonQuery();
-          }
-        }
-        finally
-        {
-          _cnn = null;
+          cmd.CommandText = "COMMIT";
+          cmd.ExecuteNonQuery();
         }
       }
-      else
-      {
-        _cnn = null;
-      }
+      _cnn._transactionLevel--;
+      _cnn = null;
     }
 
     /// <summary>
@@ -104,11 +95,13 @@ namespace System.Data.SQLite
     /// </summary>
     protected override void Dispose(bool disposing)
     {
-      if (IsValid(false))
-        Rollback();
+      if (disposing)
+      {
+        if (IsValid(false))
+          Rollback();
 
-      _cnn = null;
-
+        _cnn = null;
+      }
       base.Dispose(disposing);
     }
 
@@ -127,19 +120,13 @@ namespace System.Data.SQLite
     {
       IsValid(true);
 
-      try
+      using (SQLiteCommand cmd = _cnn.CreateCommand())
       {
-        using (SQLiteCommand cmd = _cnn.CreateCommand())
-        {
-          cmd.CommandText = "ROLLBACK";
-          cmd.ExecuteNonQuery();
-        }
-        _cnn._transactionLevel = 0;
+        cmd.CommandText = "ROLLBACK";
+        cmd.ExecuteNonQuery();
       }
-      finally
-      {
-        _cnn = null;
-      }
+      _cnn._transactionLevel = 0;
+      _cnn = null;
     }
 
     internal bool IsValid(bool throwError)

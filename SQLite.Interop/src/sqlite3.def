@@ -83,7 +83,6 @@ sqlite3_snprintf
 sqlite3_step
 sqlite3_thread_cleanup
 sqlite3_total_changes
-sqlite3_trace
 sqlite3_transfer_bindings
 sqlite3_update_hook
 sqlite3_user_data

@@ -372,6 +372,25 @@ namespace System.Data.SQLite
     /// <param name="disposing">True if the object is being disposed explicitly</param>
     protected virtual void Dispose(bool disposing)
     {
+      if (disposing)
+      {
+        IDisposable disp;
+
+        foreach (KeyValuePair<long, object> kv in _contextDataList)
+        {
+          disp = kv.Value as IDisposable;
+          if (disp != null)
+            disp.Dispose();
+        }
+        _contextDataList.Clear();
+
+        _InvokeFunc = null;
+        _StepFunc = null;
+        _FinalFunc = null;
+        _CompareFunc = null;
+        _base = null;
+        _contextDataList = null;
+      }
     }
 
     /// <summary>
@@ -381,25 +400,6 @@ namespace System.Data.SQLite
     public void Dispose()
     {
       Dispose(true);
-
-      IDisposable disp;
-
-      foreach (KeyValuePair<long, object> kv in _contextDataList)
-      {
-        disp = kv.Value as IDisposable;
-        if (disp != null)
-          disp.Dispose();
-      }
-      _contextDataList.Clear();
-
-      _InvokeFunc = null;
-      _StepFunc = null;
-      _FinalFunc = null;
-      _CompareFunc = null;
-      _base = null;
-      _contextDataList = null;
-
-      GC.SuppressFinalize(this);
     }
 
 #if !PLATFORM_COMPACTFRAMEWORK

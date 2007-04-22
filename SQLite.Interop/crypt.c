@@ -1,5 +1,3 @@
-#include "src/pager.c"
-
 #ifndef SQLITE_OMIT_DISKIO
 #ifdef SQLITE_HAS_CODEC
 
@@ -258,7 +256,7 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
   if (hKey)
   {
     LPCRYPTBLOCK pBlock = CreateCryptBlock(hKey, sqlite3BtreePager(db->aDb[nDb].pBt), NULL);
-    sqlite3pager_set_codec(sqlite3BtreePager(db->aDb[nDb].pBt), sqlite3Codec, pBlock);
+    sqlite3PagerSetCodec(sqlite3BtreePager(db->aDb[nDb].pBt), sqlite3Codec, pBlock);
     db->aDb[nDb].pAux = pBlock;
     db->aDb[nDb].xFreeAux = DestroyCryptBlock;
 
@@ -304,7 +302,7 @@ __declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *
   {
     pBlock = CreateCryptBlock(hKey, p, NULL);
     pBlock->hReadKey = 0; // Original database is not encrypted
-    sqlite3pager_set_codec(sqlite3BtreePager(pbt), sqlite3Codec, pBlock);
+    sqlite3PagerSetCodec(sqlite3BtreePager(pbt), sqlite3Codec, pBlock);
     db->aDb[0].pAux = pBlock;
     db->aDb[0].xFreeAux = DestroyCryptBlock;
   }
@@ -319,19 +317,19 @@ __declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *
   if (!rc)
   {
     // Rewrite all the pages in the database using the new encryption key
-    Pgno nPage = sqlite3pager_pagecount(p);
+    Pgno nPage = sqlite3PagerPagecount(p);
     Pgno nSkip = PAGER_MJ_PGNO(p);
-    void *pPage;
+    DbPage *pPage;
     Pgno n;
 
     for(n = 1; rc == SQLITE_OK && n <= nPage; n ++)
     {
       if (n == nSkip) continue;
-      rc = sqlite3pager_get(p, n, &pPage);
+      rc = sqlite3PagerGet(p, n, &pPage);
       if(!rc)
       {
-        rc = sqlite3pager_write(pPage);
-        sqlite3pager_unref(pPage);
+        rc = sqlite3PagerWrite(pPage);
+        sqlite3PagerUnref(pPage);
       }
     }
   }
@@ -373,7 +371,7 @@ __declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *
   // pager anymore.  Destroy the crypt block and remove the codec from the pager.
   if (!pBlock->hReadKey && !pBlock->hWriteKey)
   {
-    sqlite3pager_set_codec(p, NULL, NULL);
+    sqlite3PagerSetCodec(p, NULL, NULL);
     db->aDb[0].pAux = NULL;
     db->aDb[0].xFreeAux = NULL;
     DestroyCryptBlock(pBlock);

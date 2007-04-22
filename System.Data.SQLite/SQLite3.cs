@@ -20,7 +20,8 @@ namespace System.Data.SQLite
     /// <summary>
     /// The opaque pointer returned to us by the sqlite provider
     /// </summary>
-    protected IntPtr              _sql;
+    protected SQLiteConnectionHandle _sql;
+
     /// <summary>
     /// The user-defined functions registered on this connection
     /// </summary>
@@ -38,13 +39,10 @@ namespace System.Data.SQLite
 
     internal override void Close()
     {
-      if (_sql != IntPtr.Zero)
-      {
-        int n = UnsafeNativeMethods.sqlite3_close_interop(_sql);
-        if (n > 0) throw new SQLiteException(n, SQLiteLastError());
-        SQLiteFunction.UnbindFunctions(this, _functionsArray);
-      }
-      _sql = IntPtr.Zero;
+      if (_sql != null)
+        _sql.Dispose();
+
+      _sql = null;
     }
 
     internal override void Cancel()
@@ -71,9 +69,13 @@ namespace System.Data.SQLite
 
     internal override void Open(string strFilename)
     {
-      if (_sql != IntPtr.Zero) return;
-      int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), out _sql);
+      if (_sql != null) return;
+      IntPtr db;
+
+      int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), out db);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+
+      _sql = db;
 
       _functionsArray = SQLiteFunction.BindFunctions(this);
     }
@@ -128,19 +130,8 @@ namespace System.Data.SQLite
               UnsafeNativeMethods.sqlite3_sleep_interop((uint)rnd.Next(1, 250));
             }
           }
-
         }
       }
-    }
-
-    internal override void FinalizeStatement(SQLiteStatement stmt)
-    {
-      if (stmt._sqlite_stmt != IntPtr.Zero)
-      {
-        int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt._sqlite_stmt);
-        if (n > 0) throw new SQLiteException(n, SQLiteLastError());
-      }
-      stmt._sqlite_stmt = IntPtr.Zero;
     }
 
     internal override int Reset(SQLiteStatement stmt)
@@ -157,11 +148,10 @@ namespace System.Data.SQLite
         using (SQLiteStatement tmp = Prepare(stmt._sqlStatement, null, out str))
         {
           // Finalize the existing statement
-          FinalizeStatement(stmt);
-
+          stmt._sqlite_stmt.Dispose();
           // Reassign a new statement pointer to the old statement and clear the temporary one
           stmt._sqlite_stmt = tmp._sqlite_stmt;
-          tmp._sqlite_stmt = IntPtr.Zero;
+          tmp._sqlite_stmt = null;
 
           // Reapply parameters
           stmt.BindParameters();
@@ -179,8 +169,7 @@ namespace System.Data.SQLite
 
     internal override string SQLiteLastError()
     {
-      int len;
-      return ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(_sql, out len), len);
+      return SQLiteBase.SQLiteLastError(_sql);
     }
 
     internal override SQLiteStatement Prepare(string strSql, SQLiteStatement previous, out string strRemain)
@@ -233,7 +222,7 @@ namespace System.Data.SQLite
 
         strRemain = UTF8ToString(ptr, len);
 
-        if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
+        if (stmt != null) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
 
         return cmd;
       }

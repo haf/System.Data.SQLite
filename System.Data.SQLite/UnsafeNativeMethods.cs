@@ -11,6 +11,148 @@ namespace System.Data.SQLite
   using System.Security;
   using System.Runtime.InteropServices;
 
+#if PLATFORM_COMPACTFRAMEWORK
+  internal abstract class CriticalHandle : IDisposable
+  {
+    private bool _isClosed;
+    protected IntPtr handle;
+    
+    protected CriticalHandle(IntPtr invalidHandleValue)
+    {
+      handle = invalidHandleValue;
+      _isClosed = false;
+    }
+
+    ~CriticalHandle()
+    {
+      Dispose(false);
+    }
+
+    private void Cleanup()
+    {
+      if (!IsClosed)
+      {
+        this._isClosed = true;
+        if (!IsInvalid)
+        {
+          ReleaseHandle();
+          GC.SuppressFinalize(this);
+        }
+      }
+    }
+
+    public void Close()
+    {
+      Dispose(true);
+    }
+
+    public void Dispose()
+    {
+      Dispose(true);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+      Cleanup();
+    }
+
+    protected abstract bool ReleaseHandle();
+
+    protected void SetHandle(IntPtr value)
+    {
+      handle = value;
+    }
+
+    public void SetHandleAsInvalid()
+    {
+      _isClosed = true;
+      GC.SuppressFinalize(this);
+    }
+
+    public bool IsClosed
+    {
+      get { return _isClosed; }
+    }
+
+    public abstract bool IsInvalid
+    {
+      get;
+    }
+
+  }
+
+#endif
+
+  internal class SQLiteConnectionHandle : CriticalHandle
+  {
+    public static implicit operator IntPtr(SQLiteConnectionHandle db)
+    {
+      return db.handle;
+    }
+
+    public static implicit operator SQLiteConnectionHandle(IntPtr db)
+    {
+      return new SQLiteConnectionHandle(db);
+    }
+
+    private SQLiteConnectionHandle(IntPtr db)
+      : this()
+    {
+      SetHandle(db);
+    }
+
+    internal SQLiteConnectionHandle()
+      : base(IntPtr.Zero)
+    {
+    }
+
+    protected override bool ReleaseHandle()
+    {
+      SQLiteBase.Close(this);
+      return true;
+    }
+
+    public override bool IsInvalid
+    {
+      get { return (handle == IntPtr.Zero); }
+    }
+  }
+
+  internal class SQLiteStatementHandle : CriticalHandle
+  {
+    public static implicit operator IntPtr(SQLiteStatementHandle stmt)
+    {
+      return stmt.handle;
+    }
+
+    public static implicit operator SQLiteStatementHandle(IntPtr stmt)
+    {
+      return new SQLiteStatementHandle(stmt);
+    }
+
+    private SQLiteStatementHandle(IntPtr stmt)
+      : this()
+    {
+      SetHandle(stmt);
+    }
+
+    internal SQLiteStatementHandle()
+      : base(IntPtr.Zero)
+    {
+    }
+
+    protected override bool ReleaseHandle()
+    {
+      SQLiteBase.FinalizeStatement(this);
+      return true;
+    }
+
+    public override bool IsInvalid
+    {
+      get { return (handle == IntPtr.Zero); }
+    }
+  }
+
 #if !PLATFORM_COMPACTFRAMEWORK
   [SuppressUnmanagedCodeSecurity]
 #endif
@@ -33,7 +175,7 @@ namespace System.Data.SQLite
     internal static extern IntPtr sqlite3_libversion_interop(out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_free_interop(IntPtr p);
+    internal static extern void sqlite3_free_interop(IntPtr db);
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_open_interop(byte[] utf8Filename, out IntPtr db);
@@ -49,6 +191,9 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_errmsg_interop(IntPtr db, out int len);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_errmsg_stmt_interop(IntPtr stmt, out int len);
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_changes_interop(IntPtr db);
@@ -208,9 +353,6 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
     internal static extern int sqlite3_open16_interop(string utf16Filename, out IntPtr db);
-
-    [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_errmsg16_interop(IntPtr db, out int len);
 
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
     internal static extern int sqlite3_prepare16_interop(IntPtr db, IntPtr pSql, int sqlLen, out IntPtr stmt, out IntPtr ptrRemain, out int len);

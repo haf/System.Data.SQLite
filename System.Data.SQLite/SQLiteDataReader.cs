@@ -22,11 +22,11 @@ namespace System.Data.SQLite
     /// <summary>
     /// Underlying command this reader is attached to
     /// </summary>
-    private SQLiteCommand   _command;
+    private SQLiteCommand _command;
     /// <summary>
     /// Index of the current statement in the command being processed
     /// </summary>
-    private int             _activeStatementIndex;
+    private int _activeStatementIndex;
     /// <summary>
     /// Current statement being Read()
     /// </summary>
@@ -38,19 +38,19 @@ namespace System.Data.SQLite
     ///  1 = Finished reading
     ///  2 = Non-row-returning statement, no records
     /// </summary>
-    private int             _readingState;
+    private int _readingState;
     /// <summary>
     /// Number of records affected by the insert/update statements executed on the command
     /// </summary>
-    private int             _rowsAffected;
+    private int _rowsAffected;
     /// <summary>
     /// Count of fields (columns) in the row-returning statement currently being processed
     /// </summary>
-    private int             _fieldCount;
+    private int _fieldCount;
     /// <summary>
     /// Datatypes of active fields (columns) in the current statement, used for type-restricting data
     /// </summary>
-    private SQLiteType[]    _fieldTypeArray;
+    private SQLiteType[] _fieldTypeArray;
 
     /// <summary>
     /// The behavior of the datareader
@@ -60,7 +60,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// If set, then dispose of the command object when the reader is finished
     /// </summary>
-    internal bool           _disposeCommand;
+    internal bool _disposeCommand;
 
     /// <summary>
     /// An array of rowid's for the active statement if CommandBehavior.KeyInfo is specified
@@ -102,7 +102,7 @@ namespace System.Data.SQLite
           _command.Connection.Close();
 
         if (_disposeCommand)
-          ((IDisposable)_command).Dispose();
+          _command.Dispose();
       }
 
       _command = null;
@@ -117,12 +117,11 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Disposes the datareader.  Calls Close() to ensure everything is cleaned up.
+    /// Disposes the datareader.  Base class calls Close() to ensure everything is cleaned up.
     /// </summary>
     protected override void Dispose(bool disposing)
     {
       base.Dispose(disposing);
-      GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -590,7 +589,7 @@ namespace System.Data.SQLite
 
         strColumn = _command.Connection._sql.ColumnOriginalName(_activeStatement, n);
         if (String.IsNullOrEmpty(strColumn) == false) row[SchemaTableColumn.BaseColumnName] = strColumn;
-        
+
         row[SchemaTableColumn.IsExpression] = String.IsNullOrEmpty(strColumn);
         row[SchemaTableColumn.IsAliased] = (String.Compare(GetName(n), strColumn, true, CultureInfo.InvariantCulture) != 0);
 
@@ -705,7 +704,7 @@ namespace System.Data.SQLite
             }
           }
         }
-        
+
         if (String.IsNullOrEmpty(dataType))
         {
           TypeAffinity affin;
@@ -828,7 +827,7 @@ namespace System.Data.SQLite
         {
           // Reset the previously-executed statement
           _activeStatement._sql.Reset(_activeStatement);
-          
+
           // If we're only supposed to return a single rowset, step through all remaining statements once until
           // they are all done and return false to indicate no more resultsets exist.
           if ((_commandBehavior & CommandBehavior.SingleResult) != 0)

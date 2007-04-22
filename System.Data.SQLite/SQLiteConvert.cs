@@ -136,7 +136,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// An UTF-8 Encoding instance, so we can convert strings to and from UTF-8
     /// </summary>
-    private Encoding _utf8 = new UTF8Encoding();
+    private static Encoding _utf8 = new UTF8Encoding();
     /// <summary>
     /// The default DateTime format for this instance
     /// </summary>
@@ -199,7 +199,7 @@ namespace System.Data.SQLite
     /// <param name="nativestring">The pointer to the memory where the UTF-8 string is encoded</param>
     /// <param name="nativestringlen">The number of bytes to decode</param>
     /// <returns>A string containing the translated character(s)</returns>
-    public virtual string UTF8ToString(IntPtr nativestring, int nativestringlen)
+    public static string UTF8ToString(IntPtr nativestring, int nativestringlen)
     {
       if (nativestringlen == 0) return "";
 

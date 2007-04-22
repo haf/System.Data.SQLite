@@ -19,7 +19,7 @@ namespace System.Data.SQLite
   internal abstract class SQLiteBase : SQLiteConvert, IDisposable
   {
     internal SQLiteBase(SQLiteDateFormats fmt)
-      : base(fmt) {}
+      : base(fmt) { }
 
     /// <summary>
     /// Returns a string representing the active version of SQLite
@@ -28,7 +28,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Returns the number of changes the last executing insert/update caused.
     /// </summary>
-    internal abstract int    Changes { get; }
+    internal abstract int Changes { get; }
     /// <summary>
     /// Opens a database.
     /// </summary>
@@ -37,7 +37,7 @@ namespace System.Data.SQLite
     /// to bind all attributed user-defined functions and collating sequences to the new connection.
     /// </remarks>
     /// <param name="strFilename">The filename of the database to open.  SQLite automatically creates it if it doesn't exist.</param>
-    internal abstract void   Open(string strFilename);
+    internal abstract void Open(string strFilename);
     /// <summary>
     /// Closes the currently-open database.
     /// </summary>
@@ -45,12 +45,12 @@ namespace System.Data.SQLite
     /// After the database has been closed implemeters should call SQLiteFunction.UnbindFunctions() to deallocate all interop allocated
     /// memory associated with the user-defined functions and collating sequences tied to the closed connection.
     /// </remarks>
-    internal abstract void   Close();
+    internal abstract void Close();
     /// <summary>
     /// Sets the busy timeout on the connection.  SQLiteCommand will call this before executing any command.
     /// </summary>
     /// <param name="nTimeoutMS">The number of milliseconds to wait before returning SQLITE_BUSY</param>
-    internal abstract void   SetTimeout(int nTimeoutMS);
+    internal abstract void SetTimeout(int nTimeoutMS);
     /// <summary>
     /// Returns the text of the last error issued by SQLite
     /// </summary>
@@ -74,11 +74,6 @@ namespace System.Data.SQLite
     /// <returns>True if a row was returned, False if not.</returns>
     internal abstract bool Step(SQLiteStatement stmt);
     /// <summary>
-    /// Finalizes a prepared statement.
-    /// </summary>
-    /// <param name="stmt">The statement to finalize</param>
-    internal abstract void FinalizeStatement(SQLiteStatement stmt);
-    /// <summary>
     /// Resets a prepared statement so it can be executed again.  If the error returned is SQLITE_SCHEMA, 
     /// transparently attempt to rebuild the SQL statement and throw an error if that was not possible.
     /// </summary>
@@ -96,40 +91,40 @@ namespace System.Data.SQLite
     internal abstract void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt);
     internal abstract void Bind_Null(SQLiteStatement stmt, int index);
 
-    internal abstract int    Bind_ParamCount(SQLiteStatement stmt);
+    internal abstract int Bind_ParamCount(SQLiteStatement stmt);
     internal abstract string Bind_ParamName(SQLiteStatement stmt, int index);
-    internal abstract int    Bind_ParamIndex(SQLiteStatement stmt, string paramName);
+    internal abstract int Bind_ParamIndex(SQLiteStatement stmt, string paramName);
 
-    internal abstract int    ColumnCount(SQLiteStatement stmt);
+    internal abstract int ColumnCount(SQLiteStatement stmt);
     internal abstract string ColumnName(SQLiteStatement stmt, int index);
     internal abstract TypeAffinity ColumnAffinity(SQLiteStatement stmt, int index);
     internal abstract string ColumnType(SQLiteStatement stmt, int index, out TypeAffinity nAffinity);
-    internal abstract int    ColumnIndex(SQLiteStatement stmt, string columnName);
+    internal abstract int ColumnIndex(SQLiteStatement stmt, string columnName);
     internal abstract string ColumnOriginalName(SQLiteStatement stmt, int index);
     internal abstract string ColumnDatabaseName(SQLiteStatement stmt, int index);
     internal abstract string ColumnTableName(SQLiteStatement stmt, int index);
     internal abstract void ColumnMetaData(string dataBase, string table, string column, out string dataType, out string collateSequence, out bool notNull, out bool primaryKey, out bool autoIncrement);
 
-    internal abstract double   GetDouble(SQLiteStatement stmt, int index);
-    internal abstract Int32    GetInt32(SQLiteStatement stmt, int index);
-    internal abstract Int64    GetInt64(SQLiteStatement stmt, int index);
-    internal abstract string   GetText(SQLiteStatement stmt, int index);
-    internal abstract long     GetBytes(SQLiteStatement stmt, int index, int nDataoffset, byte[] bDest, int nStart, int nLength);
-    internal abstract long     GetChars(SQLiteStatement stmt, int index, int nDataoffset, char[] bDest, int nStart, int nLength);
+    internal abstract double GetDouble(SQLiteStatement stmt, int index);
+    internal abstract Int32 GetInt32(SQLiteStatement stmt, int index);
+    internal abstract Int64 GetInt64(SQLiteStatement stmt, int index);
+    internal abstract string GetText(SQLiteStatement stmt, int index);
+    internal abstract long GetBytes(SQLiteStatement stmt, int index, int nDataoffset, byte[] bDest, int nStart, int nLength);
+    internal abstract long GetChars(SQLiteStatement stmt, int index, int nDataoffset, char[] bDest, int nStart, int nLength);
     internal abstract DateTime GetDateTime(SQLiteStatement stmt, int index);
-    internal abstract bool     IsNull(SQLiteStatement stmt, int index);
+    internal abstract bool IsNull(SQLiteStatement stmt, int index);
 
-    internal abstract IntPtr  CreateCollation(string strCollation, SQLiteCollation func);
-    internal abstract IntPtr  CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal);
+    internal abstract IntPtr CreateCollation(string strCollation, SQLiteCollation func);
+    internal abstract IntPtr CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal);
     internal abstract void FreeFunction(IntPtr cookie);
 
     internal abstract int AggregateCount(IntPtr context);
     internal abstract IntPtr AggregateContext(IntPtr context);
 
-    internal abstract long   GetParamValueBytes(IntPtr ptr, int nDataOffset, byte[] bDest, int nStart, int nLength);
+    internal abstract long GetParamValueBytes(IntPtr ptr, int nDataOffset, byte[] bDest, int nStart, int nLength);
     internal abstract double GetParamValueDouble(IntPtr ptr);
-    internal abstract int    GetParamValueInt32(IntPtr ptr);
-    internal abstract Int64  GetParamValueInt64(IntPtr ptr);
+    internal abstract int GetParamValueInt32(IntPtr ptr);
+    internal abstract Int64 GetParamValueInt64(IntPtr ptr);
     internal abstract string GetParamValueText(IntPtr ptr);
     internal abstract TypeAffinity GetParamValueType(IntPtr ptr);
 
@@ -160,7 +155,30 @@ namespace System.Data.SQLite
     public void Dispose()
     {
       Dispose(true);
-      GC.SuppressFinalize(this);
+    }
+
+    internal static string SQLiteLastError(SQLiteConnectionHandle db)
+    {
+      int len;
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
+    }
+
+    internal static string SQLiteLastError(SQLiteStatementHandle stmt)
+    {
+      int len;
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_stmt_interop(stmt, out len), len);
+    }
+
+    internal static void FinalizeStatement(SQLiteStatementHandle stmt)
+    {
+      int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
+      if (n > 0) throw new SQLiteException(n, SQLiteLastError(stmt));
+    }
+
+    internal static void Close(SQLiteConnectionHandle db)
+    {
+      int n = UnsafeNativeMethods.sqlite3_close_interop(db);
+      if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
     }
   }
 }

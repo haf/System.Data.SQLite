@@ -54,7 +54,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -72,7 +72,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
 				OutputFile="../bin/System.Data.SQLite.DLL"
 				GenerateManifest="false"
 				IgnoreDefaultLibraryNames=""
@@ -140,7 +140,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				InlineFunctionExpansion="1"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -161,6 +161,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
+				AdditionalDependencies="fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib"
 				OutputFile="../bin/CompactFramework/System.Data.SQLite.DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
@@ -228,7 +229,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -246,7 +247,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
 				OutputFile="../bin/Itanium/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -315,7 +316,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -333,7 +334,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
 				OutputFile="../bin/x64/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -400,7 +401,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -416,7 +417,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
 				OutputFile="../bin/$(InputName).DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -483,8 +484,7 @@
 				ExecutionBucket="7"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				FavorSizeOrSpeed="0"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -503,6 +503,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
+				AdditionalDependencies="fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib"
 				OutputFile="../bin/CompactFramework/$(InputName).DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
@@ -567,7 +568,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -583,7 +584,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
 				OutputFile="../bin/Itanium/$(InputName).DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -649,7 +650,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -665,7 +666,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
 				OutputFile="../bin/x64/$(InputName).DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -706,328 +707,6 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
-			<File
-				RelativePath=".\src\alter.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\analyze.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\attach.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\auth.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\btree.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Pocket PC 2003 (ARMV4)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Pocket PC 2003 (ARMV4)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\build.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\callback.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\complete.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\date.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\delete.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\expr.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\fts1.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\fts1_hash.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\fts1_porter.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\fts1_tokenizer1.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\func.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\hash.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\insert.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\legacy.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\loadext.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\main.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\opcodes.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\os.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\os_win.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\pager.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Pocket PC 2003 (ARMV4)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Pocket PC 2003 (ARMV4)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\parse.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\pragma.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\prepare.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\printf.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\random.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\select.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\table.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\tokenize.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\trigger.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\update.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\utf.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\util.c"
-				>
-				<FileConfiguration
-					Name="Release|Pocket PC 2003 (ARMV4)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\vacuum.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\vdbe.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\vdbeapi.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\vdbeaux.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\vdbefifo.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\vdbemem.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\vtab.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\where.c"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
@@ -1044,10 +723,6 @@
 		<Filter
 			Name="Extras"
 			>
-			<File
-				RelativePath=".\crypt.c"
-				>
-			</File>
 			<File
 				RelativePath=".\interop.c"
 				>

@@ -177,6 +177,25 @@ static int getVarint32(const char *p, int *pi){
  * the previous token to make the estimate a tiny bit more precise.
 */
 
+/* It is not safe to call isspace(), tolower(), or isalnum() on
+** hi-bit-set characters.  This is the same solution used in the
+** tokenizer.
+*/
+/* TODO(shess) The snippet-generation code should be using the
+** tokenizer-generated tokens rather than doing its own local
+** tokenization.
+*/
+/* TODO(shess) Is __isascii() a portable version of (c&0x80)==0? */
+static int safe_isspace(char c){
+  return (c&0x80)==0 ? isspace(c) : 0;
+}
+static int safe_tolower(char c){
+  return (c&0x80)==0 ? tolower(c) : c;
+}
+static int safe_isalnum(char c){
+  return (c&0x80)==0 ? isalnum(c) : 0;
+}
+
 typedef enum DocListType {
   DL_DOCIDS,              /* docids only */
   DL_POSITIONS,           /* docids + positions */
@@ -847,25 +866,31 @@ static char *string_dup(const char *s){
 }
 
 /* Format a string, replacing each occurrence of the % character with
- * zName.  This may be more convenient than sqlite_mprintf()
+ * zDb.zName.  This may be more convenient than sqlite_mprintf()
  * when one string is used repeatedly in a format string.
  * The caller must free() the returned string. */
-static char *string_format(const char *zFormat, const char *zName){
+static char *string_format(const char *zFormat,
+                           const char *zDb, const char *zName){
   const char *p;
   size_t len = 0;
+  size_t nDb = strlen(zDb);
   size_t nName = strlen(zName);
+  size_t nFullTableName = nDb+1+nName;
   char *result;
   char *r;
 
   /* first compute length needed */
   for(p = zFormat ; *p ; ++p){
-    len += (*p=='%' ? nName : 1);
+    len += (*p=='%' ? nFullTableName : 1);
   }
   len += 1;  /* for null terminator */
 
   r = result = malloc(len);
   for(p = zFormat; *p; ++p){
     if( *p=='%' ){
+      memcpy(r, zDb, nDb);
+      r += nDb;
+      *r++ = '.';
       memcpy(r, zName, nName);
       r += nName;
     } else {
@@ -877,8 +902,9 @@ static char *string_format(const char *zFormat, const char *zName){
   return result;
 }
 
-static int sql_exec(sqlite3 *db, const char *zName, const char *zFormat){
-  char *zCommand = string_format(zFormat, zName);
+static int sql_exec(sqlite3 *db, const char *zDb, const char *zName,
+                    const char *zFormat){
+  char *zCommand = string_format(zFormat, zDb, zName);
   int rc;
   TRACE(("FTS1 sql: %s\n", zCommand));
   rc = sqlite3_exec(db, zCommand, NULL, 0, NULL);
@@ -886,9 +912,9 @@ static int sql_exec(sqlite3 *db, const char *zName, const char *zFormat){
   return rc;
 }
 
-static int sql_prepare(sqlite3 *db, const char *zName, sqlite3_stmt **ppStmt,
-                const char *zFormat){
-  char *zCommand = string_format(zFormat, zName);
+static int sql_prepare(sqlite3 *db, const char *zDb, const char *zName,
+                       sqlite3_stmt **ppStmt, const char *zFormat){
+  char *zCommand = string_format(zFormat, zDb, zName);
   int rc;
   TRACE(("FTS1 prepare: %s\n", zCommand));
   rc = sqlite3_prepare(db, zCommand, -1, ppStmt, NULL);
@@ -1040,6 +1066,7 @@ static const char *const fulltext_zStatement[MAX_STMT] = {
 struct fulltext_vtab {
   sqlite3_vtab base;               /* Base class used by SQLite core */
   sqlite3 *db;                     /* The database connection */
+  const char *zDb;                 /* logical database name */
   const char *zName;               /* virtual table name */
   int nColumn;                     /* number of columns in virtual table */
   char **azColumn;                 /* column names.  malloced */
@@ -1139,7 +1166,7 @@ static int sql_get_statement(fulltext_vtab *v, fulltext_statement iStmt,
       default:
         zStmt = fulltext_zStatement[iStmt];
     }
-    rc = sql_prepare(v->db, v->zName, &v->pFulltextStatements[iStmt],
+    rc = sql_prepare(v->db, v->zDb, v->zName, &v->pFulltextStatements[iStmt],
                          zStmt);
     if( zStmt != fulltext_zStatement[iStmt]) free((void *) zStmt);
     if( rc!=SQLITE_OK ) return rc;
@@ -1246,13 +1273,14 @@ static void freeStringArray(int nString, const char **pString){
   int i;
 
   for (i=0 ; i < nString ; ++i) {
-    free((void *) pString[i]);
+    if( pString[i]!=NULL ) free((void *) pString[i]);
   }
   free((void *) pString);
 }
 
 /* select * from %_content where rowid = [iRow]
  * The caller must delete the returned array and all strings in it.
+ * null fields will be NULL in the returned array.
  *
  * TODO: Perhaps we should return pointer/length strings here for consistency
  * with other code which uses pointer/length. */
@@ -1276,7 +1304,11 @@ static int content_select(fulltext_vtab *v, sqlite_int64 iRow,
 
   values = (const char **) malloc(v->nColumn * sizeof(const char *));
   for(i=0; i<v->nColumn; ++i){
-    values[i] = string_dup((char*)sqlite3_column_text(s, i));
+    if( sqlite3_column_type(s, i)==SQLITE_NULL ){
+      values[i] = NULL;
+    }else{
+      values[i] = string_dup((char*)sqlite3_column_text(s, i));
+    }
   }
 
   /* We expect only one row.  We must execute another sqlite3_step()
@@ -1528,7 +1560,7 @@ static int getToken(const char *z, int *tokenType){
       return 0;
     }
     case ' ': case '\t': case '\n': case '\f': case '\r': {
-      for(i=1; isspace(z[i]); i++){}
+      for(i=1; safe_isspace(z[i]); i++){}
       *tokenType = TOKEN_SPACE;
       return i;
     }
@@ -1680,7 +1712,7 @@ static void tokenListToIdList(char **azIn){
   int i, j;
   if( azIn ){
     for(i=0, j=-1; azIn[i]; i++){
-      if( isalnum(azIn[i][0]) || azIn[i][1] ){
+      if( safe_isalnum(azIn[i][0]) || azIn[i][1] ){
         dequoteString(azIn[i]);
         if( j>=0 ){
           azIn[j] = azIn[i];
@@ -1729,11 +1761,11 @@ static char *firstToken(char *zIn, char **pzTail){
 ** s[] is t[].
 */
 static int startsWith(const char *s, const char *t){
-  while( isspace(*s) ){ s++; }
+  while( safe_isspace(*s) ){ s++; }
   while( *t ){
-    if( tolower(*s++)!=tolower(*t++) ) return 0;
+    if( safe_tolower(*s++)!=safe_tolower(*t++) ) return 0;
   }
-  return *s!='_' && !isalnum(*s);
+  return *s!='_' && !safe_isalnum(*s);
 }
 
 /*
@@ -1742,6 +1774,7 @@ static int startsWith(const char *s, const char *t){
 ** and use by fulltextConnect and fulltextCreate.
 */
 typedef struct TableSpec {
+  const char *zDb;         /* Logical database name */
   const char *zName;       /* Name of the full-text index */
   int nColumn;             /* Number of columns to be indexed */
   char **azColumn;         /* Original names of columns to be indexed */
@@ -1804,6 +1837,7 @@ static int parseSpec(TableSpec *pSpec, int argc, const char *const*argv,
   /* Identify the column names and the tokenizer and delimiter arguments
   ** in the argv[][] array.
   */
+  pSpec->zDb = azArg[1];
   pSpec->zName = azArg[2];
   pSpec->nColumn = 0;
   pSpec->azColumn = azArg;
@@ -1843,7 +1877,7 @@ static int parseSpec(TableSpec *pSpec, int argc, const char *const*argv,
     char *p;
     pSpec->azContentColumn[i] = sqlite3_mprintf("c%d%s", i, azArg[i]);
     for (p = pSpec->azContentColumn[i]; *p ; ++p) {
-      if( !isalnum(*p) ) *p = '_';
+      if( !safe_isalnum(*p) ) *p = '_';
     }
   }
 
@@ -1904,6 +1938,7 @@ static int constructVtab(
   memset(v, 0, sizeof(*v));
   /* sqlite will initialize v->base */
   v->db = db;
+  v->zDb = spec->zDb;       /* Freed when azColumn is freed */
   v->zName = spec->zName;   /* Freed when azColumn is freed */
   v->nColumn = spec->nColumn;
   v->azContentColumn = spec->azContentColumn;
@@ -2020,11 +2055,11 @@ static int fulltextCreate(sqlite3 *db, void *pAux,
   append(&schema, "CREATE TABLE %_content(");
   appendList(&schema, spec.nColumn, spec.azContentColumn);
   append(&schema, ")");
-  rc = sql_exec(db, spec.zName, schema.s);
+  rc = sql_exec(db, spec.zDb, spec.zName, schema.s);
   free(schema.s);
   if( rc!=SQLITE_OK ) goto out;
 
-  rc = sql_exec(db, spec.zName,
+  rc = sql_exec(db, spec.zDb, spec.zName,
     "create table %_term(term text, segment integer, doclist blob, "
                         "primary key(term, segment));");
   if( rc!=SQLITE_OK ) goto out;
@@ -2082,7 +2117,7 @@ static int fulltextDestroy(sqlite3_vtab *pVTab){
   int rc;
 
   TRACE(("FTS1 Destroy %p\n", pVTab));
-  rc = sql_exec(v->db, v->zName,
+  rc = sql_exec(v->db, v->zDb, v->zName,
                 "drop table if exists %_content;"
                 "drop table if exists %_term;"
                 );
@@ -2319,10 +2354,10 @@ static int wordBoundary(
     }
   }
   for(i=1; i<=10; i++){
-    if( isspace(zDoc[iBreak-i]) ){
+    if( safe_isspace(zDoc[iBreak-i]) ){
       return iBreak - i + 1;
     }
-    if( isspace(zDoc[iBreak+i]) ){
+    if( safe_isspace(zDoc[iBreak+i]) ){
       return iBreak + i + 1;
     }
   }
@@ -2335,7 +2370,7 @@ static int wordBoundary(
 */
 static void appendWhiteSpace(StringBuffer *p){
   if( p->len==0 ) return;
-  if( isspace(p->s[p->len-1]) ) return;
+  if( safe_isspace(p->s[p->len-1]) ) return;
   append(p, " ");
 }
 
@@ -2343,7 +2378,7 @@ static void appendWhiteSpace(StringBuffer *p){
 ** Remove white space from teh end of the StringBuffer
 */
 static void trimWhiteSpace(StringBuffer *p){
-  while( p->len>0 && isspace(p->s[p->len-1]) ){
+  while( p->len>0 && safe_isspace(p->s[p->len-1]) ){
     p->len--;
   }
 }
@@ -2839,7 +2874,7 @@ static int fulltextFilter(
   zSql = sqlite3_mprintf("select rowid, * from %%_content %s",
                           idxNum==QUERY_GENERIC ? "" : "where rowid=?");
   sqlite3_finalize(c->pStmt);
-  rc = sql_prepare(v->db, v->zName, &c->pStmt, zSql);
+  rc = sql_prepare(v->db, v->zDb, v->zName, &c->pStmt, zSql);
   sqlite3_free(zSql);
   if( rc!=SQLITE_OK ) return rc;
 

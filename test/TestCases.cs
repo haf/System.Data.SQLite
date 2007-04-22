@@ -89,6 +89,9 @@ namespace test
       try { FullTextTest(cnn); Console.WriteLine("SUCCESS - Full Text Search"); }
       catch (Exception) { Console.WriteLine("FAIL - Full Text Search"); }
 
+      try { DisposePattenTest(cnn); Console.WriteLine("SUCCESS - Dispose pattern test"); }
+      catch (Exception) { Console.WriteLine("FAIL - Dispose pattern test"); }
+
       try { KeyInfoTest(fact, cnn); Console.WriteLine("SUCCESS - KeyInfo Fetch"); }
       catch (Exception) { Console.WriteLine("FAIL - KeyInfo Fetch"); }
 
@@ -150,6 +153,20 @@ namespace test
       catch (Exception) { Console.WriteLine("FAIL - DropTable"); }
 
       Console.WriteLine("\r\nTests Finished.");
+    }
+
+    internal static void DisposePattenTest(DbConnection cnn)
+    {
+      using (DbConnection newcnn = ((ICloneable)cnn).Clone() as DbConnection)
+      {
+        for (int x = 0; x < 10000; x++)
+        {
+          DbCommand cmd = newcnn.CreateCommand();
+          cmd.CommandText = "SELECT * FROM sqlite_master";
+          DbDataReader reader = cmd.ExecuteReader();
+          reader.Read();
+        }
+      }
     }
 
     internal static void KeyInfoTest(DbProviderFactory fact, DbConnection cnn)

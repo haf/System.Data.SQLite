@@ -95,48 +95,48 @@ namespace System.Data.SQLite
     /// <summary>
     /// State of the current connection
     /// </summary>
-    private ConnectionState      _connectionState;
+    private ConnectionState _connectionState;
     /// <summary>
     /// The connection string
     /// </summary>
-    private string               _connectionString;
+    private string _connectionString;
     /// <summary>
     /// Nesting level of the transactions open on the connection
     /// </summary>
-    internal int                 _transactionLevel;
+    internal int _transactionLevel;
 #if !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
     /// Whether or not the connection is enlisted in a distrubuted transaction
     /// </summary>
-    internal SQLiteEnlistment    _enlistment;
+    internal SQLiteEnlistment _enlistment;
 #endif
     /// <summary>
     /// The base SQLite object to interop with
     /// </summary>
-    internal SQLiteBase          _sql;
+    internal SQLiteBase _sql;
     /// <summary>
     /// Commands associated with this connection
     /// </summary>
-    internal List<SQLiteCommand> _commandList;
+    internal List<WeakReference> _commandList;
     /// <summary>
     /// The database filename minus path and extension
     /// </summary>
-    private string               _dataSource;
+    private string _dataSource;
     /// <summary>
     /// Temporary password storage, emptied after the database has been opened
     /// </summary>
-    private byte[]               _password;
+    private byte[] _password;
 
-    internal bool                _binaryGuid;
+    internal bool _binaryGuid;
 
-    internal long                _version;
+    internal long _version;
 
     private event SQLiteUpdateEventHandler _updateHandler;
-    private event SQLiteCommitHandler      _commitHandler;
-    private event EventHandler             _rollbackHandler;
+    private event SQLiteCommitHandler _commitHandler;
+    private event EventHandler _rollbackHandler;
 
-    private SQLiteUpdateCallback   _updateCallback;
-    private SQLiteCommitCallback   _commitCallback;
+    private SQLiteUpdateCallback _updateCallback;
+    private SQLiteCommitCallback _commitCallback;
     private SQLiteRollbackCallback _rollbackCallback;
 
     /// <summary>
@@ -173,8 +173,8 @@ namespace System.Data.SQLite
     private void UpdateCallback(int type, IntPtr database, int databaseLen, IntPtr table, int tableLen, Int64 rowid)
     {
       _updateHandler(this, new UpdateEventArgs(
-        _sql.UTF8ToString(database, databaseLen),
-        _sql.UTF8ToString(table, tableLen),
+        SQLiteBase.UTF8ToString(database, databaseLen),
+        SQLiteBase.UTF8ToString(table, tableLen),
         (UpdateEventType)type,
         rowid));
     }
@@ -250,7 +250,8 @@ namespace System.Data.SQLite
     /// <summary>
     /// Default constructor
     /// </summary>
-    public SQLiteConnection() : this("")
+    public SQLiteConnection()
+      : this("")
     {
     }
 
@@ -265,7 +266,7 @@ namespace System.Data.SQLite
       _connectionString = "";
       _transactionLevel = 0;
       _version = 0;
-      _commandList = new List<SQLiteCommand>();
+      _commandList = new List<WeakReference>();
 
       if (connectionString != null)
         ConnectionString = connectionString;
@@ -277,7 +278,8 @@ namespace System.Data.SQLite
     /// attach to them.
     /// </summary>
     /// <param name="connection"></param>
-    public SQLiteConnection(SQLiteConnection connection) : this(connection.ConnectionString)
+    public SQLiteConnection(SQLiteConnection connection)
+      : this(connection.ConnectionString)
     {
       string str;
 
@@ -335,7 +337,9 @@ namespace System.Data.SQLite
     protected override void Dispose(bool disposing)
     {
       base.Dispose(disposing);
-      Close();
+
+      if (disposing)
+        Close();
     }
 
     /// <summary>
@@ -462,9 +466,25 @@ namespace System.Data.SQLite
         // resources.  The commands are still valid and will automatically re-acquire the
         // unmanaged resources the next time they are run -- provided this connection is
         // re-opened before then.
+        WeakReference[] clone;
+
         lock (_commandList)
         {
-          foreach (SQLiteCommand cmd in _commandList)
+          clone = new WeakReference[_commandList.Count];
+          _commandList.CopyTo(clone);
+        }
+
+        for (int n = 0; n < clone.Length; n++)
+        {
+          SQLiteCommand cmd = null;
+          try
+          {
+            cmd = clone[n].Target as SQLiteCommand;
+          }
+          catch
+          {
+          }
+          if (cmd != null)
             cmd.ClearCommands();
         }
 
@@ -480,7 +500,7 @@ namespace System.Data.SQLite
           cnn._enlistment = _enlistment;
           cnn._connectionState = _connectionState;
           cnn._version = _version;
-          
+
           cnn._enlistment._transaction._cnn = cnn;
           cnn._enlistment._disposeConnection = true;
         }
@@ -490,12 +510,11 @@ namespace System.Data.SQLite
         }
         _enlistment = null;
 #else
-        _sql.Close();
+          _sql.Close();
 #endif
         _sql = null;
         _transactionLevel = 0;
       }
-
       OnStateChange(ConnectionState.Closed);
     }
 
@@ -620,7 +639,7 @@ namespace System.Data.SQLite
 #endif
     public override string DataSource
     {
-      get 
+      get
       {
         return _dataSource;
       }
@@ -1853,7 +1872,7 @@ namespace System.Data.SQLite
     {
       lock (_commandList)
       {
-        _commandList.Add(cmd);
+        _commandList.Add(new WeakReference(cmd, false));
       }
     }
 
@@ -1861,7 +1880,20 @@ namespace System.Data.SQLite
     {
       lock (_commandList)
       {
-        _commandList.Remove(cmd);
+        foreach (WeakReference r in _commandList)
+        {
+          try
+          {
+            if (r.Target as SQLiteCommand == cmd)
+            {
+              _commandList.Remove(r);
+              return;
+            }
+          }
+          catch
+          {
+          }
+        }
       }
     }
   }

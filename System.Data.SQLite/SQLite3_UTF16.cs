@@ -43,17 +43,14 @@ namespace System.Data.SQLite
 
     internal override void Open(string strFilename)
     {
-      if (_sql != IntPtr.Zero) return;
-      int n = UnsafeNativeMethods.sqlite3_open16_interop(strFilename, out _sql);
+      if (_sql != null) return;
+      IntPtr db;
+
+      int n = UnsafeNativeMethods.sqlite3_open16_interop(strFilename, out db);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
 
+      _sql = db;
       _functionsArray = SQLiteFunction.BindFunctions(this);
-    }
-
-    internal override string SQLiteLastError()
-    {
-      int len;
-      return ToString(UnsafeNativeMethods.sqlite3_errmsg16_interop(_sql, out len), len);
     }
 
     internal override void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt)
@@ -83,6 +80,7 @@ namespace System.Data.SQLite
     {
       return ToDateTime(GetText(stmt, index));
     }
+
     internal override string GetText(SQLiteStatement stmt, int index)
     {
       int len;

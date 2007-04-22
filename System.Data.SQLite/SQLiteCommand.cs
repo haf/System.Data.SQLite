@@ -32,7 +32,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Indicates whether or not a DataReader is active on the command.
     /// </summary>
-    private SQLiteDataReader _activeReader;
+    private WeakReference _activeReader;
     /// <summary>
     /// The timeout for the command, kludged because SQLite doesn't support per-command timeout values
     /// </summary>
@@ -147,16 +147,32 @@ namespace System.Data.SQLite
     {
       base.Dispose(disposing);
 
-      // If a reader is active on this command, don't destroy it completely
-      if (_activeReader != null)
+      if (disposing)
       {
-        _activeReader._disposeCommand = true;
-        return;
-      }
+        // If a reader is active on this command, don't destroy the command, instead let the reader do it
+        SQLiteDataReader reader = null;
+        if (_activeReader != null)
+        {
+          try
+          {
+            reader = _activeReader.Target as SQLiteDataReader;
+          }
+          catch
+          {
+          }
+        }
 
-      Connection = null;
-      _parameterCollection.Clear();
-      _commandText = null;
+        if (reader != null)
+        {
+          reader._disposeCommand = true;
+          _activeReader = null;
+          return;
+        }
+
+        Connection = null;
+        _parameterCollection.Clear();
+        _commandText = null;
+      }
     }
 
     /// <summary>
@@ -165,7 +181,21 @@ namespace System.Data.SQLite
     internal void ClearCommands()
     {
       if (_activeReader != null)
-        _activeReader.Close();
+      {
+        SQLiteDataReader reader = null;
+        try
+        {
+          reader = _activeReader.Target as SQLiteDataReader;
+        }
+        catch
+        {
+        }
+
+        if (reader != null)
+          reader.Close();
+
+        _activeReader = null;
+      }
 
       if (_statementList == null) return;
 
@@ -262,7 +292,7 @@ namespace System.Data.SQLite
       {
         if (_commandText == value) return;
 
-        if (_activeReader != null)
+        if (_activeReader != null && _activeReader.IsAlive)
         {
           throw new InvalidOperationException("Cannot set CommandText while a DataReader is active");
         }
@@ -342,7 +372,7 @@ namespace System.Data.SQLite
       get { return _cnn; }
       set
       {
-        if (_activeReader != null)
+        if (_activeReader != null && _activeReader.IsAlive)
           throw new InvalidOperationException("Cannot set Connection while a DataReader is active");
 
         if (_cnn != null)
@@ -409,7 +439,7 @@ namespace System.Data.SQLite
       {
         if (_cnn != null)
         {
-          if (_activeReader != null)
+          if (_activeReader != null && _activeReader.IsAlive)
             throw new InvalidOperationException("Cannot set Transaction while a DataReader is active");
 
           if (value != null)
@@ -446,7 +476,7 @@ namespace System.Data.SQLite
     /// </summary>
     private void InitializeForReader()
     {
-      if (_activeReader != null)
+      if (_activeReader != null && _activeReader.IsAlive)
         throw new InvalidOperationException("DataReader already active on this command");
 
       if (_cnn == null)
@@ -482,7 +512,7 @@ namespace System.Data.SQLite
       InitializeForReader();
 
       SQLiteDataReader rd = new SQLiteDataReader(this, behavior);
-      _activeReader = rd;
+      _activeReader = new WeakReference(rd, false);
 
       return rd;
     }

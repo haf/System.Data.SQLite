@@ -27,7 +27,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The actual statement pointer
     /// </summary>
-    internal IntPtr            _sqlite_stmt;
+    internal SQLiteStatementHandle  _sqlite_stmt;
     /// <summary>
     /// An index from which unnamed parameters begin
     /// </summary>
@@ -54,7 +54,7 @@ namespace System.Data.SQLite
     /// <param name="stmt">The statement</param>
     /// <param name="strCommand">The command text for this statement</param>
     /// <param name="previous">The previous command in a multi-statement command</param>
-    internal SQLiteStatement(SQLiteBase sqlbase, IntPtr stmt, string strCommand, SQLiteStatement previous)
+    internal SQLiteStatement(SQLiteBase sqlbase, SQLiteStatementHandle stmt, string strCommand, SQLiteStatement previous)
     {
       _sql     = sqlbase;
       _sqlite_stmt = stmt;
@@ -124,14 +124,13 @@ namespace System.Data.SQLite
     /// </summary>
     public void Dispose()
     {
-      _sql.FinalizeStatement(this);
+      _sqlite_stmt.Dispose();
+      _sqlite_stmt = null;
       
       _paramNames = null;
       _paramValues = null;
       _sql = null;
       _sqlStatement = null;
-
-      GC.SuppressFinalize(this);
     }
     #endregion
     
