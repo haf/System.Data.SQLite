@@ -569,12 +569,14 @@ namespace System.Data.SQLite
       {
         row = tbl.NewRow();
 
+        DbType typ = GetSQLiteType(n).Type;
+
         // Default settings for the column
         row[SchemaTableColumn.ColumnName] = GetName(n);
         row[SchemaTableColumn.ColumnOrdinal] = n;
-        row[SchemaTableColumn.ColumnSize] = SQLiteConvert.DbTypeToColumnSize(GetSQLiteType(n).Type);
-        row[SchemaTableColumn.NumericPrecision] = 255;
-        row[SchemaTableColumn.NumericScale] = 255;
+        row[SchemaTableColumn.ColumnSize] = SQLiteConvert.DbTypeToColumnSize(typ);
+        row[SchemaTableColumn.NumericPrecision] = SQLiteConvert.DbTypeToNumericPrecision(typ);
+        row[SchemaTableColumn.NumericScale] = SQLiteConvert.DbTypeToNumericScale(typ);
         row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
         row[SchemaTableColumn.IsLong] = (GetSQLiteType(n).Type == DbType.Binary);
         row[SchemaTableColumn.AllowDBNull] = true;

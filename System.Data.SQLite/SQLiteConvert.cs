@@ -458,6 +458,72 @@ namespace System.Data.SQLite
       2147483647,   // 25 (Xml)
     };
 
+    internal static object DbTypeToNumericPrecision(DbType typ)
+    {
+      return _dbtypetonumericprecision[(int)typ];
+    }
+
+    private static object[] _dbtypetonumericprecision = {
+      DBNull.Value, // 0
+      DBNull.Value, // 1
+      3,
+      DBNull.Value,
+      19,
+      DBNull.Value, // 5
+      DBNull.Value, // 6
+      53,
+      53,
+      DBNull.Value,
+      5,
+      10,
+      19,
+      DBNull.Value,
+      3,
+      24,
+      DBNull.Value,
+      DBNull.Value,
+      5,
+      10,
+      19,
+      53,
+      DBNull.Value,
+      DBNull.Value,
+      DBNull.Value
+    };
+
+    internal static object DbTypeToNumericScale(DbType typ)
+    {
+      return _dbtypetonumericscale[(int)typ];
+    }
+
+    private static object[] _dbtypetonumericscale = {
+      DBNull.Value, // 0
+      DBNull.Value, // 1
+      0,
+      DBNull.Value,
+      4,
+      DBNull.Value, // 5
+      DBNull.Value, // 6
+      DBNull.Value,
+      DBNull.Value,
+      DBNull.Value,
+      0,
+      0,
+      0,
+      DBNull.Value,
+      0,
+      DBNull.Value,
+      DBNull.Value,
+      DBNull.Value,
+      0,
+      0,
+      0,
+      0,
+      DBNull.Value,
+      DBNull.Value,
+      DBNull.Value
+    };
+
     /// <summary>
     /// Convert a DbType to a Type
     /// </summary>

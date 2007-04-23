@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.39.1 January 11, 2007<br>
-    Using SQLite 3.3.10<br>
+    Version 1.0.41.0 Beta April 23, 2007<br>
+    Using SQLite 3.3.16<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -119,6 +119,23 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.41.0 - April 23, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.16</li>
+      <li>Second go at implementing proper finalizers to cleanup after folks who've forgotten to Dispose() of the SQLite objects</li>
+      <li>Enhanced GetSchema(IndexColumns) to provide numeric scale and precision values</li>
+      <li>Fixed the column ordinals in GetSchema(IndexColumns) to report the ordinal of the column in the index, not the table</li>
+      <li>Fixed a bug whereby parameters named with an empty string (such as String.Empty) were treated like a named parameter instead of an unnamed parameter</li>
+    </ul>
+    <p><b>1.0.40.0 - January 31, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.12</li>
+      <li>Lots of new code to handle misuse of the library.&nbsp; Implemented finalizers
+        where it made sense, fixed numerous garbage collector issues when objects are not
+        disposed properly, &nbsp;fixed some object lifetime issues, etc.</li>
+      <li>A failed Commit() on a transaction no longer leaves the transaction in an unusable
+        state.</li>
+    </ul>
     <p><b>1.0.39.1 - January 11, 2007</b></p>
     <ul>
     <li>Fixed a really dumb mistake that for some reason didn't trigger any errors in

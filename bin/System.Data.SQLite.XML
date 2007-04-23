@@ -765,7 +765,7 @@
         </member>
         <member name="M:System.Data.SQLite.SQLiteDataReader.Dispose(System.Boolean)">
             <summary>
-            Disposes the datareader.  Calls Close() to ensure everything is cleaned up.
+            Disposes the datareader.  Base class calls Close() to ensure everything is cleaned up.
             </summary>
         </member>
         <member name="M:System.Data.SQLite.SQLiteDataReader.CheckClosed">
@@ -1607,12 +1607,6 @@
             </summary>
             <param name="stmt">The SQLiteStatement to step through</param>
             <returns>True if a row was returned, False if not.</returns>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteBase.FinalizeStatement(System.Data.SQLite.SQLiteStatement)">
-            <summary>
-            Finalizes a prepared statement.
-            </summary>
-            <param name="stmt">The statement to finalize</param>
         </member>
         <member name="M:System.Data.SQLite.SQLiteBase.Reset(System.Data.SQLite.SQLiteStatement)">
             <summary>
@@ -2934,7 +2928,7 @@
             Command this statement belongs to (if any)
             </summary>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteStatement.#ctor(System.Data.SQLite.SQLiteBase,System.IntPtr,System.String,System.Data.SQLite.SQLiteStatement)">
+        <member name="M:System.Data.SQLite.SQLiteStatement.#ctor(System.Data.SQLite.SQLiteBase,System.Data.SQLite.SQLiteStatementHandle,System.String,System.Data.SQLite.SQLiteStatement)">
             <summary>
             Initializes the statement and attempts to get all information about parameters in the statement
             </summary>

@@ -142,7 +142,7 @@ namespace System.Data.SQLite
     {
       int n = -1;
 
-      if (parameter.ParameterName != null)
+      if (String.IsNullOrEmpty(parameter.ParameterName) == false)
       {
         n = IndexOf(parameter.ParameterName);
       }

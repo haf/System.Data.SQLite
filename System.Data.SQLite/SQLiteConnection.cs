@@ -1224,6 +1224,8 @@ namespace System.Data.SQLite
                 {
                   row = tbl.NewRow();
 
+                  row["NUMERIC_PRECISION"] = schemaRow[SchemaTableColumn.NumericPrecision];
+                  row["NUMERIC_SCALE"] = schemaRow[SchemaTableColumn.NumericScale];
                   row["TABLE_NAME"] = rdTables.GetString(2);
                   row["COLUMN_NAME"] = schemaRow[SchemaTableColumn.ColumnName];
                   row["TABLE_CATALOG"] = strCatalog;
@@ -1655,6 +1657,7 @@ namespace System.Data.SQLite
                 }
               }
             }
+            // This is a rowid row
             if (primaryKeys.Count == 1 && maybeRowId == true)
             {
               row = tbl.NewRow();
@@ -1664,7 +1667,7 @@ namespace System.Data.SQLite
               row["TABLE_NAME"] = rdTables.GetString(2);
               row["COLUMN_NAME"] = primaryKeys[0].Value;
               row["INDEX_NAME"] = row["CONSTRAINT_NAME"];
-              row["ORDINAL_POSITION"] = primaryKeys[0].Key;
+              row["ORDINAL_POSITION"] = 0; // primaryKeys[0].Key;
 
               if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, (string)row["INDEX_NAME"], true, CultureInfo.InvariantCulture) == 0)
                 tbl.Rows.Add(row);
@@ -1675,6 +1678,7 @@ namespace System.Data.SQLite
             {
               while (rdIndexes.Read())
               {
+                int ordinal = 0;
                 if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, rdIndexes.GetString(1), true, CultureInfo.InvariantCulture) == 0)
                 {
                   using (SQLiteCommand cmdIndex = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].index_info([{1}])", strCatalog, rdIndexes.GetString(1)), this))
@@ -1689,7 +1693,9 @@ namespace System.Data.SQLite
                       row["TABLE_NAME"] = rdIndexes.GetString(2);
                       row["COLUMN_NAME"] = rdIndex.GetString(2);
                       row["INDEX_NAME"] = rdIndexes.GetString(1);
-                      row["ORDINAL_POSITION"] = rdIndex.GetInt32(1);
+                      row["ORDINAL_POSITION"] = ordinal; // rdIndex.GetInt32(1);
+
+                      ordinal++;
 
                       if (String.IsNullOrEmpty(strColumn) || String.Compare(strColumn, row["COLUMN_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
                         tbl.Rows.Add(row);
