@@ -70,8 +70,36 @@ namespace System.Data.SQLite
     /// </summary>
     public event EventHandler<RowUpdatingEventArgs> RowUpdating
     {
-      add { base.Events.AddHandler(_updatingEventPH, value); }
+      add
+      {
+        EventHandler<RowUpdatingEventArgs> previous = (EventHandler<RowUpdatingEventArgs>)base.Events[_updatingEventPH];
+        if ((previous != null) && (value.Target is DbCommandBuilder))
+        {
+          EventHandler<RowUpdatingEventArgs> handler = (EventHandler<RowUpdatingEventArgs>)FindBuilder(previous);
+          if (handler != null)
+          {
+            base.Events.RemoveHandler(_updatingEventPH, handler);
+          }
+        }
+        base.Events.AddHandler(_updatingEventPH, value); 
+      }
       remove { base.Events.RemoveHandler(_updatingEventPH, value); }
+    }
+
+    internal static Delegate FindBuilder(MulticastDelegate mcd)
+    {
+      if (mcd != null)
+      {
+        Delegate[] invocationList = mcd.GetInvocationList();
+        for (int i = 0; i < invocationList.Length; i++)
+        {
+          if (invocationList[i].Target is DbCommandBuilder)
+          {
+            return invocationList[i];
+          }
+        }
+      }
+      return null;
     }
 
     /// <summary>

@@ -56,6 +56,42 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
+    <p><b>1.0.42.0 - June 1, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.17</li>
+      <li>Changed the SQLiteFunction static constructor so it only enumerates loaded modules
+        that have referenced the SQLite assembly, which hopefully should cut down dramatically
+        the time it takes for that function to execute.&nbsp;</li>
+      <li>Added the FTS2 full-text search extension to the project.&nbsp; Look for FTS1
+        to disappear within the next couple of revisions.&nbsp;</li>
+      <li>Fixed a bug introduced with the finalizers that triggered an error when statements
+        ended with a semi-colon or had other non-parsable comments at the end of a statement&nbsp;</li>
+      <li>Fixed an intermittent multi-threaded race condition between the garbage collector
+        thread and the main application thread which lead to an occasional SQLITE_MISUSE
+        error.</li>
+      <li>Fixed another issue relating to SQLite's inherent typelessness when dealing with
+        aggregate functions which could return Int64 or Double or even String for a given
+        row depending on what was aggregated.</li>
+      <li>Remembered to recompile the DDEX portion of the engine this time, so Compact Framework
+        users can once again use the design-time functionality</li>
+    </ul>
+    <p><b>1.0.41.0 - April 23, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.16</li>
+      <li>Second go at implementing proper finalizers to cleanup after folks who've forgotten to Dispose() of the SQLite objects</li>
+      <li>Enhanced GetSchema(IndexColumns) to provide numeric scale and precision values</li>
+      <li>Fixed the column ordinals in GetSchema(IndexColumns) to report the ordinal of the column in the index, not the table</li>
+      <li>Fixed a bug whereby parameters named with an empty string (such as String.Empty) were treated like a named parameter instead of an unnamed parameter</li>
+    </ul>
+    <p><b>1.0.40.0 - January 31, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.12</li>
+      <li>Lots of new code to handle misuse of the library.&nbsp; Implemented finalizers
+        where it made sense, fixed numerous garbage collector issues when objects are not
+        disposed properly, &nbsp;fixed some object lifetime issues, etc.</li>
+      <li>A failed Commit() on a transaction no longer leaves the transaction in an unusable
+        state.</li>
+    </ul>
     <p><b>1.0.39.1 - January 11, 2007</b></p>
     <ul>
     <li>Fixed a really dumb mistake that for some reason didn't trigger any errors in

@@ -54,7 +54,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -72,7 +72,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib fts2/$(ConfigurationName)/SQLite.Interop.FTS2.lib $(NOINHERIT)"
 				OutputFile="../bin/System.Data.SQLite.DLL"
 				GenerateManifest="false"
 				IgnoreDefaultLibraryNames=""
@@ -140,7 +140,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				InlineFunctionExpansion="1"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -161,7 +161,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib"
+				AdditionalDependencies="fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib fts2/$(ConfigurationName)/SQLite.Interop.FTS2.lib"
 				OutputFile="../bin/CompactFramework/System.Data.SQLite.DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
@@ -229,7 +229,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -247,7 +247,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib fts2/$(ConfigurationName)/SQLite.Interop.FTS2.lib $(NOINHERIT)"
 				OutputFile="../bin/Itanium/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -316,7 +316,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -334,7 +334,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib fts2/$(ConfigurationName)/SQLite.Interop.FTS2.lib $(NOINHERIT)"
 				OutputFile="../bin/x64/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -401,7 +401,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -417,7 +417,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib fts2/$(ConfigurationName)/SQLite.Interop.FTS2.lib $(NOINHERIT)"
 				OutputFile="../bin/$(InputName).DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -484,7 +484,7 @@
 				ExecutionBucket="7"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_OMIT_TRACE"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -503,7 +503,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				AdditionalDependencies="fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib"
+				AdditionalDependencies="fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib fts2/$(ConfigurationName)/SQLite.Interop.FTS2.lib"
 				OutputFile="../bin/CompactFramework/$(InputName).DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
@@ -568,7 +568,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -584,7 +584,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib fts2/$(ConfigurationName)/SQLite.Interop.FTS2.lib $(NOINHERIT)"
 				OutputFile="../bin/Itanium/$(InputName).DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
@@ -650,7 +650,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -666,7 +666,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib $(NOINHERIT)"
+				AdditionalDependencies="advapi32.lib fts1/$(ConfigurationName)/SQLite.Interop.FTS1.lib fts2/$(ConfigurationName)/SQLite.Interop.FTS2.lib $(NOINHERIT)"
 				OutputFile="../bin/x64/$(InputName).DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""

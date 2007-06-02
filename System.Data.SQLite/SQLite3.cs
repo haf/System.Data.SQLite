@@ -222,7 +222,7 @@ namespace System.Data.SQLite
 
         strRemain = UTF8ToString(ptr, len);
 
-        if (stmt != null) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
+        if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, stmt, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
 
         return cmd;
       }

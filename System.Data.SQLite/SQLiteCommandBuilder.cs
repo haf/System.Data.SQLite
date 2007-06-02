@@ -18,8 +18,6 @@ namespace System.Data.SQLite
   /// </summary>
   public sealed class SQLiteCommandBuilder : DbCommandBuilder
   {
-    private EventHandler<RowUpdatingEventArgs> _handler;
-
     /// <summary>
     /// Default constructor
     /// </summary>
@@ -88,10 +86,14 @@ namespace System.Data.SQLite
     /// <param name="adapter">A data adapter to receive events on.</param>
     protected override void SetRowUpdatingHandler(DbDataAdapter adapter)
     {
-      SQLiteDataAdapter adp = (SQLiteDataAdapter)adapter;
-
-      _handler = new EventHandler<RowUpdatingEventArgs>(RowUpdatingEventHandler);
-      adp.RowUpdating += _handler;
+      if (adapter == base.DataAdapter)
+      {
+        ((SQLiteDataAdapter)adapter).RowUpdating -= new EventHandler<RowUpdatingEventArgs>(RowUpdatingEventHandler);
+      }
+      else
+      {
+        ((SQLiteDataAdapter)adapter).RowUpdating += new EventHandler<RowUpdatingEventArgs>(RowUpdatingEventHandler);
+      }
     }
 
     private void RowUpdatingEventHandler(object sender, RowUpdatingEventArgs e)

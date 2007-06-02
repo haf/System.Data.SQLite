@@ -755,7 +755,13 @@ namespace System.Data.SQLite
         return _keyInfo.GetValue(i - VisibleFieldCount);
 
       SQLiteType typ = GetSQLiteType(i);
-      typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
+      TypeAffinity aff = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
+
+      if (aff != typ.Affinity)
+      {
+        typ.Type = DbType.Object;
+        typ.Affinity = aff;
+      }
       return _activeStatement._sql.GetValue(_activeStatement, i, ref typ);
     }
 

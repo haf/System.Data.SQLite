@@ -12,10 +12,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", 
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
-	ProjectSection(ProjectDependencies) = postProject
-		{AC139952-261A-4463-B6FA-AEBC25283A66} = {AC139952-261A-4463-B6FA-AEBC25283A66}
-		{10B51CE8-A838-44DE-BD82-B658F0296F80} = {10B51CE8-A838-44DE-BD82-B658F0296F80}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39A3B743-1EBD-4CC0-8E37-ACE3DD38B1C0}"
 	ProjectSection(WebsiteProperties) = preProject
@@ -32,6 +28,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop", "SQLite.In
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B} = {BCD4CA74-771B-49EE-9025-606CB839DA0B}
 		{AC139951-261A-4463-B6FA-AEBC25283A66} = {AC139951-261A-4463-B6FA-AEBC25283A66}
 		{AC139952-261A-4463-B6FA-AEBC25283A66} = {AC139952-261A-4463-B6FA-AEBC25283A66}
 		{BCD6CA74-771B-49EE-9025-606CB839DA0B} = {BCD6CA74-771B-49EE-9025-606CB839DA0B}
@@ -54,6 +51,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite - Full",
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop.FTS1", "SQLite.Interop\FTS1\FTS1.vcproj", "{BCD6CA74-771B-49EE-9025-606CB839DA0B}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop.FTS2", "SQLite.Interop\FTS2\FTS2.vcproj", "{BCD4CA74-771B-49EE-9025-606CB839DA0B}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -159,7 +162,7 @@ Global
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Debug|Win32.Build.0 = Debug|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Debug|x64.Build.0 = Debug|Any CPU
-		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Compact Framework.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Compact Framework.ActiveCfg = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Itanium.ActiveCfg = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Itanium.Build.0 = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
@@ -188,6 +191,26 @@ Global
 		{BCD6CA74-771B-49EE-9025-606CB839DA0B}.Release|Win32.Build.0 = Release|Win32
 		{BCD6CA74-771B-49EE-9025-606CB839DA0B}.Release|x64.ActiveCfg = Release|x64
 		{BCD6CA74-771B-49EE-9025-606CB839DA0B}.Release|x64.Build.0 = Release|x64
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|Compact Framework.ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|Compact Framework.Build.0 = Debug|Pocket PC 2003 (ARMV4)
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|Itanium.ActiveCfg = Debug|Itanium
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|Itanium.Build.0 = Debug|Itanium
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|Mixed Platforms.Build.0 = Debug|x64
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|Win32.Build.0 = Debug|Win32
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|x64.ActiveCfg = Debug|x64
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Debug|x64.Build.0 = Debug|x64
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|Compact Framework.ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|Compact Framework.Build.0 = Release|Pocket PC 2003 (ARMV4)
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|Itanium.ActiveCfg = Release|Itanium
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|Itanium.Build.0 = Release|Itanium
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|Mixed Platforms.ActiveCfg = Release|x64
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|Mixed Platforms.Build.0 = Release|x64
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|Win32.ActiveCfg = Release|Win32
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|Win32.Build.0 = Release|Win32
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|x64.ActiveCfg = Release|x64
+		{BCD4CA74-771B-49EE-9025-606CB839DA0B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

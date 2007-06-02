@@ -733,9 +733,13 @@ __declspec(dllexport) const void * WINAPI sqlite3_column_origin_name16_interop(s
 
 __declspec(dllexport) int WINAPI sqlite3_table_column_metadata_interop(sqlite3 *db, const char *zDbName, const char *zTableName, const char *zColumnName, char **pzDataType, char **pzCollSeq, int *pNotNull, int *pPrimaryKey, int *pAutoinc, int *pdtLen, int *pcsLen)
 {
-  int n = sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc);
+  int n;
+  
+  EnterDbMutex(db);
+  n = sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc);
   *pdtLen = (*pzDataType != 0) ? strlen(*pzDataType) : 0;
   *pcsLen = (*pzCollSeq != 0) ? strlen(*pzCollSeq) : 0;
+  LeaveDbMutex(db);
 
   return n;
 }
@@ -775,50 +779,81 @@ __declspec(dllexport) void * WINAPI sqlite3_rollback_hook_interop(sqlite3 *pDb, 
 __declspec(dllexport) int WINAPI sqlite3_table_cursor(sqlite3_stmt *pstmt, int iDb, Pgno tableRootPage)
 {
   Vdbe *p = (Vdbe *)pstmt;
+  sqlite3 *db = (p == NULL) ? NULL : p->db;
   int n;
+  int ret = -1;
 
+  EnterDbMutex(db);
   for (n = 0; n < p->nCursor && p->apCsr[n] != NULL; n++)
   {
     if (p->apCsr[n]->isTable == FALSE) continue;
     if (p->apCsr[n]->iDb != iDb) continue;
     if (p->apCsr[n]->pCursor->pgnoRoot == tableRootPage)
-      return n;
+    {
+      ret = n;
+      break;
+    }
   }
-  return -1;
+  LeaveDbMutex(db);
+  return ret;
 }
 
 __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int cursor, sqlite_int64 *prowid)
 {
   Vdbe *p = (Vdbe *)pstmt;
+  sqlite3 *db = (p == NULL) ? NULL : p->db;
   int rc = 0;
   Cursor *pC;
+  int ret = 0;
 
-  if (cursor < 0 || cursor >= p->nCursor) return SQLITE_ERROR;
-  if (p->apCsr[cursor] == NULL) return SQLITE_ERROR;
-  pC = p->apCsr[cursor];
+  EnterDbMutex(db);
+  while (1)
+  {
+    if (cursor < 0 || cursor >= p->nCursor)
+    {
+      ret = SQLITE_ERROR;
+      break;
+    }
+    if (p->apCsr[cursor] == NULL)
+    {
+      ret = SQLITE_ERROR;
+      break;
+    }
 
-  rc = sqlite3VdbeCursorMoveto(pC);
-  if( rc ) return rc;
+    pC = p->apCsr[cursor];
 
-  if( pC->rowidIsValid )
-  {
-    *prowid = pC->lastRowid;
+    ret = sqlite3VdbeCursorMoveto(pC);
+    if(ret)
+      break;
+
+    if(pC->rowidIsValid)
+    {
+      *prowid = pC->lastRowid;
+    }
+    else if(pC->pseudoTable)
+    {
+      *prowid = keyToInt(pC->iKey);
+    }
+    else if(pC->nullRow || pC->pCursor==0)
+    {
+      ret = SQLITE_ERROR;
+      break;
+    }
+    else
+    {
+      if (pC->pCursor == NULL)
+      {
+        ret = SQLITE_ERROR;
+        break;
+      }
+      sqlite3BtreeKeySize(pC->pCursor, prowid);
+      *prowid = keyToInt(*prowid);
+    }
+    break;
   }
-  else if(pC->pseudoTable )
-  {
-    *prowid = keyToInt(pC->iKey);
-  }
-  else if(pC->nullRow || pC->pCursor==0)
-  {
-    return SQLITE_ERROR;
-  }
-  else
-  {
-    if (pC->pCursor == NULL) return SQLITE_ERROR;
-    sqlite3BtreeKeySize(pC->pCursor, prowid);
-    *prowid = keyToInt(*prowid);
-  }
-  return 0;
+  LeaveDbMutex(db);
+
+  return ret;
 }
 
 #endif // OS_WIN

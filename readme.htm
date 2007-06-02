@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.41.0 Beta April 23, 2007<br>
-    Using SQLite 3.3.16<br>
+    Version 1.0.42.0 June &nbsp;1, 2007<br>
+    Using SQLite 3.3.17<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -119,6 +119,33 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.43.0 - June 2, 2007</b></p>
+    <ul>
+    <li>Fixed a reuse bug in the SQLiteDataAdapter in conjunction with the SQLiteCommandBuilder.&nbsp;
+      It's been there unnoticed for more than a year, so it looks like most folks never
+      encountered it.</li>
+      <li>Fixed an event handler bug in SQLiteCommandBuilder in which it could fail to unlatch
+        from the DataAdapter when reused.&nbsp; Relates to the previous bugfix.</li>
+    </ul>
+    <p><b>1.0.42.0 - June 1, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.3.17</li>
+      <li>Changed the SQLiteFunction static constructor so it only enumerates loaded modules
+        that have referenced the SQLite assembly, which hopefully should cut down dramatically
+        the time it takes for that function to execute.&nbsp;</li>
+      <li>Added the FTS2 full-text search extension to the project.&nbsp; Look for FTS1
+        to disappear within the next couple of revisions.&nbsp;</li>
+      <li>Fixed a bug introduced with the finalizers that triggered an error when statements
+        ended with a semi-colon or had other non-parsable comments at the end of a statement&nbsp;</li>
+      <li>Fixed an intermittent multi-threaded race condition between the garbage collector
+        thread and the main application thread which lead to an occasional SQLITE_MISUSE
+        error.</li>
+      <li>Fixed another issue relating to SQLite's inherent typelessness when dealing with
+        aggregate functions which could return Int64 or Double or even String for a given
+        row depending on what was aggregated.</li>
+      <li>Remembered to recompile the DDEX portion of the engine this time, so Compact Framework
+        users can once again use the design-time functionality</li>
+    </ul>
     <p><b>1.0.41.0 - April 23, 2007</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.16</li>
