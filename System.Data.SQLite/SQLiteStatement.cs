@@ -124,7 +124,10 @@ namespace System.Data.SQLite
     /// </summary>
     public void Dispose()
     {
-      _sqlite_stmt.Dispose();
+      if (_sqlite_stmt != null)
+      {
+        _sqlite_stmt.Dispose();
+      }
       _sqlite_stmt = null;
       
       _paramNames = null;
