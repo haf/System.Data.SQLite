@@ -57,7 +57,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,41,0
+ FILEVERSION 1,0,43,0
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -75,7 +75,7 @@ BEGIN
         BEGIN
             VALUE "Comments", "http://sqlite.phxsoftware.com"
             VALUE "FileDescription", "SQLite ADO.NET 2.0 Setup"
-            VALUE "FileVersion", "1.0.41.0"
+            VALUE "FileVersion", "1.0.43.0"
             VALUE "InternalName", "setup"
             VALUE "LegalCopyright", "Released to the public domain"
             VALUE "OriginalFilename", "setup.exe"
