@@ -73,7 +73,7 @@ namespace System.Data.SQLite
       IntPtr db;
 
       int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), out db);
-      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+      if (n > 0) throw new SQLiteException(n, null);
 
       _sql = db;
 
@@ -89,8 +89,8 @@ namespace System.Data.SQLite
     internal override bool Step(SQLiteStatement stmt)
     {
       int n;
-      long timeout = 0;
       Random rnd = null;
+      uint timeout = (uint)(Environment.TickCount + (stmt._command._commandTimeout * 1000));
 
       while (true)
       {
@@ -111,16 +111,14 @@ namespace System.Data.SQLite
           if (r == 0)
             throw new SQLiteException(n, SQLiteLastError());
 
-          else if (r == 6 && stmt._command != null) // SQLITE_LOCKED
+          else if ((r == 6 || r == 5) && stmt._command != null) // SQLITE_LOCKED || SQLITE_BUSY
           {
             // Keep trying
-            if (timeout == 0) // First time we've encountered the lock
-            {
-              timeout = Environment.TickCount + (stmt._command._commandTimeout * 1000);
+            if (rnd == null) // First time we've encountered the lock
               rnd = new Random();
-            }
+
             // If we've exceeded the command's timeout, give up and throw an error
-            if (Environment.TickCount - timeout > 0)
+            if ((uint)Environment.TickCount - timeout > 0)
             {
               throw new SQLiteException(r, SQLiteLastError());
             }
@@ -320,7 +318,7 @@ namespace System.Data.SQLite
         string[] ar = stmt.TypeDefinitions;
         if (ar != null)
         {
-          if (index < ar.Length)
+          if (index < ar.Length && ar[index] != null)
             return ar[index];
         }
 

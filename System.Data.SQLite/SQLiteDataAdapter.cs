@@ -72,6 +72,7 @@ namespace System.Data.SQLite
     {
       add
       {
+#if !PLATFORM_COMPACTFRAMEWORK
         EventHandler<RowUpdatingEventArgs> previous = (EventHandler<RowUpdatingEventArgs>)base.Events[_updatingEventPH];
         if ((previous != null) && (value.Target is DbCommandBuilder))
         {
@@ -81,11 +82,13 @@ namespace System.Data.SQLite
             base.Events.RemoveHandler(_updatingEventPH, handler);
           }
         }
+#endif
         base.Events.AddHandler(_updatingEventPH, value); 
       }
       remove { base.Events.RemoveHandler(_updatingEventPH, value); }
     }
 
+#if !PLATFORM_COMPACTFRAMEWORK
     internal static Delegate FindBuilder(MulticastDelegate mcd)
     {
       if (mcd != null)
@@ -101,6 +104,7 @@ namespace System.Data.SQLite
       }
       return null;
     }
+#endif
 
     /// <summary>
     /// Row updated event handler

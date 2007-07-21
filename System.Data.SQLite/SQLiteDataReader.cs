@@ -755,13 +755,21 @@ namespace System.Data.SQLite
         return _keyInfo.GetValue(i - VisibleFieldCount);
 
       SQLiteType typ = GetSQLiteType(i);
-      TypeAffinity aff = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
 
-      if (aff != typ.Affinity)
+      // Because SQLite is inherently type-less, check this column and row's type
+      // against the cache.  If they're different, then the db owner put varying datatypes in 
+      // this column.  If that's the case, then stick with using SQLite's base datatypes rather
+      // than the richer declared type in the table schema.
+      if (typ.Type != DbType.Object)
       {
-        typ.Type = DbType.Object;
-        typ.Affinity = aff;
+        TypeAffinity aff = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
+        if (aff != typ.Affinity)
+        {
+          typ.Type = DbType.Object;
+          typ.Affinity = aff;
+        }
       }
+
       return _activeStatement._sql.GetValue(_activeStatement, i, ref typ);
     }
 
@@ -914,7 +922,7 @@ namespace System.Data.SQLite
     {
       if (_fieldTypeArray == null) _fieldTypeArray = new SQLiteType[VisibleFieldCount];
 
-      if (_fieldTypeArray[i].Affinity == TypeAffinity.Uninitialized || _fieldTypeArray[i].Affinity == TypeAffinity.Null)
+      if (_fieldTypeArray[i].Affinity == TypeAffinity.Uninitialized)
         _fieldTypeArray[i].Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out _fieldTypeArray[i].Affinity));
       return _fieldTypeArray[i];
     }

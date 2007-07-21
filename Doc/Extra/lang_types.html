@@ -54,7 +54,7 @@
     <div id="mainSection">
     <div id="mainBody">
       <h1 class="heading">
-        SQL As Understood By SQLite</h1>
+        SQL As Understood By SQLite (sortof)</h1>
       <h4>
         TYPES</h4>
       <p>
@@ -68,37 +68,72 @@
                 color="#ff3434">datatype name</font></i><b><font color="#2c2cf0"></font></b>][,<b><font color="#2c2cf0"></font></b><i><font
                 color="#ff3434">datatype
                       name</font></i><b><font color="#2c2cf0"></font></b>][,<b><font color="#2c2cf0"></font></b><i><font
-                color="#ff3434">...</font></i>] ; <em><span style="color: #ff3434">select stmt</span></em></td>
+                color="#ff3434">...</font></i>] ; <em><span style="color: #ff3434">select-stmt</span></em></td>            
+          </tr>
+          <tr>
+          <td align="right" width="1%" nowrap>
+          <i><font color="#ff3434">select-stmt</font></i> ::=</td>
+          <td>
+            see <a href="lang_select.html">SELECT</a></td>
           </tr>
         </table>
       </p>
       <p>
-        The VACUUM command is an SQLite extension modeled after a similar command found
-        in PostgreSQL. If VACUUM is invoked with the name of a table or index then it is
-        suppose to clean up the named table or index. In version 1.0 of SQLite, the VACUUM
-        command would invoke <b>gdbm_reorganize()</b> to clean up the backend database file.</p>
-      <p>
-        VACUUM became a no-op when the GDBM backend was removed from SQLITE in version 2.0.0.
-        VACUUM was reimplemented in version 2.8.1. The index or table name argument is now
-        ignored.
+        Use the TYPES keyword before a SELECT statement to provide the SQLite ADO.NET provider
+        a list of return datatypes to expect from the subsequent SELECT statement.&nbsp;
       </p>
       <p>
-        When an object (table, index, or trigger) is dropped from the database, it leaves
-        behind empty space. This makes the database file larger than it needs to be, but
-        can speed up inserts. In time inserts and deletes can leave the database file structure
-        fragmented, which slows down disk access to the database contents. The VACUUM command
-        cleans the main database by copying its contents to a temporary database file and
-        reloading the original database file from the copy. This eliminates free pages,
-        aligns table data to be contiguous, and otherwise cleans up the database file structure.
-        It is not possible to perform the same process on an attached database file.</p>
+        This is a language extension (aka <strong>hack</strong>) to SQLite specifically for the ADO.NET data
+        provider.&nbsp; It is a pseudo-statement, meaning only the ADO.NET provider understands
+        it.</p>
+      <h3>
+        Background</h3>
       <p>
-        This command will fail if there is an active transaction. This command has no effect
-        on an in-memory database.</p>
+        Due to SQLite's typeless nature, there are certain kinds of queries for which the
+        ADO.NET provider cannot determine the proper return data type.&nbsp; Scalar and
+        aggregate functions pose a particular problem because
+        there is no requirement for a given scalar or aggregate function to return any particular
+        datatype.&nbsp; As a matter of fact, scalar functions could theoretically return
+        a different datatype for every row or column in a query and this is perfectly legal
+        from SQLite's point of view.</p>
       <p>
-        As of SQLite version 3.1, an alternative to using the VACUUM command is auto-vacuum
-        mode, enabled using the <a href="pragma.html#pragma_auto_vacuum">auto_vacuum pragma</a>.</p>
+        Since ADO.NET is designed around a typed system and we're shoe-horning SQLite into
+        it, this keyword helps the provider out in cases where the return type cannot be easily determined.</p>
       <p>
-        &nbsp;</p>
+        This command must be used in conjunction with a SELECT statement.&nbsp; It only
+        works when both the TYPES keyword and its value(s) are passed along with a SELECT
+        statement as a single semi-colon separated unit.</p>
+      <h3>
+        Examples</h3>
+      <p>
+        <strong><span style="color: #2c2cf0">TYPES</span> [bigint], [int], [smallint], [tinyint];<br />
+          <span style="color: #2c2cf0">SELECT</span> 1, 2, 3, 4;</strong></p>
+      <p>
+        The above query would return the columns as types System.Int64, System.Int32, System.Int16
+        and System.Byte respectively.</p>
+      <p>
+        <strong><span style="color: #2c2cf0">TYPES</span> [bigint], [int], , [tinyint];<br />
+          <span style="color: #2c2cf0">SELECT</span> 1, 2, 3, 4;</strong></p>
+      <p>
+        In this sample, only columns 1, 2 and 4 would have explicit typing.&nbsp; Column
+        3's datatype would pass though the system and be discovered normally.</p>
+      <p>
+        <strong><span style="color: #2c2cf0">TYPES</span> real;<br />
+          <span style="color: #2c2cf0">SELECT</span> SUM(Cost) FROM [Products];</strong></p>
+      <p>
+        The above query explicitly tells the provider that the SUM aggregate function returns
+        a System.Double.</p>
+      <h3>
+        Usage Notes</h3>
+      <ul>
+        <li>You cannot use parameters in the TYPES statement.</li>
+        <li>The TYPES statement must be immediately followed by a SELECT statement.</li>
+        <li>It is legal to pass multiple TYPES and SELECT statements in a multi-statement
+          command.</li>
+        <li>You may enclose datatypes in quotes <strong>""</strong> or brackets <strong>[]</strong>
+          or those <strong>``</strong> thingies if you want.<br />
+        </li>
+      </ul>
       <hr>
       <div id="footer">
         <p>

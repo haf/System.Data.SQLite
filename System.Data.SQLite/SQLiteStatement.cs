@@ -225,24 +225,15 @@ namespace System.Data.SQLite
       int pos = typedefs.IndexOf("TYPES", 0, StringComparison.OrdinalIgnoreCase);
       if (pos == -1) throw new ArgumentOutOfRangeException();
 
-      string[] types = typedefs.Substring(pos + 6).Replace(" ", "").Replace(";", "").Replace("\"", "").Replace("[", "").Replace("]", "").Split(',', '\r', '\n', '\t');
+      string[] types = typedefs.Substring(pos + 6).Replace(" ", "").Replace(";", "").Replace("\"", "").Replace("[", "").Replace("]", "").Replace("`","").Split(',', '\r', '\n', '\t');
 
-      int cols = 0;
       int n;
       for (n = 0; n < types.Length; n++)
       {
-        if (String.IsNullOrEmpty(types[n]) == false)
-          cols++;
+        if (String.IsNullOrEmpty(types[n]) == true)
+          types[n] = null;
       }
-
-      _types = new string[cols];
-
-      cols = 0;
-      for (n = 0; n < types.Length; n++)
-      {
-        if (String.IsNullOrEmpty(types[n]) == false)
-          _types[cols++] = types[n];
-      }
+      _types = types;
     }
   }
 }

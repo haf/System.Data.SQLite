@@ -47,7 +47,7 @@ namespace System.Data.SQLite
       IntPtr db;
 
       int n = UnsafeNativeMethods.sqlite3_open16_interop(strFilename, out db);
-      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+      if (n > 0) throw new SQLiteException(n, null);
 
       _sql = db;
       _functionsArray = SQLiteFunction.BindFunctions(this);

@@ -50,7 +50,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SQLITE_ENABLE_FTS2"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SQLITE_ENABLE_FTS2;SQLITE_CORE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
@@ -113,7 +113,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SQLITE_ENABLE_FTS2"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SQLITE_ENABLE_FTS2;SQLITE_CORE"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
 				DebugInformationFormat="3"
@@ -181,7 +181,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SQLITE_ENABLE_FTS2"
+				PreprocessorDefinitions="WIN64;_DEBUG;_LIB;SQLITE_ENABLE_FTS2;SQLITE_CORE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
@@ -242,7 +242,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SQLITE_ENABLE_FTS2"
+				PreprocessorDefinitions="WIN64;_DEBUG;_LIB;SQLITE_ENABLE_FTS2;SQLITE_CORE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
@@ -303,7 +303,7 @@
 				Name="VCCLCompilerTool"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SQLITE_ENABLE_FTS2"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SQLITE_ENABLE_FTS2;SQLITE_CORE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -366,9 +366,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
-				FavorSizeOrSpeed="1"
+				Optimization="1"
 				AdditionalIncludeDirectories="..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SQLITE_ENABLE_FTS2"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SQLITE_ENABLE_FTS2;SQLITE_CORE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -440,7 +440,7 @@
 				Name="VCCLCompilerTool"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SQLITE_ENABLE_FTS2"
+				PreprocessorDefinitions="WIN64;NDEBUG;_LIB;SQLITE_ENABLE_FTS2;SQLITE_CORE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -504,7 +504,7 @@
 				Name="VCCLCompilerTool"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SQLITE_ENABLE_FTS2"
+				PreprocessorDefinitions="WIN64;NDEBUG;_LIB;SQLITE_ENABLE_FTS2;SQLITE_CORE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -559,6 +559,10 @@
 			</File>
 			<File
 				RelativePath=".\fts2_porter.c"
+				>
+			</File>
+			<File
+				RelativePath=".\fts2_tokenizer.c"
 				>
 			</File>
 			<File

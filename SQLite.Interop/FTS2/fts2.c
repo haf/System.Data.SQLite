@@ -1,7 +1,17 @@
-/* The author disclaims copyright to this source code.
- *
- * This is an SQLite module implementing full-text search.
- */
+/*
+** 2006 Oct 10
+**
+** The author disclaims copyright to this source code.  In place of
+** a legal notice, here is a blessing:
+**
+**    May you do good and not evil.
+**    May you find forgiveness for yourself and forgive others.
+**    May you share freely, never taking more than you give.
+**
+******************************************************************************
+**
+** This is an SQLite module implementing full-text search.
+*/
 
 /*
 ** The code in this file is only compiled if:
@@ -1847,7 +1857,7 @@ static struct fulltext_vtab *cursor_vtab(fulltext_cursor *c){
   return (fulltext_vtab *) c->base.pVtab;
 }
 
-static const sqlite3_module fulltextModule;   /* forward declaration */
+static const sqlite3_module fts2Module;   /* forward declaration */
 
 /* Return a dynamically generated statement of the form
  *   insert into %_content (rowid, ...) values (?, ...)
@@ -1937,20 +1947,15 @@ static int sql_step_statement(fulltext_vtab *v, fulltext_statement iStmt,
     if( rc==SQLITE_BUSY ) continue;
     if( rc!=SQLITE_ERROR ) return rc;
 
-    rc = sqlite3_reset(s);
-    if( rc!=SQLITE_SCHEMA ) return SQLITE_ERROR;
-
-    v->pFulltextStatements[iStmt] = NULL;   /* Still in s */
-    rc = sql_get_statement(v, iStmt, &pNewStmt);
-    if( rc!=SQLITE_OK ) goto err;
-    *ppStmt = pNewStmt;
-
-    rc = sqlite3_transfer_bindings(s, pNewStmt);
-    if( rc!=SQLITE_OK ) goto err;
-
+    /* If an SQLITE_SCHEMA error has occured, then finalizing this
+     * statement is going to delete the fulltext_vtab structure. If
+     * the statement just executed is in the pFulltextStatements[]
+     * array, it will be finalized twice. So remove it before
+     * calling sqlite3_finalize().
+     */
+    v->pFulltextStatements[iStmt] = NULL;
     rc = sqlite3_finalize(s);
-    if( rc!=SQLITE_OK ) return rc;
-    s = pNewStmt;
+    break;
   }
   return rc;
 
@@ -2008,25 +2013,17 @@ static int sql_step_leaf_statement(fulltext_vtab *v, int idx,
     if( rc==SQLITE_BUSY ) continue;
     if( rc!=SQLITE_ERROR ) return rc;
 
-    rc = sqlite3_reset(s);
-    if( rc!=SQLITE_SCHEMA ) return SQLITE_ERROR;
-
-    v->pLeafSelectStmts[idx] = NULL;   /* Still in s */
-    rc = sql_get_leaf_statement(v, idx, &pNewStmt);
-    if( rc!=SQLITE_OK ) goto err;
-    *ppStmt = pNewStmt;
-
-    rc = sqlite3_transfer_bindings(s, pNewStmt);
-    if( rc!=SQLITE_OK ) goto err;
-
+    /* If an SQLITE_SCHEMA error has occured, then finalizing this
+     * statement is going to delete the fulltext_vtab structure. If
+     * the statement just executed is in the pLeafSelectStmts[]
+     * array, it will be finalized twice. So remove it before
+     * calling sqlite3_finalize().
+     */
+    v->pLeafSelectStmts[idx] = NULL;
     rc = sqlite3_finalize(s);
-    if( rc!=SQLITE_OK ) return rc;
-    s = pNewStmt;
+    break;
   }
-  return rc;
 
- err:
-  sqlite3_finalize(s);
   return rc;
 }
 
@@ -2402,6 +2399,7 @@ static int getToken(const char *z, int *tokenType){
       *tokenType = TOKEN_SPACE;
       return i;
     }
+    case '`':
     case '\'':
     case '"': {
       int delim = z[0];
@@ -2761,6 +2759,7 @@ static char *fulltextSchema(
 */
 static int constructVtab(
   sqlite3 *db,              /* The SQLite database connection */
+  fts2Hash *pHash,          /* Hash table containing tokenizers */
   TableSpec *spec,          /* Parsed spec information from parseSpec() */
   sqlite3_vtab **ppVTab,    /* Write the resulting vtab structure here */
   char **pzErr              /* Write any error message here */
@@ -2770,6 +2769,9 @@ static int constructVtab(
   fulltext_vtab *v = 0;
   const sqlite3_tokenizer_module *m = NULL;
   char *schema;
+
+  char const *zTok;         /* Name of tokenizer to use for this fts table */
+  int nTok;                 /* Length of zTok, including nul terminator */
 
   v = (fulltext_vtab *) malloc(sizeof(fulltext_vtab));
   if( v==0 ) return SQLITE_NOMEM;
@@ -2787,16 +2789,20 @@ static int constructVtab(
   if( spec->azTokenizer==0 ){
     return SQLITE_NOMEM;
   }
-  /* TODO(shess) For now, add new tokenizers as else if clauses. */
-  if( spec->azTokenizer[0]==0 || startsWith(spec->azTokenizer[0], "simple") ){
-    sqlite3Fts2SimpleTokenizerModule(&m);
-  }else if( startsWith(spec->azTokenizer[0], "porter") ){
-    sqlite3Fts2PorterTokenizerModule(&m);
-  }else{
+
+  zTok = spec->azTokenizer[0]; 
+  if( !zTok ){
+    zTok = "simple";
+  }
+  nTok = strlen(zTok)+1;
+
+  m = (sqlite3_tokenizer_module *)sqlite3Fts2HashFind(pHash, zTok, nTok);
+  if( !m ){
     *pzErr = sqlite3_mprintf("unknown tokenizer: %s", spec->azTokenizer[0]);
     rc = SQLITE_ERROR;
     goto err;
   }
+
   for(n=0; spec->azTokenizer[n]; n++){}
   if( n ){
     rc = m->xCreate(n-1, (const char*const*)&spec->azTokenizer[1],
@@ -2841,7 +2847,7 @@ static int fulltextConnect(
   int rc = parseSpec(&spec, argc, argv, pzErr);
   if( rc!=SQLITE_OK ) return rc;
 
-  rc = constructVtab(db, &spec, ppVTab, pzErr);
+  rc = constructVtab(db, (fts2Hash *)pAux, &spec, ppVTab, pzErr);
   clearTableSpec(&spec);
   return rc;
 }
@@ -2887,7 +2893,7 @@ static int fulltextCreate(sqlite3 *db, void *pAux,
                 ");");
   if( rc!=SQLITE_OK ) goto out;
 
-  rc = constructVtab(db, &spec, ppVTab, pzErr);
+  rc = constructVtab(db, (fts2Hash *)pAux, &spec, ppVTab, pzErr);
 
 out:
   clearTableSpec(&spec);
@@ -3105,7 +3111,7 @@ static void snippetAllOffsets(fulltext_cursor *p){
   if( p->q.nTerms==0 ) return;
   pFts = p->q.pFts;
   nColumn = pFts->nColumn;
-  iColumn = p->iCursorType;
+  iColumn = (p->iCursorType - QUERY_FULLTEXT);
   if( iColumn<0 || iColumn>=nColumn ){
     iFirst = 0;
     iLast = nColumn-1;
@@ -5833,7 +5839,31 @@ static int fulltextFindFunction(
   return 0;
 }
 
-static const sqlite3_module fulltextModule = {
+/*
+** Rename an fts2 table.
+*/
+static int fulltextRename(
+  sqlite3_vtab *pVtab,
+  const char *zName
+){
+  fulltext_vtab *p = (fulltext_vtab *)pVtab;
+  int rc = SQLITE_NOMEM;
+  char *zSql = sqlite3_mprintf(
+    "ALTER TABLE %Q.'%q_content'  RENAME TO '%q_content';"
+    "ALTER TABLE %Q.'%q_segments' RENAME TO '%q_segments';"
+    "ALTER TABLE %Q.'%q_segdir'   RENAME TO '%q_segdir';"
+    , p->zDb, p->zName, zName 
+    , p->zDb, p->zName, zName 
+    , p->zDb, p->zName, zName
+  );
+  if( zSql ){
+    rc = sqlite3_exec(p->db, zSql, 0, 0, 0);
+    sqlite3_free(zSql);
+  }
+  return rc;
+}
+
+static const sqlite3_module fts2Module = {
   /* iVersion      */ 0,
   /* xCreate       */ fulltextCreate,
   /* xConnect      */ fulltextConnect,
@@ -5853,17 +5883,98 @@ static const sqlite3_module fulltextModule = {
   /* xCommit       */ fulltextCommit,
   /* xRollback     */ fulltextRollback,
   /* xFindFunction */ fulltextFindFunction,
+  /* xRename */       fulltextRename,
 };
 
+static void hashDestroy(void *p){
+  fts2Hash *pHash = (fts2Hash *)p;
+  sqlite3Fts2HashClear(pHash);
+  sqlite3_free(pHash);
+}
+
+/*
+** The fts2 built-in tokenizers - "simple" and "porter" - are implemented
+** in files fts2_tokenizer1.c and fts2_porter.c respectively. The following
+** two forward declarations are for functions declared in these files
+** used to retrieve the respective implementations.
+**
+** Calling sqlite3Fts2SimpleTokenizerModule() sets the value pointed
+** to by the argument to point a the "simple" tokenizer implementation.
+** Function ...PorterTokenizerModule() sets *pModule to point to the
+** porter tokenizer/stemmer implementation.
+*/
+void sqlite3Fts2SimpleTokenizerModule(sqlite3_tokenizer_module const**ppModule);
+void sqlite3Fts2PorterTokenizerModule(sqlite3_tokenizer_module const**ppModule);
+void sqlite3Fts2IcuTokenizerModule(sqlite3_tokenizer_module const**ppModule);
+
+int sqlite3Fts2InitHashTable(sqlite3 *, fts2Hash *, const char *);
+
+/*
+** Initialise the fts2 extension. If this extension is built as part
+** of the sqlite library, then this function is called directly by
+** SQLite. If fts2 is built as a dynamically loadable extension, this
+** function is called by the sqlite3_extension_init() entry point.
+*/
 int sqlite3Fts2Init(sqlite3 *db){
-  sqlite3_overload_function(db, "snippet", -1);
-  sqlite3_overload_function(db, "offsets", -1);
-  return sqlite3_create_module(db, "fts2", &fulltextModule, 0);
+  int rc = SQLITE_OK;
+  fts2Hash *pHash = 0;
+  const sqlite3_tokenizer_module *pSimple = 0;
+  const sqlite3_tokenizer_module *pPorter = 0;
+  const sqlite3_tokenizer_module *pIcu = 0;
+
+  sqlite3Fts2SimpleTokenizerModule(&pSimple);
+  sqlite3Fts2PorterTokenizerModule(&pPorter);
+#ifdef SQLITE_ENABLE_ICU
+  sqlite3Fts2IcuTokenizerModule(&pIcu);
+#endif
+
+  /* Allocate and initialise the hash-table used to store tokenizers. */
+  pHash = sqlite3_malloc(sizeof(fts2Hash));
+  if( !pHash ){
+    rc = SQLITE_NOMEM;
+  }else{
+    sqlite3Fts2HashInit(pHash, FTS2_HASH_STRING, 1);
+  }
+
+  /* Load the built-in tokenizers into the hash table */
+  if( rc==SQLITE_OK ){
+    if( sqlite3Fts2HashInsert(pHash, "simple", 7, (void *)pSimple)
+     || sqlite3Fts2HashInsert(pHash, "porter", 7, (void *)pPorter) 
+     || (pIcu && sqlite3Fts2HashInsert(pHash, "icu", 4, (void *)pIcu))
+    ){
+      rc = SQLITE_NOMEM;
+    }
+  }
+
+  /* Create the virtual table wrapper around the hash-table and overload 
+  ** the two scalar functions. If this is successful, register the
+  ** module with sqlite.
+  */
+  if( SQLITE_OK==rc 
+   && SQLITE_OK==(rc = sqlite3Fts2InitHashTable(db, pHash, "fts2_tokenizer"))
+   && SQLITE_OK==(rc = sqlite3_overload_function(db, "snippet", -1))
+   && SQLITE_OK==(rc = sqlite3_overload_function(db, "offsets", -1))
+  ){
+    return sqlite3_create_module_v2(
+        db, "fts2", &fts2Module, (void *)pHash, hashDestroy
+    );
+  }
+
+  /* An error has occured. Delete the hash table and return the error code. */
+  assert( rc!=SQLITE_OK );
+  if( pHash ){
+    sqlite3Fts2HashClear(pHash);
+    sqlite3_free(pHash);
+  }
+  return rc;
 }
 
 #if !SQLITE_CORE
-int sqlite3_extension_init(sqlite3 *db, char **pzErrMsg,
-                           const sqlite3_api_routines *pApi){
+int sqlite3_extension_init(
+  sqlite3 *db, 
+  char **pzErrMsg,
+  const sqlite3_api_routines *pApi
+){
   SQLITE_EXTENSION_INIT2(pApi)
   return sqlite3Fts2Init(db);
 }
