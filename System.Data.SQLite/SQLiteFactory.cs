@@ -14,7 +14,7 @@ namespace System.Data.SQLite
   /// <summary>
   /// SQLite implementation of DbProviderFactory.
   /// </summary>
-  public sealed class SQLiteFactory : DbProviderFactory
+  public sealed partial class SQLiteFactory : DbProviderFactory
   {
     /// <summary>
     /// Static instance member which returns an instanced SQLiteFactory class.

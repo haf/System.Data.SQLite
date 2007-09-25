@@ -74,10 +74,9 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
   }
 
   // Figure out how big to make our spare crypt block
-  if (CryptEncrypt(hKey, 0, TRUE, 0, NULL, &pBlock->dwCryptSize, pBlock->dwCryptSize * 2))
-  {
-    pBlock->pvCrypt = sqliteMalloc(pBlock->dwCryptSize + (CRYPT_OFFSET * 2));
-  }
+  CryptEncrypt(hKey, 0, TRUE, 0, NULL, &pBlock->dwCryptSize, pBlock->dwCryptSize * 2);
+  pBlock->pvCrypt = sqliteMalloc(pBlock->dwCryptSize + (CRYPT_OFFSET * 2));
+
   return pBlock;
 }
 
@@ -147,7 +146,6 @@ void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
       pvTemp = data;
       data = ((LPBYTE)pBlock->pvCrypt) + CRYPT_OFFSET;
     }
-
 
     dwPageSize = pBlock->dwCryptSize;
     CryptDecrypt(pBlock->hReadKey, 0, TRUE, 0, (LPBYTE)data, &dwPageSize);

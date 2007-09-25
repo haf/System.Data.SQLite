@@ -21,6 +21,8 @@ namespace System.Data.SQLite
     /// The opaque pointer returned to us by the sqlite provider
     /// </summary>
     protected SQLiteConnectionHandle _sql;
+    protected string _fileName;
+    protected bool _usePool;
 
     /// <summary>
     /// The user-defined functions registered on this connection
@@ -34,13 +36,23 @@ namespace System.Data.SQLite
 
     protected override void Dispose(bool bDisposing)
     {
-      Close();
+      if (bDisposing)
+        Close();
     }
 
+    // It isn't necessary to cleanup any functions we've registered.  If the connection
+    // goes to the pool and is resurrected later, re-registered functions will overwrite the
+    // previous functions.  The SQLiteFunctionCookieHandle will take care of freeing unmanaged
+    // resources belonging to the previously-registered functions.
     internal override void Close()
     {
       if (_sql != null)
-        _sql.Dispose();
+      {
+        if (_usePool)
+          SQLiteConnectionPool.Add(_fileName, _sql);
+        else
+          _sql.Dispose();
+      }
 
       _sql = null;
     }
@@ -55,7 +67,7 @@ namespace System.Data.SQLite
       get
       {
         int len;
-        return ToString(UnsafeNativeMethods.sqlite3_libversion_interop(out len), len);
+        return UTF8ToString(UnsafeNativeMethods.sqlite3_libversion_interop(out len), len);
       }
     }
 
@@ -67,16 +79,29 @@ namespace System.Data.SQLite
       }
     }
 
-    internal override void Open(string strFilename)
+    internal override void Open(string strFilename, bool usePool)
     {
       if (_sql != null) return;
-      IntPtr db;
 
-      int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), out db);
-      if (n > 0) throw new SQLiteException(n, null);
+      _usePool = usePool;
+      if (usePool)
+      {
+        _fileName = strFilename;
+        _sql = SQLiteConnectionPool.Remove(strFilename);
+      }
 
-      _sql = db;
+      if (_sql == null)
+      {
+        System.Diagnostics.Debug.WriteLine("Creating a new connection");
+        IntPtr db;
 
+        int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), out db);
+        if (n > 0) throw new SQLiteException(n, null);
+
+        _sql = db;
+      }
+      // Bind functions to this connection.  If any previous functions of the same name
+      // were already bound, then the new bindings replace the old.
       _functionsArray = SQLiteFunction.BindFunctions(this);
     }
 
@@ -282,7 +307,7 @@ namespace System.Data.SQLite
     internal override string Bind_ParamName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_bind_parameter_name_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_bind_parameter_name_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override int Bind_ParamIndex(SQLiteStatement stmt, string paramName)
@@ -298,7 +323,7 @@ namespace System.Data.SQLite
     internal override string ColumnName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_name_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_name_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override TypeAffinity ColumnAffinity(SQLiteStatement stmt, int index)
@@ -312,7 +337,7 @@ namespace System.Data.SQLite
       IntPtr p = UnsafeNativeMethods.sqlite3_column_decltype_interop(stmt._sqlite_stmt, index, out len);
       nAffinity = ColumnAffinity(stmt, index);
 
-      if (p != IntPtr.Zero) return base.ToString(p, len);
+      if (p != IntPtr.Zero) return UTF8ToString(p, len);
       else
       {
         string[] ar = stmt.TypeDefinitions;
@@ -351,19 +376,19 @@ namespace System.Data.SQLite
     internal override string ColumnOriginalName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_origin_name_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_origin_name_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override string ColumnDatabaseName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_database_name_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_database_name_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override string ColumnTableName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_table_name_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_table_name_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override void ColumnMetaData(string dataBase, string table, string column, out string dataType, out string collateSequence, out bool notNull, out bool primaryKey, out bool autoIncrement)
@@ -380,8 +405,8 @@ namespace System.Data.SQLite
       n = UnsafeNativeMethods.sqlite3_table_column_metadata_interop(_sql, ToUTF8(dataBase), ToUTF8(table), ToUTF8(column), out dataTypePtr, out collSeqPtr, out nnotNull, out nprimaryKey, out nautoInc, out dtLen, out csLen);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
 
-      dataType = base.ToString(dataTypePtr, dtLen);
-      collateSequence = base.ToString(collSeqPtr, csLen);
+      dataType = UTF8ToString(dataTypePtr, dtLen);
+      collateSequence = UTF8ToString(collSeqPtr, csLen);
 
       notNull = (nnotNull == 1);
       primaryKey = (nprimaryKey == 1);
@@ -410,7 +435,7 @@ namespace System.Data.SQLite
     internal override string GetText(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_text_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_text_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override DateTime GetDateTime(SQLiteStatement stmt, int index)
@@ -490,11 +515,6 @@ namespace System.Data.SQLite
       return nCookie;
     }
 
-    internal override void FreeFunction(IntPtr nCookie)
-    {
-      UnsafeNativeMethods.sqlite3_function_free_callbackcookie(nCookie);
-    }
-
     internal override long GetParamValueBytes(IntPtr p, int nDataOffset, byte[] bDest, int nStart, int nLength)
     {
       IntPtr ptr;
@@ -538,7 +558,7 @@ namespace System.Data.SQLite
     internal override string GetParamValueText(IntPtr ptr)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_value_text_interop(ptr, out len), len);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_value_text_interop(ptr, out len), len);
     }
 
     internal override TypeAffinity GetParamValueType(IntPtr ptr)
@@ -621,14 +641,11 @@ namespace System.Data.SQLite
     /// <param name="index">The column index to retrieve</param>
     /// <param name="typ">The type of data contained in the column.  If Uninitialized, this function will retrieve the datatype information.</param>
     /// <returns>Returns the data in the column</returns>
-    internal override object GetValue(SQLiteStatement stmt, int index, ref SQLiteType typ)
+    internal override object GetValue(SQLiteStatement stmt, int index, SQLiteType typ)
     {
-      if (typ.Affinity == 0) typ = SQLiteConvert.ColumnToType(stmt, index);
       if (IsNull(stmt, index)) return DBNull.Value;
 
-      Type t = SQLiteConvert.SQLiteTypeToType(typ);
-
-      switch (TypeToAffinity(t))
+      switch (typ.Affinity)
       {
         case TypeAffinity.Blob:
           if (typ.Type == DbType.Guid && typ.Affinity == TypeAffinity.Text)
@@ -645,11 +662,22 @@ namespace System.Data.SQLite
         case TypeAffinity.DateTime:
           return GetDateTime(stmt, index);
         case TypeAffinity.Double:
-          return Convert.ChangeType(GetDouble(stmt, index), t, null);
+          if (typ.Type == DbType.Double || typ.Type == DbType.Object)
+            return GetDouble(stmt, index);
+          else
+            return Convert.ChangeType(GetDouble(stmt, index), SQLiteConvert.SQLiteTypeToType(typ), null);
         case TypeAffinity.Int64:
-          return Convert.ChangeType(GetInt64(stmt, index), t, null);
+          if (typ.Type == DbType.DateTime && _datetimeFormat == SQLiteDateFormats.ISO8601)
+            return GetDateTime(stmt, index);
+          else if (typ.Type == DbType.Int64 || typ.Type == DbType.Object)
+            return GetInt64(stmt, index);
+          else
+            return Convert.ChangeType(GetInt64(stmt, index), SQLiteConvert.SQLiteTypeToType(typ), null);
         default:
-          return GetText(stmt, index);
+          if (typ.Type == DbType.DateTime && _datetimeFormat == SQLiteDateFormats.ISO8601)
+            return GetDateTime(stmt, index);
+          else
+            return GetText(stmt, index);
       }
     }
 
@@ -665,6 +693,11 @@ namespace System.Data.SQLite
       if (rc == 0) return rowid;
 
       return 0;
+    }
+
+    internal override void DetachAll()
+    {
+      UnsafeNativeMethods.sqlite3_detach_all_interop(_sql);
     }
   }
 }

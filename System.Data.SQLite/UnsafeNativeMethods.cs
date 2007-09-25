@@ -83,6 +83,7 @@ namespace System.Data.SQLite
 
 #endif
 
+  // Handles the unmanaged database pointer, and provides finalization support for it.
   internal class SQLiteConnectionHandle : CriticalHandle
   {
     public static implicit operator IntPtr(SQLiteConnectionHandle db)
@@ -108,7 +109,7 @@ namespace System.Data.SQLite
 
     protected override bool ReleaseHandle()
     {
-      SQLiteBase.Close(this);
+      SQLiteBase.CloseConnection(this);
       return true;
     }
 
@@ -118,6 +119,7 @@ namespace System.Data.SQLite
     }
   }
 
+  // Provides finalization support for unmanaged SQLite statements.
   internal class SQLiteStatementHandle : CriticalHandle
   {
     public static implicit operator IntPtr(SQLiteStatementHandle stmt)
@@ -144,6 +146,43 @@ namespace System.Data.SQLite
     protected override bool ReleaseHandle()
     {
       SQLiteBase.FinalizeStatement(this);
+      return true;
+    }
+
+    public override bool IsInvalid
+    {
+      get { return (handle == IntPtr.Zero); }
+    }
+  }
+
+  // Handles and provides finalization for the unmanaged interop cookie
+  // created to support calling back into .NET.
+  internal class SQLiteFunctionCookieHandle : CriticalHandle
+  {
+    public static implicit operator IntPtr(SQLiteFunctionCookieHandle cookie)
+    {
+      return cookie.handle;
+    }
+
+    public static implicit operator SQLiteFunctionCookieHandle(IntPtr cookie)
+    {
+      return new SQLiteFunctionCookieHandle(cookie);
+    }
+
+    private SQLiteFunctionCookieHandle(IntPtr cookie)
+      : this()
+    {
+      SetHandle(cookie);
+    }
+
+    internal SQLiteFunctionCookieHandle()
+      : base(IntPtr.Zero)
+    {
+    }
+
+    protected override bool ReleaseHandle()
+    {
+      SQLiteBase.FreeFunction(this);
       return true;
     }
 
@@ -416,5 +455,8 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_table_cursor(IntPtr stmt, int db, int tableRootPage);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_detach_all_interop(IntPtr db);
   }
 }

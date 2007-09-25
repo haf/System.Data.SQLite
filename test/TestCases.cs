@@ -162,7 +162,7 @@ namespace test
         for (int x = 0; x < 10000; x++)
         {
           DbCommand cmd = newcnn.CreateCommand();
-          cmd.CommandText = "SELECT * FROM sqlite_master";
+          cmd.CommandText = "SELECT * FROM TestCase";
           DbDataReader reader = cmd.ExecuteReader();
           reader.Read();
         }
@@ -331,7 +331,7 @@ namespace test
     {
       using (DbCommand cmd = cnn.CreateCommand())
       {
-        cmd.CommandText = "CREATE TABLE TestCase (ID integer primary key autoincrement, Field1 Integer, Field2 Float, Field3 VARCHAR(50), Field4 CHAR(10), Field5 DateTime, Field6 Image)";
+        cmd.CommandText = "CREATE TABLE TestCase (ID integer primary key autoincrement, Field1 int, Field2 Float, Field3 VARCHAR(50), Field4 CHAR(10), Field5 DateTime, Field6 Image)";
         //cmd.CommandText = "CREATE TABLE TestCase (ID bigint primary key identity, Field1 Integer, Field2 Float, Field3 VARCHAR(50), Field4 CHAR(10), Field5 DateTime, Field6 Image)";
         cmd.ExecuteNonQuery();
       }
@@ -653,6 +653,12 @@ namespace test
                   dtEnd -= dtStart;
                   Console.WriteLine(String.Format("Commits in {0} ms", (dtEnd)));
                 }
+
+                using (DataTable tbl = new DataTable())
+                {
+                  adp.SelectCommand.CommandText = "SELECT * FROM TestCase";
+                  adp.Fill(tbl);
+                }
               }
             }
           }
@@ -702,7 +708,7 @@ namespace test
       {
         int nTimes;
         int dtStart;
-
+        
         nTimes = 0;
         cmd.CommandText = "SELECT Foo('ee','foo')";
         dtStart = Environment.TickCount;

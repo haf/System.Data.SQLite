@@ -17,7 +17,7 @@ namespace System.Data.SQLite
   /// SQLite implementation of DbCommand.
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
-  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.31.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
+  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.32.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
 #endif
   public sealed class SQLiteCommand : DbCommand, ICloneable
   {
@@ -29,6 +29,10 @@ namespace System.Data.SQLite
     /// The connection the command is associated with
     /// </summary>
     private SQLiteConnection _cnn;
+    /// <summary>
+    /// The version of the connection the command is associated with
+    /// </summary>
+    private long _version;
     /// <summary>
     /// Indicates whether or not a DataReader is active on the command.
     /// </summary>
@@ -378,13 +382,15 @@ namespace System.Data.SQLite
         if (_cnn != null)
         {
           ClearCommands();
-          _cnn.RemoveCommand(this);
+          //_cnn.RemoveCommand(this);
         }
 
         _cnn = value;
-
         if (_cnn != null)
-          _cnn.AddCommand(this);
+          _version = _cnn._version;
+
+        //if (_cnn != null)
+        //  _cnn.AddCommand(this);
       }
     }
 
@@ -485,6 +491,13 @@ namespace System.Data.SQLite
       if (_cnn.State != ConnectionState.Open)
         throw new InvalidOperationException("Database is not open");
 
+      // If the version of the connection has changed, clear out any previous commands before starting
+      if (_cnn._version != _version)
+      {
+        _version = _cnn._version;
+        ClearCommands();
+      }
+
       // Map all parameters for statements already built
       _parameterCollection.MapParameters(null);
 
@@ -584,7 +597,7 @@ namespace System.Data.SQLite
 
         if (_cnn._sql.Step(stmt) == true && ret == null)
         {
-          ret = _cnn._sql.GetValue(stmt, 0, ref typ);
+          ret = _cnn._sql.GetValue(stmt, 0, typ);
         }
         _cnn._sql.Reset(stmt);
       }

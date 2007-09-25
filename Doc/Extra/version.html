@@ -56,7 +56,38 @@
     <div id="mainBody">
 
       <h1 class="heading">Version History</h1>
-    <p><b>1.0.44.0 - July 22, 2007</b></p>
+    <p><b>1.0.45.0 - September 25, 2007</b></p>
+    <ul>
+    <li><strong>Breaking change in GetSchema("Indexes") </strong>-- MetaDataCollections
+      restrictions and identifier parts counts were wrong for this schema and I was using
+      the wrong final parameter as the final restriction.&nbsp; Meaning, if you use the
+      Indexes schema and are querying for a specific index the array should now be {catalog,
+      null, table, index } instead of {catalog, null, table, null, index}</li>
+      <li>Fixed some errors in the encryption module, most notably when a non-default page
+        size is specified in the connection string.</li>
+      <li>Fixed SQLiteDataReader to better handle type-less usage scenarios, which also
+        fixes problems with null values and datetimes.</li>
+      <li>Fixed the leftover temp files problem on WinCE </li>
+      <li>Added connection pooling.&nbsp; The default is disabled for now, but may change
+      in the future.&nbsp; Set "Pooling=True" in the connection string to enable it. </li>
+      <li>Sped up SQLiteConnection.Open() considerably.</li>
+      <li>Added some more robust cleanup code regarding SQLiteFunctions.</li>
+      <li>Minor additions to the code to allow for future LINQ integration into the main
+        codebase.</li>
+      <li>Fixed a long-standing bug in the Open() command of SQLiteConnection which failed
+      to honor the documented default behavior of the SQLite.NET provider to open the
+      database in "Synchronous=Normal" mode.&nbsp; The default was "Full". </li>
+      <li>If Open() fails, it no longer sets the connection state to Broken.&nbsp; It instead
+        reverts back to Closed, and cleans up after itself.</li>
+      <li>Added several new parameters to the ConnectionString for setting max page count,
+        legacy file format, and another called FailIfMissing to raise an error rather than
+        create the database file automatically if it does not already exist.</li>
+      <li>Fixed some designer toolbox references to the wrong version of the SQLite.Designer</li>
+      <li>Fixed a bug in the mergebin utility with regards to COR20 metadata rowsize computations.&nbsp;
+      </li>
+      <li>Minor documentation corrections &nbsp;&nbsp;</li>
+    </ul>
+    <p><b>1.0.44.0 - July 21, 2007</b></p>
     <ul>
     <li>Code merge with SQLite 3.4.1</li>
       <li>Fixed a bug in SQLiteConnection.Open() which threw the wrong kind of error in

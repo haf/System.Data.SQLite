@@ -32,12 +32,13 @@ namespace System.Data.SQLite
     /// <summary>
     /// Opens a database.
     /// </summary>
+    /// <param name="usePool">If true, the connection can be pulled from the connection pool</param>
     /// <remarks>
     /// Implementers should call SQLiteFunction.BindFunctions() and save the array after opening a connection
     /// to bind all attributed user-defined functions and collating sequences to the new connection.
     /// </remarks>
     /// <param name="strFilename">The filename of the database to open.  SQLite automatically creates it if it doesn't exist.</param>
-    internal abstract void Open(string strFilename);
+    internal abstract void Open(string strFilename, bool usePool);
     /// <summary>
     /// Closes the currently-open database.
     /// </summary>
@@ -116,7 +117,6 @@ namespace System.Data.SQLite
 
     internal abstract IntPtr CreateCollation(string strCollation, SQLiteCollation func);
     internal abstract IntPtr CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal);
-    internal abstract void FreeFunction(IntPtr cookie);
 
     internal abstract int AggregateCount(IntPtr context);
     internal abstract IntPtr AggregateContext(IntPtr context);
@@ -145,8 +145,9 @@ namespace System.Data.SQLite
 
     internal abstract int GetCursorForTable(SQLiteStatement stmt, int database, int rootPage);
     internal abstract long GetRowIdForCursor(SQLiteStatement stmt, int cursor);
+    internal abstract void DetachAll();
 
-    internal abstract object GetValue(SQLiteStatement stmt, int index, ref SQLiteType typ);
+    internal abstract object GetValue(SQLiteStatement stmt, int index, SQLiteType typ);
 
     protected virtual void Dispose(bool bDisposing)
     {
@@ -156,6 +157,11 @@ namespace System.Data.SQLite
     {
       Dispose(true);
     }
+
+    // These statics are here for lack of a better place to put them.
+    // They exist here because they are called during the finalization of
+    // a SQLiteStatementHandle, SQLiteConnectionHandle, and SQLiteFunctionCookieHandle.
+    // Therefore these functions have to be static, and have to be low-level.
 
     internal static string SQLiteLastError(SQLiteConnectionHandle db)
     {
@@ -175,10 +181,16 @@ namespace System.Data.SQLite
       if (n > 0) throw new SQLiteException(n, SQLiteLastError(stmt));
     }
 
-    internal static void Close(SQLiteConnectionHandle db)
+    internal static void CloseConnection(SQLiteConnectionHandle db)
     {
       int n = UnsafeNativeMethods.sqlite3_close_interop(db);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
     }
+
+    internal static void FreeFunction(IntPtr nCookie)
+    {
+      UnsafeNativeMethods.sqlite3_function_free_callbackcookie(nCookie);
+    }
+
   }
 }

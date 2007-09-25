@@ -345,7 +345,7 @@
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2"
-			WholeProgramOptimization="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -366,13 +366,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
-				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SQLITE_ENABLE_FTS1;SQLITE_CORE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
 			/>

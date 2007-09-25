@@ -96,7 +96,8 @@ DWORD CMetadataTables::GetMaxIndexSizeOf(UINT * puiTables)
     puiTables ++;
   }
 
-  return (dwMaxRows > (ULONG)(2 << (16 - uCount))) ? 4 : 2;
+  return (dwMaxRows > 0xFFFF) ? 4 : 2;
+  //return (dwMaxRows > (ULONG)(2 << (16 - uCount))) ? 4 : 2;
 }
 
 CTableData *CMetadataTables::GetTable(UINT uId)

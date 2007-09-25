@@ -82,13 +82,37 @@ namespace System.Data.SQLite
   /// </item>
   /// <item>
   /// <description>Enlist</description>
-  /// <description><B>Y</B> - Automatically enlist in distributed transactions<br/><b>N</b> - No automatic enlistment</description>
+  /// <description><b>Y</b> - Automatically enlist in distributed transactions<br/><b>N</b> - No automatic enlistment</description>
   /// <description>N</description>
   /// <description>Y</description>
   /// </item>
+  /// <item>
+  /// <description>Pooling</description>
+  /// <description><b>True</b> - Use connection pooling<br/><b>False</b> - Do not use connection pooling</description>
+  /// <description>N</description>
+  /// <description>False</description>
+  /// </item>
+  /// <item>
+  /// <description>FailIfMissing</description>
+  /// <description><b>True</b> - Don't create the database if it does not exist, throw an error instead<br/><b>False</b> - Automatically create the database if it does not exist</description>
+  /// <description>N</description>
+  /// <description>False</description>
+  /// </item>
+  /// <item>
+  /// <description>Max Page Count</description>
+  /// <description>{size in pages} - Limits the maximum number of pages (limits the size) of the database</description>
+  /// <description>N</description>
+  /// <description>0</description>
+  /// </item>
+  /// <item>
+  /// <description>Legacy Format</description>
+  /// <description><b>True</b> - Use the more compatible legacy 3.x database format<br/><b>False</b> - Use the newer 3.3x database format which compresses numbers more effectively</description>
+  /// <description>N</description>
+  /// <description>True</description>
+  /// </item>
   /// </list>
   /// </remarks>
-  public sealed class SQLiteConnection : DbConnection, ICloneable
+  public sealed partial class SQLiteConnection : DbConnection, ICloneable
   {
     private const string _dataDirectory = "|DataDirectory|";
 
@@ -117,7 +141,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Commands associated with this connection
     /// </summary>
-    internal List<WeakReference> _commandList;
+    //internal List<WeakReference> _commandList;
     /// <summary>
     /// The database filename minus path and extension
     /// </summary>
@@ -266,7 +290,7 @@ namespace System.Data.SQLite
       _connectionString = "";
       _transactionLevel = 0;
       _version = 0;
-      _commandList = new List<WeakReference>();
+      //_commandList = new List<WeakReference>();
 
       if (connectionString != null)
         ConnectionString = connectionString;
@@ -466,27 +490,27 @@ namespace System.Data.SQLite
         // resources.  The commands are still valid and will automatically re-acquire the
         // unmanaged resources the next time they are run -- provided this connection is
         // re-opened before then.
-        WeakReference[] clone;
+        //WeakReference[] clone;
 
-        lock (_commandList)
-        {
-          clone = new WeakReference[_commandList.Count];
-          _commandList.CopyTo(clone);
-        }
+        //lock (_commandList)
+        //{
+        //  clone = new WeakReference[_commandList.Count];
+        //  _commandList.CopyTo(clone);
+        //}
 
-        for (int n = 0; n < clone.Length; n++)
-        {
-          SQLiteCommand cmd = null;
-          try
-          {
-            cmd = clone[n].Target as SQLiteCommand;
-          }
-          catch
-          {
-          }
-          if (cmd != null)
-            cmd.ClearCommands();
-        }
+        //for (int n = 0; n < clone.Length; n++)
+        //{
+        //  SQLiteCommand cmd = null;
+        //  try
+        //  {
+        //    cmd = clone[n].Target as SQLiteCommand;
+        //  }
+        //  catch
+        //  {
+        //  }
+        //  if (cmd != null)
+        //    cmd.ClearCommands();
+        //}
 
 #if !PLATFORM_COMPACTFRAMEWORK
         if (_enlistment != null)
@@ -589,11 +613,35 @@ namespace System.Data.SQLite
     /// <description>N</description>
     /// <description>Y</description>
     /// </item>
+    /// <item>
+    /// <description>Pooling</description>
+    /// <description><b>True</b> - Use connection pooling<br/><b>False</b> - Do not use connection pooling</description>
+    /// <description>N</description>
+    /// <description>False</description>
+    /// </item>
+    /// <item>
+    /// <description>FailIfMissing</description>
+    /// <description><b>True</b> - Don't create the database if it does not exist, throw an error instead<br/><b>False</b> - Automatically create the database if it does not exist</description>
+    /// <description>N</description>
+    /// <description>False</description>
+    /// </item>
+    /// <item>
+    /// <description>Max Page Count</description>
+    /// <description>{size in pages} - Limits the maximum number of pages (limits the size) of the database</description>
+    /// <description>N</description>
+    /// <description>0</description>
+    /// </item>
+    /// <item>
+    /// <description>Legacy Format</description>
+    /// <description><b>True</b> - Use the more compatible legacy 3.x database format<br/><b>False</b> - Use the newer 3.3x database format which compresses numbers more effectively</description>
+    /// <description>N</description>
+    /// <description>True</description>
+    /// </item>
     /// </list>
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
     [RefreshProperties(RefreshProperties.All), DefaultValue("")]
-    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.31.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.32.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
     public override string ConnectionString
     {
@@ -663,11 +711,11 @@ namespace System.Data.SQLite
     /// Parses the connection string into component parts
     /// </summary>
     /// <returns>An array of key-value pairs representing each parameter of the connection string</returns>
-    internal KeyValuePair<string, string>[] ParseConnectionString()
+    internal SortedList<string, string> ParseConnectionString()
     {
       string s = _connectionString;
       int n;
-      List<KeyValuePair<string, string>> ls = new List<KeyValuePair<string, string>>();
+      SortedList<string, string> ls = new SortedList<string, string>(StringComparer.OrdinalIgnoreCase);
 
       // First split into semi-colon delimited values.  The Split() function of SQLiteBase accounts for and properly
       // skips semi-colons in quoted strings
@@ -681,15 +729,11 @@ namespace System.Data.SQLite
         arPiece = SQLiteConvert.Split(arParts[n], '=');
         if (arPiece.Length == 2)
         {
-          ls.Add(new KeyValuePair<string, string>(arPiece[0], arPiece[1]));
+          ls.Add(arPiece[0], arPiece[1]);
         }
         else throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, "Invalid ConnectionString format for parameter \"{0}\"", (arPiece.Length > 0) ? arPiece[0] : "null"));
       }
-      KeyValuePair<string, string>[] ar = new KeyValuePair<string, string>[ls.Count];
-      ls.CopyTo(ar, 0);
-
-      // Return the array of key-value pairs
-      return ar;
+      return ls;
     }
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -712,20 +756,16 @@ namespace System.Data.SQLite
     /// <summary>
     /// Looks for a key in the array of key/values of the parameter string.  If not found, return the specified default value
     /// </summary>
-    /// <param name="opts">The Key/Value pair array to look in</param>
+    /// <param name="items">The list to look in</param>
     /// <param name="key">The key to find</param>
     /// <param name="defValue">The default value to return if the key is not found</param>
     /// <returns>The value corresponding to the specified key, or the default value if not found.</returns>
-    static internal string FindKey(KeyValuePair<string, string>[] opts, string key, string defValue)
+    static internal string FindKey(SortedList<string, string> items, string key, string defValue)
     {
-      int x = opts.Length;
-      for (int n = 0; n < x; n++)
-      {
-        if (String.Compare(opts[n].Key, key, true, CultureInfo.InvariantCulture) == 0)
-        {
-          return opts[n].Value;
-        }
-      }
+      string ret;
+
+      if (items.TryGetValue(key, out ret)) return ret;
+
       return defValue;
     }
 
@@ -739,7 +779,7 @@ namespace System.Data.SQLite
 
       Close();
 
-      KeyValuePair<string, string>[] opts = ParseConnectionString();
+      SortedList<string, string> opts = ParseConnectionString();
       string fileName;
 
       if (Convert.ToInt32(FindKey(opts, "Version", "3"), CultureInfo.InvariantCulture) != 3)
@@ -758,7 +798,8 @@ namespace System.Data.SQLite
 #endif
       try
       {
-        bool bUTF16 = (Convert.ToBoolean(FindKey(opts, "UseUTF16Encoding", "False"), CultureInfo.InvariantCulture) == true);
+        bool usePooling = (Convert.ToBoolean(FindKey(opts, "Pooling", Boolean.FalseString), CultureInfo.CurrentCulture) == true);
+        bool bUTF16 = (Convert.ToBoolean(FindKey(opts, "UseUTF16Encoding", Boolean.FalseString), CultureInfo.CurrentCulture) == true);
         SQLiteDateFormats dateFormat = String.Compare(FindKey(opts, "DateTimeFormat", "ISO8601"), "ticks", true, CultureInfo.InvariantCulture) == 0 ? SQLiteDateFormats.Ticks : SQLiteDateFormats.ISO8601;
 
         if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
@@ -768,18 +809,26 @@ namespace System.Data.SQLite
 
         fileName = ExpandFileName(fileName);
 
-        try
+        if (Convert.ToBoolean(FindKey(opts, "FailIfMissing", Boolean.FalseString), CultureInfo.CurrentCulture) == true)
         {
-          if (IO.File.Exists(fileName) == false)
-            throw new IO.FileNotFoundException(String.Format(CultureInfo.CurrentCulture, "Unable to locate file \"{0}\", creating new database.", fileName));
+          try
+          {
+            // Try and open the file, and keep it open while SQLite tries to open it -- otherwise its possible it could be deleted between calls in a race
+            // condition.
+            using (System.IO.FileStream fs = new System.IO.FileStream(fileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
+            {
+              _sql.Open(fileName, usePooling);
+            }
+          }
+          catch (Exception e)
+          {
+            throw new SQLiteException("Unable to open database file", e);
+          }
         }
-        catch
-        {
-        }
+        else // This will create the database if it doesn't exist.
+          _sql.Open(fileName, usePooling);
 
-        _sql.Open(fileName);
-
-        _binaryGuid = (Convert.ToBoolean(FindKey(opts, "BinaryGUID", "True"), CultureInfo.InvariantCulture) == true);
+        _binaryGuid = (Convert.ToBoolean(FindKey(opts, "BinaryGUID", Boolean.TrueString), CultureInfo.CurrentCulture) == true);
 
         string password = FindKey(opts, "Password", null);
 
@@ -798,39 +847,49 @@ namespace System.Data.SQLite
         {
           string defValue;
 
-          defValue = FindKey(opts, "Synchronous", "Normal");
-          if (String.Compare(defValue, "Normal", true, CultureInfo.InvariantCulture) != 0)
-          {
-            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA Synchronous={0}", defValue);
-            cmd.ExecuteNonQuery();
-          }
-
-          defValue = FindKey(opts, "Cache Size", "2000");
-          if (Convert.ToInt32(defValue) != 2000)
-          {
-            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA Cache_Size={0}", defValue);
-            cmd.ExecuteNonQuery();
-          }
-
           if (fileName != ":memory:")
           {
             defValue = FindKey(opts, "Page Size", "1024");
             if (Convert.ToInt32(defValue) != 1024)
             {
-              cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA Page_Size={0}", defValue);
+              cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA page_size={0}", defValue);
               cmd.ExecuteNonQuery();
             }
+          }
+
+          defValue = FindKey(opts, "Max Page Count", "0");
+          if (Convert.ToInt32(defValue) != 0)
+          {
+            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA max_page_count={0}", defValue);
+            cmd.ExecuteNonQuery();
+          }
+
+          defValue = FindKey(opts, "Legacy Format", Boolean.TrueString);
+          cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA legacy_file_format={0}", Convert.ToBoolean(defValue, CultureInfo.InvariantCulture) == true ? "ON" : "OFF");
+          cmd.ExecuteNonQuery();
+
+          defValue = FindKey(opts, "Synchronous", "Normal");
+          if (String.Compare(defValue, "Full", StringComparison.OrdinalIgnoreCase) != 0)
+            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA synchronous={0}", defValue);
+          cmd.ExecuteNonQuery();
+
+          defValue = FindKey(opts, "Cache Size", "2000");
+          if (Convert.ToInt32(defValue) != 2000)
+          {
+            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA cache_size={0}", defValue);
+            cmd.ExecuteNonQuery();
           }
         }
 
 #if !PLATFORM_COMPACTFRAMEWORK
-        if (FindKey(opts, "Enlist", "Y").ToUpper()[0] == 'Y' && Transactions.Transaction.Current != null)
+        if (Transactions.Transaction.Current != null && (FindKey(opts, "Enlist", "Y").ToUpper()[0] == 'Y'
+             || Convert.ToBoolean(FindKey(opts, "Enlist", "True"), CultureInfo.CurrentCulture) == true))
           EnlistTransaction(Transactions.Transaction.Current);
 #endif
       }
       catch (SQLiteException)
       {
-        OnStateChange(ConnectionState.Broken);
+        Close();
         throw;
       }
     }
@@ -951,6 +1010,10 @@ namespace System.Data.SQLite
         sourceFile = System.IO.Path.Combine(dataDirectory, sourceFile.Substring(_dataDirectory.Length));
       }
 
+#if !PLATFORM_COMPACTFRAMEWORK
+      sourceFile = System.IO.Path.GetFullPath(sourceFile);
+#endif
+
       return sourceFile;
     }
     ///<overloads>
@@ -1034,7 +1097,7 @@ namespace System.Data.SQLite
         case "COLUMNS":
           return Schema_Columns(parms[0], parms[2], parms[3]);
         case "INDEXES":
-          return Schema_Indexes(parms[0], parms[2], parms[4]);
+          return Schema_Indexes(parms[0], parms[2], parms[3]);
         case "INDEXCOLUMNS":
           return Schema_IndexColumns(parms[0], parms[2], parms[3], parms[4]);
         case "TABLES":
@@ -1874,34 +1937,34 @@ namespace System.Data.SQLite
       return tbl;
     }
 
-    internal void AddCommand(SQLiteCommand cmd)
-    {
-      lock (_commandList)
-      {
-        _commandList.Add(new WeakReference(cmd, false));
-      }
-    }
+    //internal void AddCommand(SQLiteCommand cmd)
+    //{
+    //  lock (_commandList)
+    //  {
+    //    _commandList.Add(new WeakReference(cmd, false));
+    //  }
+    //}
 
-    internal void RemoveCommand(SQLiteCommand cmd)
-    {
-      lock (_commandList)
-      {
-        foreach (WeakReference r in _commandList)
-        {
-          try
-          {
-            if (r.Target as SQLiteCommand == cmd)
-            {
-              _commandList.Remove(r);
-              return;
-            }
-          }
-          catch
-          {
-          }
-        }
-      }
-    }
+    //internal void RemoveCommand(SQLiteCommand cmd)
+    //{
+    //  lock (_commandList)
+    //  {
+    //    foreach (WeakReference r in _commandList)
+    //    {
+    //      try
+    //      {
+    //        if (r.Target as SQLiteCommand == cmd)
+    //        {
+    //          _commandList.Remove(r);
+    //          return;
+    //        }
+    //      }
+    //      catch
+    //      {
+    //      }
+    //    }
+    //  }
+    //}
   }
 
   /// <summary>

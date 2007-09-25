@@ -79,7 +79,7 @@ namespace System.Data.SQLite
       _activeStatementIndex = -1;
       _activeStatement = null;
       _rowsAffected = -1;
-      _fieldCount = -1;
+      _fieldCount = 0;
 
       if (_command != null)
         NextResult();
@@ -114,14 +114,6 @@ namespace System.Data.SQLite
         _keyInfo.Dispose();
         _keyInfo = null;
       }
-    }
-
-    /// <summary>
-    /// Disposes the datareader.  Base class calls Close() to ensure everything is cleaned up.
-    /// </summary>
-    protected override void Dispose(bool disposing)
-    {
-      base.Dispose(disposing);
     }
 
     /// <summary>
@@ -207,9 +199,7 @@ namespace System.Data.SQLite
     {
       CheckClosed();
       CheckValidRow();
-      TypeAffinity affinity;
-
-      affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
+      TypeAffinity affinity = GetSQLiteType(i).Affinity;
 
       switch (affinity)
       {
@@ -219,7 +209,7 @@ namespace System.Data.SQLite
           if (typ == DbType.Int64) return affinity;
           if (typ == DbType.Boolean) return affinity;
           if (typ == DbType.Byte) return affinity;
-          if (typ == DbType.DateTime && _command.Connection._sql._datetimeFormat == SQLiteDateFormats.Ticks) return affinity;
+          if (typ == DbType.DateTime) return affinity;
           if (typ == DbType.Single) return affinity;
           if (typ == DbType.Double) return affinity;
           if (typ == DbType.Decimal) return affinity;
@@ -756,21 +746,7 @@ namespace System.Data.SQLite
 
       SQLiteType typ = GetSQLiteType(i);
 
-      // Because SQLite is inherently type-less, check this column and row's type
-      // against the cache.  If they're different, then the db owner put varying datatypes in 
-      // this column.  If that's the case, then stick with using SQLite's base datatypes rather
-      // than the richer declared type in the table schema.
-      if (typ.Type != DbType.Object)
-      {
-        TypeAffinity aff = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
-        if (aff != typ.Affinity)
-        {
-          typ.Type = DbType.Object;
-          typ.Affinity = aff;
-        }
-      }
-
-      return _activeStatement._sql.GetValue(_activeStatement, i, ref typ);
+      return _activeStatement._sql.GetValue(_activeStatement, i, typ);
     }
 
     /// <summary>
@@ -920,11 +896,40 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteType structure</returns>
     private SQLiteType GetSQLiteType(int i)
     {
-      if (_fieldTypeArray == null) _fieldTypeArray = new SQLiteType[VisibleFieldCount];
+      SQLiteType typ;
 
-      if (_fieldTypeArray[i].Affinity == TypeAffinity.Uninitialized)
-        _fieldTypeArray[i].Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out _fieldTypeArray[i].Affinity));
-      return _fieldTypeArray[i];
+      // Initialize the field types array if not already initialized
+      if (_fieldTypeArray == null)
+        _fieldTypeArray = new SQLiteType[VisibleFieldCount];
+
+      // Initialize this column's field type instance
+      if (_fieldTypeArray[i] == null) _fieldTypeArray[i] = new SQLiteType();
+
+      typ = _fieldTypeArray[i];
+
+      // If not initialized, then fetch the declared column datatype and attempt to convert it 
+      // to a known DbType.
+      if (typ.Affinity == TypeAffinity.Uninitialized)
+        typ.Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity));
+      else if (typ.Type != DbType.Object)
+      {
+        TypeAffinity newaffinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
+
+        // If the affinity of a column changes over time, then the database must be taking advantage of
+        // SQLite's typelessness.  So we have to fallback to using basic SQLite affinities instead of the
+        // column's declared type.
+        // The exceptions to the rule are DateTime, which can be Int64 or Text, and Guid which can be Blob or Text.
+        // If either of those is the case, then allow the variation row to row.
+        if (newaffinity != typ.Affinity && newaffinity != TypeAffinity.Null && typ.Affinity != TypeAffinity.Null
+          && !(typ.Type == DbType.Guid && (newaffinity == TypeAffinity.Blob || newaffinity == TypeAffinity.Text))
+          && !(typ.Type == DbType.DateTime && (newaffinity == TypeAffinity.Text || newaffinity == TypeAffinity.Int64))
+          )
+          typ.Type = DbType.Object;
+
+        typ.Affinity = newaffinity;
+      }
+
+      return typ;
     }
 
     /// <summary>
@@ -961,7 +966,7 @@ namespace System.Data.SQLite
     /// </summary>
     public override int RecordsAffected
     {
-      get { return _rowsAffected; }
+      get { return (_rowsAffected < 0) ? 0 : _rowsAffected; }
     }
 
     /// <summary>

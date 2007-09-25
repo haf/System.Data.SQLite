@@ -78,7 +78,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Used internally to keep track of memory allocated for aggregate functions
     /// </summary>
-    private IntPtr                     _interopCookie;
+    private SQLiteFunctionCookieHandle _interopCookie;
     /// <summary>
     /// Internal array used to keep track of aggregate function context data
     /// </summary>
@@ -524,28 +524,6 @@ namespace System.Data.SQLite
       lFunctions.CopyTo(arFunctions, 0);
 
       return arFunctions;
-    }
-
-    /// <summary>
-    /// Issued after the base connection is closed, this function cleans up all user-defined functions and disposes of them.
-    /// </summary>
-    /// <remarks>
-    /// Cleaning up here is done mainly because of the interop wrapper.  It allocated memory to hold a reference to all the
-    /// delegates, and now must free that memory.
-    /// Freeing is done after the connection is closed to ensure no callbacks get hit after we've freed the cookie.
-    /// </remarks>
-    /// <param name="sqlbase">The base SQLite connection object</param>
-    /// <param name="ar">An array of user-defined functions for this object</param>
-    internal static void UnbindFunctions(SQLiteBase sqlbase, SQLiteFunction[] ar)
-    {
-      if (ar == null) return;
-
-      int x = ar.Length;
-      for (int n = 0; n < x; n++)
-      {
-        sqlbase.FreeFunction(ar[n]._interopCookie);
-        ar[n].Dispose();
-      }
     }
   }
 }

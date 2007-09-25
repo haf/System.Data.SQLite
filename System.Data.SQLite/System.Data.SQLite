@@ -53,6 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="LINQ\SQLiteConnection_Linq.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="LINQ\SQLiteFactory_Linq.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SQLite3.cs" />
     <Compile Include="SQLite3_UTF16.cs" />
     <Compile Include="SQLiteBase.cs" />
@@ -65,6 +71,7 @@
     <Compile Include="SQLiteConnection.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="SQLiteConnectionPool.cs" />
     <Compile Include="SQLiteConnectionStringBuilder.cs" />
     <Compile Include="SQLiteConvert.cs" />
     <Compile Include="SQLiteDataAdapter.cs">

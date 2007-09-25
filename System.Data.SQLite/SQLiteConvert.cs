@@ -79,7 +79,7 @@ namespace System.Data.SQLite
   /// <summary>
   /// Struct used internally to determine the datatype of a column in a resultset
   /// </summary>
-  internal struct SQLiteType
+  internal class SQLiteType
   {
     /// <summary>
     /// The DbType of the column, or DbType.Object if it cannot be determined
@@ -342,14 +342,10 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="stmt">The statement to retrieve information for</param>
     /// <param name="i">The column to retrieve type information on</param>
-    /// <returns>Returns a SQLiteType struct</returns>
-    internal static SQLiteType ColumnToType(SQLiteStatement stmt, int i)
+    /// <param name="typ">The SQLiteType to receive the affinity for the given column</param>
+    internal static void ColumnToType(SQLiteStatement stmt, int i, SQLiteType typ)
     {
-      SQLiteType typ;
-
       typ.Type = TypeNameToDbType(stmt._sql.ColumnType(stmt, i, out typ.Affinity));
-
-      return typ;
     }
 
     /// <summary>

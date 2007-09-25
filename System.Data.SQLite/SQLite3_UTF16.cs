@@ -28,6 +28,11 @@ namespace System.Data.SQLite
     /// <returns>A .NET string</returns>
     public override string ToString(IntPtr b, int nbytelen)
     {
+      return UTF16ToString(b, nbytelen);
+    }
+
+    public static string UTF16ToString(IntPtr b, int nbytelen)
+    {
       if (nbytelen == 0) return "";
       return Marshal.PtrToStringUni(b, nbytelen / 2);
     }
@@ -37,31 +42,36 @@ namespace System.Data.SQLite
       get
       {
         int len;
-        return base.ToString(UnsafeNativeMethods.sqlite3_libversion_interop(out len), len);
+        return UTF8ToString(UnsafeNativeMethods.sqlite3_libversion_interop(out len), len);
       }
     }
 
-    internal override void Open(string strFilename)
+    internal override void Open(string strFilename, bool usePool)
     {
       if (_sql != null) return;
-      IntPtr db;
 
-      int n = UnsafeNativeMethods.sqlite3_open16_interop(strFilename, out db);
-      if (n > 0) throw new SQLiteException(n, null);
+      _usePool = usePool;
+      if (usePool)
+      {
+        _fileName = strFilename;
+        _sql = SQLiteConnectionPool.Remove(strFilename);
+      }
 
-      _sql = db;
+      if (_sql == null)
+      {
+        IntPtr db;
+
+        int n = UnsafeNativeMethods.sqlite3_open16_interop(strFilename, out db);
+        if (n > 0) throw new SQLiteException(n, null);
+
+        _sql = db;
+      }
       _functionsArray = SQLiteFunction.BindFunctions(this);
     }
 
     internal override void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt)
     {
       Bind_Text(stmt, index, ToString(dt));
-    }
-
-    internal override string Bind_ParamName(SQLiteStatement stmt, int index)
-    {
-      int len;
-      return base.ToString(UnsafeNativeMethods.sqlite3_bind_parameter_name_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override void Bind_Text(SQLiteStatement stmt, int index, string value)
@@ -73,7 +83,7 @@ namespace System.Data.SQLite
     internal override string ColumnName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_name16_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_name16_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override DateTime GetDateTime(SQLiteStatement stmt, int index)
@@ -84,25 +94,25 @@ namespace System.Data.SQLite
     internal override string GetText(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_text16_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_text16_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override string ColumnOriginalName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_origin_name16_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_origin_name16_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override string ColumnDatabaseName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_database_name16_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_database_name16_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override string ColumnTableName(SQLiteStatement stmt, int index)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_column_table_name16_interop(stmt._sqlite_stmt, index, out len), len);
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_table_name16_interop(stmt._sqlite_stmt, index, out len), len);
     }
 
     internal override IntPtr CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal)
@@ -128,7 +138,7 @@ namespace System.Data.SQLite
     internal override string GetParamValueText(IntPtr ptr)
     {
       int len;
-      return ToString(UnsafeNativeMethods.sqlite3_value_text16_interop(ptr, out len), len);
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_value_text16_interop(ptr, out len), len);
     }
 
     internal override void ReturnError(IntPtr context, string value)

@@ -22,7 +22,7 @@ DWORD _ph[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 #include <tchar.h>
 
 // Additional flag for sqlite3.flags, we use it as a reference counter
-#define SQLITE_WantClose 0x01000000
+#define SQLITE_WantClose 0x10000000
 
 typedef void (WINAPI *SQLITEUSERFUNC)(void *, int, void **);
 typedef int  (WINAPI *SQLITECOLLATION)(int, const void *, int, const void*);
@@ -196,6 +196,11 @@ __declspec(dllexport) int WINAPI sqlite3_close_interop(sqlite3 *db)
   }
 
   return ret;
+}
+
+// Returns the number of databases attached to this one
+__declspec(dllexport) void WINAPI sqlite3_detach_all_interop(sqlite3 *db)
+{
 }
 
 __declspec(dllexport) int WINAPI sqlite3_exec_interop(sqlite3 *db, const char *sql, sqlite3_callback cb, void *pv, char **errmsg, int *plen)

@@ -71,9 +71,9 @@ namespace System.Data.SQLite
     {
       get
       {
-        if (ContainsKey("Version") == false) return 3;
-
-        return Convert.ToInt32(this["Version"], CultureInfo.CurrentCulture);
+        object value;
+        TryGetValue("Version", out value);
+        return Convert.ToInt32(value, CultureInfo.CurrentCulture);
       }
       set
       {
@@ -94,7 +94,11 @@ namespace System.Data.SQLite
     {
       get
       {
-        return (SynchronizationModes)TypeDescriptor.GetConverter(typeof(SynchronizationModes)).ConvertFrom(this["Synchronous"]);
+        object value;
+        TryGetValue("Synchronous", out value);
+        if (value is string)
+          return (SynchronizationModes)TypeDescriptor.GetConverter(typeof(SynchronizationModes)).ConvertFrom(value);
+        else return (SynchronizationModes)value;
       }
       set
       {
@@ -111,7 +115,9 @@ namespace System.Data.SQLite
     {
       get
       {
-        return Convert.ToBoolean(this["UseUTF16Encoding"], CultureInfo.CurrentCulture);
+        object value;
+        TryGetValue("UseUTF16Encoding", out value);
+        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
       }
       set
       {
@@ -120,17 +126,57 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Gets/Sets whether or not to use connection pooling.  The default is "False"
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(false)]
+    public bool Pooling
+    {
+      get
+      {
+        object value;
+        TryGetValue("Pooling", out value);
+        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+      }
+      set
+      {
+        this["Pooling"] = value;
+      }
+    }
+
+    /// <summary>
+    /// Gets/Sets whethor not to store GUID's in binary format.  The default is True
+    /// which saves space in the database.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(true)]
+    public bool BinaryGUID
+    {
+      get
+      {
+        object value;
+        TryGetValue("BinaryGUID", out value);
+        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+      }
+      set
+      {
+        this["BinaryGUID"] = value;
+      }
+    }
+
+    /// <summary>
     /// Gets/Sets the filename to open on the connection string.
     /// </summary>
     [DisplayName("Data Source")]
     [Browsable(true)]
+    [DefaultValue("")]
     public string DataSource
     {
       get
       {
-        if (ContainsKey("Data Source") == false) return "";
-
-        return this["Data Source"].ToString();
+        object value;
+        TryGetValue("Data Source", out value);
+        return value.ToString();
       }
       set
       {
@@ -142,34 +188,56 @@ namespace System.Data.SQLite
     /// Determines whether or not the connection will automatically participate
     /// in the current distributed transaction (if one exists)
     /// </summary>
-    [DisplayName("Automatic Enlistment")]
     [Browsable(true)]
     [DefaultValue(true)]
     public bool Enlist
     {
       get
       {
-        if (ContainsKey("Enlist") == false) return true;
-
-        return (this["Enlist"].ToString() == "Y");
+        object value;
+        TryGetValue("Enlist", out value);
+        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
       }
       set
       {
-        this["Enlist"] = (value == true) ? "Y" : "N";
+        this["Enlist"] = value;
       }
     }
+
+    /// <summary>
+    /// If enabled, uses the legacy 3.xx format for maximum compatibility, but results in larger
+    /// database sizes.
+    /// </summary>
+    [DisplayName("Legacy Format")]
+    [Browsable(true)]
+    [DefaultValue(true)]
+    public bool LegacyFormat
+    {
+      get
+      {
+        object value;
+        TryGetValue("Legacy Format", out value);
+        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+      }
+      set
+      {
+        this["Legacy Format"] = value;
+      }
+    }
+
     /// <summary>
     /// Gets/sets the database encryption password
     /// </summary>
     [Browsable(true)]
     [PasswordPropertyText(true)]
+    [DefaultValue("")]
     public string Password
     {
       get
       {
-        if (ContainsKey("Password") == false) return "";
-
-        return this["Password"].ToString();
+        object value;
+        TryGetValue("Password", out value);
+        return value.ToString();
       }
       set
       {
@@ -187,12 +255,33 @@ namespace System.Data.SQLite
     {
       get
       {
-        if (ContainsKey("Page Size") == false) return 1024;
-        return Convert.ToInt32(this["Page Size"], CultureInfo.InvariantCulture);
+        object value;
+        TryGetValue("Page Size", out value);
+        return Convert.ToInt32(value, CultureInfo.CurrentCulture);
       }
       set
       {
         this["Page Size"] = value;
+      }
+    }
+
+    /// <summary>
+    /// Gets/Sets the maximum number of pages the database may hold
+    /// </summary>
+    [DisplayName("Max Page Count")]
+    [Browsable(true)]
+    [DefaultValue(0)]
+    public int MaxPageCount
+    {
+      get
+      {
+        object value;
+        TryGetValue("Max Page Count", out value);
+        return Convert.ToInt32(value, CultureInfo.CurrentCulture);
+      }
+      set
+      {
+        this["Max Page Count"] = value;
       }
     }
 
@@ -206,8 +295,9 @@ namespace System.Data.SQLite
     {
       get
       {
-        if (ContainsKey("Cache Size") == false) return 2000;
-        return Convert.ToInt32(this["Cache Size"], CultureInfo.InvariantCulture);
+        object value;
+        TryGetValue("Cache Size", out value);
+        return Convert.ToInt32(value, CultureInfo.CurrentCulture);
       }
       set
       {
@@ -224,9 +314,11 @@ namespace System.Data.SQLite
     {
       get
       {
-        if (ContainsKey("DateTimeFormat") == false) return SQLiteDateFormats.ISO8601;
-
-        return (SQLiteDateFormats)TypeDescriptor.GetConverter(typeof(SQLiteDateFormats)).ConvertFrom(this["DateTimeFormat"]);
+        object value;
+        TryGetValue("DateTimeFormat", out value);
+        if (value is string)
+          return (SQLiteDateFormats)TypeDescriptor.GetConverter(typeof(SQLiteDateFormats)).ConvertFrom(value);
+        else return (SQLiteDateFormats)value;
       }
       set
       {
