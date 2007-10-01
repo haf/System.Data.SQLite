@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.42.0 June &nbsp;1, 2007<br>
-    Using SQLite 3.3.17<br>
+    Version 1.0.46.0 September 30, 2007<br>
+    Using SQLite 3.4.2<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -119,13 +119,66 @@
     <p></p>
     <p>
       <b>Version History</b></p>
-    <p><b>1.0.43.0 - June 2, 2007</b></p>
+    <p><b>1.0.46.0 - September 30, 2007</b></p>
     <ul>
-    <li>Fixed a reuse bug in the SQLiteDataAdapter in conjunction with the SQLiteCommandBuilder.&nbsp;
+    <li>Fixed faulty logic in type discovery code when using SQLiteDataReader.GetValue().</li>
+      <li>Fixed Connection.Open() bug when dealing with :memory: databases.</li>
+      <li>Fixed SQLiteCommand.ExecuteScalar() to return a properly-typed value.</li>
+      <li>Added support for SQLiteParameter.ResetDbType().</li>
+      <li>Added test cases for rigid and flexible type testing.</li>
+    </ul>
+    <p><b>1.0.45.0 - September 25, 2007</b></p>
+    <ul>
+    <li><strong>Breaking change in GetSchema("Indexes") </strong>-- MetaDataCollections
+      restrictions and identifier parts counts were wrong for this schema and I was using
+      the wrong final parameter as the final restriction.&nbsp; Meaning, if you use the
+      Indexes schema and are querying for a specific index the array should now be {catalog,
+      null, table, index } instead of {catalog, null, table, null, index}</li>
+      <li>Code merge with SQLite 3.4.2</li>
+      <li>Fixed some errors in the encryption module, most notably when a non-default page
+        size is specified in the connection string. </li>
+      <li>Fixed SQLiteDataReader to better handle type-less usage scenarios, which also
+        fixes problems with null values and datetimes.</li>
+      <li>Fixed the leftover temp files problem on WinCE </li>
+      <li>Added connection pooling.&nbsp; The default is disabled for now, but may change
+      in the future.&nbsp; Set "Pooling=True" in the connection string to enable it. </li>
+      <li>Sped up SQLiteConnection.Open() considerably.</li>
+      <li>Added some more robust cleanup code regarding SQLiteFunctions.</li>
+      <li>Minor additions to the code to allow for future LINQ integration into the main
+        codebase.</li>
+      <li>Fixed a long-standing bug in the Open() command of SQLiteConnection which failed
+      to honor the documented default behavior of the SQLite.NET provider to open the
+      database in "Synchronous=Normal" mode.&nbsp; The default was "Full". </li>
+      <li>If Open() fails, it no longer sets the connection state to Broken.&nbsp; It instead
+        reverts back to Closed, and cleans up after itself.</li>
+      <li>Added several new parameters to the ConnectionString for setting max page count,
+        legacy file format, and another called FailIfMissing to raise an error rather than
+        create the database file automatically if it does not already exist.</li>
+      <li>Fixed some designer toolbox references to the wrong version of the SQLite.Designer</li>
+      <li>Fixed a bug in the mergebin utility with regards to COR20 metadata rowsize computations.&nbsp;
+      </li>
+      <li>Minor documentation corrections &nbsp;&nbsp;</li>
+    </ul>
+    <p><b>1.0.44.0 - July 21, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.4.1</li>
+      <li>Fixed a bug in SQLiteConnection.Open() which threw the wrong kind of error in
+        the wrong kind of way when a database file could not be opened or created.&nbsp;</li>
+      <li>Small enhancements to the TYPES keyword, and added documentation for it in the
+        help file.</li>
+      <li>Hopefully fixed the occasional SQLITE_BUSY errors that cropped up when starting
+        a transaction.&nbsp; Usually occurred in high-contention scenarios, and the underlying
+        SQLite engine bypasses the busy handler in this scenario to return immediately.</li>
+    </ul>
+    <p><b>1.0.43.0 - June 21, 2007</b></p>
+    <ul>
+    <li>Code merge with SQLite 3.4.0</li>
+      <li>Fixed a reuse bug in the SQLiteDataAdapter in conjunction with the SQLiteCommandBuilder.&nbsp;
       It's been there unnoticed for more than a year, so it looks like most folks never
-      encountered it.</li>
+      encountered it. </li>
       <li>Fixed an event handler bug in SQLiteCommandBuilder in which it could fail to unlatch
         from the DataAdapter when reused.&nbsp; Relates to the previous bugfix.</li>
+      <li>Fixed a double-dispose bug in SQLiteStatement that triggered a SQLiteException.&nbsp;</li>
     </ul>
     <p><b>1.0.42.0 - June 1, 2007</b></p>
     <ul>

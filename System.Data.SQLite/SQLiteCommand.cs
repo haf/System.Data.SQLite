@@ -597,6 +597,8 @@ namespace System.Data.SQLite
 
         if (_cnn._sql.Step(stmt) == true && ret == null)
         {
+          typ.Type = SQLiteConvert.TypeNameToDbType(_cnn._sql.ColumnType(stmt, 0, out typ.Affinity));
+
           ret = _cnn._sql.GetValue(stmt, 0, typ);
         }
         _cnn._sql.Reset(stmt);

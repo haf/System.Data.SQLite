@@ -303,7 +303,14 @@ namespace System.Data.SQLite
     {
       get
       {
-        if (_dbType == -1) return DbType.String; // Unassigned default value is String
+        if (_dbType == -1)
+        {
+          if (_objValue != null && _objValue != DBNull.Value)
+          {
+            return SQLiteConvert.TypeToDbType(_objValue.GetType());
+          }
+          return DbType.String; // Unassigned default value is String
+        }
         return (DbType)_dbType;
       }
       set
@@ -344,10 +351,11 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Not implemented
+    /// Resets the DbType of the parameter so it can be inferred from the value
     /// </summary>
     public override void ResetDbType()
     {
+      _dbType = -1;
     }
 
     /// <summary>

@@ -911,23 +911,8 @@ namespace System.Data.SQLite
       // to a known DbType.
       if (typ.Affinity == TypeAffinity.Uninitialized)
         typ.Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity));
-      else if (typ.Type != DbType.Object)
-      {
-        TypeAffinity newaffinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
-
-        // If the affinity of a column changes over time, then the database must be taking advantage of
-        // SQLite's typelessness.  So we have to fallback to using basic SQLite affinities instead of the
-        // column's declared type.
-        // The exceptions to the rule are DateTime, which can be Int64 or Text, and Guid which can be Blob or Text.
-        // If either of those is the case, then allow the variation row to row.
-        if (newaffinity != typ.Affinity && newaffinity != TypeAffinity.Null && typ.Affinity != TypeAffinity.Null
-          && !(typ.Type == DbType.Guid && (newaffinity == TypeAffinity.Blob || newaffinity == TypeAffinity.Text))
-          && !(typ.Type == DbType.DateTime && (newaffinity == TypeAffinity.Text || newaffinity == TypeAffinity.Int64))
-          )
-          typ.Type = DbType.Object;
-
-        typ.Affinity = newaffinity;
-      }
+      else
+        typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
 
       return typ;
     }

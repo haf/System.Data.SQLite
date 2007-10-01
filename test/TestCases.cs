@@ -89,6 +89,9 @@ namespace test
       try { FullTextTest(cnn); Console.WriteLine("SUCCESS - Full Text Search"); }
       catch (Exception) { Console.WriteLine("FAIL - Full Text Search"); }
 
+      try { DataTypeTest(cnn); Console.WriteLine("SUCCESS - DataType Test"); }
+      catch (Exception) { Console.WriteLine("FAIL - DataType Test"); }
+
       try { DisposePattenTest(cnn); Console.WriteLine("SUCCESS - Dispose pattern test"); }
       catch (Exception) { Console.WriteLine("FAIL - Dispose pattern test"); }
 
@@ -165,6 +168,94 @@ namespace test
           cmd.CommandText = "SELECT * FROM TestCase";
           DbDataReader reader = cmd.ExecuteReader();
           reader.Read();
+        }
+      }
+    }
+
+    internal static void DataTypeTest(DbConnection cnn)
+    {
+      DateTime now = DateTime.Now;
+      using (DbCommand cmd = cnn.CreateCommand())
+      {
+        cmd.CommandText = "create table datatypetest(id integer primary key, myvalue, datetimevalue datetime, decimalvalue decimal)";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "insert into datatypetest(myvalue, datetimevalue, decimalvalue) values(?,?,?)";
+        DbParameter p1 = cmd.CreateParameter();
+        DbParameter p2 = cmd.CreateParameter();
+        DbParameter p3 = cmd.CreateParameter();
+
+        cmd.Parameters.Add(p1);
+        cmd.Parameters.Add(p2);
+        cmd.Parameters.Add(p3);
+
+        p1.Value = 1;
+        p2.Value = DateTime.MinValue;
+        p3.Value = (Decimal)1.05;
+        cmd.ExecuteNonQuery();
+
+        p1.ResetDbType();
+        p2.ResetDbType();
+        p3.ResetDbType();
+
+        p1.Value = "One";
+        p2.Value = "2001-01-01";
+        p3.Value = (Decimal)1.0;
+        cmd.ExecuteNonQuery();
+
+        p1.ResetDbType();
+        p2.ResetDbType();
+        p3.ResetDbType();
+
+        p1.Value = 1.01;
+        p2.Value = now;
+        p3.Value = (Decimal)9.91;
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "select myvalue, datetimevalue, decimalvalue from datatypetest";
+        using (DbDataReader reader = cmd.ExecuteReader())
+        {
+          for (int n = 0; n < 3; n++)
+          {
+            reader.Read();
+            if (reader.GetValue(1).GetType() != reader.GetDateTime(1).GetType()) throw new ArgumentOutOfRangeException();
+            if (reader.GetValue(2).GetType() != reader.GetDecimal(2).GetType()) throw new ArgumentOutOfRangeException();
+
+            switch (n)
+            {
+              case 0:
+                if (reader.GetValue(0).GetType() != typeof(long)) throw new ArgumentOutOfRangeException();
+
+                if (reader.GetValue(0).Equals((long)1) == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(1).Equals(DateTime.MinValue) == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(2).Equals((Decimal)1.05) == false) throw new ArgumentOutOfRangeException();
+
+                if (reader.GetInt64(0) != (long)1) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new ArgumentOutOfRangeException();
+                break;
+              case 1:
+                if (reader.GetValue(0).GetType() != typeof(string)) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(0).Equals("One") == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(1).Equals(new DateTime(2001, 1, 1)) == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(2).Equals((Decimal)1.0) == false) throw new ArgumentOutOfRangeException();
+
+                if (reader.GetString(0) != "One") throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new ArgumentOutOfRangeException();
+                break;
+              case 2:
+                if (reader.GetValue(0).GetType() != typeof(double)) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(0).Equals(1.01) == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(1).Equals(now) == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(2).Equals((Decimal)9.91) == false) throw new ArgumentOutOfRangeException();
+
+                if (reader.GetDouble(0) != 1.01) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new ArgumentOutOfRangeException();
+                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new ArgumentOutOfRangeException();
+                break;
+            }
+          }
         }
       }
     }

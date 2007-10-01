@@ -92,7 +92,6 @@ namespace System.Data.SQLite
 
       if (_sql == null)
       {
-        System.Diagnostics.Debug.WriteLine("Creating a new connection");
         IntPtr db;
 
         int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), out db);
@@ -340,24 +339,25 @@ namespace System.Data.SQLite
       if (p != IntPtr.Zero) return UTF8ToString(p, len);
       else
       {
-        string[] ar = stmt.TypeDefinitions;
-        if (ar != null)
-        {
-          if (index < ar.Length && ar[index] != null)
-            return ar[index];
-        }
+        return String.Empty;
+        //string[] ar = stmt.TypeDefinitions;
+        //if (ar != null)
+        //{
+        //  if (index < ar.Length && ar[index] != null)
+        //    return ar[index];
+        //}
 
-        switch (nAffinity)
-        {
-          case TypeAffinity.Int64:
-            return "BIGINT";
-          case TypeAffinity.Double:
-            return "DOUBLE";
-          case TypeAffinity.Blob:
-            return "BLOB";
-          default:
-            return "TEXT";
-        }
+        //switch (nAffinity)
+        //{
+        //  case TypeAffinity.Int64:
+        //    return "BIGINT";
+        //  case TypeAffinity.Double:
+        //    return "DOUBLE";
+        //  case TypeAffinity.Blob:
+        //    return "BLOB";
+        //  default:
+        //    return "TEXT";
+        //}
       }
     }
 
@@ -644,8 +644,16 @@ namespace System.Data.SQLite
     internal override object GetValue(SQLiteStatement stmt, int index, SQLiteType typ)
     {
       if (IsNull(stmt, index)) return DBNull.Value;
+      TypeAffinity aff = typ.Affinity;
+      Type t = null;
 
-      switch (typ.Affinity)
+      if (typ.Type != DbType.Object)
+      {
+        t = SQLiteConvert.SQLiteTypeToType(typ);
+        aff = TypeToAffinity(t);
+      }
+
+      switch (aff)
       {
         case TypeAffinity.Blob:
           if (typ.Type == DbType.Guid && typ.Affinity == TypeAffinity.Text)
@@ -662,22 +670,15 @@ namespace System.Data.SQLite
         case TypeAffinity.DateTime:
           return GetDateTime(stmt, index);
         case TypeAffinity.Double:
-          if (typ.Type == DbType.Double || typ.Type == DbType.Object)
-            return GetDouble(stmt, index);
+          if (t == null) return GetDouble(stmt, index);
           else
-            return Convert.ChangeType(GetDouble(stmt, index), SQLiteConvert.SQLiteTypeToType(typ), null);
+            return Convert.ChangeType(GetDouble(stmt, index), t, null);
         case TypeAffinity.Int64:
-          if (typ.Type == DbType.DateTime && _datetimeFormat == SQLiteDateFormats.ISO8601)
-            return GetDateTime(stmt, index);
-          else if (typ.Type == DbType.Int64 || typ.Type == DbType.Object)
-            return GetInt64(stmt, index);
+          if (t == null) return GetInt64(stmt, index);
           else
-            return Convert.ChangeType(GetInt64(stmt, index), SQLiteConvert.SQLiteTypeToType(typ), null);
+            return Convert.ChangeType(GetInt64(stmt, index), t, null);
         default:
-          if (typ.Type == DbType.DateTime && _datetimeFormat == SQLiteDateFormats.ISO8601)
-            return GetDateTime(stmt, index);
-          else
-            return GetText(stmt, index);
+          return GetText(stmt, index);
       }
     }
 

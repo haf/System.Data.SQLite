@@ -54,8 +54,15 @@
     </div>
     <div id="mainSection">
     <div id="mainBody">
-
-      <h1 class="heading">Version History</h1>
+    <h1 class="heading">Version History</h1>
+    <p><b>1.0.46.0 - September 30, 2007</b></p>
+    <ul>
+    <li>Fixed faulty logic in type discovery code when using SQLiteDataReader.GetValue().</li>
+      <li>Fixed Connection.Open() bug when dealing with :memory: databases.</li>
+      <li>Fixed SQLiteCommand.ExecuteScalar() to return a properly-typed value.</li>
+      <li>Added support for SQLiteParameter.ResetDbType().</li>
+      <li>Added test cases for rigid and flexible type testing.</li>
+    </ul>
     <p><b>1.0.45.0 - September 25, 2007</b></p>
     <ul>
     <li><strong>Breaking change in GetSchema("Indexes") </strong>-- MetaDataCollections

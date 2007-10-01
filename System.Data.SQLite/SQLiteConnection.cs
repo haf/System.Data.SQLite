@@ -486,32 +486,6 @@ namespace System.Data.SQLite
     {
       if (_sql != null)
       {
-        // Force any commands associated with this connection to release their unmanaged
-        // resources.  The commands are still valid and will automatically re-acquire the
-        // unmanaged resources the next time they are run -- provided this connection is
-        // re-opened before then.
-        //WeakReference[] clone;
-
-        //lock (_commandList)
-        //{
-        //  clone = new WeakReference[_commandList.Count];
-        //  _commandList.CopyTo(clone);
-        //}
-
-        //for (int n = 0; n < clone.Length; n++)
-        //{
-        //  SQLiteCommand cmd = null;
-        //  try
-        //  {
-        //    cmd = clone[n].Target as SQLiteCommand;
-        //  }
-        //  catch
-        //  {
-        //  }
-        //  if (cmd != null)
-        //    cmd.ClearCommands();
-        //}
-
 #if !PLATFORM_COMPACTFRAMEWORK
         if (_enlistment != null)
         {
@@ -792,10 +766,14 @@ namespace System.Data.SQLite
 
       if (String.Compare(fileName, ":MEMORY:", true, CultureInfo.InvariantCulture) == 0)
         fileName = ":memory:";
+      else
+      {
 #if PLATFORM_COMPACTFRAMEWORK
-      else if (fileName.StartsWith(".\\"))
-        fileName = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
+       if (fileName.StartsWith(".\\"))
+         fileName = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
 #endif
+       fileName = ExpandFileName(fileName);
+      }
       try
       {
         bool usePooling = (Convert.ToBoolean(FindKey(opts, "Pooling", Boolean.FalseString), CultureInfo.CurrentCulture) == true);
@@ -806,8 +784,6 @@ namespace System.Data.SQLite
           _sql = new SQLite3_UTF16(dateFormat);
         else
           _sql = new SQLite3(dateFormat);
-
-        fileName = ExpandFileName(fileName);
 
         if (Convert.ToBoolean(FindKey(opts, "FailIfMissing", Boolean.FalseString), CultureInfo.CurrentCulture) == true)
         {
