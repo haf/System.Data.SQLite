@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.46.0 September 30, 2007<br>
-    Using SQLite 3.4.2<br>
+    Version 1.0.47.0 December 4, 2007<br>
+    Using SQLite 3.5.3<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -21,7 +21,7 @@
     </h2>
     <UL>
       <LI>
-      Written from scratch on VS2005 specifically for ADO.NET 2.0, implementing all the
+      Written from scratch on VS2005/2008 specifically for ADO.NET 2.0, implementing all the
       base classes and features recently introduced in the framework, including automatic
       transaction enlistment.<li>Supports the Full
         and Compact .NET Framework, as well as native C/C++ development.&nbsp; 100% binary
@@ -32,7 +32,8 @@
       <li>Encrypted database support.&nbsp; Encrypted databases are fully encrypted and
         support both binary and cleartext password types.</li>
       <LI>
-      Visual Studio 2005 Design-Time Support, works with all versions of VS2005, including
+      Visual Studio 2005/2008 Design-Time Support, works with all versions of VS2005/2008,
+        including
       all Express Editions.&nbsp; You can add a SQLite 
       database to the Servers list, design queries with the Query Designer, 
       drag-and-drop tables onto a Typed DataSet, etc.
@@ -79,7 +80,7 @@
       In Windows Explorer, navigate to the <STRONG>SQLite.NET\bin\Designer</STRONG>
         folder and execute the <STRONG>INSTALL.EXE</STRONG>
       file.&nbsp; The program will
-      automatically detect what version(s) of Visual Studio 2005 are installed and allow
+      automatically detect what version(s) of Visual Studio 2005/2008 are installed and allow
       you to selectively install and uninstall the designer for each edition.</P>
     <H2><STRONG>DbFactory Support (Non-Compact Framework)</STRONG></H2>
     In order to use the SQLiteFactory and have the SQLite data provider enumerated 
@@ -119,6 +120,32 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.47.0 - December 4, 2007</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.5.3</li>
+      <li>Added installer support for Visual Studio 2008.&nbsp; Code is still using the
+        VS2005 SDK so one or two bells and whistles are missing, but nothing significant.</li>
+      <li>This is the last version that the FTS1 and FTS2 extensions will appear.&nbsp;
+        Everyone should rebuild their fulltext indexes using the new FTS3 module.&nbsp;
+        FTS1 and FTS2 suffer from a design flaw that could cause database corruption with
+        certain vacuum operations.</li>
+      <li>Fixed pooled connections so they rollback any outstanding transactions before
+        going to the pool.&nbsp; </li>
+      <li>Fixed the unintended breaking of the TYPES keyword, and mis-typing of untyped
+        or indeterminate column types. </li>
+      <li>Assert a FileIOPermission() requirement in the static SQLiteFunction constructor.
+      </li>
+      <li>The CE-only SQLiteFunction.RegisterFunction() is now available on the desktop
+        platform for dynamic registration of functions.&nbsp; You must still close and re-open
+        a connection in order for the new function to be seen by a connection.</li>
+      <li>Fixed the "database is locked" errors by implementing behavioral changes in the
+        interop.c file for SQLite.&nbsp; Closing a database force-finalizes any prepared
+        statements on the database to ensure the connection is fully closed.&nbsp; This
+        was rather tricky because the GC thread could still be finalizing statements itself.
+        &nbsp;</li>
+      <li>Modifed the mergebin utility to help circumvent a long-standing strong name verification
+        bug in the Compact Framework.</li>
+    </ul>
     <p><b>1.0.46.0 - September 30, 2007</b></p>
     <ul>
     <li>Fixed faulty logic in type discovery code when using SQLiteDataReader.GetValue().</li>

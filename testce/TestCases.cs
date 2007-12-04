@@ -296,7 +296,7 @@ namespace test
     {
       using (DbCommand cmd = cnn.CreateCommand())
       {
-        cmd.CommandText = "CREATE VIRTUAL TABLE FullText USING FTS2(name, ingredients);";
+        cmd.CommandText = "CREATE VIRTUAL TABLE FullText USING FTS1(name, ingredients);";
         cmd.ExecuteNonQuery();
 
         string[] names = { "broccoli stew", "pumpkin stew", "broccoli pie", "pumpkin pie" };

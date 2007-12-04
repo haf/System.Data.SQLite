@@ -407,6 +407,7 @@ namespace System.Data.SQLite
     /// Using reflection, enumerate all assemblies in the current appdomain looking for classes that
     /// have a SQLiteFunctionAttribute attribute, and registering them accordingly.
     /// </summary>
+    [Security.Permissions.FileIOPermission(Security.Permissions.SecurityAction.Assert, AllFiles = Security.Permissions.FileIOPermissionAccess.PathDiscovery)]
     static SQLiteFunction()
     {
       SQLiteFunctionAttribute at;
@@ -462,7 +463,7 @@ namespace System.Data.SQLite
         }
       }
     }
-#else
+#endif
     /// <summary>
     /// Manual method of registering a function.  The type must still have the SQLiteFunctionAttributes in order to work
     /// properly, but this is a workaround for the Compact Framework where enumerating assemblies is not currently supported.
@@ -484,7 +485,6 @@ namespace System.Data.SQLite
         }
       }
     }
-#endif
 
     /// <summary>
     /// Called by SQLiteBase derived classes, this function binds all user-defined functions to a connection.

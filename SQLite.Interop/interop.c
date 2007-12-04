@@ -1,3 +1,4 @@
+//#include "../temp/sqlite.interop/src/sqlite3.c"
 #include "src/sqlite3.c"
 #include "crypt.c"
 #include <tchar.h>
@@ -6,20 +7,12 @@
 
 #if _WIN32_WCE
 #include "merge.h"
-
-// IMPORTANT: This placeholder is here for a reason!!!
-// On the Compact Framework the .data section of the DLL must have its RawDataSize larger than the VirtualSize!
-// If its not, strong name validation will fail and other bad things will happen.
-DWORD _ph[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-
 #else
 #include "merge_full.h"
 #endif // _WIN32_WCE
 #endif // NDEBUG
 
 #ifdef OS_WIN
-
-#include <tchar.h>
 
 // Additional flag for sqlite3.flags, we use it as a reference counter
 #define SQLITE_WantClose 0x10000000
@@ -72,46 +65,46 @@ __declspec(dllexport) void WINAPI sqlite3_sleep_interop(int milliseconds)
 
 void InitializeDbMutex(sqlite3 *pdb)
 {
-  pdb->pTraceArg = (CRITICAL_SECTION *)sqliteMalloc(sizeof(CRITICAL_SECTION));
-  InitializeCriticalSection(pdb->pTraceArg);
+  //pdb->pTraceArg = (CRITICAL_SECTION *)sqlite3_malloc(sizeof(CRITICAL_SECTION));
+  //InitializeCriticalSection(pdb->pTraceArg);
 }
 
 void EnterDbMutex(sqlite3 *pdb)
 {
-  if (pdb->pTraceArg)
-  {
-    EnterCriticalSection(pdb->pTraceArg);
-  }
+  //if (pdb->pTraceArg)
+  //{
+  //  EnterCriticalSection(pdb->pTraceArg);
+  //}
 }
 
 void LeaveDbMutex(sqlite3 *pdb)
 {
-  if (pdb->pTraceArg)
-  {
-    LeaveCriticalSection(pdb->pTraceArg);
-  }
+  //if (pdb->pTraceArg)
+  //{
+  //  LeaveCriticalSection(pdb->pTraceArg);
+  //}
 }
 
 int sqlite3_closeAndFreeMutex(sqlite3 *db)
 {
-  CRITICAL_SECTION *pcrit = db->pTraceArg;
-  int ret;
-  EnterDbMutex(db);
+  //CRITICAL_SECTION *pcrit = db->pTraceArg;
+  //int ret;
+  //EnterDbMutex(db);
 
-  ret = sqlite3_close(db);
-  if (ret == SQLITE_OK)
-  {
-    if (pcrit)
-    {
-      LeaveCriticalSection(pcrit);
-      DeleteCriticalSection(pcrit);
-      free(pcrit);
-    }
-  }
-  else
-    LeaveDbMutex(db);
+  //ret = sqlite3_close(db);
+  //if (ret == SQLITE_OK)
+  //{
+  //  if (pcrit)
+  //  {
+  //    LeaveCriticalSection(pcrit);
+  //    DeleteCriticalSection(pcrit);
+  //    sqlite3_free(pcrit);
+  //  }
+  //}
+  //else
+  //  LeaveDbMutex(db);
 
-  return ret;
+  return 0;
 }
 
 int SetCompression(const wchar_t *pwszFilename, unsigned short ufLevel)
@@ -181,18 +174,52 @@ __declspec(dllexport) int WINAPI sqlite3_libversion_number_interop(void)
   return sqlite3_libversion_number();
 }
 
+/*
+    The goal of this version of close is different than that of sqlite3_close(), and is designed to lend itself better to .NET's non-deterministic finalizers and
+    the GC thread.  SQLite will not close a database if statements are open on it -- but for our purposes, we'd rather finalize all active statements
+    and forcibly close the database.  The reason is simple -- a lot of people don't Dispose() of their objects correctly and let the garbage collector
+    do it.  This leads to unexpected behavior when a user thinks they've closed a database, but it's still open because not all the statements have
+    hit the GC yet.
+
+    So, here we have a problem ... .NET has a pointer to any number of sqlite3_stmt objects.  We can't call sqlite3_finalize() on these because
+    their memory is freed and can be used for something else.  The GC thread could potentially try and call finalize again on the statement after
+    that memory was deallocated.  BAD.  So, what we need to do is make a copy of each statement, and call finalize() on the copy -- so that the original
+    statement's memory is preserved, and marked as BAD, but we can still manage to finalize everything and forcibly close the database.  Later when the 
+    GC gets around to calling finalize_interop() on the "bad" statement, we detect that and finish deallocating the pointer.
+*/
 __declspec(dllexport) int WINAPI sqlite3_close_interop(sqlite3 *db)
 {
-  // Try and close the database.  If there are unfinalized statements, mark the database to be closed as
-  // soon as the last finalized statement is closed
   int ret = sqlite3_closeAndFreeMutex(db);
-  if (ret == SQLITE_BUSY)
+
+  if (ret == SQLITE_BUSY && db->pVdbe)
   {
-    if (db->pVdbe)
+    while (db->pVdbe)
     {
-      db->flags |= SQLITE_WantClose;
-      ret = 0;
+      // Make a copy of the first prepared statement
+      Vdbe *p = (Vdbe *)sqlite3_malloc(sizeof(Vdbe));
+      Vdbe *po = db->pVdbe;
+
+      if (!p) return SQLITE_NOMEM;
+
+      CopyMemory(p, po, sizeof(Vdbe));
+
+      // Put it on the chain so we can free it
+      db->pVdbe = p;
+      ret = sqlite3_finalize((sqlite3_stmt *)p); // This will also free the copy's memory
+      if (ret)
+      {
+        // finalize failed -- so we must put back anything we munged
+        CopyMemory(po, p, sizeof(Vdbe));
+        db->pVdbe = po;
+        break;
+      }
+      else
+      {
+        ZeroMemory(po, sizeof(Vdbe));
+        po->magic = VDBE_MAGIC_DEAD;
+      }
     }
+    ret = sqlite3_closeAndFreeMutex(db);
   }
 
   return ret;
@@ -486,6 +513,11 @@ __declspec(dllexport) int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
   sqlite3 *db = (p == NULL) ? NULL : p->db;
   int ret;
 
+  if (p->magic == VDBE_MAGIC_DEAD && p->db == NULL)
+  {
+    sqlite3_free(p);
+    return SQLITE_OK;
+  }
   EnterDbMutex(db);
   ret = sqlite3_finalize(stmt);
   LeaveDbMutex(db);
@@ -860,5 +892,13 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
 
   return ret;
 }
+
+
+// IMPORTANT: This placeholder is here for a reason!!!
+// On the Compact Framework the .data section of the DLL must have its RawDataSize larger than the VirtualSize!
+// If its not, strong name validation will fail and other bad things will happen.
+#if _WIN32_WCE
+__int64 _ph[84] = {1};
+#endif // _WIN32_WCE
 
 #endif // OS_WIN

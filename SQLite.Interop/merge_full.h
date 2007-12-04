@@ -3,10 +3,10 @@
 
 #include <windef.h>
 
-#pragma data_seg(".clr")
+#pragma data_seg(push,clrseg,".clr")
 #pragma comment(linker, "/SECTION:.clr,ER")
-  char __ph[141848] = {0}; // The number of bytes to reserve
-#pragma data_seg()
+  char __ph[142252] = {0}; // The number of bytes to reserve
+#pragma data_seg(pop,clrseg)
 
 typedef BOOL (WINAPI *DLLMAIN)(HANDLE, DWORD, LPVOID);
 typedef struct EXTRA_STUFF

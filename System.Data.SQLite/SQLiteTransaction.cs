@@ -120,13 +120,19 @@ namespace System.Data.SQLite
     {
       IsValid(true);
 
-      using (SQLiteCommand cmd = _cnn.CreateCommand())
+      IssueRollback(_cnn);
+
+      _cnn._transactionLevel = 0;
+      _cnn = null;
+    }
+
+    internal static void IssueRollback(SQLiteConnection cnn)
+    {
+      using (SQLiteCommand cmd = cnn.CreateCommand())
       {
         cmd.CommandText = "ROLLBACK";
         cmd.ExecuteNonQuery();
       }
-      _cnn._transactionLevel = 0;
-      _cnn = null;
     }
 
     internal bool IsValid(bool throwError)

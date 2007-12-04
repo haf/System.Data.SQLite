@@ -29,7 +29,7 @@ namespace test
       {
         TestCases tests = new TestCases();
 
-        cnn.ConnectionString = "Data Source=test.db3";
+        cnn.ConnectionString = "Data Source=test.db3;Password=yVXL39etehPX";
         cnn.Open();
         tests.Run(cnn);
 

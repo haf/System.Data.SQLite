@@ -18,6 +18,7 @@ namespace install
   using System.GACManagedAccess;
   using System.Xml;
   using System.Diagnostics;
+  using System.Collections.Generic;
 
   public partial class InstallDesigner : Form
   {
@@ -31,10 +32,12 @@ namespace install
     private static string[] compactFrameworks = new string[] { "PocketPC", "SmartPhone", "WindowsCE" };
 
     internal bool _remove = false;
-    private string _regRoot = "8.0";
+    //private string _regRoot = "8.0";
     private System.Reflection.Assembly _assm = null;
     private bool _ignoreChecks = true;
     private string _assmLocation;
+
+    private Dictionary<string, string> _regRoots = new Dictionary<string,string>();
 
     string SQLiteLocation
     {
@@ -97,12 +100,15 @@ namespace install
     {
       string[] args = Environment.GetCommandLineArgs();
 
+      _regRoots.Add("8.0", "2005");
+      _regRoots.Add("9.0", "2008");
+
       for (int n = 0; n < args.Length; n++)
       {
         if (String.Compare(args[n], "/regroot", true) == 0 ||
           String.Compare(args[n], "-regroot", true) == 0)
         {
-          _regRoot = args[n + 1];
+          _regRoots.Add(args[n + 1], args[n + 1]);
           break;
         }
         else if (String.Compare(args[n], "/remove", true) == 0 ||
@@ -116,33 +122,35 @@ namespace install
 
       RegistryKey key;
 
-      using (key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft"))
+      foreach (KeyValuePair<string, string> pair in _regRoots)
       {
-        AddItem(key, "VisualStudio", "Visual Studio (full editions)", standardDataProviderGuid, null);
-        AddItem(key, "VWDExpress", "Visual Web Developer Express Edition", standardDataProviderGuid, null);
+        using (key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft"))
+        {
+          AddItem(key, pair.Key, "VisualStudio", String.Format("Visual Studio {0} (full editions)", pair.Value), standardDataProviderGuid, null);
+          AddItem(key, pair.Key, "VWDExpress", String.Format("Visual Web Developer Express {0} Edition", pair.Value), standardDataProviderGuid, null);
 
-        warningPanel.Visible = (AddItem(key, "VCSExpress", "Visual C# Express Edition *", oledbDataProviderGuid, oledbAltDataProviderGuid)
-         | AddItem(key, "VCExpress", "Visual C++ Express Edition *", oledbDataProviderGuid, oledbAltDataProviderGuid)
-         | AddItem(key, "VBExpress", "Visual Basic Express Edition *", oledbDataProviderGuid, oledbAltDataProviderGuid)
-         | AddItem(key, "VJSExpress", "Visual J# Express Edition *", oledbDataProviderGuid, oledbAltDataProviderGuid));
+          warningPanel.Visible = (AddItem(key, pair.Key, "VCSExpress", String.Format("Visual C# Express {0} Edition *", pair.Value), oledbDataProviderGuid, oledbAltDataProviderGuid)
+           | AddItem(key, pair.Key, "VCExpress", String.Format("Visual C++ Express {0} Edition *", pair.Value), oledbDataProviderGuid, oledbAltDataProviderGuid)
+           | AddItem(key, pair.Key, "VBExpress", String.Format("Visual Basic Express {0} Edition *", pair.Value), oledbDataProviderGuid, oledbAltDataProviderGuid)
+           | AddItem(key, pair.Key, "VJSExpress", String.Format("Visual J# Express {0} Edition *", pair.Value), oledbDataProviderGuid, oledbAltDataProviderGuid));
+        }
+        GlobalAddRemove(pair.Key);
       }
-
-      GlobalAddRemove();
 
       _ignoreChecks = false;
     }
 
-    private bool AddItem(RegistryKey parent, string subkeyname, string itemName, Guid lookFor, object isChecked)
+    private bool AddItem(RegistryKey parent, string version, string subkeyname, string itemName, Guid lookFor, object isChecked)
     {
       RegistryKey subkey;
 
       try
       {
-        using (subkey = parent.OpenSubKey(String.Format("{0}\\{1}", subkeyname, _regRoot)))
+        using (subkey = parent.OpenSubKey(String.Format("{0}\\{1}", subkeyname, version)))
         {
           ListViewItem item = new ListViewItem(itemName);
 
-          item.Tag = subkeyname;
+          item.Tag = new string[] { subkeyname, version };
 
           using (RegistryKey subsubkey = subkey.OpenSubKey("DataProviders"))
           {
@@ -187,30 +195,33 @@ namespace install
     {
       if (_ignoreChecks) return;
 
+      string[] arr = (string[])e.Item.Tag;
+
       DoInstallUninstall(e.Item);
 
-      GlobalAddRemove();
+      GlobalAddRemove(arr[1]);
     }
 
     private void DoInstallUninstall(ListViewItem Item)
     {
+      string[] arr = (string[])Item.Tag;
       if (Item.Checked == false)
       {
         if (Item.Text.IndexOf('*') > -1)
-          RestoreJet((string)Item.Tag);
+          RestoreJet(arr[0], arr[1]);
         else
-          Uninstall((string)Item.Tag, standardDataProviderGuid, standardDataSourcesGuid);
+          Uninstall(arr[0], arr[1], standardDataProviderGuid, standardDataSourcesGuid);
       }
       else
       {
         if (Item.Text.IndexOf('*') > -1)
-          ReplaceJet((string)Item.Tag);
+          ReplaceJet(arr[0], arr[1]);
         else
-          Install((string)Item.Tag, standardDataProviderGuid, standardDataSourcesGuid);
+          Install(arr[0], arr[1], standardDataProviderGuid, standardDataSourcesGuid);
       }
     }
 
-    private void GlobalAddRemove()
+    private void GlobalAddRemove(string version)
     {
       bool install = false;
 //      bool installed;
@@ -452,12 +463,12 @@ namespace install
         throw;
       }
 
-      FixXmlLibPaths(install);
+      FixXmlLibPaths(install, version);
     }
 
-    private void ReplaceJet(string keyname)
+    private void ReplaceJet(string keyname, string version)
     {
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, version), true))
       {
         using (RegistryKey source = key.OpenSubKey(oledbDataProviderGuid.ToString("B")))
         {
@@ -470,7 +481,7 @@ namespace install
         key.DeleteSubKeyTree(oledbDataProviderGuid.ToString("B"));
       }
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, version), true))
       {
         using (RegistryKey source = key.OpenSubKey(jetDataSourcesGuid.ToString("B")))
         {
@@ -483,12 +494,12 @@ namespace install
         key.DeleteSubKeyTree(jetDataSourcesGuid.ToString("B"));
       }
 
-      Install(keyname, oledbDataProviderGuid, jetDataSourcesGuid);
+      Install(keyname, version, oledbDataProviderGuid, jetDataSourcesGuid);
     }
 
-    private void RestoreJet(string keyname)
+    private void RestoreJet(string keyname, string version)
     {
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, version), true))
       {
         using (RegistryKey source = key.OpenSubKey(oledbAltDataProviderGuid.ToString("B")))
         {
@@ -496,9 +507,9 @@ namespace install
         }
       }
 
-      Uninstall(keyname, oledbDataProviderGuid, jetDataSourcesGuid);
+      Uninstall(keyname, version, oledbDataProviderGuid, jetDataSourcesGuid);
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, version), true))
       {
         using (RegistryKey source = key.OpenSubKey(oledbAltDataProviderGuid.ToString("B")))
         {
@@ -513,7 +524,7 @@ namespace install
         }
       }
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, version), true))
       {
         using (RegistryKey source = key.OpenSubKey(jetAltDataSourcesGuid.ToString("B")))
         {
@@ -529,11 +540,11 @@ namespace install
       }
     }
 
-    private void Install(string keyname, Guid provider, Guid source)
+    private void Install(string keyname, string version, Guid provider, Guid source)
     {
       bool usePackage = (keyname == "VisualStudio");
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, version), true))
       {
         using (RegistryKey subkey = key.CreateSubKey(provider.ToString("B"), RegistryKeyPermissionCheck.ReadWriteSubTree))
         {
@@ -570,7 +581,7 @@ namespace install
         }
       }
 
-      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
+      using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, version), true))
       {
         using (RegistryKey subkey = key.CreateSubKey(source.ToString("B"), RegistryKeyPermissionCheck.ReadWriteSubTree))
         {
@@ -618,7 +629,7 @@ namespace install
 
       if (usePackage)
       {
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Packages", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Packages", keyname, version), true))
         {
           using (RegistryKey subkey = key.CreateSubKey("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}", RegistryKeyPermissionCheck.ReadWriteSubTree))
           {
@@ -634,12 +645,12 @@ namespace install
           }
         }
 
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Menus", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Menus", keyname, version), true))
         {
           key.SetValue("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}", ", 1000, 1");
         }
 
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Services", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Services", keyname, version), true))
         {
           using (RegistryKey subkey = key.CreateSubKey("{DCBE6C8D-0E57-4099-A183-98FF74C64D9D}", RegistryKeyPermissionCheck.ReadWriteSubTree))
           {
@@ -650,11 +661,11 @@ namespace install
       }
     }
 
-    private XmlDocument GetConfig(string keyname, out string xmlFileName)
+    private XmlDocument GetConfig(string keyname, string version, out string xmlFileName)
     {
       try
       {
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}", keyname, version), true))
         {
           xmlFileName = (string)key.GetValue("InstallDir");
           if (String.Compare(keyname, "VisualStudio", true) == 0)
@@ -676,30 +687,30 @@ namespace install
       return null;
     }
 
-    private void Uninstall(string keyname, Guid provider, Guid source)
+    private void Uninstall(string keyname, string version, Guid provider, Guid source)
     {
       try
       {
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataProviders", keyname, version), true))
         {
           if (key != null) key.DeleteSubKeyTree(provider.ToString("B"));
         }
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\DataSources", keyname, version), true))
         {
           if (key != null) key.DeleteSubKeyTree(source.ToString("B"));
         }
 
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Packages", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Packages", keyname, version), true))
         {
           if (key != null) key.DeleteSubKeyTree("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}");
         }
 
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Services", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Services", keyname, version), true))
         {
           if (key != null) key.DeleteSubKeyTree("{DCBE6C8D-0E57-4099-A183-98FF74C64D9D}");
         }
 
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Menus", keyname, _regRoot), true))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Menus", keyname, version), true))
         {
           key.DeleteValue("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}");
         }
@@ -719,7 +730,7 @@ namespace install
 
       // Remove factory support from the development environment config file
       string xmlFileName;
-      XmlDocument xmlDoc = GetConfig(keyname, out xmlFileName);
+      XmlDocument xmlDoc = GetConfig(keyname, version, out xmlFileName);
 
       if (xmlDoc == null) return;
 
@@ -758,14 +769,14 @@ namespace install
       }
     }
 
-    private void FixXmlLibPaths(bool install)
+    private void FixXmlLibPaths(bool install, string version)
     {
       string installDir = null;
       RegistryKey key = null;
 
       try
       {
-        key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\VisualStudio\\8.0");
+        key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\VisualStudio\\{0}", version));
         if (key != null)
         {
           try
@@ -787,7 +798,7 @@ namespace install
 
         if (key == null)
         {
-          key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\VCExpress\\8.0");
+          key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\VCExpress\\{0}", version));
           if (key == null) return;
         }
 

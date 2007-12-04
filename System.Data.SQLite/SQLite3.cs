@@ -339,13 +339,13 @@ namespace System.Data.SQLite
       if (p != IntPtr.Zero) return UTF8ToString(p, len);
       else
       {
+        string[] ar = stmt.TypeDefinitions;
+        if (ar != null)
+        {
+          if (index < ar.Length && ar[index] != null)
+            return ar[index];
+        }
         return String.Empty;
-        //string[] ar = stmt.TypeDefinitions;
-        //if (ar != null)
-        //{
-        //  if (index < ar.Length && ar[index] != null)
-        //    return ar[index];
-        //}
 
         //switch (nAffinity)
         //{

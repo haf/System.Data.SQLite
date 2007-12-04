@@ -501,15 +501,17 @@ namespace System.Data.SQLite
 
           cnn._enlistment._transaction._cnn = cnn;
           cnn._enlistment._disposeConnection = true;
+          _sql = null;
+          _enlistment = null;
         }
-        else
-        {
-          _sql.Close();
-        }
-        _enlistment = null;
-#else
-          _sql.Close();
 #endif
+        if (_sql != null)
+        {
+          if (_transactionLevel > 0)
+            SQLiteTransaction.IssueRollback(this);
+
+          _sql.Close();
+        }
         _sql = null;
         _transactionLevel = 0;
       }

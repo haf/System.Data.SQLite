@@ -11,7 +11,7 @@
 #include "TableData.h"
 
 void DumpCLRInfo(LPCTSTR pszFile);
-void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection);
+void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection, DWORD dwAdjust);
 void DumpCLRPragma(LPCTSTR pszAssembly, LPCTSTR pszSection);
 
 typedef struct EXTRA_STUFF
@@ -33,7 +33,9 @@ Syntax: MERGEBIN [/I:assembly] [/S:sectionname assembly nativedll]\n \
 /P:assembly            Outputs the C++ pragma code that can be used\n \
                        as additional input to a C++ app to reserve\n \
                        a section block large enough for the managed code.\n \
-\n \
+/A:#                   adjust .data segment virtual size to the specified\n \
+                       amount for Windows CE fixing up.\n \
+                       \n \
 The native DLL must have an unused section in it, into which the\n \
 .NET assembly will be inserted.  You can do this with the following code:\n \
   #pragma data_seg(\".clr\")\n \
@@ -56,6 +58,7 @@ in it.\n \
   LPTSTR pszNative = NULL;
   LPTSTR pszSection = NULL;
   BOOL bDoPragma = FALSE;
+  DWORD dwAdjust = 0;
 
   for (int n = 1; n < argc; n++)
   {
@@ -105,11 +108,20 @@ in it.\n \
         return 0;
       }
       break;
+    case 'A':
+    case 'a':
+      if (argv[n][2] != ':')
+      {
+        _tprintf(_T("A parameter requires a numeric value\n"));
+        return 0;
+      }
+      dwAdjust = _ttol(&argv[n][3]);
+      break;
     }
   }
 
   if (pszAssembly && pszNative && pszSection && !bDoPragma)
-    MergeModules(pszAssembly, pszNative, pszSection);
+    MergeModules(pszAssembly, pszNative, pszSection, dwAdjust);
 
   if (pszAssembly && bDoPragma)
     DumpCLRPragma(pszAssembly, pszSection);
@@ -204,10 +216,10 @@ void DumpCLRPragma(LPCTSTR pszAssembly, LPCTSTR pszSection)
   _tprintf(_T("// This code was automatically generated from assembly\n\
 // %s\n\n\
 #include <windef.h>\n\n\
-#pragma data_seg(\"%s\")\n\
+#pragma data_seg(push,clrseg,\"%s\")\n\
 #pragma comment(linker, \"/SECTION:%s,ER\")\n\
   char __ph[%d] = {0}; // The number of bytes to reserve\n\
-#pragma data_seg()\n\n\
+#pragma data_seg(pop,clrseg)\n\n\
 typedef BOOL (WINAPI *DLLMAIN)(HANDLE, DWORD, LPVOID);\n\
 typedef struct EXTRA_STUFF\n\
 {\n\
@@ -299,7 +311,7 @@ DWORD GetExportedCorDllMainRVA(CPEFile& file)
 }
 
 // Merges a pure .NET assembly with a native DLL, inserting it into the specified section
-void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
+void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection, DWORD dwAdjust)
 {
   CPEFile peFile;
   CPEFile peDest;
@@ -486,7 +498,15 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection)
       {
         if (section->SizeOfRawData < section->Misc.VirtualSize)
         {
-          _tprintf(_T("\nWARNING: %s section has a RawData size of %X and a VirtualSize of %X, strong named image may not run on Windows CE\n"), section->Name, section->SizeOfRawData, section->Misc.VirtualSize);
+          if (_tcscmp((LPCSTR)section->Name, _T(".data")) == 0 && dwAdjust > 0)
+          {
+            _tprintf(_T("\nWARNING: %s section has a RawData size of %d, less than its VirtualSize of %d, adjusting VirtualSize to %d\n"), section->Name, section->SizeOfRawData, section->Misc.VirtualSize, dwAdjust);
+            section->Misc.VirtualSize = dwAdjust;
+          }
+          else
+          {
+            _tprintf(_T("\nWARNING: %s section has a RawData size of %d and a VirtualSize of %d, strong named image may not run on Windows CE\n"), section->Name, section->SizeOfRawData, section->Misc.VirtualSize);
+          }
         }
       }
     }

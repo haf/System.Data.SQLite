@@ -355,26 +355,8 @@ namespace System.Data.SQLite
     /// <returns>Returns a .NET Type object</returns>
     internal static Type SQLiteTypeToType(SQLiteType t)
     {
-      if (t.Type != DbType.Object)
-        return SQLiteConvert.DbTypeToType(t.Type);
-
-      return _typeaffinities[(int)t.Affinity];
+      return SQLiteConvert.DbTypeToType(t.Type);
     }
-
-    static Type[] _typeaffinities = {
-      null,
-      typeof(Int64),
-      typeof(Double),
-      typeof(string),
-      typeof(byte[]),
-      typeof(DBNull),
-      null,
-      null,
-      null,
-      null,
-      typeof(DateTime),
-      null,
-    };
 
     /// <summary>
     /// For a given intrinsic type, return a DbType

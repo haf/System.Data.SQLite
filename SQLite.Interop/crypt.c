@@ -53,7 +53,7 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
 
   if (!pExisting) // Creating a new cryptblock
   {
-    pBlock = sqliteMalloc(sizeof(CRYPTBLOCK));
+    pBlock = sqlite3_malloc(sizeof(CRYPTBLOCK));
     ZeroMemory(pBlock, sizeof(CRYPTBLOCK));
     pBlock->hReadKey = hKey;
     pBlock->hWriteKey = hKey;
@@ -69,13 +69,13 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
   // Existing cryptblocks may have a buffer, if so, delete it
   if (pBlock->pvCrypt)
   {
-    sqliteFree(pBlock->pvCrypt);
+    sqlite3_free(pBlock->pvCrypt);
     pBlock->pvCrypt = NULL;
   }
 
   // Figure out how big to make our spare crypt block
   CryptEncrypt(hKey, 0, TRUE, 0, NULL, &pBlock->dwCryptSize, pBlock->dwCryptSize * 2);
-  pBlock->pvCrypt = sqliteMalloc(pBlock->dwCryptSize + (CRYPT_OFFSET * 2));
+  pBlock->pvCrypt = sqlite3_malloc(pBlock->dwCryptSize + (CRYPT_OFFSET * 2));
 
   return pBlock;
 }
@@ -98,11 +98,11 @@ static void DestroyCryptBlock(LPCRYPTBLOCK pBlock)
   // If there's extra buffer space allocated, free it as well
   if (pBlock->pvCrypt)
   {
-    sqliteFree(pBlock->pvCrypt);
+    sqlite3_free(pBlock->pvCrypt);
   }
 
   // All done with this cryptblock
-  sqliteFree(pBlock);
+  sqlite3_free(pBlock);
 }
 
 // Encrypt/Decrypt functionality, called by pager.c
@@ -116,16 +116,16 @@ void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
 
   // Make sure the page size for the pager is still the same as the page size
   // for the cryptblock.  If the user changed it, we need to adjust!
-  if (nMode != 2)
-  {
-    PgHdr *pageHeader;
-    pageHeader = DATA_TO_PGHDR(data);
-    if (pageHeader->pPager->pageSize != pBlock->dwPageSize)
-    {
-      // Update the cryptblock to reflect the new page size
-      CreateCryptBlock(0, pageHeader->pPager, pBlock);
-    }
-  }
+  //if (nMode != 2)
+  //{
+  //  PgHdr *pageHeader;
+  //  pageHeader = DATA_TO_PGHDR(data);
+  //  if (pageHeader->pPager->pageSize != pBlock->dwPageSize)
+  //  {
+  //    // Update the cryptblock to reflect the new page size
+  //    CreateCryptBlock(0, pageHeader->pPager, pBlock);
+  //  }
+  //}
 
   switch(nMode)
   {

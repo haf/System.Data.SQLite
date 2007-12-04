@@ -565,9 +565,9 @@ namespace System.Data.SQLite
         x++;
         if (stmt == null) break;
 
-        _cnn._sql.Step(stmt);
-        nAffected += _cnn._sql.Changes;
+        while (_cnn._sql.Step(stmt)) ;
         _cnn._sql.Reset(stmt);
+        nAffected += _cnn._sql.Changes;
       }
 
       return nAffected;

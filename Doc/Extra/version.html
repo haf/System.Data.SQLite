@@ -55,6 +55,32 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.47.0 - December 4, 2007</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.5.3</li>
+      <li>Added installer support for Visual Studio 2008.&nbsp; Code is still using the
+        VS2005 SDK so one or two bells and whistles are missing, but nothing significant.</li>
+      <li>This is the last version that the FTS1 and FTS2 extensions will appear.&nbsp;
+        Everyone should rebuild their fulltext indexes using the new FTS3 module.&nbsp;
+        FTS1 and FTS2 suffer from a design flaw that could cause database corruption with
+        certain vacuum operations.</li>
+      <li>Fixed pooled connections so they rollback any outstanding transactions before
+        going to the pool.&nbsp; </li>
+      <li>Fixed the unintended breaking of the TYPES keyword, and mis-typing of untyped
+        or indeterminate column types. </li>
+      <li>Assert a FileIOPermission() requirement in the static SQLiteFunction constructor.
+      </li>
+      <li>The CE-only SQLiteFunction.RegisterFunction() is now available on the desktop
+        platform for dynamic registration of functions.&nbsp; You must still close and re-open
+        a connection in order for the new function to be seen by a connection.</li>
+      <li>Fixed the "database is locked" errors by implementing behavioral changes in the
+        interop.c file for SQLite.&nbsp; Closing a database force-finalizes any prepared
+        statements on the database to ensure the connection is fully closed.&nbsp; This
+        was rather tricky because the GC thread could still be finalizing statements itself.
+        &nbsp;</li>
+      <li>Modifed the mergebin utility to help circumvent a long-standing strong name verification
+        bug in the Compact Framework.</li>
+    </ul>
     <p><b>1.0.46.0 - September 30, 2007</b></p>
     <ul>
     <li>Fixed faulty logic in type discovery code when using SQLiteDataReader.GetValue().</li>
