@@ -185,6 +185,27 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Gets/sets the default command timeout for newly-created commands.  This is especially useful for 
+    /// commands used internally such as inside a SQLiteTransaction, where setting the timeout is not possible.
+    /// </summary>
+    [DisplayName("Default Timeout")]
+    [Browsable(true)]
+    [DefaultValue(30)]
+    public int DefaultTimeout
+    {
+      get
+      {
+        object value;
+        TryGetValue("Default Timeout", out value);
+        return Convert.ToInt32(value, CultureInfo.CurrentCulture);
+      }
+      set
+      {
+        this["Default Timeout"] = value;
+      }
+    }
+
+    /// <summary>
     /// Determines whether or not the connection will automatically participate
     /// in the current distributed transaction (if one exists)
     /// </summary>
@@ -201,6 +222,27 @@ namespace System.Data.SQLite
       set
       {
         this["Enlist"] = value;
+      }
+    }
+
+    /// <summary>
+    /// If set to true, will throw an exception if the database specified in the connection
+    /// string does not exist.  If false, the database will be created automatically.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(false)]
+    [DisplayName("Fail If Missing")]
+    public bool FailIfMissing
+    {
+      get
+      {
+        object value;
+        TryGetValue("FailIfMissing", out value);
+        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+      }
+      set
+      {
+        this["FailIfMissing"] = value;
       }
     }
 

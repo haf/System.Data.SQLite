@@ -110,11 +110,19 @@ namespace System.Data.SQLite
   /// <description>N</description>
   /// <description>True</description>
   /// </item>
+  /// <item>
+  /// <description>Default Timeout</description>
+  /// <description>{time in seconds}<br/>The default command timeout</description>
+  /// <description>N</description>
+  /// <description>30</description>
+  /// </item>
   /// </list>
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
   {
     private const string _dataDirectory = "|DataDirectory|";
+    private const string _masterdb = "sqlite_master";
+    private const string _tempmasterdb = "sqlite_temp_master";
 
     /// <summary>
     /// State of the current connection
@@ -139,10 +147,6 @@ namespace System.Data.SQLite
     /// </summary>
     internal SQLiteBase _sql;
     /// <summary>
-    /// Commands associated with this connection
-    /// </summary>
-    //internal List<WeakReference> _commandList;
-    /// <summary>
     /// The database filename minus path and extension
     /// </summary>
     private string _dataSource;
@@ -150,6 +154,11 @@ namespace System.Data.SQLite
     /// Temporary password storage, emptied after the database has been opened
     /// </summary>
     private byte[] _password;
+
+    /// <summary>
+    /// Default command timeout
+    /// </summary>
+    private int _defaultTimeout = 30;
 
     internal bool _binaryGuid;
 
@@ -167,106 +176,6 @@ namespace System.Data.SQLite
     /// This event is raised whenever the database is opened or closed.
     /// </summary>
     public override event StateChangeEventHandler StateChange;
-
-    /// <summary>
-    /// This event is raised whenever SQLite makes an update/delete/insert into the database on
-    /// this connection.  It only applies to the given connection.
-    /// </summary>
-    public event SQLiteUpdateEventHandler Update
-    {
-      add
-      {
-        if (_updateHandler == null)
-        {
-          _updateCallback = new SQLiteUpdateCallback(UpdateCallback);
-          _sql.SetUpdateHook(_updateCallback);
-        }
-        _updateHandler += value;
-      }
-      remove
-      {
-        _updateHandler -= value;
-        if (_updateHandler == null)
-        {
-          _sql.SetUpdateHook(null);
-          _updateCallback = null;
-        }
-      }
-    }
-
-    private void UpdateCallback(int type, IntPtr database, int databaseLen, IntPtr table, int tableLen, Int64 rowid)
-    {
-      _updateHandler(this, new UpdateEventArgs(
-        SQLiteBase.UTF8ToString(database, databaseLen),
-        SQLiteBase.UTF8ToString(table, tableLen),
-        (UpdateEventType)type,
-        rowid));
-    }
-
-    /// <summary>
-    /// This event is raised whenever SQLite is committing a transaction.
-    /// Return non-zero to trigger a rollback
-    /// </summary>
-    public event SQLiteCommitHandler Commit
-    {
-      add
-      {
-        if (_commitHandler == null)
-        {
-          _commitCallback = new SQLiteCommitCallback(CommitCallback);
-          _sql.SetCommitHook(_commitCallback);
-        }
-        _commitHandler += value;
-      }
-      remove
-      {
-        _commitHandler -= value;
-        if (_commitHandler == null)
-        {
-          _sql.SetCommitHook(null);
-          _commitCallback = null;
-        }
-      }
-    }
-
-    /// <summary>
-    /// This event is raised whenever SQLite is committing a transaction.
-    /// Return non-zero to trigger a rollback
-    /// </summary>
-    public event EventHandler RollBack
-    {
-      add
-      {
-        if (_rollbackHandler == null)
-        {
-          _rollbackCallback = new SQLiteRollbackCallback(RollbackCallback);
-          _sql.SetRollbackHook(_rollbackCallback);
-        }
-        _rollbackHandler += value;
-      }
-      remove
-      {
-        _rollbackHandler -= value;
-        if (_rollbackHandler == null)
-        {
-          _sql.SetRollbackHook(null);
-          _rollbackCallback = null;
-        }
-      }
-    }
-
-
-    private int CommitCallback()
-    {
-      CommitEventArgs e = new CommitEventArgs();
-      _commitHandler(this, e);
-      return (e.AbortTransaction == true) ? 1 : 0;
-    }
-
-    private void RollbackCallback()
-    {
-      _rollbackHandler(this, EventArgs.Empty);
-    }
 
     ///<overloads>
     /// Constructs a new SQLiteConnection object
@@ -549,7 +458,7 @@ namespace System.Data.SQLite
     /// </item>
     /// <item>
     /// <description>DateTimeFormat</description>
-    /// <description><b>Ticks</b> - Use DateTime.Ticks<br/><b>ISO8601</b> - Use ISO8601 DateTime format</description>
+    /// <description><b>Ticks</b> - Use DateTime.Ticks<br/><b>ISO8601</b> - Use ISO8601 DateTime format<br/><b>JulianDay</b> - Use JulianDay format</description>
     /// <description>N</description>
     /// <description>ISO8601</description>
     /// </item>
@@ -613,11 +522,17 @@ namespace System.Data.SQLite
     /// <description>N</description>
     /// <description>True</description>
     /// </item>
+    /// <item>
+    /// <description>Default Timeout</description>
+    /// <description>{time in seconds}<br/>The default command timeout</description>
+    /// <description>N</description>
+    /// <description>30</description>
+    /// </item>
     /// </list>
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
     [RefreshProperties(RefreshProperties.All), DefaultValue("")]
-    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.32.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.33.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
     public override string ConnectionString
     {
@@ -780,7 +695,13 @@ namespace System.Data.SQLite
       {
         bool usePooling = (Convert.ToBoolean(FindKey(opts, "Pooling", Boolean.FalseString), CultureInfo.CurrentCulture) == true);
         bool bUTF16 = (Convert.ToBoolean(FindKey(opts, "UseUTF16Encoding", Boolean.FalseString), CultureInfo.CurrentCulture) == true);
-        SQLiteDateFormats dateFormat = String.Compare(FindKey(opts, "DateTimeFormat", "ISO8601"), "ticks", true, CultureInfo.InvariantCulture) == 0 ? SQLiteDateFormats.Ticks : SQLiteDateFormats.ISO8601;
+
+        _defaultTimeout = Convert.ToInt32(FindKey(opts, "Default Timeout", "30"), CultureInfo.CurrentCulture);
+
+        SQLiteDateFormats dateFormat = SQLiteDateFormats.ISO8601;
+        string temp = FindKey(opts, "DateTimeFormat", "ISO8601");
+        if (String.Compare(temp, "ticks", true, CultureInfo.InvariantCulture) == 0) dateFormat = SQLiteDateFormats.Ticks;
+        else if (String.Compare(temp, "julianday", true, CultureInfo.InvariantCulture) == 0) dateFormat = SQLiteDateFormats.JulianDay;
 
         if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
           _sql = new SQLite3_UTF16(dateFormat);
@@ -848,8 +769,10 @@ namespace System.Data.SQLite
 
           defValue = FindKey(opts, "Synchronous", "Normal");
           if (String.Compare(defValue, "Full", StringComparison.OrdinalIgnoreCase) != 0)
+          {
             cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA synchronous={0}", defValue);
-          cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
+          }
 
           defValue = FindKey(opts, "Cache Size", "2000");
           if (Convert.ToInt32(defValue) != 2000)
@@ -870,6 +793,17 @@ namespace System.Data.SQLite
         Close();
         throw;
       }
+    }
+
+    /// <summary>
+    /// Gets/sets the default command timeout for newly-created commands.  This is especially useful for 
+    /// commands used internally such as inside a SQLiteTransaction, where setting the timeout is not possible.
+    /// This can also be set in the ConnectionString with "Default Timeout"
+    /// </summary>
+    public int DefaultTimeout
+    {
+      get { return _defaultTimeout; }
+      set { _defaultTimeout = value; }
     }
 
     /// <summary>
@@ -1247,41 +1181,49 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'table' OR [type] LIKE 'view'", strCatalog), this))
+      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+
+      using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'table' OR [type] LIKE 'view'", strCatalog, master), this))
       using (SQLiteDataReader rdTables = cmdTables.ExecuteReader())
       {
         while (rdTables.Read())
         {
           if (String.IsNullOrEmpty(strTable) || String.Compare(strTable, rdTables.GetString(2), true, CultureInfo.InvariantCulture) == 0)
           {
-            using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
-            using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader(CommandBehavior.SchemaOnly))
-            using (DataTable tblSchema = rd.GetSchemaTable(false, true))
+            try
             {
-              foreach (DataRow schemaRow in tblSchema.Rows)
+              using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
+              using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader(CommandBehavior.SchemaOnly))
+              using (DataTable tblSchema = rd.GetSchemaTable(false, true))
               {
-                if (String.Compare(schemaRow[SchemaTableColumn.ColumnName].ToString(), strColumn, true, CultureInfo.InvariantCulture) == 0
-                  || strColumn == null)
+                foreach (DataRow schemaRow in tblSchema.Rows)
                 {
-                  row = tbl.NewRow();
+                  if (String.Compare(schemaRow[SchemaTableColumn.ColumnName].ToString(), strColumn, true, CultureInfo.InvariantCulture) == 0
+                    || strColumn == null)
+                  {
+                    row = tbl.NewRow();
 
-                  row["NUMERIC_PRECISION"] = schemaRow[SchemaTableColumn.NumericPrecision];
-                  row["NUMERIC_SCALE"] = schemaRow[SchemaTableColumn.NumericScale];
-                  row["TABLE_NAME"] = rdTables.GetString(2);
-                  row["COLUMN_NAME"] = schemaRow[SchemaTableColumn.ColumnName];
-                  row["TABLE_CATALOG"] = strCatalog;
-                  row["ORDINAL_POSITION"] = schemaRow[SchemaTableColumn.ColumnOrdinal];
-                  row["COLUMN_HASDEFAULT"] = (schemaRow[SchemaTableOptionalColumn.DefaultValue] != DBNull.Value);
-                  row["COLUMN_DEFAULT"] = schemaRow[SchemaTableOptionalColumn.DefaultValue];
-                  row["IS_NULLABLE"] = schemaRow[SchemaTableColumn.AllowDBNull];
-                  row["DATA_TYPE"] = schemaRow["DataTypeName"]; // SQLiteConvert.DbTypeToType((DbType)schemaRow[SchemaTableColumn.ProviderType]).ToString();
-                  row["CHARACTER_MAXIMUM_LENGTH"] = schemaRow[SchemaTableColumn.ColumnSize];
-                  row["TABLE_SCHEMA"] = schemaRow[SchemaTableColumn.BaseSchemaName];
-                  row["PRIMARY_KEY"] = schemaRow[SchemaTableColumn.IsKey];
+                    row["NUMERIC_PRECISION"] = schemaRow[SchemaTableColumn.NumericPrecision];
+                    row["NUMERIC_SCALE"] = schemaRow[SchemaTableColumn.NumericScale];
+                    row["TABLE_NAME"] = rdTables.GetString(2);
+                    row["COLUMN_NAME"] = schemaRow[SchemaTableColumn.ColumnName];
+                    row["TABLE_CATALOG"] = strCatalog;
+                    row["ORDINAL_POSITION"] = schemaRow[SchemaTableColumn.ColumnOrdinal];
+                    row["COLUMN_HASDEFAULT"] = (schemaRow[SchemaTableOptionalColumn.DefaultValue] != DBNull.Value);
+                    row["COLUMN_DEFAULT"] = schemaRow[SchemaTableOptionalColumn.DefaultValue];
+                    row["IS_NULLABLE"] = schemaRow[SchemaTableColumn.AllowDBNull];
+                    row["DATA_TYPE"] = schemaRow["DataTypeName"]; // SQLiteConvert.DbTypeToType((DbType)schemaRow[SchemaTableColumn.ProviderType]).ToString();
+                    row["CHARACTER_MAXIMUM_LENGTH"] = schemaRow[SchemaTableColumn.ColumnSize];
+                    row["TABLE_SCHEMA"] = schemaRow[SchemaTableColumn.BaseSchemaName];
+                    row["PRIMARY_KEY"] = schemaRow[SchemaTableColumn.IsKey];
 
-                  tbl.Rows.Add(row);
+                    tbl.Rows.Add(row);
+                  }
                 }
               }
+            }
+            catch(SQLiteException)
+            {
             }
           }
         }
@@ -1338,7 +1280,9 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'table'", strCatalog), this))
+      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      
+      using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'table'", strCatalog, master), this))
       using (SQLiteDataReader rdTables = cmdTables.ExecuteReader())
       {
         while (rdTables.Read())
@@ -1373,7 +1317,7 @@ namespace System.Data.SQLite
               row["TABLE_NAME"] = rdTables.GetString(2);
               row["INDEX_CATALOG"] = strCatalog;
               row["PRIMARY_KEY"] = true;
-              row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
+              row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "{1}_PK_{0}", rdTables.GetString(2), master);
               row["UNIQUE"] = true;
 
               if (String.Compare((string)row["INDEX_NAME"], strIndex, true, CultureInfo.InvariantCulture) == 0
@@ -1468,7 +1412,9 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT [type], [name], [tbl_name], [rootpage], [sql], [rowid] FROM [{0}].[sqlite_master] WHERE [type] LIKE 'table'", strCatalog), this))
+      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+
+      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT [type], [name], [tbl_name], [rootpage], [sql], [rowid] FROM [{0}].[{1}] WHERE [type] LIKE 'table'", strCatalog, master), this))
       using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
       {
         while (rd.Read())
@@ -1531,7 +1477,9 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'view'", strCatalog), this))
+      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+
+      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'view'", strCatalog, master), this))
       using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
       {
         while (rd.Read())
@@ -1673,9 +1621,11 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
+      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+
       tbl.BeginLoadData();
 
-      using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'table'", strCatalog), this))
+      using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'table'", strCatalog, master), this))
       using (SQLiteDataReader rdTables = cmdTables.ExecuteReader())
       {
         while (rdTables.Read())
@@ -1703,7 +1653,7 @@ namespace System.Data.SQLite
             {
               row = tbl.NewRow();
               row["CONSTRAINT_CATALOG"] = strCatalog;
-              row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "sqlite_master_PK_{0}", rdTables.GetString(2));
+              row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "{1}_PK_{0}", rdTables.GetString(2), master);
               row["TABLE_CATALOG"] = strCatalog;
               row["TABLE_NAME"] = rdTables.GetString(2);
               row["COLUMN_NAME"] = primaryKeys[0].Value;
@@ -1714,7 +1664,7 @@ namespace System.Data.SQLite
                 tbl.Rows.Add(row);
             }
 
-            using (SQLiteCommand cmdIndexes = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'index' AND [tbl_name] LIKE '{1}'", strCatalog, rdTables.GetString(2).Replace("'", "''")), this))
+            using (SQLiteCommand cmdIndexes = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{2}] WHERE [type] LIKE 'index' AND [tbl_name] LIKE '{1}'", strCatalog, rdTables.GetString(2).Replace("'", "''"), master), this))
             using (SQLiteDataReader rdIndexes = cmdIndexes.ExecuteReader())
             {
               while (rdIndexes.Read())
@@ -1783,9 +1733,11 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
+      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      
       tbl.BeginLoadData();
 
-      using (SQLiteCommand cmdViews = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'view'", strCatalog), this))
+      using (SQLiteCommand cmdViews = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'view'", strCatalog, master), this))
       using (SQLiteDataReader rdViews = cmdViews.ExecuteReader())
       {
         while (rdViews.Read())
@@ -1871,9 +1823,11 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
+      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+
       tbl.BeginLoadData();
 
-      using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[sqlite_master] WHERE [type] LIKE 'table'", strCatalog), this))
+      using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'table'", strCatalog, master), this))
       using (SQLiteDataReader rdTables = cmdTables.ExecuteReader())
       {
         while (rdTables.Read())
@@ -1889,17 +1843,17 @@ namespace System.Data.SQLite
               {
                 row = tbl.NewRow();
                 row["CONSTRAINT_CATALOG"] = strCatalog;
-                row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}", rdTables.GetString(2), rdKey.GetString(3), rdKey.GetString(4));
+                row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}", rdTables[2], rdKey[3], rdKey[4]);
                 row["TABLE_CATALOG"] = strCatalog;
                 row["TABLE_NAME"] = rdTables.GetString(2);
                 row["CONSTRAINT_TYPE"] = "FOREIGN KEY";
                 row["IS_DEFERRABLE"] = false;
                 row["INITIALLY_DEFERRED"] = false;
-                row["FKEY_FROM_COLUMN"] = rdKey.GetString(3);
+                row["FKEY_FROM_COLUMN"] = rdKey[3].ToString();
                 row["FKEY_FROM_ORDINAL_POSITION"] = rdTable.GetOrdinal(row["FKEY_FROM_COLUMN"].ToString());
                 row["FKEY_TO_CATALOG"] = strCatalog;
-                row["FKEY_TO_TABLE"] = rdKey.GetString(2);
-                row["FKEY_TO_COLUMN"] = rdKey.GetString(4);
+                row["FKEY_TO_TABLE"] = rdKey[2].ToString();
+                row["FKEY_TO_COLUMN"] = rdKey[4].ToString();
 
                 if (String.IsNullOrEmpty(strKeyName) || String.Compare(strKeyName, row["CONSTRAINT_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
                   tbl.Rows.Add(row);
@@ -1915,34 +1869,105 @@ namespace System.Data.SQLite
       return tbl;
     }
 
-    //internal void AddCommand(SQLiteCommand cmd)
-    //{
-    //  lock (_commandList)
-    //  {
-    //    _commandList.Add(new WeakReference(cmd, false));
-    //  }
-    //}
+    /// <summary>
+    /// This event is raised whenever SQLite makes an update/delete/insert into the database on
+    /// this connection.  It only applies to the given connection.
+    /// </summary>
+    public event SQLiteUpdateEventHandler Update
+    {
+      add
+      {
+        if (_updateHandler == null)
+        {
+          _updateCallback = new SQLiteUpdateCallback(UpdateCallback);
+          _sql.SetUpdateHook(_updateCallback);
+        }
+        _updateHandler += value;
+      }
+      remove
+      {
+        _updateHandler -= value;
+        if (_updateHandler == null)
+        {
+          _sql.SetUpdateHook(null);
+          _updateCallback = null;
+        }
+      }
+    }
 
-    //internal void RemoveCommand(SQLiteCommand cmd)
-    //{
-    //  lock (_commandList)
-    //  {
-    //    foreach (WeakReference r in _commandList)
-    //    {
-    //      try
-    //      {
-    //        if (r.Target as SQLiteCommand == cmd)
-    //        {
-    //          _commandList.Remove(r);
-    //          return;
-    //        }
-    //      }
-    //      catch
-    //      {
-    //      }
-    //    }
-    //  }
-    //}
+    private void UpdateCallback(int type, IntPtr database, int databaseLen, IntPtr table, int tableLen, Int64 rowid)
+    {
+      _updateHandler(this, new UpdateEventArgs(
+        SQLiteBase.UTF8ToString(database, databaseLen),
+        SQLiteBase.UTF8ToString(table, tableLen),
+        (UpdateEventType)type,
+        rowid));
+    }
+
+    /// <summary>
+    /// This event is raised whenever SQLite is committing a transaction.
+    /// Return non-zero to trigger a rollback
+    /// </summary>
+    public event SQLiteCommitHandler Commit
+    {
+      add
+      {
+        if (_commitHandler == null)
+        {
+          _commitCallback = new SQLiteCommitCallback(CommitCallback);
+          _sql.SetCommitHook(_commitCallback);
+        }
+        _commitHandler += value;
+      }
+      remove
+      {
+        _commitHandler -= value;
+        if (_commitHandler == null)
+        {
+          _sql.SetCommitHook(null);
+          _commitCallback = null;
+        }
+      }
+    }
+
+    /// <summary>
+    /// This event is raised whenever SQLite is committing a transaction.
+    /// Return non-zero to trigger a rollback
+    /// </summary>
+    public event EventHandler RollBack
+    {
+      add
+      {
+        if (_rollbackHandler == null)
+        {
+          _rollbackCallback = new SQLiteRollbackCallback(RollbackCallback);
+          _sql.SetRollbackHook(_rollbackCallback);
+        }
+        _rollbackHandler += value;
+      }
+      remove
+      {
+        _rollbackHandler -= value;
+        if (_rollbackHandler == null)
+        {
+          _sql.SetRollbackHook(null);
+          _rollbackCallback = null;
+        }
+      }
+    }
+
+
+    private int CommitCallback()
+    {
+      CommitEventArgs e = new CommitEventArgs();
+      _commitHandler(this, e);
+      return (e.AbortTransaction == true) ? 1 : 0;
+    }
+
+    private void RollbackCallback()
+    {
+      _rollbackHandler(this, EventArgs.Empty);
+    }
   }
 
   /// <summary>

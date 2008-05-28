@@ -25,6 +25,21 @@ namespace test
       {
       }
 
+      //SQLiteConnection sqlite_con = new SQLiteConnection(@"data source=""|DataDirectory|donnees.db""");
+
+      //SQLiteDataAdapter sqlite_da = new SQLiteDataAdapter();
+      //DataSet dataSet = new DataSet();
+
+      //sqlite_da.SelectCommand = new SQLiteCommand("select * from donnees", sqlite_con);
+
+
+
+      //sqlite_con.Open();
+
+      //sqlite_da.Fill(dataSet);
+
+      //sqlite_con.Close();
+
       using (cnn = new SQLiteConnection())
       {
         TestCases tests = new TestCases();

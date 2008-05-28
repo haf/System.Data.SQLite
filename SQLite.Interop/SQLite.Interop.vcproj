@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="SQLite.Interop"
 	ProjectGUID="{10B51CE8-A838-44DE-BD82-B658F0296F80}"
 	RootNamespace="SQLite.Interop"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -54,7 +55,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 			/>
@@ -75,7 +76,8 @@
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
-				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=""
 				TargetMachine="1"
 				KeyFile=""
@@ -98,9 +100,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -135,7 +134,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -160,7 +159,8 @@
 				ModuleDefinitionFile="src\sqlite3.def"
 				AddModuleNamesToAssembly=""
 				EmbedManagedResourceFile=""
-				SubSystem="9"
+				SubSystem="8"
+				RandomizedBaseAddress="1"
 				TargetMachine="3"
 			/>
 			<Tool
@@ -173,12 +173,15 @@
 				Name="VCBscMakeTool"
 			/>
 			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
 				Name="VCCodeSignTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /A:1120 /S:.clr ..\System.Data.SQLite\bin\CompactFramework\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
+				CommandLine="..\bin\tools\mergebin.exe /A:1580 /S:.clr ..\System.Data.SQLite\bin\CompactFramework\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
@@ -220,7 +223,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -242,7 +245,8 @@
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
-				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=""
 				TargetMachine="5"
 				KeyFile=""
@@ -265,9 +269,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -306,7 +307,7 @@
 				AdditionalOptions="/GS-"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
 				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
@@ -328,7 +329,8 @@
 				ModuleDefinitionFile="src\sqlite3.def"
 				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
-				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=""
 				TargetMachine="17"
 				KeyFile=""
@@ -351,9 +353,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -390,7 +389,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -412,6 +411,8 @@
 				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
 				GenerateDebugInformation="true"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=""
 				TargetMachine="1"
 				KeyFile="..\System.Data.SQLite\System.Data.SQLite.snk"
@@ -434,9 +435,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -473,7 +471,7 @@
 				ExecutionBucket="7"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -499,6 +497,8 @@
 				AddModuleNamesToAssembly=""
 				EmbedManagedResourceFile=""
 				GenerateDebugInformation="true"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="3"
 			/>
 			<Tool
@@ -509,6 +509,9 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
 			/>
 			<Tool
 				Name="VCCodeSignTool"
@@ -556,7 +559,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -577,6 +580,8 @@
 				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
 				GenerateDebugInformation="true"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=""
 				TargetMachine="5"
 				KeyFile="..\System.Data.SQLite\System.Data.SQLite.snk"
@@ -599,9 +604,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -637,7 +639,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GS-"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_ENABLE_FTS2;SQLITE_ENABLE_FTS1;SQLITE_OMIT_TRACE"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;NO_TCL;THREADSAFE=1;WIN64;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
 				DebugInformationFormat="3"
@@ -658,6 +660,8 @@
 				EmbedManagedResourceFile=""
 				DelayLoadDLLs="advapi32.dll"
 				GenerateDebugInformation="true"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=""
 				TargetMachine="17"
 				KeyFile="..\System.Data.SQLite\System.Data.SQLite.snk"
@@ -680,9 +684,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.47.0 December 4, 2007<br>
-    Using SQLite 3.5.3<br>
+    Version 1.0.49.0 May 28, 2008<br>
+    Using SQLite 3.5.9<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -21,7 +21,7 @@
     </h2>
     <UL>
       <LI>
-      Written from scratch on VS2005/2008 specifically for ADO.NET 2.0, implementing all the
+      Written from scratch on VS2008 specifically for ADO.NET 2.0, implementing all the
       base classes and features recently introduced in the framework, including automatic
       transaction enlistment.<li>Supports the Full
         and Compact .NET Framework, as well as native C/C++ development.&nbsp; 100% binary
@@ -34,7 +34,7 @@
       <LI>
       Visual Studio 2005/2008 Design-Time Support, works with all versions of VS2005/2008,
         including
-      all Express Editions.&nbsp; You can add a SQLite 
+      all Express Editions of VS2005.&nbsp; You can add a SQLite 
       database to the Servers list, design queries with the Query Designer, 
       drag-and-drop tables onto a Typed DataSet, etc.
       <LI>
@@ -120,6 +120,47 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.49.0 - May 28, 2008</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.5.9</li>
+      <li>Fixed schema problems when querying the TEMP catalog.</li>
+      <li>Changed BLOB datatype schema to return IsLong = False instead of True.&nbsp; This
+        was preventing DbCommandBuilder from using GUID's and BLOB's as primary keys.</li>
+      <li>Fix rollover issue with SQLite3.Reset() using TickCount.</li>
+      <li>Fixed SQLiteDataReader to dispose of its command (if called for) before 
+        closing the connection (when flagged to do so) instead of the other way around.</li>
+      <li>Fixed a DbNull error when retrieving items not backed by a table schema.</li>
+      <li>Fixed foreign key constraint parsing bug.</li>
+      <li>Added FailIfMissing property to the SQLiteConnectionStringBuilder.</li>
+      <li>Converted the source projects to Visual Studio 2008.</li>
+    </ul>
+    <p><b>1.0.48.0 - December 28, 2007</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.5.4</li>
+      <li>Calling SQLiteDataReader.GetFieldType() on a column with no schema information
+        and whos first row is initially NULL now returns type Object instead of type DbNull.</li>
+      <li>Added support for a new DateTime type, JulianDay.&nbsp; SQLite uses Julian dates
+        internally.</li>
+      <li>Added a new connection string parameter "Default Timeout" and a corresponding
+        method on the SQLiteConnection object to change the default command timeout.&nbsp;
+        This is especially useful for changing the timeout on transactions, which use SQLiteCommand
+        objects internally and have no ADO.NET-friendly way to adjust the command timeout
+        on those commands.</li>
+      <li>FTS1 and FTS2 modules were removed from the codebase.&nbsp; Please upgrade all
+        full-text indexes to use the FTS3 module.&nbsp;</li>
+    </ul>
+    <p><b>1.0.47.2 - December 10, 2007</b></p>
+    <ul>
+      <li>Fixed yet one more bug when closing a database with unfinalized command objects</li>
+      <li>Fixed the DataReader's GetFieldType function when dealing with untyped SQLite affinities</li>
+    </ul>
+    <p><b>1.0.47.1 - December 5, 2007</b></p>
+    <ul>
+      <li>Fixed a leftover bug from the codemerge with SQLite 3.5.3 that failed to close a database.</li>
+      <li>Fixed the broken Compact Framework distribution binary.</li>
+      <li>SQLite 3.5.x changed some internal infrastructure pieces in the encryption interface
+        which I didn't catch initially.&nbsp; Fixed.&nbsp;</li>
+    </ul>
     <p><b>1.0.47.0 - December 4, 2007</b></p>
     <ul>
       <li>Code merge with SQLite 3.5.3</li>

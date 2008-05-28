@@ -9,6 +9,7 @@
 
 typedef struct _CRYPTBLOCK
 {
+  Pager    *pPager;       // Pager this cryptblock belongs to
   HCRYPTKEY hReadKey;     // Key used to read from the database and write to the journal
   HCRYPTKEY hWriteKey;    // Key used to write to the database
   DWORD     dwPageSize;   // Size of pages
@@ -63,6 +64,7 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
     pBlock = pExisting;
   }
 
+  pBlock->pPager = pager;
   pBlock->dwPageSize = (DWORD)pager->pageSize;
   pBlock->dwCryptSize = pBlock->dwPageSize;
 
@@ -116,16 +118,14 @@ void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
 
   // Make sure the page size for the pager is still the same as the page size
   // for the cryptblock.  If the user changed it, we need to adjust!
-  //if (nMode != 2)
-  //{
-  //  PgHdr *pageHeader;
-  //  pageHeader = DATA_TO_PGHDR(data);
-  //  if (pageHeader->pPager->pageSize != pBlock->dwPageSize)
-  //  {
-  //    // Update the cryptblock to reflect the new page size
-  //    CreateCryptBlock(0, pageHeader->pPager, pBlock);
-  //  }
-  //}
+  if (nMode != 2)
+  {
+    if (pBlock->pPager->pageSize != pBlock->dwPageSize)
+    {
+      // Update the cryptblock to reflect the new page size
+      CreateCryptBlock(pBlock->hReadKey, pBlock->pPager, pBlock);
+    }
+  }
 
   switch(nMode)
   {

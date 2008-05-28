@@ -97,12 +97,12 @@ namespace System.Data.SQLite
         }
         _command.ClearDataReader();
 
+        if (_disposeCommand)
+          _command.Dispose();
+
         // If the datareader's behavior includes closing the connection, then do so here.
         if ((_commandBehavior & CommandBehavior.CloseConnection) != 0 && _command.Connection != null)
           _command.Connection.Close();
-
-        if (_disposeCommand)
-          _command.Dispose();
       }
 
       _command = null;
@@ -218,6 +218,7 @@ namespace System.Data.SQLite
           if (typ == DbType.Single) return affinity;
           if (typ == DbType.Double) return affinity;
           if (typ == DbType.Decimal) return affinity;
+          if (typ == DbType.DateTime) return affinity;
           break;
         case TypeAffinity.Text:
           if (typ == DbType.SByte) return affinity;
@@ -327,8 +328,6 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetDataTypeName(int i)
     {
-      CheckClosed();
-
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetDataTypeName(i - VisibleFieldCount);
 
@@ -386,8 +385,6 @@ namespace System.Data.SQLite
     /// <returns>Type</returns>
     public override Type GetFieldType(int i)
     {
-      CheckClosed();
-
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetFieldType(i - VisibleFieldCount);
 
@@ -478,7 +475,6 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetName(int i)
     {
-      CheckClosed();
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetName(i - VisibleFieldCount);
 
@@ -568,7 +564,7 @@ namespace System.Data.SQLite
         row[SchemaTableColumn.NumericPrecision] = SQLiteConvert.DbTypeToNumericPrecision(typ);
         row[SchemaTableColumn.NumericScale] = SQLiteConvert.DbTypeToNumericScale(typ);
         row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
-        row[SchemaTableColumn.IsLong] = (GetSQLiteType(n).Type == DbType.Binary);
+        row[SchemaTableColumn.IsLong] = false;
         row[SchemaTableColumn.AllowDBNull] = true;
         row[SchemaTableOptionalColumn.IsReadOnly] = false;
         row[SchemaTableOptionalColumn.IsRowVersion] = false;
@@ -739,8 +735,6 @@ namespace System.Data.SQLite
     /// <returns>object</returns>
     public override object GetValue(int i)
     {
-      CheckClosed();
-
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetValue(i - VisibleFieldCount);
 
@@ -794,8 +788,6 @@ namespace System.Data.SQLite
     /// <returns>True or False</returns>
     public override bool IsDBNull(int i)
     {
-      CheckClosed();
-
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.IsDBNull(i - VisibleFieldCount);
 

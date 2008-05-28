@@ -101,6 +101,8 @@ namespace System.Data.SQLite
     /// </summary>
     private SQLiteCollation _CompareFunc;
 
+    private int _count = 1;
+
     /// <summary>
     /// This static list contains all the user-defined functions declared using the proper attributes.
     /// </summary>
@@ -332,15 +334,22 @@ namespace System.Data.SQLite
     /// <param name="argsptr">A pointer to the array of arguments</param>
     internal void StepCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
-      int n = _base.AggregateCount(context);
+      int n = _count;
       long nAux;
       object obj = null;
 
       nAux = (long)_base.AggregateContext(context);
       if (n > 1) obj = _contextDataList[nAux];
 
-      Step(ConvertParams(nArgs, argsptr), n, ref obj);
-      _contextDataList[nAux] = obj;      
+      try
+      {
+        Step(ConvertParams(nArgs, argsptr), n, ref obj);
+        _contextDataList[nAux] = obj;
+      }
+      finally
+      {
+        _count++;
+      }
     }
 
     /// <summary>
@@ -354,6 +363,7 @@ namespace System.Data.SQLite
       long n = (long)_base.AggregateContext(context);
       object obj = null;
 
+      _count = 1;
       if (_contextDataList.ContainsKey(n))
       {
         obj = _contextDataList[n];
@@ -410,57 +420,63 @@ namespace System.Data.SQLite
     [Security.Permissions.FileIOPermission(Security.Permissions.SecurityAction.Assert, AllFiles = Security.Permissions.FileIOPermissionAccess.PathDiscovery)]
     static SQLiteFunction()
     {
-      SQLiteFunctionAttribute at;
-      System.Reflection.Assembly[] arAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-      int w = arAssemblies.Length;
-      System.Reflection.AssemblyName sqlite = System.Reflection.Assembly.GetCallingAssembly().GetName();
-
-      for (int n = 0; n < w; n++)
+      try
       {
-        Type[] arTypes;
-        bool found = false;
-        System.Reflection.AssemblyName[] references;
-        try
+        SQLiteFunctionAttribute at;
+        System.Reflection.Assembly[] arAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+        int w = arAssemblies.Length;
+        System.Reflection.AssemblyName sqlite = System.Reflection.Assembly.GetCallingAssembly().GetName();
+
+        for (int n = 0; n < w; n++)
         {
-          // Inspect only assemblies that reference SQLite
-          references = arAssemblies[n].GetReferencedAssemblies();
-          int t = references.Length;
-          for (int z = 0; z < t; z++)
+          Type[] arTypes;
+          bool found = false;
+          System.Reflection.AssemblyName[] references;
+          try
           {
-            if (references[z].Name == sqlite.Name)
+            // Inspect only assemblies that reference SQLite
+            references = arAssemblies[n].GetReferencedAssemblies();
+            int t = references.Length;
+            for (int z = 0; z < t; z++)
             {
-              found = true;
-              break;
+              if (references[z].Name == sqlite.Name)
+              {
+                found = true;
+                break;
+              }
             }
+
+            if (found == false)
+              continue;
+
+            arTypes = arAssemblies[n].GetTypes();
+          }
+          catch (Reflection.ReflectionTypeLoadException e)
+          {
+            arTypes = e.Types;
           }
 
-          if (found == false)
-            continue;
-
-          arTypes = arAssemblies[n].GetTypes();
-        }
-        catch (Reflection.ReflectionTypeLoadException e)
-        {
-          arTypes = e.Types;
-        }
-
-        int v = arTypes.Length;
-        for (int x = 0; x < v; x++)
-        {
-          if (arTypes[x] == null) continue;
-
-          object[] arAtt = arTypes[x].GetCustomAttributes(typeof(SQLiteFunctionAttribute), false);
-          int u = arAtt.Length;
-          for (int y = 0; y < u; y++)
+          int v = arTypes.Length;
+          for (int x = 0; x < v; x++)
           {
-            at = arAtt[y] as SQLiteFunctionAttribute;
-            if (at != null)
+            if (arTypes[x] == null) continue;
+
+            object[] arAtt = arTypes[x].GetCustomAttributes(typeof(SQLiteFunctionAttribute), false);
+            int u = arAtt.Length;
+            for (int y = 0; y < u; y++)
             {
-              at._instanceType = arTypes[x];
-              _registeredFunctions.Add(at);
+              at = arAtt[y] as SQLiteFunctionAttribute;
+              if (at != null)
+              {
+                at._instanceType = arTypes[x];
+                _registeredFunctions.Add(at);
+              }
             }
           }
         }
+      }
+      catch // SQLite provider can continue without being able to find built-in functions
+      {
       }
     }
 #endif

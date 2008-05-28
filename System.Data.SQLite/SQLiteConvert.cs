@@ -74,6 +74,10 @@ namespace System.Data.SQLite
     /// The default format for this provider.
     /// </summary>
     ISO8601 = 1,
+    /// <summary>
+    /// JulianDay format, which is what SQLite uses internally
+    /// </summary>
+    JulianDay = 2
   }
 
   /// <summary>
@@ -112,25 +116,23 @@ namespace System.Data.SQLite
     /// An array of ISO8601 datetime formats we support conversion from
     /// </summary>
     private static string[] _datetimeFormats = new string[] {
-      "yyyy-MM-dd HH:mm:ss.fffffff",
-      "yyyy-MM-dd HH:mm:ss",
-      "yyyy-MM-dd HH:mm",                               
-      "yyyyMMddHHmmss",
-      "yyyyMMddHHmm",
-      "yyyyMMddTHHmmssfffffff",
-      "yyyy-MM-dd",
-      "yy-MM-dd",
-      "yyyyMMdd",
-      "HH:mm:ss",
-      "HH:mm",
       "THHmmss",
       "THHmm",
-      "yyyy-MM-dd HH:mm:ss.fff",
+      "HH:mm:ss",
+      "HH:mm",
+      "HH:mm:ss.FFFFFFF",
+      "yy-MM-dd",
+      "yyyy-MM-dd",
+      "yyyy-MM-dd HH:mm:ss.FFFFFFF",
+      "yyyy-MM-dd HH:mm:ss",
+      "yyyy-MM-dd HH:mm",                               
+      "yyyy-MM-ddTHH:mm:ss.FFFFFFF",
       "yyyy-MM-ddTHH:mm",
       "yyyy-MM-ddTHH:mm:ss",
-      "yyyy-MM-ddTHH:mm:ss.fff",
-      "yyyy-MM-ddTHH:mm:ss.ffffff",
-      "HH:mm:ss.fff"
+      "yyyyMMddHHmmss",
+      "yyyyMMddHHmm",
+      "yyyyMMddTHHmmssFFFFFFF",
+      "yyyyMMdd"
     };
 
     /// <summary>
@@ -228,7 +230,7 @@ namespace System.Data.SQLite
     ///   HH:mm:ss
     ///   THHmmss
     /// </remarks>
-    /// <param name="dateText">The string containing either a Tick value or an ISO8601-format string</param>
+    /// <param name="dateText">The string containing either a Tick value, a JulianDay double, or an ISO8601-format string</param>
     /// <returns>A DateTime value</returns>
     public DateTime ToDateTime(string dateText)
     {
@@ -236,24 +238,48 @@ namespace System.Data.SQLite
       {
         case SQLiteDateFormats.Ticks:
           return new DateTime(Convert.ToInt64(dateText, CultureInfo.InvariantCulture));
+        case SQLiteDateFormats.JulianDay:
+          return ToDateTime(Convert.ToDouble(dateText, CultureInfo.InvariantCulture));
         default:
           return DateTime.ParseExact(dateText, _datetimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None);
       }
     }
 
     /// <summary>
+    /// Converts a julianday value into a DateTime
+    /// </summary>
+    /// <param name="julianDay">The value to convert</param>
+    /// <returns>A .NET DateTime</returns>
+    public DateTime ToDateTime(double julianDay)
+    {
+      return DateTime.FromOADate(julianDay - 2415018.5);
+    }
+
+    /// <summary>
+    /// Converts a DateTime struct to a JulianDay double
+    /// </summary>
+    /// <param name="value">The DateTime to convert</param>
+    /// <returns>The JulianDay value the Datetime represents</returns>
+    public double ToJulianDay(DateTime value)
+    {
+      return value.ToOADate() + 2415018.5;
+    }
+
+    /// <summary>
     /// Converts a DateTime to a string value, using the current DateTimeFormat specified for the connection when it was opened.
     /// </summary>
     /// <param name="dateValue">The DateTime value to convert</param>
-    /// <returns>Either a string consisting of the tick count for DateTimeFormat.Ticks, or a date/time in ISO8601 format.</returns>
+    /// <returns>Either a string consisting of the tick count for DateTimeFormat.Ticks, a JulianDay double, or a date/time in ISO8601 format.</returns>
     public string ToString(DateTime dateValue)
     {
       switch (_datetimeFormat)
       {
         case SQLiteDateFormats.Ticks:
           return dateValue.Ticks.ToString(CultureInfo.InvariantCulture);
+        case SQLiteDateFormats.JulianDay:
+          return ToJulianDay(dateValue).ToString(CultureInfo.InvariantCulture);
         default:
-          return dateValue.ToString(_datetimeFormats[0], CultureInfo.InvariantCulture);
+          return dateValue.ToString(_datetimeFormats[7], CultureInfo.InvariantCulture);
       }
     }
 
@@ -271,6 +297,7 @@ namespace System.Data.SQLite
     {
       return ToDateTime(ToString(ptr, len));
     }
+
     #endregion
 
     /// <summary>
@@ -355,8 +382,22 @@ namespace System.Data.SQLite
     /// <returns>Returns a .NET Type object</returns>
     internal static Type SQLiteTypeToType(SQLiteType t)
     {
-      return SQLiteConvert.DbTypeToType(t.Type);
+      if (t.Type == DbType.Object)
+        return _affinitytotype[(int)t.Affinity];
+      else
+        return SQLiteConvert.DbTypeToType(t.Type);
     }
+
+    private static Type[] _affinitytotype = {
+      typeof(object),
+      typeof(Int64),
+      typeof(Double),
+      typeof(string),
+      typeof(byte[]),
+      typeof(object),
+      typeof(DateTime),
+      typeof(object)
+    };
 
     /// <summary>
     /// For a given intrinsic type, return a DbType

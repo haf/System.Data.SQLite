@@ -19,23 +19,35 @@ namespace SQLite.Designer
 
     private SQLiteConnectionProperties _props;
 
+    private string GetCurrentPassword()
+    {
+      try
+      {
+        return _props["Password"] as string;
+      }
+      catch
+      {
+        return String.Empty;
+      }
+    }
+
     internal ChangePasswordDialog(SQLiteConnectionProperties props)
     {
       _props = props;
       InitializeComponent();
 
-      password.Text = _props["Password"] as string;
+      password.Text = GetCurrentPassword();
     }
 
     private void password_TextChanged(object sender, EventArgs e)
     {
-      if (String.IsNullOrEmpty(password.Text) || password.Text == _props["Password"] as string)
+      if (String.IsNullOrEmpty(password.Text) || password.Text == GetCurrentPassword())
       {
         confirmLabel.Enabled = false;
         passwordConfirm.Enabled = false;
         passwordConfirm.Text = "";
 
-        if (String.IsNullOrEmpty(password.Text) && _props["Password"] != null)
+        if (String.IsNullOrEmpty(password.Text) && String.IsNullOrEmpty(GetCurrentPassword()) == false)
           action.Text = VSPackage.Decrypt;
         else
           action.Text = "";
@@ -45,7 +57,7 @@ namespace SQLite.Designer
         confirmLabel.Enabled = true;
         passwordConfirm.Enabled = true;
 
-        if (_props["Password"] != null)
+        if (String.IsNullOrEmpty(GetCurrentPassword()) == false)
           action.Text = VSPackage.ReEncrypt;
         else
           action.Text = VSPackage.Encrypt;

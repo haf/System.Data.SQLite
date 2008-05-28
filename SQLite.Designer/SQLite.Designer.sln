@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLite.Designer", "SQLite.Designer.csproj", "{9B4A5CF6-5BE5-4926-ACC7-B729A8C05198}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "install", "..\tools\install\install.csproj", "{71EED886-B5BF-488E-A4AA-1403E393D224}"

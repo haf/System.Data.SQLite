@@ -88,10 +88,10 @@ void LeaveDbMutex(sqlite3 *pdb)
 int sqlite3_closeAndFreeMutex(sqlite3 *db)
 {
   //CRITICAL_SECTION *pcrit = db->pTraceArg;
-  //int ret;
+  int ret;
   //EnterDbMutex(db);
 
-  //ret = sqlite3_close(db);
+  ret = sqlite3_close(db);
   //if (ret == SQLITE_OK)
   //{
   //  if (pcrit)
@@ -104,7 +104,7 @@ int sqlite3_closeAndFreeMutex(sqlite3 *db)
   //else
   //  LeaveDbMutex(db);
 
-  return 0;
+  return ret;
 }
 
 int SetCompression(const wchar_t *pwszFilename, unsigned short ufLevel)
@@ -446,6 +446,8 @@ __declspec(dllexport) int WINAPI sqlite3_step_interop(sqlite3_stmt *stmt)
   int ret;
 
   EnterDbMutex(((Vdbe *)stmt)->db);
+
+  if (((Vdbe *)stmt)->magic == VDBE_MAGIC_DEAD) return SQLITE_ERROR;
   ret = sqlite3_step(stmt);
   LeaveDbMutex(((Vdbe *)stmt)->db);
 
@@ -541,6 +543,7 @@ __declspec(dllexport) int WINAPI sqlite3_reset_interop(sqlite3_stmt *stmt)
   int ret;
 
   EnterDbMutex(((Vdbe *)stmt)->db);
+  if (((Vdbe *)stmt)->magic == VDBE_MAGIC_DEAD) return SQLITE_SCHEMA;
   ret = sqlite3_reset(stmt);
   LeaveDbMutex(((Vdbe *)stmt)->db);
   return ret;
@@ -898,7 +901,7 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
 // On the Compact Framework the .data section of the DLL must have its RawDataSize larger than the VirtualSize!
 // If its not, strong name validation will fail and other bad things will happen.
 #if _WIN32_WCE
-__int64 _ph[84] = {1};
+__int64 _ph[128] = {1};
 #endif // _WIN32_WCE
 
 #endif // OS_WIN

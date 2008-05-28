@@ -114,7 +114,8 @@ namespace System.Data.SQLite
     {
       int n;
       Random rnd = null;
-      uint timeout = (uint)(Environment.TickCount + (stmt._command._commandTimeout * 1000));
+      uint starttick = (uint)Environment.TickCount;
+      uint timeout = (uint)(stmt._command._commandTimeout * 1000);
 
       while (true)
       {
@@ -142,7 +143,7 @@ namespace System.Data.SQLite
               rnd = new Random();
 
             // If we've exceeded the command's timeout, give up and throw an error
-            if ((uint)Environment.TickCount - timeout > 0)
+            if ((uint)Environment.TickCount - starttick > timeout)
             {
               throw new SQLiteException(r, SQLiteLastError());
             }
@@ -180,7 +181,7 @@ namespace System.Data.SQLite
         }
         return -1; // Reset was OK, with schema change
       }
-      else if (n == 6) // SQLITE_LOCKED
+      else if (n == 6 || n == 5) // SQLITE_LOCKED || SQLITE_BUSY
         return n;
 
       if (n > 0)

@@ -101,6 +101,12 @@
             <description>N</description>
             <description>True</description>
             </item>
+            <item>
+            <description>Default Timeout</description>
+            <description>{time in seconds}<br/>The default command timeout</description>
+            <description>N</description>
+            <description>30</description>
+            </item>
             </list>
             </remarks>
         </member>
@@ -137,6 +143,11 @@
         <member name="F:System.Data.SQLite.SQLiteConnection._password">
             <summary>
             Temporary password storage, emptied after the database has been opened
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnection._defaultTimeout">
+            <summary>
+            Default command timeout
             </summary>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.#ctor">
@@ -479,24 +490,6 @@
             This event is raised whenever the database is opened or closed.
             </summary>
         </member>
-        <member name="E:System.Data.SQLite.SQLiteConnection.Update">
-            <summary>
-            This event is raised whenever SQLite makes an update/delete/insert into the database on
-            this connection.  It only applies to the given connection.
-            </summary>
-        </member>
-        <member name="E:System.Data.SQLite.SQLiteConnection.Commit">
-            <summary>
-            This event is raised whenever SQLite is committing a transaction.
-            Return non-zero to trigger a rollback
-            </summary>
-        </member>
-        <member name="E:System.Data.SQLite.SQLiteConnection.RollBack">
-            <summary>
-            This event is raised whenever SQLite is committing a transaction.
-            Return non-zero to trigger a rollback
-            </summary>
-        </member>
         <member name="P:System.Data.SQLite.SQLiteConnection.ConnectionString">
             <summary>
             The connection string containing the parameters for the connection
@@ -529,7 +522,7 @@
             </item>
             <item>
             <description>DateTimeFormat</description>
-            <description><b>Ticks</b> - Use DateTime.Ticks<br/><b>ISO8601</b> - Use ISO8601 DateTime format</description>
+            <description><b>Ticks</b> - Use DateTime.Ticks<br/><b>ISO8601</b> - Use ISO8601 DateTime format<br/><b>JulianDay</b> - Use JulianDay format</description>
             <description>N</description>
             <description>ISO8601</description>
             </item>
@@ -593,6 +586,12 @@
             <description>N</description>
             <description>True</description>
             </item>
+            <item>
+            <description>Default Timeout</description>
+            <description>{time in seconds}<br/>The default command timeout</description>
+            <description>N</description>
+            <description>30</description>
+            </item>
             </list>
             </remarks>
         </member>
@@ -606,6 +605,13 @@
             Returns an empty string
             </summary>
         </member>
+        <member name="P:System.Data.SQLite.SQLiteConnection.DefaultTimeout">
+            <summary>
+            Gets/sets the default command timeout for newly-created commands.  This is especially useful for 
+            commands used internally such as inside a SQLiteTransaction, where setting the timeout is not possible.
+            This can also be set in the ConnectionString with "Default Timeout"
+            </summary>
+        </member>
         <member name="P:System.Data.SQLite.SQLiteConnection.ServerVersion">
             <summary>
             Returns the version of the underlying SQLite database engine
@@ -614,6 +620,24 @@
         <member name="P:System.Data.SQLite.SQLiteConnection.State">
             <summary>
             Returns the state of the connection.
+            </summary>
+        </member>
+        <member name="E:System.Data.SQLite.SQLiteConnection.Update">
+            <summary>
+            This event is raised whenever SQLite makes an update/delete/insert into the database on
+            this connection.  It only applies to the given connection.
+            </summary>
+        </member>
+        <member name="E:System.Data.SQLite.SQLiteConnection.Commit">
+            <summary>
+            This event is raised whenever SQLite is committing a transaction.
+            Return non-zero to trigger a rollback
+            </summary>
+        </member>
+        <member name="E:System.Data.SQLite.SQLiteConnection.RollBack">
+            <summary>
+            This event is raised whenever SQLite is committing a transaction.
+            Return non-zero to trigger a rollback
             </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLiteDataAdapter">
@@ -755,6 +779,11 @@
             The default format for this provider.
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteDateFormats.JulianDay">
+            <summary>
+            JulianDay format, which is what SQLite uses internally
+            </summary>
+        </member>
         <member name="T:System.Data.SQLite.SQLiteType">
             <summary>
             Struct used internally to determine the datatype of a column in a resultset
@@ -845,15 +874,29 @@
               HH:mm:ss
               THHmmss
             </remarks>
-            <param name="dateText">The string containing either a Tick value or an ISO8601-format string</param>
+            <param name="dateText">The string containing either a Tick value, a JulianDay double, or an ISO8601-format string</param>
             <returns>A DateTime value</returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.ToDateTime(System.Double)">
+            <summary>
+            Converts a julianday value into a DateTime
+            </summary>
+            <param name="julianDay">The value to convert</param>
+            <returns>A .NET DateTime</returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.ToJulianDay(System.DateTime)">
+            <summary>
+            Converts a DateTime struct to a JulianDay double
+            </summary>
+            <param name="value">The DateTime to convert</param>
+            <returns>The JulianDay value the Datetime represents</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConvert.ToString(System.DateTime)">
             <summary>
             Converts a DateTime to a string value, using the current DateTimeFormat specified for the connection when it was opened.
             </summary>
             <param name="dateValue">The DateTime value to convert</param>
-            <returns>Either a string consisting of the tick count for DateTimeFormat.Ticks, or a date/time in ISO8601 format.</returns>
+            <returns>Either a string consisting of the tick count for DateTimeFormat.Ticks, a JulianDay double, or a date/time in ISO8601 format.</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConvert.ToDateTime(System.IntPtr,System.Int32)">
             <summary>
@@ -1272,6 +1315,13 @@
             Using reflection, enumerate all assemblies in the current appdomain looking for classes that
             have a SQLiteFunctionAttribute attribute, and registering them accordingly.
             </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteFunction.RegisterFunction(System.Type)">
+            <summary>
+            Manual method of registering a function.  The type must still have the SQLiteFunctionAttributes in order to work
+            properly, but this is a workaround for the Compact Framework where enumerating assemblies is not currently supported.
+            </summary>
+            <param name="typ">The type of the function to register</param>
         </member>
         <member name="M:System.Data.SQLite.SQLiteFunction.BindFunctions(System.Data.SQLite.SQLiteBase)">
             <summary>
@@ -1813,7 +1863,7 @@
         </member>
         <member name="M:System.Data.SQLite.SQLiteParameter.ResetDbType">
             <summary>
-            Not implemented
+            Resets the DbType of the parameter so it can be inferred from the value
             </summary>
         </member>
         <member name="M:System.Data.SQLite.SQLiteParameter.Clone">
@@ -2296,10 +2346,22 @@
             Gets/Sets the filename to open on the connection string.
             </summary>
         </member>
+        <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.DefaultTimeout">
+            <summary>
+            Gets/sets the default command timeout for newly-created commands.  This is especially useful for 
+            commands used internally such as inside a SQLiteTransaction, where setting the timeout is not possible.
+            </summary>
+        </member>
         <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.Enlist">
             <summary>
             Determines whether or not the connection will automatically participate
             in the current distributed transaction (if one exists)
+            </summary>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.FailIfMissing">
+            <summary>
+            If set to true, will throw an exception if the database specified in the connection
+            string does not exist.  If false, the database will be created automatically.
             </summary>
         </member>
         <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.LegacyFormat">
@@ -2615,7 +2677,7 @@
             SQLite implementation of DbProviderFactory.
             </summary>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteFactory.GetService(System.Type)">
+        <member name="M:System.Data.SQLite.SQLiteFactory.System#IServiceProvider#GetService(System.Type)">
             <summary>
             Will provide a DbProviderServices object in .NET 3.5
             </summary>
