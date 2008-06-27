@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.49.0 May 28, 2008<br>
+    Version 1.0.50.0 June 27, 2008<br>
     Using SQLite 3.5.9<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -120,6 +120,16 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.50.0 - June 27, 2008</b></p>
+    <ul>
+      <li>Fixed some lingering dispose issues and race conditions when some objects were finalized.</li>
+      <li>Fixed the SQLiteConvert.Split() routine to be a little smarter when splitting 
+        strings, which solves the quoted data source filename problem.</li>
+      <li>Enhanced the mergebin utility to work around the strong name validation bug on 
+        the Compact Framework.&nbsp; The old workaround kludged the DLL and caused WM6.1 
+        to fail to load it.&nbsp; This new solution is permanent and no longer kludges 
+        the DLL.</li>
+    </ul>
     <p><b>1.0.49.0 - May 28, 2008</b></p>
     <ul>
       <li>Code merge with SQLite 3.5.9</li>

@@ -113,7 +113,7 @@
 			IntermediateDirectory="Pocket PC 2003 (ARMV4)\$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="1"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -134,8 +134,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
+				Optimization="1"
+				FavorSizeOrSpeed="2"
 				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);NDEBUG;_WINDOWS;_USRDLL;CPPSMART_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);UNICODE;_UNICODE;SQLITE_HAS_CODEC;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_ENABLE_FTS3;SQLITE_OMIT_TRACE"
-				StringPooling="true"
 				ExceptionHandling="0"
 				BufferSecurityCheck="false"
 			/>
@@ -150,17 +151,23 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				Description="Fixing .bss section"
+				CommandLine="..\bin\tools\mergebin.exe /B:&quot;$(IntDir)\interop.obj&quot;"
 			/>
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="../bin/CompactFramework/System.Data.SQLite.DLL"
+				SuppressStartupBanner="false"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
 				AddModuleNamesToAssembly=""
 				EmbedManagedResourceFile=""
 				SubSystem="8"
-				RandomizedBaseAddress="1"
+				EntryPointSymbol=""
+				RandomizedBaseAddress="0"
+				DataExecutionPrevention="0"
+				MergeSections=""
 				TargetMachine="3"
 			/>
 			<Tool
@@ -181,7 +188,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /A:1580 /S:.clr ..\System.Data.SQLite\bin\CompactFramework\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
+				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\CompactFramework\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
 			/>
 			<DeploymentTool
 				ForceDirty="-1"

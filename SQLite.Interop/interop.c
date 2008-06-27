@@ -1,4 +1,3 @@
-//#include "../temp/sqlite.interop/src/sqlite3.c"
 #include "src/sqlite3.c"
 #include "crypt.c"
 #include <tchar.h>
@@ -63,49 +62,49 @@ __declspec(dllexport) void WINAPI sqlite3_sleep_interop(int milliseconds)
   Sleep(milliseconds);
 }
 
-void InitializeDbMutex(sqlite3 *pdb)
+static CRITICAL_SECTION g_cs;
+static LONG g_dwcsInit = 0;
+
+//void InitializeDbMutex(sqlite3 *pdb)
+//{
+//  //pdb->pTraceArg = (CRITICAL_SECTION *)sqlite3_malloc(sizeof(CRITICAL_SECTION));
+//  //InitializeCriticalSection(pdb->pTraceArg);
+//}
+//
+void EnterGlobalMutex()
 {
-  //pdb->pTraceArg = (CRITICAL_SECTION *)sqlite3_malloc(sizeof(CRITICAL_SECTION));
-  //InitializeCriticalSection(pdb->pTraceArg);
+  if (InterlockedCompareExchange(&g_dwcsInit, 1, 0) == 0)
+    InitializeCriticalSection(&g_cs);
+
+  EnterCriticalSection(&g_cs);
 }
 
-void EnterDbMutex(sqlite3 *pdb)
+void LeaveGlobalMutex()
 {
-  //if (pdb->pTraceArg)
-  //{
-  //  EnterCriticalSection(pdb->pTraceArg);
-  //}
+  LeaveCriticalSection(&g_cs);
 }
-
-void LeaveDbMutex(sqlite3 *pdb)
-{
-  //if (pdb->pTraceArg)
-  //{
-  //  LeaveCriticalSection(pdb->pTraceArg);
-  //}
-}
-
-int sqlite3_closeAndFreeMutex(sqlite3 *db)
-{
-  //CRITICAL_SECTION *pcrit = db->pTraceArg;
-  int ret;
-  //EnterDbMutex(db);
-
-  ret = sqlite3_close(db);
-  //if (ret == SQLITE_OK)
-  //{
-  //  if (pcrit)
-  //  {
-  //    LeaveCriticalSection(pcrit);
-  //    DeleteCriticalSection(pcrit);
-  //    sqlite3_free(pcrit);
-  //  }
-  //}
-  //else
-  //  LeaveDbMutex(db);
-
-  return ret;
-}
+//
+//int sqlite3_closeAndFreeMutex(sqlite3 *db)
+//{
+//  //CRITICAL_SECTION *pcrit = db->pTraceArg;
+//  int ret;
+//  //EnterDbMutex(db);
+//
+//  ret = sqlite3_close(db);
+//  //if (ret == SQLITE_OK)
+//  //{
+//  //  if (pcrit)
+//  //  {
+//  //    LeaveCriticalSection(pcrit);
+//  //    DeleteCriticalSection(pcrit);
+//  //    sqlite3_free(pcrit);
+//  //  }
+//  //}
+//  //else
+//  //  LeaveDbMutex(db);
+//
+//  return ret;
+//}
 
 int SetCompression(const wchar_t *pwszFilename, unsigned short ufLevel)
 {
@@ -189,7 +188,11 @@ __declspec(dllexport) int WINAPI sqlite3_libversion_number_interop(void)
 */
 __declspec(dllexport) int WINAPI sqlite3_close_interop(sqlite3 *db)
 {
-  int ret = sqlite3_closeAndFreeMutex(db);
+  int ret;
+  
+  EnterGlobalMutex();
+
+  ret = sqlite3_close(db);
 
   if (ret == SQLITE_BUSY && db->pVdbe)
   {
@@ -199,7 +202,11 @@ __declspec(dllexport) int WINAPI sqlite3_close_interop(sqlite3 *db)
       Vdbe *p = (Vdbe *)sqlite3_malloc(sizeof(Vdbe));
       Vdbe *po = db->pVdbe;
 
-      if (!p) return SQLITE_NOMEM;
+      if (!p) 
+      {
+        ret = SQLITE_NOMEM;
+        break;
+      }
 
       CopyMemory(p, po, sizeof(Vdbe));
 
@@ -219,8 +226,10 @@ __declspec(dllexport) int WINAPI sqlite3_close_interop(sqlite3 *db)
         po->magic = VDBE_MAGIC_DEAD;
       }
     }
-    ret = sqlite3_closeAndFreeMutex(db);
+    ret = sqlite3_close(db);
   }
+
+  LeaveGlobalMutex();
 
   return ret;
 }
@@ -234,10 +243,8 @@ __declspec(dllexport) int WINAPI sqlite3_exec_interop(sqlite3 *db, const char *s
 { 
   int n;
 
-  EnterDbMutex(db);
   n = sqlite3_exec(db, sql, cb, pv, errmsg);
   *plen = (*errmsg != 0) ? strlen(*errmsg) : 0;
-  LeaveDbMutex(db);
 
   return n;
 }
@@ -302,16 +309,12 @@ __declspec(dllexport) void WINAPI sqlite3_free_interop(char *z)
 __declspec(dllexport) int WINAPI sqlite3_open_interop(const char*filename, sqlite3 **ppdb)
 {
   int ret = sqlite3_open(filename, ppdb);
-  if (ret == SQLITE_OK) InitializeDbMutex(*ppdb);
-
   return ret;
 }
 
 __declspec(dllexport) int WINAPI sqlite3_open16_interop(const void *filename, sqlite3 **ppdb)
 {
   int ret = sqlite3_open16(filename, ppdb);
-  if (ret == SQLITE_OK) InitializeDbMutex(*ppdb);
-
   return ret;
 }
 
@@ -338,10 +341,9 @@ __declspec(dllexport) int WINAPI sqlite3_prepare_interop(sqlite3 *db, const char
 {
   int n;
 
-  EnterDbMutex(db);
   n = sqlite3_prepare(db, sql, nbytes, ppstmt, pztail);
   *plen = (*pztail != 0) ? strlen(*pztail) : 0;
-  LeaveDbMutex(db);
+
   return n;
 }
 
@@ -349,10 +351,9 @@ __declspec(dllexport) int WINAPI sqlite3_prepare16_interop(sqlite3 *db, const vo
 {
   int n;
 
-  EnterDbMutex(db);
   n = sqlite3_prepare16(db, sql, nchars * sizeof(wchar_t), ppstmt, pztail);
   *plen = (*pztail != 0) ? wcslen((wchar_t *)*pztail) * sizeof(wchar_t) : 0;
-  LeaveDbMutex(db);
+
   return n;
 }
 
@@ -445,11 +446,8 @@ __declspec(dllexport) int WINAPI sqlite3_step_interop(sqlite3_stmt *stmt)
 {
   int ret;
 
-  EnterDbMutex(((Vdbe *)stmt)->db);
-
   if (((Vdbe *)stmt)->magic == VDBE_MAGIC_DEAD) return SQLITE_ERROR;
   ret = sqlite3_step(stmt);
-  LeaveDbMutex(((Vdbe *)stmt)->db);
 
   return ret;
 }
@@ -511,29 +509,43 @@ __declspec(dllexport) int WINAPI sqlite3_column_type_interop(sqlite3_stmt *stmt,
 __declspec(dllexport) int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 {
   // Try and finalize a statement, and close the database it belonged to if the database was marked for closing
-  Vdbe *p = (Vdbe *)stmt;
-  sqlite3 *db = (p == NULL) ? NULL : p->db;
+  Vdbe *p;
+  sqlite3 *db;
   int ret;
 
-  if (p->magic == VDBE_MAGIC_DEAD && p->db == NULL)
-  {
-    sqlite3_free(p);
-    return SQLITE_OK;
-  }
-  EnterDbMutex(db);
-  ret = sqlite3_finalize(stmt);
-  LeaveDbMutex(db);
+  EnterGlobalMutex();
 
-  if (ret == SQLITE_OK)
+  p = (Vdbe *)stmt;
+  db = (p == NULL) ? NULL : p->db;
+
+  while(1)
   {
-    if (db->flags & SQLITE_WantClose)
+    if (p->magic == VDBE_MAGIC_DEAD)
     {
-      if (db->pVdbe == NULL)
+      if (db == NULL)
       {
-        sqlite3_closeAndFreeMutex(db);
+        sqlite3_free(p);
+        ret = SQLITE_OK;
+        break;
       }
     }
+
+    ret = sqlite3_finalize(stmt);
+
+    if (ret == SQLITE_OK)
+    {
+      if (db->flags & SQLITE_WantClose)
+      {
+        if (db->pVdbe == NULL)
+        {
+          ret = sqlite3_close(db);
+        }
+      }
+    }
+    break;
   }
+
+  LeaveGlobalMutex();
 
   return ret;
 }
@@ -542,10 +554,8 @@ __declspec(dllexport) int WINAPI sqlite3_reset_interop(sqlite3_stmt *stmt)
 {
   int ret;
 
-  EnterDbMutex(((Vdbe *)stmt)->db);
   if (((Vdbe *)stmt)->magic == VDBE_MAGIC_DEAD) return SQLITE_SCHEMA;
   ret = sqlite3_reset(stmt);
-  LeaveDbMutex(((Vdbe *)stmt)->db);
   return ret;
 }
 
@@ -775,11 +785,9 @@ __declspec(dllexport) int WINAPI sqlite3_table_column_metadata_interop(sqlite3 *
 {
   int n;
   
-  EnterDbMutex(db);
   n = sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc);
   *pdtLen = (*pzDataType != 0) ? strlen(*pzDataType) : 0;
   *pcsLen = (*pzCollSeq != 0) ? strlen(*pzCollSeq) : 0;
-  LeaveDbMutex(db);
 
   return n;
 }
@@ -823,7 +831,7 @@ __declspec(dllexport) int WINAPI sqlite3_table_cursor(sqlite3_stmt *pstmt, int i
   int n;
   int ret = -1;
 
-  EnterDbMutex(db);
+  sqlite3_mutex_enter(db->mutex);
   for (n = 0; n < p->nCursor && p->apCsr[n] != NULL; n++)
   {
     if (p->apCsr[n]->isTable == FALSE) continue;
@@ -834,7 +842,8 @@ __declspec(dllexport) int WINAPI sqlite3_table_cursor(sqlite3_stmt *pstmt, int i
       break;
     }
   }
-  LeaveDbMutex(db);
+  sqlite3_mutex_leave(db->mutex);
+
   return ret;
 }
 
@@ -846,7 +855,7 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
   Cursor *pC;
   int ret = 0;
 
-  EnterDbMutex(db);
+  sqlite3_mutex_enter(db->mutex);
   while (1)
   {
     if (cursor < 0 || cursor >= p->nCursor)
@@ -891,17 +900,17 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
     }
     break;
   }
-  LeaveDbMutex(db);
+  sqlite3_mutex_leave(db->mutex);
 
   return ret;
 }
 
-
 // IMPORTANT: This placeholder is here for a reason!!!
 // On the Compact Framework the .data section of the DLL must have its RawDataSize larger than the VirtualSize!
 // If its not, strong name validation will fail and other bad things will happen.
-#if _WIN32_WCE
-__int64 _ph[128] = {1};
-#endif // _WIN32_WCE
+//#if _WIN32_WCE
+//__int64 _ph[17] = {1};
+//#endif // _WIN32_WCE
 
 #endif // OS_WIN
+

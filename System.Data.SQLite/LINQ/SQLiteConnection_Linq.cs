@@ -16,17 +16,10 @@ namespace System.Data.SQLite
 
   public sealed partial class SQLiteConnection
   {
-#if LINQ
-    protected override DbProviderFactory DbProviderFactory
-    {
-      get { return SQLiteFactory.Instance; }
-    }
-#endif
     /// <summary>
-    /// Returns a SQLiteProviderFactory object.  This will be mandatory in .NET 3.5, so we'll eat the warning for now
-    /// and allow .NET 2.0 objects to have this capability
+    /// Returns a SQLiteProviderFactory object.
     /// </summary>
-    public new SQLiteFactory DbProviderFactory
+    protected override DbProviderFactory DbProviderFactory
     {
       get { return SQLiteFactory.Instance; }
     }

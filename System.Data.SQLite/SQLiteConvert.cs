@@ -338,24 +338,34 @@ namespace System.Data.SQLite
         if (n == -1) break;
         if (source[n] == toks[0])
         {
-          source = source.Remove(n, 1);
-          n = source.IndexOfAny(quot, n);
+          //source = source.Remove(n, 1);
+          n = source.IndexOfAny(quot, n + 1);
           if (n == -1)
           {
-            source = "\"" + source;
+            //source = "\"" + source;
             break;
           }
-          source = source.Remove(n, 1);
+          n++;
+          //source = source.Remove(n, 1);
         }
         else
         {
           s = source.Substring(0, n).Trim();
+          if (s.Length > 1 && s[0] == quot[0] && s[s.Length - 1] == s[0])
+            s = s.Substring(1, s.Length - 2);
+
           source = source.Substring(n + 1).Trim();
           if (s.Length > 0) ls.Add(s);
           n = 0;
         }
       }
-      if (source.Length > 0) ls.Add(source);
+      if (source.Length > 0)
+      {
+        s = source.Trim();
+        if (s.Length > 1 && s[0] == quot[0] && s[s.Length - 1] == s[0])
+          s = s.Substring(1, s.Length - 2);
+        ls.Add(s);
+      }
 
       string[] ar = new string[ls.Count];
       ls.CopyTo(ar, 0);

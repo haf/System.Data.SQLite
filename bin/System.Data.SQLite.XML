@@ -481,8 +481,7 @@
         </member>
         <member name="P:System.Data.SQLite.SQLiteConnection.DbProviderFactory">
             <summary>
-            Returns a SQLiteProviderFactory object.  This will be mandatory in .NET 3.5, so we'll eat the warning for now
-            and allow .NET 2.0 objects to have this capability
+            Returns a SQLiteProviderFactory object.
             </summary>
         </member>
         <member name="E:System.Data.SQLite.SQLiteConnection.StateChange">
