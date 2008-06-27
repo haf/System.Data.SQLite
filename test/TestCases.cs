@@ -160,7 +160,8 @@ namespace test
 
     internal static void DisposePattenTest(DbConnection cnn)
     {
-      using (DbConnection newcnn = ((ICloneable)cnn).Clone() as DbConnection)
+      DbConnection newcnn = ((ICloneable)cnn).Clone() as DbConnection;
+      try
       {
         for (int x = 0; x < 10000; x++)
         {
@@ -168,7 +169,17 @@ namespace test
           cmd.CommandText = "SELECT * FROM TestCase";
           DbDataReader reader = cmd.ExecuteReader();
           reader.Read();
+
+          if (x % 500 == 0)
+          {
+            newcnn.Dispose();
+            newcnn = ((ICloneable)cnn).Clone() as DbConnection;
+          }
         }
+      }
+      finally
+      {
+        newcnn.Dispose();
       }
     }
 

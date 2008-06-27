@@ -19,7 +19,7 @@ namespace test
 
       SQLiteConnection cnn = new SQLiteConnection();
       {
-        cnn.ConnectionString = "Data Source=test.db3;Pooling=False";
+        cnn.ConnectionString = "Data Source=\"test.db3\";Pooling=False";
         cnn.Open();
 
         TestCases.Run(fact, cnn);

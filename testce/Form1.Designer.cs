@@ -30,13 +30,18 @@ namespace test
 		private void InitializeComponent()
 		{
       this.mainMenu1 = new System.Windows.Forms.MainMenu();
-      this.textBox1 = new System.Windows.Forms.TextBox();
       this.menuItem1 = new System.Windows.Forms.MenuItem();
+      this.textBox1 = new System.Windows.Forms.TextBox();
       this.SuspendLayout();
       // 
       // mainMenu1
       // 
       this.mainMenu1.MenuItems.Add(this.menuItem1);
+      // 
+      // menuItem1
+      // 
+      this.menuItem1.Text = "Exit";
+      this.menuItem1.Click += new System.EventHandler(this.menuItem1_Click);
       // 
       // textBox1
       // 
@@ -44,21 +49,15 @@ namespace test
       this.textBox1.Location = new System.Drawing.Point(0, 0);
       this.textBox1.Multiline = true;
       this.textBox1.Name = "textBox1";
-      this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-      this.textBox1.Size = new System.Drawing.Size(240, 268);
+      this.textBox1.Size = new System.Drawing.Size(176, 180);
       this.textBox1.TabIndex = 0;
       this.textBox1.WordWrap = false;
-      // 
-      // menuItem1
-      // 
-      this.menuItem1.Text = "Exit";
-      this.menuItem1.Click += new System.EventHandler(this.menuItem1_Click);
       // 
       // Form1
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-      this.ClientSize = new System.Drawing.Size(240, 268);
+      this.ClientSize = new System.Drawing.Size(176, 180);
       this.Controls.Add(this.textBox1);
       this.Menu = this.mainMenu1;
       this.Name = "Form1";

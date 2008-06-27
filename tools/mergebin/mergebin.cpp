@@ -13,6 +13,7 @@
 void DumpCLRInfo(LPCTSTR pszFile);
 void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection, DWORD dwAdjust);
 void DumpCLRPragma(LPCTSTR pszAssembly, LPCTSTR pszSection);
+void FixObjFile(LPCTSTR pszFile);
 
 typedef struct EXTRA_STUFF
 {
@@ -33,9 +34,10 @@ Syntax: MERGEBIN [/I:assembly] [/S:sectionname assembly nativedll]\n \
 /P:assembly            Outputs the C++ pragma code that can be used\n \
                        as additional input to a C++ app to reserve\n \
                        a section block large enough for the managed code.\n \
-/A:#                   adjust .data segment virtual size to the specified\n \
-                       amount for Windows CE fixing up.\n \
-                       \n \
+/B:objectfile          Windows CE workaround, changes the attributes of\n \
+                       the .BSS section of an object file to generate a\n \
+                       DLL that doesn't have a .bss section whos \n \
+                       virtualsize is larger than the rawdata size.\n \
 The native DLL must have an unused section in it, into which the\n \
 .NET assembly will be inserted.  You can do this with the following code:\n \
   #pragma data_seg(\".clr\")\n \
@@ -58,6 +60,7 @@ in it.\n \
   LPTSTR pszNative = NULL;
   LPTSTR pszSection = NULL;
   BOOL bDoPragma = FALSE;
+  BOOL bDoObj = FALSE;
   DWORD dwAdjust = 0;
 
   for (int n = 1; n < argc; n++)
@@ -108,26 +111,81 @@ in it.\n \
         return 0;
       }
       break;
-    case 'A':
-    case 'a':
-      if (argv[n][2] != ':')
+    //case 'A':
+    //case 'a':
+    //  if (argv[n][2] != ':')
+    //  {
+    //    _tprintf(_T("A parameter requires a numeric value\n"));
+    //    return 0;
+    //  }
+    //  dwAdjust = _ttol(&argv[n][3]);
+    //  break;
+    case 'B':
+    case 'b':
+      pszAssembly = &argv[n][3];
+      if (argv[n][2] != ':' || lstrlen(pszAssembly) == 0)
       {
-        _tprintf(_T("A parameter requires a numeric value\n"));
+        _tprintf(_T("/B requires an object file name\n"));
         return 0;
       }
-      dwAdjust = _ttol(&argv[n][3]);
+      bDoObj = TRUE;
       break;
     }
   }
 
-  if (pszAssembly && pszNative && pszSection && !bDoPragma)
+  if (pszAssembly && bDoObj)
+    FixObjFile(pszAssembly);
+  else if (pszAssembly && pszNative && pszSection && !bDoPragma)
     MergeModules(pszAssembly, pszNative, pszSection, dwAdjust);
-
-  if (pszAssembly && bDoPragma)
+  else if (pszAssembly && bDoPragma)
     DumpCLRPragma(pszAssembly, pszSection);
 
   return 0;
 }
+
+LPBYTE memstr(LPBYTE buffer, LPCSTR find, DWORD size)
+{
+	LPBYTE p;
+	DWORD findsize = lstrlenA(find);
+
+	for (p = buffer; p <= (buffer-findsize+size); p++)
+	{
+		if (memcmp(p, find, findsize) == 0)
+			return p; /* found */
+	}
+	return NULL;
+}
+
+void FixObjFile(LPCTSTR pszFile)
+{
+  HANDLE hMap = INVALID_HANDLE_VALUE;
+  HANDLE hFile = CreateFile(pszFile, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+  LPBYTE p;
+  DWORD dwSize;
+
+  if (hFile == INVALID_HANDLE_VALUE) return;
+
+  dwSize = GetFileSize(hFile, NULL);
+  hMap = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, 0, NULL);
+  if (hMap)
+  {
+    p = (LPBYTE)MapViewOfFile(hMap, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
+    if (p)
+    {
+      PIMAGE_SECTION_HEADER section = (PIMAGE_SECTION_HEADER)memstr(p, ".bss", dwSize);
+
+      if (section)
+      {
+        section->Characteristics &= ~IMAGE_SCN_CNT_UNINITIALIZED_DATA;
+        section->Characteristics |= IMAGE_SCN_CNT_INITIALIZED_DATA;
+      }
+      UnmapViewOfFile(p);
+    }
+    CloseHandle(hMap);
+  }
+  CloseHandle(hFile);
+}
+
 
 BOOL GetMinMaxCOR20RVA(CPEFile& file, DWORD& dwMin, DWORD& dwMax)
 {
@@ -496,6 +554,17 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection, DW
       PIMAGE_SECTION_HEADER section = IMAGE_FIRST_SECTION(pNT);
       for (UINT i=0; i < pNT->FileHeader.NumberOfSections; i++, section++)
       {
+        if (_tcscmp((LPCSTR)section->Name, _T(".bss")) == 0)
+        {
+          section->Characteristics &= ~IMAGE_SCN_CNT_INITIALIZED_DATA;
+          section->Characteristics |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;
+          DWORD dwBSSRVA = section->VirtualAddress;
+          LPBYTE pBSS = (LPBYTE)peDest.GetPtrFromRVA(dwBSSRVA);
+          for (DWORD u = 0; u < section->SizeOfRawData; u++)
+          {
+            pBSS[u] = 0;
+          }
+        }
         if (section->SizeOfRawData < section->Misc.VirtualSize)
         {
           if (_tcscmp((LPCSTR)section->Name, _T(".data")) == 0 && dwAdjust > 0)
