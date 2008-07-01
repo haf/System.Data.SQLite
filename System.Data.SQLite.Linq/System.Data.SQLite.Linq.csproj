@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30428</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E6BF9F74-58E2-413B-A7CE-EA653ECB728D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Data.SQLite</RootNamespace>
+    <AssemblyName>System.Data.SQLite.Linq</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkSubset>Full</TargetFrameworkSubset>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\System.Data.SQLite\System.Data.SQLite.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Designer\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Designer\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Entity">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="SQL Generation\DmlSqlGenerator.cs" />
+    <Compile Include="SQL Generation\ISqlFragment.cs" />
+    <Compile Include="SQL Generation\JoinSymbol.cs" />
+    <Compile Include="SQL Generation\MetadataHelpers.cs" />
+    <Compile Include="SQL Generation\SqlBuilder.cs" />
+    <Compile Include="SQL Generation\SqlGenerator.cs" />
+    <Compile Include="SQL Generation\SqlSelectStatement.cs" />
+    <Compile Include="SQL Generation\SqlWriter.cs" />
+    <Compile Include="SQL Generation\Symbol.cs" />
+    <Compile Include="SQL Generation\SymbolPair.cs" />
+    <Compile Include="SQL Generation\SymbolTable.cs" />
+    <Compile Include="SQL Generation\TopClause.cs" />
+    <Compile Include="SQLiteProviderManifest.cs" />
+    <Compile Include="SQLiteProviderServices.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.Data.SQLite\System.Data.SQLite - Full.csproj">
+      <Project>{AC139952-261A-4463-B6FA-AEBC25283A66}</Project>
+      <Name>System.Data.SQLite - Full</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Common.ConceptualSchemaDefinition.csdl" />
+    <None Include="Resources\Common.ProviderManifest.xsd" />
+    <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.ssdl" />
+    <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaMapping.msl" />
+    <None Include="Resources\System.Data.Resources.CSDLSchema.xsd" />
+    <None Include="Resources\System.Data.Resources.CSMSL.xsd" />
+    <None Include="Resources\System.Data.Resources.EntityStoreSchemaGenerator.xsd" />
+    <None Include="Resources\System.Data.Resources.SSDLSchema.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SQLiteProviderServices.ProviderManifest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
