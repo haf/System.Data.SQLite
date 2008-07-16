@@ -556,8 +556,9 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection, DW
       {
         if (_tcscmp((LPCSTR)section->Name, _T(".bss")) == 0)
         {
-          section->Characteristics &= ~IMAGE_SCN_CNT_INITIALIZED_DATA;
-          section->Characteristics |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;
+          _tcscpy((LPSTR)section->Name, _T(".idata"));
+          //section->Characteristics &= ~IMAGE_SCN_CNT_INITIALIZED_DATA;
+          //section->Characteristics |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;
           DWORD dwBSSRVA = section->VirtualAddress;
           LPBYTE pBSS = (LPBYTE)peDest.GetPtrFromRVA(dwBSSRVA);
           for (DWORD u = 0; u < section->SizeOfRawData; u++)
