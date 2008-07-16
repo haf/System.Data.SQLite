@@ -13,8 +13,9 @@ namespace SQLite.Designer.Editors
   using Microsoft.VisualStudio;
   using Microsoft.VisualStudio.Data;
   using SQLite.Designer.Design;
+  using System.ComponentModel.Design;
 
-  public partial class TableDesignerDoc : UserControl,
+  public partial class TableDesignerDoc : DesignerDocBase,
     IVsPersistDocData,
     IVsWindowPane,
     IOleCommandTarget,
@@ -27,10 +28,15 @@ namespace SQLite.Designer.Editors
     internal DataConnection _connection;
     internal Microsoft.VisualStudio.Data.ServiceProvider _serviceProvider;
     internal Table _table;
+    internal bool _dirty;
+    internal bool _init = false;
+
+    private bool _warned = false;
 
     public TableDesignerDoc(DataConnection cnn, string tableName)
     {
       _connection = cnn;
+      _init = true;
 
       InitializeComponent();
 
@@ -60,6 +66,27 @@ namespace SQLite.Designer.Editors
         _editingTables.Add(GetHashCode(), tableName);
       }
       _table = new Table(tableName, _connection.ConnectionSupport.ProviderObject as DbConnection, this);
+      foreach(Column c in _table.Columns)
+      {
+        n = _dataGrid.Rows.Add();
+        _dataGrid.Rows[n].Tag = c;
+        c.Parent = _dataGrid.Rows[n];
+      }
+      _init = false;
+
+      if (_dataGrid.Rows.Count > 0)
+      {
+        _dataGrid.EndEdit();
+        _sqlText.Text = _table.OriginalSql;
+      }
+    }
+
+    public override string CanonicalName
+    {
+      get
+      {
+        return _table.Name;
+      }
     }
 
     void SetPropertyWindow()
@@ -68,6 +95,17 @@ namespace SQLite.Designer.Editors
       if (track != null)
       {
         track.OnSelectChange(this);
+      }
+    }
+
+    public string Caption
+    {
+      get
+      {
+        string catalog = "main";
+        if (_table != null) catalog = _table.Catalog;
+
+        return String.Format("{0}.{1} Table (SQLite [{2}])", catalog, base.Name, ((DbConnection)_connection.ConnectionSupport.ProviderObject).DataSource);
       }
     }
 
@@ -81,7 +119,6 @@ namespace SQLite.Designer.Editors
       }
       set
       {
-        string caption = "SQLite:" + value;
         base.Name = value;
 
         if (_serviceProvider != null)
@@ -89,44 +126,50 @@ namespace SQLite.Designer.Editors
           IVsWindowFrame frame = _serviceProvider.GetService(typeof(IVsWindowFrame)) as IVsWindowFrame;
           if (frame != null)
           {
-            frame.SetProperty((int)__VSFPROPID.VSFPROPID_EditorCaption, value);
+            frame.SetProperty((int)__VSFPROPID.VSFPROPID_EditorCaption, Caption);
           }
         }
       }
     }
 
-    //public void NotifyChanges()
-    //{
-    //  if (_serviceProvider == null) return;
+    public void NotifyChanges()
+    {
+      if (_serviceProvider == null) return;
 
-    //  // Get a reference to the Running Document Table
-    //  IVsRunningDocumentTable runningDocTable = (IVsRunningDocumentTable)_serviceProvider.GetService(typeof(SVsRunningDocumentTable));
+      _sqlText.Text = _table.GetSql();
 
-    //  // Lock the document
-    //  uint docCookie;
-    //  IVsHierarchy hierarchy;
-    //  uint itemID;
-    //  IntPtr docData;
-    //  int hr = runningDocTable.FindAndLockDocument(
-    //      (uint)_VSRDTFLAGS.RDT_ReadLock,
-    //      base.Name,
-    //      out hierarchy,
-    //      out itemID,
-    //      out docData,
-    //      out docCookie
-    //  );
-    //  ErrorHandler.ThrowOnFailure(hr);
+      // Get a reference to the Running Document Table
+      IVsRunningDocumentTable runningDocTable = (IVsRunningDocumentTable)_serviceProvider.GetService(typeof(SVsRunningDocumentTable));
 
-    //  // Send the notification
-    //  hr = runningDocTable.NotifyDocumentChanged(docCookie, (uint)__VSRDTATTRIB.RDTA_DocDataReloaded);
+      // Lock the document
+      uint docCookie;
+      IVsHierarchy hierarchy;
+      uint itemID;
+      IntPtr docData;
+      int hr = runningDocTable.FindAndLockDocument(
+          (uint)_VSRDTFLAGS.RDT_ReadLock,
+          base.Name,
+          out hierarchy,
+          out itemID,
+          out docData,
+          out docCookie
+      );
+      ErrorHandler.ThrowOnFailure(hr);
 
-    //  // Unlock the document.
-    //  // Note that we have to unlock the document even if the previous call failed.
-    //  runningDocTable.UnlockDocument((uint)_VSRDTFLAGS.RDT_ReadLock, docCookie);
+      IVsUIShell shell = _serviceProvider.GetService(typeof(IVsUIShell)) as IVsUIShell;
+      if (shell != null)
+      {
+        shell.UpdateDocDataIsDirtyFeedback(docCookie, (_dirty == true) ? 1 : 0);
+      }
 
-    //  // Check ff the call to NotifyDocChanged failed.
-    //  ErrorHandler.ThrowOnFailure(hr);
-    //}
+      // Unlock the document.
+      // Note that we have to unlock the document even if the previous call failed.
+      runningDocTable.UnlockDocument((uint)_VSRDTFLAGS.RDT_ReadLock, docCookie);
+
+
+      // Check ff the call to NotifyDocChanged failed.
+      //ErrorHandler.ThrowOnFailure(hr);
+    }
 
     #region IVsPersistDocData Members
 
@@ -142,7 +185,7 @@ namespace SQLite.Designer.Editors
 
     public int IsDocDataDirty(out int pfDirty)
     {
-      pfDirty = 1;
+      pfDirty = _dirty == true ? 1 : 0;
       return VSConstants.S_OK;
     }
 
@@ -177,6 +220,72 @@ namespace SQLite.Designer.Editors
       pbstrMkDocumentNew = _table.Name;
       pfSaveCanceled = 0;
 
+      if (String.IsNullOrEmpty(_table.OriginalSql) == true)
+      {
+        using (TableNameDialog dlg = new TableNameDialog("Table", _table.Name))
+        {
+          if (dlg.ShowDialog(this) == DialogResult.Cancel)
+          {
+            pfSaveCanceled = 1;
+            return VSConstants.S_OK;
+          }
+          _table.Name = dlg.TableName;
+        }
+      }
+
+      _init = true;
+      for (int n = 0; n < _table.Columns.Count; n++)
+      {
+        Column c = _table.Columns[n];
+        if (String.IsNullOrEmpty(c.ColumnName) == true)
+        {
+          _dataGrid.Rows.Remove(c.Parent);
+          _table.Columns.Remove(c);
+          n--;
+          continue;
+        }
+      }
+
+      for (int n = 0; n < _dataGrid.Rows.Count; n++)
+      {
+        if ((_dataGrid.Rows[n].Tag is Column) == false)
+        {
+          try
+          {
+            _dataGrid.Rows.RemoveAt(n);
+          }
+          catch
+          {
+            if (n == _dataGrid.Rows.Count - 1) break;
+          }
+          n--;
+        }
+      }
+      _init = false;
+
+      using (DbTransaction trans = _table.GetConnection().BeginTransaction())
+      {
+        try
+        {
+          using (DbCommand cmd = _table.GetConnection().CreateCommand())
+          {
+            cmd.CommandText = _table.GetSql();
+            cmd.ExecuteNonQuery();
+          }
+          trans.Commit();
+        }
+        catch (Exception)
+        {
+          trans.Rollback();
+          throw;
+        }
+      }
+
+      _dirty = false;
+      _table.Committed();
+      NotifyChanges();
+      _sqlText.Text = _table.OriginalSql;
+
       return VSConstants.S_OK;
     }
 
@@ -191,6 +300,18 @@ namespace SQLite.Designer.Editors
 
     public int ClosePane()
     {
+      if (_serviceProvider != null)
+      {
+        EnvDTE.DTE dte = (EnvDTE.DTE)_serviceProvider.GetService(typeof(EnvDTE.DTE));
+
+        //Show toolbar
+        if (dte != null)
+        {
+          Microsoft.VisualStudio.CommandBars.CommandBars commandBars = (Microsoft.VisualStudio.CommandBars.CommandBars)dte.CommandBars;
+          Microsoft.VisualStudio.CommandBars.CommandBar bar = commandBars["Table Designer"];
+          bar.Visible = false;
+        }
+      }
       this.Dispose(true);
       return VSConstants.S_OK;
     }
@@ -250,26 +371,131 @@ namespace SQLite.Designer.Editors
 
     #endregion
 
+    public void MakeDirty()
+    {
+      _dirty = true;
+      NotifyChanges();
+    }
+
+    private bool IsPkSelected()
+    {
+      bool newVal = false;
+      foreach (Column c in _propertyGrid.SelectedObjects)
+      {
+        foreach (IndexColumn ic in _table.PrimaryKey.Columns)
+        {
+          if (String.Compare(c.ColumnName, ic.Column, StringComparison.OrdinalIgnoreCase) == 0)
+          {
+            newVal = true;
+            break;
+          }
+        }
+      }
+      return newVal;
+    }
+
     #region IOleCommandTarget Members
 
     public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
     {
+      if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97)
+      {
+        switch ((VSConstants.VSStd97CmdID)nCmdID)
+        {
+          case VSConstants.VSStd97CmdID.PrimaryKey:
+            bool newVal = IsPkSelected();
+
+            if (newVal == false)
+            {
+              _table.PrimaryKey.Columns.Clear();
+              foreach (Column c in _propertyGrid.SelectedObjects)
+              {
+                IndexColumn newcol = new IndexColumn(_table.PrimaryKey, null);
+                newcol.Column = c.ColumnName;
+                _table.PrimaryKey.Columns.Add(newcol);
+              }
+            }
+            else
+            {
+              foreach (Column c in _propertyGrid.SelectedObjects)
+              {
+                foreach (IndexColumn ic in _table.PrimaryKey.Columns)
+                {
+                  if (String.Compare(c.ColumnName, ic.Column, StringComparison.OrdinalIgnoreCase) == 0)
+                  {
+                    _table.PrimaryKey.Columns.Remove(ic);
+                    break;
+                  }
+                }
+              }
+            }
+
+            _dataGrid_SelectionChanged(this, EventArgs.Empty);
+            _dataGrid.Invalidate();
+            MakeDirty();
+            return VSConstants.S_OK;
+        }
+      }
+      else if (pguidCmdGroup == SQLiteCommandHandler.guidDavinci)
+      {
+        switch ((VSConstants.VSStd97CmdID)nCmdID)
+        {
+          case VSConstants.VSStd97CmdID.ManageIndexes:
+            IndexHolder holder = new IndexHolder(_table.Indexes, _table.ForeignKeys);
+            _pg.SelectedObject = holder;
+            _pg.SelectedGridItem = _pg.SelectedGridItem.Parent.GridItems[0];
+            IndexEditor ed = new IndexEditor(_table);
+            ed.EditValue((ITypeDescriptorContext)_pg.SelectedGridItem, (System.IServiceProvider)_pg.SelectedGridItem, _pg.SelectedGridItem.Value);
+            return VSConstants.S_OK;
+          case VSConstants.VSStd97CmdID.ManageRelationships:
+            holder = new IndexHolder(_table.Indexes, _table.ForeignKeys);
+            _pg.SelectedObject = holder;
+            _pg.SelectedGridItem = _pg.SelectedGridItem.Parent.GridItems[1];
+            ForeignKeyEditor fed = new ForeignKeyEditor(_table);
+            fed.EditValue((ITypeDescriptorContext)_pg.SelectedGridItem, (System.IServiceProvider)_pg.SelectedGridItem, _pg.SelectedGridItem.Value);
+            return VSConstants.S_OK;
+          case VSConstants.VSStd97CmdID.AlignRight: // Insert Column
+            _dataGrid.Rows.Insert(_dataGrid.SelectedRows[0].Index, 1);
+            return VSConstants.S_OK;
+          case VSConstants.VSStd97CmdID.AlignToGrid: // Delete Column
+            while (_dataGrid.SelectedRows.Count > 0)
+            {
+              try
+              {
+                DataGridViewRow row = _dataGrid.SelectedRows[0];
+                Column c = row.Tag as Column;
+                row.Selected = false;
+                if (c != null)
+                  _table.Columns.Remove(c);
+
+                _dataGrid.Rows.Remove(row);
+              }
+              catch
+              {
+              }
+            }
+            return VSConstants.S_OK;
+        }
+      }
+
       return (int)(Microsoft.VisualStudio.OLE.Interop.Constants.OLECMDERR_E_NOTSUPPORTED);
     }
 
     public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
     {
-      System.Diagnostics.Debug.WriteLine(pguidCmdGroup.ToString());
-
       if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97)
       {
         switch ((VSConstants.VSStd97CmdID)prgCmds[0].cmdID)
         {
           case VSConstants.VSStd97CmdID.PrimaryKey:
-          case VSConstants.VSStd97CmdID.GenerateChangeScript:
             prgCmds[0].cmdf = (uint)(OLECMDF.OLECMDF_SUPPORTED | OLECMDF.OLECMDF_ENABLED);
-            System.Diagnostics.Debug.Write(".");
+            if (IsPkSelected() == true)
+              prgCmds[0].cmdf |= (uint)(OLECMDF.OLECMDF_LATCHED);
+
             break;
+          //case VSConstants.VSStd97CmdID.GenerateChangeScript:
+          //  prgCmds[0].cmdf = (uint)(OLECMDF.OLECMDF_SUPPORTED | OLECMDF.OLECMDF_ENABLED);
+          //  break;
           default:
             return (int)(Microsoft.VisualStudio.OLE.Interop.Constants.OLECMDERR_E_NOTSUPPORTED);
         }
@@ -282,7 +508,7 @@ namespace SQLite.Designer.Editors
         {
           case (uint)VSConstants.VSStd97CmdID.ManageRelationships:
           case (uint)VSConstants.VSStd97CmdID.ManageIndexes:
-          case (uint)VSConstants.VSStd97CmdID.ManageConstraints:
+          //case (uint)VSConstants.VSStd97CmdID.ManageConstraints:
           //case 10: // Table View -> Custom
           //case 14: // Table View -> Modify Custom
           //case 33: // Database Diagram -> Add Table
@@ -340,7 +566,6 @@ namespace SQLite.Designer.Editors
 
     int ISelectionContainer.SelectObjects(uint cSelect, object[] apUnkSelect, uint dwFlags)
     {
-      apUnkSelect[0] = _table;
       return VSConstants.S_OK;
     }
 
@@ -368,13 +593,39 @@ namespace SQLite.Designer.Editors
       return VSConstants.S_OK;
     }
 
+    private void _timer_Tick(object sender, EventArgs e)
+    {
+      _timer.Enabled = false;
+      if (_serviceProvider != null)
+      {
+        EnvDTE.DTE dte = (EnvDTE.DTE)_serviceProvider.GetService(typeof(EnvDTE.DTE));
+
+        //Show toolbar
+        if (dte != null)
+        {
+          Microsoft.VisualStudio.CommandBars.CommandBars commandBars = (Microsoft.VisualStudio.CommandBars.CommandBars)dte.CommandBars;
+          Microsoft.VisualStudio.CommandBars.CommandBar bar = commandBars["Table Designer"];
+          bar.Visible = true;
+        }
+      }
+
+      if (_warned == false)
+      {
+        _warned = true;
+        if (_table.HasCheck == true)
+          MessageBox.Show(this, "This table has CHECK constraints that could not be parsed.  Before making any changes to this table, make sure you note the constraints in the SQL window first", "Parser Error");
+      }
+    }
+
     int IVsWindowFrameNotify.OnShow(int fShow)
     {
       switch ((__FRAMESHOW)fShow)
       {
-        case __FRAMESHOW.FRAMESHOW_TabActivated:
         case __FRAMESHOW.FRAMESHOW_WinShown:
           SetPropertyWindow();
+          _timer.Enabled = true;
+          break;
+        case __FRAMESHOW.FRAMESHOW_WinHidden:
           break;
       }
       return VSConstants.S_OK;
@@ -401,6 +652,30 @@ namespace SQLite.Designer.Editors
       _dataGrid.EndEdit();
       if (e.Button == MouseButtons.Right)
       {
+        if (_dataGrid.Rows[e.RowIndex].Selected == false)
+        {
+          switch (Control.ModifierKeys)
+          {
+            case Keys.Control:
+              _dataGrid.Rows[e.RowIndex].Selected = true;
+              break;
+            case Keys.Shift:
+              int min = Math.Min(_dataGrid.CurrentRow.Index, e.RowIndex);
+              int max = Math.Max(_dataGrid.CurrentRow.Index, e.RowIndex);
+              for (int n = 0; n < _dataGrid.Rows.Count; n++)
+              {
+                _dataGrid.Rows[n].Selected = (_dataGrid.Rows[n].Index <= min || _dataGrid.Rows[n].Index <= max);
+              }
+              break;
+            default:
+              for (int n = 0; n < _dataGrid.Rows.Count; n++)
+              {
+                _dataGrid.Rows[n].Selected = (e.RowIndex == n);
+              }
+              break;
+          }
+        }
+
         IVsUIShell shell = _serviceProvider.GetService(typeof(IVsUIShell)) as IVsUIShell;
         if (shell != null)
         {
@@ -420,6 +695,7 @@ namespace SQLite.Designer.Editors
 
     private void _dataGrid_CellClick(object sender, DataGridViewCellEventArgs e)
     {
+      if (_init == true) return;
       if (e.ColumnIndex == -1 && e.RowIndex == -1)
       {
         _dataGrid.EndEdit();
@@ -429,13 +705,23 @@ namespace SQLite.Designer.Editors
 
     private void _dataGrid_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
     {
+      if (_init == true) return;
       if (e.ColumnIndex > -1 || e.RowIndex < 0) return;
 
       Column col = _dataGrid.Rows[e.RowIndex].Tag as Column;
 
       if (col == null) return;
 
-      if (col.PrimaryKey.Enabled == true)
+      bool ispk = false;
+      foreach (IndexColumn ic in _table.PrimaryKey.Columns)
+      {
+        if (String.Compare(ic.Column, col.ColumnName, StringComparison.OrdinalIgnoreCase) == 0)
+        {
+          ispk = true;
+          break;
+        }
+      }
+      if (ispk == true)
       {
         e.Paint(e.ClipBounds, DataGridViewPaintParts.All);
         _imageList.Draw(e.Graphics, e.CellBounds.Left, e.CellBounds.Top + ((e.CellBounds.Bottom - e.CellBounds.Top) - _imageList.ImageSize.Height) / 2, 0);
@@ -445,6 +731,7 @@ namespace SQLite.Designer.Editors
 
     private void _dataGrid_SelectionChanged(object sender, EventArgs e)
     {
+      if (_init == true) return;
       List<object> items = new List<object>();
 
       for (int n = 0; n < _dataGrid.Rows.Count; n++)
@@ -460,26 +747,87 @@ namespace SQLite.Designer.Editors
       items.CopyTo(objs);
 
       _propertyGrid.SelectedObjects = objs;
+
+      IVsUIShell shell = _serviceProvider.GetService(typeof(IVsUIShell)) as IVsUIShell;
+      if (shell != null)
+      {
+        shell.UpdateCommandUI(0);
+      }
     }
 
     private void _dataGrid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
     {
-      _propertyGrid.SelectedObjects = _propertyGrid.SelectedObjects;
+      if (_init == true) return;
+      if (e.RowIndex > -1)
+      {
+        MakeDirty();
+        _propertyGrid.SelectedObjects = _propertyGrid.SelectedObjects;
+      }
     }
 
     private void _dataGrid_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
     {
+      if (_init == true) return;
       _dataGrid_SelectionChanged(sender, e);
+    }
+
+    private void _dataGrid_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+    {
+      if (_init == true) return;
+      MakeDirty();
+    }
+
+    private void _dataGrid_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
+    {
+      if (_init == true) return;
+      MakeDirty();
+    }
+
+    private void TableDesignerDoc_VisibleChanged(object sender, EventArgs e)
+    {
+    }
+  }
+
+  internal class IndexHolder
+  {
+    private List<Index> _indexes;
+    private List<ForeignKey> _fkeys;
+
+    internal IndexHolder(List<Index> idx, List<ForeignKey> fk)
+    {
+      _indexes = idx;
+      _fkeys = fk;
+    }
+
+    public List<Index> Indexes
+    {
+      get { return _indexes; }
+    }
+
+    public List<ForeignKey> ForeignKeys
+    {
+      get { return _fkeys; }
+    }
+  }
+
+  public class DesignerDocBase : UserControl
+  {
+    public virtual string CanonicalName
+    {
+      get
+      {
+        return null;
+      }
     }
   }
 
   internal class FakeHierarchy : IVsUIHierarchy, IVsPersistHierarchyItem2
   {
-    TableDesignerDoc _control;
+    DesignerDocBase _control;
     IVsUIHierarchy _owner;
     Dictionary<uint, IVsHierarchyEvents> _events = new Dictionary<uint, IVsHierarchyEvents>();
 
-    internal FakeHierarchy(TableDesignerDoc control, IVsUIHierarchy owner)
+    internal FakeHierarchy(DesignerDocBase control, IVsUIHierarchy owner)
     {
       _control = control;
       _owner = owner;
@@ -510,7 +858,7 @@ namespace SQLite.Designer.Editors
 
     int IVsUIHierarchy.GetCanonicalName(uint itemid, out string pbstrName)
     {
-      pbstrName = _control._table.Name;
+      pbstrName = _control.CanonicalName;
       return VSConstants.S_OK;
     }
 
@@ -541,7 +889,7 @@ namespace SQLite.Designer.Editors
           break;
         case __VSHPROPID.VSHPROPID_Caption:
         case __VSHPROPID.VSHPROPID_SaveName:
-          pvar = _control._table.Name;
+          pvar = _control.CanonicalName;
           break;
         case __VSHPROPID.VSHPROPID_IsHiddenItem:
           pvar = true;

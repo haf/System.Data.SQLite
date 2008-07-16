@@ -61,13 +61,14 @@ namespace System.Data.SQLite
     /// <summary>
     /// Prepares a SQL statement for execution.
     /// </summary>
+    /// <param name="cnn">The source connection preparing the command.  Can be null for any caller except LINQ</param>
     /// <param name="strSql">The SQL command text to prepare</param>
     /// <param name="previous">The previous statement in a multi-statement command, or null if no previous statement exists</param>
     /// <param name="strRemain">The remainder of the statement that was not processed.  Each call to prepare parses the
     /// SQL up to to either the end of the text or to the first semi-colon delimiter.  The remaining text is returned
     /// here for a subsequent call to Prepare() until all the text has been processed.</param>
     /// <returns>Returns an initialized SQLiteStatement.</returns>
-    internal abstract SQLiteStatement Prepare(string strSql, SQLiteStatement previous, out string strRemain);
+    internal abstract SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, out string strRemain);
     /// <summary>
     /// Steps through a prepared statement.
     /// </summary>
@@ -105,6 +106,8 @@ namespace System.Data.SQLite
     internal abstract string ColumnDatabaseName(SQLiteStatement stmt, int index);
     internal abstract string ColumnTableName(SQLiteStatement stmt, int index);
     internal abstract void ColumnMetaData(string dataBase, string table, string column, out string dataType, out string collateSequence, out bool notNull, out bool primaryKey, out bool autoIncrement);
+    internal abstract bool TableHasCheckConstraints(string database, string table);
+    internal abstract void GetIndexColumnExtendedInfo(string database, string index, string column, out int sortMode, out int onError, out string collationSequence);
 
     internal abstract double GetDouble(SQLiteStatement stmt, int index);
     internal abstract Int32 GetInt32(SQLiteStatement stmt, int index);
@@ -191,6 +194,10 @@ namespace System.Data.SQLite
     {
       UnsafeNativeMethods.sqlite3_function_free_callbackcookie(nCookie);
     }
+  }
 
+  internal interface ISQLiteSchemaExtensions
+  {
+    void BuildTempSchema(SQLiteConnection cnn);
   }
 }

@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.50.0 June 27, 2008<br>
-    Using SQLite 3.5.9<br>
+    Version 1.0.52.0 July 16, 2008<br>
+    Using SQLite 3.6.0<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -120,6 +120,46 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.52.0 - July 16, 2008</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.6.0</li>
+      <li>Added a lot of previously-missing exports to the DEF file for the 
+        native library.</li>
+      <li>Fixed SQLiteDataReader to check for an invalid connection before operating on 
+        an open cursor.</li>
+      <li>Implemented the Cancel() function of SQLiteCommand to cancel an active reader.</li>
+      <li>Added beta table and view designers to the Visual Studio Server Explorer.&nbsp; You can now 
+        edit/create tables and views, manage indexes and foreign keys from Visual Studio.&nbsp; 
+        This feature is still undergoing testing so use at your own risk!</li>
+      <li>Fixed the Server Explorer so VS2005 users can once again right-click tables 
+        and views and open the table data.</li>
+      <li>Added some new interop code to assist in returning more metadata not normally 
+        available through the SQLite API.&nbsp; Specifically, index column sort modes 
+        and collating sequences.&nbsp; Also added code to detect (but not parse) CHECK 
+        constraints, so the table designer can pop up a warning when editing a table 
+        with these constraints.&nbsp; Since I can&#39;t currently parse them.</li>
+      <li>Lots of LINQ SQL generation improvements and fixes.</li>
+      <li>Made some progress cleaning up and fixing up the schema definitions and 
+        manifests for EdmGen.</li>
+      <li>Added a built-in SQLiteFunction called last_rows_affected() which can be 
+        called from SQL to get the number of rows affected by the last update/insert 
+        operation on the connection.&nbsp; This is roughly equivalent to Sql Server&#39;s 
+        @@ROWCOUNT variable.</li>      
+    </ul>
+    <p><b>1.0.51.0 - July 1, 2008</b></p>
+    <ul>
+      <li><b>VS2008 SP1 Beta1 LINQ Support</b></li>
+      <li>Added experimental Entity Framework support in a new library, 
+        System.Data.SQLite.Linq.&nbsp; Some things work, some don&#39;t.&nbsp; I haven&#39;t 
+        finished rigging everything up yet.&nbsp; The core library remains stable.&nbsp; 
+        All LINQ-specific code is completely separate from the core.</li>
+      <li>Added some columns to several existing schemas to support some of the 
+        EDM framework stuff.</li>
+      <li>Minor tweaks to the factory to better support dynamic loading of the Linq 
+        extension library for SQLite.</li>
+      <li>SQLite&#39;s busy handler was interfering with the provider&#39;s busy handling 
+        mechanism, so its been disabled.</li>
+    </ul>
     <p><b>1.0.50.0 - June 27, 2008</b></p>
     <ul>
       <li>Fixed some lingering dispose issues and race conditions when some objects were finalized.</li>

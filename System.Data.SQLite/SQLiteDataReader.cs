@@ -67,6 +67,8 @@ namespace System.Data.SQLite
     /// </summary>
     private SQLiteKeyReader _keyInfo;
 
+    internal long _version; // Matches the version of the connection
+
     /// <summary>
     /// Internal constructor, initializes the datareader and sets up to begin executing statements
     /// </summary>
@@ -75,6 +77,8 @@ namespace System.Data.SQLite
     internal SQLiteDataReader(SQLiteCommand cmd, CommandBehavior behave)
     {
       _command = cmd;
+      _version = _command.Connection._version;
+
       _commandBehavior = behave;
       _activeStatementIndex = -1;
       _activeStatement = null;
@@ -85,34 +89,64 @@ namespace System.Data.SQLite
         NextResult();
     }
 
+    internal void Cancel()
+    {
+      _version = 0;
+    }
+
     /// <summary>
     /// Closes the datareader, potentially closing the connection as well if CommandBehavior.CloseConnection was specified.
     /// </summary>
     public override void Close()
     {
-      if (_command != null)
+      try
       {
-        while (NextResult())
+        if (_command != null)
         {
+          try
+          {
+            try
+            {
+              // Make sure we've not been canceled
+              if (_version != 0)
+              {
+                try
+                {
+                  while (NextResult())
+                  {
+                  }
+                }
+                catch
+                {
+                }
+              }
+              _command.ClearDataReader();
+            }
+            finally
+            {
+              // If the datareader's behavior includes closing the connection, then do so here.
+              if ((_commandBehavior & CommandBehavior.CloseConnection) != 0 && _command.Connection != null)
+                _command.Connection.Close();
+            }
+          }
+          finally
+          {
+            if (_disposeCommand)
+              _command.Dispose();
+          }
         }
-        _command.ClearDataReader();
 
-        if (_disposeCommand)
-          _command.Dispose();
-
-        // If the datareader's behavior includes closing the connection, then do so here.
-        if ((_commandBehavior & CommandBehavior.CloseConnection) != 0 && _command.Connection != null)
-          _command.Connection.Close();
+        _command = null;
+        _activeStatement = null;
+        _fieldTypeArray = null;
       }
-
-      _command = null;
-      _activeStatement = null;
-      _fieldTypeArray = null;
-
-      if (_keyInfo != null)
+      finally
       {
-        _keyInfo.Dispose();
-        _keyInfo = null;
+        if (_keyInfo != null)
+        {
+          _keyInfo.Dispose();
+          _keyInfo = null;
+        }
       }
     }
 
@@ -123,6 +157,12 @@ namespace System.Data.SQLite
     {
       if (_command == null)
         throw new InvalidOperationException("DataReader has been closed");
+
+      if (_version == 0)
+        throw new SQLiteException((int)SQLiteErrorCode.Abort, "Execution was aborted by the user");
+
+      if (_command.Connection.State != ConnectionState.Open || _command.Connection._version != _version)
+        throw new InvalidOperationException("Connection was closed, statement was terminated");
     }
 
     /// <summary>
@@ -548,7 +588,7 @@ namespace System.Data.SQLite
       tbl.Columns.Add(SchemaTableOptionalColumn.ProviderSpecificDataType, typeof(Type));
       tbl.Columns.Add(SchemaTableOptionalColumn.DefaultValue, typeof(object));
       tbl.Columns.Add("DataTypeName", typeof(string));
-
+      tbl.Columns.Add("CollationType", typeof(string));
       tbl.BeginLoadData();
 
       for (int n = 0; n < _fieldCount; n++)
@@ -608,6 +648,7 @@ namespace System.Data.SQLite
 
           row[SchemaTableColumn.IsKey] = bPrimaryKey;
           row[SchemaTableOptionalColumn.IsAutoIncrement] = bAutoIncrement;
+          row["CollationType"] = collSeq;
 
           // For types like varchar(50) and such, extract the size
           arSize = dataType.Split('(');

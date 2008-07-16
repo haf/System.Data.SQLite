@@ -553,6 +553,34 @@ namespace System.Data.SQLite
       DBNull.Value
     };
 
+    internal static string DbTypeToTypeName(DbType typ)
+    {
+      for (int n = 0; n < _dbtypeNames.Length; n++)
+      {
+        if (_dbtypeNames[n].dataType == typ)
+          return _dbtypeNames[n].typeName;
+      }
+
+      return String.Empty;
+    }
+
+    private static SQLiteTypeNames[] _dbtypeNames = {
+      new SQLiteTypeNames("INTEGER", DbType.Int64),
+      new SQLiteTypeNames("TINYINT", DbType.Byte),
+      new SQLiteTypeNames("INT", DbType.Int32),
+      new SQLiteTypeNames("VARCHAR", DbType.AnsiString),
+      new SQLiteTypeNames("NVARCHAR", DbType.String),
+      new SQLiteTypeNames("CHAR", DbType.AnsiStringFixedLength),
+      new SQLiteTypeNames("NCHAR", DbType.StringFixedLength),
+      new SQLiteTypeNames("FLOAT", DbType.Double),
+      new SQLiteTypeNames("REAL", DbType.Single),          
+      new SQLiteTypeNames("BIT", DbType.Boolean),
+      new SQLiteTypeNames("DECIMAL", DbType.Decimal),
+      new SQLiteTypeNames("DATETIME", DbType.DateTime),
+      new SQLiteTypeNames("BLOB", DbType.Binary),
+      new SQLiteTypeNames("UNIQUEIDENTIFIER", DbType.Guid),
+      new SQLiteTypeNames("SMALLINT", DbType.Int16),
+    };
     /// <summary>
     /// Convert a DbType to a Type
     /// </summary>

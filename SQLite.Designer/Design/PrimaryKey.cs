@@ -2,51 +2,62 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
+using System.Data;
+using System.Data.Common;
 
 namespace SQLite.Designer.Design
 {
-  [TypeConverter(typeof(ExpandableObjectConverter))]
-  internal class PrimaryKey
+  internal class PrimaryKey : Index, ICloneable
   {
-    private bool _primaryKey;
-    private bool _autoIncrement;
-    private IndexDirection _direction;
-    private ConflictEnum _conflict;
-    Column _column;
+    private bool _autoincrement;
 
-    internal PrimaryKey(Column col)
+    internal PrimaryKey(DbConnection cnn, Table table, DataRow row)
+      : base(cnn, table, row)
     {
-      _column = col;
+      if (String.IsNullOrEmpty(_name) == false && _name.StartsWith("sqlite_", StringComparison.OrdinalIgnoreCase))
+        _name = null;
     }
 
-    [RefreshProperties(RefreshProperties.All)]
-    [DefaultValue(false)]
-    public bool Enabled
+    protected PrimaryKey(PrimaryKey source)
+      : base(source)
     {
-      get { return _primaryKey; }
-      set
+      _autoincrement = source._autoincrement;
+    }
+
+    public override IndexTypeEnum IndexType
+    {
+      get
       {
-        _primaryKey = value;
-
-        if (_primaryKey == false)
-          AutoIncrement = false;
-
-        _column.RefreshGrid();
+        return IndexTypeEnum.PrimaryKey;
       }
     }
 
-    [RefreshProperties(RefreshProperties.All)]
-    [DefaultValue(false)]
-    [DisplayName("Auto Increment")]
-    public bool AutoIncrement
+    protected override string NamePrefix
     {
-      get { return _autoIncrement; }
+      get
+      {
+        return "PK";
+      }
+    }
+
+    protected override string NewName
+    {
+      get
+      {
+        return Table.Name;
+      }
+    }
+
+    [Browsable(false)]
+    public override bool Unique
+    {
+      get
+      {
+        return true;
+      }
       set
       {
-        if (_primaryKey == false && value == true)
-          Enabled = true;
-
-        _autoIncrement = value;
+        base.Unique = true;
       }
     }
 
@@ -58,23 +69,25 @@ namespace SQLite.Designer.Design
       set { _conflict = value; }
     }
 
-    [DefaultValue(IndexDirection.Ascending)]
-    [DisplayName("Sort Mode")]
-    public IndexDirection SortMode
+    [DefaultValue(false)]
+    public bool AutoIncrement
     {
-      get { return _direction; }
-      set { _direction = value; }
+      get
+      {
+        if (Columns.Count > 1) return false;
+        if (Columns.Count == 1 && Columns[0].SortMode != ColumnSortMode.Ascending) return false;
+        return _autoincrement;
+      }
+      set { _autoincrement = value; }
     }
 
-    public override string ToString()
-    {
-      return Enabled.ToString();
-    }
-  }
+    #region ICloneable Members
 
-  internal enum IndexDirection
-  {
-    Ascending = 0,
-    Descending = 1,
+    object ICloneable.Clone()
+    {
+      return new PrimaryKey(this);
+    }
+
+    #endregion
   }
 }

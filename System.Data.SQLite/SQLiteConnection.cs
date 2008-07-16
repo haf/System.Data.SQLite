@@ -13,6 +13,7 @@ namespace System.Data.SQLite
   using System.Collections.Generic;
   using System.Globalization;
   using System.ComponentModel;
+  using System.Text;
 
   /// <summary>
   /// SQLite implentation of DbConnection.
@@ -749,7 +750,7 @@ namespace System.Data.SQLite
           if (fileName != ":memory:")
           {
             defValue = FindKey(opts, "Page Size", "1024");
-            if (Convert.ToInt32(defValue) != 1024)
+            if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 1024)
             {
               cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA page_size={0}", defValue);
               cmd.ExecuteNonQuery();
@@ -757,7 +758,7 @@ namespace System.Data.SQLite
           }
 
           defValue = FindKey(opts, "Max Page Count", "0");
-          if (Convert.ToInt32(defValue) != 0)
+          if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 0)
           {
             cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA max_page_count={0}", defValue);
             cmd.ExecuteNonQuery();
@@ -775,7 +776,7 @@ namespace System.Data.SQLite
           }
 
           defValue = FindKey(opts, "Cache Size", "2000");
-          if (Convert.ToInt32(defValue) != 2000)
+          if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 2000)
           {
             cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA cache_size={0}", defValue);
             cmd.ExecuteNonQuery();
@@ -928,6 +929,7 @@ namespace System.Data.SQLite
 
       return sourceFile;
     }
+
     ///<overloads>
     /// The following commands are used to extract schema information out of the database.  Valid schema types are:
     /// <list type="bullet">
@@ -1007,6 +1009,7 @@ namespace System.Data.SQLite
         case "DATATYPES":
           return Schema_DataTypes();
         case "COLUMNS":
+        case "TABLECOLUMNS":
           return Schema_Columns(parms[0], parms[2], parms[3]);
         case "INDEXES":
           return Schema_Indexes(parms[0], parms[2], parms[3]);
@@ -1176,6 +1179,9 @@ namespace System.Data.SQLite
       tbl.Columns.Add("DOMAIN_NAME", typeof(string));
       tbl.Columns.Add("DESCRIPTION", typeof(string));
       tbl.Columns.Add("PRIMARY_KEY", typeof(bool));
+      tbl.Columns.Add("EDM_TYPE", typeof(string));
+      tbl.Columns.Add("AUTOINCREMENT", typeof(bool));
+      tbl.Columns.Add("UNIQUE", typeof(bool));
 
       tbl.BeginLoadData();
 
@@ -1194,7 +1200,7 @@ namespace System.Data.SQLite
             {
               using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
               using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader(CommandBehavior.SchemaOnly))
-              using (DataTable tblSchema = rd.GetSchemaTable(false, true))
+              using (DataTable tblSchema = rd.GetSchemaTable(true, true))
               {
                 foreach (DataRow schemaRow in tblSchema.Rows)
                 {
@@ -1212,11 +1218,14 @@ namespace System.Data.SQLite
                     row["COLUMN_HASDEFAULT"] = (schemaRow[SchemaTableOptionalColumn.DefaultValue] != DBNull.Value);
                     row["COLUMN_DEFAULT"] = schemaRow[SchemaTableOptionalColumn.DefaultValue];
                     row["IS_NULLABLE"] = schemaRow[SchemaTableColumn.AllowDBNull];
-                    row["DATA_TYPE"] = schemaRow["DataTypeName"]; // SQLiteConvert.DbTypeToType((DbType)schemaRow[SchemaTableColumn.ProviderType]).ToString();
+                    row["DATA_TYPE"] = schemaRow["DataTypeName"].ToString().ToLower(CultureInfo.InvariantCulture);
+                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)schemaRow[SchemaTableColumn.ProviderType]).ToString().ToLower(CultureInfo.InvariantCulture);
                     row["CHARACTER_MAXIMUM_LENGTH"] = schemaRow[SchemaTableColumn.ColumnSize];
                     row["TABLE_SCHEMA"] = schemaRow[SchemaTableColumn.BaseSchemaName];
                     row["PRIMARY_KEY"] = schemaRow[SchemaTableColumn.IsKey];
-
+                    row["AUTOINCREMENT"] = schemaRow[SchemaTableOptionalColumn.IsAutoIncrement];
+                    row["COLLATION_NAME"] = schemaRow["CollationType"];
+                    row["UNIQUE"] = schemaRow[SchemaTableColumn.IsUnique];
                     tbl.Rows.Add(row);
                   }
                 }
@@ -1275,6 +1284,7 @@ namespace System.Data.SQLite
       tbl.Columns.Add("PAGES", typeof(int));
       tbl.Columns.Add("FILTER_CONDITION", typeof(string));
       tbl.Columns.Add("INTEGRATED", typeof(bool));
+      tbl.Columns.Add("INDEX_DEFINITION", typeof(string));
 
       tbl.BeginLoadData();
 
@@ -1293,22 +1303,27 @@ namespace System.Data.SQLite
           {
             // First, look for any rowid indexes -- which sqlite defines are INTEGER PRIMARY KEY columns.
             // Such indexes are not listed in the indexes list but count as indexes just the same.
-            using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].table_info([{1}])", strCatalog, rdTables.GetString(2)), this))
-            using (SQLiteDataReader rdTable = cmdTable.ExecuteReader())
+            try
             {
-              while (rdTable.Read())
+              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].table_info([{1}])", strCatalog, rdTables.GetString(2)), this))
+              using (SQLiteDataReader rdTable = cmdTable.ExecuteReader())
               {
-                if (rdTable.GetInt32(5) == 1)
+                while (rdTable.Read())
                 {
-                  primaryKeys.Add(rdTable.GetInt32(0));
+                  if (rdTable.GetInt32(5) == 1)
+                  {
+                    primaryKeys.Add(rdTable.GetInt32(0));
 
-                  // If the primary key is of type INTEGER, then its a rowid and we need to make a fake index entry for it.
-                  if (String.Compare(rdTable.GetString(2), "INTEGER", true, CultureInfo.InvariantCulture) == 0)
-                    maybeRowId = true;
+                    // If the primary key is of type INTEGER, then its a rowid and we need to make a fake index entry for it.
+                    if (String.Compare(rdTable.GetString(2), "INTEGER", true, CultureInfo.InvariantCulture) == 0)
+                      maybeRowId = true;
+                  }
                 }
               }
             }
-
+            catch (SQLiteException)
+            {
+            }
             if (primaryKeys.Count == 1 && maybeRowId == true)
             {
               row = tbl.NewRow();
@@ -1330,52 +1345,70 @@ namespace System.Data.SQLite
             }
 
             // Now fetch all the rest of the indexes.
-            using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].index_list([{1}])", strCatalog, rdTables.GetString(2)), this))
-            using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
+            try
             {
-              while (rd.Read())
+              using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].index_list([{1}])", strCatalog, rdTables.GetString(2)), this))
+              using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
               {
-                if (String.Compare(rd.GetString(1), strIndex, true, CultureInfo.InvariantCulture) == 0
-                || strIndex == null)
+                while (rd.Read())
                 {
-                  row = tbl.NewRow();
-
-                  row["TABLE_CATALOG"] = strCatalog;
-                  row["TABLE_NAME"] = rdTables.GetString(2);
-                  row["INDEX_CATALOG"] = strCatalog;
-                  row["INDEX_NAME"] = rd.GetString(1);
-                  row["UNIQUE"] = rd.GetBoolean(2);
-                  row["PRIMARY_KEY"] = false;
-
-                  // Now for the really hard work.  Figure out which index is the primary key index.
-                  // The only way to figure it out is to check if the index was an autoindex and if we have a non-rowid
-                  // primary key, and all the columns in the given index match the primary key columns
-                  if (primaryKeys.Count > 0 && rd.GetString(1).StartsWith("sqlite_autoindex_" + rdTables.GetString(2), StringComparison.InvariantCultureIgnoreCase) == true)
+                  if (String.Compare(rd.GetString(1), strIndex, true, CultureInfo.InvariantCulture) == 0
+                  || strIndex == null)
                   {
-                    using (SQLiteCommand cmdDetails = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].index_info([{1}])", strCatalog, rd.GetString(1)), this))
-                    using (SQLiteDataReader rdDetails = cmdDetails.ExecuteReader())
+                    row = tbl.NewRow();
+
+                    row["TABLE_CATALOG"] = strCatalog;
+                    row["TABLE_NAME"] = rdTables.GetString(2);
+                    row["INDEX_CATALOG"] = strCatalog;
+                    row["INDEX_NAME"] = rd.GetString(1);
+                    row["UNIQUE"] = rd.GetBoolean(2);
+                    row["PRIMARY_KEY"] = false;
+
+                    // get the index definition
+                    using (SQLiteCommand cmdIndexes = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{2}] WHERE [type] LIKE 'index' AND [name] LIKE '{1}'", strCatalog, rd.GetString(1).Replace("'", "''"), master), this))
+                    using (SQLiteDataReader rdIndexes = cmdIndexes.ExecuteReader())
                     {
-                      int nMatches = 0;
-                      while (rdDetails.Read())
+                      while (rdIndexes.Read())
                       {
-                        if (primaryKeys.Contains(rdDetails.GetInt32(1)) == false)
-                        {
-                          nMatches = 0;
-                          break;
-                        }
-                        nMatches++;
-                      }
-                      if (nMatches == primaryKeys.Count)
-                      {
-                        row["PRIMARY_KEY"] = true;
-                        primaryKeys.Clear();
+                        if (rdIndexes.IsDBNull(4) == false)
+                          row["INDEX_DEFINITION"] = rdIndexes.GetString(4);
+                        break;
                       }
                     }
-                  }
 
-                  tbl.Rows.Add(row);
+                    // Now for the really hard work.  Figure out which index is the primary key index.
+                    // The only way to figure it out is to check if the index was an autoindex and if we have a non-rowid
+                    // primary key, and all the columns in the given index match the primary key columns
+                    if (primaryKeys.Count > 0 && rd.GetString(1).StartsWith("sqlite_autoindex_" + rdTables.GetString(2), StringComparison.InvariantCultureIgnoreCase) == true)
+                    {
+                      using (SQLiteCommand cmdDetails = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].index_info([{1}])", strCatalog, rd.GetString(1)), this))
+                      using (SQLiteDataReader rdDetails = cmdDetails.ExecuteReader())
+                      {
+                        int nMatches = 0;
+                        while (rdDetails.Read())
+                        {
+                          if (primaryKeys.Contains(rdDetails.GetInt32(1)) == false)
+                          {
+                            nMatches = 0;
+                            break;
+                          }
+                          nMatches++;
+                        }
+                        if (nMatches == primaryKeys.Count)
+                        {
+                          row["PRIMARY_KEY"] = true;
+                          primaryKeys.Clear();
+                        }
+                      }
+                    }
+
+                    tbl.Rows.Add(row);
+                  }
                 }
               }
+            }
+            catch (SQLiteException)
+            {
             }
           }
         }
@@ -1407,7 +1440,8 @@ namespace System.Data.SQLite
       tbl.Columns.Add("TABLE_TYPE", typeof(string));
       tbl.Columns.Add("TABLE_ID", typeof(long));
       tbl.Columns.Add("TABLE_ROOTPAGE", typeof(int));
-
+      tbl.Columns.Add("TABLE_DEFINITION", typeof(string));
+      tbl.Columns.Add("HAS_CHECKCONSTRAINTS", typeof(bool));
       tbl.BeginLoadData();
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
@@ -1436,6 +1470,8 @@ namespace System.Data.SQLite
               row["TABLE_TYPE"] = strItem;
               row["TABLE_ID"] = rd.GetInt64(5);
               row["TABLE_ROOTPAGE"] = rd.GetInt32(3);
+              row["TABLE_DEFINITION"] = rd.GetString(4);
+              row["HAS_CHECKCONSTRAINTS"] = _sql.TableHasCheckConstraints(strCatalog, rd.GetString(2));
 
               tbl.Rows.Add(row);
             }
@@ -1618,6 +1654,9 @@ namespace System.Data.SQLite
       tbl.Columns.Add("COLUMN_NAME", typeof(string));
       tbl.Columns.Add("ORDINAL_POSITION", typeof(int));
       tbl.Columns.Add("INDEX_NAME", typeof(string));
+      tbl.Columns.Add("COLLATION_NAME", typeof(string));
+      tbl.Columns.Add("SORT_MODE", typeof(string));
+      tbl.Columns.Add("CONFLICT_OPTION", typeof(int));
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
@@ -1634,19 +1673,25 @@ namespace System.Data.SQLite
           primaryKeys.Clear();
           if (String.IsNullOrEmpty(strTable) || String.Compare(rdTables.GetString(2), strTable, true, CultureInfo.InvariantCulture) == 0)
           {
-            using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].table_info([{1}])", strCatalog, rdTables.GetString(2)), this))
-            using (SQLiteDataReader rdTable = cmdTable.ExecuteReader())
+            try
             {
-              while (rdTable.Read())
+              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].table_info([{1}])", strCatalog, rdTables.GetString(2)), this))
+              using (SQLiteDataReader rdTable = cmdTable.ExecuteReader())
               {
-                if (rdTable.GetInt32(5) == 1) // is a primary key
+                while (rdTable.Read())
                 {
-                  primaryKeys.Add(new KeyValuePair<int, string>(rdTable.GetInt32(0), rdTable.GetString(1)));
-                  // Is an integer -- could be a rowid if no other primary keys exist in the table
-                  if (String.Compare(rdTable.GetString(2), "INTEGER", true, CultureInfo.InvariantCulture) == 0)
-                    maybeRowId = true;
+                  if (rdTable.GetInt32(5) == 1) // is a primary key
+                  {
+                    primaryKeys.Add(new KeyValuePair<int, string>(rdTable.GetInt32(0), rdTable.GetString(1)));
+                    // Is an integer -- could be a rowid if no other primary keys exist in the table
+                    if (String.Compare(rdTable.GetString(2), "INTEGER", true, CultureInfo.InvariantCulture) == 0)
+                      maybeRowId = true;
+                  }
                 }
               }
+            }
+            catch (SQLiteException)
+            {
             }
             // This is a rowid row
             if (primaryKeys.Count == 1 && maybeRowId == true)
@@ -1659,6 +1704,9 @@ namespace System.Data.SQLite
               row["COLUMN_NAME"] = primaryKeys[0].Value;
               row["INDEX_NAME"] = row["CONSTRAINT_NAME"];
               row["ORDINAL_POSITION"] = 0; // primaryKeys[0].Key;
+              row["COLLATION_NAME"] = "BINARY";
+              row["SORT_MODE"] = "ASC";
+              row["CONFLICT_OPTION"] = 2;
 
               if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, (string)row["INDEX_NAME"], true, CultureInfo.InvariantCulture) == 0)
                 tbl.Rows.Add(row);
@@ -1672,25 +1720,42 @@ namespace System.Data.SQLite
                 int ordinal = 0;
                 if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, rdIndexes.GetString(1), true, CultureInfo.InvariantCulture) == 0)
                 {
-                  using (SQLiteCommand cmdIndex = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].index_info([{1}])", strCatalog, rdIndexes.GetString(1)), this))
-                  using (SQLiteDataReader rdIndex = cmdIndex.ExecuteReader())
+                  try
                   {
-                    while (rdIndex.Read())
+                    using (SQLiteCommand cmdIndex = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].index_info([{1}])", strCatalog, rdIndexes.GetString(1)), this))
+                    using (SQLiteDataReader rdIndex = cmdIndex.ExecuteReader())
                     {
-                      row = tbl.NewRow();
-                      row["CONSTRAINT_CATALOG"] = strCatalog;
-                      row["CONSTRAINT_NAME"] = rdIndexes.GetString(1);
-                      row["TABLE_CATALOG"] = strCatalog;
-                      row["TABLE_NAME"] = rdIndexes.GetString(2);
-                      row["COLUMN_NAME"] = rdIndex.GetString(2);
-                      row["INDEX_NAME"] = rdIndexes.GetString(1);
-                      row["ORDINAL_POSITION"] = ordinal; // rdIndex.GetInt32(1);
+                      while (rdIndex.Read())
+                      {
+                        row = tbl.NewRow();
+                        row["CONSTRAINT_CATALOG"] = strCatalog;
+                        row["CONSTRAINT_NAME"] = rdIndexes.GetString(1);
+                        row["TABLE_CATALOG"] = strCatalog;
+                        row["TABLE_NAME"] = rdIndexes.GetString(2);
+                        row["COLUMN_NAME"] = rdIndex.GetString(2);
+                        row["INDEX_NAME"] = rdIndexes.GetString(1);
+                        row["ORDINAL_POSITION"] = ordinal; // rdIndex.GetInt32(1);
 
-                      ordinal++;
+                        string collationSequence;
+                        int sortMode;
+                        int onError;
+                        _sql.GetIndexColumnExtendedInfo(strCatalog, rdIndexes.GetString(1), rdIndex.GetString(2), out sortMode, out onError, out collationSequence);
 
-                      if (String.IsNullOrEmpty(strColumn) || String.Compare(strColumn, row["COLUMN_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
-                        tbl.Rows.Add(row);
+                        if (String.IsNullOrEmpty(collationSequence) == false)
+                          row["COLLATION_NAME"] = collationSequence;
+
+                        row["SORT_MODE"] = (sortMode == 0) ? "ASC" : "DESC";
+                        row["CONFLICT_OPTION"] = onError;
+
+                        ordinal++;
+
+                        if (String.IsNullOrEmpty(strColumn) || String.Compare(strColumn, row["COLUMN_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
+                          tbl.Rows.Add(row);
+                      }
                     }
+                  }
+                  catch (SQLiteException)
+                  {
                   }
                 }
               }
@@ -1730,6 +1795,26 @@ namespace System.Data.SQLite
       tbl.Columns.Add("TABLE_SCHEMA", typeof(string));
       tbl.Columns.Add("TABLE_NAME", typeof(string));
       tbl.Columns.Add("COLUMN_NAME", typeof(string));
+      tbl.Columns.Add("ORDINAL_POSITION", typeof(int));
+      tbl.Columns.Add("COLUMN_HASDEFAULT", typeof(bool));
+      tbl.Columns.Add("COLUMN_DEFAULT", typeof(string));
+      tbl.Columns.Add("COLUMN_FLAGS", typeof(long));
+      tbl.Columns.Add("IS_NULLABLE", typeof(bool));
+      tbl.Columns.Add("DATA_TYPE", typeof(string));
+      tbl.Columns.Add("CHARACTER_MAXIMUM_LENGTH", typeof(int));
+      tbl.Columns.Add("NUMERIC_PRECISION", typeof(int));
+      tbl.Columns.Add("NUMERIC_SCALE", typeof(int));
+      tbl.Columns.Add("DATETIME_PRECISION", typeof(long));
+      tbl.Columns.Add("CHARACTER_SET_CATALOG", typeof(string));
+      tbl.Columns.Add("CHARACTER_SET_SCHEMA", typeof(string));
+      tbl.Columns.Add("CHARACTER_SET_NAME", typeof(string));
+      tbl.Columns.Add("COLLATION_CATALOG", typeof(string));
+      tbl.Columns.Add("COLLATION_SCHEMA", typeof(string));
+      tbl.Columns.Add("COLLATION_NAME", typeof(string));
+      tbl.Columns.Add("PRIMARY_KEY", typeof(bool));
+      tbl.Columns.Add("EDM_TYPE", typeof(string));
+      tbl.Columns.Add("AUTOINCREMENT", typeof(bool));
+      tbl.Columns.Add("UNIQUE", typeof(bool));
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
@@ -1776,7 +1861,18 @@ namespace System.Data.SQLite
                     row["TABLE_NAME"] = schemaRow[SchemaTableColumn.BaseTableName];
                     row["COLUMN_NAME"] = schemaRow[SchemaTableColumn.ColumnName];
                     row["VIEW_COLUMN_NAME"] = viewRow[SchemaTableColumn.ColumnName];
-
+                    row["COLUMN_HASDEFAULT"] = (viewRow[SchemaTableOptionalColumn.DefaultValue] != DBNull.Value);
+                    row["COLUMN_DEFAULT"] = viewRow[SchemaTableOptionalColumn.DefaultValue];
+                    row["ORDINAL_POSITION"] = viewRow[SchemaTableColumn.ColumnOrdinal];
+                    row["IS_NULLABLE"] = viewRow[SchemaTableColumn.AllowDBNull];
+                    row["DATA_TYPE"] = viewRow["DataTypeName"]; // SQLiteConvert.DbTypeToType((DbType)viewRow[SchemaTableColumn.ProviderType]).ToString();
+                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)viewRow[SchemaTableColumn.ProviderType]).ToString();
+                    row["CHARACTER_MAXIMUM_LENGTH"] = viewRow[SchemaTableColumn.ColumnSize];
+                    row["TABLE_SCHEMA"] = viewRow[SchemaTableColumn.BaseSchemaName];
+                    row["PRIMARY_KEY"] = viewRow[SchemaTableColumn.IsKey];
+                    row["AUTOINCREMENT"] = viewRow[SchemaTableOptionalColumn.IsAutoIncrement];
+                    row["COLLATION_NAME"] = viewRow["CollationType"];
+                    row["UNIQUE"] = viewRow[SchemaTableColumn.IsUnique];
                     tbl.Rows.Add(row);
                   }
                 }
@@ -1834,30 +1930,37 @@ namespace System.Data.SQLite
         {
           if (String.IsNullOrEmpty(strTable) || String.Compare(strTable, rdTables.GetString(2), true, CultureInfo.InvariantCulture) == 0)
           {
-            using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
-            using (SQLiteDataReader rdTable = cmdTable.ExecuteReader(CommandBehavior.SchemaOnly))
-            using (SQLiteCommand cmdKey = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].foreign_key_list([{1}])", strCatalog, rdTables.GetString(2)), this))
-            using (SQLiteDataReader rdKey = cmdKey.ExecuteReader())
+            try
             {
-              while (rdKey.Read())
+              using (SQLiteCommandBuilder builder = new SQLiteCommandBuilder())
+              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
+              using (SQLiteDataReader rdTable = cmdTable.ExecuteReader(CommandBehavior.SchemaOnly))
+              using (SQLiteCommand cmdKey = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].foreign_key_list([{1}])", strCatalog, rdTables.GetString(2)), this))
+              using (SQLiteDataReader rdKey = cmdKey.ExecuteReader())
               {
-                row = tbl.NewRow();
-                row["CONSTRAINT_CATALOG"] = strCatalog;
-                row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}", rdTables[2], rdKey[3], rdKey[4]);
-                row["TABLE_CATALOG"] = strCatalog;
-                row["TABLE_NAME"] = rdTables.GetString(2);
-                row["CONSTRAINT_TYPE"] = "FOREIGN KEY";
-                row["IS_DEFERRABLE"] = false;
-                row["INITIALLY_DEFERRED"] = false;
-                row["FKEY_FROM_COLUMN"] = rdKey[3].ToString();
-                row["FKEY_FROM_ORDINAL_POSITION"] = rdTable.GetOrdinal(row["FKEY_FROM_COLUMN"].ToString());
-                row["FKEY_TO_CATALOG"] = strCatalog;
-                row["FKEY_TO_TABLE"] = rdKey[2].ToString();
-                row["FKEY_TO_COLUMN"] = rdKey[4].ToString();
+                while (rdKey.Read())
+                {
+                  row = tbl.NewRow();
+                  row["CONSTRAINT_CATALOG"] = strCatalog;
+                  row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}", rdTables[2], rdKey[3], rdKey[4]);
+                  row["TABLE_CATALOG"] = strCatalog;
+                  row["TABLE_NAME"] = builder.UnquoteIdentifier(rdTables.GetString(2));
+                  row["CONSTRAINT_TYPE"] = "FOREIGN KEY";
+                  row["IS_DEFERRABLE"] = false;
+                  row["INITIALLY_DEFERRED"] = false;
+                  row["FKEY_FROM_COLUMN"] = builder.UnquoteIdentifier(rdKey[3].ToString());
+                  row["FKEY_FROM_ORDINAL_POSITION"] = rdTable.GetOrdinal(row["FKEY_FROM_COLUMN"].ToString());
+                  row["FKEY_TO_CATALOG"] = strCatalog;
+                  row["FKEY_TO_TABLE"] = builder.UnquoteIdentifier(rdKey[2].ToString());
+                  row["FKEY_TO_COLUMN"] = builder.UnquoteIdentifier(rdKey[4].ToString());
 
-                if (String.IsNullOrEmpty(strKeyName) || String.Compare(strKeyName, row["CONSTRAINT_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
-                  tbl.Rows.Add(row);
+                  if (String.IsNullOrEmpty(strKeyName) || String.Compare(strKeyName, row["CONSTRAINT_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
+                    tbl.Rows.Add(row);
+                }
               }
+            }
+            catch (SQLiteException)
+            {
             }
           }
         }

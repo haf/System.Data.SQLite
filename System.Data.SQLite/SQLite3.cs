@@ -24,6 +24,9 @@ namespace System.Data.SQLite
     protected string _fileName;
     protected bool _usePool;
 
+#if !PLATFORM_COMPACTFRAMEWORK
+    private bool _buildingSchema = false;
+#endif
     /// <summary>
     /// The user-defined functions registered on this connection
     /// </summary>
@@ -102,6 +105,7 @@ namespace System.Data.SQLite
       // Bind functions to this connection.  If any previous functions of the same name
       // were already bound, then the new bindings replace the old.
       _functionsArray = SQLiteFunction.BindFunctions(this);
+      SetTimeout(0);
     }
 
     internal override void SetTimeout(int nTimeoutMS)
@@ -168,7 +172,7 @@ namespace System.Data.SQLite
       {
         // Recreate a dummy statement
         string str;
-        using (SQLiteStatement tmp = Prepare(stmt._sqlStatement, null, out str))
+        using (SQLiteStatement tmp = Prepare(null, stmt._sqlStatement, null, out str))
         {
           // Finalize the existing statement
           stmt._sqlite_stmt.Dispose();
@@ -195,7 +199,7 @@ namespace System.Data.SQLite
       return SQLiteBase.SQLiteLastError(_sql);
     }
 
-    internal override SQLiteStatement Prepare(string strSql, SQLiteStatement previous, out string strRemain)
+    internal override SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, out string strRemain)
     {
       IntPtr stmt = IntPtr.Zero;
       IntPtr ptr = IntPtr.Zero;
@@ -229,7 +233,7 @@ namespace System.Data.SQLite
 
               while (cmd == null && strSql.Length > 0)
               {
-                cmd = Prepare(strSql, previous, out strRemain);
+                cmd = Prepare(cnn, strSql, previous, out strRemain);
                 strSql = strRemain;
               }
 
@@ -238,6 +242,32 @@ namespace System.Data.SQLite
 
               return cmd;
             }
+#if !PLATFORM_COMPACTFRAMEWORK
+            else if (_buildingSchema == false && String.Compare(SQLiteLastError(), 0, "no such table: TEMP.SCHEMA", 0, 26, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+              strRemain = "";
+              _buildingSchema = true;
+              try
+              {
+                ISQLiteSchemaExtensions ext = ((IServiceProvider)SQLiteFactory.Instance).GetService(typeof(ISQLiteSchemaExtensions)) as ISQLiteSchemaExtensions;
+
+                if (ext != null)
+                  ext.BuildTempSchema(cnn);
+
+                while (cmd == null && strSql.Length > 0)
+                {
+                  cmd = Prepare(cnn, strSql, previous, out strRemain);
+                  strSql = strRemain;
+                }
+
+                return cmd;
+              }
+              finally
+              {
+                _buildingSchema = false;
+              }
+            }
+#endif
           }
         }
 
@@ -331,6 +361,14 @@ namespace System.Data.SQLite
       return UnsafeNativeMethods.sqlite3_column_type_interop(stmt._sqlite_stmt, index);
     }
 
+    internal override bool TableHasCheckConstraints(string database, string table)
+    {
+      int ret;
+      int rc = UnsafeNativeMethods.sqlite3_table_hascheckconstraints(_sql, ToUTF8(database), ToUTF8(table), out ret);
+      if (rc > 0) throw new SQLiteException(rc, SQLiteLastError());
+
+      return (ret == 1);
+    }
     internal override string ColumnType(SQLiteStatement stmt, int index, out TypeAffinity nAffinity)
     {
       int len;
@@ -700,6 +738,17 @@ namespace System.Data.SQLite
     internal override void DetachAll()
     {
       UnsafeNativeMethods.sqlite3_detach_all_interop(_sql);
+    }
+
+    internal override void GetIndexColumnExtendedInfo(string database, string index, string column, out int sortMode, out int onError, out string collationSequence)
+    {
+      IntPtr coll;
+      int colllen;
+
+      int rc = UnsafeNativeMethods.sqlite3_index_column_info_interop(_sql, ToUTF8(database), ToUTF8(index), ToUTF8(column), out sortMode, out onError, out coll, out colllen);
+      if (rc != 0) throw new SQLiteException(rc, "");
+
+      collationSequence = UTF8ToString(coll, colllen);
     }
   }
 }

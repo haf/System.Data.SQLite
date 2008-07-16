@@ -53,7 +53,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,50,0
+ FILEVERSION 1,0,52,0
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -71,10 +71,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "http://sqlite.phxsoftware.com"
             VALUE "FileDescription", "System.Data.SQLite Interop Library"
-            VALUE "FileVersion", "1.0.50.0"
+            VALUE "FileVersion", "1.0.52.0"
             VALUE "InternalName", "SQLite.Interop.DLL"
             VALUE "LegalCopyright", "Released to the public domain"
-            VALUE "OriginalFilename", "SQLite3.DLL 3.5.9"
+            VALUE "OriginalFilename", "SQLite3.DLL 3.6.0"
             VALUE "ProductName", "System.Data.SQLite"
             VALUE "ProductVersion", "1.0"
         END

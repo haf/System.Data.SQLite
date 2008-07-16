@@ -267,8 +267,12 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
 // original password for security purposes.  Therefore return NULL.
 void sqlite3CodecGetKey(sqlite3 *db, int nDb, void **ppKey, int *pnKeyLen)
 {
-  *ppKey = NULL;
-  *pnKeyLen = 0;
+  Btree *pbt = db->aDb[0].pBt;
+  Pager *p = sqlite3BtreePager(pbt);
+  LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)sqlite3pager_get_codecarg(p);
+
+  if (ppKey) *ppKey = 0;
+  if (pnKeyLen && pBlock) *pnKeyLen = 1;
 }
 
 // We do not attach this key to the temp store, only the main database.
@@ -315,10 +319,12 @@ __declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *
   if (!rc)
   {
     // Rewrite all the pages in the database using the new encryption key
-    Pgno nPage = sqlite3PagerPagecount(p);
+    Pgno nPage;
     Pgno nSkip = PAGER_MJ_PGNO(p);
     DbPage *pPage;
     Pgno n;
+
+    rc = sqlite3PagerPagecount(p, &nPage);
 
     for(n = 1; rc == SQLITE_OK && n <= nPage; n ++)
     {

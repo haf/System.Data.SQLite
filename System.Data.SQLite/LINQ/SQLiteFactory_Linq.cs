@@ -18,6 +18,7 @@ namespace System.Data.SQLite
   public sealed partial class SQLiteFactory : IServiceProvider
   {
     private static Type _dbProviderServicesType;
+    private static object _sqliteServices;
 
     static SQLiteFactory()
     {
@@ -29,22 +30,29 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="serviceType">The class or interface type to query for</param>
     /// <returns></returns>
-    [ReflectionPermission(SecurityAction.Assert, MemberAccess = true)]
     object IServiceProvider.GetService(Type serviceType)
     {
-      if (_dbProviderServicesType != null)
+      if (serviceType == typeof(ISQLiteSchemaExtensions) ||
+        (_dbProviderServicesType != null && serviceType == _dbProviderServicesType))
       {
-        if (serviceType == _dbProviderServicesType)
-        {
-          Type type = Type.GetType("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version=2.0.33.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", false);
-          if (type != null)
-          {
-            FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-            return field.GetValue(null);
-          }
-        }
+        return GetSQLiteProviderServicesInstance();
       }
       return null;
+    }
+
+    [ReflectionPermission(SecurityAction.Assert, MemberAccess = true)]
+    private object GetSQLiteProviderServicesInstance()
+    {
+      if (_sqliteServices == null)
+      {
+        Type type = Type.GetType("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version=2.0.35.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", false);
+        if (type != null)
+        {
+          FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+          _sqliteServices = field.GetValue(null);
+        }
+      }
+      return _sqliteServices;
     }
   }
 }

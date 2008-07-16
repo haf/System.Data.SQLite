@@ -33,6 +33,7 @@ namespace SQLite.Designer
     internal static readonly Guid guidIFCmdId = new Guid("{74d21311-2aee-11d1-8bfb-00a0c90f26f7}");
     internal static readonly Guid guidDavinci = new Guid("{732abe75-cd80-11d0-a2db-00aa00a3efff}");
     internal static readonly Guid guidDavinciGrp = new Guid("{732abe74-cd80-11d0-a2db-00aa00a3efff}");
+    internal static readonly Guid guidQueryGroup = new Guid("5efc7975-14bc-11cf-9b2b-00aa00573819");
 
     public SQLiteCommandHandler()
     {
@@ -73,12 +74,12 @@ namespace SQLite.Designer
             status.Visible = true;
             status.Enabled = (SystemTableSelected == false && SystemIndexSelected == false);
             return status;
-          //case cmdid.CreateTable:
-          //case cmdid.CreateView:
-          //  status.Supported = true;
-          //  status.Visible = true;
-          //  status.Enabled = true;
-          //  return status;
+          case cmdid.CreateTable:
+          case cmdid.CreateView:
+            status.Supported = true;
+            status.Visible = true;
+            status.Enabled = true;
+            return status;
         }
       }
       base.GetCommandStatus(itemIds, command, textType, status);
@@ -133,6 +134,10 @@ namespace SQLite.Designer
       }
     }
 
+    public override object[] ExecuteCommand(int[] itemIds, OleCommand command, OleCommandExecutionOption executionOption, object arguments)
+    {
+      return base.ExecuteCommand(itemIds, command, executionOption, arguments);
+    }
     /// <summary>
     /// This method executes a specified command, potentially based
     /// on parameters passed in from the data view support XML.
@@ -182,19 +187,31 @@ namespace SQLite.Designer
         switch ((cmdid)command.CommandId)
         {
           case cmdid.CreateTable:
-            CreateTable(itemId);
+            DesignTable(itemId, null);
             break;
           case cmdid.CreateView:
-            CreateView(itemId);
+            DesignView(itemId, null);
             break;
           case cmdid.Alter:
             switch ((string)args[0])
             {
               case "Table":
+                {
+                  object[] parts;
+                  int[] items = DataViewHierarchyAccessor.GetSelectedItems();
+                  parts = DataViewHierarchyAccessor.GetObjectIdentifier(items[0]);
+                  DesignTable(itemId, parts[2].ToString());
+                }
                 break;
               case "Index":
                 break;
               case "View":
+                {
+                  object[] parts;
+                  int[] items = DataViewHierarchyAccessor.GetSelectedItems();
+                  parts = DataViewHierarchyAccessor.GetObjectIdentifier(items[0]);
+                  DesignView(itemId, parts[2].ToString());
+                }
                 break;
             }
             break;
@@ -207,7 +224,7 @@ namespace SQLite.Designer
       return returnValue;
     }
 
-    private void CreateTable(int itemId)
+    private void DesignTable(int itemId, string tableName)
     {
       Microsoft.VisualStudio.OLE.Interop.IServiceProvider provider = DataViewHierarchyAccessor.ServiceProvider as Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
       IVsUIShell shell = DataViewHierarchyAccessor.ServiceProvider.GetService(typeof(IVsUIShell)) as IVsUIShell;
@@ -216,14 +233,14 @@ namespace SQLite.Designer
 
       if (shell != null)
       {
-        TableDesignerDoc form = new TableDesignerDoc(DataViewHierarchyAccessor.Connection, null);
+        TableDesignerDoc form = new TableDesignerDoc(DataViewHierarchyAccessor.Connection, tableName);
         IntPtr formptr = System.Runtime.InteropServices.Marshal.GetIUnknownForObject(form);
         Guid empty = Guid.Empty;
         FakeHierarchy fake = new FakeHierarchy(form, hier);
 
         int code = shell.CreateDocumentWindow(
           0, // (uint)(__VSCREATEDOCWIN.CDW_fCreateNewWindow | __VSCREATEDOCWIN.CDW_RDTFLAGS_MASK) | (uint)(_VSRDTFLAGS.RDT_CanBuildFromMemory | _VSRDTFLAGS.RDT_NonCreatable | _VSRDTFLAGS.RDT_VirtualDocument | _VSRDTFLAGS.RDT_DontAddToMRU),
-          form.Name, fake, (uint)itemId, formptr, formptr, ref empty, null, ref empty, provider, "SQLite:", form.Name, null, out frame);
+          form.Name, fake, (uint)itemId, formptr, formptr, ref empty, null, ref empty, provider, "", form.Caption, null, out frame);
 
         if (frame != null)
         {
@@ -235,12 +252,36 @@ namespace SQLite.Designer
           code = frame.Show();
         }
       }
-      // TODO: Implement this command
     }
 
-    private void CreateView(int itemId)
+    private void DesignView(int itemId, string viewName)
     {
-      // TODO: Implement this command
+      Microsoft.VisualStudio.OLE.Interop.IServiceProvider provider = DataViewHierarchyAccessor.ServiceProvider as Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+      IVsUIShell shell = DataViewHierarchyAccessor.ServiceProvider.GetService(typeof(IVsUIShell)) as IVsUIShell;
+      IVsUIHierarchy hier = DataViewHierarchyAccessor.Hierarchy;
+      IVsWindowFrame frame;
+
+      if (shell != null)
+      {
+        ViewDesignerDoc form = new ViewDesignerDoc(DataViewHierarchyAccessor.Connection, viewName);
+        IntPtr formptr = System.Runtime.InteropServices.Marshal.GetIUnknownForObject(form);
+        Guid empty = Guid.Empty;
+        FakeHierarchy fake = new FakeHierarchy(form, hier);
+
+        int code = shell.CreateDocumentWindow(
+          0, // (uint)(__VSCREATEDOCWIN.CDW_fCreateNewWindow | __VSCREATEDOCWIN.CDW_RDTFLAGS_MASK) | (uint)(_VSRDTFLAGS.RDT_CanBuildFromMemory | _VSRDTFLAGS.RDT_NonCreatable | _VSRDTFLAGS.RDT_VirtualDocument | _VSRDTFLAGS.RDT_DontAddToMRU),
+          form.Name, fake, (uint)itemId, formptr, formptr, ref empty, null, ref empty, provider, "", form.Caption, null, out frame);
+
+        if (frame != null)
+        {
+          object ret;
+          int prop = (int)__VSFPROPID.VSFPROPID_Caption;
+
+          code = frame.GetProperty(prop, out ret);
+
+          code = frame.Show();
+        }
+      }
     }
 
     private void DropSelectedTables()

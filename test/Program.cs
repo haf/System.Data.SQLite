@@ -3,7 +3,7 @@ using System.Data;
 using System.Text;
 using System.Data.Common;
 using System.Data.SQLite;
-using System.Data.SqlClient;
+using System.Threading;
 using System.Transactions;
 
 namespace test
@@ -12,14 +12,15 @@ namespace test
   {
     static void Main(string[] args)
     {
+      if (System.IO.File.Exists("test.db3"))
+        System.IO.File.Delete("test.db3");
+
       DbProviderFactory fact;
       fact = DbProviderFactories.GetFactory("System.Data.SQLite");
 
-      System.IO.File.Delete("test.db3");
-
       SQLiteConnection cnn = new SQLiteConnection();
       {
-        cnn.ConnectionString = "Data Source=\"test.db3\";Pooling=False";
+        cnn.ConnectionString = "Data Source=test.db3;Pooling=False;Password=testing";
         cnn.Open();
 
         TestCases.Run(fact, cnn);

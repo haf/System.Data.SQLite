@@ -412,16 +412,20 @@ namespace System.Data.SQLite
       Dispose(true);
     }
 
-#if !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
     /// Using reflection, enumerate all assemblies in the current appdomain looking for classes that
     /// have a SQLiteFunctionAttribute attribute, and registering them accordingly.
     /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
     [Security.Permissions.FileIOPermission(Security.Permissions.SecurityAction.Assert, AllFiles = Security.Permissions.FileIOPermissionAccess.PathDiscovery)]
+#endif
     static SQLiteFunction()
     {
       try
       {
+        SQLiteFunction.RegisterFunction(typeof(SQLiteFunc_RowCount));
+
+#if !PLATFORM_COMPACTFRAMEWORK
         SQLiteFunctionAttribute at;
         System.Reflection.Assembly[] arAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
         int w = arAssemblies.Length;
@@ -474,12 +478,12 @@ namespace System.Data.SQLite
             }
           }
         }
+#endif
       }
       catch // SQLite provider can continue without being able to find built-in functions
       {
       }
     }
-#endif
     /// <summary>
     /// Manual method of registering a function.  The type must still have the SQLiteFunctionAttributes in order to work
     /// properly, but this is a workaround for the Compact Framework where enumerating assemblies is not currently supported.
@@ -540,6 +544,15 @@ namespace System.Data.SQLite
       lFunctions.CopyTo(arFunctions, 0);
 
       return arFunctions;
+    }
+  }
+
+  [SQLiteFunction(Name = "last_rows_affected", FuncType = FunctionType.Scalar, Arguments = 0)]
+  internal class SQLiteFunc_RowCount : SQLiteFunction
+  {
+    public override object Invoke(object[] args)
+    {
+      return ((SQLiteBase)SQLiteConvert).Changes;
     }
   }
 }

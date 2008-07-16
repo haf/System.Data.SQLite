@@ -227,7 +227,7 @@ namespace System.Data.SQLite
         if (_statementList == null)
           _remainingText = _commandText;
 
-        stmt = _cnn._sql.Prepare(_remainingText, (_statementList == null) ? null : _statementList[_statementList.Count - 1], out _remainingText);
+        stmt = _cnn._sql.Prepare(_cnn, _remainingText, (_statementList == null) ? null : _statementList[_statementList.Count - 1], out _remainingText);
         if (stmt != null)
         {
           stmt._command = this;
@@ -281,6 +281,12 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Cancel()
     {
+      if (_activeReader != null)
+      {
+        SQLiteDataReader reader = _activeReader.Target as SQLiteDataReader;
+        if (reader != null)
+          reader.Cancel();
+      }
     }
 
     /// <summary>
@@ -504,8 +510,8 @@ namespace System.Data.SQLite
       // Map all parameters for statements already built
       _parameterCollection.MapParameters(null);
 
-      // Set the default command timeout
-      _cnn._sql.SetTimeout(_commandTimeout * 1000);
+      //// Set the default command timeout
+      //_cnn._sql.SetTimeout(_commandTimeout * 1000);
     }
 
     /// <summary>

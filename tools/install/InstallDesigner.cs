@@ -429,7 +429,18 @@ namespace install
             if (String.IsNullOrEmpty(s)) break;
 
             AssemblyCache.UninstallAssembly(s, null, out disp);
-          } SQLite = null;
+          }
+
+          entries = new AssemblyCacheEnum("System.Data.SQLite.Linq");
+          while (true)
+          {
+            s = entries.GetNextAssembly();
+            if (String.IsNullOrEmpty(s)) break;
+
+            AssemblyCache.UninstallAssembly(s, null, out disp);
+          }
+          
+          SQLite = null;
         }
         else // Install SQLite into the GAC
         {
@@ -453,6 +464,9 @@ namespace install
           finally
           {
             File.Delete(tempPath);
+            if (File.Exists(Path.GetFullPath("System.Data.SQLite.Linq.DLL")) == true)
+              AssemblyCache.InstallAssembly(Path.GetFullPath("System.Data.SQLite.Linq.DLL"), null, AssemblyCommitFlags.Default);
+
             AssemblyCache.InstallAssembly(Path.GetFullPath("SQLite.Designer.DLL"), null, AssemblyCommitFlags.Default);
             AssemblyCache.InstallAssembly(SQLiteLocation, null, AssemblyCommitFlags.Default);
           }

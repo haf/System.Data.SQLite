@@ -14,15 +14,6 @@ namespace SQLite.Designer.Editors
       base.NotifyCurrentCellDirty(dirty);
       SQLite.Designer.Design.Column col = Rows[CurrentCell.RowIndex].Tag as SQLite.Designer.Design.Column;
 
-      if (col == null && CurrentRow.IsNewRow == false)
-      {
-        col = new SQLite.Designer.Design.Column(Rows[CurrentCell.RowIndex]);
-        Rows[CurrentCell.RowIndex].Tag = col;
-        base.OnSelectionChanged(new EventArgs());
-      }
-      if (col != null)
-        col.CellValueChanged();
-
       if (_owner == null)
       {
         Control ctl = this;
@@ -34,6 +25,16 @@ namespace SQLite.Designer.Editors
         }
         if (ctl != null) _owner = ctl as TableDesignerDoc;
       }
+
+      if (col == null && CurrentRow.IsNewRow == false)
+      {
+        col = new SQLite.Designer.Design.Column(_owner._table, Rows[CurrentCell.RowIndex]);
+        Rows[CurrentCell.RowIndex].Tag = col;
+        _owner._table.Columns.Insert(CurrentCell.RowIndex, col);
+        base.OnSelectionChanged(new EventArgs());
+      }
+      if (col != null)
+        col.CellValueChanged();
 
       if (_owner != null)
         _owner.RefreshToolbars();
@@ -88,6 +89,7 @@ namespace SQLite.Designer.Editors
       if (base.Items.Count == 0)
       {
         base.Items.Add("integer");
+        base.Items.Add("int");
         base.Items.Add("smallint");
         base.Items.Add("tinyint");
         base.Items.Add("bit");

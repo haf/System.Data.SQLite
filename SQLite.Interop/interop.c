@@ -11,7 +11,7 @@
 #endif // _WIN32_WCE
 #endif // NDEBUG
 
-#ifdef OS_WIN
+#ifdef SQLITE_OS_WIN
 
 // Additional flag for sqlite3.flags, we use it as a reference counter
 #define SQLITE_WantClose 0x10000000
@@ -792,6 +792,73 @@ __declspec(dllexport) int WINAPI sqlite3_table_column_metadata_interop(sqlite3 *
   return n;
 }
 
+__declspec(dllexport) int WINAPI sqlite3_table_hascheckconstraints(sqlite3 *db, const char *zDbName, const char *zTableName, int *result)
+{
+  int rc;
+  char *zErrMsg = 0;
+  Table *pTab = 0;
+  
+  *result = 0;
+
+  /* Ensure the database schema has been loaded */
+  sqlite3_mutex_enter(db->mutex);
+  (void)sqlite3SafetyOn(db);
+  sqlite3BtreeEnterAll(db);
+  rc = sqlite3Init(db, &zErrMsg);
+  sqlite3BtreeLeaveAll(db);
+  if( SQLITE_OK!=rc ){
+    goto error_out;
+  }
+
+  /* Locate the table in question */
+  pTab = sqlite3FindTable(db, zTableName, zDbName);
+  if( !pTab || pTab->pSelect ){
+    pTab = 0;
+    goto error_out;
+  }
+
+  if (pTab->pCheck) *result = 1;
+
+error_out:
+  (void)sqlite3SafetyOff(db);
+
+  if( !pTab ){
+    sqlite3SetString(&zErrMsg, db, "no such table : ", zTableName, 0);
+    rc = SQLITE_ERROR;
+  }
+  sqlite3Error(db, rc, (zErrMsg?"%s":0), zErrMsg);
+  sqlite3_free(zErrMsg);
+  rc = sqlite3ApiExit(db, rc);
+  sqlite3_mutex_leave(db->mutex);
+  return rc;
+}
+
+__declspec(dllexport) int WINAPI sqlite3_index_column_info_interop(sqlite3 *db, const char *zDb, const char *zIndexName, const char *zColumnName, int *sortOrder, int *onError, char **pzColl, int *plen)
+{
+  Index *pIdx;
+  Table *pTab;
+  char *zErrMsg = 0;
+  int n;
+  pIdx = sqlite3FindIndex(db, zIndexName, zDb);
+  if (!pIdx) return SQLITE_ERROR;
+
+  pTab = pIdx->pTable;
+  for (n = 0; n < pIdx->nColumn; n++)
+  {
+    int cnum = pIdx->aiColumn[n];
+    if (sqlite3StrICmp(pTab->aCol[cnum].zName, zColumnName) == 0)
+    {
+      *sortOrder = pIdx->aSortOrder[n];
+      *pzColl = pIdx->azColl[n];
+      *plen = strlen(*pzColl);
+      *onError = pIdx->onError;
+
+      return SQLITE_OK;
+    }
+  }
+  return SQLITE_ERROR;
+}
+
 void sqlite3_update_callback(void *pArg, int type, const char *pDatabase, const char *pTable, sqlite_int64 rowid)
 {
   SQLITEUPDATEHOOK func = (SQLITEUPDATEHOOK)pArg;
@@ -912,5 +979,5 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
 //__int64 _ph[17] = {1};
 //#endif // _WIN32_WCE
 
-#endif // OS_WIN
+#endif // SQLITE_OS_WIN
 

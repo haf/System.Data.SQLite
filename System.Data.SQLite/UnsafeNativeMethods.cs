@@ -458,5 +458,11 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern void sqlite3_detach_all_interop(IntPtr db);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_table_hascheckconstraints(IntPtr db, byte[] catalog, byte[] table, out int result);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_index_column_info_interop(IntPtr db,  byte[] catalog, byte[] IndexName, byte[] ColumnName, out int sortOrder, out int onError, out IntPtr Collation, out int colllen);
   }
 }

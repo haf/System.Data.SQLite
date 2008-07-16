@@ -52,10 +52,18 @@
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\PublicAssemblies\EnvDTE.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Data.ConnectionUI, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Microsoft Visual Studio 2008 SDK\VisualStudioIntegration\Common\Assemblies\2005\Microsoft.Data.ConnectionUI.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.CommandBars, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Program Files (x86)\Common Files\Microsoft Shared\MSEnv\PublicAssemblies\Microsoft.VisualStudio.CommandBars.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Data, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -89,9 +97,12 @@
       <DependentUpon>ChangePasswordDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Design\Column.cs" />
+    <Compile Include="Design\ForeignKey.cs" />
+    <Compile Include="Design\Index.cs" />
     <Compile Include="Design\PrimaryKey.cs" />
     <Compile Include="Design\Table.cs" />
     <Compile Include="Design\Unique.cs" />
+    <Compile Include="Design\View.cs" />
     <Compile Include="Editors\AutoCompleteColumn.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -100,6 +111,12 @@
     </Compile>
     <Compile Include="Editors\TableDesignerDoc.Designer.cs">
       <DependentUpon>TableDesignerDoc.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\ViewDesignerDoc.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Editors\ViewDesignerDoc.Designer.cs">
+      <DependentUpon>ViewDesignerDoc.cs</DependentUpon>
     </Compile>
     <Compile Include="SQLiteAdapterDesigner.cs">
     </Compile>
@@ -123,6 +140,12 @@
     <Compile Include="SQLiteDataViewSupport.cs" />
     <Compile Include="SQLitePackage.cs" />
     <Compile Include="SQLiteProviderObjectFactory.cs" />
+    <Compile Include="TableNameDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TableNameDialog.Designer.cs">
+      <DependentUpon>TableNameDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="VSPackage.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -135,7 +158,7 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SQLiteDataViewSupport.xml" />
+    <EmbeddedResource Include="SQLiteDataViewSupport2008.xml" />
     <EmbeddedResource Include="VSPackage.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>VSPackage.Designer.cs</LastGenOutput>
@@ -152,11 +175,20 @@
       <SubType>Designer</SubType>
       <DependentUpon>TableDesignerDoc.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Editors\ViewDesignerDoc.resx">
+      <DependentUpon>ViewDesignerDoc.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SQLiteConnectionUIControl.resx">
       <SubType>Designer</SubType>
       <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SQLiteDataObjectSupport.xml" />
+    <EmbeddedResource Include="TableNameDialog.resx">
+      <DependentUpon>TableNameDialog.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SQLiteDataViewSupport2005.xml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

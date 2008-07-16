@@ -160,9 +160,6 @@
         <CommandBinding name="Browse_Data" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12384" handler="884DD964-5327-461f-9F06-6484DD540F8F">
           <Parameter value="Open"/>
         </CommandBinding>
-        <!--<CommandBinding name="Browse_DataVS2005" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12384" handler="Microsoft.VisualStudio.DataTools.DBPackage.VDT_OLEDB_CommandHandler_TableTools">
-          <Parameter value="Open"/>
-        </CommandBinding>-->
         <CommandBinding name="Design" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12291" handler="SQLite.Designer.SQLiteCommandHandler">
           <Parameter value="Table"/>
         </CommandBinding>
@@ -189,7 +186,13 @@
         <CommandBinding name="DropView" guid="5efc7975-14bc-11cf-9b2b-00aa00573819" cmdid="17" handler="SQLite.Designer.SQLiteCommandHandler">
           <Parameter value="View"/>
         </CommandBinding>
-        </CommandBindings>
+        <CommandBinding name="Design" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12291" handler="SQLite.Designer.SQLiteCommandHandler">
+          <Parameter value="View"/>
+        </CommandBinding>
+        <CommandBinding name="Browse_Data" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="12384" handler="884DD964-5327-461f-9F06-6484DD540F8F">
+          <Parameter value="Open"/>
+        </CommandBinding>
+      </CommandBindings>
     </TypeExtension>
     
     <TypeExtension name="ViewColumn">

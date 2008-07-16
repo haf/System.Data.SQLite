@@ -20,8 +20,19 @@ namespace SQLite.Designer
   internal sealed class SQLiteDataViewSupport : DataViewSupport
   {
     public SQLiteDataViewSupport()
-      : base("SQLite.Designer.SQLiteDataViewSupport", typeof(SQLiteDataViewSupport).Assembly)
+      : base(String.Format("SQLite.Designer.SQLiteDataViewSupport{0}", GetVSVersion()), typeof(SQLiteDataViewSupport).Assembly)
     {
+    }
+
+    private static string GetVSVersion()
+    {
+      switch (System.Diagnostics.FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]).FileMajorPart)
+      {
+        case 8:
+          return "2005";
+        default:
+          return "2008";
+      }
     }
   }
 }

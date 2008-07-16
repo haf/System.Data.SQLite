@@ -2240,10 +2240,11 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteBase.Prepare(System.String,System.Data.SQLite.SQLiteStatement,System.String@)">
+        <member name="M:System.Data.SQLite.SQLiteBase.Prepare(System.Data.SQLite.SQLiteConnection,System.String,System.Data.SQLite.SQLiteStatement,System.String@)">
             <summary>
             Prepares a SQL statement for execution.
             </summary>
+            <param name="cnn">The source connection preparing the command.  Can be null for any caller except LINQ</param>
             <param name="strSql">The SQL command text to prepare</param>
             <param name="previous">The previous statement in a multi-statement command, or null if no previous statement exists</param>
             <param name="strRemain">The remainder of the statement that was not processed.  Each call to prepare parses the
