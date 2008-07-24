@@ -661,7 +661,7 @@ namespace install
 
         using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Menus", keyname, version), true))
         {
-          key.SetValue("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}", ", 1000, 1");
+          key.SetValue("{DCBE6C8D-0E57-4099-A183-98FF74C64D9C}", ", 1000, 2");
         }
 
         using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\{0}\\{1}\\Services", keyname, version), true))

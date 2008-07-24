@@ -60,4 +60,9 @@
     <NumberOfRestrictions>4</NumberOfRestrictions>
     <NumberOfIdentifierParts>3</NumberOfIdentifierParts>
   </MetaDataCollections>
+  <MetaDataCollections>
+    <CollectionName>Triggers</CollectionName>
+    <NumberOfRestrictions>4</NumberOfRestrictions>
+    <NumberOfIndentifierParts>3</NumberOfIndentifierParts>
+  </MetaDataCollections>
 </DocumentElement>

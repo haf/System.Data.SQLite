@@ -172,7 +172,7 @@ namespace System.Data.SQLite
       {
         // Recreate a dummy statement
         string str;
-        using (SQLiteStatement tmp = Prepare(null, stmt._sqlStatement, null, out str))
+        using (SQLiteStatement tmp = Prepare(null, stmt._sqlStatement, null, (uint)(stmt._command._commandTimeout * 1000), out str))
         {
           // Finalize the existing statement
           stmt._sqlite_stmt.Dispose();
@@ -199,7 +199,7 @@ namespace System.Data.SQLite
       return SQLiteBase.SQLiteLastError(_sql);
     }
 
-    internal override SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, out string strRemain)
+    internal override SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, uint timeoutMS, out string strRemain)
     {
       IntPtr stmt = IntPtr.Zero;
       IntPtr ptr = IntPtr.Zero;
@@ -209,17 +209,20 @@ namespace System.Data.SQLite
       byte[] b = ToUTF8(strSql);
       string typedefs = null;
       SQLiteStatement cmd = null;
+      Random rnd = null;
+      uint starttick = (uint)Environment.TickCount;
+
       GCHandle handle = GCHandle.Alloc(b, GCHandleType.Pinned);
       IntPtr psql = handle.AddrOfPinnedObject();
-
       try
       {
-        while (n == 17 && retries < 3)
+        while ((n == 17 || n == 6) && retries < 3)
         {
           n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, psql, b.Length - 1, out stmt, out ptr, out len);
-          retries++;
 
-          if (n == 1)
+          if (n == 17)
+            retries++;
+          else if (n == 1)
           {
             if (String.Compare(SQLiteLastError(), "near \"TYPES\": syntax error", StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -233,7 +236,7 @@ namespace System.Data.SQLite
 
               while (cmd == null && strSql.Length > 0)
               {
-                cmd = Prepare(cnn, strSql, previous, out strRemain);
+                cmd = Prepare(cnn, strSql, previous, timeoutMS, out strRemain);
                 strSql = strRemain;
               }
 
@@ -256,7 +259,7 @@ namespace System.Data.SQLite
 
                 while (cmd == null && strSql.Length > 0)
                 {
-                  cmd = Prepare(cnn, strSql, previous, out strRemain);
+                  cmd = Prepare(cnn, strSql, previous, timeoutMS, out strRemain);
                   strSql = strRemain;
                 }
 
@@ -268,6 +271,23 @@ namespace System.Data.SQLite
               }
             }
 #endif
+          }
+          else if (n == 6) // Locked -- delay a small amount before retrying
+          {
+            // Keep trying
+            if (rnd == null) // First time we've encountered the lock
+              rnd = new Random();
+
+            // If we've exceeded the command's timeout, give up and throw an error
+            if ((uint)Environment.TickCount - starttick > timeoutMS)
+            {
+              throw new SQLiteException(n, SQLiteLastError());
+            }
+            else
+            {
+              // Otherwise sleep for a random amount of time up to 250ms
+              UnsafeNativeMethods.sqlite3_sleep_interop((uint)rnd.Next(1, 250));
+            }
           }
         }
 

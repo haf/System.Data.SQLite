@@ -1,15 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.ComponentModel;
-using System.ComponentModel.Design;
-using System.Windows.Forms;
-using System.Drawing.Design;
-using System.Data;
-using System.Data.Common;
+/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
 
 namespace SQLite.Designer.Design
 {
+  using System;
+  using System.Collections.Generic;
+  using System.Text;
+  using System.ComponentModel;
+  using System.ComponentModel.Design;
+  using System.Windows.Forms;
+  using System.Drawing.Design;
+  using System.Data;
+  using System.Data.Common;
+
   internal class Column : IHaveConnection
   {
     private bool _allowNulls = false;
@@ -19,9 +26,7 @@ namespace SQLite.Designer.Design
     private string _origName = "";
     private string _collate;
     private DataGridViewRow _parent;
-    private string _checkconstraint = "";
     private Unique _unique;
-    //private PrimaryKey _primaryKey;
     private Table _table;
 
     internal Column(Table table, DataGridViewRow row)
@@ -29,14 +34,12 @@ namespace SQLite.Designer.Design
       _parent = row;
       _table = table as Table;
       _unique = new Unique(this);
-      //_primaryKey = new PrimaryKey(this);
     }
 
     internal Column(DataRow row, Table source)
     {
       _table = source;
       _unique = new Unique(this, row);
-      //_primaryKey = new PrimaryKey(this, row);
 
       if (row.IsNull("AUTOINCREMENT") == false && (bool)row["AUTOINCREMENT"] == true)
         _table.PrimaryKey.AutoIncrement = true;
@@ -84,6 +87,11 @@ namespace SQLite.Designer.Design
       get { return _table; }
     }
 
+    internal void Committed()
+    {
+      _origName = ColumnName;
+    }
+
     internal DataGridViewRow Parent
     {
       get { return _parent; }
@@ -102,24 +110,26 @@ namespace SQLite.Designer.Design
       _parent.DataGridView.Refresh();
     }
 
-    internal void CellValueChanged()
+    internal void CellValueChanged(int rowIndex, int cellIndex)
     {
       if (_parent == null) return;
-      if (_parent.DataGridView.CurrentCell.RowIndex != _parent.Index) return;
+      if (rowIndex != _parent.Index) return;
 
       object value;
 
-      if (_parent.DataGridView.CurrentCell.IsInEditMode == true)
+      if (_parent.Cells[cellIndex].IsInEditMode == true)
       {
         if (_parent.DataGridView.EditingControl != null)
           value = ((IDataGridViewEditingControl)_parent.DataGridView.EditingControl).EditingControlFormattedValue;
         else
-          value = _parent.DataGridView.CurrentCell.EditedFormattedValue;
+          value = _parent.Cells[cellIndex].EditedFormattedValue;
       }
       else
-        value = _parent.DataGridView.CurrentCell.Value;
+        value = _parent.Cells[cellIndex].Value;
 
-      switch (_parent.DataGridView.CurrentCell.ColumnIndex)
+      if (value == null) value = String.Empty;
+
+      switch (cellIndex)
       {
         case 0:
           ColumnName = value.ToString();
@@ -133,23 +143,10 @@ namespace SQLite.Designer.Design
       }
     }
 
-    [DisplayName("Check")]
-    [Category("Constraints")]
-    public virtual string CheckConstraint
-    {
-      get { return _checkconstraint; }
-      set
-      {
-        if (_checkconstraint != value)
-        {
-          _checkconstraint = value;
-          _table._owner.MakeDirty();
-        }
-      }
-    }
-
     [DefaultValue("BINARY")]
     [Category("Constraints")]
+    [Editor(typeof(CollationTypeEditor), typeof(UITypeEditor))]
+    [Description("The collation sequence to use for the column.  This will affect comparison and equality tests against the column.")]
     public virtual string Collate
     {
       get { return _collate; }
@@ -159,12 +156,17 @@ namespace SQLite.Designer.Design
         if (_collate != value)
         {
           _collate = value;
+          
+          if (_table.PrimaryKey.Columns.Count == 1 && String.Compare(ColumnName, _table.PrimaryKey.Columns[0].Column, StringComparison.OrdinalIgnoreCase) == 0)
+            _table.PrimaryKey.Columns[0].Collate = value;
+
           _table._owner.MakeDirty();
         }
       }
     }
 
     [Category("Constraints")]
+    [Description("The unique constraints of the column")]
     public virtual Unique Unique
     {
       get { return _unique; }
@@ -174,7 +176,14 @@ namespace SQLite.Designer.Design
     public virtual string ColumnName
     {
       get { return _columnName; }
-      set { _columnName = value; }
+      set
+      {
+        if (value != _columnName)
+        {
+          _columnName = value;
+          _table.MakeDirty();
+        }
+      }
     }
 
     [Browsable(false)]
@@ -183,16 +192,10 @@ namespace SQLite.Designer.Design
       get { return _origName; }
     }
 
-    //[DisplayName("Primary Key")]
-    //[Category("Constraints")]
-    //public virtual PrimaryKey PrimaryKey
-    //{
-    //  get { return _primaryKey; }
-    //}
-
     [DefaultValue(false)]
     [DisplayName("Allow Nulls")]
     [Category("Constraints")]
+    [Description("Specifies whether or not the column will allow NULL values.")]
     public virtual bool AllowNulls
     {
       get { return _allowNulls; }
@@ -203,6 +206,7 @@ namespace SQLite.Designer.Design
           _allowNulls = value;
           if (_parent == null) return;
           _parent.Cells[2].Value = _allowNulls;
+          _table.MakeDirty();
         }
       }
     }
@@ -211,11 +215,19 @@ namespace SQLite.Designer.Design
     public virtual string DataType
     {
       get { return _dataType; }
-      set { _dataType = value; }
+      set
+      {
+        if (value != _dataType)
+        {
+          _dataType = value;
+          _table.MakeDirty();
+        }
+      }
     }
 
     [DisplayName("Default Value")]
     [Category("Constraints")]
+    [Description("The default value to populate in the column when an explicit value is not specified.")]
     public virtual string DefaultValue
     {
       get { return _defaultValue; }
@@ -247,16 +259,14 @@ namespace SQLite.Designer.Design
       if (AllowNulls == false)
         builder.Append(" NOT NULL");
 
+      if (String.IsNullOrEmpty(Collate) == false && String.Compare(Collate, "BINARY", StringComparison.OrdinalIgnoreCase) != 0)
+        builder.AppendFormat(" COLLATE {0}", Collate.ToUpperInvariant());
+
       if (Unique.Enabled == true && isprimary == false)
       {
         builder.Append(" UNIQUE");
         if (Unique.Conflict != ConflictEnum.Abort)
-          builder.AppendFormat(" ON CONFLICT {0}", Unique.Conflict.ToString());
-      }
-
-      if (String.IsNullOrEmpty(CheckConstraint) == false)
-      {
-        builder.AppendFormat(" CONSTRAINT CK_{0}_{1} CHECK ({2})", _table.Name, ColumnName, CheckConstraint);
+          builder.AppendFormat(" ON CONFLICT {0}", Unique.Conflict.ToString().ToUpperInvariant());
       }
     }
   }

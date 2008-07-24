@@ -227,7 +227,7 @@ namespace System.Data.SQLite
         if (_statementList == null)
           _remainingText = _commandText;
 
-        stmt = _cnn._sql.Prepare(_cnn, _remainingText, (_statementList == null) ? null : _statementList[_statementList.Count - 1], out _remainingText);
+        stmt = _cnn._sql.Prepare(_cnn, _remainingText, (_statementList == null) ? null : _statementList[_statementList.Count - 1], (uint)(_commandTimeout * 1000), out _remainingText);
         if (stmt != null)
         {
           stmt._command = this;
@@ -464,8 +464,11 @@ namespace System.Data.SQLite
           }
           _transaction = value;
         }
-        else if (value != null)
-          throw new ArgumentOutOfRangeException("SQLiteTransaction", "Not associated with a connection");
+        else
+        {
+          Connection = value.Connection;
+          _transaction = value;
+        }
       }
     }
 

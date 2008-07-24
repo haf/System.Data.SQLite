@@ -55,6 +55,23 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.53.0 - July 24, 2008</b></p>
+    <ul>
+      <li>Enabled sqlite_load_extension</li>
+      <li>Added retry/timeout code to SQLite3.Prepare() when preparing statements for 
+        execution and a SQLITE_BUSY error occurs.</li>
+      <li>Added a new schema to SQLiteConnection.GetSchema() called <i>Triggers</i>.&nbsp; 
+        Used to retrieve the trigger(s) associated with a database and/or table/view.</li>
+      <li>Extensive updates to table/view editing capabilities inside Visual Studio&#39;s 
+        Server Explorer.&nbsp; The program now parses and lets you edit CHECK constraints and 
+        triggers on a table, as well as define triggers on views.&nbsp; Experimental 
+        still, so e-mail me if you have issues.</li>
+      <li>Minor bugfix to the ViewColumns schema to return the proper base column name 
+        for a view that aliases a column.</li>
+      <li>Fixed the insert/update/delete DML support in the Linq module.</li>
+      <li>Changed the behavior of SQLiteCommand to allow a transaction to be set even if 
+        the command hasn&#39;t been associated with a connection yet.</li>
+    </ul>
     <p><b>1.0.52.0 - July 16, 2008</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.0</li>

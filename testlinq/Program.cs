@@ -36,6 +36,22 @@ namespace testlinq
           }
         }
 
+        {
+          Categories c = new Categories();
+          c.CategoryName = "Test Category";
+          c.Description = "My Description";
+          db.AddToCategories(c);
+          db.SaveChanges();
+
+          Console.WriteLine(c.CategoryID);
+
+          c.Description = "My modified description";
+          db.SaveChanges();
+
+          db.DeleteObject(c);
+          db.SaveChanges();
+        }
+
         // This query fails due to a SQLite core issue.  Currently pending review by Dr. Hipp
         //{
         //  var query = from p in db.Products

@@ -1,26 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.ComponentModel;
-using System.Data;
-using System.Data.Common;
-using System.ComponentModel.Design;
-using System.Drawing.Design;
-using System.Windows.Forms;
+﻿/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
 
 namespace SQLite.Designer.Design
 {
+  using System;
+  using System.Collections.Generic;
+  using System.Collections;
+  using System.Text;
+  using System.ComponentModel;
+  using System.Data;
+  using System.Data.Common;
+  using System.ComponentModel.Design;
+  using System.Drawing.Design;
+  using System.Windows.Forms;
+
   internal class ForeignKeyEditor : CollectionEditor
   {
     Table _table;
-    bool _cancel = false;
+    CollectionEditor.CollectionForm _form;
     object[] _items;
+    object[] _orig;
+    int _count;
 
     internal ForeignKeyEditor(Table parent)
       : base(typeof(List<ForeignKey>))
     {
       _table = parent;
+      _count = _table.ForeignKeys.Count;
+    }
+
+    protected override CollectionEditor.CollectionForm CreateCollectionForm()
+    {
+      _form = base.CreateCollectionForm();
+      _form.Text = "Foreign Key Editor";
+      foreach (Control c in _form.Controls[0].Controls)
+      {
+        PropertyGrid grid = c as PropertyGrid;
+        if (grid != null)
+        {
+          grid.HelpVisible = true;
+          break;
+        }
+      }
+      _form.Width = (int)(_form.Width * 1.25);
+      _form.Height = (int)(_form.Height * 1.25);
+
+      return _form;
     }
 
     protected override object CreateInstance(Type itemType)
@@ -36,16 +65,23 @@ namespace SQLite.Designer.Design
     {
       if (_items == null)
       {
-        List<ForeignKey> value = editValue as List<ForeignKey>;
-        _items = new object[value.Count];
+        List<ForeignKey> items = editValue as List<ForeignKey>;
+        _items = new object[items.Count];
+        _orig = new object[items.Count];
         for (int n = 0; n < _items.Length; n++)
-          _items[n] = value[n].Clone();
+        {
+          _items[n] = ((ICloneable)items[n]).Clone();
+          _orig[n] = items[n];
+        }
       }
       return _items;
     }
 
     protected override object SetItems(object editValue, object[] value)
     {
+      bool dirty = false;
+      if (_form.DialogResult == DialogResult.Cancel) value = _orig;
+
       if (editValue != null)
       {
         int length = this.GetItems(editValue).Length;
@@ -62,19 +98,16 @@ namespace SQLite.Designer.Design
 
           if (fkey != null && String.IsNullOrEmpty(fkey.From.Column) == false && String.IsNullOrEmpty(fkey.To.Catalog) == false &&
             String.IsNullOrEmpty(fkey.To.Table) == false && String.IsNullOrEmpty(fkey.To.Column) == false)
+          {
+            if (fkey.IsDirty) dirty = true;
+
             list.Add(value[i]);
+          }
         }
+        if ((dirty == true || list.Count != _count) && _form.DialogResult == DialogResult.OK)
+        _table.MakeDirty();      
       }
-      
-      if (_cancel == false)
-        _table._owner.MakeDirty();
-
       return editValue;
-    }
-
-    protected override void CancelChanges()
-    {
-      _cancel = true;
     }
   }
 
@@ -140,17 +173,29 @@ namespace SQLite.Designer.Design
 
     protected void SetCatalog(string value)
     {
-      _catalog = value;
+      if (_catalog != value)
+      {
+        _catalog = value;
+        _fkey.MakeDirty();
+      }
     }
 
     protected void SetTable(string value)
     {
-      _table = value;
+      if (_table != value)
+      {
+        _table = value;
+        _fkey.MakeDirty();
+      }
     }
 
     protected void SetColumn(string value)
     {
-      _column = value;
+      if (_column != value)
+      {
+        _column = value;
+        _fkey.MakeDirty();
+      }
     }
   }
 
@@ -163,6 +208,7 @@ namespace SQLite.Designer.Design
     }
 
     [Editor(typeof(ColumnsTypeEditor), typeof(UITypeEditor))]
+    [Description("The primary (parent) column of the foreign key relationship")]
     public new string Column
     {
       get { return base.Column; }
@@ -198,6 +244,7 @@ namespace SQLite.Designer.Design
 
     [Browsable(false)]
     [Editor(typeof(CatalogTypeEditor), typeof(UITypeEditor))]
+    [Description("The database catalog (main, temp, or the name of an attached database) to which the foreign key refers.")]
     public new string Catalog
     {
       get
@@ -212,6 +259,7 @@ namespace SQLite.Designer.Design
 
     [DisplayName("Base Table")]
     [Editor(typeof(TablesTypeEditor), typeof(UITypeEditor))]
+    [Description("The child table to which the foreign key refers.")]
     public new string Table
     {
       get { return base.Table; }
@@ -219,6 +267,7 @@ namespace SQLite.Designer.Design
     }
 
     [Editor(typeof(ColumnsTypeEditor), typeof(UITypeEditor))]
+    [Description("The child column to which the foreign key refers.")]
     public new string Column
     {
       get { return base.Column; }
@@ -233,6 +282,7 @@ namespace SQLite.Designer.Design
     internal ForeignKeyFromItem _from;
     internal ForeignKeyToItem _to;
     internal string _name;
+    private bool _dirty = false;
 
     private ForeignKey(ForeignKey source)
     {
@@ -240,6 +290,23 @@ namespace SQLite.Designer.Design
       _from = new ForeignKeyFromItem(this, source._from.Column);
       _to = new ForeignKeyToItem(this, source._to.Catalog, source._to.Table, source._to.Column);
       _name = source._name;
+      _dirty = source._dirty;
+    }
+
+    internal void MakeDirty()
+    {
+      _dirty = true;
+    }
+
+    [Browsable(false)]
+    internal bool IsDirty
+    {
+      get { return _dirty; }
+    }
+
+    internal void ClearDirty()
+    {
+      _dirty = false;
     }
 
     internal ForeignKey(DbConnection cnn, Table table, DataRow row)
@@ -270,6 +337,7 @@ namespace SQLite.Designer.Design
 
     [ParenthesizePropertyName(true)]
     [Category("Identity")]
+    [Description("The name of the foreign key.")]
     public string Name
     {
       get
@@ -278,7 +346,14 @@ namespace SQLite.Designer.Design
 
         return String.Format("FK_{0}_{1}_{2}_{3}", _from.Table, _from.Column, _to.Table, _to.Column);
       }
-      set { _name = value; }
+      set
+      {
+        if (_name != value)
+        {
+          _name = value;
+          MakeDirty();
+        }
+      }
     }
 
     #region IHaveConnection Members
@@ -292,6 +367,7 @@ namespace SQLite.Designer.Design
 
     [DisplayName("Primary/Unique Key")]
     [Category("Source")]
+    [Description("The source (parent) column in the current table that is to be the unique value of the foreign key.")]
     public ForeignKeyFromItem From
     {
       get { return _from; }
@@ -299,6 +375,7 @@ namespace SQLite.Designer.Design
 
     [DisplayName("Foreign Key")]
     [Category("Target")]
+    [Description("The child table and column to which the specified parent column is related.")]
     public ForeignKeyToItem To
     {
       get { return _to; }

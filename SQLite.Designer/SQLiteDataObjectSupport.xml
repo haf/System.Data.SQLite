@@ -279,6 +279,7 @@
 						</Concept>
 					</Concepts>
 				</Property>
+        <Property name="DataType" type="System.String" itemName="data_type" />
         <Property name="SystemType" type="System.String" itemName="data_type">
           <Concepts>
             <Concept name="UserDataType"/>
@@ -516,6 +517,42 @@
       </Actions>
     </Type>
 
+    <Type name="Triggers" defaultSort="Database,Table,Name">
+      <Concepts>
+        <Concept name="TableTriggers" restrictions="{Catalog},null,{Table},{Name}"/>
+      </Concepts>
+      <Identifier>
+        <Part name="Database" itemName="table_catalog">
+          <Concepts>
+            <Concept name="Identifier0"/>
+          </Concepts>
+        </Part>
+        <Part name="Schema" itemName="table_schema">
+          <Concepts>
+            <Concept name="Identifier1"/>
+          </Concepts>
+        </Part>
+        <Part name="Table" itemName="table_name">
+          <Concepts>
+            <Concept name="Identifier2"/>
+          </Concepts>
+        </Part>
+        <Part name="Name" itemName="trigger_name">
+          <Concepts>
+            <Concept name="Identifier3"/>
+          </Concepts>
+        </Part>
+      </Identifier>
+      <Properties>
+        <Property name="Name" type="System.String" itemName="trigger_name"/>
+      </Properties>
+      <Actions>
+        <Action name="Enumerate" guid="61CC0372-384D-42e5-9707-6D7C8DC5287A" handler="Microsoft.VisualStudio.Data.AdoDotNet.AdoDotNetObjectEnumerator">
+          <Parameter value="Triggers"/>
+        </Action>
+      </Actions>
+    </Type>
+    
     <Type name="ForeignKey" defaultSort="Database,Table,Name">
       <Concepts>
         <Concept name="TableForeignKey" restrictions="{Catalog},null,{Table},{Name}"/>

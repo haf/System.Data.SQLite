@@ -1,45 +1,16 @@
-using System;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using System.Drawing;
+/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
 
 namespace SQLite.Designer.Editors
 {
-  public class DbGridView : DataGridView
-  {
-    private TableDesignerDoc _owner = null;
-
-    public override void NotifyCurrentCellDirty(bool dirty)
-    {
-      base.NotifyCurrentCellDirty(dirty);
-      SQLite.Designer.Design.Column col = Rows[CurrentCell.RowIndex].Tag as SQLite.Designer.Design.Column;
-
-      if (_owner == null)
-      {
-        Control ctl = this;
-
-        while (ctl.GetType() != typeof(TableDesignerDoc))
-        {
-          ctl = ctl.Parent;
-          if (ctl == null) break;
-        }
-        if (ctl != null) _owner = ctl as TableDesignerDoc;
-      }
-
-      if (col == null && CurrentRow.IsNewRow == false)
-      {
-        col = new SQLite.Designer.Design.Column(_owner._table, Rows[CurrentCell.RowIndex]);
-        Rows[CurrentCell.RowIndex].Tag = col;
-        _owner._table.Columns.Insert(CurrentCell.RowIndex, col);
-        base.OnSelectionChanged(new EventArgs());
-      }
-      if (col != null)
-        col.CellValueChanged();
-
-      if (_owner != null)
-        _owner.RefreshToolbars();
-    }
-  }
+  using System;
+  using System.Windows.Forms;
+  using System.Runtime.InteropServices;
+  using System.Drawing;
 
   public class AutoCompleteColumn : DataGridViewColumn
   {
@@ -57,11 +28,6 @@ namespace SQLite.Designer.Editors
       {
         return typeof(AutoCompleteEditingControl);
       }
-    }
-
-    protected override bool SetValue(int rowIndex, object value)
-    {
-      return base.SetValue(rowIndex, value);
     }
   }
 
@@ -101,6 +67,7 @@ namespace SQLite.Designer.Editors
         base.Items.Add("money");
         base.Items.Add("float");
         base.Items.Add("real");
+        base.Items.Add("decimal");
         base.Items.Add("numeric(18,0)");
         base.Items.Add("char(10)");
         base.Items.Add("nchar(10)");

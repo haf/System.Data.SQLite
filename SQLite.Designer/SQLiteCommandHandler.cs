@@ -21,9 +21,11 @@ namespace SQLite.Designer
     CreateTable = 0x3520,
     CreateView = 0x3521,
     Alter = 0x3003,
+    Refresh = 0x3004,
     Delete = 17,
     Vacuum = 262,
     Rekey = 263,
+    Triggers = 264,
   }
 
   internal sealed class SQLiteCommandHandler : DataViewCommandHandler
@@ -34,6 +36,8 @@ namespace SQLite.Designer
     internal static readonly Guid guidDavinci = new Guid("{732abe75-cd80-11d0-a2db-00aa00a3efff}");
     internal static readonly Guid guidDavinciGrp = new Guid("{732abe74-cd80-11d0-a2db-00aa00a3efff}");
     internal static readonly Guid guidQueryGroup = new Guid("5efc7975-14bc-11cf-9b2b-00aa00573819");
+    internal static Guid guidTableDesignContext = new Guid("4194fee5-6777-419f-a5fc-47a536df1bdb");
+    internal static Guid guidViewDesignContext = new Guid("b968e165-98e0-41f0-8fbe-a8ed1d246a90");
 
     public SQLiteCommandHandler()
     {
@@ -233,14 +237,14 @@ namespace SQLite.Designer
 
       if (shell != null)
       {
-        TableDesignerDoc form = new TableDesignerDoc(DataViewHierarchyAccessor.Connection, tableName);
+        TableDesignerDoc form = new TableDesignerDoc(itemId, DataViewHierarchyAccessor, tableName);
         IntPtr formptr = System.Runtime.InteropServices.Marshal.GetIUnknownForObject(form);
         Guid empty = Guid.Empty;
         FakeHierarchy fake = new FakeHierarchy(form, hier);
 
         int code = shell.CreateDocumentWindow(
           0, // (uint)(__VSCREATEDOCWIN.CDW_fCreateNewWindow | __VSCREATEDOCWIN.CDW_RDTFLAGS_MASK) | (uint)(_VSRDTFLAGS.RDT_CanBuildFromMemory | _VSRDTFLAGS.RDT_NonCreatable | _VSRDTFLAGS.RDT_VirtualDocument | _VSRDTFLAGS.RDT_DontAddToMRU),
-          form.Name, fake, (uint)itemId, formptr, formptr, ref empty, null, ref empty, provider, "", form.Caption, null, out frame);
+          form.Name, fake, (uint)itemId, formptr, formptr, ref empty, null, ref guidTableDesignContext, provider, "", form.Caption, null, out frame);
 
         if (frame != null)
         {
@@ -263,14 +267,14 @@ namespace SQLite.Designer
 
       if (shell != null)
       {
-        ViewDesignerDoc form = new ViewDesignerDoc(DataViewHierarchyAccessor.Connection, viewName);
+        ViewDesignerDoc form = new ViewDesignerDoc(itemId, DataViewHierarchyAccessor, viewName);
         IntPtr formptr = System.Runtime.InteropServices.Marshal.GetIUnknownForObject(form);
         Guid empty = Guid.Empty;
         FakeHierarchy fake = new FakeHierarchy(form, hier);
 
         int code = shell.CreateDocumentWindow(
           0, // (uint)(__VSCREATEDOCWIN.CDW_fCreateNewWindow | __VSCREATEDOCWIN.CDW_RDTFLAGS_MASK) | (uint)(_VSRDTFLAGS.RDT_CanBuildFromMemory | _VSRDTFLAGS.RDT_NonCreatable | _VSRDTFLAGS.RDT_VirtualDocument | _VSRDTFLAGS.RDT_DontAddToMRU),
-          form.Name, fake, (uint)itemId, formptr, formptr, ref empty, null, ref empty, provider, "", form.Caption, null, out frame);
+          form.Name, fake, (uint)itemId, formptr, formptr, ref empty, null, ref guidViewDesignContext, provider, "", form.Caption, null, out frame);
 
         if (frame != null)
         {
@@ -388,10 +392,14 @@ namespace SQLite.Designer
       }
     }
 
-    private void Refresh(int itemId)
+    public void Refresh(int itemId)
     {
-      IVsUIHierarchy hier = DataViewHierarchyAccessor.Hierarchy as IVsUIHierarchy;
+      Refresh(DataViewHierarchyAccessor, itemId);
+    }
 
+    public static void Refresh(DataViewHierarchyAccessor accessor, int itemId)
+    {
+      IVsUIHierarchy hier = accessor.Hierarchy as IVsUIHierarchy;
       Guid g = VSConstants.GUID_VSStandardCommandSet97;
       hier.ExecCommand((uint)itemId, ref g, (uint)0xbd, (uint)OleCommandExecutionOption.DoDefault, IntPtr.Zero, IntPtr.Zero);
     }

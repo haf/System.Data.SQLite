@@ -340,7 +340,10 @@
         string separator = String.Empty;
         foreach (DataColumn dc in table.Columns)
         {
-          sql.AppendFormat(CultureInfo.InvariantCulture, "{2}{0} {1}", builder.QuoteIdentifier(dc.ColumnName), SQLiteConvert.DbTypeToTypeName(SQLiteConvert.TypeToDbType(dc.DataType)), separator);
+          DbType dbtypeName = SQLiteConvert.TypeToDbType(dc.DataType);
+          string typeName = SQLiteConvert.DbTypeToTypeName(dbtypeName);
+
+          sql.AppendFormat(CultureInfo.InvariantCulture, "{2}{0} {1}", builder.QuoteIdentifier(dc.ColumnName), typeName, separator);
           separator = ", ";
         }
         sql.Append(")");
@@ -357,7 +360,12 @@
 
           foreach (DataRow row in table.Rows)
           {
-            source.Rows.Add(row.ItemArray);
+            object[] arr = row.ItemArray;
+
+            for (int n = 0; n < arr.Length; n++)
+              if (arr[n] is string) arr[n] = ((string)arr[n]).ToLower();
+
+            source.Rows.Add(arr);
           }
           adp.Update(source);
         }

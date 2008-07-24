@@ -1,45 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.ComponentModel;
-using System.Data;
-using System.Data.Common;
-using System.ComponentModel.Design;
-using System.Drawing.Design;
-using System.Windows.Forms;
+﻿/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
 
 namespace SQLite.Designer.Design
 {
+  using System;
+  using System.Collections.Generic;
+  using System.Collections;
+  using System.Text;
+  using System.ComponentModel;
+  using System.Data;
+  using System.Data.Common;
+  using System.ComponentModel.Design;
+  using System.Drawing.Design;
+  using System.Windows.Forms;
+
   internal class IndexEditor : CollectionEditor
   {
     Table _table;
-    bool _cancel = false;
-    object[] _items;
+    CollectionEditor.CollectionForm _form;
+    object[] _items = null;
+    object[] _orig;
+    int _count;
 
     internal IndexEditor(Table parent)
       : base(typeof(List<Index>))
     {
       _table = parent;
-    }
-
-    protected override object CreateInstance(Type itemType)
-    {
-      if (itemType == typeof(Index))
-      {
-        return new Index(null, _table, null);
-      }
-      throw new NotSupportedException();
-    }
-
-    protected override void CancelChanges()
-    {
-      _cancel = true;
-    }
-
-    protected override bool CanRemoveInstance(object value)
-    {
-      return !(value is PrimaryKey);
     }
 
     protected override object[] GetItems(object editValue)
@@ -51,17 +41,77 @@ namespace SQLite.Designer.Design
         int extra = (_table.PrimaryKey.Columns.Count > 0) ? 1 : 0;
 
         _items = new object[value.Count + extra];
+        _orig = new object[_items.Length];
         for (int n = extra; n < _items.Length; n++)
+        {
           _items[n] = ((ICloneable)value[n - extra]).Clone();
+          _orig[n] = value[n - extra];
+        }
 
         if (extra > 0)
-          _items[0] = _table.PrimaryKey;
+        {
+          _items[0] = ((ICloneable)_table.PrimaryKey).Clone();
+          _orig[0] = _table.PrimaryKey;
+        }
+
+        _count = _items.Length;
       }
       return _items;
     }
 
+    protected override CollectionEditor.CollectionForm CreateCollectionForm()
+    {
+      _form = base.CreateCollectionForm();
+      _form.Text = "Index Editor";
+
+      /* Doing this because I can't figure out how to get the Columns collection editor to notify this editor when a column of an index is updated.
+         This forces the collection editor form to be "dirty" which calls SetItems() when you hit OK or cancel.  Otherwise, if you
+         change a column around and hit OK, then hit OK on this editor, it won't be dirty and won't update. */
+      try
+      {
+        _form.GetType().InvokeMember("dirty", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.SetField, null, _form, new object[] { true });
+      }
+      catch
+      {
+      }
+
+      foreach (Control c in _form.Controls[0].Controls)
+      {
+        PropertyGrid grid = c as PropertyGrid;
+        if (grid != null)
+        {
+          grid.HelpVisible = true;
+          break;
+        }
+      }
+      _form.Width = (int)(_form.Width * 1.25);
+      _form.Height = (int)(_form.Height * 1.25);
+
+      return _form;
+    }
+
+    protected override object CreateInstance(Type itemType)
+    {
+      if (itemType == typeof(Index))
+      {
+        return new Index(null, _table, null);
+      }
+      throw new NotSupportedException();
+    }
+
+    protected override bool CanRemoveInstance(object value)
+    {
+      return !(value is PrimaryKey);
+    }
+
     protected override object SetItems(object editValue, object[] value)
     {
+      bool dirty = false;
+      int count = 0;
+
+      if (_form.DialogResult == DialogResult.Cancel)
+        value = _orig;
+
       if (editValue != null)
       {
         int length = this.GetItems(editValue).Length;
@@ -79,16 +129,23 @@ namespace SQLite.Designer.Design
           if (idx is PrimaryKey)
           {
             _table.PrimaryKey = (PrimaryKey)idx;
+            if (idx.IsDirty) dirty = true;
+            count++;
           }
           else
           {
             if (idx != null && idx.Columns.Count > 0)
-              list.Add(value[i]);
+            {
+              idx.Name = idx.Name;
+              list.Add(idx);
+              if (idx.IsDirty) dirty = true;
+              count++;
+            }
           }
         }
       }
 
-      if (_cancel == false)
+      if ((dirty == true || count != _count) && _form.DialogResult == DialogResult.OK)
         _table._owner.MakeDirty();
 
       return editValue;
@@ -98,18 +155,38 @@ namespace SQLite.Designer.Design
   internal class IndexColumnEditor : CollectionEditor
   {
     Index _index;
-    bool _cancel = false;
     object[] _items;
+    object[] _orig;
+    int _count;
+    CollectionEditor.CollectionForm _form;
 
     public IndexColumnEditor() : base(typeof(List<IndexColumn>))
     {
+    }
+
+    protected override CollectionEditor.CollectionForm CreateCollectionForm()
+    {
+      _form = base.CreateCollectionForm();
+      _form.Text = "Index Columns Editor";
+      foreach (Control c in _form.Controls[0].Controls)
+      {
+        PropertyGrid grid = c as PropertyGrid;
+        if (grid != null)
+        {
+          grid.HelpVisible = true;
+          break;
+        }
+      }
+      _form.Width = (int)(_form.Width * 1.25);
+      _form.Height = (int)(_form.Height * 1.25);
+      return _form;
     }
 
     public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
     {
       _index = context.Instance as Index;
       _items = null;
-      _cancel = false;
+      _count = 0;
       return base.EditValue(context, provider, value);
     }
 
@@ -122,25 +199,29 @@ namespace SQLite.Designer.Design
       throw new NotSupportedException();
     }
 
-    protected override void CancelChanges()
-    {
-      _cancel = true;
-    }
-
     protected override object[] GetItems(object editValue)
     {
       if (_items == null)
       {
         List<IndexColumn> value = editValue as List<IndexColumn>;
         _items = new object[value.Count];
+        _orig = new object[value.Count];
         for (int n = 0; n < _items.Length; n++)
-          _items[n] = value[n].Clone();
+        {
+          _items[n] = ((ICloneable)value[n]).Clone();
+          _orig[n] = value[n];
+        }
+
+        _count = _items.Length;
       }
       return _items;
     }
 
     protected override object SetItems(object editValue, object[] value)
     {
+      if (_form.DialogResult == DialogResult.Cancel)
+        value = _orig;
+
       if (editValue != null)
       {
         int length = this.GetItems(editValue).Length;
@@ -156,18 +237,17 @@ namespace SQLite.Designer.Design
           IndexColumn idx = value[i] as IndexColumn;
 
           if (idx != null && String.IsNullOrEmpty(idx.Column) == false)
+          {
             list.Add(value[i]);
+          }
         }
       }
 
-      if (_cancel == false)
+      if ((_index.IsDirty || _index.Columns.Count != _count) && _form.DialogResult == DialogResult.OK)
       {
         if (_index.Columns.Count > 0 && String.IsNullOrEmpty(_index._name) == true)
           _index.Name = _index.Name;
-
-        _index.Table._owner.MakeDirty();
       }
-
       return editValue;
     }
   }
@@ -198,7 +278,7 @@ namespace SQLite.Designer.Design
           if (c.SortMode != ColumnSortMode.Ascending)
             builder.Append(" DESC");
           if (c.Collate != "BINARY")
-            builder.AppendFormat(" COLLATE {0}", c.Collate);
+            builder.AppendFormat(" COLLATE {0}", c.Collate.ToUpperInvariant());
 
           separator = ", ";
         }
@@ -218,34 +298,81 @@ namespace SQLite.Designer.Design
   [DefaultProperty("Column")]
   internal class IndexColumn : IHaveConnectionScope, ICloneable
   {
-    private Index _parent;
+    internal Index _parent;
     private string _column;
     private ColumnSortMode _mode = ColumnSortMode.Ascending;
     private string _collate = "BINARY";
 
     [Editor(typeof(ColumnsTypeEditor), typeof(UITypeEditor))]
     [DisplayName("Base Column")]
+    [Category("Source")]
+    [Description("The column name to be included in the index.")]
+    [NotifyParentProperty(true)]
+    [RefreshProperties(RefreshProperties.All)]
     public string Column
     {
       get { return _column; }
-      set { _column = value; }
+      set
+      {
+        if (_column != value)
+        {
+          _column = value;
+          _parent.MakeDirty();
+        }
+      }
     }
 
     [DefaultValue(ColumnSortMode.Ascending)]
+    [Category("Constraints")]
+    [Description("Specifies what order to sort the column in.  Descending indexes are not supported when using the SQLite legacy file format.")]
+    [NotifyParentProperty(true)]
+    [RefreshProperties(RefreshProperties.All)]
     public ColumnSortMode SortMode
     {
       get { return _mode; }
-      set { _mode = value; }
+      set
+      {
+        if (value != _mode)
+        {
+          _mode = value;
+          _parent.MakeDirty();
+        }
+      }
     }
 
     [DefaultValue("BINARY")]
+    [Category("Constraints")]
+    [Editor(typeof(CollationTypeEditor), typeof(UITypeEditor))]
+    [Description("The collation sequence to use to generate the index for the specified column.")]
+    [NotifyParentProperty(true)]
+    [RefreshProperties(RefreshProperties.All)]
     public string Collate
     {
       get { return _collate; }
       set
       {
-        if (String.IsNullOrEmpty(value)) _collate = "BINARY";
-        else _collate = value;
+        if (String.IsNullOrEmpty(value)) value = "BINARY";
+
+        if (value != _collate)
+        {
+          _collate = value;
+          if (_parent is PrimaryKey)
+          {
+            PrimaryKey pk = _parent as PrimaryKey;
+            if (pk.Columns.Count == 1)
+            {
+              foreach (Column c in pk.Table.Columns)
+              {
+                if (string.Compare(c.ColumnName, Column, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                  c.Collate = value;
+                  break;
+                }
+              }
+            }
+          }
+          _parent.MakeDirty();
+        }
       }
     }
 
@@ -268,12 +395,12 @@ namespace SQLite.Designer.Design
       _parent = parent;
       if (row != null)
       {
-        _column = row["COLUMN_NAME"].ToString(); //.Trim().TrimStart('[').TrimEnd(']')
+        _column = row["COLUMN_NAME"].ToString();
         if (row.IsNull("SORT_MODE") == false && (string)row["SORT_MODE"] != "ASC")
           _mode = ColumnSortMode.Descending;
 
-        if (row.IsNull("COLLATION_NAME") == false && (string)row["COLLATION_NAME"] != "BINARY")
-          _collate = row["COLLATION_NAME"].ToString();
+        if (row.IsNull("COLLATION_NAME") == false)
+          _collate = row["COLLATION_NAME"].ToString().ToUpperInvariant();
       }
     }
 
@@ -324,15 +451,23 @@ namespace SQLite.Designer.Design
     private string _definition;
     private bool _calcname;
     internal ConflictEnum _conflict = ConflictEnum.Abort;
+    bool _dirty = false;
 
     protected Index(Index source)
     {
       _table = source._table;
       _name = source._name;
       _unique = source._unique;
-      _columns = source._columns;
       _definition = source._definition;
       _conflict = source._conflict;
+      _dirty = source._dirty;
+
+      foreach (IndexColumn c in source._columns)
+      {
+        IndexColumn copy = ((ICloneable)c).Clone() as IndexColumn;
+        copy._parent = this;
+        _columns.Add(copy);
+      }
     }
 
     internal Index(DbConnection cnn, Table table, DataRow index)
@@ -349,20 +484,14 @@ namespace SQLite.Designer.Design
           foreach (DataRow row in tbl.Rows)
           {
             _columns.Add(new IndexColumn(this, row));
-            //builder.AppendFormat("{0}[{1}]", separator, row["COLUMN_NAME"]);
-            //if (row.IsNull("SORT_MODE") == false && (string)row["SORT_MODE"] != "ASC")
-            //  builder.AppendFormat(" {0}", row["SORT_MODE"]);
-
-            //if (row.IsNull("COLLATION_NAME") == false && (string)row["COLLATION_NAME"] != "BINARY")
-            //  builder.AppendFormat(" COLLATE {0}", row["COLLATION_NAME"]);
-
-            //separator = ", ";
           }
         }
       }
     }
 
     [DisplayName("Index Type")]
+    [Category("Storage")]
+    [Description("Specifies whether this is an index or a primary key.")]
     public virtual IndexTypeEnum IndexType
     {
       get { return IndexTypeEnum.Index; }
@@ -384,10 +513,12 @@ namespace SQLite.Designer.Design
       foreach (IndexColumn c in Columns)
       {
         builder.AppendFormat("{0}[{1}]", separator, c.Column);
+        
         if (c.SortMode != ColumnSortMode.Ascending)
           builder.Append(" DESC");
-        if (c.Collate != "BINARY")
-          builder.AppendFormat(" COLLATE {0}", c.Collate);
+
+        if (String.IsNullOrEmpty(c.Collate) && String.Compare(c.Collate,"BINARY", StringComparison.OrdinalIgnoreCase) != 0)
+          builder.AppendFormat(" COLLATE {0}", c.Collate.ToUpperInvariant());
 
         separator = ", ";
       }
@@ -406,11 +537,35 @@ namespace SQLite.Designer.Design
       get { return _definition; }
     }
 
+    internal void MakeDirty()
+    {
+      _dirty = true;
+    }
+
+    [Browsable(false)]
+    internal bool IsDirty
+    {
+      get { return _dirty; }
+    }
+
+    internal void ClearDirty()
+    {
+      _dirty = false;
+    }
+
     [DefaultValue(false)]
+    [Description("When set to true, the combination of column(s) of the index must be a unique value.")]
     public virtual bool Unique
     {
       get { return _unique; }
-      set { _unique = value; }
+      set
+      {
+        if (value != _unique)
+        {
+          _unique = value;
+          MakeDirty();
+        }
+      }
     }
 
     [Browsable(false)]
@@ -427,6 +582,8 @@ namespace SQLite.Designer.Design
 
     [ParenthesizePropertyName(true)]
     [RefreshProperties(RefreshProperties.All)]
+    [Category("Identity")]
+    [Description("The name of the index.")]
     public virtual string Name
     {
       get
@@ -464,12 +621,22 @@ namespace SQLite.Designer.Design
         }
         return _name;
       }
-      set { _name = value; }
+      set
+      {
+        if (value != _name)
+        {
+          _name = value;
+          MakeDirty();
+        }
+      }
     }
 
     [TypeConverter(typeof(IndexTypeConverter))]
     [Editor(typeof(IndexColumnEditor), typeof(UITypeEditor))]
     [RefreshProperties(RefreshProperties.All)]
+    [Category("Source")]
+    [Description("The column(s) to be indexed.")]
+    [NotifyParentProperty(true)]
     public List<IndexColumn> Columns
     {
       get { return _columns; }
@@ -509,7 +676,11 @@ namespace SQLite.Designer.Design
     override public object EditValue(ITypeDescriptorContext ctx, IServiceProvider provider, object value)
     {
       Index idx = ctx.Instance as Index;
-      Table parent = idx.Table;
+      Trigger trig = ctx.Instance as Trigger;
+      ViewTableBase parent = null;
+
+      if (idx != null) parent = idx.Table;
+      else if (trig != null) parent = trig.ViewTableBase;
 
       // initialize editor service
       _edSvc = (System.Windows.Forms.Design.IWindowsFormsEditorService)provider.GetService(typeof(System.Windows.Forms.Design.IWindowsFormsEditorService));
@@ -523,22 +694,37 @@ namespace SQLite.Designer.Design
       
       // populate the list
       _list.Items.Clear();
-      using (DataTable tbl = parent._connection.GetSchema("Columns", new string[] { parent.Catalog, null, parent.Name }))
+      DataTable tbl = null;
+
+      try
       {
+        string prefix = "";
+        tbl = parent.GetConnection().GetSchema("Columns", new string[] { parent.Catalog, null, parent.Name });
+        if (tbl.Rows.Count == 0)
+        {
+          tbl.Dispose();
+          tbl = null;
+          prefix = "VIEW_";
+          tbl = parent.GetConnection().GetSchema("ViewColumns", new string[] { parent.Catalog, null, parent.Name });
+        }
         foreach (DataRow item in tbl.Rows)
         {
           // add this item with the proper check state
           CheckState check = CheckState.Unchecked;
           for (int n = 0; n < values.Length; n++)
           {
-            if (values[n].Trim() == String.Format("[{0}]", item["COLUMN_NAME"].ToString()))
+            if (values[n].Trim() == String.Format("[{0}]", item[prefix + "COLUMN_NAME"].ToString()))
             {
               check = CheckState.Checked;
               break;
             }
           }
-          _list.Items.Add(item["COLUMN_NAME"].ToString(), check);
+          _list.Items.Add(item[prefix + "COLUMN_NAME"].ToString(), check);
         }
+      }
+      finally
+      {
+        if (tbl != null) tbl.Dispose();
       }
       _list.Height = Math.Min(300, (_list.Items.Count + 1) * _list.Font.Height);
 

@@ -1,12 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.ComponentModel;
-using System.Data;
-using System.Data.Common;
+/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
 
 namespace SQLite.Designer.Design
 {
+  using System;
+  using System.Collections.Generic;
+  using System.Text;
+  using System.ComponentModel;
+  using System.Data;
+  using System.Data.Common;
+
   [TypeConverter(typeof(ExpandableObjectConverter))]
   [DefaultProperty("Enabled")]
   internal class Unique : IHaveConnection
@@ -41,6 +48,8 @@ namespace SQLite.Designer.Design
 
     [DefaultValue(false)]
     [DisplayName("Enabled")]
+    [RefreshProperties(RefreshProperties.All)]
+    [Description("When enabled, all values entered into this column must be unique.")]
     public bool Enabled
     {
       get { return _isUnique; }
@@ -56,6 +65,8 @@ namespace SQLite.Designer.Design
 
     [DefaultValue(ConflictEnum.Abort)]
     [DisplayName("On Conflict")]
+    [RefreshProperties(RefreshProperties.All)]
+    [Description("Specifies what action to take when the unique constraint on the column is violated.")]
     public ConflictEnum Conflict
     {
       get { return _conflict; }
@@ -64,6 +75,10 @@ namespace SQLite.Designer.Design
         if (_conflict != value)
         {
           _conflict = value;
+          
+          if (_conflict != ConflictEnum.Abort && _isUnique == false)
+            _isUnique = true;
+
           _column.Table._owner.MakeDirty();
         }
       }

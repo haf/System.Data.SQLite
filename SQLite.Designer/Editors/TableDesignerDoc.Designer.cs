@@ -33,26 +33,20 @@ namespace SQLite.Designer.Editors
     {
       this.components = new System.ComponentModel.Container();
       System.Windows.Forms.SplitContainer _splitter;
-      System.Windows.Forms.SplitContainer splitContainer1;
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TableDesignerDoc));
-      this._dataGrid = new SQLite.Designer.Editors.DbGridView();
+      this._dataGrid = new System.Windows.Forms.DataGridView();
       this.name = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.type = new SQLite.Designer.Editors.AutoCompleteColumn();
       this.isnull = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-      this._sqlText = new System.Windows.Forms.RichTextBox();
       this._propertyGrid = new System.Windows.Forms.PropertyGrid();
+      this._sqlText = new System.Windows.Forms.RichTextBox();
       this.autoCompleteColumn1 = new SQLite.Designer.Editors.AutoCompleteColumn();
       this._imageList = new System.Windows.Forms.ImageList(this.components);
-      this._timer = new System.Windows.Forms.Timer(this.components);
       this._pg = new System.Windows.Forms.PropertyGrid();
       _splitter = new System.Windows.Forms.SplitContainer();
-      splitContainer1 = new System.Windows.Forms.SplitContainer();
       _splitter.Panel1.SuspendLayout();
       _splitter.Panel2.SuspendLayout();
       _splitter.SuspendLayout();
-      splitContainer1.Panel1.SuspendLayout();
-      splitContainer1.Panel2.SuspendLayout();
-      splitContainer1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this._dataGrid)).BeginInit();
       this.SuspendLayout();
       // 
@@ -66,35 +60,20 @@ namespace SQLite.Designer.Editors
       // 
       // _splitter.Panel1
       // 
-      _splitter.Panel1.Controls.Add(splitContainer1);
+      _splitter.Panel1.Controls.Add(this._dataGrid);
+      _splitter.Panel1.Controls.Add(this._pg);
+      _splitter.Panel1.Controls.Add(this._sqlText);
       // 
       // _splitter.Panel2
       // 
-      _splitter.Panel2.Controls.Add(this._sqlText);
+      _splitter.Panel2.Controls.Add(this._propertyGrid);
       _splitter.Size = new System.Drawing.Size(436, 631);
-      _splitter.SplitterDistance = 465;
+      _splitter.SplitterDistance = 383;
       _splitter.TabIndex = 0;
-      // 
-      // splitContainer1
-      // 
-      splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-      splitContainer1.Location = new System.Drawing.Point(0, 0);
-      splitContainer1.Name = "splitContainer1";
-      splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      // 
-      // splitContainer1.Panel1
-      // 
-      splitContainer1.Panel1.Controls.Add(this._dataGrid);
-      // 
-      // splitContainer1.Panel2
-      // 
-      splitContainer1.Panel2.Controls.Add(this._propertyGrid);
-      splitContainer1.Size = new System.Drawing.Size(436, 465);
-      splitContainer1.SplitterDistance = 215;
-      splitContainer1.TabIndex = 0;
       // 
       // _dataGrid
       // 
+      this._dataGrid.AllowDrop = true;
       this._dataGrid.AllowUserToResizeRows = false;
       this._dataGrid.BackgroundColor = System.Drawing.SystemColors.Window;
       this._dataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -108,17 +87,22 @@ namespace SQLite.Designer.Editors
       this._dataGrid.RowHeadersWidth = 42;
       this._dataGrid.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
       this._dataGrid.RowTemplate.Height = 23;
-      this._dataGrid.Size = new System.Drawing.Size(436, 215);
+      this._dataGrid.Size = new System.Drawing.Size(436, 383);
       this._dataGrid.TabIndex = 2;
       this._dataGrid.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this._dataGrid_CellValueChanged);
+      this._dataGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this._dataGrid_MouseDown);
+      this._dataGrid.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this._dataGrid_UserDeletingRow);
+      this._dataGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this._dataGrid_MouseMove);
+      this._dataGrid.CellValidated += new System.Windows.Forms.DataGridViewCellEventHandler(this._dataGrid_CellValidated);
       this._dataGrid.UserDeletedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this._dataGrid_UserDeletedRow);
-      this._dataGrid.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this._dataGrid_RowsAdded);
+      this._dataGrid.DragOver += new System.Windows.Forms.DragEventHandler(this._dataGrid_DragOver);
+      this._dataGrid.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this._dataGrid_CellValidated);
       this._dataGrid.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this._dataGrid_CellPainting);
       this._dataGrid.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this._dataGrid_CellClick);
       this._dataGrid.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this._dataGrid_CellEnter);
-      this._dataGrid.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this._dataGrid_RowsRemoved);
       this._dataGrid.RowHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this._dataGrid_RowHeaderMouseClick);
       this._dataGrid.SelectionChanged += new System.EventHandler(this._dataGrid_SelectionChanged);
+      this._dataGrid.DragDrop += new System.Windows.Forms.DragEventHandler(this._dataGrid_DragDrop);
       // 
       // name
       // 
@@ -137,23 +121,24 @@ namespace SQLite.Designer.Editors
       this.isnull.HeaderText = "Allow Nulls";
       this.isnull.Name = "isnull";
       // 
-      // _sqlText
-      // 
-      this._sqlText.Dock = System.Windows.Forms.DockStyle.Fill;
-      this._sqlText.Location = new System.Drawing.Point(0, 0);
-      this._sqlText.Name = "_sqlText";
-      this._sqlText.ReadOnly = true;
-      this._sqlText.Size = new System.Drawing.Size(436, 162);
-      this._sqlText.TabIndex = 0;
-      this._sqlText.Text = "";
-      // 
       // _propertyGrid
       // 
       this._propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
       this._propertyGrid.Location = new System.Drawing.Point(0, 0);
       this._propertyGrid.Name = "_propertyGrid";
-      this._propertyGrid.Size = new System.Drawing.Size(436, 246);
+      this._propertyGrid.Size = new System.Drawing.Size(436, 244);
       this._propertyGrid.TabIndex = 0;
+      // 
+      // _sqlText
+      // 
+      this._sqlText.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this._sqlText.Location = new System.Drawing.Point(3, 3);
+      this._sqlText.Name = "_sqlText";
+      this._sqlText.ReadOnly = true;
+      this._sqlText.Size = new System.Drawing.Size(165, 162);
+      this._sqlText.TabIndex = 0;
+      this._sqlText.Text = "";
+      this._sqlText.Visible = false;
       // 
       // autoCompleteColumn1
       // 
@@ -168,13 +153,9 @@ namespace SQLite.Designer.Editors
       this._imageList.TransparentColor = System.Drawing.Color.Magenta;
       this._imageList.Images.SetKeyName(0, "PrimaryKey.bmp");
       // 
-      // _timer
-      // 
-      this._timer.Tick += new System.EventHandler(this._timer_Tick);
-      // 
       // _pg
       // 
-      this._pg.Location = new System.Drawing.Point(0, 0);
+      this._pg.Location = new System.Drawing.Point(3, 171);
       this._pg.Name = "_pg";
       this._pg.PropertySort = System.Windows.Forms.PropertySort.NoSort;
       this._pg.Size = new System.Drawing.Size(130, 130);
@@ -187,18 +168,12 @@ namespace SQLite.Designer.Editors
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.SystemColors.Window;
-      this.Controls.Add(this._pg);
       this.Controls.Add(_splitter);
-      this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.Name = "TableDesignerDoc";
       this.Size = new System.Drawing.Size(436, 631);
-      this.VisibleChanged += new System.EventHandler(this.TableDesignerDoc_VisibleChanged);
       _splitter.Panel1.ResumeLayout(false);
       _splitter.Panel2.ResumeLayout(false);
       _splitter.ResumeLayout(false);
-      splitContainer1.Panel1.ResumeLayout(false);
-      splitContainer1.Panel2.ResumeLayout(false);
-      splitContainer1.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this._dataGrid)).EndInit();
       this.ResumeLayout(false);
 
@@ -209,12 +184,11 @@ namespace SQLite.Designer.Editors
     private System.Windows.Forms.PropertyGrid _propertyGrid;
     private AutoCompleteColumn autoCompleteColumn1;
     private System.Windows.Forms.ImageList _imageList;
-    private DbGridView _dataGrid;
+    private System.Windows.Forms.DataGridView _dataGrid;
     private System.Windows.Forms.DataGridViewTextBoxColumn name;
     private AutoCompleteColumn type;
     private System.Windows.Forms.DataGridViewCheckBoxColumn isnull;
     private System.Windows.Forms.RichTextBox _sqlText;
-    private System.Windows.Forms.Timer _timer;
     private System.Windows.Forms.PropertyGrid _pg;
 
   }

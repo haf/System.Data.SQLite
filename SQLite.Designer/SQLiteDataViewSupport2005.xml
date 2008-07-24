@@ -73,17 +73,14 @@
                   <DisplayName>{View.Name}</DisplayName>
                   <Icon name="View"/>
 									<Children>
-										<Selection type="ViewColumn" restrictions="{View.Database},null,{View.Name}">
-											<SelectionNode>
-												<Icon name="Column"/>
-											</SelectionNode>
-										</Selection>
+                    <SubHierarchyRef name="View children"/>
 									</Children>
 								</SelectionNode>
 							</Selection>
 						</Children>
-					</StaticNode>                    
-				</Children>
+					</StaticNode>
+                  
+        </Children>
 			</StaticConnectionNode>
 		</DataView>
 	</DataViews>
@@ -137,7 +134,43 @@
           </Selection>
         </Children>
       </StaticNode>
+
+      <StaticNode nid="Triggers">
+        <DisplayName>Triggers</DisplayName>
+        <Children>
+          <Selection type="Triggers" restrictions="{Table.Database},null,{Table.Name}">
+            <SelectionNode>
+              <Icon name="Index" />
+            </SelectionNode>
+          </Selection>
+        </Children>
+      </StaticNode>
+    </SubHierarchy>
+    <SubHierarchy name="view children">      
+      <StaticNode nid="Columns">
+        <DisplayName>Columns</DisplayName>
+        <CommandBindings>
+          <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
+        </CommandBindings>
+        <Children>
+          <Selection type="ViewColumn" restrictions="{View.Database},null,{View.Name}">
+            <SelectionNode>
+              <Icon name="Column"/>
+            </SelectionNode>
+          </Selection>
+        </Children>
+      </StaticNode>
       
+      <StaticNode nid="Triggers">
+        <DisplayName>Triggers</DisplayName>
+        <Children>
+          <Selection type="Triggers" restrictions="{View.Database},null,{View.Name}">
+            <SelectionNode>
+              <Icon name="Index" />
+            </SelectionNode>
+          </Selection>
+        </Children>
+      </StaticNode>
     </SubHierarchy>
   </SubHierarchies>
   <TypeExtensions>
@@ -201,6 +234,7 @@
           <Category resource="Category_Identity"/>
         </Part>
         <Part name="Database">
+          <DisplayName>Catalog</DisplayName>
           <Category resource="Category_Location"/>
         </Part>
         <Part name="View">
@@ -209,6 +243,7 @@
       </Identifier>
       <Properties>
         <Property name="Ordinal"/>
+        <Property name="Length"/>
         <Property name="DataType">
           <DisplayName>Data Type</DisplayName>
         </Property>
@@ -251,6 +286,21 @@
           <Parameter value="Index"/>
         </CommandBinding>
       </CommandBindings>
+    </TypeExtension>
+
+    <TypeExtension name="Triggers">
+      <Identifier>
+        <Part name="Name">
+          <Category resource="Category_Identity"/>
+        </Part>
+        <Part name="Database">
+          <DisplayName>Catalog</DisplayName>
+          <Category resource="Category_Location"/>
+        </Part>
+        <Part name="Table">
+          <Category resource="Category_Location"/>
+        </Part>
+      </Identifier>
     </TypeExtension>
 
     <TypeExtension name="TableColumn">

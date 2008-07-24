@@ -309,12 +309,14 @@ __declspec(dllexport) void WINAPI sqlite3_free_interop(char *z)
 __declspec(dllexport) int WINAPI sqlite3_open_interop(const char*filename, sqlite3 **ppdb)
 {
   int ret = sqlite3_open(filename, ppdb);
+  if (!ret) sqlite3_enable_load_extension(*ppdb, 1);
   return ret;
 }
 
 __declspec(dllexport) int WINAPI sqlite3_open16_interop(const void *filename, sqlite3 **ppdb)
 {
   int ret = sqlite3_open16(filename, ppdb);
+  if (!ret) sqlite3_enable_load_extension(*ppdb, 1);
   return ret;
 }
 

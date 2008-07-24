@@ -73,16 +73,6 @@
       <DIV>
         <br>
       </DIV>
-      <h1 class="heading">What's Coming Up?</h1>
-      <p>There's a few things I'm aiming to do in the near future:&nbsp;</p>
-      <DIV>
-        <ul>
-          <LI>
-            Trigger design/view support from the Visual Studio Server Explorer and the 
-            ability to create/edit views.</LI>
-          </ul>
-      </DIV>
-      <br>
       <h1 class="heading">Using this library</h1>
       <p>The following are links to information on various aspects of the library and 
         how to use it in your application(s)
@@ -105,14 +95,16 @@
           native C/C++ development.&nbsp; 100% binary compatible with the original sqlite3.dll.
         </li>
         <li>
-        On the Compact Framework, it is faster than the newly-introduced Sql Server Mobile.
+        On the Compact Framework, it is faster than Sql Server Mobile.
           SQLite's installed size is a fraction of Sql Mobile's. It uses less memory at runtime,
           runs queries faster, and has a smaller database file size as well. </li>
         <li>Encrypted database support.&nbsp; Encrypted databases are fully encrypted and
           support both binary and cleartext password types. </li>
         <li>Visual Studio 2005/2008 Design-Time Support.&nbsp; You can add a SQLite 
         database to the Servers list, design queries with the Query Designer, 
-        drag-and-drop tables onto a Typed DataSet, etc. </li>
+        drag-and-drop tables onto a Typed DataSet, etc.</li>
+            <li>Full SQLite schema editing inside Visual Studio.&nbsp; You can create/edit 
+              tables, views, triggers, indexes, check constraints and foreign keys. </li>
         <li>
         Single file redistributable.&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
         are combined into one multi-module assembly. </li>
@@ -127,8 +119,7 @@
           DbConnection.GetSchema(...) support includes the <i>MetaDataCollections</i>, <i>
           DataSourceInformation</i>, <i>Columns</i>, <i>Tables</i>, <i>Views, ViewColumns, </i>
           <i>Catalogs, </i><i>Indexes, 
-            IndexColumns </i>and <em>ForeignKeys</em>
-        keywords.
+            IndexColumns, ForeignKeys </i>and <em>Triggers</em>.
         </li>
         <li>
         Enhanced DbDataReader.GetSchemaTable() functionality returns catalog, namespace 

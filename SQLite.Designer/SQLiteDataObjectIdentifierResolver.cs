@@ -56,6 +56,7 @@ namespace SQLite.Designer
         case "index":
         case "foreignkey":
         case "viewcolumn":
+        case "triggers":
           length = 4;
           break;
         case "indexcolumn":

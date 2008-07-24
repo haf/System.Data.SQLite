@@ -1013,6 +1013,8 @@ namespace System.Data.SQLite
           return Schema_Columns(parms[0], parms[2], parms[3]);
         case "INDEXES":
           return Schema_Indexes(parms[0], parms[2], parms[3]);
+        case "TRIGGERS":
+          return Schema_Triggers(parms[0], parms[2], parms[3]);
         case "INDEXCOLUMNS":
           return Schema_IndexColumns(parms[0], parms[2], parms[3], parms[4]);
         case "TABLES":
@@ -1414,6 +1416,52 @@ namespace System.Data.SQLite
         }
       }
 
+      tbl.AcceptChanges();
+      tbl.EndLoadData();
+
+      return tbl;
+    }
+
+    private DataTable Schema_Triggers(string catalog, string table, string triggerName)
+    {
+      DataTable tbl = new DataTable("Triggers");
+      DataRow row;
+
+      tbl.Locale = CultureInfo.InvariantCulture;
+      tbl.Columns.Add("TABLE_CATALOG", typeof(string));
+      tbl.Columns.Add("TABLE_SCHEMA", typeof(string));
+      tbl.Columns.Add("TABLE_NAME", typeof(string));
+      tbl.Columns.Add("TRIGGER_NAME", typeof(string));
+      tbl.Columns.Add("TRIGGER_DEFINITION", typeof(string));
+
+      tbl.BeginLoadData();
+
+      if (String.IsNullOrEmpty(table)) table = null;
+      if (String.IsNullOrEmpty(catalog)) catalog = "main";
+      string master = (String.Compare(catalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+
+      using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT [type], [name], [tbl_name], [rootpage], [sql], [rowid] FROM [{0}].[{1}] WHERE [type] LIKE 'trigger'", catalog, master), this))
+      using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
+      {
+        while (rd.Read())
+        {
+          if (String.Compare(rd.GetString(1), triggerName, true, CultureInfo.InvariantCulture) == 0
+            || triggerName == null)
+          {
+            if (table == null || String.Compare(table, rd.GetString(2), true, CultureInfo.InvariantCulture) == 0)
+            {
+              row = tbl.NewRow();
+
+              row["TABLE_CATALOG"] = catalog;
+              row["TABLE_NAME"] = rd.GetString(2);
+              row["TRIGGER_NAME"] = rd.GetString(1);
+              row["TRIGGER_DEFINITION"] = rd.GetString(4);
+
+              tbl.Rows.Add(row);
+            }
+          }
+        }
+      }
       tbl.AcceptChanges();
       tbl.EndLoadData();
 
@@ -1859,7 +1907,7 @@ namespace System.Data.SQLite
                     row["TABLE_CATALOG"] = strCatalog;
                     row["TABLE_SCHEMA"] = schemaRow[SchemaTableColumn.BaseSchemaName];
                     row["TABLE_NAME"] = schemaRow[SchemaTableColumn.BaseTableName];
-                    row["COLUMN_NAME"] = schemaRow[SchemaTableColumn.ColumnName];
+                    row["COLUMN_NAME"] = schemaRow[SchemaTableColumn.BaseColumnName];
                     row["VIEW_COLUMN_NAME"] = viewRow[SchemaTableColumn.ColumnName];
                     row["COLUMN_HASDEFAULT"] = (viewRow[SchemaTableOptionalColumn.DefaultValue] != DBNull.Value);
                     row["COLUMN_DEFAULT"] = viewRow[SchemaTableOptionalColumn.DefaultValue];

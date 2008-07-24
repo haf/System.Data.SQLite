@@ -1,4 +1,11 @@
-﻿namespace SQLite.Designer.Design
+﻿/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
+
+namespace SQLite.Designer.Design
 {
   using System;
   using System.Data.Common;
@@ -10,7 +17,7 @@
   using System.Text;
   using SQLite.Designer.Editors;
 
-  internal class View : ICustomTypeDescriptor, IHaveConnection
+  internal class View : ViewTableBase, ICustomTypeDescriptor
   {
     private string _name;
     private string _oldname;
@@ -19,6 +26,8 @@
     private ViewDesignerDoc _owner;
     private string _catalog;
     private DbConnection _connection;
+    List<ViewTrigger> _triggers = new List<ViewTrigger>();
+    List<ViewTrigger> _oldtriggers = new List<ViewTrigger>();
 
     internal View(string viewName, DbConnection connection, ViewDesignerDoc parent)
     {
@@ -36,7 +45,26 @@
           if (tbl.Rows.Count > 0)
           {
             _sql = tbl.Rows[0]["VIEW_DEFINITION"].ToString();
-            _oldsql = _sql;
+
+            StringBuilder builder = new StringBuilder();
+            builder.Append(_sql);
+            builder.AppendLine(";");
+
+            _triggers.Clear();
+            _oldtriggers.Clear();
+
+            using (DataTable ttbl = _connection.GetSchema("Triggers", new string[] { Catalog, null, Name }))
+            {
+              foreach (DataRow row in ttbl.Rows)
+              {
+                ViewTrigger t = new ViewTrigger(this, row);
+                _triggers.Add(t);
+                _oldtriggers.Add(((ICloneable)t).Clone() as ViewTrigger);
+
+                builder.AppendFormat("{0};\r\n", t.OriginalSql);
+              }
+            }
+            _oldsql = builder.ToString();
           }
           else
           {
@@ -46,10 +74,28 @@
       }
     }
 
+    public override void MakeDirty()
+    {
+      _owner.MakeDirty();
+    }
+
+    [Browsable(false)]
+    public override object Triggers
+    {
+      get { return _triggers; }
+    }
+
     public void Committed()
     {
       _oldsql = _sql;
       _oldname = _name;
+
+      _oldtriggers = _triggers;
+      _triggers.Clear();
+      foreach (ViewTrigger trig in _oldtriggers)
+      {
+        _triggers.Add(((ICloneable)trig).Clone() as ViewTrigger);
+      }
     }
 
     public override string ToString()
@@ -60,7 +106,7 @@
     [Category("Storage")]
     [RefreshProperties(RefreshProperties.All)]
     [ParenthesizePropertyName(true)]
-    public string Name
+    public override string Name
     {
       get { return _name; }
       set
@@ -73,31 +119,16 @@
         }
       }
     }
-
+  
     [Category("Storage")]
     [Editor(typeof(CatalogTypeEditor), typeof(UITypeEditor))]
     [DefaultValue("main")]
     [RefreshProperties(RefreshProperties.All)]
-    public string Catalog
+    public override string Catalog
     {
       get { return _catalog; }
-      //set
-      //{
-      //  string catalogs = "";
-      //  using (DataTable table = _connection.GetSchema("Catalogs"))
-      //  {
-      //    foreach (DataRow row in table.Rows)
-      //    {
-      //      catalogs += (row[0].ToString() + ",");
-      //    }
-      //  }
-
-      //  if (catalogs.IndexOf(value + ",", StringComparison.OrdinalIgnoreCase) == -1)
-      //    throw new ArgumentOutOfRangeException("Unrecognized catalog!");
-
-      //  _catalog = value;
-      //}
     }
+
     [Category("Storage")]
     public string Database
     {
@@ -131,9 +162,23 @@
       StringBuilder builder = new StringBuilder();
 
       if (String.IsNullOrEmpty(_oldname) == false)
+      {
+        foreach (ViewTrigger trig in _oldtriggers)
+        {
+          builder.AppendFormat("DROP TRIGGER [{0}].[{1}];\r\n", Catalog, trig.Name);
+        }
         builder.AppendFormat("DROP VIEW [{0}].[{1}];\r\n", Catalog, _oldname);
+      }
 
       builder.AppendFormat("CREATE VIEW [{0}].[{1}] AS {2};\r\n", Catalog, Name, SqlText);
+
+      string sep = "";
+      foreach (ViewTrigger trig in _triggers)
+      {
+        builder.Append(sep);
+        trig.WriteSql(builder);
+        sep = "\r\n";
+      }
 
       return builder.ToString();
     }
@@ -202,13 +247,9 @@
 
     #endregion
 
-    #region IHaveConnection Members
-
-    public DbConnection GetConnection()
+    public override DbConnection GetConnection()
     {
       return _connection;
     }
-
-    #endregion
   }
 }
