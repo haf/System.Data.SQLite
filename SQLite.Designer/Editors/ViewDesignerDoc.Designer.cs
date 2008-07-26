@@ -59,6 +59,7 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.Controls.Add(this._pg);
+      this.Font = new System.Drawing.Font("MS Shell Dlg 2", 8.25F);
       this.Name = "ViewDesignerDoc";
       this.Size = new System.Drawing.Size(553, 407);
       this.ResumeLayout(false);

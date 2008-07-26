@@ -117,6 +117,12 @@ namespace System.Data.SQLite
   /// <description>N</description>
   /// <description>30</description>
   /// </item>
+  /// <item>
+  /// <description>Journal Mode</description>
+  /// <description><b>Delete</b> - Delete the journal file after a commit<br/><b>Persist</b> - Zero out and leave the journal file on disk after a commit<br/><b>Off</b> - Disable the rollback journal entirely</description>
+  /// <description>N</description>
+  /// <description>Delete</description>
+  /// </item>
   /// </list>
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
@@ -529,6 +535,12 @@ namespace System.Data.SQLite
     /// <description>N</description>
     /// <description>30</description>
     /// </item>
+    /// <item>
+    /// <description>Journal Mode</description>
+    /// <description><b>Delete</b> - Delete the journal file after a commit<br/><b>Persist</b> - Zero out and leave the journal file on disk after a commit<br/><b>Off</b> - Disable the rollback journal entirely</description>
+    /// <description>N</description>
+    /// <description>Delete</description>
+    /// </item>
     /// </list>
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -779,6 +791,13 @@ namespace System.Data.SQLite
           if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 2000)
           {
             cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA cache_size={0}", defValue);
+            cmd.ExecuteNonQuery();
+          }
+
+          defValue = FindKey(opts, "Journal Mode", "Delete");
+          if (String.Compare(defValue, "Default", StringComparison.OrdinalIgnoreCase) != 0)
+          {
+            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA journal_mode={0}", defValue);
             cmd.ExecuteNonQuery();
           }
         }

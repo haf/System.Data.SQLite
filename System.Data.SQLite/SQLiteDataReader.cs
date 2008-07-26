@@ -180,7 +180,7 @@ namespace System.Data.SQLite
     /// <returns>Returns a DbEnumerator object.</returns>
     public override Collections.IEnumerator GetEnumerator()
     {
-      return new DbEnumerator(this);
+      return new DbEnumerator(this, ((_commandBehavior & CommandBehavior.CloseConnection) == CommandBehavior.CloseConnection));
     }
 
     /// <summary>

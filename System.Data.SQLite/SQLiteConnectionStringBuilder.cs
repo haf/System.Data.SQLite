@@ -368,6 +368,26 @@ namespace System.Data.SQLite
       }
     }
 
+    [Browsable(true)]
+    [DefaultValue(SQLiteJournalModeEnum.Delete)]
+    [DisplayName("Journal Mode")]
+    public SQLiteJournalModeEnum JournalMode
+    {
+      get
+      {
+        object value;
+        TryGetValue("Journal Mode", out value);
+        if (value is string)
+          return (SQLiteJournalModeEnum)TypeDescriptor.GetConverter(typeof(SQLiteJournalModeEnum)).ConvertFrom(value);
+        else
+          return (SQLiteJournalModeEnum)value;
+      }
+      set
+      {
+        this["Journal Mode"] = value;
+      }
+    }
+
     /// <summary>
     /// Helper function for retrieving values from the connectionstring
     /// </summary>

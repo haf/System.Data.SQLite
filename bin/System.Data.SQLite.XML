@@ -107,6 +107,12 @@
             <description>N</description>
             <description>30</description>
             </item>
+            <item>
+            <description>Journal Mode</description>
+            <description><b>Delete</b> - Delete the journal file after a commit<br/><b>Persist</b> - Zero out and leave the journal file on disk after a commit<br/><b>Off</b> - Disable the rollback journal entirely</description>
+            <description>N</description>
+            <description>Delete</description>
+            </item>
             </list>
             </remarks>
         </member>
@@ -591,6 +597,12 @@
             <description>N</description>
             <description>30</description>
             </item>
+            <item>
+            <description>Journal Mode</description>
+            <description><b>Delete</b> - Delete the journal file after a commit<br/><b>Persist</b> - Zero out and leave the journal file on disk after a commit<br/><b>Off</b> - Disable the rollback journal entirely</description>
+            <description>N</description>
+            <description>Delete</description>
+            </item>
             </list>
             </remarks>
         </member>
@@ -762,10 +774,13 @@
         </member>
         <member name="T:System.Data.SQLite.SQLiteDateFormats">
             <summary>
-            This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of two formats.  Ticks and ISO8601.
+            This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of three formats.  Ticks, ISO8601
+            and JulianDay.
             Ticks is inherently more accurate, but less compatible with 3rd party tools that query the database, and renders the DateTime field
-            unreadable without post-processing.
+            unreadable as text without post-processing.
             ISO8601 is more compatible, readable, fully-processable, but less accurate as it doesn't provide time down to fractions of a second.
+            JulianDay is the numeric format the SQLite uses internally and is arguably the most compatible with 3rd party tools.  It is
+            not readable as text without post-processing.
             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteDateFormats.Ticks">
@@ -781,6 +796,36 @@
         <member name="F:System.Data.SQLite.SQLiteDateFormats.JulianDay">
             <summary>
             JulianDay format, which is what SQLite uses internally
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteJournalModeEnum">
+            <summary>
+            This enum determines how SQLite treats its journal file.
+            </summary>
+            <remarks>
+            By default SQLite will create and delete the journal file when needed during a transaction.
+            However, for some computers running certain filesystem monitoring tools, the rapid
+            creation and deletion of the journal file can cause those programs to fail, or to interfere with SQLite.
+            
+            If a program or virus scanner is interfering with SQLite's journal file, you may receive errors like "unable to open database file"
+            when starting a transaction.  If this is happening, you may want to change the default journal mode to Persist.
+            </remarks>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Delete">
+            <summary>
+            The default mode, this causes SQLite to create and destroy the journal file as-needed.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Persist">
+            <summary>
+            When this is set, SQLite will keep the journal file even after a transaction has completed.  It's contents will be erased,
+            and the journal re-used as often as needed.  If it is deleted, it will be recreated the next time it is needed.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Off">
+            <summary>
+            This option disables the rollback journal entirely.  Interrupted transactions or a program crash can cause database
+            corruption in this mode!
             </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLiteType">
@@ -2240,13 +2285,14 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteBase.Prepare(System.Data.SQLite.SQLiteConnection,System.String,System.Data.SQLite.SQLiteStatement,System.String@)">
+        <member name="M:System.Data.SQLite.SQLiteBase.Prepare(System.Data.SQLite.SQLiteConnection,System.String,System.Data.SQLite.SQLiteStatement,System.UInt32,System.String@)">
             <summary>
             Prepares a SQL statement for execution.
             </summary>
             <param name="cnn">The source connection preparing the command.  Can be null for any caller except LINQ</param>
             <param name="strSql">The SQL command text to prepare</param>
             <param name="previous">The previous statement in a multi-statement command, or null if no previous statement exists</param>
+            <param name="timeoutMS">The timeout to wait before aborting the prepare</param>
             <param name="strRemain">The remainder of the statement that was not processed.  Each call to prepare parses the
             SQL up to to either the end of the text or to the first semi-colon delimiter.  The remaining text is returned
             here for a subsequent call to Prepare() until all the text has been processed.</param>

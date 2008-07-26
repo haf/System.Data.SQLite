@@ -416,7 +416,6 @@ namespace SQLite.Designer.Editors
 
     public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
     {
-      System.Diagnostics.Debug.WriteLine(String.Format("{0} {1}", pguidCmdGroup, nCmdID));
       if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97)
       {
         switch ((VSConstants.VSStd97CmdID)nCmdID)
@@ -555,6 +554,10 @@ namespace SQLite.Designer.Editors
             _pg.SelectedGridItem = _pg.SelectedGridItem.Parent.GridItems[0];
             IndexEditor ed = new IndexEditor(_table);
             ed.EditValue((ITypeDescriptorContext)_pg.SelectedGridItem, (System.IServiceProvider)_pg.SelectedGridItem, _pg.SelectedGridItem.Value);
+
+            _dataGrid_SelectionChanged(this, EventArgs.Empty);
+            _dataGrid.Invalidate();
+
             return VSConstants.S_OK;
           case VSConstants.VSStd97CmdID.ManageRelationships:
             holder = new EditorHolder(_table);

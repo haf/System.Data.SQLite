@@ -165,6 +165,8 @@ namespace test
       {
         for (int x = 0; x < 10000; x++)
         {
+          if (newcnn.State != ConnectionState.Open) 
+            newcnn.Open();
           DbCommand cmd = newcnn.CreateCommand();
           cmd.CommandText = "SELECT * FROM TestCase";
           DbDataReader reader = cmd.ExecuteReader();
@@ -224,6 +226,7 @@ namespace test
         cmd.ExecuteNonQuery();
 
         cmd.CommandText = "select myvalue, datetimevalue, decimalvalue from datatypetest";
+        cmd.Parameters.Clear();
         using (DbDataReader reader = cmd.ExecuteReader())
         {
           for (int n = 0; n < 3; n++)
@@ -369,6 +372,7 @@ namespace test
         }
 
         cmd.CommandText = "select rowid, name, ingredients from FullText where name match 'pie';";
+        cmd.Parameters.Clear();
 
         int[] rowids = { 3, 4 };
         n = 0;
@@ -391,6 +395,7 @@ namespace test
       {
         using (DbConnection cnn2 = ((ICloneable)cnn).Clone() as DbConnection)
         {
+          if (cnn2.State != ConnectionState.Open) cnn2.Open();
           using (DbCommand cmd = cnn2.CreateCommand())
           {
             // Created a table inside the transaction scope
@@ -422,8 +427,9 @@ namespace test
           object o = cmd.ExecuteScalar();
           throw new InvalidOperationException("Transaction failed! The table exists!");
         }
-        catch(SQLiteException)
+        catch(Exception e)
         {
+          if (e is InvalidOperationException) throw;
           return; // Succeeded, the table should not have existed
         }
       }
@@ -468,7 +474,11 @@ namespace test
 
         // Insert a guid as a default binary representation
         cmd.CommandText = "INSERT INTO GuidTest(MyGuid) VALUES(@b)";
-        ((SQLiteParameterCollection)cmd.Parameters).AddWithValue("@b", guid);
+        DbParameter parm = cmd.CreateParameter();
+        parm.ParameterName = "@b";
+        parm.Value = guid;
+        cmd.Parameters.Add(parm);
+        //((SQLiteParameterCollection)cmd.Parameters).AddWithValue("@b", guid);
 
         // Insert a guid as text
         cmd.ExecuteNonQuery();
@@ -477,6 +487,8 @@ namespace test
         cmd.ExecuteNonQuery();
 
         cmd.CommandText = "SELECT MyGuid FROM GuidTest";
+        cmd.Parameters.Clear();
+
         using (DbDataReader reader = cmd.ExecuteReader())
         {
           reader.Read();
@@ -650,6 +662,7 @@ namespace test
 
           using (DbConnection clone = (DbConnection)((ICloneable)cnn).Clone())
           {
+            if (clone.State != ConnectionState.Open) clone.Open();
             using (DbCommand newcmd = clone.CreateCommand())
             {
               newcmd.CommandText = "DELETE FROM TestCase WHERE Field6 IS NULL";
@@ -941,7 +954,7 @@ namespace test
             {
               cmdwrite.ExecuteNonQuery();
             }
-            catch (SQLiteException)
+            catch (Exception)
             {
               dwtick = (Environment.TickCount - dwtick) / 1000;
               if (dwtick < 5 || dwtick > 6)

@@ -38,11 +38,11 @@ namespace SQLite.Designer.Editors
       this.name = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.type = new SQLite.Designer.Editors.AutoCompleteColumn();
       this.isnull = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-      this._propertyGrid = new System.Windows.Forms.PropertyGrid();
+      this._pg = new System.Windows.Forms.PropertyGrid();
       this._sqlText = new System.Windows.Forms.RichTextBox();
+      this._propertyGrid = new System.Windows.Forms.PropertyGrid();
       this.autoCompleteColumn1 = new SQLite.Designer.Editors.AutoCompleteColumn();
       this._imageList = new System.Windows.Forms.ImageList(this.components);
-      this._pg = new System.Windows.Forms.PropertyGrid();
       _splitter = new System.Windows.Forms.SplitContainer();
       _splitter.Panel1.SuspendLayout();
       _splitter.Panel2.SuspendLayout();
@@ -118,16 +118,21 @@ namespace SQLite.Designer.Editors
       // 
       // isnull
       // 
+      this.isnull.FalseValue = false;
       this.isnull.HeaderText = "Allow Nulls";
+      this.isnull.IndeterminateValue = false;
       this.isnull.Name = "isnull";
+      this.isnull.TrueValue = true;
       // 
-      // _propertyGrid
+      // _pg
       // 
-      this._propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-      this._propertyGrid.Location = new System.Drawing.Point(0, 0);
-      this._propertyGrid.Name = "_propertyGrid";
-      this._propertyGrid.Size = new System.Drawing.Size(436, 244);
-      this._propertyGrid.TabIndex = 0;
+      this._pg.Location = new System.Drawing.Point(3, 171);
+      this._pg.Name = "_pg";
+      this._pg.PropertySort = System.Windows.Forms.PropertySort.NoSort;
+      this._pg.Size = new System.Drawing.Size(130, 130);
+      this._pg.TabIndex = 1;
+      this._pg.ToolbarVisible = false;
+      this._pg.Visible = false;
       // 
       // _sqlText
       // 
@@ -139,6 +144,14 @@ namespace SQLite.Designer.Editors
       this._sqlText.TabIndex = 0;
       this._sqlText.Text = "";
       this._sqlText.Visible = false;
+      // 
+      // _propertyGrid
+      // 
+      this._propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+      this._propertyGrid.Location = new System.Drawing.Point(0, 0);
+      this._propertyGrid.Name = "_propertyGrid";
+      this._propertyGrid.Size = new System.Drawing.Size(436, 244);
+      this._propertyGrid.TabIndex = 0;
       // 
       // autoCompleteColumn1
       // 
@@ -153,22 +166,13 @@ namespace SQLite.Designer.Editors
       this._imageList.TransparentColor = System.Drawing.Color.Magenta;
       this._imageList.Images.SetKeyName(0, "PrimaryKey.bmp");
       // 
-      // _pg
-      // 
-      this._pg.Location = new System.Drawing.Point(3, 171);
-      this._pg.Name = "_pg";
-      this._pg.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-      this._pg.Size = new System.Drawing.Size(130, 130);
-      this._pg.TabIndex = 1;
-      this._pg.ToolbarVisible = false;
-      this._pg.Visible = false;
-      // 
       // TableDesignerDoc
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.SystemColors.Window;
       this.Controls.Add(_splitter);
+      this.Font = new System.Drawing.Font("MS Shell Dlg 2", 8.25F);
       this.Name = "TableDesignerDoc";
       this.Size = new System.Drawing.Size(436, 631);
       _splitter.Panel1.ResumeLayout(false);
@@ -185,11 +189,11 @@ namespace SQLite.Designer.Editors
     private AutoCompleteColumn autoCompleteColumn1;
     private System.Windows.Forms.ImageList _imageList;
     private System.Windows.Forms.DataGridView _dataGrid;
+    private System.Windows.Forms.RichTextBox _sqlText;
+    private System.Windows.Forms.PropertyGrid _pg;
     private System.Windows.Forms.DataGridViewTextBoxColumn name;
     private AutoCompleteColumn type;
     private System.Windows.Forms.DataGridViewCheckBoxColumn isnull;
-    private System.Windows.Forms.RichTextBox _sqlText;
-    private System.Windows.Forms.PropertyGrid _pg;
 
   }
 }

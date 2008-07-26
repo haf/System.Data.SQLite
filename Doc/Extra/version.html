@@ -55,6 +55,18 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.54.0 - July 25, 2008</b></p>
+    <ul>
+      <li>Fixed the setup project, which somehow &quot;forgot&quot; to include all the binaries in 
+        the 53 release.</li>
+      <li>Fixed a crash in the table designer when creating a new table and tabbing past 
+        the &quot;Allow Nulls&quot; cell in the grid while creating a new column.</li>
+      <li>Fixed a mostly-benign bug in SQLiteDataReader&#39;s GetEnumerator, which failed to 
+        pass along a flag to the underyling DbEnumerator it creates.&nbsp; This one&#39;s 
+        been around since day 1 and nobody&#39;s noticed it in all these years.</li>
+      <li>Added a new connection string parameter &quot;Journal Mode&quot; that allows you to set 
+        the SQLite journal mode to Delete, Persist or Off.</li>
+    </ul>
     <p><b>1.0.53.0 - July 24, 2008</b></p>
     <ul>
       <li>Enabled sqlite_load_extension</li>

@@ -125,9 +125,7 @@ namespace SQLite.Designer.Design
           value = _parent.Cells[cellIndex].EditedFormattedValue;
       }
       else
-        value = _parent.Cells[cellIndex].Value;
-
-      if (value == null) value = String.Empty;
+        value = _parent.Cells[cellIndex].EditedFormattedValue;
 
       switch (cellIndex)
       {
@@ -138,7 +136,13 @@ namespace SQLite.Designer.Design
           DataType = value.ToString();
           break;
         case 2:
-          AllowNulls = Convert.ToBoolean(value);
+          try
+          {
+            AllowNulls = Convert.ToBoolean(value);
+          }
+          catch
+          {
+          }
           break;
       }
     }
@@ -250,7 +254,7 @@ namespace SQLite.Designer.Design
           builder.Append(" DESC");
 
         if (_table.PrimaryKey.Conflict != ConflictEnum.Abort)
-          builder.AppendFormat(" ON CONFLICT {0}", _table.PrimaryKey.Conflict.ToString());
+          builder.AppendFormat(" ON CONFLICT {0}", _table.PrimaryKey.Conflict.ToString().ToUpperInvariant());
 
         if (_table.PrimaryKey.AutoIncrement == true)
           builder.Append(" AUTOINCREMENT");

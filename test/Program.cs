@@ -18,10 +18,19 @@ namespace test
       DbProviderFactory fact;
       fact = DbProviderFactories.GetFactory("System.Data.SQLite");
 
-      SQLiteConnection cnn = new SQLiteConnection();
+      DbConnection cnn = fact.CreateConnection();
       {
-        cnn.ConnectionString = "Data Source=test.db3;Pooling=False;Password=testing";
+        cnn.ConnectionString = "Data Source=test.db3;Pooling=False;FailIfMissing=False";
         cnn.Open();
+
+        using (DbCommand cmd = cnn.CreateCommand())
+        {
+          cmd.CommandText = "TYPES integer, nvarchar, double;SELECT 1, 2, 3;";
+          using (DbDataReader reader = cmd.ExecuteReader())
+          {
+            reader.Read();
+          }
+        }
 
         TestCases.Run(fact, cnn);
       }

@@ -59,10 +59,13 @@ namespace System.Data.SQLite
   }
 
   /// <summary>
-  /// This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of two formats.  Ticks and ISO8601.
+  /// This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of three formats.  Ticks, ISO8601
+  /// and JulianDay.
   /// Ticks is inherently more accurate, but less compatible with 3rd party tools that query the database, and renders the DateTime field
-  /// unreadable without post-processing.
+  /// unreadable as text without post-processing.
   /// ISO8601 is more compatible, readable, fully-processable, but less accurate as it doesn't provide time down to fractions of a second.
+  /// JulianDay is the numeric format the SQLite uses internally and is arguably the most compatible with 3rd party tools.  It is
+  /// not readable as text without post-processing.
   /// </summary>
   public enum SQLiteDateFormats
   {
@@ -78,6 +81,35 @@ namespace System.Data.SQLite
     /// JulianDay format, which is what SQLite uses internally
     /// </summary>
     JulianDay = 2
+  }
+
+  /// <summary>
+  /// This enum determines how SQLite treats its journal file.
+  /// </summary>
+  /// <remarks>
+  /// By default SQLite will create and delete the journal file when needed during a transaction.
+  /// However, for some computers running certain filesystem monitoring tools, the rapid
+  /// creation and deletion of the journal file can cause those programs to fail, or to interfere with SQLite.
+  /// 
+  /// If a program or virus scanner is interfering with SQLite's journal file, you may receive errors like "unable to open database file"
+  /// when starting a transaction.  If this is happening, you may want to change the default journal mode to Persist.
+  /// </remarks>
+  public enum SQLiteJournalModeEnum
+  {
+    /// <summary>
+    /// The default mode, this causes SQLite to create and destroy the journal file as-needed.
+    /// </summary>
+    Delete = 0,
+    /// <summary>
+    /// When this is set, SQLite will keep the journal file even after a transaction has completed.  It's contents will be erased,
+    /// and the journal re-used as often as needed.  If it is deleted, it will be recreated the next time it is needed.
+    /// </summary>
+    Persist = 1,
+    /// <summary>
+    /// This option disables the rollback journal entirely.  Interrupted transactions or a program crash can cause database
+    /// corruption in this mode!
+    /// </summary>
+    Off = 2
   }
 
   /// <summary>
