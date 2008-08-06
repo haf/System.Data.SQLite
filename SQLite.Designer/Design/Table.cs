@@ -33,7 +33,6 @@ namespace SQLite.Designer.Design
     private string _catalog;
     private List<Column> _columns = new List<Column>();
     private bool _exists = false;
-    private bool _hascheck = false;
     private string _origSql = String.Empty;
     private List<Index> _indexes = new List<Index>();
     private List<Index> _oldindexes = new List<Index>();
@@ -92,7 +91,6 @@ namespace SQLite.Designer.Design
         if (tbl.Rows.Count > 0)
         {
           _exists = true;
-          _hascheck = (bool)tbl.Rows[0]["HAS_CHECKCONSTRAINTS"];
           _origSql = tbl.Rows[0]["TABLE_DEFINITION"].ToString().Trim().TrimEnd(';');
         }
         else
@@ -267,12 +265,6 @@ namespace SQLite.Designer.Design
     public string OriginalSql
     {
       get { return _origSql; }
-    }
-
-    [Browsable(false)]
-    public bool HasCheck
-    {
-      get { return _hascheck; }
     }
 
     [Category("Storage")]

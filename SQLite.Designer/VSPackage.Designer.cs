@@ -102,5 +102,14 @@ namespace SQLite.Designer {
                 return ResourceManager.GetString("ReEncrypt", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string ToolboxItems {
+            get {
+                return ResourceManager.GetString("ToolboxItems", resourceCulture);
+            }
+        }
     }
 }

@@ -17,69 +17,89 @@ namespace SQLite.Designer
   /// </summary>
   internal sealed class SQLiteConnectionProperties : AdoDotNetConnectionProperties
   {
-    public SQLiteConnectionProperties() : base("System.Data.SQLite")
+    public SQLiteConnectionProperties()
+      : this(null)
     {
     }
 
-    public SQLiteConnectionProperties(string connectionString) : base("System.Data.SQLite", connectionString)
+    public SQLiteConnectionProperties(string connectionString)
+      : base("System.Data.SQLite", connectionString)
     {
     }
 
     public override string[] GetBasicProperties()
     {
-      return new string[] { "Data Source" };
+      return new string[] { "data source" };
+    }
+
+    protected override bool ShouldPersistProperty(string propertyName)
+    {
+      if (String.Compare(propertyName, "Database", StringComparison.OrdinalIgnoreCase) == 0) return false;
+
+      return base.ShouldPersistProperty(propertyName);
+    }
+
+    public override bool Contains(string propertyName)
+    {
+      if (String.Compare(propertyName, "Database", StringComparison.OrdinalIgnoreCase) == 0)
+        return (base.Contains("data source") || base.Contains("uri"));
+
+      return base.Contains(propertyName);
+    }
+
+    public override object this[string propertyName]
+    {
+      get
+      {
+        if (String.Compare(propertyName, "Database", StringComparison.OrdinalIgnoreCase) == 0)
+          return System.IO.Path.GetFileNameWithoutExtension(GetDatabaseFile());
+
+        return base[propertyName];
+      }
+      set
+      {
+        base[propertyName] = value;
+      }
+    }
+
+    internal string GetDatabaseFile()
+    {
+      if (this["data source"] is string && ((string)this["data source"]).Length > 0)
+        return (string)this["data source"];
+      else if (this["uri"] is string)
+        return MapUriPath((string)this["uri"]);
+      return String.Empty;
     }
 
     public override bool  IsComplete
     {
       get 
       {
-        return true;
+        if (Contains("data source") == true)
+        {
+          if (this["data source"] is string && ((string)this["data source"]).Length > 0)
+            return true;
+        }
+        else if (Contains("uri") == true)
+        {
+          if (this["uri"] is string && MapUriPath((string)this["uri"]).Length > 0)
+            return true;
+        }
+
+        return false;
       }
     }
 
-    public override bool EquivalentTo(DataConnectionProperties connectionProperties)
+    internal static string MapUriPath(string path)
     {
-      SQLiteConnectionProperties props = connectionProperties as SQLiteConnectionProperties;
-
-      if (props == null) return false;
-
-      return (String.Compare((string)this["Data Source"], (string)props["Data Source"], true) == 0);
+      if (path.StartsWith("file://"))
+        return path.Substring(7);
+      else if (path.StartsWith("file:"))
+        return path.Substring(5);
+      else if (path.StartsWith("/"))
+        return path;
+      else
+        return String.Empty;
     }
-    // Provides automatic locating and loading of the SQLite assembly if its not registered in the GAC.
-    // However, if it's not registered in the GAC, then certain design-time elements will fail.
-    //
-    //private static System.Reflection.Assembly _sqlite = null;
-    //static SQLiteConnectionProperties()
-    //{
-    //  AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
-    //}
-
-    //private static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-    //{
-    //  if (args.Name.StartsWith("System.Data.SQLite", StringComparison.InvariantCultureIgnoreCase))
-    //  {
-    //    return SQLiteAssembly;
-    //  }
-    //  return null;
-    //}
-
-    //internal static System.Reflection.Assembly SQLiteAssembly
-    //{
-    //  get
-    //  {
-    //    if (_sqlite == null)
-    //    {
-    //      using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\.NETFramework\\v2.0.50727\\AssemblyFoldersEx\\SQLite"))
-    //      {
-    //        if (key != null)
-    //        {
-    //          _sqlite = System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(key.GetValue(null).ToString(), "System.Data.SQLite.DLL"));
-    //        }
-    //      }
-    //    }
-    //    return _sqlite;
-    //  }
-    //}
   }
 }

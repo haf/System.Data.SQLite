@@ -4,6 +4,55 @@
         <name>System.Data.SQLite</name>
     </assembly>
     <members>
+        <member name="F:System.Data.SQLite.SQLiteConnectionPool._connections">
+            <summary>
+            The connection pool object
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionPool._poolVersion">
+            <summary>
+            The default version number new pools will get
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnectionPool.Remove(System.String,System.Int32,System.Int32@)">
+            <summary>
+            Attempt to pull a pooled connection out of the queue for active duty
+            </summary>
+            <param name="fileName">The filename for a desired connection</param>
+            <param name="maxPoolSize">The maximum size the connection pool for the filename can be</param>
+            <param name="version">The pool version the returned connection will belong to</param>
+            <returns>Returns NULL if no connections were available.  Even if none are, the poolversion will still be a valid pool version</returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnectionPool.ClearAllPools">
+            <summary>
+            Clears out all pooled connections and rev's up the default pool version to force all old active objects
+            not in the pool to get discarded rather than returned to their pools.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnectionPool.ClearPool(System.String)">
+            <summary>
+            Clear a given pool for a given filename.  Discards anything in the pool for the given file, and revs the pool
+            version so current active objects on the old version of the pool will get discarded rather than be returned to the pool.
+            </summary>
+            <param name="fileName">The filename of the pool to clear</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnectionPool.Add(System.String,System.Data.SQLite.SQLiteConnectionHandle,System.Int32)">
+            <summary>
+            Return a connection to the pool for someone else to use.
+            </summary>
+            <param name="fileName">The filename of the pool to use</param>
+            <param name="hdl">The connection handle to pool</param>
+            <param name="version">The pool version the handle was created under</param>
+            <remarks>
+            If the version numbers don't match between the connection and the pool, then the handle is discarded.
+            </remarks>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteConnectionPool.Pool">
+            <summary>
+            Keeps track of connections made on a specified file.  The PoolVersion dictates whether old objects get
+            returned to the pool or discarded when no longer in use.
+            </summary>
+        </member>
         <member name="T:System.Data.SQLite.SQLiteConnection">
             <summary>
             SQLite implentation of DbConnection.
@@ -99,7 +148,7 @@
             <description>Legacy Format</description>
             <description><b>True</b> - Use the more compatible legacy 3.x database format<br/><b>False</b> - Use the newer 3.3x database format which compresses numbers more effectively</description>
             <description>N</description>
-            <description>True</description>
+            <description>False</description>
             </item>
             <item>
             <description>Default Timeout</description>
@@ -112,6 +161,24 @@
             <description><b>Delete</b> - Delete the journal file after a commit<br/><b>Persist</b> - Zero out and leave the journal file on disk after a commit<br/><b>Off</b> - Disable the rollback journal entirely</description>
             <description>N</description>
             <description>Delete</description>
+            </item>
+            <item>
+            <description>Read Only</description>
+            <description><b>True</b> - Open the database for read only access<br/><b>False</b> - Open the database for normal read/write access</description>
+            <description>N</description>
+            <description>False</description>
+            </item>
+            <item>
+            <description>Max Pool Size</description>
+            <description>The maximum number of connections for the given connection string that can be in the connection pool</description>
+            <description>N</description>
+            <description>100</description>
+            </item>
+            <item>
+            <description>Default IsolationLevel</description>
+            <description>The default transaciton isolation level</description>
+            <description>N</description>
+            <description>Serializable</description>
             </item>
             </list>
             </remarks>
@@ -129,6 +196,11 @@
         <member name="F:System.Data.SQLite.SQLiteConnection._transactionLevel">
             <summary>
             Nesting level of the transactions open on the connection
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnection._defaultIsolation">
+            <summary>
+            The default isolation level for new transactions
             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteConnection._enlistment">
@@ -220,9 +292,9 @@
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.BeginTransaction(System.Data.IsolationLevel,System.Boolean)">
             <summary>
-            Creates a new SQLiteTransaction if one isn't already active on the connection.
+            OBSOLETE.  Creates a new SQLiteTransaction if one isn't already active on the connection.
             </summary>
-            <param name="isolationLevel">SQLite doesn't support varying isolation levels, so this parameter is ignored.</param>
+            <param name="isolationLevel">This parameter is ignored.</param>
             <param name="deferredLock">When TRUE, SQLite defers obtaining a write lock until a write operation is requested.
             When FALSE, a writelock is obtained immediately.  The default is TRUE, but in a multi-threaded multi-writer 
             environment, one may instead choose to lock the database immediately to avoid any possible writer deadlock.</param>
@@ -230,10 +302,10 @@
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.BeginTransaction(System.Boolean)">
             <summary>
-            Creates a new SQLiteTransaction if one isn't already active on the connection.
+            OBSOLETE.  Creates a new SQLiteTransaction if one isn't already active on the connection.
             </summary>
             <param name="deferredLock">When TRUE, SQLite defers obtaining a write lock until a write operation is requested.
-            When FALSE, a writelock is obtained immediately.  The default is TRUE, but in a multi-threaded multi-writer 
+            When FALSE, a writelock is obtained immediately.  The default is false, but in a multi-threaded multi-writer 
             environment, one may instead choose to lock the database immediately to avoid any possible writer deadlock.</param>
             <returns>Returns a SQLiteTransaction object.</returns>
         </member>
@@ -241,7 +313,16 @@
             <summary>
             Creates a new SQLiteTransaction if one isn't already active on the connection.
             </summary>
-            <param name="isolationLevel">SQLite supports only serializable transactions.</param>
+            <param name="isolationLevel">Supported isolation levels are Serializable, ReadCommitted and Unspecified.</param>
+            <remarks>
+            Unspecified will use the default isolation level specified in the connection string.  If no isolation level is specified in the 
+            connection string, Serializable is used.
+            Serializable transactions are the default.  In this mode, the engine gets an immediate lock on the database, and no other threads
+            may begin a transaction.  Other threads may read from the database, but not write.
+            With a ReadCommitted isolation level, locks are deferred and elevated as needed.  It is possible for multiple threads to start
+            a transaction in ReadCommitted mode, but if a thread attempts to commit a transaction while another thread
+            has a ReadCommitted lock, it may timeout or cause a deadlock on both threads until both threads' CommandTimeout's are reached.
+            </remarks>
             <returns>Returns a SQLiteTransaction object.</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.BeginTransaction">
@@ -254,7 +335,7 @@
             <summary>
             Forwards to the local BeginTransaction() function
             </summary>
-            <param name="isolationLevel"></param>
+            <param name="isolationLevel">Supported isolation levels are Unspecified, Serializable, and ReadCommitted</param>
             <returns></returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.ChangeDatabase(System.String)">
@@ -266,6 +347,18 @@
         <member name="M:System.Data.SQLite.SQLiteConnection.Close">
             <summary>
             When the database connection is closed, all commands linked to this connection are automatically reset.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.ClearPool(System.Data.SQLite.SQLiteConnection)">
+            <summary>
+            Clears the connection pool associated with the connection.  Any other active connections using the same database file
+            will be discarded instead of returned to the pool when they are closed.
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.ClearAllPools">
+            <summary>
+            Clears all connection pools.  Any active connections will be discarded instead of sent to the pool when they are closed.
             </summary>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.CreateCommand">
@@ -280,10 +373,11 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteConnection.ParseConnectionString">
+        <member name="M:System.Data.SQLite.SQLiteConnection.ParseConnectionString(System.String)">
             <summary>
             Parses the connection string into component parts
             </summary>
+            <param name="connectionString">The connection string to parse</param>
             <returns>An array of key-value pairs representing each parameter of the connection string</returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.EnlistTransaction(System.Transactions.Transaction)">
@@ -589,7 +683,7 @@
             <description>Legacy Format</description>
             <description><b>True</b> - Use the more compatible legacy 3.x database format<br/><b>False</b> - Use the newer 3.3x database format which compresses numbers more effectively</description>
             <description>N</description>
-            <description>True</description>
+            <description>False</description>
             </item>
             <item>
             <description>Default Timeout</description>
@@ -602,6 +696,24 @@
             <description><b>Delete</b> - Delete the journal file after a commit<br/><b>Persist</b> - Zero out and leave the journal file on disk after a commit<br/><b>Off</b> - Disable the rollback journal entirely</description>
             <description>N</description>
             <description>Delete</description>
+            </item>
+            <item>
+            <description>Read Only</description>
+            <description><b>True</b> - Open the database for read only access<br/><b>False</b> - Open the database for normal read/write access</description>
+            <description>N</description>
+            <description>False</description>
+            </item>
+            <item>
+            <description>Max Pool Size</description>
+            <description>The maximum number of connections for the given connection string that can be in the connection pool</description>
+            <description>N</description>
+            <description>100</description>
+            </item>
+            <item>
+            <description>Default IsolationLevel</description>
+            <description>The default transaciton isolation level</description>
+            <description>N</description>
+            <description>Serializable</description>
             </item>
             </list>
             </remarks>
@@ -724,123 +836,6 @@
         <member name="P:System.Data.SQLite.SQLiteDataAdapter.DeleteCommand">
             <summary>
             Gets/sets the delete command for this DataAdapter
-            </summary>
-        </member>
-        <member name="T:System.Data.SQLite.TypeAffinity">
-            <summary>
-            SQLite has very limited types, and is inherently text-based.  The first 5 types below represent the sum of all types SQLite
-            understands.  The DateTime extension to the spec is for internal use only.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.TypeAffinity.Uninitialized">
-            <summary>
-            Not used
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.TypeAffinity.Int64">
-            <summary>
-            All integers in SQLite default to Int64
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.TypeAffinity.Double">
-            <summary>
-            All floating point numbers in SQLite default to double
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.TypeAffinity.Text">
-            <summary>
-            The default data type of SQLite is text
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.TypeAffinity.Blob">
-            <summary>
-            Typically blob types are only seen when returned from a function
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.TypeAffinity.Null">
-            <summary>
-            Null types can be returned from functions
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.TypeAffinity.DateTime">
-            <summary>
-            Used internally by this provider
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.TypeAffinity.None">
-            <summary>
-            Used internally
-            </summary>
-        </member>
-        <member name="T:System.Data.SQLite.SQLiteDateFormats">
-            <summary>
-            This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of three formats.  Ticks, ISO8601
-            and JulianDay.
-            Ticks is inherently more accurate, but less compatible with 3rd party tools that query the database, and renders the DateTime field
-            unreadable as text without post-processing.
-            ISO8601 is more compatible, readable, fully-processable, but less accurate as it doesn't provide time down to fractions of a second.
-            JulianDay is the numeric format the SQLite uses internally and is arguably the most compatible with 3rd party tools.  It is
-            not readable as text without post-processing.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteDateFormats.Ticks">
-            <summary>
-            Using ticks is more accurate but less compatible with other viewers and utilities that access your database.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteDateFormats.ISO8601">
-            <summary>
-            The default format for this provider.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteDateFormats.JulianDay">
-            <summary>
-            JulianDay format, which is what SQLite uses internally
-            </summary>
-        </member>
-        <member name="T:System.Data.SQLite.SQLiteJournalModeEnum">
-            <summary>
-            This enum determines how SQLite treats its journal file.
-            </summary>
-            <remarks>
-            By default SQLite will create and delete the journal file when needed during a transaction.
-            However, for some computers running certain filesystem monitoring tools, the rapid
-            creation and deletion of the journal file can cause those programs to fail, or to interfere with SQLite.
-            
-            If a program or virus scanner is interfering with SQLite's journal file, you may receive errors like "unable to open database file"
-            when starting a transaction.  If this is happening, you may want to change the default journal mode to Persist.
-            </remarks>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Delete">
-            <summary>
-            The default mode, this causes SQLite to create and destroy the journal file as-needed.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Persist">
-            <summary>
-            When this is set, SQLite will keep the journal file even after a transaction has completed.  It's contents will be erased,
-            and the journal re-used as often as needed.  If it is deleted, it will be recreated the next time it is needed.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Off">
-            <summary>
-            This option disables the rollback journal entirely.  Interrupted transactions or a program crash can cause database
-            corruption in this mode!
-            </summary>
-        </member>
-        <member name="T:System.Data.SQLite.SQLiteType">
-            <summary>
-            Struct used internally to determine the datatype of a column in a resultset
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteType.Type">
-            <summary>
-            The DbType of the column, or DbType.Object if it cannot be determined
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteType.Affinity">
-            <summary>
-            The affinity of a column, used for expressions or when Type is DbType.Object
             </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLiteConvert">
@@ -980,6 +975,24 @@
             <param name="separator">Separator character</param>
             <returns>A string array of the split up elements</returns>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.ToBoolean(System.Object)">
+            <summary>
+            Convert a value to true or false.
+            </summary>
+            <param name="source">A string or number representing true or false</param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.ToBoolean(System.String)">
+            <summary>
+            Convert a string to true or false.
+            </summary>
+            <param name="source">A string representing true or false</param>
+            <returns></returns>
+            <remarks>
+            "yes", "no", "y", "n", "0", "1", "on", "off" as well as Boolean.FalseString and Boolean.TrueString will all be
+            converted to a proper boolean value.
+            </remarks>
+        </member>
         <member name="M:System.Data.SQLite.SQLiteConvert.ColumnToType(System.Data.SQLite.SQLiteStatement,System.Int32,System.Data.SQLite.SQLiteType)">
             <summary>
             Determines the data type of a column in a statement
@@ -1029,6 +1042,127 @@
             </summary>
             <param name="Name">The name of the type to match</param>
             <returns>The .NET DBType the text evaluates to.</returns>
+        </member>
+        <member name="T:System.Data.SQLite.TypeAffinity">
+            <summary>
+            SQLite has very limited types, and is inherently text-based.  The first 5 types below represent the sum of all types SQLite
+            understands.  The DateTime extension to the spec is for internal use only.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.TypeAffinity.Uninitialized">
+            <summary>
+            Not used
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.TypeAffinity.Int64">
+            <summary>
+            All integers in SQLite default to Int64
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.TypeAffinity.Double">
+            <summary>
+            All floating point numbers in SQLite default to double
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.TypeAffinity.Text">
+            <summary>
+            The default data type of SQLite is text
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.TypeAffinity.Blob">
+            <summary>
+            Typically blob types are only seen when returned from a function
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.TypeAffinity.Null">
+            <summary>
+            Null types can be returned from functions
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.TypeAffinity.DateTime">
+            <summary>
+            Used internally by this provider
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.TypeAffinity.None">
+            <summary>
+            Used internally
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteDateFormats">
+            <summary>
+            This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of three formats.  Ticks, ISO8601
+            and JulianDay.
+            </summary>
+            <remarks>
+            ISO8601 is more compatible, readable, fully-processable, but less accurate as it doesn't provide time down to fractions of a second.
+            JulianDay is the numeric format the SQLite uses internally and is arguably the most compatible with 3rd party tools.  It is
+            not readable as text without post-processing.
+            Ticks less compatible with 3rd party tools that query the database, and renders the DateTime field unreadable as text without post-processing.
+            
+            The preferred order of choosing a datetime format is JulianDay, ISO8601, and then Ticks.  Ticks is mainly present for legacy 
+            code support.
+            </remarks>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteDateFormats.Ticks">
+            <summary>
+            Using ticks is not recommended and is not well supported with LINQ.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteDateFormats.ISO8601">
+            <summary>
+            The default format for this provider.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteDateFormats.JulianDay">
+            <summary>
+            JulianDay format, which is what SQLite uses internally
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteJournalModeEnum">
+            <summary>
+            This enum determines how SQLite treats its journal file.
+            </summary>
+            <remarks>
+            By default SQLite will create and delete the journal file when needed during a transaction.
+            However, for some computers running certain filesystem monitoring tools, the rapid
+            creation and deletion of the journal file can cause those programs to fail, or to interfere with SQLite.
+            
+            If a program or virus scanner is interfering with SQLite's journal file, you may receive errors like "unable to open database file"
+            when starting a transaction.  If this is happening, you may want to change the default journal mode to Persist.
+            </remarks>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Delete">
+            <summary>
+            The default mode, this causes SQLite to create and destroy the journal file as-needed.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Persist">
+            <summary>
+            When this is set, SQLite will keep the journal file even after a transaction has completed.  It's contents will be erased,
+            and the journal re-used as often as needed.  If it is deleted, it will be recreated the next time it is needed.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteJournalModeEnum.Off">
+            <summary>
+            This option disables the rollback journal entirely.  Interrupted transactions or a program crash can cause database
+            corruption in this mode!
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteType">
+            <summary>
+            Struct used internally to determine the datatype of a column in a resultset
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteType.Type">
+            <summary>
+            The DbType of the column, or DbType.Object if it cannot be determined
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteType.Affinity">
+            <summary>
+            The affinity of a column, used for expressions or when Type is DbType.Object
+            </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLiteTransaction">
             <summary>
@@ -1126,48 +1260,6 @@
             A single sub-query for a given table/database.
             </summary>
         </member>
-        <member name="T:System.Data.SQLite.FunctionType">
-            <summary>
-            The type of user-defined function to declare
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.FunctionType.Scalar">
-            <summary>
-            Scalar functions are designed to be called and return a result immediately.  Examples include ABS(), Upper(), Lower(), etc.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.FunctionType.Aggregate">
-            <summary>
-            Aggregate functions are designed to accumulate data until the end of a call and then return a result gleaned from the accumulated data.
-            Examples include SUM(), COUNT(), AVG(), etc.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.FunctionType.Collation">
-            <summary>
-            Collation sequences are used to sort textual data in a custom manner, and appear in an ORDER BY clause.  Typically text in an ORDER BY is
-            sorted using a straight case-insensitive comparison function.  Custom collating sequences can be used to alter the behavior of text sorting
-            in a user-defined manner.
-            </summary>
-        </member>
-        <member name="T:System.Data.SQLite.SQLiteCallback">
-            <summary>
-            An internal callback delegate declaration.
-            </summary>
-            <param name="context">Raw context pointer for the user function</param>
-            <param name="nArgs">Count of arguments to the function</param>
-            <param name="argsptr">A pointer to the array of argument pointers</param>
-        </member>
-        <member name="T:System.Data.SQLite.SQLiteCollation">
-            <summary>
-            Internal callback delegate for implementing collation sequences
-            </summary>
-            <param name="len1">Length of the string pv1</param>
-            <param name="pv1">Pointer to the first string to compare</param>
-            <param name="len2">Length of the string pv2</param>
-            <param name="pv2">Pointer to the second string to compare</param>
-            <returns>Returns -1 if the first string is less than the second.  0 if they are equal, or 1 if the first string is greater
-            than the second.</returns>
-        </member>
         <member name="T:System.Data.SQLite.SQLiteFunction">
             <summary>
             This abstract class is designed to handle user-defined functions easily.  An instance of the derived class is made for each
@@ -1189,11 +1281,6 @@
         <member name="F:System.Data.SQLite.SQLiteFunction._base">
             <summary>
             The base connection this function is attached to
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.SQLiteFunction._interopCookie">
-            <summary>
-            Used internally to keep track of memory allocated for aggregate functions
             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteFunction._contextDataList">
@@ -1219,6 +1306,11 @@
         <member name="F:System.Data.SQLite.SQLiteFunction._CompareFunc">
             <summary>
             Holds a reference to the callback function for collation sequences
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteFunction._context">
+            <summary>
+            Current context of the current callback.  Only valid during a callback
             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteFunction._registeredFunctions">
@@ -1310,10 +1402,11 @@
             <param name="nArgs">Number of arguments passed in</param>
             <param name="argsptr">A pointer to the array of arguments</param>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteFunction.CompareCallback(System.Int32,System.IntPtr,System.Int32,System.IntPtr)">
+        <member name="M:System.Data.SQLite.SQLiteFunction.CompareCallback(System.IntPtr,System.Int32,System.IntPtr,System.Int32,System.IntPtr)">
             <summary>
             Internal collation sequence function, which wraps up the raw string pointers and executes the Compare() virtual function.
             </summary>
+            <param name="ptr">Not used</param>
             <param name="len1">Length of the string pv1</param>
             <param name="ptr1">Pointer to the first string to compare</param>
             <param name="len2">Length of the string pv2</param>
@@ -1334,13 +1427,11 @@
             <param name="nArgs">Number of arguments passed in</param>
             <param name="argsptr">A pointer to the array of arguments</param>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteFunction.FinalCallback(System.IntPtr,System.Int32,System.IntPtr)">
+        <member name="M:System.Data.SQLite.SQLiteFunction.FinalCallback(System.IntPtr)">
             <summary>
             An internal aggregate Final function callback, which wraps the context pointer and calls the virtual Final() method.
             </summary>
             <param name="context">A raw context pointer</param>
-            <param name="nArgs">Not used, always zero</param>
-            <param name="argsptr">Not used, always zero</param>
         </member>
         <member name="M:System.Data.SQLite.SQLiteFunction.Dispose(System.Boolean)">
             <summary>
@@ -1374,7 +1465,7 @@
             as the connection (UTF-8 or UTF-16).
             </summary>
             <remarks>
-            The wrapper functions that interop with SQLite will create a unique cooke value, which internally is a pointer to
+            The wrapper functions that interop with SQLite will create a unique cookie value, which internally is a pointer to
             all the wrapped callback functions.  The interop function uses it to map CDecl callbacks to StdCall callbacks.
             </remarks>
             <param name="sqlbase">The base object on which the functions are to bind</param>
@@ -1385,6 +1476,159 @@
             Returns a reference to the underlying connection's SQLiteConvert class, which can be used to convert
             strings and DateTime's into the current connection's encoding schema.
             </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteFunctionEx">
+            <summary>
+            Extends SQLiteFunction and allows an inherited class to obtain the collating sequence associated with a function call.
+            </summary>
+            <remarks>
+            User-defined functions can call the GetCollationSequence() method in this class and use it to compare strings and char arrays.
+            </remarks>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteFunctionEx.GetCollationSequence">
+            <summary>
+            Obtains the collating sequence in effect for the given function.
+            </summary>
+            <remarks>
+            As an optimization, SQLite does not fill in this information when calling functions, unless the NeedCollationSequence
+            boolean value is set to true in the SQLiteFunctionAttribute.
+            </remarks>
+            <returns></returns>
+        </member>
+        <member name="T:System.Data.SQLite.FunctionType">
+            <summary>
+            The type of user-defined function to declare
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.FunctionType.Scalar">
+            <summary>
+            Scalar functions are designed to be called and return a result immediately.  Examples include ABS(), Upper(), Lower(), etc.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.FunctionType.Aggregate">
+            <summary>
+            Aggregate functions are designed to accumulate data until the end of a call and then return a result gleaned from the accumulated data.
+            Examples include SUM(), COUNT(), AVG(), etc.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.FunctionType.Collation">
+            <summary>
+            Collation sequences are used to sort textual data in a custom manner, and appear in an ORDER BY clause.  Typically text in an ORDER BY is
+            sorted using a straight case-insensitive comparison function.  Custom collating sequences can be used to alter the behavior of text sorting
+            in a user-defined manner.
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteCallback">
+            <summary>
+            An internal callback delegate declaration.
+            </summary>
+            <param name="context">Raw context pointer for the user function</param>
+            <param name="nArgs">Count of arguments to the function</param>
+            <param name="argsptr">A pointer to the array of argument pointers</param>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteFinalCallback">
+            <summary>
+            An internal final callback delegate declaration.
+            </summary>
+            <param name="context">Raw context pointer for the user function</param>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteCollation">
+            <summary>
+            Internal callback delegate for implementing collation sequences
+            </summary>
+            <param name="puser">Not used</param>
+            <param name="len1">Length of the string pv1</param>
+            <param name="pv1">Pointer to the first string to compare</param>
+            <param name="len2">Length of the string pv2</param>
+            <param name="pv2">Pointer to the second string to compare</param>
+            <returns>Returns -1 if the first string is less than the second.  0 if they are equal, or 1 if the first string is greater
+            than the second.</returns>
+        </member>
+        <member name="T:System.Data.SQLite.CollationTypeEnum">
+            <summary>
+            The type of collating sequence
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationTypeEnum.Binary">
+            <summary>
+            The built-in BINARY collating sequence
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationTypeEnum.NoCase">
+            <summary>
+            The built-in NOCASE collating sequence
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationTypeEnum.Reverse">
+            <summary>
+            The built-in REVERSE collating sequence
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationTypeEnum.Custom">
+            <summary>
+            A custom user-defined collating sequence
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.CollationEncodingEnum">
+            <summary>
+            The encoding type the collation sequence uses
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationEncodingEnum.UTF8">
+            <summary>
+            The collation sequence is UTF8
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationEncodingEnum.UTF16LE">
+            <summary>
+            The collation sequence is UTF16 little-endian
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationEncodingEnum.UTF16BE">
+            <summary>
+            The collation sequence is UTF16 big-endian
+            </summary>
+        </member>
+        <member name="T:System.Data.SQLite.CollationSequence">
+            <summary>
+            A struct describing the collating sequence a function is executing in
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationSequence.Name">
+            <summary>
+            The name of the collating sequence
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationSequence.Type">
+            <summary>
+            The type of collating sequence
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationSequence.Encoding">
+            <summary>
+            The text encoding of the collation sequence
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.CollationSequence._func">
+            <summary>
+            Context of the function that requested the collating sequence
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.CollationSequence.Compare(System.String,System.String)">
+            <summary>
+            Calls the base collating sequence to compare two strings
+            </summary>
+            <param name="s1">The first string to compare</param>
+            <param name="s2">The second string to compare</param>
+            <returns>-1 if s1 is less than s2, 0 if s1 is equal to s2, and 1 if s1 is greater than s2</returns>
+        </member>
+        <member name="M:System.Data.SQLite.CollationSequence.Compare(System.Char[],System.Char[])">
+            <summary>
+            Calls the base collating sequence to compare two character arrays
+            </summary>
+            <param name="c1">The first array to compare</param>
+            <param name="c2">The second array to compare</param>
+            <returns>-1 if c1 is less than c2, 0 if c1 is equal to c2, and 1 if c1 is greater than c2</returns>
         </member>
         <member name="T:System.Data.SQLite.SQLiteDataReader">
             <summary>
@@ -2006,6 +2250,11 @@
             Returns foreign key information for the given catalog
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteMetaDataCollectionNames.Triggers">
+            <summary>
+            Returns the triggers on the database
+            </summary>
+        </member>
         <member name="T:System.Data.SQLite.SQLiteCommand">
             <summary>
             SQLite implementation of DbCommand.
@@ -2253,16 +2502,18 @@
             a SQLite data provider, and inherits from SQLiteConvert which allows for simple translations of string to and from SQLite.
             </summary>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteBase.Open(System.String,System.Boolean)">
+        <member name="M:System.Data.SQLite.SQLiteBase.Open(System.String,System.Data.SQLite.SQLiteOpenFlagsEnum,System.Int32,System.Boolean)">
             <summary>
             Opens a database.
             </summary>
-            <param name="usePool">If true, the connection can be pulled from the connection pool</param>
             <remarks>
             Implementers should call SQLiteFunction.BindFunctions() and save the array after opening a connection
             to bind all attributed user-defined functions and collating sequences to the new connection.
             </remarks>
             <param name="strFilename">The filename of the database to open.  SQLite automatically creates it if it doesn't exist.</param>
+            <param name="flags">The open flags to use when creating the connection</param>
+            <param name="maxPoolSize">The maximum size of the pool for the given filename</param>
+            <param name="usePool">If true, the connection can be pulled from the connection pool</param>
         </member>
         <member name="M:System.Data.SQLite.SQLiteBase.Close">
             <summary>
@@ -2284,6 +2535,11 @@
             Returns the text of the last error issued by SQLite
             </summary>
             <returns></returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteBase.ClearPool">
+            <summary>
+            When pooling is enabled, force this connection to be disposed rather than returned to the pool
+            </summary>
         </member>
         <member name="M:System.Data.SQLite.SQLiteBase.Prepare(System.Data.SQLite.SQLiteConnection,System.String,System.Data.SQLite.SQLiteStatement,System.UInt32,System.String@)">
             <summary>
@@ -2392,6 +2648,11 @@
             Gets/Sets the filename to open on the connection string.
             </summary>
         </member>
+        <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.Uri">
+            <summary>
+            An alternate to the data source property
+            </summary>
+        </member>
         <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.DefaultTimeout">
             <summary>
             Gets/sets the default command timeout for newly-created commands.  This is especially useful for 
@@ -2414,6 +2675,11 @@
             <summary>
             If enabled, uses the legacy 3.xx format for maximum compatibility, but results in larger
             database sizes.
+            </summary>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.ReadOnly">
+            <summary>
+            When enabled, the database will be opened for read-only access and writing will be disabled.
             </summary>
         </member>
         <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.Password">
@@ -2439,6 +2705,16 @@
         <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.DateTimeFormat">
             <summary>
             Gets/Sets the datetime format for the connection.
+            </summary>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.JournalMode">
+            <summary>
+            Determines how SQLite handles the transaction journal file.
+            </summary>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteConnectionStringBuilder.DefaultIsolationLevel">
+            <summary>
+            Sets the default isolation level for transactions on the connection.
             </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLite3">

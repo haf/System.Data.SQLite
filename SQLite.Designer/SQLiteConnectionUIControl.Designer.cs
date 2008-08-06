@@ -49,6 +49,7 @@ namespace SQLite.Designer
       this.offRadioButton = new System.Windows.Forms.RadioButton();
       this.normalRadioButton = new System.Windows.Forms.RadioButton();
       this.fullRadioButton = new System.Windows.Forms.RadioButton();
+      this.julianRadioButton = new System.Windows.Forms.RadioButton();
       labelPassword = new System.Windows.Forms.Label();
       securityGroup = new System.Windows.Forms.GroupBox();
       encodingGroup = new System.Windows.Forms.GroupBox();
@@ -131,6 +132,7 @@ namespace SQLite.Designer
       // 
       // dateTimeGroup
       // 
+      dateTimeGroup.Controls.Add(this.julianRadioButton);
       dateTimeGroup.Controls.Add(this.ticksRadioButton);
       dateTimeGroup.Controls.Add(this.iso8601RadioButton);
       dateTimeGroup.Location = new System.Drawing.Point(84, 159);
@@ -143,7 +145,7 @@ namespace SQLite.Designer
       // ticksRadioButton
       // 
       this.ticksRadioButton.AutoSize = true;
-      this.ticksRadioButton.Location = new System.Drawing.Point(6, 44);
+      this.ticksRadioButton.Location = new System.Drawing.Point(7, 66);
       this.ticksRadioButton.Name = "ticksRadioButton";
       this.ticksRadioButton.Size = new System.Drawing.Size(48, 17);
       this.ticksRadioButton.TabIndex = 1;
@@ -292,6 +294,18 @@ namespace SQLite.Designer
       this.fullRadioButton.UseVisualStyleBackColor = true;
       this.fullRadioButton.CheckedChanged += new System.EventHandler(this.sync_Changed);
       // 
+      // julianRadioButton
+      // 
+      this.julianRadioButton.AutoSize = true;
+      this.julianRadioButton.Location = new System.Drawing.Point(7, 44);
+      this.julianRadioButton.Name = "julianRadioButton";
+      this.julianRadioButton.Size = new System.Drawing.Size(74, 17);
+      this.julianRadioButton.TabIndex = 2;
+      this.julianRadioButton.TabStop = true;
+      this.julianRadioButton.Text = "Julian Day";
+      this.julianRadioButton.UseVisualStyleBackColor = true;
+      this.julianRadioButton.CheckedChanged += new System.EventHandler(this.datetime_Changed);
+      // 
       // SQLiteConnectionUIControl
       // 
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
@@ -300,7 +314,7 @@ namespace SQLite.Designer
       this.Controls.Add(dateTimeGroup);
       this.Controls.Add(encodingGroup);
       this.Controls.Add(securityGroup);
-      this.Font = new System.Drawing.Font("MS Shell Dlg 2", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.Name = "SQLiteConnectionUIControl";
       this.Size = new System.Drawing.Size(312, 322);
       securityGroup.ResumeLayout(false);
@@ -332,5 +346,6 @@ namespace SQLite.Designer
     private System.Windows.Forms.RadioButton offRadioButton;
     private System.Windows.Forms.RadioButton normalRadioButton;
     private System.Windows.Forms.RadioButton fullRadioButton;
+    private System.Windows.Forms.RadioButton julianRadioButton;
   }
 }

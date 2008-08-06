@@ -5,6 +5,12 @@
     <link rel="stylesheet" type="text/css" href="ndoc.css"> </link>
     <link rel="stylesheet" type="text/css" href="user.css"> </link>
     <script type="text/javascript" src="ndoc.js"> </script>
+    <style type="text/css">
+      .style1
+      {
+        height: 70px;
+      }
+    </style>
   </head>
   <body style="display: none;">
     <input type="hidden" id="userDataCache" class="userDataStyle" />
@@ -359,10 +365,74 @@
       <p>
         <table border="0" cellpadding="10">
           <tr>
-            <td align="right" valign="top" width="120">
+            <td align="right" valign="top" width="1%" nowrap>
               abs(<i>X</i>)</td>
             <td valign="top">
               Return the absolute value of argument <i>X</i>.</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              acos(<i>X</i>)</td>
+            <td valign="top">
+              A mathematical function that returns the angle, in radians, whose cosine is the 
+              specified <b>double</b> expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              acosh(<i>X</i>)</td>
+            <td valign="top">
+              Inverse hyperbolic cosine</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              asin(<i>X</i>)</td>
+            <td valign="top">
+              Returns the angle, in radians, whose sine is the specified <b>double</b> 
+              expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              asinh(<i>X</i>)</td>
+            <td valign="top">
+              Inverse hyperbolic sine</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              atan(<i>X</i>)</td>
+            <td valign="top">
+              Returns the angle in radians whose tangent is a specified <b>double</b> 
+              expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              atanh(<i>X</i>)</td>
+            <td valign="top">
+              Inverse hyperbolic tangent</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap class="style1">
+              atn2(<i>X</i>,<i>Y</i>)<br />
+              atan2(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top" class="style1">
+              Returns the angle, in radians, between the positive x-axis and the ray from the 
+              origin to the point (y, x), where x and y are the values of the two specified 
+              double expressions</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              ceil(<i>X</i>)<br />
+              ceiling(<i>X</i>)</td>
+            <td valign="top">
+              Returns the smallest integer greater than, or equal to, the specified numeric 
+              expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              charindex(<i>X</i>,<i>Y</i>[,<i>Z</i>])</td>
+            <td valign="top">
+              Returns the 1-based position of the string <i>X</i> inside the string <i>Y</i> 
+              starting at position <i>Z</i>.&nbsp; Returns 0 if not <i>X</i> is not found 
+              within <i>Y</i>.</td>
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
@@ -370,6 +440,58 @@
             <td valign="top">
               Return a copy of the first non-NULL argument. If all arguments are NULL then NULL
               is returned. There must be at least 2 arguments.</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              cos(<i>X</i>)</td>
+            <td valign="top">
+              a mathematical function that returns the trigonometric cosine of the specified 
+              angle, in radians, in the specified expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              cosh(<i>X</i>)</td>
+            <td valign="top">
+              Hyperbolic cosine</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              cot(<i>X</i>)</td>
+            <td valign="top">
+              A mathematical function that returns the trigonometric cotangent of the 
+              specified angle, in radians, in the specified <b>double</b> expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              coth(<i>X</i>)</td>
+            <td valign="top">
+              <span class="h1purpose">Hyperbolic cotangent</span></td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              difference(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Returns an integer value that indicates the difference between the SOUNDEX 
+              values of two character expressions</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              degrees(<i>X</i>)</td>
+            <td valign="top">
+              Converts radians to degrees</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              exp(<i>X</i>)</td>
+            <td valign="top">
+              Returns the exponential value of the specified expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              floor(<i>X</i>)</td>
+            <td valign="top">
+              Returns the largest integer less than or equal to the specified numeric 
+              expression</td>
           </tr>
           <tr>
             <a name="globFunc"></a>
@@ -395,6 +517,18 @@
               Return the ROWID of the last row insert from this connection to the database. This
               is the same value that would be returned from the <b>sqlite_last_insert_rowid()</b>
               API function.</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              last_rows_affected()</td>
+            <td valign="top">
+              Returns the number of rows affected by the last insert/update operation</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              leftstr(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Returns the leftmost <i>Y</i> characters in string <i>X</i>.</td>
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
@@ -430,6 +564,18 @@
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
+              log(<i>X</i>)</td>
+            <td valign="top">
+              Returns the natural logarithm of the specified <b>double</b> expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              log10(<i>X</i>)</td>
+            <td valign="top">
+              Returns the base-10 logarithm of the specified <b>double</b> expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
               lower(<i>X</i>)</td>
             <td valign="top">
               Return a copy of string <i>X</i> will all characters converted to lower case. The
@@ -462,6 +608,46 @@
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
+              padc(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Pads the given string <i>X</i> on the left and the right with spaces until it is 
+              the specified length <i>Y</i></td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              padl(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Pads the given string <i>X</i> on the left with spaces until it is the specified 
+              length <i>Y</i></td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              padr(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Pads the given string <i>X</i> on the right with spaces until it is the 
+              specified length <i>Y</i></td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              pi</td>
+            <td valign="top">
+              Returns the value of pi</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              power(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Returns the value of the specified expression <i>X</i> to the specified power <i>
+              Y</i></td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              proper(<i>X</i>)</td>
+            <td valign="top">
+              Proper-case the given string <i>X</i></td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
               quote(<i>X</i>)</td>
             <td valign="top">
               This routine returns a string which is the value of its argument suitable for inclusion
@@ -474,9 +660,33 @@
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
+              radians(<i>X</i>)</td>
+            <td valign="top">
+              Converts degrees to radians</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
               random(*)</td>
             <td valign="top">
               Return a pseudo-random integer between -9223372036854775808 and +9223372036854775807.</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              replicate(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Return the concatenation of string <i>X</i> repeated <i>Y</i> times</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              reverse(<i>X</i>)</td>
+            <td valign="top">
+              Returns the string <i>X</i> reversed</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              rightstr(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Returns the right-most <i>Y</i> characters in string <i>X</i>.</td>
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
@@ -488,17 +698,49 @@
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
+              sign(<i>X</i>)</td>
+            <td valign="top">
+              Returns the positive (+1), zero (0), or negative (-1) sign of the specified 
+              expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              sin(<i>X</i>)</td>
+            <td valign="top">
+              Returns the trigonometric sine of the specified angle, in radians, and in an 
+              approximate numeric, <b>double</b>, expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
               soundex(<i>X</i>)</td>
             <td valign="top">
-              Compute the soundex encoding of the string <i>X</i>. The string "?000" is returned
-              if the argument is NULL. This function is omitted from SQLite by default. It is
-              only available the -DSQLITE_SOUNDEX=1 compiler option is used when SQLite is built.</td>
+              Compute the soundex encoding of the string <i>X</i>. The string &quot;?000&quot; is 
+              returned if the argument is NULL.</td>
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
               sqlite_version(*)</td>
             <td valign="top">
-              Return the version string for the SQLite library that is running. Example: "2.8.0"</td>
+              Return the version string for the SQLite library that is running. Example: "3.6.0"</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              sqrt(<i>X</i>)</td>
+            <td valign="top">
+              Returns the square root of the specified value</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              square(X)</td>
+            <td valign="top">
+              Returns the square of the specified value</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              strfilter(<i>X</i>,<i>Y</i>)</td>
+            <td valign="top">
+              Given a source string <i>X</i> and the characters to filter <i>Y</i>, returns <i>
+              X</i> with all characters not found in <i>Y</i> removed.</td>
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
@@ -509,6 +751,18 @@
               1. If <i>Y</i> is negative the the first character of the substring is found by
               counting from the right rather than the left. If SQLite is configured to support
               UTF-8, then characters indices refer to actual UTF-8 characters, not bytes.</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              tan(<i>X</i>)</td>
+            <td valign="top">
+              Returns the tangent of the input expression</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              tanh(<i>X</i>)</td>
+            <td valign="top">
+              Hyperbolic tangent</td>
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
@@ -567,10 +821,28 @@
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
+              lower_quartile(<i>X</i>)</td>
+            <td valign="top">
+              Returns the lower quartile of the given numbers in the set</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
               max(<i>X</i>)</td>
             <td valign="top">
               Return the maximum value of all values in the group. The usual sort order is used
               to determine the maximum.</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              median(<i>X</i>)</td>
+            <td valign="top">
+              Returns the middle value in a set of ordered numbers. (The medial value is 
+              unlike the mean value, which is the sum of a set of numbers divided by the count 
+              of numbers in the set). The median value is determined by choosing the smallest 
+              value such that at least half of the values in the set are no greater than the 
+              chosen value. If the number of values within the set is odd, the median value 
+              corresponds to a single value. If the number of values within the set is even, 
+              the median value corresponds to the sum of the two middle values divided by two.</td>
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
@@ -579,6 +851,19 @@
               Return the minimum non-NULL value of all values in the group. The usual sort order
               is used to determine the minimum. NULL is only returned if all values in the group
               are NULL.</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              mode(<i>X</i>)</td>
+            <td valign="top">
+              Computes the most frequently occurring value in a sample set</td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              stdev(<i>X</i>)</td>
+            <td valign="top">
+              Returns the statistical standard deviation of all values in the specified 
+              expression</td>
           </tr>
           <tr>
             <td align="right" width="1%" nowrap>
@@ -603,6 +888,12 @@
                 and an integer overflow occurs at any point during the computation. Total() never
                 throws an exception.</p>
             </td>
+          </tr>
+          <tr>
+            <td align="right" width="1%" nowrap>
+              upper_quartile(<i>X</i>)</td>
+            <td valign="top">
+              Returns the upper quartile of the numbers in the given set</td>
           </tr>
         </table>
       </p>

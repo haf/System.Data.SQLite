@@ -28,7 +28,24 @@ namespace SQLite.Designer
     {
       IServiceContainer sc = (IServiceContainer)this;
       sc.AddService(typeof(SQLiteProviderObjectFactory), new ServiceCreatorCallback(CreateService), true);
+
+      ToolboxInitialized += new EventHandler(SQLitePackage_ToolboxInitialized);
+      ToolboxUpgraded += new EventHandler(SQLitePackage_ToolboxUpgraded);
       base.Initialize();
+    }
+
+    void SQLitePackage_ToolboxUpgraded(object sender, EventArgs e)
+    {
+      IVsToolbox vstbx = GetService(typeof(SVsToolbox)) as IVsToolbox;
+
+      vstbx.RemoveTab("SQLite");
+
+      SQLitePackage_ToolboxInitialized(sender, e);
+    }
+
+    void SQLitePackage_ToolboxInitialized(object sender, EventArgs e)
+    {
+      ParseToolboxResource(new System.IO.StringReader(VSPackage.ToolboxItems), null);
     }
 
     private object CreateService(IServiceContainer container, Type serviceType)

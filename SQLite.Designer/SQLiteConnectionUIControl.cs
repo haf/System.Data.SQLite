@@ -56,8 +56,11 @@ namespace SQLite.Designer
 
     public override void LoadProperties()
     {
-      fileTextBox.Text = ConnectionProperties["Data Source"] as string;
-      passwordTextBox.Text = ConnectionProperties["Password"] as string;
+      if (ConnectionProperties.Contains("data source"))
+        fileTextBox.Text = ConnectionProperties["data source"] as string;
+
+      if (ConnectionProperties.Contains("password"))
+        passwordTextBox.Text = ConnectionProperties["password"] as string;
     }
 
     #endregion
@@ -65,25 +68,27 @@ namespace SQLite.Designer
     private void passwordTextBox_Leave(object sender, EventArgs e)
     {
       if (String.IsNullOrEmpty(passwordTextBox.Text))
-        ConnectionProperties.Remove("Password");
+        ConnectionProperties.Remove("password");
       else
-        ConnectionProperties["Password"] = passwordTextBox.Text;
+        ConnectionProperties["password"] = passwordTextBox.Text;
     }
 
     private void encoding_Changed(object sender, EventArgs e)
     {
       if (utf8RadioButton.Checked == true)
-        ConnectionProperties.Remove("UseUTF16Encoding");
+        ConnectionProperties.Remove("useutf16encoding");
       else
-        ConnectionProperties["UseUTF16Encoding"] = utf16RadioButton.Checked;
+        ConnectionProperties["useutf16encoding"] = utf16RadioButton.Checked;
     }
 
     private void datetime_Changed(object sender, EventArgs e)
     {
       if (iso8601RadioButton.Checked == true)
-        ConnectionProperties.Remove("DateTimeFormat");
+        ConnectionProperties.Remove("datetimeformat");
+      else if (ticksRadioButton.Checked == true)
+        ConnectionProperties["datetimeformat"] = "Ticks";
       else
-        ConnectionProperties["DateTimeFormat"] = "Ticks";
+        ConnectionProperties["datetimeformat"] = "JulianDay";
     }
 
     private void sync_Changed(object sender, EventArgs e)
@@ -93,26 +98,26 @@ namespace SQLite.Designer
       else if (offRadioButton.Checked == true) sync = "Off";
 
       if (sync == "Normal")
-        ConnectionProperties.Remove("Synchronous");
+        ConnectionProperties.Remove("synchronous");
       else
-        ConnectionProperties["Synchronous"] = sync;
+        ConnectionProperties["synchronous"] = sync;
     }
 
     private void pageSizeTextBox_Leave(object sender, EventArgs e)
     {
       int n = Convert.ToInt32(pageSizeTextBox.Text);
-      ConnectionProperties["Page Size"] = n;
+      ConnectionProperties["page size"] = n;
     }
 
     private void cacheSizeTextbox_Leave(object sender, EventArgs e)
     {
       int n = Convert.ToInt32(cacheSizeTextbox.Text);
-      ConnectionProperties["Cache Size"] = n;
+      ConnectionProperties["cache size"] = n;
     }
 
     private void fileTextBox_Leave(object sender, EventArgs e)
     {
-      ConnectionProperties["Data Source"] = fileTextBox.Text;
+      ConnectionProperties["data source"] = fileTextBox.Text;
     }
   }
 }

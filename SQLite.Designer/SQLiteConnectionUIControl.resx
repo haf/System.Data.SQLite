@@ -138,12 +138,6 @@
   <metadata name="pageSizeLabel.GenerateMember" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
   </metadata>
-  <metadata name="cacheSizeLabel.GenerateMember" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>False</value>
-  </metadata>
-  <metadata name="pageSizeLabel.GenerateMember" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>False</value>
-  </metadata>
   <metadata name="syncGroup.GenerateMember" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
   </metadata>
