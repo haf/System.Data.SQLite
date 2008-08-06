@@ -152,6 +152,17 @@ namespace install
 
           item.Tag = new string[] { subkeyname, version };
 
+          // Verify this edition has been installed and its not a fluke that the key exists
+          string dir = (string)subkey.GetValue("InstallDir");
+
+          using (RegistryKey subsubkey = subkey.OpenSubKey("Packages"))
+          {
+            if (subsubkey == null)
+              throw new ArgumentException("Edition not installed");
+            if (subsubkey.SubKeyCount < 5)
+              throw new ArgumentException("Edition not installed");
+          }
+          
           using (RegistryKey subsubkey = subkey.OpenSubKey("DataProviders"))
           {
             if (subsubkey == null)
@@ -656,6 +667,10 @@ namespace install
             subkey.SetValue("MinEdition", "standard");
             subkey.SetValue("ProductName", "SQLite Data Provider");
             subkey.SetValue("ProductVersion", "1.0");
+            using (RegistryKey toolboxKey = subkey.CreateSubKey("Toolbox"))
+            {
+              toolboxKey.SetValue("Default Items", 3);
+            }
           }
         }
 

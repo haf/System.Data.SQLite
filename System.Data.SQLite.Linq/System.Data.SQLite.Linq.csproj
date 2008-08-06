@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30428</ProductVersion>
+    <ProductVersion>9.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E6BF9F74-58E2-413B-A7CE-EA653ECB728D}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -74,14 +74,15 @@
     <Compile Include="SQLiteProviderServices.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Common.ConceptualSchemaDefinition.csdl" />
-    <None Include="Resources\Common.ProviderManifest.xsd" />
+    <EmbeddedResource Include="Resources\Common.ConceptualSchemaDefinition.csdl" />
+    <EmbeddedResource Include="Resources\Common.ProviderManifest.xsd" />
     <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.ssdl" />
     <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaMapping.msl" />
-    <None Include="Resources\System.Data.Resources.CSDLSchema.xsd" />
-    <None Include="Resources\System.Data.Resources.CSMSL.xsd" />
-    <None Include="Resources\System.Data.Resources.EntityStoreSchemaGenerator.xsd" />
-    <None Include="Resources\System.Data.Resources.SSDLSchema.xsd" />
+    <EmbeddedResource Include="Resources\System.Data.Resources.CodeGenerationSchema.xsd" />
+    <EmbeddedResource Include="Resources\System.Data.Resources.CSDLSchema.xsd" />
+    <EmbeddedResource Include="Resources\System.Data.Resources.CSMSL.xsd" />
+    <EmbeddedResource Include="Resources\System.Data.Resources.EntityStoreSchemaGenerator.xsd" />
+    <EmbeddedResource Include="Resources\System.Data.Resources.SSDLSchema.xsd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

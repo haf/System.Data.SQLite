@@ -46,5 +46,9 @@ namespace System.Data.SQLite
     /// Returns foreign key information for the given catalog
     /// </summary>
     public static readonly string ForeignKeys = "ForeignKeys";
+    /// <summary>
+    /// Returns the triggers on the database
+    /// </summary>
+    public static readonly string Triggers = "Triggers";
   }
 }

@@ -35,14 +35,14 @@
         List<DbParameter> parameters;
         CommandType commandType;
 
-        command.CommandText = SqlGenerator.GenerateSql(commandTree, out parameters, out commandType);
+        command.CommandText = SqlGenerator.GenerateSql((SQLiteProviderManifest)manifest, commandTree, out parameters, out commandType);
         command.CommandType = commandType;
 
         // Get the function (if any) implemented by the command tree since this influences our interpretation of parameters
         EdmFunction function = null;
         if (commandTree is DbFunctionCommandTree)
         {
-          function = ((DbFunctionCommandTree)commandTree).Function;
+          function = ((DbFunctionCommandTree)commandTree).EdmFunction;
         }
 
         // Now make sure we populate the command's parameters from the CQT's parameters:
@@ -93,12 +93,16 @@
 
     protected override string GetDbProviderManifestToken(DbConnection connection)
     {
-      return "SQLite";
+      if (String.IsNullOrEmpty(connection.ConnectionString))
+        throw new ArgumentNullException("ConnectionString");
+
+      SortedList<string, string> opts = SQLiteConnection.ParseConnectionString(connection.ConnectionString);
+      return SQLiteConnection.FindKey(opts, "DateTimeFormat", "ISO8601");
     }
 
     protected override DbProviderManifest GetDbProviderManifest(string versionHint)
     {
-      return new SQLiteProviderManifest();
+      return new SQLiteProviderManifest(versionHint);
     }
 
     /// <summary>
@@ -343,7 +347,7 @@
           DbType dbtypeName = SQLiteConvert.TypeToDbType(dc.DataType);
           string typeName = SQLiteConvert.DbTypeToTypeName(dbtypeName);
 
-          sql.AppendFormat(CultureInfo.InvariantCulture, "{2}{0} {1}", builder.QuoteIdentifier(dc.ColumnName), typeName, separator);
+          sql.AppendFormat(CultureInfo.InvariantCulture, "{2}{0} {1} COLLATE NOCASE", builder.QuoteIdentifier(dc.ColumnName), typeName, separator);
           separator = ", ";
         }
         sql.Append(")");
@@ -362,8 +366,8 @@
           {
             object[] arr = row.ItemArray;
 
-            for (int n = 0; n < arr.Length; n++)
-              if (arr[n] is string) arr[n] = ((string)arr[n]).ToLower();
+            //for (int n = 0; n < arr.Length; n++)
+            //  if (arr[n] is string) arr[n] = ((string)arr[n]).ToLower();
 
             source.Rows.Add(arr);
           }

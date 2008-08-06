@@ -21,6 +21,7 @@ namespace System.Data.SQLite
     /// </summary>
     internal SQLiteConnection _cnn;
     internal long _version; // Matches the version of the connection
+    private IsolationLevel _level;
 
     /// <summary>
     /// Constructs the transaction object, binding it to the supplied connection
@@ -31,6 +32,8 @@ namespace System.Data.SQLite
     {
       _cnn = connection;
       _version = _cnn._version;
+
+      _level = (deferredLock == true) ? IsolationLevel.ReadCommitted : IsolationLevel.Serializable;
 
       if (_cnn._transactionLevel++ == 0)
       {
@@ -110,7 +113,7 @@ namespace System.Data.SQLite
     /// </summary>
     public override IsolationLevel IsolationLevel
     {
-      get { return IsolationLevel.Serializable; }
+      get { return _level; }
     }
 
     /// <summary>

@@ -32,13 +32,15 @@ namespace System.Data.SQLite
     /// <summary>
     /// Opens a database.
     /// </summary>
-    /// <param name="usePool">If true, the connection can be pulled from the connection pool</param>
     /// <remarks>
     /// Implementers should call SQLiteFunction.BindFunctions() and save the array after opening a connection
     /// to bind all attributed user-defined functions and collating sequences to the new connection.
     /// </remarks>
     /// <param name="strFilename">The filename of the database to open.  SQLite automatically creates it if it doesn't exist.</param>
-    internal abstract void Open(string strFilename, bool usePool);
+    /// <param name="flags">The open flags to use when creating the connection</param>
+    /// <param name="maxPoolSize">The maximum size of the pool for the given filename</param>
+    /// <param name="usePool">If true, the connection can be pulled from the connection pool</param>
+    internal abstract void Open(string strFilename, SQLiteOpenFlagsEnum flags, int maxPoolSize, bool usePool);
     /// <summary>
     /// Closes the currently-open database.
     /// </summary>
@@ -57,6 +59,11 @@ namespace System.Data.SQLite
     /// </summary>
     /// <returns></returns>
     internal abstract string SQLiteLastError();
+
+    /// <summary>
+    /// When pooling is enabled, force this connection to be disposed rather than returned to the pool
+    /// </summary>
+    internal abstract void ClearPool();
 
     /// <summary>
     /// Prepares a SQL statement for execution.
@@ -83,7 +90,6 @@ namespace System.Data.SQLite
     /// <param name="stmt">The statement to reset</param>
     /// <returns>Returns -1 if the schema changed while resetting, 0 if the reset was sucessful or 6 (SQLITE_LOCKED) if the reset failed due to a lock</returns>
     internal abstract int Reset(SQLiteStatement stmt);
-
     internal abstract void Cancel();
 
     internal abstract void Bind_Double(SQLiteStatement stmt, int index, double value);
@@ -107,7 +113,6 @@ namespace System.Data.SQLite
     internal abstract string ColumnDatabaseName(SQLiteStatement stmt, int index);
     internal abstract string ColumnTableName(SQLiteStatement stmt, int index);
     internal abstract void ColumnMetaData(string dataBase, string table, string column, out string dataType, out string collateSequence, out bool notNull, out bool primaryKey, out bool autoIncrement);
-    internal abstract bool TableHasCheckConstraints(string database, string table);
     internal abstract void GetIndexColumnExtendedInfo(string database, string index, string column, out int sortMode, out int onError, out string collationSequence);
 
     internal abstract double GetDouble(SQLiteStatement stmt, int index);
@@ -119,8 +124,11 @@ namespace System.Data.SQLite
     internal abstract DateTime GetDateTime(SQLiteStatement stmt, int index);
     internal abstract bool IsNull(SQLiteStatement stmt, int index);
 
-    internal abstract IntPtr CreateCollation(string strCollation, SQLiteCollation func);
-    internal abstract IntPtr CreateFunction(string strFunction, int nArgs, SQLiteCallback func, SQLiteCallback funcstep, SQLiteCallback funcfinal);
+    internal abstract void CreateCollation(string strCollation, SQLiteCollation func, SQLiteCollation func16);
+    internal abstract void CreateFunction(string strFunction, int nArgs, bool needCollSeq, SQLiteCallback func, SQLiteCallback funcstep, SQLiteFinalCallback funcfinal);
+    internal abstract CollationSequence GetCollationSequence(SQLiteFunction func, IntPtr context);
+    internal abstract int ContextCollateCompare(CollationEncodingEnum enc, IntPtr context, string s1, string s2);
+    internal abstract int ContextCollateCompare(CollationEncodingEnum enc, IntPtr context, char[] c1, char[] c2);
 
     internal abstract int AggregateCount(IntPtr context);
     internal abstract IntPtr AggregateContext(IntPtr context);
@@ -149,7 +157,6 @@ namespace System.Data.SQLite
 
     internal abstract int GetCursorForTable(SQLiteStatement stmt, int database, int rootPage);
     internal abstract long GetRowIdForCursor(SQLiteStatement stmt, int cursor);
-    internal abstract void DetachAll();
 
     internal abstract object GetValue(SQLiteStatement stmt, int index, SQLiteType typ);
 
@@ -169,36 +176,70 @@ namespace System.Data.SQLite
 
     internal static string SQLiteLastError(SQLiteConnectionHandle db)
     {
+#if !SQLITE_STANDARD
       int len;
       return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
-    }
-
-    internal static string SQLiteLastError(SQLiteStatementHandle stmt)
-    {
-      int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_stmt_interop(stmt, out len), len);
+#else
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
+#endif
     }
 
     internal static void FinalizeStatement(SQLiteStatementHandle stmt)
     {
+#if !SQLITE_STANDARD
       int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
-      if (n > 0) throw new SQLiteException(n, SQLiteLastError(stmt));
+#else
+      int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
+#endif
+      if (n > 0) throw new SQLiteException(n, null);
     }
 
     internal static void CloseConnection(SQLiteConnectionHandle db)
     {
+#if !SQLITE_STANDARD
       int n = UnsafeNativeMethods.sqlite3_close_interop(db);
+#else
+      ResetConnection(db);
+      int n = UnsafeNativeMethods.sqlite3_close(db);
+#endif
       if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
     }
 
-    internal static void FreeFunction(IntPtr nCookie)
+    internal static void ResetConnection(SQLiteConnectionHandle db)
     {
-      UnsafeNativeMethods.sqlite3_function_free_callbackcookie(nCookie);
+      IntPtr stmt = IntPtr.Zero;
+
+      do
+      {
+        stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
+        if (stmt != IntPtr.Zero)
+        {
+#if !SQLITE_STANDARD
+          UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+#else
+          UnsafeNativeMethods.sqlite3_reset(stmt);
+#endif
+        }
+      } while (stmt != IntPtr.Zero);
+
+      // Not overly concerned with the return value from a rollback.
+      UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
     }
   }
 
   internal interface ISQLiteSchemaExtensions
   {
     void BuildTempSchema(SQLiteConnection cnn);
+  }
+
+  [Flags]
+  internal enum SQLiteOpenFlagsEnum
+  {
+    None = 0,
+    ReadOnly = 0x01,
+    ReadWrite = 0x02,
+    Create = 0x04,
+    SharedCache = 0x01000000,
+    Default = 0x06,
   }
 }

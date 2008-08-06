@@ -14,6 +14,8 @@ namespace System.Data.SQLite
   using System.Globalization;
   using System.ComponentModel;
   using System.Text;
+  using System.Runtime.InteropServices;
+  using System.IO;
 
   /// <summary>
   /// SQLite implentation of DbConnection.
@@ -109,7 +111,7 @@ namespace System.Data.SQLite
   /// <description>Legacy Format</description>
   /// <description><b>True</b> - Use the more compatible legacy 3.x database format<br/><b>False</b> - Use the newer 3.3x database format which compresses numbers more effectively</description>
   /// <description>N</description>
-  /// <description>True</description>
+  /// <description>False</description>
   /// </item>
   /// <item>
   /// <description>Default Timeout</description>
@@ -122,6 +124,24 @@ namespace System.Data.SQLite
   /// <description><b>Delete</b> - Delete the journal file after a commit<br/><b>Persist</b> - Zero out and leave the journal file on disk after a commit<br/><b>Off</b> - Disable the rollback journal entirely</description>
   /// <description>N</description>
   /// <description>Delete</description>
+  /// </item>
+  /// <item>
+  /// <description>Read Only</description>
+  /// <description><b>True</b> - Open the database for read only access<br/><b>False</b> - Open the database for normal read/write access</description>
+  /// <description>N</description>
+  /// <description>False</description>
+  /// </item>
+  /// <item>
+  /// <description>Max Pool Size</description>
+  /// <description>The maximum number of connections for the given connection string that can be in the connection pool</description>
+  /// <description>N</description>
+  /// <description>100</description>
+  /// </item>
+  /// <item>
+  /// <description>Default IsolationLevel</description>
+  /// <description>The default transaciton isolation level</description>
+  /// <description>N</description>
+  /// <description>Serializable</description>
   /// </item>
   /// </list>
   /// </remarks>
@@ -143,6 +163,12 @@ namespace System.Data.SQLite
     /// Nesting level of the transactions open on the connection
     /// </summary>
     internal int _transactionLevel;
+
+    /// <summary>
+    /// The default isolation level for new transactions
+    /// </summary>
+    private IsolationLevel _defaultIsolation;
+
 #if !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
     /// Whether or not the connection is enlisted in a distrubuted transaction
@@ -289,29 +315,35 @@ namespace System.Data.SQLite
     /// <param name="databaseFileName">The file to create</param>
     static public void CreateFile(string databaseFileName)
     {
-      IO.FileStream fs = IO.File.Create(databaseFileName);
+      FileStream fs = File.Create(databaseFileName);
       fs.Close();
     }
 
+#if !SQLITE_STANDARD
     /// <summary>
     /// On NTFS volumes, this function turns on the compression attribute for the given file.
     /// It must not be open or referenced at the time of the function call.
     /// </summary>
     /// <param name="databaseFileName">The file to compress</param>
+    [Obsolete("This functionality is being removed from a future version of the SQLite provider")]
     static public void CompressFile(string databaseFileName)
     {
       UnsafeNativeMethods.sqlite3_compressfile(databaseFileName);
     }
+#endif
 
+#if !SQLITE_STANDARD
     /// <summary>
     /// On NTFS volumes, this function removes the compression attribute for the given file.
     /// It must not be open or referenced at the time of the function call.
     /// </summary>
     /// <param name="databaseFileName">The file to decompress</param>
+    [Obsolete("This functionality is being removed from a future version of the SQLite provider")]
     static public void DecompressFile(string databaseFileName)
     {
       UnsafeNativeMethods.sqlite3_decompressfile(databaseFileName);
     }
+#endif
 
     /// <summary>
     /// Raises the state change event when the state of the connection changes
@@ -330,41 +362,49 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Creates a new SQLiteTransaction if one isn't already active on the connection.
+    /// OBSOLETE.  Creates a new SQLiteTransaction if one isn't already active on the connection.
     /// </summary>
-    /// <param name="isolationLevel">SQLite doesn't support varying isolation levels, so this parameter is ignored.</param>
+    /// <param name="isolationLevel">This parameter is ignored.</param>
     /// <param name="deferredLock">When TRUE, SQLite defers obtaining a write lock until a write operation is requested.
     /// When FALSE, a writelock is obtained immediately.  The default is TRUE, but in a multi-threaded multi-writer 
     /// environment, one may instead choose to lock the database immediately to avoid any possible writer deadlock.</param>
     /// <returns>Returns a SQLiteTransaction object.</returns>
+    [Obsolete("Use one of the standard BeginTransaction methods, this one will be removed soon")]
     public SQLiteTransaction BeginTransaction(IsolationLevel isolationLevel, bool deferredLock)
     {
-      return BeginTransaction(deferredLock);
+      return (SQLiteTransaction)BeginDbTransaction(deferredLock == false ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted);
     }
 
     /// <summary>
-    /// Creates a new SQLiteTransaction if one isn't already active on the connection.
+    /// OBSOLETE.  Creates a new SQLiteTransaction if one isn't already active on the connection.
     /// </summary>
     /// <param name="deferredLock">When TRUE, SQLite defers obtaining a write lock until a write operation is requested.
-    /// When FALSE, a writelock is obtained immediately.  The default is TRUE, but in a multi-threaded multi-writer 
+    /// When FALSE, a writelock is obtained immediately.  The default is false, but in a multi-threaded multi-writer 
     /// environment, one may instead choose to lock the database immediately to avoid any possible writer deadlock.</param>
     /// <returns>Returns a SQLiteTransaction object.</returns>
+    [Obsolete("Use one of the standard BeginTransaction methods, this one will be removed soon")]
     public SQLiteTransaction BeginTransaction(bool deferredLock)
     {
-      if (_connectionState != ConnectionState.Open)
-        throw new InvalidOperationException();
-
-      return new SQLiteTransaction(this, deferredLock);
+      return (SQLiteTransaction)BeginDbTransaction(deferredLock == false ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted);
     }
 
     /// <summary>
     /// Creates a new SQLiteTransaction if one isn't already active on the connection.
     /// </summary>
-    /// <param name="isolationLevel">SQLite supports only serializable transactions.</param>
+    /// <param name="isolationLevel">Supported isolation levels are Serializable, ReadCommitted and Unspecified.</param>
+    /// <remarks>
+    /// Unspecified will use the default isolation level specified in the connection string.  If no isolation level is specified in the 
+    /// connection string, Serializable is used.
+    /// Serializable transactions are the default.  In this mode, the engine gets an immediate lock on the database, and no other threads
+    /// may begin a transaction.  Other threads may read from the database, but not write.
+    /// With a ReadCommitted isolation level, locks are deferred and elevated as needed.  It is possible for multiple threads to start
+    /// a transaction in ReadCommitted mode, but if a thread attempts to commit a transaction while another thread
+    /// has a ReadCommitted lock, it may timeout or cause a deadlock on both threads until both threads' CommandTimeout's are reached.
+    /// </remarks>
     /// <returns>Returns a SQLiteTransaction object.</returns>
     public new SQLiteTransaction BeginTransaction(IsolationLevel isolationLevel)
     {
-      return BeginTransaction(false);
+      return (SQLiteTransaction)BeginDbTransaction(isolationLevel);
     }
 
     /// <summary>
@@ -373,17 +413,25 @@ namespace System.Data.SQLite
     /// <returns>Returns a SQLiteTransaction object.</returns>
     public new SQLiteTransaction BeginTransaction()
     {
-      return BeginTransaction(false);
+      return (SQLiteTransaction)BeginDbTransaction(_defaultIsolation);
     }
 
     /// <summary>
     /// Forwards to the local BeginTransaction() function
     /// </summary>
-    /// <param name="isolationLevel"></param>
+    /// <param name="isolationLevel">Supported isolation levels are Unspecified, Serializable, and ReadCommitted</param>
     /// <returns></returns>
     protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
     {
-      return BeginTransaction(false);
+      if (_connectionState != ConnectionState.Open)
+        throw new InvalidOperationException();
+
+      if (isolationLevel == IsolationLevel.Unspecified) isolationLevel = _defaultIsolation;
+
+      if (isolationLevel != IsolationLevel.Serializable && isolationLevel != IsolationLevel.ReadCommitted)
+        throw new ArgumentException("isolationLevel");
+
+      return new SQLiteTransaction(this, isolationLevel != IsolationLevel.Serializable);
     }
 
     /// <summary>
@@ -432,6 +480,25 @@ namespace System.Data.SQLite
         _transactionLevel = 0;
       }
       OnStateChange(ConnectionState.Closed);
+    }
+
+    /// <summary>
+    /// Clears the connection pool associated with the connection.  Any other active connections using the same database file
+    /// will be discarded instead of returned to the pool when they are closed.
+    /// </summary>
+    /// <param name="connection"></param>
+    public static void ClearPool(SQLiteConnection connection)
+    {
+      if (connection._sql == null) return;
+      connection._sql.ClearPool();
+    }
+
+    /// <summary>
+    /// Clears all connection pools.  Any active connections will be discarded instead of sent to the pool when they are closed.
+    /// </summary>
+    public static void ClearAllPools()
+    {
+      SQLiteConnectionPool.ClearAllPools();
     }
 
     /// <summary>
@@ -527,7 +594,7 @@ namespace System.Data.SQLite
     /// <description>Legacy Format</description>
     /// <description><b>True</b> - Use the more compatible legacy 3.x database format<br/><b>False</b> - Use the newer 3.3x database format which compresses numbers more effectively</description>
     /// <description>N</description>
-    /// <description>True</description>
+    /// <description>False</description>
     /// </item>
     /// <item>
     /// <description>Default Timeout</description>
@@ -541,11 +608,29 @@ namespace System.Data.SQLite
     /// <description>N</description>
     /// <description>Delete</description>
     /// </item>
+    /// <item>
+    /// <description>Read Only</description>
+    /// <description><b>True</b> - Open the database for read only access<br/><b>False</b> - Open the database for normal read/write access</description>
+    /// <description>N</description>
+    /// <description>False</description>
+    /// </item>
+    /// <item>
+    /// <description>Max Pool Size</description>
+    /// <description>The maximum number of connections for the given connection string that can be in the connection pool</description>
+    /// <description>N</description>
+    /// <description>100</description>
+    /// </item>
+    /// <item>
+    /// <description>Default IsolationLevel</description>
+    /// <description>The default transaciton isolation level</description>
+    /// <description>N</description>
+    /// <description>Serializable</description>
+    /// </item>
     /// </list>
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
     [RefreshProperties(RefreshProperties.All), DefaultValue("")]
-    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.33.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.35.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
     public override string ConnectionString
     {
@@ -611,13 +696,26 @@ namespace System.Data.SQLite
       }
     }
 
+    internal static string MapUriPath(string path)
+    {
+	    if (path.StartsWith ("file://"))
+		    return path.Substring (7);
+      else if (path.StartsWith ("file:"))
+		    return path.Substring (5);
+      else if (path.StartsWith ("/"))
+		    return path;
+      else
+		    throw new InvalidOperationException ("Invalid connection string: invalid URI");
+    }
+    
     /// <summary>
     /// Parses the connection string into component parts
     /// </summary>
+    /// <param name="connectionString">The connection string to parse</param>
     /// <returns>An array of key-value pairs representing each parameter of the connection string</returns>
-    internal SortedList<string, string> ParseConnectionString()
+    internal static SortedList<string, string> ParseConnectionString(string connectionString)
     {
-      string s = _connectionString;
+      string s = connectionString;
       int n;
       SortedList<string, string> ls = new SortedList<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -683,7 +781,7 @@ namespace System.Data.SQLite
 
       Close();
 
-      SortedList<string, string> opts = ParseConnectionString();
+      SortedList<string, string> opts = ParseConnectionString(_connectionString);
       string fileName;
 
       if (Convert.ToInt32(FindKey(opts, "Version", "3"), CultureInfo.InvariantCulture) != 3)
@@ -692,7 +790,13 @@ namespace System.Data.SQLite
       fileName = FindKey(opts, "Data Source", "");
 
       if (String.IsNullOrEmpty(fileName))
-        throw new ArgumentException("Data Source cannot be empty.  Use :memory: to open an in-memory database");
+      {
+        fileName = FindKey(opts, "Uri", "");
+        if (String.IsNullOrEmpty(fileName))
+          throw new ArgumentException("Data Source cannot be empty.  Use :memory: to open an in-memory database");
+        else
+          fileName = MapUriPath(fileName);
+      }
 
       if (String.Compare(fileName, ":MEMORY:", true, CultureInfo.InvariantCulture) == 0)
         fileName = ":memory:";
@@ -700,47 +804,45 @@ namespace System.Data.SQLite
       {
 #if PLATFORM_COMPACTFRAMEWORK
        if (fileName.StartsWith(".\\"))
-         fileName = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
+         fileName = Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
 #endif
        fileName = ExpandFileName(fileName);
       }
       try
       {
-        bool usePooling = (Convert.ToBoolean(FindKey(opts, "Pooling", Boolean.FalseString), CultureInfo.CurrentCulture) == true);
-        bool bUTF16 = (Convert.ToBoolean(FindKey(opts, "UseUTF16Encoding", Boolean.FalseString), CultureInfo.CurrentCulture) == true);
+        bool usePooling = (SQLiteConvert.ToBoolean(FindKey(opts, "Pooling", Boolean.FalseString)) == true);
+        bool bUTF16 = (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding", Boolean.FalseString)) == true);
+        int maxPoolSize = Convert.ToInt32(FindKey(opts, "Max Pool Size", "100"));
 
         _defaultTimeout = Convert.ToInt32(FindKey(opts, "Default Timeout", "30"), CultureInfo.CurrentCulture);
 
-        SQLiteDateFormats dateFormat = SQLiteDateFormats.ISO8601;
-        string temp = FindKey(opts, "DateTimeFormat", "ISO8601");
-        if (String.Compare(temp, "ticks", true, CultureInfo.InvariantCulture) == 0) dateFormat = SQLiteDateFormats.Ticks;
-        else if (String.Compare(temp, "julianday", true, CultureInfo.InvariantCulture) == 0) dateFormat = SQLiteDateFormats.JulianDay;
+        _defaultIsolation = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), FindKey(opts, "Default IsolationLevel", "Serializable"), true);
+        if (_defaultIsolation != IsolationLevel.Serializable && _defaultIsolation != IsolationLevel.ReadCommitted)
+          throw new NotSupportedException("Invalid Default IsolationLevel specified");
+
+        SQLiteDateFormats dateFormat = (SQLiteDateFormats)Enum.Parse(typeof(SQLiteDateFormats), FindKey(opts, "DateTimeFormat", "ISO8601"), true);
+        //string temp = FindKey(opts, "DateTimeFormat", "ISO8601");
+        //if (String.Compare(temp, "ticks", true, CultureInfo.InvariantCulture) == 0) dateFormat = SQLiteDateFormats.Ticks;
+        //else if (String.Compare(temp, "julianday", true, CultureInfo.InvariantCulture) == 0) dateFormat = SQLiteDateFormats.JulianDay;
 
         if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
           _sql = new SQLite3_UTF16(dateFormat);
         else
           _sql = new SQLite3(dateFormat);
 
-        if (Convert.ToBoolean(FindKey(opts, "FailIfMissing", Boolean.FalseString), CultureInfo.CurrentCulture) == true)
-        {
-          try
-          {
-            // Try and open the file, and keep it open while SQLite tries to open it -- otherwise its possible it could be deleted between calls in a race
-            // condition.
-            using (System.IO.FileStream fs = new System.IO.FileStream(fileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
-            {
-              _sql.Open(fileName, usePooling);
-            }
-          }
-          catch (Exception e)
-          {
-            throw new SQLiteException("Unable to open database file", e);
-          }
-        }
-        else // This will create the database if it doesn't exist.
-          _sql.Open(fileName, usePooling);
+        SQLiteOpenFlagsEnum flags = SQLiteOpenFlagsEnum.None;
 
-        _binaryGuid = (Convert.ToBoolean(FindKey(opts, "BinaryGUID", Boolean.TrueString), CultureInfo.CurrentCulture) == true);
+        if (SQLiteConvert.ToBoolean(FindKey(opts, "FailIfMissing", Boolean.FalseString)) == false)
+          flags |= SQLiteOpenFlagsEnum.Create;
+
+        if (SQLiteConvert.ToBoolean(FindKey(opts, "Read Only", Boolean.FalseString)) == true)
+          flags |= SQLiteOpenFlagsEnum.ReadOnly;
+        else
+          flags |= SQLiteOpenFlagsEnum.ReadWrite;
+
+        _sql.Open(fileName, flags, maxPoolSize, usePooling);
+
+        _binaryGuid = (SQLiteConvert.ToBoolean(FindKey(opts, "BinaryGUID", Boolean.TrueString)) == true);
 
         string password = FindKey(opts, "Password", null);
 
@@ -750,7 +852,7 @@ namespace System.Data.SQLite
           _sql.SetPassword(_password);
         _password = null;
 
-        _dataSource = System.IO.Path.GetFileNameWithoutExtension(fileName);
+        _dataSource = Path.GetFileNameWithoutExtension(fileName);
 
         OnStateChange(ConnectionState.Open);
         _version++;
@@ -776,8 +878,8 @@ namespace System.Data.SQLite
             cmd.ExecuteNonQuery();
           }
 
-          defValue = FindKey(opts, "Legacy Format", Boolean.TrueString);
-          cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA legacy_file_format={0}", Convert.ToBoolean(defValue, CultureInfo.InvariantCulture) == true ? "ON" : "OFF");
+          defValue = FindKey(opts, "Legacy Format", Boolean.FalseString);
+          cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA legacy_file_format={0}", SQLiteConvert.ToBoolean(defValue) == true ? "ON" : "OFF");
           cmd.ExecuteNonQuery();
 
           defValue = FindKey(opts, "Synchronous", "Normal");
@@ -803,8 +905,7 @@ namespace System.Data.SQLite
         }
 
 #if !PLATFORM_COMPACTFRAMEWORK
-        if (Transactions.Transaction.Current != null && (FindKey(opts, "Enlist", "Y").ToUpper()[0] == 'Y'
-             || Convert.ToBoolean(FindKey(opts, "Enlist", "True"), CultureInfo.CurrentCulture) == true))
+        if (Transactions.Transaction.Current != null && SQLiteConvert.ToBoolean(FindKey(opts, "Enlist", Boolean.TrueString)) == true)
           EnlistTransaction(Transactions.Transaction.Current);
 #endif
       }
@@ -926,7 +1027,7 @@ namespace System.Data.SQLite
         string dataDirectory;
 
 #if PLATFORM_COMPACTFRAMEWORK
-        dataDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase);
+        dataDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase);
 #else
         dataDirectory = AppDomain.CurrentDomain.GetData("DataDirectory") as string;
         if (String.IsNullOrEmpty(dataDirectory))
@@ -935,15 +1036,15 @@ namespace System.Data.SQLite
 
         if (sourceFile.Length > _dataDirectory.Length)
         {
-          if (sourceFile[_dataDirectory.Length] == System.IO.Path.DirectorySeparatorChar ||
-              sourceFile[_dataDirectory.Length] == System.IO.Path.AltDirectorySeparatorChar)
+          if (sourceFile[_dataDirectory.Length] == Path.DirectorySeparatorChar ||
+              sourceFile[_dataDirectory.Length] == Path.AltDirectorySeparatorChar)
             sourceFile = sourceFile.Remove(_dataDirectory.Length, 1);
         }
-        sourceFile = System.IO.Path.Combine(dataDirectory, sourceFile.Substring(_dataDirectory.Length));
+        sourceFile = Path.Combine(dataDirectory, sourceFile.Substring(_dataDirectory.Length));
       }
 
 #if !PLATFORM_COMPACTFRAMEWORK
-      sourceFile = System.IO.Path.GetFullPath(sourceFile);
+      sourceFile = Path.GetFullPath(sourceFile);
 #endif
 
       return sourceFile;
@@ -1091,7 +1192,7 @@ namespace System.Data.SQLite
 
       tbl.BeginLoadData();
 
-      IO.StringReader reader = new IO.StringReader(SR.MetaDataCollections);
+      StringReader reader = new StringReader(SR.MetaDataCollections);
       tbl.ReadXml(reader);
       reader.Close();
 
@@ -1276,7 +1377,7 @@ namespace System.Data.SQLite
     {
       DataTable tbl = new DataTable("Indexes");
       DataRow row;
-      Collections.Generic.List<int> primaryKeys = new List<int>();
+      List<int> primaryKeys = new List<int>();
       bool maybeRowId;
 
       tbl.Locale = CultureInfo.InvariantCulture;
@@ -1508,7 +1609,6 @@ namespace System.Data.SQLite
       tbl.Columns.Add("TABLE_ID", typeof(long));
       tbl.Columns.Add("TABLE_ROOTPAGE", typeof(int));
       tbl.Columns.Add("TABLE_DEFINITION", typeof(string));
-      tbl.Columns.Add("HAS_CHECKCONSTRAINTS", typeof(bool));
       tbl.BeginLoadData();
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
@@ -1538,7 +1638,6 @@ namespace System.Data.SQLite
               row["TABLE_ID"] = rd.GetInt64(5);
               row["TABLE_ROOTPAGE"] = rd.GetInt32(3);
               row["TABLE_DEFINITION"] = rd.GetString(4);
-              row["HAS_CHECKCONSTRAINTS"] = _sql.TableHasCheckConstraints(strCatalog, rd.GetString(2));
 
               tbl.Rows.Add(row);
             }
@@ -1591,7 +1690,7 @@ namespace System.Data.SQLite
             || String.IsNullOrEmpty(strView))
           {
             strItem = rd.GetString(4).Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ');
-            nPos = Globalization.CultureInfo.InvariantCulture.CompareInfo.IndexOf(strItem, " AS ", CompareOptions.IgnoreCase);
+            nPos = CultureInfo.InvariantCulture.CompareInfo.IndexOf(strItem, " AS ", CompareOptions.IgnoreCase);
             if (nPos > -1)
             {
               strItem = strItem.Substring(nPos + 4).Trim();
@@ -1686,7 +1785,7 @@ namespace System.Data.SQLite
 
       tbl.BeginLoadData();
 
-      IO.StringReader reader = new IO.StringReader(SR.DataTypes);
+      StringReader reader = new StringReader(SR.DataTypes);
       tbl.ReadXml(reader);
       reader.Close();
 
@@ -2065,11 +2164,11 @@ namespace System.Data.SQLite
       }
     }
 
-    private void UpdateCallback(int type, IntPtr database, int databaseLen, IntPtr table, int tableLen, Int64 rowid)
+    private void UpdateCallback(IntPtr puser, int type, IntPtr database, IntPtr table, Int64 rowid)
     {
       _updateHandler(this, new UpdateEventArgs(
-        SQLiteBase.UTF8ToString(database, databaseLen),
-        SQLiteBase.UTF8ToString(table, tableLen),
+        SQLiteBase.UTF8ToString(database, -1),
+        SQLiteBase.UTF8ToString(table, -1),
         (UpdateEventType)type,
         rowid));
     }
@@ -2127,14 +2226,14 @@ namespace System.Data.SQLite
     }
 
 
-    private int CommitCallback()
+    private int CommitCallback(IntPtr parg)
     {
       CommitEventArgs e = new CommitEventArgs();
       _commitHandler(this, e);
       return (e.AbortTransaction == true) ? 1 : 0;
     }
 
-    private void RollbackCallback()
+    private void RollbackCallback(IntPtr parg)
     {
       _rollbackHandler(this, EventArgs.Empty);
     }
@@ -2159,9 +2258,18 @@ namespace System.Data.SQLite
     Off = 2,
   }
 
-  internal delegate void SQLiteUpdateCallback(int type, IntPtr database, int databaseLen, IntPtr table, int tableLen, Int64 rowid);
-  internal delegate int SQLiteCommitCallback();
-  internal delegate void SQLiteRollbackCallback();
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+  internal delegate void SQLiteUpdateCallback(IntPtr puser, int type, IntPtr database, IntPtr table, Int64 rowid);
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+  internal delegate int SQLiteCommitCallback(IntPtr puser);
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+  internal delegate void SQLiteRollbackCallback(IntPtr puser);
 
   /// <summary>
   /// Raised when a transaction is about to be committed.  To roll back a transaction, set the 

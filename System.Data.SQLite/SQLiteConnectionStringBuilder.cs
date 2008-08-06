@@ -72,7 +72,7 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Version", out value);
+        TryGetValue("version", out value);
         return Convert.ToInt32(value, CultureInfo.CurrentCulture);
       }
       set
@@ -80,7 +80,7 @@ namespace System.Data.SQLite
         if (value != 3)
           throw new NotSupportedException();
 
-        this["Version"] = value;
+        this["version"] = value;
       }
     }
 
@@ -95,14 +95,14 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Synchronous", out value);
+        TryGetValue("synchronous", out value);
         if (value is string)
           return (SynchronizationModes)TypeDescriptor.GetConverter(typeof(SynchronizationModes)).ConvertFrom(value);
         else return (SynchronizationModes)value;
       }
       set
       {
-        this["Synchronous"] = value;
+        this["synchronous"] = value;
       }
     }
 
@@ -116,12 +116,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("UseUTF16Encoding", out value);
-        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+        TryGetValue("useutf16encoding", out value);
+        return SQLiteConvert.ToBoolean(value);
       }
       set
       {
-        this["UseUTF16Encoding"] = value;
+        this["useutf16encoding"] = value;
       }
     }
 
@@ -135,12 +135,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Pooling", out value);
-        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+        TryGetValue("pooling", out value);
+        return SQLiteConvert.ToBoolean(value);
       }
       set
       {
-        this["Pooling"] = value;
+        this["pooling"] = value;
       }
     }
 
@@ -155,12 +155,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("BinaryGUID", out value);
-        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+        TryGetValue("binaryguid", out value);
+        return SQLiteConvert.ToBoolean(value);
       }
       set
       {
-        this["BinaryGUID"] = value;
+        this["binaryguid"] = value;
       }
     }
 
@@ -175,12 +175,30 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Data Source", out value);
+        TryGetValue("data source", out value);
         return value.ToString();
       }
       set
       {
-        this["Data Source"] = value;
+        this["data source"] = value;
+      }
+    }
+
+    /// <summary>
+    /// An alternate to the data source property
+    /// </summary>
+    [Browsable(false)]
+    public string Uri
+    {
+      get
+      {
+        object value;
+        TryGetValue("uri", out value);
+        return value.ToString();
+      }
+      set
+      {
+        this["uri"] = value;
       }
     }
 
@@ -196,12 +214,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Default Timeout", out value);
+        TryGetValue("default timeout", out value);
         return Convert.ToInt32(value, CultureInfo.CurrentCulture);
       }
       set
       {
-        this["Default Timeout"] = value;
+        this["default timeout"] = value;
       }
     }
 
@@ -216,12 +234,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Enlist", out value);
-        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+        TryGetValue("enlist", out value);
+        return SQLiteConvert.ToBoolean(value);
       }
       set
       {
-        this["Enlist"] = value;
+        this["enlist"] = value;
       }
     }
 
@@ -237,12 +255,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("FailIfMissing", out value);
-        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+        TryGetValue("failifmissing", out value);
+        return SQLiteConvert.ToBoolean(value);
       }
       set
       {
-        this["FailIfMissing"] = value;
+        this["failifmissing"] = value;
       }
     }
 
@@ -252,18 +270,38 @@ namespace System.Data.SQLite
     /// </summary>
     [DisplayName("Legacy Format")]
     [Browsable(true)]
-    [DefaultValue(true)]
+    [DefaultValue(false)]
     public bool LegacyFormat
     {
       get
       {
         object value;
-        TryGetValue("Legacy Format", out value);
-        return Convert.ToBoolean(value, CultureInfo.CurrentCulture);
+        TryGetValue("legacy format", out value);
+        return SQLiteConvert.ToBoolean(value);
       }
       set
       {
-        this["Legacy Format"] = value;
+        this["legacy format"] = value;
+      }
+    }
+
+    /// <summary>
+    /// When enabled, the database will be opened for read-only access and writing will be disabled.
+    /// </summary>
+    [DisplayName("Read Only")]
+    [Browsable(true)]
+    [DefaultValue(false)]
+    public bool ReadOnly
+    {
+      get
+      {
+        object value;
+        TryGetValue("read only", out value);
+        return SQLiteConvert.ToBoolean(value);
+      }
+      set
+      {
+        this["read only"] = value;
       }
     }
 
@@ -278,12 +316,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Password", out value);
+        TryGetValue("password", out value);
         return value.ToString();
       }
       set
       {
-        this["Password"] = value;
+        this["password"] = value;
       }
     }
 
@@ -298,12 +336,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Page Size", out value);
+        TryGetValue("page size", out value);
         return Convert.ToInt32(value, CultureInfo.CurrentCulture);
       }
       set
       {
-        this["Page Size"] = value;
+        this["page size"] = value;
       }
     }
 
@@ -318,12 +356,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Max Page Count", out value);
+        TryGetValue("max page count", out value);
         return Convert.ToInt32(value, CultureInfo.CurrentCulture);
       }
       set
       {
-        this["Max Page Count"] = value;
+        this["max page count"] = value;
       }
     }
 
@@ -338,12 +376,12 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Cache Size", out value);
+        TryGetValue("cache size", out value);
         return Convert.ToInt32(value, CultureInfo.CurrentCulture);
       }
       set
       {
-        this["Cache Size"] = value;
+        this["cache size"] = value;
       }
     }
 
@@ -357,17 +395,20 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("DateTimeFormat", out value);
+        TryGetValue("datetimeformat", out value);
         if (value is string)
           return (SQLiteDateFormats)TypeDescriptor.GetConverter(typeof(SQLiteDateFormats)).ConvertFrom(value);
         else return (SQLiteDateFormats)value;
       }
       set
       {
-        this["DateTimeFormat"] = value;
+        this["datetimeformat"] = value;
       }
     }
 
+    /// <summary>
+    /// Determines how SQLite handles the transaction journal file.
+    /// </summary>
     [Browsable(true)]
     [DefaultValue(SQLiteJournalModeEnum.Delete)]
     [DisplayName("Journal Mode")]
@@ -376,7 +417,7 @@ namespace System.Data.SQLite
       get
       {
         object value;
-        TryGetValue("Journal Mode", out value);
+        TryGetValue("journal mode", out value);
         if (value is string)
           return (SQLiteJournalModeEnum)TypeDescriptor.GetConverter(typeof(SQLiteJournalModeEnum)).ConvertFrom(value);
         else
@@ -384,7 +425,30 @@ namespace System.Data.SQLite
       }
       set
       {
-        this["Journal Mode"] = value;
+        this["journal mode"] = value;
+      }
+    }
+
+    /// <summary>
+    /// Sets the default isolation level for transactions on the connection.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(IsolationLevel.Serializable)]
+    [DisplayName("Default Isolation Level")]
+    public IsolationLevel DefaultIsolationLevel
+    {
+      get
+      {
+        object value;
+        TryGetValue("default isolationlevel", out value);
+        if (value is string)
+          return (IsolationLevel)TypeDescriptor.GetConverter(typeof(IsolationLevel)).ConvertFrom(value);
+        else
+          return (IsolationLevel)value;
+      }
+      set
+      {
+        this["default isolationlevel"] = value;
       }
     }
 

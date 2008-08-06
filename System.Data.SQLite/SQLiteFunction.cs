@@ -14,46 +14,6 @@ namespace System.Data.SQLite
   using System.Globalization;
 
   /// <summary>
-  /// The type of user-defined function to declare
-  /// </summary>
-  public enum FunctionType
-  {
-    /// <summary>
-    /// Scalar functions are designed to be called and return a result immediately.  Examples include ABS(), Upper(), Lower(), etc.
-    /// </summary>
-    Scalar = 0,
-    /// <summary>
-    /// Aggregate functions are designed to accumulate data until the end of a call and then return a result gleaned from the accumulated data.
-    /// Examples include SUM(), COUNT(), AVG(), etc.
-    /// </summary>
-    Aggregate = 1,
-    /// <summary>
-    /// Collation sequences are used to sort textual data in a custom manner, and appear in an ORDER BY clause.  Typically text in an ORDER BY is
-    /// sorted using a straight case-insensitive comparison function.  Custom collating sequences can be used to alter the behavior of text sorting
-    /// in a user-defined manner.
-    /// </summary>
-    Collation = 2,
-  }
-
-  /// <summary>
-  /// An internal callback delegate declaration.
-  /// </summary>
-  /// <param name="context">Raw context pointer for the user function</param>
-  /// <param name="nArgs">Count of arguments to the function</param>
-  /// <param name="argsptr">A pointer to the array of argument pointers</param>
-  internal delegate void SQLiteCallback(IntPtr context, int nArgs, IntPtr argsptr);
-  /// <summary>
-  /// Internal callback delegate for implementing collation sequences
-  /// </summary>
-  /// <param name="len1">Length of the string pv1</param>
-  /// <param name="pv1">Pointer to the first string to compare</param>
-  /// <param name="len2">Length of the string pv2</param>
-  /// <param name="pv2">Pointer to the second string to compare</param>
-  /// <returns>Returns -1 if the first string is less than the second.  0 if they are equal, or 1 if the first string is greater
-  /// than the second.</returns>
-  internal delegate int SQLiteCollation(int len1, IntPtr pv1, int len2, IntPtr pv2);
-
-  /// <summary>
   /// This abstract class is designed to handle user-defined functions easily.  An instance of the derived class is made for each
   /// connection to the database.
   /// </summary>
@@ -74,11 +34,8 @@ namespace System.Data.SQLite
     /// <summary>
     /// The base connection this function is attached to
     /// </summary>
-    private SQLiteBase              _base;
-    /// <summary>
-    /// Used internally to keep track of memory allocated for aggregate functions
-    /// </summary>
-    private SQLiteFunctionCookieHandle _interopCookie;
+    internal SQLiteBase              _base;
+
     /// <summary>
     /// Internal array used to keep track of aggregate function context data
     /// </summary>
@@ -95,11 +52,18 @@ namespace System.Data.SQLite
     /// <summary>
     /// Holds a reference to the callback function for finalizing an aggregate function
     /// </summary>
-    private SQLiteCallback  _FinalFunc;
+    private SQLiteFinalCallback  _FinalFunc;
     /// <summary>
     /// Holds a reference to the callback function for collation sequences
     /// </summary>
     private SQLiteCollation _CompareFunc;
+
+    private SQLiteCollation _CompareFunc16;
+
+    /// <summary>
+    /// Current context of the current callback.  Only valid during a callback
+    /// </summary>
+    internal IntPtr _context;
 
     private int _count = 1;
 
@@ -304,21 +268,28 @@ namespace System.Data.SQLite
     /// <param name="argsptr">A pointer to the array of arguments</param>
     internal void ScalarCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
+      _context = context;
       SetReturnValue(context, Invoke(ConvertParams(nArgs, argsptr)));
     }
 
     /// <summary>
     /// Internal collation sequence function, which wraps up the raw string pointers and executes the Compare() virtual function.
     /// </summary>
+    /// <param name="ptr">Not used</param>
     /// <param name="len1">Length of the string pv1</param>
     /// <param name="ptr1">Pointer to the first string to compare</param>
     /// <param name="len2">Length of the string pv2</param>
     /// <param name="ptr2">Pointer to the second string to compare</param>
     /// <returns>Returns -1 if the first string is less than the second.  0 if they are equal, or 1 if the first string is greater
     /// than the second.</returns>
-    internal int CompareCallback(int len1, IntPtr ptr1, int len2, IntPtr ptr2)
+    internal int CompareCallback(IntPtr ptr, int len1, IntPtr ptr1, int len2, IntPtr ptr2)
     {
-      return Compare(_base.ToString(ptr1, len1), _base.ToString(ptr2, len2));
+      return Compare(SQLiteConvert.UTF8ToString(ptr1, len1), SQLiteConvert.UTF8ToString(ptr2, len2));
+    }
+
+    internal int CompareCallback16(IntPtr ptr, int len1, IntPtr ptr1, int len2, IntPtr ptr2)
+    {
+      return Compare(SQLite3_UTF16.UTF16ToString(ptr1, len1), SQLite3_UTF16.UTF16ToString(ptr2, len2));
     }
 
     /// <summary>
@@ -343,6 +314,7 @@ namespace System.Data.SQLite
 
       try
       {
+        _context = context;
         Step(ConvertParams(nArgs, argsptr), n, ref obj);
         _contextDataList[nAux] = obj;
       }
@@ -356,9 +328,7 @@ namespace System.Data.SQLite
     /// An internal aggregate Final function callback, which wraps the context pointer and calls the virtual Final() method.
     /// </summary>
     /// <param name="context">A raw context pointer</param>
-    /// <param name="nArgs">Not used, always zero</param>
-    /// <param name="argsptr">Not used, always zero</param>
-    internal void FinalCallback(IntPtr context, int nArgs, IntPtr argsptr)
+    internal void FinalCallback(IntPtr context)
     {
       long n = (long)_base.AggregateContext(context);
       object obj = null;
@@ -370,6 +340,7 @@ namespace System.Data.SQLite
         _contextDataList.Remove(n);
       }
 
+      _context = context;
       SetReturnValue(context, Final(obj));
 
       IDisposable disp = obj as IDisposable;
@@ -423,8 +394,6 @@ namespace System.Data.SQLite
     {
       try
       {
-        SQLiteFunction.RegisterFunction(typeof(SQLiteFunc_RowCount));
-
 #if !PLATFORM_COMPACTFRAMEWORK
         SQLiteFunctionAttribute at;
         System.Reflection.Assembly[] arAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
@@ -512,7 +481,7 @@ namespace System.Data.SQLite
     /// as the connection (UTF-8 or UTF-16).
     /// </summary>
     /// <remarks>
-    /// The wrapper functions that interop with SQLite will create a unique cooke value, which internally is a pointer to
+    /// The wrapper functions that interop with SQLite will create a unique cookie value, which internally is a pointer to
     /// all the wrapped callback functions.  The interop function uses it to map CDecl callbacks to StdCall callbacks.
     /// </remarks>
     /// <param name="sqlbase">The base object on which the functions are to bind</param>
@@ -528,13 +497,14 @@ namespace System.Data.SQLite
         f._base = sqlbase;
         f._InvokeFunc = (pr.FuncType == FunctionType.Scalar) ? new SQLiteCallback(f.ScalarCallback) : null;
         f._StepFunc = (pr.FuncType == FunctionType.Aggregate) ? new SQLiteCallback(f.StepCallback) : null;
-        f._FinalFunc = (pr.FuncType == FunctionType.Aggregate) ? new SQLiteCallback(f.FinalCallback) : null;
+        f._FinalFunc = (pr.FuncType == FunctionType.Aggregate) ? new SQLiteFinalCallback(f.FinalCallback) : null;
         f._CompareFunc = (pr.FuncType == FunctionType.Collation) ? new SQLiteCollation(f.CompareCallback) : null;
+        f._CompareFunc16 = (pr.FuncType == FunctionType.Collation) ? new SQLiteCollation(f.CompareCallback16) : null;
 
         if (pr.FuncType != FunctionType.Collation)
-          f._interopCookie = sqlbase.CreateFunction(pr.Name, pr.Arguments, f._InvokeFunc, f._StepFunc, f._FinalFunc);
+          sqlbase.CreateFunction(pr.Name, pr.Arguments, (f is SQLiteFunctionEx), f._InvokeFunc, f._StepFunc, f._FinalFunc);
         else
-          f._interopCookie = sqlbase.CreateCollation(pr.Name, f._CompareFunc);
+          sqlbase.CreateCollation(pr.Name, f._CompareFunc, f._CompareFunc16);
 
 
         lFunctions.Add(f);
@@ -547,12 +517,169 @@ namespace System.Data.SQLite
     }
   }
 
-  [SQLiteFunction(Name = "last_rows_affected", FuncType = FunctionType.Scalar, Arguments = 0)]
-  internal class SQLiteFunc_RowCount : SQLiteFunction
+  /// <summary>
+  /// Extends SQLiteFunction and allows an inherited class to obtain the collating sequence associated with a function call.
+  /// </summary>
+  /// <remarks>
+  /// User-defined functions can call the GetCollationSequence() method in this class and use it to compare strings and char arrays.
+  /// </remarks>
+  public class SQLiteFunctionEx : SQLiteFunction
   {
-    public override object Invoke(object[] args)
+    /// <summary>
+    /// Obtains the collating sequence in effect for the given function.
+    /// </summary>
+    /// <remarks>
+    /// As an optimization, SQLite does not fill in this information when calling functions, unless the NeedCollationSequence
+    /// boolean value is set to true in the SQLiteFunctionAttribute.
+    /// </remarks>
+    /// <returns></returns>
+    protected CollationSequence GetCollationSequence()
     {
-      return ((SQLiteBase)SQLiteConvert).Changes;
+      return _base.GetCollationSequence(this, _context);
+    }
+  }
+
+  /// <summary>
+  /// The type of user-defined function to declare
+  /// </summary>
+  public enum FunctionType
+  {
+    /// <summary>
+    /// Scalar functions are designed to be called and return a result immediately.  Examples include ABS(), Upper(), Lower(), etc.
+    /// </summary>
+    Scalar = 0,
+    /// <summary>
+    /// Aggregate functions are designed to accumulate data until the end of a call and then return a result gleaned from the accumulated data.
+    /// Examples include SUM(), COUNT(), AVG(), etc.
+    /// </summary>
+    Aggregate = 1,
+    /// <summary>
+    /// Collation sequences are used to sort textual data in a custom manner, and appear in an ORDER BY clause.  Typically text in an ORDER BY is
+    /// sorted using a straight case-insensitive comparison function.  Custom collating sequences can be used to alter the behavior of text sorting
+    /// in a user-defined manner.
+    /// </summary>
+    Collation = 2,
+  }
+
+  /// <summary>
+  /// An internal callback delegate declaration.
+  /// </summary>
+  /// <param name="context">Raw context pointer for the user function</param>
+  /// <param name="nArgs">Count of arguments to the function</param>
+  /// <param name="argsptr">A pointer to the array of argument pointers</param>
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+  internal delegate void SQLiteCallback(IntPtr context, int nArgs, IntPtr argsptr);
+  /// <summary>
+  /// An internal final callback delegate declaration.
+  /// </summary>
+  /// <param name="context">Raw context pointer for the user function</param>
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+  internal delegate void SQLiteFinalCallback(IntPtr context);
+  /// <summary>
+  /// Internal callback delegate for implementing collation sequences
+  /// </summary>
+  /// <param name="puser">Not used</param>
+  /// <param name="len1">Length of the string pv1</param>
+  /// <param name="pv1">Pointer to the first string to compare</param>
+  /// <param name="len2">Length of the string pv2</param>
+  /// <param name="pv2">Pointer to the second string to compare</param>
+  /// <returns>Returns -1 if the first string is less than the second.  0 if they are equal, or 1 if the first string is greater
+  /// than the second.</returns>
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+  internal delegate int SQLiteCollation(IntPtr puser, int len1, IntPtr pv1, int len2, IntPtr pv2);
+
+  /// <summary>
+  /// The type of collating sequence
+  /// </summary>
+  public enum CollationTypeEnum
+  {
+    /// <summary>
+    /// The built-in BINARY collating sequence
+    /// </summary>
+    Binary = 1,
+    /// <summary>
+    /// The built-in NOCASE collating sequence
+    /// </summary>
+    NoCase = 2,
+    /// <summary>
+    /// The built-in REVERSE collating sequence
+    /// </summary>
+    Reverse = 3,
+    /// <summary>
+    /// A custom user-defined collating sequence
+    /// </summary>
+    Custom = 0,
+  }
+
+  /// <summary>
+  /// The encoding type the collation sequence uses
+  /// </summary>
+  public enum CollationEncodingEnum
+  {
+    /// <summary>
+    /// The collation sequence is UTF8
+    /// </summary>
+    UTF8 = 1,
+    /// <summary>
+    /// The collation sequence is UTF16 little-endian
+    /// </summary>
+    UTF16LE = 2,
+    /// <summary>
+    /// The collation sequence is UTF16 big-endian
+    /// </summary>
+    UTF16BE = 3,
+  }
+
+  /// <summary>
+  /// A struct describing the collating sequence a function is executing in
+  /// </summary>
+  public struct CollationSequence
+  {
+    /// <summary>
+    /// The name of the collating sequence
+    /// </summary>
+    public string Name;
+    /// <summary>
+    /// The type of collating sequence
+    /// </summary>
+    public CollationTypeEnum Type;
+
+    /// <summary>
+    /// The text encoding of the collation sequence
+    /// </summary>
+    public CollationEncodingEnum Encoding;
+
+    /// <summary>
+    /// Context of the function that requested the collating sequence
+    /// </summary>
+    internal SQLiteFunction _func;
+
+    /// <summary>
+    /// Calls the base collating sequence to compare two strings
+    /// </summary>
+    /// <param name="s1">The first string to compare</param>
+    /// <param name="s2">The second string to compare</param>
+    /// <returns>-1 if s1 is less than s2, 0 if s1 is equal to s2, and 1 if s1 is greater than s2</returns>
+    public int Compare(string s1, string s2)
+    {
+      return _func._base.ContextCollateCompare(Encoding, _func._context, s1, s2);
+    }
+
+    /// <summary>
+    /// Calls the base collating sequence to compare two character arrays
+    /// </summary>
+    /// <param name="c1">The first array to compare</param>
+    /// <param name="c2">The second array to compare</param>
+    /// <returns>-1 if c1 is less than c2, 0 if c1 is equal to c2, and 1 if c1 is greater than c2</returns>
+    public int Compare(char[] c1, char[] c2)
+    {
+      return _func._base.ContextCollateCompare(Encoding, _func._context, c1, c2);
     }
   }
 }

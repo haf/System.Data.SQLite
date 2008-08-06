@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Schema Namespace="SQLite" Provider="System.Data.SQLite" ProviderManifestToken="SQLite" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
+<Schema Namespace="SQLite" Provider="System.Data.SQLite" ProviderManifestToken="ISO8601" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
   <EntityContainer Name="Schema">
     <EntitySet Name="STables" EntityType="Self.Table">
       <DefiningQuery>
         SELECT
-        '[' || TABLE_NAME || ']' [Id]
+        '[' || TABLE_NAME || ']' COLLATE NOCASE [Id]
         ,   TABLE_CATALOG [CatalogName]
         ,   TABLE_SCHEMA [SchemaName]
         ,   TABLE_NAME    [Name]
@@ -18,8 +18,8 @@
     <EntitySet Name="STableColumns" EntityType="Self.TableColumn">
       <DefiningQuery>
         SELECT
-        '[' || c.TABLE_NAME || ']' || '[' || c.COLUMN_NAME || ']' [Id]
-        ,   '[' || c.TABLE_NAME || ']'                             [ParentId]
+        '[' || c.TABLE_NAME || ']' || '[' || c.COLUMN_NAME || ']' COLLATE NOCASE [Id]
+        ,   '[' || c.TABLE_NAME || ']'  COLLATE NOCASE                     [ParentId]
         ,   c.COLUMN_NAME   [Name]
         ,   c.ORDINAL_POSITION [Ordinal]
         ,   c.IS_NULLABLE [IsNullable]
@@ -46,7 +46,7 @@
     <EntitySet Name="SViews" EntityType="Self.View">
       <DefiningQuery>
         SELECT
-        '[' || TABLE_NAME || ']' [Id]
+        '[' || TABLE_NAME || ']'  COLLATE NOCASE [Id]
         ,   TABLE_CATALOG             [CatalogName]
         ,   TABLE_SCHEMA              [SchemaName]
         ,   TABLE_NAME                [Name]
@@ -60,8 +60,8 @@
     <EntitySet Name="SViewColumns" EntityType="Self.ViewColumn">
       <DefiningQuery>
         SELECT
-        '[' || c.TABLE_NAME || ']' || '[' || c.COLUMN_NAME || ']' [Id]
-        ,   '[' || c.TABLE_NAME || ']'                             [ParentId]
+        '[' || c.TABLE_NAME || ']' || '[' || c.COLUMN_NAME || ']' COLLATE NOCASE [Id]
+        ,   '[' || c.TABLE_NAME || ']' COLLATE NOCASE                             [ParentId]
         ,   c.COLUMN_NAME   [Name]
         ,   c.ORDINAL_POSITION [Ordinal]
         ,   c.IS_NULLABLE [IsNullable]
@@ -175,8 +175,8 @@
     <EntitySet Name="SConstraints" EntityType="Self.Constraint">
       <DefiningQuery>
         SELECT
-        '[' || tc.CONSTRAINT_NAME || ']' [Id]
-        , '[' || tc.TABLE_NAME || ']' [ParentId]
+        '[' || tc.CONSTRAINT_NAME || ']'  COLLATE NOCASE [Id]
+        , '[' || tc.TABLE_NAME || ']'  COLLATE NOCASE [ParentId]
         , tc.CONSTRAINT_NAME [Name]
         , tc.CONSTRAINT_TYPE [ConstraintType]
         , tc.IS_DEFERRABLE [IsDeferrable]
@@ -198,8 +198,8 @@
     <EntitySet Name="SConstraintColumns" EntityType="Self.ConstraintColumn">
       <DefiningQuery>
         SELECT
-        '[' || CONSTRAINT_NAME || ']' [ConstraintId]
-        , '[' || TABLE_NAME || ']' || '[' || COLUMN_NAME    || ']' [ColumnId]
+        '[' || CONSTRAINT_NAME || ']'  COLLATE NOCASE [ConstraintId]
+        , '[' || TABLE_NAME || ']' || '[' || COLUMN_NAME    || ']'  COLLATE NOCASE [ColumnId]
         FROM
         TEMP.SCHEMACONSTRAINTCOLUMNS
       </DefiningQuery>
@@ -208,9 +208,9 @@
     <EntitySet Name="SForeignKeyConstraints" EntityType="Self.ForeignKeyConstraint">
       <DefiningQuery>
         SELECT
-        '[' || rc.CONSTRAINT_NAME || ']' [Id]
-        , 'NO ACTION' [UpdateRule]
-        , 'NO ACTION' [DeleteRule]
+        '[' || rc.CONSTRAINT_NAME || ']'  COLLATE NOCASE [Id]
+        , 'NO ACTION'  COLLATE NOCASE [UpdateRule]
+        , 'NO ACTION'  COLLATE NOCASE [DeleteRule]
         FROM
         TEMP.SCHEMAFOREIGNKEYS rc
       </DefiningQuery>
@@ -219,10 +219,10 @@
     <EntitySet Name="SForeignKeys" EntityType="Self.ForeignKey">
       <DefiningQuery>
         SELECT
-        '[' || FC.CONSTRAINT_NAME || ']' || '[' || FC.FKEY_FROM_ORDINAL_POSITION || ']' [Id]
-        ,   '[' || FC.FKEY_TO_TABLE || ']' || '[' || FC.FKEY_TO_COLUMN || ']' [ToColumnId]
-        ,   '[' || FC.TABLE_NAME || ']' || '[' || FC.FKEY_FROM_COLUMN || ']' [FromColumnId]
-        ,   '[' || FC.CONSTRAINT_NAME || ']' [ConstraintId]
+        '[' || FC.CONSTRAINT_NAME || ']' || '[' || FC.FKEY_FROM_ORDINAL_POSITION || ']' COLLATE NOCASE [Id]
+        ,   '[' || FC.FKEY_TO_TABLE || ']' || '[' || FC.FKEY_TO_COLUMN || ']' COLLATE NOCASE [ToColumnId]
+        ,   '[' || FC.TABLE_NAME || ']' || '[' || FC.FKEY_FROM_COLUMN || ']' COLLATE NOCASE [FromColumnId]
+        ,   '[' || FC.CONSTRAINT_NAME || ']' COLLATE NOCASE [ConstraintId]
         ,   FC.FKEY_FROM_ORDINAL_POSITION [Ordinal]
         FROM
         TEMP.SCHEMAFOREIGNKEYS FC

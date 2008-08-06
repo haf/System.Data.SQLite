@@ -200,6 +200,8 @@ namespace System.Data.SQLite
   /// </remarks>
   internal sealed class SqlGenerator : DbExpressionVisitor<ISqlFragment>
   {
+    private SQLiteProviderManifest _manifest;
+
     #region Visitor parameter stacks
     /// <summary>
     /// Every relational node has to pass its SELECT statement to its children
@@ -267,7 +269,7 @@ namespace System.Data.SQLite
     static private readonly Dictionary<string, FunctionHandler> _builtInFunctionHandlers = InitializeBuiltInFunctionHandlers();
     static private readonly Dictionary<string, FunctionHandler> _canonicalFunctionHandlers = InitializeCanonicalFunctionHandlers();
     static private readonly Dictionary<string, string> _functionNameToOperatorDictionary = InitializeFunctionNameToOperatorDictionary();
-    static private readonly Dictionary<string, object> _datepartKeywords = InitializeDatepartKeywords();
+    static private readonly Dictionary<string, string> _datepartKeywords = InitializeDatepartKeywords();
     static private readonly char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     private delegate ISqlFragment FunctionHandler(SqlGenerator sqlgen, DbFunctionExpression functionExpr);
@@ -278,12 +280,12 @@ namespace System.Data.SQLite
     /// <returns></returns>
     private static Dictionary<string, FunctionHandler> InitializeBuiltInFunctionHandlers()
     {
-      Dictionary<string, FunctionHandler> functionHandlers = new Dictionary<string, FunctionHandler>(5, StringComparer.Ordinal);
-      functionHandlers.Add("concat", HandleConcatFunction);
-      functionHandlers.Add("dateadd", HandleDatepartDateFunction);
-      functionHandlers.Add("datediff", HandleDatepartDateFunction);
-      functionHandlers.Add("datename", HandleDatepartDateFunction);
-      functionHandlers.Add("datepart", HandleDatepartDateFunction);
+      Dictionary<string, FunctionHandler> functionHandlers = new Dictionary<string, FunctionHandler>(7, StringComparer.Ordinal);
+      functionHandlers.Add("CONCAT", HandleConcatFunction);
+      functionHandlers.Add("DATEPART", HandleDatepartDateFunction);
+      functionHandlers.Add("DatePart", HandleDatepartDateFunction);
+      functionHandlers.Add("GETDATE", HandleGetDateFunction);
+      functionHandlers.Add("GETUTCDATE", HandleGetUtcDateFunction);
       return functionHandlers;
     }
 
@@ -311,6 +313,8 @@ namespace System.Data.SQLite
       functionHandlers.Add("Second", HandleCanonicalFunctionDatepart);
       functionHandlers.Add("DateAdd", HandleCanonicalFunctionDateAdd);
       functionHandlers.Add("DateDiff", HandleCanonicalFunctionDateSubtract);
+      functionHandlers.Add("DATEADD", HandleCanonicalFunctionDateAdd); // store
+      functionHandlers.Add("DATEDIFF", HandleCanonicalFunctionDateSubtract); // store
 
       //Functions that translate to operators
       functionHandlers.Add("Concat", HandleConcatFunction);
@@ -325,43 +329,40 @@ namespace System.Data.SQLite
     /// Valid datepart values
     /// </summary>
     /// <returns></returns>
-    private static Dictionary<string, object> InitializeDatepartKeywords()
+    private static Dictionary<string, string> InitializeDatepartKeywords()
     {
       #region Datepart Keywords
       //
       // valid datepart values
       //
-      Dictionary<string, object> datepartKeywords = new Dictionary<string, object>(30, StringComparer.Ordinal);
-      datepartKeywords.Add("d", null);
-      datepartKeywords.Add("day", null);
-      datepartKeywords.Add("dayofyear", null);
-      datepartKeywords.Add("dd", null);
-      datepartKeywords.Add("dw", null);
-      datepartKeywords.Add("dy", null);
-      datepartKeywords.Add("hh", null);
-      datepartKeywords.Add("hour", null);
-      datepartKeywords.Add("m", null);
-      datepartKeywords.Add("mi", null);
-      datepartKeywords.Add("millisecond", null);
-      datepartKeywords.Add("minute", null);
-      datepartKeywords.Add("mm", null);
-      datepartKeywords.Add("month", null);
-      datepartKeywords.Add("ms", null);
-      datepartKeywords.Add("n", null);
-      datepartKeywords.Add("q", null);
-      datepartKeywords.Add("qq", null);
-      datepartKeywords.Add("quarter", null);
-      datepartKeywords.Add("s", null);
-      datepartKeywords.Add("second", null);
-      datepartKeywords.Add("ss", null);
-      datepartKeywords.Add("week", null);
-      datepartKeywords.Add("weekday", null);
-      datepartKeywords.Add("wk", null);
-      datepartKeywords.Add("ww", null);
-      datepartKeywords.Add("y", null);
-      datepartKeywords.Add("year", null);
-      datepartKeywords.Add("yy", null);
-      datepartKeywords.Add("yyyy", null);
+      Dictionary<string, string> datepartKeywords = new Dictionary<string, string>(30, StringComparer.OrdinalIgnoreCase);
+      datepartKeywords.Add("d", "%d");
+      datepartKeywords.Add("day", "%d");
+      datepartKeywords.Add("dayofyear", "%j");
+      datepartKeywords.Add("dd", "%d");
+      datepartKeywords.Add("dw", "%w");
+      datepartKeywords.Add("dy", "%j");
+      datepartKeywords.Add("hh", "%H");
+      datepartKeywords.Add("hour", "%H");
+      datepartKeywords.Add("m", "%m");
+      datepartKeywords.Add("mi", "%M");
+      datepartKeywords.Add("millisecond", "%f");
+      datepartKeywords.Add("minute", "%M");
+      datepartKeywords.Add("mm", "%m");
+      datepartKeywords.Add("month", "%m");
+      datepartKeywords.Add("ms", "%f");
+      datepartKeywords.Add("n", "%M");
+      datepartKeywords.Add("s", "%S");
+      datepartKeywords.Add("second", "%S");
+      datepartKeywords.Add("ss", "%S");
+      datepartKeywords.Add("week", "%W");
+      datepartKeywords.Add("weekday", "%w");
+      datepartKeywords.Add("wk", "%W");
+      datepartKeywords.Add("ww", "%W");
+      datepartKeywords.Add("y", "%Y");
+      datepartKeywords.Add("year", "%Y");
+      datepartKeywords.Add("yy", "%Y");
+      datepartKeywords.Add("yyyy", "%Y");
       return datepartKeywords;
       #endregion
     }
@@ -374,8 +375,8 @@ namespace System.Data.SQLite
     private static Dictionary<string, string> InitializeFunctionNameToOperatorDictionary()
     {
       Dictionary<string, string> functionNameToOperatorDictionary = new Dictionary<string, string>(5, StringComparer.Ordinal);
-      functionNameToOperatorDictionary.Add("Concat", "+");    //canonical
-      functionNameToOperatorDictionary.Add("CONCAT", "+");    //store
+      functionNameToOperatorDictionary.Add("Concat", "||");    //canonical
+      functionNameToOperatorDictionary.Add("CONCAT", "||");    //store
       functionNameToOperatorDictionary.Add("BitwiseAnd", "&");
       functionNameToOperatorDictionary.Add("BitwiseNot", "~");
       functionNameToOperatorDictionary.Add("BitwiseOr", "|");
@@ -389,8 +390,9 @@ namespace System.Data.SQLite
     /// <summary>
     /// Basic constructor. 
     /// </summary>
-    private SqlGenerator()
+    private SqlGenerator(SQLiteProviderManifest manifest)
     {
+      _manifest = manifest;
     }
     #endregion
 
@@ -403,7 +405,7 @@ namespace System.Data.SQLite
     /// <param name="parameters">Parameters to add to the command tree corresponding
     /// to constants in the command tree. Used only in ModificationCommandTrees.</param>
     /// <returns>The string representing the SQL to be executed.</returns>
-    internal static string GenerateSql(DbCommandTree tree, out List<DbParameter> parameters, out CommandType commandType)
+    internal static string GenerateSql(SQLiteProviderManifest manifest, DbCommandTree tree, out List<DbParameter> parameters, out CommandType commandType)
     {
       commandType = CommandType.Text;
 
@@ -411,7 +413,7 @@ namespace System.Data.SQLite
       DbQueryCommandTree queryCommandTree = tree as DbQueryCommandTree;
       if (queryCommandTree != null)
       {
-        SqlGenerator sqlGen = new SqlGenerator();
+        SqlGenerator sqlGen = new SqlGenerator(manifest);
         parameters = null;
         
         string sql = sqlGen.GenerateSql((DbQueryCommandTree)tree);
@@ -423,7 +425,7 @@ namespace System.Data.SQLite
       DbFunctionCommandTree DbFunctionCommandTree = tree as DbFunctionCommandTree;
       if (DbFunctionCommandTree != null)
       {
-        SqlGenerator sqlGen = new SqlGenerator();
+        SqlGenerator sqlGen = new SqlGenerator(manifest);
         parameters = null;
 
         string sql = sqlGen.GenerateFunctionSql(DbFunctionCommandTree, out commandType);
@@ -472,7 +474,9 @@ namespace System.Data.SQLite
     /// <returns>The string representing the SQL to be executed.</returns>
     private string GenerateSql(DbQueryCommandTree tree)
     {
-      tree.Validate();
+      // Tree Validation seems to have disappeared from the public method list in SP1 RC
+      //tree.Validate();
+      tree.GetType().InvokeMember("Validate", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.InvokeMethod, null, tree, null);
 
       selectStatementStack = new Stack<SqlSelectStatement>();
       isParentAJoinStack = new Stack<bool>();
@@ -526,9 +530,11 @@ namespace System.Data.SQLite
     /// </summary>
     private string GenerateFunctionSql(DbFunctionCommandTree tree, out CommandType commandType)
     {
-      tree.Validate();
+      // Tree Validation seems to have disappeared from the public method list in SP1 RC
+      //tree.Validate();
+      tree.GetType().InvokeMember("Validate", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.InvokeMethod, null, tree, null);
 
-      EdmFunction function = tree.Function;
+      EdmFunction function = tree.EdmFunction;
 
       // We expect function to always have these properties
       string userCommandText = (string)function.MetadataProperties["CommandTextAttribute"].Value;
@@ -606,29 +612,31 @@ namespace System.Data.SQLite
     /// <returns>A <see cref="SqlSelectStatement"/>.</returns>
     public override ISqlFragment Visit(DbApplyExpression e)
     {
-      List<DbExpressionBinding> inputs = new List<DbExpressionBinding>();
-      inputs.Add(e.Input);
-      inputs.Add(e.Apply);
+      throw new NotSupportedException("APPLY joins are not supported");
 
-      string joinString;
-      switch (e.ExpressionKind)
-      {
-        case DbExpressionKind.CrossApply:
-          joinString = "CROSS APPLY";
-          break;
+      //List<DbExpressionBinding> inputs = new List<DbExpressionBinding>();
+      //inputs.Add(e.Input);
+      //inputs.Add(e.Apply);
 
-        case DbExpressionKind.OuterApply:
-          joinString = "OUTER APPLY";
-          break;
+      //string joinString;
+      //switch (e.ExpressionKind)
+      //{
+      //  case DbExpressionKind.CrossApply:
+      //    joinString = "CROSS APPLY";
+      //    break;
 
-        default:
-          Debug.Assert(false);
-          throw new InvalidOperationException();
-      }
+      //  case DbExpressionKind.OuterApply:
+      //    joinString = "OUTER APPLY";
+      //    break;
 
-      // The join condition does not exist in this case, so we use null.
-      // We do not have a on clause, so we use JoinType.CrossJoin.
-      return VisitJoinExpression(inputs, DbExpressionKind.CrossJoin, joinString, null);
+      //  default:
+      //    Debug.Assert(false);
+      //    throw new InvalidOperationException();
+      //}
+
+      //// The join condition does not exist in this case, so we use null.
+      //// We do not have a on clause, so we use JoinType.CrossJoin.
+      //return VisitJoinExpression(inputs, DbExpressionKind.CrossJoin, joinString, null);
     }
 
     /// <summary>
@@ -887,8 +895,8 @@ namespace System.Data.SQLite
       {
         Symbol fromSymbol;
         TypeUsage inputType = MetadataHelpers.GetElementTypeUsage(e.Argument.ResultType);
-        result = CreateNewSelectStatement(result, "distinct", inputType, out fromSymbol);
-        AddFromSymbol(result, "distinct", fromSymbol, false);
+        result = CreateNewSelectStatement(result, "DISTINCT", inputType, out fromSymbol);
+        AddFromSymbol(result, "DISTINCT", fromSymbol, false);
       }
 
       result.IsDistinct = true;
@@ -1040,10 +1048,11 @@ namespace System.Data.SQLite
     /// <returns>A <see cref="SqlBuilder"/></returns>
     public override ISqlFragment Visit(DbFunctionExpression e)
     {
-      if (e.IsLambda)
-      {
-        throw new NotSupportedException();
-      }
+      // The check for a Lambda expression seems to have disappeared from the public method list in SP1 RC
+      //if (e.IsLambda)
+      //{
+      //  throw new NotSupportedException();
+      //}
 
       //
       // check if function requires special case processing, if so, delegates to it
@@ -1406,7 +1415,7 @@ namespace System.Data.SQLite
         AddFromSymbol(result, "top", fromSymbol, false);
       }
 
-      ISqlFragment topCount = HandaleCountExpression(e.Limit);
+      ISqlFragment topCount = HandleCountExpression(e.Limit);
 
       result.Top = new TopClause(topCount, e.WithTies);
       return result;
@@ -1730,94 +1739,95 @@ namespace System.Data.SQLite
     /// <returns>A <see cref="SqlBuilder"/></returns>
     public override ISqlFragment Visit(DbSkipExpression e)
     {
-      Debug.Assert(e.Count is DbConstantExpression || e.Count is DbParameterReferenceExpression, "DbSkipExpression.Count is of invalid expression type");
+      throw new NotSupportedException();
+      //Debug.Assert(e.Count is DbConstantExpression || e.Count is DbParameterReferenceExpression, "DbSkipExpression.Count is of invalid expression type");
 
-      //Visit the input
-      Symbol fromSymbol;
-      SqlSelectStatement input = VisitInputExpression(e.Input.Expression, e.Input.VariableName, e.Input.VariableType, out fromSymbol);
+      ////Visit the input
+      //Symbol fromSymbol;
+      //SqlSelectStatement input = VisitInputExpression(e.Input.Expression, e.Input.VariableName, e.Input.VariableType, out fromSymbol);
 
-      // Skip is not compatible with anything that OrderBy is not compatible with, as well as with distinct
-      if (!IsCompatible(input, e.ExpressionKind))
-      {
-        input = CreateNewSelectStatement(input, e.Input.VariableName, e.Input.VariableType, out fromSymbol);
-      }
+      //// Skip is not compatible with anything that OrderBy is not compatible with, as well as with distinct
+      //if (!IsCompatible(input, e.ExpressionKind))
+      //{
+      //  input = CreateNewSelectStatement(input, e.Input.VariableName, e.Input.VariableType, out fromSymbol);
+      //}
 
-      selectStatementStack.Push(input);
-      symbolTable.EnterScope();
+      //selectStatementStack.Push(input);
+      //symbolTable.EnterScope();
 
-      AddFromSymbol(input, e.Input.VariableName, fromSymbol);
+      //AddFromSymbol(input, e.Input.VariableName, fromSymbol);
 
-      //Add the default columns
-      Debug.Assert(input.Select.IsEmpty);
-      List<Symbol> inputColumns = AddDefaultColumns(input);
+      ////Add the default columns
+      //Debug.Assert(input.Select.IsEmpty);
+      //List<Symbol> inputColumns = AddDefaultColumns(input);
 
-      input.Select.Append(", row_number() OVER (ORDER BY ");
-      AddSortKeys(input.Select, e.SortOrder);
-      input.Select.Append(") AS ");
+      //input.Select.Append(", row_number() OVER (ORDER BY ");
+      //AddSortKeys(input.Select, e.SortOrder);
+      //input.Select.Append(") AS ");
 
-      Symbol row_numberSymbol = new Symbol("row_number", null);
+      //Symbol row_numberSymbol = new Symbol("row_number", null);
 
-      input.Select.Append(row_numberSymbol);
+      //input.Select.Append(row_numberSymbol);
 
-      //The inner statement is complete, its scopes need not be valid any longer
-      symbolTable.ExitScope();
-      selectStatementStack.Pop();
+      ////The inner statement is complete, its scopes need not be valid any longer
+      //symbolTable.ExitScope();
+      //selectStatementStack.Pop();
 
-      //Create the resulting statement 
-      //See CreateNewSelectStatement, it is very similar
+      ////Create the resulting statement 
+      ////See CreateNewSelectStatement, it is very similar
 
-      SqlSelectStatement result = new SqlSelectStatement();
-      result.From.Append("( ");
-      result.From.Append(input);
-      result.From.AppendLine();
-      result.From.Append(") ");
+      //SqlSelectStatement result = new SqlSelectStatement();
+      //result.From.Append("( ");
+      //result.From.Append(input);
+      //result.From.AppendLine();
+      //result.From.Append(") ");
 
-      //Create a symbol for the input
-      Symbol resultFromSymbol = null;
+      ////Create a symbol for the input
+      //Symbol resultFromSymbol = null;
 
-      if (input.FromExtents.Count == 1)
-      {
-        JoinSymbol oldJoinSymbol = input.FromExtents[0] as JoinSymbol;
-        if (oldJoinSymbol != null)
-        {
-          // Note: input.FromExtents will not do, since it might
-          // just be an alias of joinSymbol, and we want an actual JoinSymbol.
-          JoinSymbol newJoinSymbol = new JoinSymbol(e.Input.VariableName, e.Input.VariableType, oldJoinSymbol.ExtentList);
-          // This indicates that the oldStatement is a blocking scope
-          // i.e. it hides/renames extent columns
-          newJoinSymbol.IsNestedJoin = true;
-          newJoinSymbol.ColumnList = inputColumns;
-          newJoinSymbol.FlattenedExtentList = oldJoinSymbol.FlattenedExtentList;
+      //if (input.FromExtents.Count == 1)
+      //{
+      //  JoinSymbol oldJoinSymbol = input.FromExtents[0] as JoinSymbol;
+      //  if (oldJoinSymbol != null)
+      //  {
+      //    // Note: input.FromExtents will not do, since it might
+      //    // just be an alias of joinSymbol, and we want an actual JoinSymbol.
+      //    JoinSymbol newJoinSymbol = new JoinSymbol(e.Input.VariableName, e.Input.VariableType, oldJoinSymbol.ExtentList);
+      //    // This indicates that the oldStatement is a blocking scope
+      //    // i.e. it hides/renames extent columns
+      //    newJoinSymbol.IsNestedJoin = true;
+      //    newJoinSymbol.ColumnList = inputColumns;
+      //    newJoinSymbol.FlattenedExtentList = oldJoinSymbol.FlattenedExtentList;
 
-          resultFromSymbol = newJoinSymbol;
-        }
-      }
+      //    resultFromSymbol = newJoinSymbol;
+      //  }
+      //}
 
-      if (resultFromSymbol == null)
-      {
-        // This is just a simple extent/SqlSelectStatement,
-        // and we can get the column list from the type.
-        resultFromSymbol = new Symbol(e.Input.VariableName, e.Input.VariableType);
-      }
-      //Add the ORDER BY part
-      selectStatementStack.Push(result);
-      symbolTable.EnterScope();
+      //if (resultFromSymbol == null)
+      //{
+      //  // This is just a simple extent/SqlSelectStatement,
+      //  // and we can get the column list from the type.
+      //  resultFromSymbol = new Symbol(e.Input.VariableName, e.Input.VariableType);
+      //}
+      ////Add the ORDER BY part
+      //selectStatementStack.Push(result);
+      //symbolTable.EnterScope();
 
-      AddFromSymbol(result, e.Input.VariableName, resultFromSymbol);
+      //AddFromSymbol(result, e.Input.VariableName, resultFromSymbol);
 
-      //Add the predicate 
-      result.Where.Append(resultFromSymbol);
-      result.Where.Append(".");
-      result.Where.Append(row_numberSymbol);
-      result.Where.Append(" > ");
-      result.Where.Append(HandaleCountExpression(e.Count));
+      ////Add the predicate 
+      //result.Where.Append(resultFromSymbol);
+      //result.Where.Append(".");
+      //result.Where.Append(row_numberSymbol);
+      //result.Where.Append(" > ");
+      //result.Where.Append(HandaleCountExpression(e.Count));
 
-      AddSortKeys(result.OrderBy, e.SortOrder);
+      //AddSortKeys(result.OrderBy, e.SortOrder);
 
-      symbolTable.ExitScope();
-      selectStatementStack.Pop();
+      //symbolTable.ExitScope();
+      //selectStatementStack.Pop();
 
-      return result;
+      //return result;
     }
 
     /// <summary>
@@ -1923,12 +1933,12 @@ namespace System.Data.SQLite
 
       //The only aggregate function with different name is Big_Count
       //Note: If another such function is to be added, a dictionary should be created
-      if (MetadataHelpers.IsCanonicalFunction(functionAggregate.Function)
-          && String.Equals(functionAggregate.Function.Name, "BigCount", StringComparison.Ordinal))
-      {
-        aggregateResult.Append("COUNT_BIG");
-      }
-      else
+      //if (MetadataHelpers.IsCanonicalFunction(functionAggregate.Function)
+      //    && String.Equals(functionAggregate.Function.Name, "BigCount", StringComparison.Ordinal))
+      //{
+      //  aggregateResult.Append("COUNT_BIG");
+      //}
+      //else
       {
         WriteFunctionName(aggregateResult, functionAggregate.Function);
       }
@@ -2638,8 +2648,50 @@ namespace System.Data.SQLite
       return sqlgen.HandleSpecialFunctionToOperator(e, true);
     }
 
+    private static ISqlFragment HandleGetDateFunction(SqlGenerator sqlgen, DbFunctionExpression e)
+    {
+      SqlBuilder result = new SqlBuilder();
+      Debug.Assert(e.Arguments.Count == 0, "Canonical getdate function should have no arguments");
+
+      switch (sqlgen._manifest._dateFormat)
+      {
+        case SQLiteDateFormats.Ticks:
+          result.Append("(STRFTIME('%s', 'now') * 10000000 + 621355968000000000)");
+          break;
+        case SQLiteDateFormats.JulianDay:
+          result.Append("CAST(STRFTIME('%J', 'now') AS double)");
+          break;
+        default:
+          result.Append("STRFTIME('%Y-%m-%d %H:%M:%S', 'now')");
+          break;
+      }
+
+      return result;
+    }
+
+    private static ISqlFragment HandleGetUtcDateFunction(SqlGenerator sqlgen, DbFunctionExpression e)
+    {
+      SqlBuilder result = new SqlBuilder();
+      Debug.Assert(e.Arguments.Count == 0, "Canonical getutcdate function should have no arguments");
+
+      switch (sqlgen._manifest._dateFormat)
+      {
+        case SQLiteDateFormats.Ticks:
+          result.Append("(STRFTIME('%s', 'now', 'utc') * 10000000 + 621355968000000000)");
+          break;
+        case SQLiteDateFormats.JulianDay:
+          result.Append("CAST(STRFTIME('%J', 'now', 'utc') AS double)");
+          break;
+        default:
+          result.Append("STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'utc')");
+          break;
+      }
+
+      return result;
+    }
+
     /// <summary>
-    /// Handles special case in which datapart 'type' parameter is present. all the functions
+    /// Handles special case in which datepart 'type' parameter is present. all the functions
     /// handles here have *only* the 1st parameter as datepart. datepart value is passed along
     /// the QP as string and has to be expanded as TSQL keyword.
     /// </summary>
@@ -2648,7 +2700,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     private static ISqlFragment HandleDatepartDateFunction(SqlGenerator sqlgen, DbFunctionExpression e)
     {
-      Debug.Assert(e.Arguments.Count > 0, "e.Arguments.Count > 0");
+      Debug.Assert(e.Arguments.Count == 2, "datepart function must have 2 arguments");
 
       DbConstantExpression constExpr = e.Arguments[0] as DbConstantExpression;
       if (null == constExpr)
@@ -2667,29 +2719,48 @@ namespace System.Data.SQLite
       //
       // check if datepart value is valid
       //
-      if (!_datepartKeywords.ContainsKey(datepart))
+      string trans;
+      if (!_datepartKeywords.TryGetValue(datepart, out trans))
       {
         throw new InvalidOperationException(String.Format("{0}' is not a valid value for DATEPART argument in '{1}.{2}' function", datepart, e.Function.NamespaceName, e.Function.Name));
       }
 
-      //
-      // finaly, expand the function name
-      //
-      sqlgen.WriteFunctionName(result, e.Function);
-      result.Append("(");
-
-      // expand the datepart literal as tsql kword
-      result.Append(datepart);
-      string separator = ", ";
-
-      // expand remaining arguments
-      for (int i = 1; i < e.Arguments.Count; i++)
+      if (trans != "%f")
       {
-        result.Append(separator);
-        result.Append(e.Arguments[i].Accept(sqlgen));
-      }
+        result.Append("CAST(STRFTIME('");
 
-      result.Append(")");
+        // expand the datepart literal as tsql kword
+        result.Append(trans);
+        result.Append("', ");
+
+        switch (sqlgen._manifest._dateFormat)
+        {
+          case SQLiteDateFormats.Ticks:
+            result.Append(String.Format("(({0} - 621355968000000000) / 10000000.0)", e.Arguments[1].Accept(sqlgen)));
+            break;
+          default:
+            result.Append(e.Arguments[1].Accept(sqlgen));
+            break;
+        }
+
+        result.Append(") AS integer)");
+      }
+      else
+      {
+        result.Append("CAST(SUBSTR(STRFTIME('%f', ");
+
+        switch (sqlgen._manifest._dateFormat)
+        {
+          case SQLiteDateFormats.Ticks:
+            result.Append(String.Format("(({0} - 621355968000000000) / 10000000.0)", e.Arguments[1].Accept(sqlgen)));
+            break;
+          default:
+            result.Append(e.Arguments[1].Accept(sqlgen));
+            break;
+        }
+
+        result.Append("), 4) AS integer)");
+      }
 
       return result;
     }
@@ -2703,17 +2774,20 @@ namespace System.Data.SQLite
     private static ISqlFragment HandleCanonicalFunctionDateAdd(SqlGenerator sqlgen, DbFunctionExpression e)
     {
       SqlBuilder result = new SqlBuilder();
-      result.Append("DATEADD (second");
-
       Debug.Assert(e.Arguments.Count == 2, "Canonical datepart functions should have exactly two arguments");
 
-      for (int i = 1; i >= 0; i--)
+      switch (sqlgen._manifest._dateFormat)
       {
-        result.Append(", ");
-        result.Append(e.Arguments[i].Accept(sqlgen));
+        case SQLiteDateFormats.Ticks:
+          result.Append(String.Format("(STRFTIME('%s', JULIANDAY({1}) - ({0} / 86400.0)) * 10000000 + 621355968000000000)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          break;
+        case SQLiteDateFormats.JulianDay:
+          result.Append(String.Format("CAST(STRFTIME('%J', JULIANDAY({1}) - ({0} / 86400.0)) AS double)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          break;
+        default:
+          result.Append(String.Format("STRFTIME('%Y-%m-%d %H:%M:%S', JULIANDAY({1}) - ({0} / 86400.0))", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          break;
       }
-
-      result.Append(")");
 
       return result;
     }
@@ -2727,23 +2801,23 @@ namespace System.Data.SQLite
     private static ISqlFragment HandleCanonicalFunctionDateSubtract(SqlGenerator sqlgen, DbFunctionExpression e)
     {
       SqlBuilder result = new SqlBuilder();
-      result.Append("DATEDIFF (second");
-
       Debug.Assert(e.Arguments.Count == 2, "Canonical datepart functions should have exactly two arguments");
 
-      for (int i = 0; i < 2; i++)
+      switch (sqlgen._manifest._dateFormat)
       {
-        result.Append(", ");
-        result.Append(e.Arguments[i].Accept(sqlgen));
+        case SQLiteDateFormats.Ticks:
+          result.Append(String.Format("CAST((({0} - 621355968000000000) / 10000000.0)  - (({1} - 621355968000000000) / 10000000.0) * 86400.0 AS integer)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          break;
+        default:
+          result.Append(String.Format("CAST((JULIANDAY({0}) - JULIANDAY({1})) * 86400.0 AS integer)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          break;
       }
-
-      result.Append(")");
 
       return result;
     }
 
     /// <summary>
-    /// Handler for canonical funcitons for extracting date parts. 
+    /// Handler for canonical functions for extracting date parts. 
     /// For example:
     ///     Year(date) -> DATEPART( year, date)
     /// </summary>
@@ -2752,15 +2826,30 @@ namespace System.Data.SQLite
     /// <returns></returns>
     private static ISqlFragment HandleCanonicalFunctionDatepart(SqlGenerator sqlgen, DbFunctionExpression e)
     {
+      string trans;
+      if (!_datepartKeywords.TryGetValue(e.Function.Name, out trans))
+      {
+        throw new InvalidOperationException(String.Format("{0}' is not a valid value for STRFTIME argument", e.Function.Name));
+      }
+
       SqlBuilder result = new SqlBuilder();
-      result.Append("DATEPART (");
-      result.Append(e.Function.Name.ToLowerInvariant());
-      result.Append(", ");
+      result.Append("CAST(STRFTIME('");
+      result.Append(trans);
+      result.Append("', ");
 
       Debug.Assert(e.Arguments.Count == 1, "Canonical datepart functions should have exactly one argument");
-      result.Append(e.Arguments[0].Accept(sqlgen));
 
-      result.Append(")");
+      switch (sqlgen._manifest._dateFormat)
+      {
+        case SQLiteDateFormats.Ticks:
+          result.Append(String.Format("(({0} - 621355968000000000) / 10000000.0)", e.Arguments[0].Accept(sqlgen)));
+          break;
+        default:
+          result.Append(e.Arguments[0].Accept(sqlgen));
+          break;
+      }
+
+      result.Append(") AS integer)");
 
       return result;
     }
@@ -2784,7 +2873,9 @@ namespace System.Data.SQLite
     /// <returns></returns>
     private static ISqlFragment HandleCanonicalFunctionNewGuid(SqlGenerator sqlgen, DbFunctionExpression e)
     {
-      return sqlgen.HandleFunctionDefaultGivenName(e, "NEWID");
+      SqlBuilder result = new SqlBuilder();
+      result.Append("RANDOMBLOB(16)");
+      return result;
     }
 
     /// <summary>
@@ -2797,7 +2888,7 @@ namespace System.Data.SQLite
     {
       SqlBuilder result = new SqlBuilder();
 
-      result.Append("LEN(");
+      result.Append("LENGTH(");
 
       Debug.Assert(e.Arguments.Count == 1, "Len should have one argument");
       result.Append(e.Arguments[0].Accept(sqlgen));
@@ -2838,12 +2929,12 @@ namespace System.Data.SQLite
     {
       SqlBuilder result = new SqlBuilder();
 
-      result.Append("LTRIM(RTRIM(");
+      result.Append("TRIM(");
 
       Debug.Assert(e.Arguments.Count == 1, "Trim should have one argument");
       result.Append(e.Arguments[0].Accept(sqlgen));
 
-      result.Append("))");
+      result.Append(")");
 
       return result;
     }
@@ -3258,7 +3349,7 @@ namespace System.Data.SQLite
     /// <param name="s"></param>
     /// <param name="isUnicode"></param>
     /// <returns>The escaped sql string.</returns>
-    private string EscapeSingleQuote(string s, bool isUnicode)
+    private static string EscapeSingleQuote(string s, bool isUnicode)
     {
       return "'" + s.Replace("'", "''") + "'";
     }
@@ -3386,7 +3477,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="e"></param>
     /// <returns></returns>
-    private ISqlFragment HandaleCountExpression(DbExpression e)
+    private ISqlFragment HandleCountExpression(DbExpression e)
     {
       ISqlFragment result;
 

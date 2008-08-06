@@ -33,6 +33,7 @@ namespace System.Data.SQLite
     private const int varcharMaxSize = Int32.MaxValue;
     private const int nvarcharMaxSize = Int32.MaxValue;
     private const int binaryMaxSize = Int32.MaxValue;
+    internal SQLiteDateFormats _dateFormat;
 
     private System.Collections.ObjectModel.ReadOnlyCollection<PrimitiveType> _primitiveTypes = null;
     private System.Collections.ObjectModel.ReadOnlyCollection<EdmFunction> _functions = null;
@@ -45,31 +46,10 @@ namespace System.Data.SQLite
     /// Constructor
     /// </summary>
     /// <param name="manifestToken">A token used to infer the capabilities of the store</param>
-    public SQLiteProviderManifest()
+    public SQLiteProviderManifest(string manifestToken)
       : base(SQLiteProviderManifest.GetProviderManifest())
     {
-    }
-
-    #endregion
-
-    #region Properties
-
-    /// <summary>
-    /// Provider Invariant Name - this property will be removed in Entity Framework v1
-    /// Entity Framework SP1Beta does not use it, but it must be defined.
-    /// </summary>
-    public override string Provider
-    {
-      get { throw new NotImplementedException(); }
-    }
-
-    /// <summary>
-    /// Provider Manifest Token - this property will be removed in Entity Framework v1
-    /// Entity Framework SP1Beta does not use it, but it must be defined.
-    /// </summary>
-    public override string Token
-    {
-      get { throw new NotImplementedException(); }
+      _dateFormat = (SQLiteDateFormats)Enum.Parse(typeof(SQLiteDateFormats), manifestToken, true);
     }
 
     #endregion

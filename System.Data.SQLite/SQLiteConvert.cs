@@ -19,127 +19,6 @@ namespace System.Data.SQLite
 #endif
 
   /// <summary>
-  /// SQLite has very limited types, and is inherently text-based.  The first 5 types below represent the sum of all types SQLite
-  /// understands.  The DateTime extension to the spec is for internal use only.
-  /// </summary>
-  public enum TypeAffinity
-  {
-    /// <summary>
-    /// Not used
-    /// </summary>
-    Uninitialized = 0,
-    /// <summary>
-    /// All integers in SQLite default to Int64
-    /// </summary>
-    Int64 = 1,
-    /// <summary>
-    /// All floating point numbers in SQLite default to double
-    /// </summary>
-    Double = 2,
-    /// <summary>
-    /// The default data type of SQLite is text
-    /// </summary>
-    Text = 3,
-    /// <summary>
-    /// Typically blob types are only seen when returned from a function
-    /// </summary>
-    Blob = 4,
-    /// <summary>
-    /// Null types can be returned from functions
-    /// </summary>
-    Null = 5,
-    /// <summary>
-    /// Used internally by this provider
-    /// </summary>
-    DateTime = 10,
-    /// <summary>
-    /// Used internally
-    /// </summary>
-    None = 11,
-  }
-
-  /// <summary>
-  /// This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of three formats.  Ticks, ISO8601
-  /// and JulianDay.
-  /// Ticks is inherently more accurate, but less compatible with 3rd party tools that query the database, and renders the DateTime field
-  /// unreadable as text without post-processing.
-  /// ISO8601 is more compatible, readable, fully-processable, but less accurate as it doesn't provide time down to fractions of a second.
-  /// JulianDay is the numeric format the SQLite uses internally and is arguably the most compatible with 3rd party tools.  It is
-  /// not readable as text without post-processing.
-  /// </summary>
-  public enum SQLiteDateFormats
-  {
-    /// <summary>
-    /// Using ticks is more accurate but less compatible with other viewers and utilities that access your database.
-    /// </summary>
-    Ticks = 0,
-    /// <summary>
-    /// The default format for this provider.
-    /// </summary>
-    ISO8601 = 1,
-    /// <summary>
-    /// JulianDay format, which is what SQLite uses internally
-    /// </summary>
-    JulianDay = 2
-  }
-
-  /// <summary>
-  /// This enum determines how SQLite treats its journal file.
-  /// </summary>
-  /// <remarks>
-  /// By default SQLite will create and delete the journal file when needed during a transaction.
-  /// However, for some computers running certain filesystem monitoring tools, the rapid
-  /// creation and deletion of the journal file can cause those programs to fail, or to interfere with SQLite.
-  /// 
-  /// If a program or virus scanner is interfering with SQLite's journal file, you may receive errors like "unable to open database file"
-  /// when starting a transaction.  If this is happening, you may want to change the default journal mode to Persist.
-  /// </remarks>
-  public enum SQLiteJournalModeEnum
-  {
-    /// <summary>
-    /// The default mode, this causes SQLite to create and destroy the journal file as-needed.
-    /// </summary>
-    Delete = 0,
-    /// <summary>
-    /// When this is set, SQLite will keep the journal file even after a transaction has completed.  It's contents will be erased,
-    /// and the journal re-used as often as needed.  If it is deleted, it will be recreated the next time it is needed.
-    /// </summary>
-    Persist = 1,
-    /// <summary>
-    /// This option disables the rollback journal entirely.  Interrupted transactions or a program crash can cause database
-    /// corruption in this mode!
-    /// </summary>
-    Off = 2
-  }
-
-  /// <summary>
-  /// Struct used internally to determine the datatype of a column in a resultset
-  /// </summary>
-  internal class SQLiteType
-  {
-    /// <summary>
-    /// The DbType of the column, or DbType.Object if it cannot be determined
-    /// </summary>
-    internal DbType Type;
-    /// <summary>
-    /// The affinity of a column, used for expressions or when Type is DbType.Object
-    /// </summary>
-    internal TypeAffinity Affinity;
-  }
-
-  internal struct SQLiteTypeNames
-  {
-    internal SQLiteTypeNames(string newtypeName, DbType newdataType)
-    {
-      typeName = newtypeName;
-      dataType = newdataType;
-    }
-
-    internal string typeName;
-    internal DbType dataType;
-  }
-
-  /// <summary>
   /// This base class provides datatype conversion services for the SQLite provider.
   /// </summary>
   public abstract class SQLiteConvert
@@ -190,7 +69,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="sourceText">The string to convert to UTF-8</param>
     /// <returns>A byte array containing the converted string plus an extra 0 terminating byte at the end of the array.</returns>
-    public byte[] ToUTF8(string sourceText)
+    public static byte[] ToUTF8(string sourceText)
     {
       Byte[] byteArray;
       int nlen = _utf8.GetByteCount(sourceText) + 1;
@@ -235,10 +114,17 @@ namespace System.Data.SQLite
     /// <returns>A string containing the translated character(s)</returns>
     public static string UTF8ToString(IntPtr nativestring, int nativestringlen)
     {
-      if (nativestringlen == 0) return "";
+      if (nativestringlen == 0 || nativestring == IntPtr.Zero) return "";
+      if (nativestringlen == -1)
+      {
+        do
+        {
+          nativestringlen++;
+        } while (Marshal.ReadByte(nativestring, nativestringlen) != 0);
+      }
 
       byte[] byteArray = new byte[nativestringlen];
-
+      
       Marshal.Copy(nativestring, byteArray, 0, nativestringlen);
 
       return _utf8.GetString(byteArray, 0, nativestringlen);
@@ -403,6 +289,49 @@ namespace System.Data.SQLite
       ls.CopyTo(ar, 0);
 
       return ar;
+    }
+
+    /// <summary>
+    /// Convert a value to true or false.
+    /// </summary>
+    /// <param name="source">A string or number representing true or false</param>
+    /// <returns></returns>
+    public static bool ToBoolean(object source)
+    {
+      if (source is bool) return (bool)source;
+
+      return ToBoolean(source.ToString());
+    }
+
+    /// <summary>
+    /// Convert a string to true or false.
+    /// </summary>
+    /// <param name="source">A string representing true or false</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// "yes", "no", "y", "n", "0", "1", "on", "off" as well as Boolean.FalseString and Boolean.TrueString will all be
+    /// converted to a proper boolean value.
+    /// </remarks>
+    public static bool ToBoolean(string source)
+    {
+      if (String.Compare(source, bool.TrueString, StringComparison.OrdinalIgnoreCase) == 0) return true;
+      else if (String.Compare(source, bool.FalseString, StringComparison.OrdinalIgnoreCase) == 0) return false;
+
+      switch(source.ToLower())
+      {
+        case "yes":
+        case "y":
+        case "1":
+        case "on":
+          return true;
+        case "no":
+        case "n":
+        case "0":
+        case "off":
+          return false;
+        default:
+          throw new ArgumentException("source");
+      }
     }
 
     #region Type Conversions
@@ -756,5 +685,130 @@ namespace System.Data.SQLite
       new SQLiteTypeNames("SMALLINT", DbType.Int16),
       new SQLiteTypeNames("BIGINT", DbType.Int64),
     };
+  }
+
+  /// <summary>
+  /// SQLite has very limited types, and is inherently text-based.  The first 5 types below represent the sum of all types SQLite
+  /// understands.  The DateTime extension to the spec is for internal use only.
+  /// </summary>
+  public enum TypeAffinity
+  {
+    /// <summary>
+    /// Not used
+    /// </summary>
+    Uninitialized = 0,
+    /// <summary>
+    /// All integers in SQLite default to Int64
+    /// </summary>
+    Int64 = 1,
+    /// <summary>
+    /// All floating point numbers in SQLite default to double
+    /// </summary>
+    Double = 2,
+    /// <summary>
+    /// The default data type of SQLite is text
+    /// </summary>
+    Text = 3,
+    /// <summary>
+    /// Typically blob types are only seen when returned from a function
+    /// </summary>
+    Blob = 4,
+    /// <summary>
+    /// Null types can be returned from functions
+    /// </summary>
+    Null = 5,
+    /// <summary>
+    /// Used internally by this provider
+    /// </summary>
+    DateTime = 10,
+    /// <summary>
+    /// Used internally
+    /// </summary>
+    None = 11,
+  }
+
+  /// <summary>
+  /// This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of three formats.  Ticks, ISO8601
+  /// and JulianDay.
+  /// </summary>
+  /// <remarks>
+  /// ISO8601 is more compatible, readable, fully-processable, but less accurate as it doesn't provide time down to fractions of a second.
+  /// JulianDay is the numeric format the SQLite uses internally and is arguably the most compatible with 3rd party tools.  It is
+  /// not readable as text without post-processing.
+  /// Ticks less compatible with 3rd party tools that query the database, and renders the DateTime field unreadable as text without post-processing.
+  /// 
+  /// The preferred order of choosing a datetime format is JulianDay, ISO8601, and then Ticks.  Ticks is mainly present for legacy 
+  /// code support.
+  /// </remarks>
+  public enum SQLiteDateFormats
+  {
+    /// <summary>
+    /// Using ticks is not recommended and is not well supported with LINQ.
+    /// </summary>
+    Ticks = 0,
+    /// <summary>
+    /// The default format for this provider.
+    /// </summary>
+    ISO8601 = 1,
+    /// <summary>
+    /// JulianDay format, which is what SQLite uses internally
+    /// </summary>
+    JulianDay = 2
+  }
+
+  /// <summary>
+  /// This enum determines how SQLite treats its journal file.
+  /// </summary>
+  /// <remarks>
+  /// By default SQLite will create and delete the journal file when needed during a transaction.
+  /// However, for some computers running certain filesystem monitoring tools, the rapid
+  /// creation and deletion of the journal file can cause those programs to fail, or to interfere with SQLite.
+  /// 
+  /// If a program or virus scanner is interfering with SQLite's journal file, you may receive errors like "unable to open database file"
+  /// when starting a transaction.  If this is happening, you may want to change the default journal mode to Persist.
+  /// </remarks>
+  public enum SQLiteJournalModeEnum
+  {
+    /// <summary>
+    /// The default mode, this causes SQLite to create and destroy the journal file as-needed.
+    /// </summary>
+    Delete = 0,
+    /// <summary>
+    /// When this is set, SQLite will keep the journal file even after a transaction has completed.  It's contents will be erased,
+    /// and the journal re-used as often as needed.  If it is deleted, it will be recreated the next time it is needed.
+    /// </summary>
+    Persist = 1,
+    /// <summary>
+    /// This option disables the rollback journal entirely.  Interrupted transactions or a program crash can cause database
+    /// corruption in this mode!
+    /// </summary>
+    Off = 2
+  }
+
+  /// <summary>
+  /// Struct used internally to determine the datatype of a column in a resultset
+  /// </summary>
+  internal class SQLiteType
+  {
+    /// <summary>
+    /// The DbType of the column, or DbType.Object if it cannot be determined
+    /// </summary>
+    internal DbType Type;
+    /// <summary>
+    /// The affinity of a column, used for expressions or when Type is DbType.Object
+    /// </summary>
+    internal TypeAffinity Affinity;
+  }
+
+  internal struct SQLiteTypeNames
+  {
+    internal SQLiteTypeNames(string newtypeName, DbType newdataType)
+    {
+      typeName = newtypeName;
+      dataType = newdataType;
+    }
+
+    internal string typeName;
+    internal DbType dataType;
   }
 }

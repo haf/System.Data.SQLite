@@ -5,37 +5,15 @@ using System.Data.Common;
 using System.Data.SQLite;
 using System.Threading;
 using System.Transactions;
+using System.Windows.Forms;
 
 namespace test
 {
   class Program
   {
-    static void Main(string[] args)
+    static void Main()
     {
-      if (System.IO.File.Exists("test.db3"))
-        System.IO.File.Delete("test.db3");
-
-      DbProviderFactory fact;
-      fact = DbProviderFactories.GetFactory("System.Data.SQLite");
-
-      DbConnection cnn = fact.CreateConnection();
-      {
-        cnn.ConnectionString = "Data Source=test.db3;Pooling=False;FailIfMissing=False";
-        cnn.Open();
-
-        using (DbCommand cmd = cnn.CreateCommand())
-        {
-          cmd.CommandText = "TYPES integer, nvarchar, double;SELECT 1, 2, 3;";
-          using (DbDataReader reader = cmd.ExecuteReader())
-          {
-            reader.Read();
-          }
-        }
-
-        TestCases.Run(fact, cnn);
-      }
-
-      Console.ReadKey();
+      Application.Run(new TestCasesDialog());
     }
 
     static void cnn_RollBack(object sender, EventArgs e)

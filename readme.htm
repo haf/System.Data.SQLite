@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.54.0 July 25, 2008<br>
-    Using SQLite 3.6.0<br>
+    Version 1.0.55.0 August 6, 2008<br>
+    Using SQLite 3.6.1<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -26,6 +26,7 @@
       transaction enlistment.<li>Supports the Full
         and Compact .NET Framework, as well as native C/C++ development.&nbsp; 100% binary
         compatible with the original sqlite3.dll.</li>
+      <li>Full Entity Framework support (ADO.NET 3.5 SP1)</li>
       <LI>
       On the Compact Framework, it is faster than Sql Server 
       Mobile.  SQLite's installed size is a fraction of Sql Mobile's. It uses less memory at runtime, runs queries faster, and has a smaller database file size as well.
@@ -120,6 +121,60 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.55.0 - August 6, 2008</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.6.1</li>
+      <li>Added support for the user-contributed extension-functions at
+        <a href="http://www.sqlite.org/contrib">http://www.sqlite.org/contrib</a>.&nbsp; 
+        Feel free to override any of them with your own implementation.&nbsp; The new 
+        functions are: <i>acos, asin, atan, atn2, atan2, acosh, asinh, atanh, 
+        difference, degrees, radians, cos, sin, tan, cot, cosh, sinh, tanh, coth, exp, 
+        log, log10, power, sign, sqrt, square, ceil, floor, pi, replicate, charindex, 
+        leftstr, rightstr, reverse, proper, padl, padr, padc, strfilter,</i> and 
+        aggregates <i>stdev, variance, mode, median, lower_quartile, upper_quartile.</i></li>
+      <li>Moved the last_rows_affected() function to the C extension library.</li>
+      <li>Added a new class, SQLiteFunctionEx which extends SQLiteFunction and adds the 
+        ability for a user-defined function to get the collating sequence during the 
+        Invoke/Step methods.&nbsp; User-defined functions can use the collating sequence 
+        as a helper to compare values.</li>
+      <li>When registering user-defined collation sequences and functions, the provider 
+        will now register both a UTF8 and a UTF16 version instead of just UTF8.</li>
+      <li>Revamped connection pooling and added static ClearPool() and ClearAllPools() 
+        functions to SQLiteConnection.&nbsp; Behavior of the pool and its clearing 
+        mechanics match SqlClient.</li>
+      <li>Fixed connections going to the pool so that any unfinalized lingering commands 
+        from un-collected datareaders are automatically reset and any lurking 
+        transactions made on the connection are rolled back.</li>
+      <li>Transaction isolation levels are now partially supported.&nbsp; Serializable 
+        is the default, which obtains read/write locks immediately -- this is compatible 
+        with previous releases of the provider.&nbsp; Unspecified will default to 
+        whatever the default isolation mode is set to, and ReadCommitted will cause a 
+        deferred lock to be obtained.&nbsp; No other values are legal.</li>
+      <li>Revamped the test.exe program.&nbsp; It&#39;s now an interactive GUI application.&nbsp; 
+        Easier for me to add tests now.</li>
+      <li>Tweaks to the VS designer package and installer.</li>
+      <li>More adjustments to the internal SQLite3.Prepare() method to account for both 
+        kinds of lock errors when retrying.</li>
+      <li>Stripped a lot of unnecessary interop() calls and replaced with base sqlite calls.&nbsp; 
+        Revamped most of UnsafeNativeMethods to make it easier to port the code.</li>
+      <li>Rerigged internal callbacks for userdef functions and other native to managed 
+        callbacks.&nbsp; More portable this way.</li>
+      <li>Source can now can be compiled with the SQLITE_STANDARD preprocessor symbol to 
+        force the wrapper to use the stock sqlite3 library.&nbsp; Some functionality is 
+        missing, but its minimal.&nbsp; None of the precompiled binaries are compiled 
+        using this setting, but its useful for testing portability.</li>
+      <li>Added &quot;boolean&quot; and a couple other missing datatypes to the &quot;DataTypes&quot; schema 
+        xml file.&nbsp; Used by the VS designer when displaying tables and querying.</li>
+      <li>Added a new connection string option &quot;Read Only&quot;.&nbsp; When set to True, the 
+        database will be opened in read-only mode.</li>
+      <li>Added a new connection string option &quot;Max Pool Size&quot; to set the maximum size 
+        of the connection pool for a given db file connection.</li>
+      <li>Added a new connection string option &quot;Default IsolationLevel&quot; to set the 
+        default isolation level of transactions.&nbsp; Possible values are Serializable and 
+        ReadCommitted.</li>
+      <li>Added a new connection string option &quot;URI&quot; as an optional parameter for 
+        compatibility with other ports of the provider.</li>
+    </ul>
     <p><b>1.0.54.0 - July 25, 2008</b></p>
     <ul>
       <li>Fixed the setup project, which somehow &quot;forgot&quot; to include all the binaries in 

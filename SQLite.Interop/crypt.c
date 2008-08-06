@@ -1,6 +1,10 @@
 #ifndef SQLITE_OMIT_DISKIO
 #ifdef SQLITE_HAS_CODEC
 
+#if _DEBUG
+#include "splitsource\pager.c"
+#endif
+
 #include <windows.h>
 #include <wincrypt.h>
 
@@ -55,6 +59,8 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
   if (!pExisting) // Creating a new cryptblock
   {
     pBlock = sqlite3_malloc(sizeof(CRYPTBLOCK));
+    if (!pBlock) return NULL;
+
     ZeroMemory(pBlock, sizeof(CRYPTBLOCK));
     pBlock->hReadKey = hKey;
     pBlock->hWriteKey = hKey;
@@ -78,6 +84,11 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
   // Figure out how big to make our spare crypt block
   CryptEncrypt(hKey, 0, TRUE, 0, NULL, &pBlock->dwCryptSize, pBlock->dwCryptSize * 2);
   pBlock->pvCrypt = sqlite3_malloc(pBlock->dwCryptSize + (CRYPT_OFFSET * 2));
+  if (!pBlock->pvCrypt)
+  {
+    sqlite3_free(pBlock);
+    return NULL;
+  }
 
   return pBlock;
 }
@@ -276,13 +287,13 @@ void sqlite3CodecGetKey(sqlite3 *db, int nDb, void **ppKey, int *pnKeyLen)
 }
 
 // We do not attach this key to the temp store, only the main database.
-__declspec(dllexport) int WINAPI sqlite3_key_interop(sqlite3 *db, const void *pKey, int nKeySize)
+int sqlite3_key(sqlite3 *db, const void *pKey, int nKeySize)
 {
   return sqlite3CodecAttach(db, 0, pKey, nKeySize);
 }
 
 // Changes the encryption key for an existing database.
-__declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *pKey, int nKeySize)
+int sqlite3_rekey(sqlite3 *db, const void *pKey, int nKeySize)
 {
   Btree *pbt = db->aDb[0].pBt;
   Pager *p = sqlite3BtreePager(pbt);
@@ -303,6 +314,9 @@ __declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *
   if (!pBlock) // Encrypt an unencrypted database
   {
     pBlock = CreateCryptBlock(hKey, p, NULL);
+    if (!pBlock)
+      return SQLITE_NOMEM;
+
     pBlock->hReadKey = 0; // Original database is not encrypted
     sqlite3PagerSetCodec(sqlite3BtreePager(pbt), sqlite3Codec, pBlock);
     db->aDb[0].pAux = pBlock;
@@ -382,16 +396,6 @@ __declspec(dllexport) int WINAPI sqlite3_rekey_interop(sqlite3 *db, const void *
   }
 
   return rc;
-}
-
-int sqlite3_key(sqlite3 *db, const void *pKey, int nKey)
-{
-  return sqlite3_key_interop(db, pKey, nKey);
-}
-
-int sqlite3_rekey(sqlite3 *db, const void *pKey, int nKey)
-{
-  return sqlite3_rekey_interop(db, pKey, nKey);
 }
 
 #endif // SQLITE_HAS_CODEC
