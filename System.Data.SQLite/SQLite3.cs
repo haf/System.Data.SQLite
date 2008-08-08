@@ -73,6 +73,14 @@ namespace System.Data.SQLite
     {
       get
       {
+        return SQLite3.SQLiteVersion;
+      }
+    }
+
+    internal static string SQLiteVersion
+    {
+      get
+      {
         return UTF8ToString(UnsafeNativeMethods.sqlite3_libversion(), -1);
       }
     }
@@ -166,7 +174,7 @@ namespace System.Data.SQLite
             else
             {
               // Otherwise sleep for a random amount of time up to 250ms
-              UnsafeNativeMethods.sqlite3_sleep((uint)rnd.Next(1, 250));
+              System.Threading.Thread.CurrentThread.Join(rnd.Next(1, 250));
             }
           }
         }
@@ -307,7 +315,7 @@ namespace System.Data.SQLite
             else
             {
               // Otherwise sleep for a random amount of time up to 250ms
-              UnsafeNativeMethods.sqlite3_sleep((uint)rnd.Next(1, 250));
+              System.Threading.Thread.CurrentThread.Join(rnd.Next(1, 250));
             }
           }
         }

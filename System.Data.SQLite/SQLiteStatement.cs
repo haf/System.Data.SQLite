@@ -196,7 +196,7 @@ namespace System.Data.SQLite
         case DbType.Single:
         case DbType.Double:
         case DbType.Currency:
-        case DbType.Decimal:
+        //case DbType.Decimal: // Dont store decimal as double ... loses precision
           _sql.Bind_Double(this, index, Convert.ToDouble(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Binary:

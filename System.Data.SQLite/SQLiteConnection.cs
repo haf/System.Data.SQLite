@@ -471,9 +471,6 @@ namespace System.Data.SQLite
 #endif
         if (_sql != null)
         {
-          if (_transactionLevel > 0)
-            SQLiteTransaction.IssueRollback(this);
-
           _sql.Close();
         }
         _sql = null;
@@ -942,6 +939,14 @@ namespace System.Data.SQLite
 
         return _sql.Version;
       }
+    }
+
+    /// <summary>
+    /// Returns the version of the underlying SQLite database engine
+    /// </summary>
+    public static string SQLiteVersion
+    {
+      get { return SQLite3.SQLiteVersion; }
     }
 
     /// <summary>

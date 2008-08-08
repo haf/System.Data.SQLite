@@ -266,6 +266,7 @@ namespace System.Data.SQLite
           if (typ == DbType.SByte) return affinity;
           if (typ == DbType.Guid) return affinity;
           if (typ == DbType.DateTime) return affinity;
+          if (typ == DbType.Decimal) return affinity;
           break;
         case TypeAffinity.Blob:
           if (typ == DbType.Guid) return affinity;
@@ -401,7 +402,7 @@ namespace System.Data.SQLite
         return _keyInfo.GetDecimal(i - VisibleFieldCount);
 
       VerifyType(i, DbType.Decimal);
-      return Convert.ToDecimal(_activeStatement._sql.GetDouble(_activeStatement, i));
+      return Convert.ToDecimal(_activeStatement._sql.GetText(_activeStatement, i));
     }
 
     /// <summary>

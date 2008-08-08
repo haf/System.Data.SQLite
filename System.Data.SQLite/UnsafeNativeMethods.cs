@@ -337,13 +337,6 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
-    internal static extern void sqlite3_sleep(uint dwMilliseconds);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
     internal static extern IntPtr sqlite3_libversion();
 
 #if !PLATFORM_COMPACTFRAMEWORK

@@ -56,7 +56,14 @@ namespace System.Data.SQLite
     private void Initialize(string cnnString)
     {
       _properties = new Hashtable();
-      base.GetProperties(_properties);
+      try
+      {
+        base.GetProperties(_properties);
+      }
+      catch(NotImplementedException)
+      {
+        FallbackGetProperties(_properties);
+      }
 
       if (String.IsNullOrEmpty(cnnString) == false)
         ConnectionString = cnnString;
@@ -249,7 +256,6 @@ namespace System.Data.SQLite
     /// </summary>
     [Browsable(true)]
     [DefaultValue(false)]
-    [DisplayName("Fail If Missing")]
     public bool FailIfMissing
     {
       get
@@ -468,9 +474,13 @@ namespace System.Data.SQLite
 
       if (pd == null) return b;
 
+      // Attempt to coerce the value into something more solid
       if (b)
       {
-        value = TypeDescriptor.GetConverter(pd.PropertyType).ConvertFrom(value);
+        if (pd.PropertyType == typeof(Boolean))
+          value = SQLiteConvert.ToBoolean(value);
+        else
+          value = TypeDescriptor.GetConverter(pd.PropertyType).ConvertFrom(value);
       }
       else
       {
@@ -482,6 +492,17 @@ namespace System.Data.SQLite
         }
       }
       return b;
+    }
+
+    private void FallbackGetProperties(Hashtable propertyList)
+    {
+      foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this, true))
+      {
+        if (descriptor.Name != "ConnectionString" && propertyList.ContainsKey(descriptor.DisplayName) == false)
+        {
+          propertyList.Add(descriptor.DisplayName, descriptor);
+        }
+      }
     }
   }
 #endif
