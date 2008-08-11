@@ -92,7 +92,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Gets/Sets the synchronous mode of the connection string.  Default is "Normal".
+    /// Gets/Sets the synchronization mode (file flushing) of the connection string.  Default is "Normal".
     /// </summary>
     [DisplayName("Synchronous")]
     [Browsable(true)]
@@ -494,6 +494,10 @@ namespace System.Data.SQLite
       return b;
     }
 
+    /// <summary>
+    /// Fallback method for MONO, which doesn't implement DbConnectionStringBuilder.GetProperties()
+    /// </summary>
+    /// <param name="propertyList">The hashtable to fill with property descriptors</param>
     private void FallbackGetProperties(Hashtable propertyList)
     {
       foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this, true))

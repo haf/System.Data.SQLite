@@ -38,6 +38,12 @@ namespace SQLite.Designer.Design
 
     #region IHaveConnection Members
 
+    [Browsable(false)]
+    public ViewTableBase DesignTable
+    {
+      get { return _column.DesignTable; }
+    }
+
     public DbConnection GetConnection()
     {
       return ((IHaveConnection)_column).GetConnection();

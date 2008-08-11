@@ -55,6 +55,23 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.56.0 - August 11, 2008</b></p>
+    <ul>
+      <li>Fixed a bug in the table designer when designing new tables, wherein you had to 
+        save the table first before being able to create indexes and foreign keys.</li>
+      <li>Tweaks to decimal type handling.&nbsp; The &#39;decimal&#39; type can&#39;t be represented 
+        by Int64 or Double (without loss of precision) in SQLite, so we have to fudge it 
+        by treating it like a string and converting it back and forth in the provider.&nbsp; 
+        Unfortunately backing it to the db as a string causes sorting problems.&nbsp; 
+        See <a href="http://sqlite.phxsoftware.com/forums/p/1296/5595.aspx#5595">this 
+        post</a> 
+        for details on using a custom collation sequence to overcome the sorting issue arising from this patch.</li>
+      <li>Minor tweaks and bugfixes to the test program and the provider.</li>
+      <li>More adjustments to make the managed-only version of the provider run and pass 
+        all tests on Mono.</li>
+      <li>LINQ to Entities bits heavily updated and compiled against VS2008 SP1 RTM.&nbsp; SQLite 
+        LINQ support is still considered beta.</li>
+    </ul>
     <p><b>1.0.55.0 - August 6, 2008</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.1</li>

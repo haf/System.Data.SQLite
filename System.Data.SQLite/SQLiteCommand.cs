@@ -565,24 +565,11 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public override int ExecuteNonQuery()
     {
-      InitializeForReader();
-
-      int nAffected = 0;
-      int x = 0;
-      SQLiteStatement stmt;
-
-      for(;;)
+      using (SQLiteDataReader reader = ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
       {
-        stmt = GetStatement(x);
-        x++;
-        if (stmt == null) break;
-
-        while (_cnn._sql.Step(stmt)) ;
-        _cnn._sql.Reset(stmt);
-        nAffected += _cnn._sql.Changes;
+        while (reader.NextResult()) ;
+        return reader.RecordsAffected;
       }
-
-      return nAffected;
     }
 
     /// <summary>
@@ -592,31 +579,12 @@ namespace System.Data.SQLite
     /// <returns>The first column of the first row of the first resultset from the query</returns>
     public override object ExecuteScalar()
     {
-      InitializeForReader();
-
-      int x = 0;
-      object ret = null;
-      SQLiteType typ = new SQLiteType();
-      SQLiteStatement stmt;
-
-      // We step through every statement in the command, but only grab the first row of the first resultset.
-      // We keep going even after obtaining it.
-      for (;;)
+      using (SQLiteDataReader reader = ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
       {
-        stmt = GetStatement(x);
-        x++;
-        if (stmt == null) break;
-
-        if (_cnn._sql.Step(stmt) == true && ret == null)
-        {
-          typ.Type = SQLiteConvert.TypeNameToDbType(_cnn._sql.ColumnType(stmt, 0, out typ.Affinity));
-
-          ret = _cnn._sql.GetValue(stmt, 0, typ);
-        }
-        _cnn._sql.Reset(stmt);
+        if (reader.Read())
+          return reader[0];
       }
-
-      return ret;
+      return null;
     }
 
     /// <summary>

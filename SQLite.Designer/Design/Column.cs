@@ -73,6 +73,12 @@ namespace SQLite.Designer.Design
 
     #region IHaveConnection Members
 
+    [Browsable(false)]
+    public ViewTableBase DesignTable
+    {
+      get { return _table; }
+    }
+
     public DbConnection GetConnection()
     {
       return ((IHaveConnection)_table).GetConnection();
@@ -182,6 +188,7 @@ namespace SQLite.Designer.Design
       get { return _columnName; }
       set
       {
+        value = value.Trim();
         if (value != _columnName)
         {
           _columnName = value;
@@ -221,6 +228,7 @@ namespace SQLite.Designer.Design
       get { return _dataType; }
       set
       {
+        value = value.Trim();
         if (value != _dataType)
         {
           _dataType = value;

@@ -427,6 +427,12 @@ namespace SQLite.Designer.Design
 
     #region IHaveConnection Members
 
+    [Browsable(false)]
+    public ViewTableBase DesignTable
+    {
+      get { return _parent.DesignTable; }
+    }
+
     public DbConnection GetConnection()
     {
       return ((IHaveConnection)_parent).GetConnection();
@@ -498,6 +504,12 @@ namespace SQLite.Designer.Design
     }
 
     #region IHaveConnection Members
+
+    [Browsable(false)]
+    public ViewTableBase DesignTable
+    {
+      get { return _table; }
+    }
 
     public DbConnection GetConnection()
     {
@@ -694,37 +706,52 @@ namespace SQLite.Designer.Design
       
       // populate the list
       _list.Items.Clear();
-      DataTable tbl = null;
 
-      try
+      if (parent is Table)
       {
-        string prefix = "";
-        tbl = parent.GetConnection().GetSchema("Columns", new string[] { parent.Catalog, null, parent.Name });
-        if (tbl.Rows.Count == 0)
+        foreach (Column c in ((Table)parent).Columns)
         {
-          tbl.Dispose();
-          tbl = null;
-          prefix = "VIEW_";
-          tbl = parent.GetConnection().GetSchema("ViewColumns", new string[] { parent.Catalog, null, parent.Name });
-        }
-        foreach (DataRow item in tbl.Rows)
-        {
-          // add this item with the proper check state
           CheckState check = CheckState.Unchecked;
           for (int n = 0; n < values.Length; n++)
           {
-            if (values[n].Trim() == String.Format("[{0}]", item[prefix + "COLUMN_NAME"].ToString()))
+            if (values[n].Trim() == String.Format("[{0}]", c.ColumnName))
             {
               check = CheckState.Checked;
               break;
             }
           }
-          _list.Items.Add(item[prefix + "COLUMN_NAME"].ToString(), check);
+          _list.Items.Add(c.ColumnName, check);
         }
       }
-      finally
+      else
       {
-        if (tbl != null) tbl.Dispose();
+        try
+        {
+          using (DbCommand cmd = trig.GetConnection().CreateCommand())
+          {
+            cmd.CommandText = ((View)parent).SqlText;
+            using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.SchemaOnly))
+            using (DataTable tbl = reader.GetSchemaTable())
+            {
+              foreach (DataRow row in tbl.Rows)
+              {
+                CheckState check = CheckState.Unchecked;
+                for (int n = 0; n < values.Length; n++)
+                {
+                  if (values[n].Trim() == String.Format("[{0}]", row[SchemaTableColumn.ColumnName]))
+                  {
+                    check = CheckState.Checked;
+                    break;
+                  }
+                }
+                _list.Items.Add(row[SchemaTableColumn.ColumnName].ToString(), check);
+              }
+            }
+          }
+        }
+        catch
+        {
+        }
       }
       _list.Height = Math.Min(300, (_list.Items.Count + 1) * _list.Font.Height);
 
@@ -779,14 +806,31 @@ namespace SQLite.Designer.Design
     {
       base.FillTreeWithData(selector, context, provider);
       IHaveConnectionScope source = context.Instance as IHaveConnectionScope;
+      ViewTableBase design;
 
       if (source == null) return;
 
-      using (DataTable table = source.GetConnection().GetSchema("Columns", new string[] { source.CatalogScope, null, source.TableScope }))
+      design = source.DesignTable;
+
+      if (design.Name != source.TableScope)
       {
-        foreach (DataRow row in table.Rows)
+        using (DataTable table = source.GetConnection().GetSchema("Columns", new string[] { source.CatalogScope, null, source.TableScope }))
         {
-          selector.AddNode(row[3].ToString(), row[3], null);
+          foreach (DataRow row in table.Rows)
+          {
+            selector.AddNode(row[3].ToString(), row[3], null);
+          }
+        }
+      }
+      else
+      {
+        Table tbl = design as Table;
+        if (tbl != null)
+        {
+          foreach (Column c in tbl.Columns)
+          {
+            selector.AddNode(c.ColumnName, c.ColumnName, null);
+          }
         }
       }
     }
@@ -803,16 +847,26 @@ namespace SQLite.Designer.Design
     {
       base.FillTreeWithData(selector, context, provider);
       IHaveConnectionScope source = context.Instance as IHaveConnectionScope;
+      Table design;
 
       if (source == null) return;
+
+      design = source.DesignTable as Table;
 
       using (DataTable table = source.GetConnection().GetSchema("Tables", new string[] { source.CatalogScope }))
       {
         foreach (DataRow row in table.Rows)
         {
-          selector.AddNode(row[2].ToString(), row[2], null);
+          bool add = true;
+          if (design != null && (row[2].ToString() == design.OldName || row[2].ToString() == design.Name))
+            add = false;
+
+          if (add) 
+            selector.AddNode(row[2].ToString(), row[2], null);
         }
       }
+      if (design != null)
+        selector.AddNode(design.Name, design.Name, null);
     }
   }
 }

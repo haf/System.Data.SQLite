@@ -19,11 +19,13 @@ namespace SQLite.Designer.Design
 
   internal abstract class ViewTableBase: IHaveConnection
   {
+    public abstract string OldName { get; }
     public abstract string Name { get; set; }
     public abstract string Catalog { get; }
     public abstract object Triggers { get; }
     public abstract void MakeDirty();
     public abstract DbConnection GetConnection();
+    public abstract ViewTableBase DesignTable { get; }
   }
 
   internal class Table : ViewTableBase, ICustomTypeDescriptor
@@ -182,6 +184,7 @@ namespace SQLite.Designer.Design
       }
 
       builder.Length = 0;
+      builder.AppendLine("-- Original table schema");
       builder.Append(_origSql);
 
       builder.AppendLine(";");
@@ -282,6 +285,12 @@ namespace SQLite.Designer.Design
           _owner.MakeDirty();
         }
       }
+    }
+
+    [Browsable(false)]
+    public override string OldName
+    {
+      get { return _oldname; }
     }
 
     public override string ToString()
@@ -462,6 +471,12 @@ namespace SQLite.Designer.Design
       return builder.ToString();
     }
 
+    [Browsable(false)]
+    public override ViewTableBase DesignTable
+    {
+      get { return this; }
+    }
+
     public override DbConnection GetConnection()
     {
       return _connection;
@@ -535,6 +550,8 @@ namespace SQLite.Designer.Design
   internal interface IHaveConnection
   {
     DbConnection GetConnection();
+    [Browsable(false)]
+    ViewTableBase DesignTable { get; }
   }
 
   internal interface IHaveConnectionScope : IHaveConnection

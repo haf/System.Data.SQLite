@@ -443,6 +443,12 @@ namespace SQLite.Designer.Design
 
     #region IHaveConnection Members
 
+    [Browsable(false)]
+    public ViewTableBase DesignTable
+    {
+      get { return _table; }
+    }
+
     public DbConnection GetConnection()
     {
       return ((IHaveConnection)_table).GetConnection();

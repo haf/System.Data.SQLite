@@ -966,12 +966,16 @@ namespace System.Data.SQLite
       }
       else if (_readingState == 0) // Actively reading rows
       {
-        if (_activeStatement._sql.Step(_activeStatement) == true)
+        // Don't read a new row if the command behavior dictates SingleRow.  We've already read the first row.
+        if ((_commandBehavior & CommandBehavior.SingleRow) == 0)
         {
-          if (_keyInfo != null)
-            _keyInfo.Reset();
+          if (_activeStatement._sql.Step(_activeStatement) == true)
+          {
+            if (_keyInfo != null)
+              _keyInfo.Reset();
 
-          return true;
+            return true;
+          }
         }
 
         _readingState = 1; // Finished reading rows

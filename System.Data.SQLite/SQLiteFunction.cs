@@ -528,10 +528,6 @@ namespace System.Data.SQLite
     /// <summary>
     /// Obtains the collating sequence in effect for the given function.
     /// </summary>
-    /// <remarks>
-    /// As an optimization, SQLite does not fill in this information when calling functions, unless the NeedCollationSequence
-    /// boolean value is set to true in the SQLiteFunctionAttribute.
-    /// </remarks>
     /// <returns></returns>
     protected CollationSequence GetCollationSequence()
     {

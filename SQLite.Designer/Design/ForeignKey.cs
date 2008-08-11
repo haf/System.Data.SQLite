@@ -133,6 +133,12 @@ namespace SQLite.Designer.Design
 
     #region IHaveConnection Members
 
+    [Browsable(false)]
+    public ViewTableBase DesignTable
+    {
+      get { return _fkey.DesignTable; }
+    }
+
     public DbConnection GetConnection()
     {
       return ((IHaveConnection)_fkey).GetConnection();
@@ -357,6 +363,12 @@ namespace SQLite.Designer.Design
     }
 
     #region IHaveConnection Members
+
+    [Browsable(false)]
+    public ViewTableBase DesignTable
+    {
+      get { return _table; }
+    }
 
     public DbConnection GetConnection()
     {

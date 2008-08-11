@@ -244,14 +244,20 @@ PROCESS
       <Parameter Name="arg" Type="Collection(Int64)" Mode="In" />
     </Function>
     <Function Name="SUM" Aggregate="true" BuiltIn="true">
-      <ReturnType Type="Decimal" />
-      <Parameter Name="arg" Type="Collection(Decimal)" Mode="In" />
-    </Function>
-    <Function Name="SUM" Aggregate="true" BuiltIn="true">
       <ReturnType Type="Double" />
       <Parameter Name="arg" Type="Collection(Double)" Mode="In" />
     </Function>
 
+    <!-- STDEV -->
+    <Function Name="STDEV" Aggregate="true" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Collection(Double)" Mode="In" />
+    </Function>
+
+    <Function Name="STDEV" Aggregate="true" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Collection(Decimal)" Mode="In" />
+    </Function>
 
     <!-- TOTAL -->
     <Function Name="TOTAL" Aggregate="true" BuiltIn="true">
@@ -263,16 +269,9 @@ PROCESS
       <Parameter Name="arg" Type="Collection(Int64)" Mode="In" />
     </Function>
     <Function Name="TOTAL" Aggregate="true" BuiltIn="true">
-      <ReturnType Type="Decimal" />
-      <Parameter Name="arg" Type="Collection(Decimal)" Mode="In" />
-    </Function>
-    <Function Name="TOTAL" Aggregate="true" BuiltIn="true">
       <ReturnType Type="Double" />
       <Parameter Name="arg" Type="Collection(Double)" Mode="In" />
     </Function>
-
-
-
 
     <!-- END AGGREGATES ############################################# -->
 
@@ -287,12 +286,60 @@ PROCESS
       <Parameter Name="arg" Type="Int64" Mode="In" />
     </Function>
     <Function Name="ABS" BuiltIn="true">
-      <ReturnType Type="Decimal" />
-      <Parameter Name="arg" Type="Decimal" Mode="In" />
-    </Function>
-    <Function Name="ABS" BuiltIn="true">
       <ReturnType Type="Double" />
       <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- CHARINDEX( strSearch, strTarget [, startLocation ] )
+                strSearch: character expression
+                strTarget: character expression
+                startLocation: tinyint, smallint, int, bigint
+                returns: int, bigint   
+        -->
+    <Function Name="CHARINDEX" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="strSearch" Type="String" Mode="In" />
+      <Parameter Name="strTarget" Type="String" Mode="In" />
+    </Function>
+    <Function Name="CHARINDEX" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="strSearch" Type="Binary" Mode="In" />
+      <Parameter Name="strTarget" Type="Binary" Mode="In" />
+    </Function>
+    <Function Name="CHARINDEX" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="strSearch" Type="String" Mode="In" />
+      <Parameter Name="strTarget" Type="String" Mode="In" />
+      <Parameter Name="startLocation" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="CHARINDEX" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="strSearch" Type="Binary" Mode="In" />
+      <Parameter Name="strTarget" Type="Binary" Mode="In" />
+      <Parameter Name="startLocation" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="CHARINDEX" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="strSearch" Type="String" Mode="In" />
+      <Parameter Name="strTarget" Type="String" Mode="In" />
+      <Parameter Name="startLocation" Type="Int64" Mode="In" />
+    </Function>
+    <Function Name="CHARINDEX" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="strSearch" Type="Binary" Mode="In" />
+      <Parameter Name="strTarget" Type="Binary" Mode="In" />
+      <Parameter Name="startLocation" Type="Int64" Mode="In" />
+    </Function>
+
+    <!-- DIFFERENCE( str1, str2 ) 
+            str1: varchar
+            str2: varchar
+            returns: int   
+        -->
+    <Function Name="DIFFERENCE" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="str1" Type="String" Mode="In" />
+      <Parameter Name="str2" Type="String" Mode="In" />
     </Function>
 
     <Function Name="HEX" BuiltIn="true">
@@ -300,9 +347,24 @@ PROCESS
       <Parameter Name="arg" Type="Binary" Mode="In" />
     </Function>
 
+    <!-- LEFT( str, count ) 
+                str: char, nchar, varchar, nvarchar, varchar(max), nvarchar(max)
+                count: tinyint, smallint, int, bigint
+                returns: varchar, nvarchar
+        -->
+    <Function Name="LEFTSTR" BuiltIn="true">
+      <ReturnType Type="String" />
+      <Parameter Name="str" Type="String" Mode="In" />
+      <Parameter Name="count" Type="Int64" Mode="In" />
+    </Function>
+
     <Function Name="LENGTH" BuiltIn="true">
       <ReturnType Type="Int32" />
       <Parameter Name="string_expression" Type="String" Mode="In" />
+    </Function>
+    <Function Name="LENGTH" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="string_expression" Type="Binary" Mode="In" />
     </Function>
 
     <!-- LOWER( str ) 
@@ -369,49 +431,35 @@ PROCESS
       <Parameter Name="strReplacement" Type="String"  Mode="In" />
     </Function>
 
-    <Function Name="ROUND" BuiltIn="true">
-      <ReturnType Type="Int32" />
-      <Parameter Name="numeric_expression" Type="Int32" Mode="In" />
-      <Parameter Name="length" Type="Int32" Mode="In" />
+    <!-- REPLICATE( strSource, count )
+            strSource: varchar, nvarchar
+            count: tinyint, smallint, int
+            returns: varchar, nvarchar   
+        -->
+    <Function Name="REPLICATE" BuiltIn="true">
+      <ReturnType Type="String"  />
+      <Parameter Name="strTarget" Type="String" Mode="In" />
+      <Parameter Name="count" Type="Int32" Mode="In" />
     </Function>
-    <Function Name="ROUND" BuiltIn="true">
-      <ReturnType Type="Int64" />
-      <Parameter Name="numeric_expression" Type="Int64" Mode="In" />
-      <Parameter Name="length" Type="Int32" Mode="In" />
+
+    <!-- REVERSE( arg ) 
+            arg: char, nchar, varchar, nvarchar, varchar(max), nvarchar(max)
+            returns: varchar, nvarchar
+        -->
+    <Function Name="REVERSE" BuiltIn="true">
+      <ReturnType Type="String" />
+      <Parameter Name="arg" Type="String" Mode="In" />
     </Function>
-    <Function Name="ROUND" BuiltIn="true">
-      <ReturnType Type="Decimal" />
-      <Parameter Name="numeric_expression" Type="Decimal" Mode="In" />
-      <Parameter Name="length" Type="Int32" Mode="In" />
-    </Function>
-    <Function Name="ROUND" BuiltIn="true">
-      <ReturnType Type="Double" />
-      <Parameter Name="numeric_expression" Type="Double" Mode="In" />
-      <Parameter Name="length" Type="Int32" Mode="In" />
-    </Function>
-    <Function Name="ROUND" BuiltIn="true">
-      <ReturnType Type="Int32" />
-      <Parameter Name="numeric_expression" Type="Int32" Mode="In" />
-      <Parameter Name="length" Type="Int32" Mode="In" />
-      <Parameter Name="function" Type="Int32" Mode="In" />
-    </Function>
-    <Function Name="ROUND" BuiltIn="true">
-      <ReturnType Type="Int64" />
-      <Parameter Name="numeric_expression" Type="Int64" Mode="In" />
-      <Parameter Name="length" Type="Int32" Mode="In" />
-      <Parameter Name="function" Type="Int32" Mode="In" />
-    </Function>
-    <Function Name="ROUND" BuiltIn="true">
-      <ReturnType Type="Decimal" />
-      <Parameter Name="numeric_expression" Type="Decimal" Mode="In" />
-      <Parameter Name="length" Type="Int32" Mode="In" />
-      <Parameter Name="function" Type="Int32" Mode="In" />
-    </Function>
-    <Function Name="ROUND" BuiltIn="true">
-      <ReturnType Type="Double" />
-      <Parameter Name="numeric_expression" Type="Double" Mode="In" />
-      <Parameter Name="length" Type="Int32" Mode="In" />
-      <Parameter Name="function" Type="Int32" Mode="In" />
+
+    <!-- RIGHT( atr, count ) 
+                str: char, nchar, varchar, nvarchar, varchar(max), nvarchar(max)
+                count: tinyint, smallint, int, bigint
+                returns: varchar, nvarchar
+        -->
+    <Function Name="RIGHTSTR" BuiltIn="true">
+      <ReturnType Type="String" />
+      <Parameter Name="str" Type="String" Mode="In" />
+      <Parameter Name="count" Type="Int64" Mode="In" />
     </Function>
 
     <Function Name="RTRIM" BuiltIn="true">
@@ -708,6 +756,269 @@ PROCESS
       <ReturnType Type="DateTime" />
     </Function>
 
+    <!-- ACOS( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="ACOS" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg1" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- ASIN( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="ASIN" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- ATAN( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="ATAN" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- ATN2( arg1, arg2 )
+                arg1: float
+                arg2: float
+                returns: float   
+        -->
+    <Function Name="ATN2" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg1" Type="Double" Mode="In" />
+      <Parameter Name="arg2" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- CEILING( arg )
+                arg: smalldatetime, datetime
+                returns: int   
+        -->
+    <Function Name="CEILING" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="arg" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="CEILING" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="arg" Type="Int64" Mode="In" />
+    </Function>
+    <Function Name="CEILING" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- COS( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="COS" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- COT( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="COT" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- DEGREES( arg )
+                arg: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+                returns: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+        -->
+    <Function Name="DEGREES" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="arg1" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="DEGREES" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="arg1" Type="Int64" Mode="In" />
+    </Function>
+    <Function Name="DEGREES" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg1" Type="Double" Mode="In" />
+    </Function>
+    <!-- EXP( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="EXP" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- FLOOR( arg )
+                arg: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+                returns: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+        -->
+    <Function Name="FLOOR" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="arg" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="FLOOR" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="arg" Type="Int64" Mode="In" />
+    </Function>
+    <Function Name="FLOOR" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- LOG( arg )
+            arg: float
+            returns: float   
+     -->
+    <Function Name="LOG" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- LOG10( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="LOG10" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+    <!-- PI( )
+                returns: float   
+        -->
+    <Function Name="PI" BuiltIn="true">
+      <ReturnType Type="Double" />
+    </Function>
+
+    <!-- POWER( x, y )
+                x: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+                y: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+                returns: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+        -->
+    <Function Name="POWER" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="x" Type="Int32" Mode="In" />
+      <Parameter Name="y" Type="Double" Mode="In" />
+    </Function>
+    <Function Name="POWER" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="x" Type="Int64" Mode="In" />
+      <Parameter Name="y" Type="Double" Mode="In" />
+    </Function>
+    <Function Name="POWER" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="x" Type="Double" Mode="In" />
+      <Parameter Name="y" Type="Double" Mode="In" />
+    </Function>
+    
+    <!-- RADIANS( arg )
+                arg: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+                returns: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+        -->
+    <Function Name="RADIANS" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="arg" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="RADIANS" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="arg" Type="Int64" Mode="In" />
+    </Function>
+    <Function Name="RADIANS" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <Function Name="ROUND" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="numeric_expression" Type="Int32" Mode="In" />
+      <Parameter Name="length" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="ROUND" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="numeric_expression" Type="Int64" Mode="In" />
+      <Parameter Name="length" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="ROUND" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="numeric_expression" Type="Double" Mode="In" />
+      <Parameter Name="length" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="ROUND" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="numeric_expression" Type="Int32" Mode="In" />
+      <Parameter Name="length" Type="Int32" Mode="In" />
+      <Parameter Name="function" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="ROUND" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="numeric_expression" Type="Int64" Mode="In" />
+      <Parameter Name="length" Type="Int32" Mode="In" />
+      <Parameter Name="function" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="ROUND" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="numeric_expression" Type="Double" Mode="In" />
+      <Parameter Name="length" Type="Int32" Mode="In" />
+      <Parameter Name="function" Type="Int32" Mode="In" />
+    </Function>
+
+    <!-- SIGN( arg )
+            arg: tinyint, smallint, int, bigint, numeric, decimal, smallmoney, money, real, float
+            returns: bigint, numeric, decimal, money, float
+        -->
+    <Function Name="SIGN" BuiltIn="true">
+      <ReturnType Type="Int32" />
+      <Parameter Name="arg" Type="Int32" Mode="In" />
+    </Function>
+    <Function Name="SIGN" BuiltIn="true">
+      <ReturnType Type="Int64" />
+      <Parameter Name="arg" Type="Int64" Mode="In" />
+    </Function>
+    <Function Name="SIGN" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- SIN( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="SIN" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- SQRT( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="SQRT" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+
+    <!-- SQUARE( arg )
+                arg: smalldatetime, datetime
+                returns: int   
+        -->
+    <Function Name="SQUARE" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg1" Type="Double" Mode="In" />
+    </Function>
+    <!-- TAN( arg )
+                arg: float
+                returns: float   
+        -->
+    <Function Name="TAN" BuiltIn="true">
+      <ReturnType Type="Double" />
+      <Parameter Name="arg" Type="Double" Mode="In" />
+    </Function>
+    
     <!-- END SYSTEM FUNCTIONS ####################################### -->
   </Functions>
 </ProviderManifest>

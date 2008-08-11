@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="northwindModel.Store" Alias="Self" Provider="System.Data.SQLite" ProviderManifestToken="ISO8601" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
+      <Schema Namespace="northwindModel.Store" Alias="Self" Provider="System.Data.SQLite" ProviderManifestToken="ISO8601" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
         <EntityContainer Name="northwindModelStoreContainer">
           <EntitySet Name="Categories" EntityType="northwindModel.Store.Categories" store:Type="Tables" />
           <EntitySet Name="CustomerCustomerDemo" EntityType="northwindModel.Store.CustomerCustomerDemo" store:Type="Tables" />
@@ -23,7 +23,7 @@
             <End Role="Customers" EntitySet="Customers" />
             <End Role="CustomerCustomerDemo" EntitySet="CustomerCustomerDemo" />
           </AssociationSet>
-          <AssociationSet Name="FK_CustomerCustomerDemo_CustomerTypeID_CustomerTypeId" Association="northwindModel.Store.FK_CustomerCustomerDemo_CustomerTypeID_CustomerTypeId">
+          <AssociationSet Name="FK_CustomerCustomerDemo_CustomerTypeID_CustomerTypeID" Association="northwindModel.Store.FK_CustomerCustomerDemo_CustomerTypeID_CustomerTypeID">
             <End Role="CustomerDemographics" EntitySet="CustomerDemographics" />
             <End Role="CustomerCustomerDemo" EntitySet="CustomerCustomerDemo" />
           </AssociationSet>
@@ -240,7 +240,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_CustomerCustomerDemo_CustomerTypeID_CustomerTypeId">
+        <Association Name="FK_CustomerCustomerDemo_CustomerTypeID_CustomerTypeID">
           <End Role="CustomerDemographics" Type="northwindModel.Store.CustomerDemographics" Multiplicity="1" />
           <End Role="CustomerCustomerDemo" Type="northwindModel.Store.CustomerCustomerDemo" Multiplicity="*" />
           <ReferentialConstraint>
@@ -384,7 +384,8 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="northwindModel" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">

@@ -422,7 +422,7 @@ namespace SQLite.Designer.Editors
         {
           case VSConstants.VSStd97CmdID.GenerateChangeScript:
             {
-              using (ChangeScriptDialog dlg = new ChangeScriptDialog(_table.Name, GetChangeScript()))
+              using (ChangeScriptDialog dlg = new ChangeScriptDialog(_table.Name, (_dirty == true) ? GetChangeScript() : String.Empty, _table.OriginalSql))
               {
                 dlg.ShowDialog(this);
               }
@@ -653,7 +653,7 @@ namespace SQLite.Designer.Editors
 
             break;
           case VSConstants.VSStd97CmdID.GenerateChangeScript:
-            if (_dirty == true)
+            if (_dirty == true || String.IsNullOrEmpty(_table.OriginalSql) == false)
             {
               prgCmds[0].cmdf = (uint)(OLECMDF.OLECMDF_SUPPORTED | OLECMDF.OLECMDF_ENABLED);
               break;

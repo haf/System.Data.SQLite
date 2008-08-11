@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.55.0 August 6, 2008<br>
+    Version 1.0.56.0 August 11, 2008<br>
     Using SQLite 3.6.1<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -24,8 +24,10 @@
       Written from scratch on VS2008 specifically for ADO.NET 2.0, implementing all the
       base classes and features recently introduced in the framework, including automatic
       transaction enlistment.<li>Supports the Full
-        and Compact .NET Framework, as well as native C/C++ development.&nbsp; 100% binary
+        and Compact .NET Framework, and native C/C++ development.&nbsp; 100% binary
         compatible with the original sqlite3.dll.</li>
+      <li>Full support for Mono via a &quot;managed only&quot; provider that runs against the 
+        official SQLite 3.6.1 or higher library.</li>
       <li>Full Entity Framework support (ADO.NET 3.5 SP1)</li>
       <LI>
       On the Compact Framework, it is faster than Sql Server 
@@ -43,8 +45,7 @@
       Single file redistributable.&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
       are combined into one multi-module assembly.
       <LI>
-      Binaries included for Itanium, x64, x86 and ARM processors.
-      <LI>
+              Binaries included for Itanium, x64, x86 and ARM processors.<LI>
       DbProviderFactory support.
       <LI>
         Full support for ATTACH'ed databases.&nbsp; Exposed as <I>Catalogs</I>
@@ -121,6 +122,23 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.56.0 - August 11, 2008</b></p>
+    <ul>
+      <li>Fixed a bug in the table designer when designing new tables, wherein you had to 
+        save the table first before being able to create indexes and foreign keys.</li>
+      <li>Tweaks to decimal type handling.&nbsp; The &#39;decimal&#39; type can&#39;t be represented 
+        by Int64 or Double (without loss of precision) in SQLite, so we have to fudge it 
+        by treating it like a string and converting it back and forth in the provider.&nbsp; 
+        Unfortunately backing it to the db as a string causes sorting problems.&nbsp; 
+        See <a href="http://sqlite.phxsoftware.com/forums/p/1296/5595.aspx#5595">this 
+        post</a> 
+        for details on using a custom collation sequence to overcome the sorting issue arising from this patch.</li>
+      <li>Minor tweaks and bugfixes to the test program and the provider.</li>
+      <li>More adjustments to make the managed-only version of the provider run and pass 
+        all tests on Mono.</li>
+      <li>LINQ to Entities bits heavily updated and compiled against VS2008 SP1 RTM.&nbsp; SQLite 
+        LINQ support is still considered beta.</li>
+    </ul>
     <p><b>1.0.55.0 - August 6, 2008</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.1</li>

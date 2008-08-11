@@ -103,7 +103,7 @@ namespace testlinq
           }
         }
 
-        // This query fails due to a SQLite core issue.  Currently pending review by Dr. Hipp
+         //This query fails due to a SQLite core issue.  Currently pending review by Dr. Hipp
         //{
         //  var query = from p in db.Products
         //              where p.Order_Details.Count(od => od.Orders.Customers.Country == p.Suppliers.Country) > 2

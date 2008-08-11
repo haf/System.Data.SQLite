@@ -119,7 +119,13 @@ namespace SQLite.Designer.Design
         }
       }
     }
-  
+
+    [Browsable(false)]
+    public override string OldName
+    {
+      get { return _oldname; }
+    }
+
     [Category("Storage")]
     [Editor(typeof(CatalogTypeEditor), typeof(UITypeEditor))]
     [DefaultValue("main")]
@@ -246,6 +252,12 @@ namespace SQLite.Designer.Design
     }
 
     #endregion
+
+    [Browsable(false)]
+    public override ViewTableBase DesignTable
+    {
+      get { return this; }
+    }
 
     public override DbConnection GetConnection()
     {

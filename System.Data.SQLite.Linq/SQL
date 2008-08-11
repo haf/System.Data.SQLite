@@ -2779,13 +2779,13 @@ namespace System.Data.SQLite
       switch (sqlgen._manifest._dateFormat)
       {
         case SQLiteDateFormats.Ticks:
-          result.Append(String.Format("(STRFTIME('%s', JULIANDAY({1}) - ({0} / 86400.0)) * 10000000 + 621355968000000000)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          result.Append(String.Format("(STRFTIME('%s', JULIANDAY({1}) + ({0} / 86400.0)) * 10000000 + 621355968000000000)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
           break;
         case SQLiteDateFormats.JulianDay:
-          result.Append(String.Format("CAST(STRFTIME('%J', JULIANDAY({1}) - ({0} / 86400.0)) AS double)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          result.Append(String.Format("CAST(STRFTIME('%J', JULIANDAY({1}) + ({0} / 86400.0)) AS double)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
           break;
         default:
-          result.Append(String.Format("STRFTIME('%Y-%m-%d %H:%M:%S', JULIANDAY({1}) - ({0} / 86400.0))", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          result.Append(String.Format("STRFTIME('%Y-%m-%d %H:%M:%S', JULIANDAY({1}) + ({0} / 86400.0))", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
           break;
       }
 
@@ -2809,7 +2809,7 @@ namespace System.Data.SQLite
           result.Append(String.Format("CAST((({0} - 621355968000000000) / 10000000.0)  - (({1} - 621355968000000000) / 10000000.0) * 86400.0 AS integer)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
           break;
         default:
-          result.Append(String.Format("CAST((JULIANDAY({0}) - JULIANDAY({1})) * 86400.0 AS integer)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
+          result.Append(String.Format("CAST((JULIANDAY({1}) - JULIANDAY({0})) * 86400.0 AS integer)", e.Arguments[0].Accept(sqlgen), e.Arguments[1].Accept(sqlgen)));
           break;
       }
 

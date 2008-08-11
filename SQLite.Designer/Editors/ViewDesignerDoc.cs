@@ -260,6 +260,12 @@ namespace SQLite.Designer.Editors
       return VSConstants.E_NOTIMPL;
     }
 
+    private void CommitQueryBuilder()
+    {
+      string query = _typeQB.InvokeMember("SqlText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.GetProperty, null, _queryDesigner, null) as string;
+      _view.SqlText = query;
+    }
+
     public int SaveDocData(VSSAVEFLAGS dwSave, out string pbstrMkDocumentNew, out int pfSaveCanceled)
     {
       pbstrMkDocumentNew = null; // _view.Name;
@@ -278,10 +284,9 @@ namespace SQLite.Designer.Editors
         }
       }
 
-      string query = _typeQB.InvokeMember("SqlText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.GetProperty, null, _queryDesigner, null) as string;
-      _view.SqlText = query;
+      CommitQueryBuilder();
 
-      query = _view.GetSqlText();
+      string query = _view.GetSqlText();
       if (String.IsNullOrEmpty(query) == false)
       {
         using (DbTransaction trans = _view.GetConnection().BeginTransaction())
@@ -424,6 +429,7 @@ namespace SQLite.Designer.Editors
             ViewHolder holder = new ViewHolder(_view);
             _pg.SelectedObject = holder;
             _pg.SelectedGridItem = _pg.SelectedGridItem.Parent.GridItems[0];
+            CommitQueryBuilder();
             TriggerEditor ted = new TriggerEditor(_view);
             ted.EditValue((ITypeDescriptorContext)_pg.SelectedGridItem, (System.IServiceProvider)_pg.SelectedGridItem, _pg.SelectedGridItem.Value);
             return VSConstants.S_OK;

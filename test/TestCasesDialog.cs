@@ -76,7 +76,7 @@ namespace test
         {
           _grid.Rows[_grid.Rows.Count - 1].Cells[1].Style.BackColor = Color.LightBlue;
         }
-        _grid.Rows[_grid.Rows.Count - 1].Height = _grid.Rows[_grid.Rows.Count - 1].GetPreferredHeight(_grid.Rows.Count - 1, DataGridViewAutoSizeRowMode.AllCells, true);
+        //_grid.Rows[_grid.Rows.Count - 1].Height = _grid.Rows[_grid.Rows.Count - 1].GetPreferredHeight(_grid.Rows.Count - 1, DataGridViewAutoSizeRowMode.AllCells, true);
       }
     }
 

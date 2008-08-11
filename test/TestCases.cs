@@ -60,7 +60,33 @@ namespace test
         throw new InconclusiveException("Not a SQLite database");
     }
 
-    [Test(Sequence = 1)]
+    //[Test(Sequence = 1)]
+    internal void ParseTest()
+    {
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        cmd.CommandText = @"
+CREATE TEMP TABLE A(ID INTEGER, BID INTEGER);CREATE TEMP TABLE B(ID INTEGER, MYVAL VARCHAR);
+INSERT INTO A (ID, BID) VALUES(2, 1);
+INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
+";
+        cmd.ExecuteNonQuery();
+        
+        cmd.CommandText = "select *, (select 1 as c from b where b.id = a.bid) from a;";
+        using (DbDataReader reader = cmd.ExecuteReader())
+        {
+          reader.Read();
+        }
+
+        cmd.CommandText = "select *, (select count(c) from (select 1 as c from b where b.id = a.bid)) from a;";
+        using (DbDataReader reader = cmd.ExecuteReader())
+        {
+          reader.Read();
+        }
+      }
+    }
+
+    [Test(Sequence = 8)]
     internal void FunctionWithCollation()
     {
       using (DbCommand cmd = _cnn.CreateCommand())
@@ -75,7 +101,7 @@ namespace test
       }
     }
 
-    [Test(Sequence = 2)]
+    [Test(Sequence = 9)]
     internal void FunctionWithCollation2()
     {
       using (DbCommand cmd = _cnn.CreateCommand())
@@ -315,6 +341,9 @@ namespace test
             catch (InvalidCastException)
             {
             }
+            catch (FormatException)
+            {
+            }
             try
             {
               Field4 = rd.GetDecimal(3);
@@ -323,12 +352,18 @@ namespace test
             catch (InvalidCastException)
             {
             }
+            catch (FormatException)
+            {
+            }
             try
             {
               Field5 = rd.GetDecimal(4);
               throw new Exception("Should have failed type checking!");
             }
             catch (InvalidCastException)
+            {
+            }
+            catch (FormatException)
             {
             }
           }
@@ -554,32 +589,32 @@ namespace test
                 if (reader.GetValue(0).GetType() != typeof(long)) throw new Exception("long type non-match");
 
                 if (reader.GetValue(0).Equals((long)1) == false) throw new Exception("long value non-match");
-                if (reader.GetValue(1).Equals(new DateTime(1753, 1, 1)) == false) throw new Exception("DateTime value non-match");
+                if (reader.GetValue(1).Equals(new DateTime(1753, 1, 1)) == false) throw new Exception(String.Format("DateTime value non-match expected {0} got {1}", new DateTime(1753, 1, 1), reader.GetValue(1)));
                 if (reader.GetValue(2).Equals((Decimal)1.05) == false) throw new Exception("Decimal value non-match");
 
-                if (reader.GetInt64(0) != (long)1) throw new Exception("long value non-match");
-                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new Exception("DateTime value non-match");
-                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new Exception("Decimal value non-match");
+                if (reader.GetValue(0).Equals(reader.GetInt64(0)) == false) throw new Exception(String.Format("long value failed to match itself, {0} and {1}", reader.GetValue(0), reader.GetInt64(0)));
+                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new Exception(String.Format("DateTime failed to match itself {0} and {1}", reader.GetValue(1), reader.GetDateTime(1)));
+                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new Exception(String.Format("Decimal failed to match itself {0} and {1}", reader.GetValue(2), reader.GetDecimal(2)));
                 break;
               case 1:
                 if (reader.GetValue(0).GetType() != typeof(string)) throw new Exception("String type non-match");
                 if (reader.GetValue(0).Equals("One") == false) throw new Exception("String value non-match");
-                if (reader.GetValue(1).Equals(new DateTime(2001, 1, 1)) == false) throw new Exception("DateTime value non-match");
+                if (reader.GetValue(1).Equals(new DateTime(2001, 1, 1)) == false) throw new Exception(String.Format("DateTime value non-match expected {0} got {1}", new DateTime(2001, 1, 1), reader.GetValue(1)));
                 if (reader.GetValue(2).Equals((Decimal)1.0) == false) throw new Exception("Decimal value non-match");
 
                 if (reader.GetString(0) != "One") throw new Exception("String value non-match");
-                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new Exception("DateTime value non-match");
-                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new Exception("Decimal value non-match");
+                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new Exception(String.Format("DateTime failed to match itself {0} and {1}", reader.GetValue(1), reader.GetDateTime(1)));
+                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new Exception(String.Format("Decimal failed to match itself {0} and {1}", reader.GetValue(2), reader.GetDecimal(2)));
                 break;
               case 2:
                 if (reader.GetValue(0).GetType() != typeof(double)) throw new Exception("Double type non-match");
                 if (reader.GetValue(0).Equals(1.01) == false) throw new Exception("Double value non-match");
-                if (reader.GetValue(1).Equals(now) == false) throw new Exception("DateTime value non-match");
+                if (reader.GetValue(1).Equals(now) == false) throw new Exception(String.Format("DateTime value non-match, expected {0} got {1}", now, reader.GetValue(1)));
                 if (reader.GetValue(2).Equals((Decimal)9.91) == false) throw new Exception("Decimal value non-match");
 
                 if (reader.GetDouble(0) != 1.01) throw new Exception("Double value non-match");
-                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new Exception("DateTime value non-match");
-                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new Exception("Decimal value non-match");
+                if (reader.GetValue(1).Equals(reader.GetDateTime(1)) == false) throw new Exception(String.Format("DateTime failed to match itself {0} and {1}", reader.GetValue(1), reader.GetDateTime(1)));
+                if (reader.GetValue(2).Equals(reader.GetDecimal(2)) == false) throw new Exception(String.Format("Decimal failed to match itself {0} and {1}", reader.GetValue(2), reader.GetDecimal(2)));
                 break;
             }
           }
@@ -1010,7 +1045,7 @@ namespace test
 
                 cmdEnd = Environment.TickCount;
                 if (cmdEnd - cmdStart < 2000 || cmdEnd - cmdStart > 3000)
-                  throw new Exception("Gave up the lock too soon!"); // Didn't wait the right amount of time
+                  throw new Exception("Did not give up the lock at the right time!"); // Didn't wait the right amount of time
 
               }
             }
@@ -1101,7 +1136,7 @@ namespace test
       {
         using (DbCommand cmd = test.cnn.CreateCommand())
         {
-          while (Environment.TickCount - start < 5000)
+          while (Environment.TickCount - start < 2000)
           {
             using (DbTransaction trans = test.cnn.BeginTransaction())
             {

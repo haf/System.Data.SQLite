@@ -173,8 +173,8 @@ namespace System.Data.SQLite
             }
             else
             {
-              // Otherwise sleep for a random amount of time up to 250ms
-              System.Threading.Thread.CurrentThread.Join(rnd.Next(1, 250));
+              // Otherwise sleep for a random amount of time up to 150ms
+              System.Threading.Thread.CurrentThread.Join(rnd.Next(1, 150));
             }
           }
         }
@@ -314,8 +314,8 @@ namespace System.Data.SQLite
             }
             else
             {
-              // Otherwise sleep for a random amount of time up to 250ms
-              System.Threading.Thread.CurrentThread.Join(rnd.Next(1, 250));
+              // Otherwise sleep for a random amount of time up to 150ms
+              System.Threading.Thread.CurrentThread.Join(rnd.Next(1, 150));
             }
           }
         }
