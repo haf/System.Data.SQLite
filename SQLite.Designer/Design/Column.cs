@@ -243,7 +243,16 @@ namespace SQLite.Designer.Design
     public virtual string DefaultValue
     {
       get { return _defaultValue; }
-      set { _defaultValue = value; }
+      set
+      {
+        value = value.Trim();
+
+        if (value != _defaultValue)
+        {
+          _defaultValue = value;
+          _table.MakeDirty();
+        }
+      }
     }
 
     internal void WriteSql(StringBuilder builder)
@@ -280,6 +289,9 @@ namespace SQLite.Designer.Design
         if (Unique.Conflict != ConflictEnum.Abort)
           builder.AppendFormat(" ON CONFLICT {0}", Unique.Conflict.ToString().ToUpperInvariant());
       }
+
+      if (String.IsNullOrEmpty(DefaultValue) == false)
+        builder.AppendFormat(" DEFAULT {0}", DefaultValue);
     }
   }
 }

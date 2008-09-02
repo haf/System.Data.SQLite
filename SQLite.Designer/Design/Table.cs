@@ -273,6 +273,7 @@ namespace SQLite.Designer.Design
     [Category("Storage")]
     [RefreshProperties(RefreshProperties.All)]
     [ParenthesizePropertyName(true)]
+    [NotifyParentProperty(true)]
     public override string Name
     {
       get { return _name; }
@@ -406,10 +407,34 @@ namespace SQLite.Designer.Design
         builder.AppendFormat("CONSTRAINT [CK_{0}_{1}] CHECK {2}", Name, n + 1, check);
       }
 
-      foreach (ForeignKey fkey in ForeignKeys)
+      List<ForeignKey> keys = new List<ForeignKey>();
+
+      for (int x = 0; x < ForeignKeys.Count; x++)
+      {
+        ForeignKey key = ForeignKeys[x];
+
+        if (String.IsNullOrEmpty(key.From.Column) == true || String.IsNullOrEmpty(key.From.Catalog) == true ||
+          String.IsNullOrEmpty(key.To.Table) == true || String.IsNullOrEmpty(key.To.Column) == true)
+          continue;
+
+        if (keys.Count > 0)
+        {
+          if (keys[0].Name == key.Name && keys[0].To.Catalog == key.To.Catalog && keys[0].To.Table == key.To.Table)
+          {
+            keys.Add(key);
+            continue;
+          }
+          builder.Append(separator);
+          WriteFKeys(keys, builder);
+          keys.Clear();
+        }
+        keys.Add(key);
+      }
+
+      if (keys.Count > 0)
       {
         builder.Append(separator);
-        fkey.WriteSql(builder);
+        WriteFKeys(keys, builder);
       }
 
       builder.Append("\r\n);\r\n");
@@ -469,6 +494,28 @@ namespace SQLite.Designer.Design
       }
 
       return builder.ToString();
+    }
+
+    private void WriteFKeys(List<ForeignKey> keys, StringBuilder builder)
+    {
+      builder.AppendFormat("CONSTRAINT [{0}] FOREIGN KEY (", keys[0].Name);
+      string separator = "";
+
+      foreach (ForeignKey key in keys)
+      {
+        builder.AppendFormat("{0}[{1}]", separator, key.From.Column);
+        separator = ", ";
+      }
+
+      builder.AppendFormat(") REFERENCES [{0}] (", keys[0].To.Table);
+
+      separator = "";
+      foreach (ForeignKey key in keys)
+      {
+        builder.AppendFormat("{0}[{1}]", separator, key.To.Column);
+        separator = ", ";
+      }
+      builder.Append(")");
     }
 
     [Browsable(false)]

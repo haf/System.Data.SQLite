@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30428</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -10,9 +10,9 @@
     <RootNamespace>test</RootNamespace>
     <AssemblyName>testce</AssemblyName>
     <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PlatformFamilyName>PocketPC</PlatformFamilyName>
-    <PlatformID>3C41C503-53EF-4c2a-8DD4-A8217CAD115E</PlatformID>
-    <OSVersion>4.20</OSVersion>
+    <PlatformFamilyName>Smartphone</PlatformFamilyName>
+    <PlatformID>f27da329-3269-4191-98e0-c87d3d7f1db9</PlatformID>
+    <OSVersion>5.02</OSVersion>
     <DeployDirSuffix>testce</DeployDirSuffix>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FormFactorID>
@@ -23,7 +23,7 @@
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
-    <NativePlatformName>Pocket PC 2003</NativePlatformName>
+    <NativePlatformName>Windows Mobile 6 Standard SDK</NativePlatformName>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
   </PropertyGroup>

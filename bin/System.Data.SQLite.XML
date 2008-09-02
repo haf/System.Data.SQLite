@@ -270,6 +270,20 @@
             </summary>
             <param name="databaseFileName">The file to create</param>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.CompressFile(System.String)">
+            <summary>
+            On NTFS volumes, this function turns on the compression attribute for the given file.
+            It must not be open or referenced at the time of the function call.
+            </summary>
+            <param name="databaseFileName">The file to compress</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.DecompressFile(System.String)">
+            <summary>
+            On NTFS volumes, this function removes the compression attribute for the given file.
+            It must not be open or referenced at the time of the function call.
+            </summary>
+            <param name="databaseFileName">The file to decompress</param>
+        </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.OnStateChange(System.Data.ConnectionState)">
             <summary>
             Raises the state change event when the state of the connection changes

@@ -1,4 +1,4 @@
-#ifdef NDEBUG
+#ifndef SQLITE_DEBUG
 #include "src/sqlite3.c"
 #else
 #include "splitsource\btreeint.h"
@@ -23,9 +23,6 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 
 #ifdef SQLITE_OS_WIN
 
-// Additional flag for sqlite3.flags, we use it as a reference counter
-#define SQLITE_WantClose 0x10000000
-
 // Additional open flags, we use this one privately
 //#define SQLITE_OPEN_SHAREDCACHE      0x01000000
 
@@ -40,22 +37,6 @@ typedef HANDLE (WINAPI *CREATEFILEW)(
     DWORD,
     DWORD,
     HANDLE);
-
-static CRITICAL_SECTION g_cs;
-static LONG g_dwcsInit = 0;
-
-void EnterGlobalMutex()
-{
-  if (InterlockedCompareExchange(&g_dwcsInit, 1, 0) == 0)
-    InitializeCriticalSection(&g_cs);
-
-  EnterCriticalSection(&g_cs);
-}
-
-void LeaveGlobalMutex()
-{
-  LeaveCriticalSection(&g_cs);
-}
 
 int SetCompression(const wchar_t *pwszFilename, unsigned short ufLevel)
 {
@@ -121,8 +102,6 @@ __declspec(dllexport) int WINAPI sqlite3_close_interop(sqlite3 *db)
 {
   int ret;
   
-  EnterGlobalMutex();
-
   ret = sqlite3_close(db);
 
   if (ret == SQLITE_BUSY && db->pVdbe)
@@ -160,8 +139,6 @@ __declspec(dllexport) int WINAPI sqlite3_close_interop(sqlite3 *db)
     ret = sqlite3_close(db);
   }
 
-  LeaveGlobalMutex();
-
   return ret;
 }
 
@@ -171,16 +148,12 @@ __declspec(dllexport) int WINAPI sqlite3_open_interop(const char*filename, int f
   //int sharedcache = ((flags & SQLITE_OPEN_SHAREDCACHE) != 0);
   //flags &= ~SQLITE_OPEN_SHAREDCACHE;
 
-  //EnterGlobalMutex();
-
   //sqlite3_enable_shared_cache(sharedcache);
   ret = sqlite3_open_v2(filename, ppdb, flags, NULL);
   //sqlite3_enable_shared_cache(0);
 
   if (ret == 0)
     RegisterExtensionFunctions(*ppdb);
-
-  //LeaveGlobalMutex();
 
   return ret;
 }
@@ -294,44 +267,23 @@ __declspec(dllexport) const void * WINAPI sqlite3_column_text16_interop(sqlite3_
 
 __declspec(dllexport) int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 {
-  // Try and finalize a statement, and close the database it belonged to if the database was marked for closing
   Vdbe *p;
   sqlite3 *db;
   int ret;
 
-  EnterGlobalMutex();
-
   p = (Vdbe *)stmt;
   db = (p == NULL) ? NULL : p->db;
 
-  while(1)
+  if (p->magic == VDBE_MAGIC_DEAD)
   {
-    if (p->magic == VDBE_MAGIC_DEAD)
+    if (db == NULL)
     {
-      if (db == NULL)
-      {
-        sqlite3_free(p);
-        ret = SQLITE_OK;
-        break;
-      }
+      sqlite3_free(p);
+      ret = SQLITE_OK;
     }
-
-    ret = sqlite3_finalize(stmt);
-
-    if (ret == SQLITE_OK)
-    {
-      if (db->flags & SQLITE_WantClose)
-      {
-        if (db->pVdbe == NULL)
-        {
-          ret = sqlite3_close(db);
-        }
-      }
-    }
-    break;
   }
-
-  LeaveGlobalMutex();
+  else
+    ret = sqlite3_finalize(stmt);
 
   return ret;
 }

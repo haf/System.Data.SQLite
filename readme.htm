@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.56.0 August 11, 2008<br>
-    Using SQLite 3.6.1<br>
+    Version 1.0.58.0 August 30, 2008<br>
+    Using SQLite 3.6.2<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -122,6 +122,51 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.59.0 - September 0, 2008</b></p>
+    <ul>
+      <li>Compiled against SQLite 3.6.2 with bug
+        <a href="http://www.sqlite.org/cvstrac/tktview?tn=3346">#3346</a> fixed.&nbsp; 
+        Solves at least one case I was seeing during EF unit testing where the core 
+        engine crashed executing a query.</li>
+      <li>Fixed the parsing of literal binaries in the EF SqlGen routine.&nbsp; SQLite 
+        now passes nearly all the testcases in Microsoft&#39;s EF Query Samples application 
+        -- the exception being the datetimeoffset and time constants test which are 
+        unsupported at this time.</li>
+    </ul>
+    <p><b>1.0.58.0 - August 30, 2008</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.6.2.&nbsp; If only I&#39;d waited one more day to release 
+        57!&nbsp; Several LINQ issues have been resolved with this engine release 
+        relating to deeply-nested subqueries that the EF SqlGen creates.</li>
+      <li>Fixed the Rollback SQLiteConnection event to not require a connection be 
+        opened first.</li>
+    </ul>
+    <p><b>1.0.57.0 - August 29, 2008</b></p>
+    <ul>
+      <li>Compiled against 3.6.1 with checkin
+        <a href="http://www.sqlite.org/cvstrac/tktview?tn=3300">#3300</a> resolved, 
+        which fixes an Entity Framework bug I was seeing.&nbsp; I currently have 3 other 
+        tickets out on the engine, which are not yet resolved and relate to EF.</li>
+      <li>Fixed decimal types to store and fetch using InvariantCulture.&nbsp; If you&#39;re 
+        using decimal datatypes in your database and were affected by the 56 release, 
+        please issue an UPDATE &lt;table&gt; SET &lt;column&gt; = REPLACE(&lt;column&gt;, &#39;,&#39;, &#39;.&#39;);&nbsp; 
+        to fix the decimal separators.&nbsp; Apologies for not testing that more 
+        thoroughly before releasing 56.</li>
+      <li>Too many LINQ fixes to list.&nbsp; Fixed views so they generate, 
+        fixed the LIMIT clause, implemented additional functionality and removed unnecessary code.</li>
+      <li>Fixed foreign key names in the designer so viewing the SQL script on a new 
+        unsaved table after renaming it in the properties toolwindow will reflect in the 
+        script properly.</li>
+      <li>Fixed the Update and Commit events on SQLiteConnection so they don&#39;t require 
+        the connection to be opened first.</li>
+      <li>Fixed userdef aggregate functions so they play nice with each other when 
+        appearing multiple times in the same statement.</li>
+      <li>Fixed the editing and saving of default values in the table designer.</li>
+      <li>Fixed ForeignKeys schema to support multi-column foreign keys.&nbsp; Also 
+        hacked support for them in the table designer, provided two foreign keys in the 
+        designer have the same name and reference the same foreign table and different 
+        columns.&nbsp; Will implement first-class support for this in the next release.</li>
+    </ul>
     <p><b>1.0.56.0 - August 11, 2008</b></p>
     <ul>
       <li>Fixed a bug in the table designer when designing new tables, wherein you had to 

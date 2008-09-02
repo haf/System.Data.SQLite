@@ -351,10 +351,10 @@
         </Part>
       </Identifier>
       <Properties>
-        <Property name="ColumnName">
+        <!--<Property name="ColumnName">
           <DisplayName>Source Column</DisplayName>
           <Category resource="Category_Source"/>
-        </Property>
+        </Property>-->
         <Property name="ReferencedTableDatabase">
           <DisplayName>Referenced Database</DisplayName>
           <Category resource="Category_Refs"/>
@@ -363,10 +363,10 @@
           <DisplayName>Referenced Table</DisplayName>
           <Category resource="Category_Refs"/>
         </Property>
-        <Property name="ReferencedColumnName">
+        <!--<Property name="ReferencedColumnName">
           <DisplayName>Referenced Column</DisplayName>
           <Category resource="Category_Refs"/>
-        </Property>
+        </Property>-->
       </Properties>
       <CommandBindings>
         <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>

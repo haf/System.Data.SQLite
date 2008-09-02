@@ -21,6 +21,8 @@ namespace System.Data.SQLite
     internal SQLiteBase(SQLiteDateFormats fmt)
       : base(fmt) { }
 
+    static internal object _lock = new object();
+
     /// <summary>
     /// Returns a string representing the active version of SQLite
     /// </summary>
@@ -186,44 +188,53 @@ namespace System.Data.SQLite
 
     internal static void FinalizeStatement(SQLiteStatementHandle stmt)
     {
+      lock (_lock)
+      {
 #if !SQLITE_STANDARD
-      int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
+        int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
 #else
       int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
 #endif
-      if (n > 0) throw new SQLiteException(n, null);
+        if (n > 0) throw new SQLiteException(n, null);
+      }
     }
 
     internal static void CloseConnection(SQLiteConnectionHandle db)
     {
+      lock (_lock)
+      {
 #if !SQLITE_STANDARD
-      int n = UnsafeNativeMethods.sqlite3_close_interop(db);
+        int n = UnsafeNativeMethods.sqlite3_close_interop(db);
 #else
       ResetConnection(db);
       int n = UnsafeNativeMethods.sqlite3_close(db);
 #endif
-      if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+        if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+      }
     }
 
     internal static void ResetConnection(SQLiteConnectionHandle db)
     {
-      IntPtr stmt = IntPtr.Zero;
-
-      do
+      lock (_lock)
       {
-        stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
-        if (stmt != IntPtr.Zero)
+        IntPtr stmt = IntPtr.Zero;
+
+        do
         {
+          stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
+          if (stmt != IntPtr.Zero)
+          {
 #if !SQLITE_STANDARD
-          UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+            UnsafeNativeMethods.sqlite3_reset_interop(stmt);
 #else
           UnsafeNativeMethods.sqlite3_reset(stmt);
 #endif
-        }
-      } while (stmt != IntPtr.Zero);
+          }
+        } while (stmt != IntPtr.Zero);
 
-      // Not overly concerned with the return value from a rollback.
-      UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+        // Not overly concerned with the return value from a rollback.
+        UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+      }
     }
   }
 

@@ -402,7 +402,7 @@ namespace System.Data.SQLite
         return _keyInfo.GetDecimal(i - VisibleFieldCount);
 
       VerifyType(i, DbType.Decimal);
-      return Convert.ToDecimal(_activeStatement._sql.GetText(_activeStatement, i));
+      return Convert.ToDecimal(_activeStatement._sql.GetText(_activeStatement, i), CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -612,7 +612,6 @@ namespace System.Data.SQLite
         row[SchemaTableColumn.IsUnique] = false;
         row[SchemaTableColumn.IsKey] = false;
         row[SchemaTableOptionalColumn.IsAutoIncrement] = false;
-        row[SchemaTableOptionalColumn.IsReadOnly] = false;
         row[SchemaTableColumn.DataType] = GetFieldType(n);
         row[SchemaTableOptionalColumn.IsHidden] = false;
 
@@ -728,22 +727,32 @@ namespace System.Data.SQLite
                   if (tblIndexColumns.Rows.Count == 1 && (bool)row[SchemaTableColumn.AllowDBNull] == false)
                     row[SchemaTableColumn.IsUnique] = rowIndexes["UNIQUE"];
 
+                  // If its an integer primary key and the only primary key in the table, then its a rowid alias and is autoincrement
+                  // NOTE:  Currently commented out because this is not always the desired behavior.  For example, a 1:1 relationship with
+                  //        another table, where the other table is autoincrement, but this one is not, and uses the rowid from the other.
+                  //        It is safer to only set Autoincrement on tables where we're SURE the user specified AUTOINCREMENT, even if its a rowid column.
+
+                  if (tblIndexColumns.Rows.Count == 1 && (bool)rowIndexes["PRIMARY_KEY"] == true && String.IsNullOrEmpty(dataType) == false &&
+                    String.Compare(dataType, "integer", true, CultureInfo.InvariantCulture) == 0)
+                  {
+                    //  row[SchemaTableOptionalColumn.IsAutoIncrement] = true;
+                  }
+
                   break;
                 }
               }
             }
           }
+
+          if (String.IsNullOrEmpty(dataType))
+          {
+            TypeAffinity affin;
+            dataType = _activeStatement._sql.ColumnType(_activeStatement, n, out affin);
+          }
+
+          if (String.IsNullOrEmpty(dataType) == false)
+            row["DataTypeName"] = dataType;
         }
-
-        if (String.IsNullOrEmpty(dataType))
-        {
-          TypeAffinity affin;
-          dataType = _activeStatement._sql.ColumnType(_activeStatement, n, out affin);
-        }
-
-        if (String.IsNullOrEmpty(dataType) == false)
-          row["DataTypeName"] = dataType;
-
         tbl.Rows.Add(row);
       }
 

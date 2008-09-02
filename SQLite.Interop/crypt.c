@@ -1,7 +1,7 @@
 #ifndef SQLITE_OMIT_DISKIO
 #ifdef SQLITE_HAS_CODEC
 
-#if _DEBUG
+#ifdef SQLITE_DEBUG
 #include "splitsource\pager.c"
 #endif
 

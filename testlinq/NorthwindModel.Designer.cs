@@ -9,49 +9,46 @@
 //------------------------------------------------------------------------------
 
 [assembly: global::System.Data.Objects.DataClasses.EdmSchemaAttribute()]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Products_CategoryID_CategoryID", "Categories", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Categories), "Products", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Products))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Orders_CustomerID_CustomerID", "Customers", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Customers), "Orders", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Orders))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Employees_ReportsTo_EmployeeID", "Employees", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Employees), "Employees1", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Employees))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Orders_EmployeeID_EmployeeID", "Employees", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Employees), "Orders", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Orders))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Order_Details_OrderID_OrderID", "Orders", global::System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Orders), "Order_Details", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Order_Details))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Order_Details_ProductID_ProductID", "Products", global::System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Products), "Order_Details", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Order_Details))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Orders_ShipVia_ShipperID", "Shippers", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Shippers), "Orders", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Orders))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Products_SupplierID_SupplierID", "Suppliers", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Suppliers), "Products", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Products))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "FK_Territories_RegionID_RegionID", "Region", global::System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Region), "Territories", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Territories))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "CustomerCustomerDemo", "Customers", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Customers), "CustomerDemographics", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.CustomerDemographics))]
-[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindModel", "EmployeeTerritories", "Employees", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Employees), "Territories", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Territories))]
+[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindEFModel", "FK_Products_CategoryID_CategoryID", "Categories", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Categories), "Products", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Products))]
+[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindEFModel", "FK_Orders_CustomerID_CustomerID", "Customers", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Customers), "Orders", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Orders))]
+[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindEFModel", "FK_InternationalOrders_OrderID_OrderID", "Orders", global::System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Orders), "InternationalOrders", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.InternationalOrders))]
+[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindEFModel", "FK_OrderDetails_OrderID_OrderID", "Orders", global::System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Orders), "OrderDetails", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.OrderDetails))]
+[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindEFModel", "FK_OrderDetails_ProductID_ProductID", "Products", global::System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Products), "OrderDetails", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.OrderDetails))]
+[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindEFModel", "FK_Products_SupplierID_SupplierID", "Suppliers", global::System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Suppliers), "Products", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Products))]
+[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindEFModel", "FK_Territories_RegionID_RegionID", "Regions", global::System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Regions), "Territories", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Territories))]
+[assembly: global::System.Data.Objects.DataClasses.EdmRelationshipAttribute("northwindEFModel", "EmployeesTerritories", "Employees", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Employees), "Territories", global::System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Territories))]
 
 // Original file name:
-// Generation date: 8/11/2008 1:35:38 PM
+// Generation date: 8/25/2008 8:54:05 AM
 namespace testlinq
 {
     
     /// <summary>
-    /// There are no comments for northwindEntities in the schema.
+    /// There are no comments for northwindEFEntities in the schema.
     /// </summary>
-    public partial class northwindEntities : global::System.Data.Objects.ObjectContext
+    public partial class northwindEFEntities : global::System.Data.Objects.ObjectContext
     {
         /// <summary>
-        /// Initializes a new northwindEntities object using the connection string found in the 'northwindEntities' section of the application configuration file.
+        /// Initializes a new northwindEFEntities object using the connection string found in the 'northwindEFEntities' section of the application configuration file.
         /// </summary>
-        public northwindEntities() : 
-                base("name=northwindEntities", "northwindEntities")
+        public northwindEFEntities() : 
+                base("name=northwindEFEntities", "northwindEFEntities")
         {
             this.OnContextCreated();
         }
         /// <summary>
-        /// Initialize a new northwindEntities object.
+        /// Initialize a new northwindEFEntities object.
         /// </summary>
-        public northwindEntities(string connectionString) : 
-                base(connectionString, "northwindEntities")
+        public northwindEFEntities(string connectionString) : 
+                base(connectionString, "northwindEFEntities")
         {
             this.OnContextCreated();
         }
         /// <summary>
-        /// Initialize a new northwindEntities object.
+        /// Initialize a new northwindEFEntities object.
         /// </summary>
-        public northwindEntities(global::System.Data.EntityClient.EntityConnection connection) : 
-                base(connection, "northwindEntities")
+        public northwindEFEntities(global::System.Data.EntityClient.EntityConnection connection) : 
+                base(connection, "northwindEFEntities")
         {
             this.OnContextCreated();
         }
@@ -71,21 +68,6 @@ namespace testlinq
             }
         }
         private global::System.Data.Objects.ObjectQuery<Categories> _Categories;
-        /// <summary>
-        /// There are no comments for CustomerDemographics in the schema.
-        /// </summary>
-        public global::System.Data.Objects.ObjectQuery<CustomerDemographics> CustomerDemographics
-        {
-            get
-            {
-                if ((this._CustomerDemographics == null))
-                {
-                    this._CustomerDemographics = base.CreateQuery<CustomerDemographics>("[CustomerDemographics]");
-                }
-                return this._CustomerDemographics;
-            }
-        }
-        private global::System.Data.Objects.ObjectQuery<CustomerDemographics> _CustomerDemographics;
         /// <summary>
         /// There are no comments for Customers in the schema.
         /// </summary>
@@ -117,20 +99,35 @@ namespace testlinq
         }
         private global::System.Data.Objects.ObjectQuery<Employees> _Employees;
         /// <summary>
-        /// There are no comments for Order_Details in the schema.
+        /// There are no comments for InternationalOrders in the schema.
         /// </summary>
-        public global::System.Data.Objects.ObjectQuery<Order_Details> Order_Details
+        public global::System.Data.Objects.ObjectQuery<InternationalOrders> InternationalOrders
         {
             get
             {
-                if ((this._Order_Details == null))
+                if ((this._InternationalOrders == null))
                 {
-                    this._Order_Details = base.CreateQuery<Order_Details>("[Order_Details]");
+                    this._InternationalOrders = base.CreateQuery<InternationalOrders>("[InternationalOrders]");
                 }
-                return this._Order_Details;
+                return this._InternationalOrders;
             }
         }
-        private global::System.Data.Objects.ObjectQuery<Order_Details> _Order_Details;
+        private global::System.Data.Objects.ObjectQuery<InternationalOrders> _InternationalOrders;
+        /// <summary>
+        /// There are no comments for OrderDetails in the schema.
+        /// </summary>
+        public global::System.Data.Objects.ObjectQuery<OrderDetails> OrderDetails
+        {
+            get
+            {
+                if ((this._OrderDetails == null))
+                {
+                    this._OrderDetails = base.CreateQuery<OrderDetails>("[OrderDetails]");
+                }
+                return this._OrderDetails;
+            }
+        }
+        private global::System.Data.Objects.ObjectQuery<OrderDetails> _OrderDetails;
         /// <summary>
         /// There are no comments for Orders in the schema.
         /// </summary>
@@ -147,6 +144,21 @@ namespace testlinq
         }
         private global::System.Data.Objects.ObjectQuery<Orders> _Orders;
         /// <summary>
+        /// There are no comments for PreviousEmployees in the schema.
+        /// </summary>
+        public global::System.Data.Objects.ObjectQuery<PreviousEmployees> PreviousEmployees
+        {
+            get
+            {
+                if ((this._PreviousEmployees == null))
+                {
+                    this._PreviousEmployees = base.CreateQuery<PreviousEmployees>("[PreviousEmployees]");
+                }
+                return this._PreviousEmployees;
+            }
+        }
+        private global::System.Data.Objects.ObjectQuery<PreviousEmployees> _PreviousEmployees;
+        /// <summary>
         /// There are no comments for Products in the schema.
         /// </summary>
         public global::System.Data.Objects.ObjectQuery<Products> Products
@@ -162,35 +174,20 @@ namespace testlinq
         }
         private global::System.Data.Objects.ObjectQuery<Products> _Products;
         /// <summary>
-        /// There are no comments for Region in the schema.
+        /// There are no comments for Regions in the schema.
         /// </summary>
-        public global::System.Data.Objects.ObjectQuery<Region> Region
+        public global::System.Data.Objects.ObjectQuery<Regions> Regions
         {
             get
             {
-                if ((this._Region == null))
+                if ((this._Regions == null))
                 {
-                    this._Region = base.CreateQuery<Region>("[Region]");
+                    this._Regions = base.CreateQuery<Regions>("[Regions]");
                 }
-                return this._Region;
+                return this._Regions;
             }
         }
-        private global::System.Data.Objects.ObjectQuery<Region> _Region;
-        /// <summary>
-        /// There are no comments for Shippers in the schema.
-        /// </summary>
-        public global::System.Data.Objects.ObjectQuery<Shippers> Shippers
-        {
-            get
-            {
-                if ((this._Shippers == null))
-                {
-                    this._Shippers = base.CreateQuery<Shippers>("[Shippers]");
-                }
-                return this._Shippers;
-            }
-        }
-        private global::System.Data.Objects.ObjectQuery<Shippers> _Shippers;
+        private global::System.Data.Objects.ObjectQuery<Regions> _Regions;
         /// <summary>
         /// There are no comments for Suppliers in the schema.
         /// </summary>
@@ -229,13 +226,6 @@ namespace testlinq
             base.AddObject("Categories", categories);
         }
         /// <summary>
-        /// There are no comments for CustomerDemographics in the schema.
-        /// </summary>
-        public void AddToCustomerDemographics(CustomerDemographics customerDemographics)
-        {
-            base.AddObject("CustomerDemographics", customerDemographics);
-        }
-        /// <summary>
         /// There are no comments for Customers in the schema.
         /// </summary>
         public void AddToCustomers(Customers customers)
@@ -250,11 +240,18 @@ namespace testlinq
             base.AddObject("Employees", employees);
         }
         /// <summary>
-        /// There are no comments for Order_Details in the schema.
+        /// There are no comments for InternationalOrders in the schema.
         /// </summary>
-        public void AddToOrder_Details(Order_Details order_Details)
+        public void AddToInternationalOrders(InternationalOrders internationalOrders)
         {
-            base.AddObject("Order_Details", order_Details);
+            base.AddObject("InternationalOrders", internationalOrders);
+        }
+        /// <summary>
+        /// There are no comments for OrderDetails in the schema.
+        /// </summary>
+        public void AddToOrderDetails(OrderDetails orderDetails)
+        {
+            base.AddObject("OrderDetails", orderDetails);
         }
         /// <summary>
         /// There are no comments for Orders in the schema.
@@ -264,6 +261,13 @@ namespace testlinq
             base.AddObject("Orders", orders);
         }
         /// <summary>
+        /// There are no comments for PreviousEmployees in the schema.
+        /// </summary>
+        public void AddToPreviousEmployees(PreviousEmployees previousEmployees)
+        {
+            base.AddObject("PreviousEmployees", previousEmployees);
+        }
+        /// <summary>
         /// There are no comments for Products in the schema.
         /// </summary>
         public void AddToProducts(Products products)
@@ -271,18 +275,11 @@ namespace testlinq
             base.AddObject("Products", products);
         }
         /// <summary>
-        /// There are no comments for Region in the schema.
+        /// There are no comments for Regions in the schema.
         /// </summary>
-        public void AddToRegion(Region region)
+        public void AddToRegions(Regions regions)
         {
-            base.AddObject("Region", region);
-        }
-        /// <summary>
-        /// There are no comments for Shippers in the schema.
-        /// </summary>
-        public void AddToShippers(Shippers shippers)
-        {
-            base.AddObject("Shippers", shippers);
+            base.AddObject("Regions", regions);
         }
         /// <summary>
         /// There are no comments for Suppliers in the schema.
@@ -300,12 +297,12 @@ namespace testlinq
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.Categories in the schema.
+    /// There are no comments for northwindEFModel.Categories in the schema.
     /// </summary>
     /// <KeyProperties>
     /// CategoryID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Categories")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="Categories")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
     public partial class Categories : global::System.Data.Objects.DataClasses.EntityObject
@@ -417,7 +414,7 @@ namespace testlinq
         /// <summary>
         /// There are no comments for Products in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Products_CategoryID_CategoryID", "Products")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_Products_CategoryID_CategoryID", "Products")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -425,113 +422,24 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Products>("northwindModel.FK_Products_CategoryID_CategoryID", "Products");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Products>("northwindEFModel.FK_Products_CategoryID_CategoryID", "Products");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Products>("northwindModel.FK_Products_CategoryID_CategoryID", "Products", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Products>("northwindEFModel.FK_Products_CategoryID_CategoryID", "Products", value);
                 }
             }
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.CustomerDemographics in the schema.
-    /// </summary>
-    /// <KeyProperties>
-    /// CustomerTypeID
-    /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="CustomerDemographics")]
-    [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
-    [global::System.Serializable()]
-    public partial class CustomerDemographics : global::System.Data.Objects.DataClasses.EntityObject
-    {
-        /// <summary>
-        /// Create a new CustomerDemographics object.
-        /// </summary>
-        /// <param name="customerTypeID">Initial value of CustomerTypeID.</param>
-        public static CustomerDemographics CreateCustomerDemographics(string customerTypeID)
-        {
-            CustomerDemographics customerDemographics = new CustomerDemographics();
-            customerDemographics.CustomerTypeID = customerTypeID;
-            return customerDemographics;
-        }
-        /// <summary>
-        /// There are no comments for Property CustomerTypeID in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public string CustomerTypeID
-        {
-            get
-            {
-                return this._CustomerTypeID;
-            }
-            set
-            {
-                this.OnCustomerTypeIDChanging(value);
-                this.ReportPropertyChanging("CustomerTypeID");
-                this._CustomerTypeID = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, false);
-                this.ReportPropertyChanged("CustomerTypeID");
-                this.OnCustomerTypeIDChanged();
-            }
-        }
-        private string _CustomerTypeID;
-        partial void OnCustomerTypeIDChanging(string value);
-        partial void OnCustomerTypeIDChanged();
-        /// <summary>
-        /// There are no comments for Property CustomerDesc in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public string CustomerDesc
-        {
-            get
-            {
-                return this._CustomerDesc;
-            }
-            set
-            {
-                this.OnCustomerDescChanging(value);
-                this.ReportPropertyChanging("CustomerDesc");
-                this._CustomerDesc = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
-                this.ReportPropertyChanged("CustomerDesc");
-                this.OnCustomerDescChanged();
-            }
-        }
-        private string _CustomerDesc;
-        partial void OnCustomerDescChanging(string value);
-        partial void OnCustomerDescChanged();
-        /// <summary>
-        /// There are no comments for Customers in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "CustomerCustomerDemo", "Customers")]
-        [global::System.Xml.Serialization.XmlIgnoreAttribute()]
-        [global::System.Xml.Serialization.SoapIgnoreAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityCollection<Customers> Customers
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Customers>("northwindModel.CustomerCustomerDemo", "Customers");
-            }
-            set
-            {
-                if ((value != null))
-                {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Customers>("northwindModel.CustomerCustomerDemo", "Customers", value);
-                }
-            }
-        }
-    }
-    /// <summary>
-    /// There are no comments for northwindModel.Customers in the schema.
+    /// There are no comments for northwindEFModel.Customers in the schema.
     /// </summary>
     /// <KeyProperties>
     /// CustomerID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Customers")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="Customers")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
     public partial class Customers : global::System.Data.Objects.DataClasses.EntityObject
@@ -804,7 +712,7 @@ namespace testlinq
         /// <summary>
         /// There are no comments for Orders in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Orders_CustomerID_CustomerID", "Orders")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_Orders_CustomerID_CustomerID", "Orders")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -812,45 +720,24 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Orders>("northwindModel.FK_Orders_CustomerID_CustomerID", "Orders");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Orders>("northwindEFModel.FK_Orders_CustomerID_CustomerID", "Orders");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Orders>("northwindModel.FK_Orders_CustomerID_CustomerID", "Orders", value);
-                }
-            }
-        }
-        /// <summary>
-        /// There are no comments for CustomerDemographics in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "CustomerCustomerDemo", "CustomerDemographics")]
-        [global::System.Xml.Serialization.XmlIgnoreAttribute()]
-        [global::System.Xml.Serialization.SoapIgnoreAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityCollection<CustomerDemographics> CustomerDemographics
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<CustomerDemographics>("northwindModel.CustomerCustomerDemo", "CustomerDemographics");
-            }
-            set
-            {
-                if ((value != null))
-                {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<CustomerDemographics>("northwindModel.CustomerCustomerDemo", "CustomerDemographics", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Orders>("northwindEFModel.FK_Orders_CustomerID_CustomerID", "Orders", value);
                 }
             }
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.Employees in the schema.
+    /// There are no comments for northwindEFModel.Employees in the schema.
     /// </summary>
     /// <KeyProperties>
     /// EmployeeID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Employees")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="Employees")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
     public partial class Employees : global::System.Data.Objects.DataClasses.EntityObject
@@ -1261,88 +1148,9 @@ namespace testlinq
         partial void OnPhotoPathChanging(string value);
         partial void OnPhotoPathChanged();
         /// <summary>
-        /// There are no comments for Employees1 in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Employees_ReportsTo_EmployeeID", "Employees1")]
-        [global::System.Xml.Serialization.XmlIgnoreAttribute()]
-        [global::System.Xml.Serialization.SoapIgnoreAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityCollection<Employees> Employees1
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Employees>("northwindModel.FK_Employees_ReportsTo_EmployeeID", "Employees1");
-            }
-            set
-            {
-                if ((value != null))
-                {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Employees>("northwindModel.FK_Employees_ReportsTo_EmployeeID", "Employees1", value);
-                }
-            }
-        }
-        /// <summary>
-        /// There are no comments for Employees2 in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Employees_ReportsTo_EmployeeID", "Employees")]
-        [global::System.Xml.Serialization.XmlIgnoreAttribute()]
-        [global::System.Xml.Serialization.SoapIgnoreAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public Employees Employees2
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Employees>("northwindModel.FK_Employees_ReportsTo_EmployeeID", "Employees").Value;
-            }
-            set
-            {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Employees>("northwindModel.FK_Employees_ReportsTo_EmployeeID", "Employees").Value = value;
-            }
-        }
-        /// <summary>
-        /// There are no comments for Employees2 in the schema.
-        /// </summary>
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityReference<Employees> Employees2Reference
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Employees>("northwindModel.FK_Employees_ReportsTo_EmployeeID", "Employees");
-            }
-            set
-            {
-                if ((value != null))
-                {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Employees>("northwindModel.FK_Employees_ReportsTo_EmployeeID", "Employees", value);
-                }
-            }
-        }
-        /// <summary>
-        /// There are no comments for Orders in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Orders_EmployeeID_EmployeeID", "Orders")]
-        [global::System.Xml.Serialization.XmlIgnoreAttribute()]
-        [global::System.Xml.Serialization.SoapIgnoreAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityCollection<Orders> Orders
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Orders>("northwindModel.FK_Orders_EmployeeID_EmployeeID", "Orders");
-            }
-            set
-            {
-                if ((value != null))
-                {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Orders>("northwindModel.FK_Orders_EmployeeID_EmployeeID", "Orders", value);
-                }
-            }
-        }
-        /// <summary>
         /// There are no comments for Territories in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "EmployeeTerritories", "Territories")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "EmployeesTerritories", "Territories")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -1350,46 +1158,178 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Territories>("northwindModel.EmployeeTerritories", "Territories");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Territories>("northwindEFModel.EmployeesTerritories", "Territories");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Territories>("northwindModel.EmployeeTerritories", "Territories", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Territories>("northwindEFModel.EmployeesTerritories", "Territories", value);
                 }
             }
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.Order_Details in the schema.
+    /// There are no comments for northwindEFModel.InternationalOrders in the schema.
+    /// </summary>
+    /// <KeyProperties>
+    /// OrderID
+    /// </KeyProperties>
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="InternationalOrders")]
+    [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
+    [global::System.Serializable()]
+    public partial class InternationalOrders : global::System.Data.Objects.DataClasses.EntityObject
+    {
+        /// <summary>
+        /// Create a new InternationalOrders object.
+        /// </summary>
+        /// <param name="orderID">Initial value of OrderID.</param>
+        /// <param name="customsDescription">Initial value of CustomsDescription.</param>
+        /// <param name="exciseTax">Initial value of ExciseTax.</param>
+        public static InternationalOrders CreateInternationalOrders(long orderID, string customsDescription, decimal exciseTax)
+        {
+            InternationalOrders internationalOrders = new InternationalOrders();
+            internationalOrders.OrderID = orderID;
+            internationalOrders.CustomsDescription = customsDescription;
+            internationalOrders.ExciseTax = exciseTax;
+            return internationalOrders;
+        }
+        /// <summary>
+        /// There are no comments for Property OrderID in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public long OrderID
+        {
+            get
+            {
+                return this._OrderID;
+            }
+            set
+            {
+                this.OnOrderIDChanging(value);
+                this.ReportPropertyChanging("OrderID");
+                this._OrderID = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
+                this.ReportPropertyChanged("OrderID");
+                this.OnOrderIDChanged();
+            }
+        }
+        private long _OrderID;
+        partial void OnOrderIDChanging(long value);
+        partial void OnOrderIDChanged();
+        /// <summary>
+        /// There are no comments for Property CustomsDescription in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(IsNullable=false)]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string CustomsDescription
+        {
+            get
+            {
+                return this._CustomsDescription;
+            }
+            set
+            {
+                this.OnCustomsDescriptionChanging(value);
+                this.ReportPropertyChanging("CustomsDescription");
+                this._CustomsDescription = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, false);
+                this.ReportPropertyChanged("CustomsDescription");
+                this.OnCustomsDescriptionChanged();
+            }
+        }
+        private string _CustomsDescription;
+        partial void OnCustomsDescriptionChanging(string value);
+        partial void OnCustomsDescriptionChanged();
+        /// <summary>
+        /// There are no comments for Property ExciseTax in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(IsNullable=false)]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public decimal ExciseTax
+        {
+            get
+            {
+                return this._ExciseTax;
+            }
+            set
+            {
+                this.OnExciseTaxChanging(value);
+                this.ReportPropertyChanging("ExciseTax");
+                this._ExciseTax = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
+                this.ReportPropertyChanged("ExciseTax");
+                this.OnExciseTaxChanged();
+            }
+        }
+        private decimal _ExciseTax;
+        partial void OnExciseTaxChanging(decimal value);
+        partial void OnExciseTaxChanged();
+        /// <summary>
+        /// There are no comments for Orders in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_InternationalOrders_OrderID_OrderID", "Orders")]
+        [global::System.Xml.Serialization.XmlIgnoreAttribute()]
+        [global::System.Xml.Serialization.SoapIgnoreAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public Orders Orders
+        {
+            get
+            {
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindEFModel.FK_InternationalOrders_OrderID_OrderID", "Orders").Value;
+            }
+            set
+            {
+                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindEFModel.FK_InternationalOrders_OrderID_OrderID", "Orders").Value = value;
+            }
+        }
+        /// <summary>
+        /// There are no comments for Orders in the schema.
+        /// </summary>
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public global::System.Data.Objects.DataClasses.EntityReference<Orders> OrdersReference
+        {
+            get
+            {
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindEFModel.FK_InternationalOrders_OrderID_OrderID", "Orders");
+            }
+            set
+            {
+                if ((value != null))
+                {
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Orders>("northwindEFModel.FK_InternationalOrders_OrderID_OrderID", "Orders", value);
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// There are no comments for northwindEFModel.OrderDetails in the schema.
     /// </summary>
     /// <KeyProperties>
     /// OrderID
     /// ProductID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Order_Details")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="OrderDetails")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
-    public partial class Order_Details : global::System.Data.Objects.DataClasses.EntityObject
+    public partial class OrderDetails : global::System.Data.Objects.DataClasses.EntityObject
     {
         /// <summary>
-        /// Create a new Order_Details object.
+        /// Create a new OrderDetails object.
         /// </summary>
         /// <param name="orderID">Initial value of OrderID.</param>
         /// <param name="productID">Initial value of ProductID.</param>
         /// <param name="unitPrice">Initial value of UnitPrice.</param>
         /// <param name="quantity">Initial value of Quantity.</param>
         /// <param name="discount">Initial value of Discount.</param>
-        public static Order_Details CreateOrder_Details(long orderID, long productID, decimal unitPrice, short quantity, float discount)
+        public static OrderDetails CreateOrderDetails(long orderID, long productID, decimal unitPrice, short quantity, float discount)
         {
-            Order_Details order_Details = new Order_Details();
-            order_Details.OrderID = orderID;
-            order_Details.ProductID = productID;
-            order_Details.UnitPrice = unitPrice;
-            order_Details.Quantity = quantity;
-            order_Details.Discount = discount;
-            return order_Details;
+            OrderDetails orderDetails = new OrderDetails();
+            orderDetails.OrderID = orderID;
+            orderDetails.ProductID = productID;
+            orderDetails.UnitPrice = unitPrice;
+            orderDetails.Quantity = quantity;
+            orderDetails.Discount = discount;
+            return orderDetails;
         }
         /// <summary>
         /// There are no comments for Property OrderID in the schema.
@@ -1509,7 +1449,7 @@ namespace testlinq
         /// <summary>
         /// There are no comments for Orders in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Order_Details_OrderID_OrderID", "Orders")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_OrderDetails_OrderID_OrderID", "Orders")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -1517,11 +1457,11 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindModel.FK_Order_Details_OrderID_OrderID", "Orders").Value;
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindEFModel.FK_OrderDetails_OrderID_OrderID", "Orders").Value;
             }
             set
             {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindModel.FK_Order_Details_OrderID_OrderID", "Orders").Value = value;
+                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindEFModel.FK_OrderDetails_OrderID_OrderID", "Orders").Value = value;
             }
         }
         /// <summary>
@@ -1533,20 +1473,20 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindModel.FK_Order_Details_OrderID_OrderID", "Orders");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Orders>("northwindEFModel.FK_OrderDetails_OrderID_OrderID", "Orders");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Orders>("northwindModel.FK_Order_Details_OrderID_OrderID", "Orders", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Orders>("northwindEFModel.FK_OrderDetails_OrderID_OrderID", "Orders", value);
                 }
             }
         }
         /// <summary>
         /// There are no comments for Products in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Order_Details_ProductID_ProductID", "Products")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_OrderDetails_ProductID_ProductID", "Products")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -1554,11 +1494,11 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Products>("northwindModel.FK_Order_Details_ProductID_ProductID", "Products").Value;
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Products>("northwindEFModel.FK_OrderDetails_ProductID_ProductID", "Products").Value;
             }
             set
             {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Products>("northwindModel.FK_Order_Details_ProductID_ProductID", "Products").Value = value;
+                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Products>("northwindEFModel.FK_OrderDetails_ProductID_ProductID", "Products").Value = value;
             }
         }
         /// <summary>
@@ -1570,24 +1510,24 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Products>("northwindModel.FK_Order_Details_ProductID_ProductID", "Products");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Products>("northwindEFModel.FK_OrderDetails_ProductID_ProductID", "Products");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Products>("northwindModel.FK_Order_Details_ProductID_ProductID", "Products", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Products>("northwindEFModel.FK_OrderDetails_ProductID_ProductID", "Products", value);
                 }
             }
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.Orders in the schema.
+    /// There are no comments for northwindEFModel.Orders in the schema.
     /// </summary>
     /// <KeyProperties>
     /// OrderID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Orders")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="Orders")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
     public partial class Orders : global::System.Data.Objects.DataClasses.EntityObject
@@ -1625,6 +1565,29 @@ namespace testlinq
         private long _OrderID;
         partial void OnOrderIDChanging(long value);
         partial void OnOrderIDChanged();
+        /// <summary>
+        /// There are no comments for Property EmployeeID in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public global::System.Nullable<long> EmployeeID
+        {
+            get
+            {
+                return this._EmployeeID;
+            }
+            set
+            {
+                this.OnEmployeeIDChanging(value);
+                this.ReportPropertyChanging("EmployeeID");
+                this._EmployeeID = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
+                this.ReportPropertyChanged("EmployeeID");
+                this.OnEmployeeIDChanged();
+            }
+        }
+        private global::System.Nullable<long> _EmployeeID;
+        partial void OnEmployeeIDChanging(global::System.Nullable<long> value);
+        partial void OnEmployeeIDChanged();
         /// <summary>
         /// There are no comments for Property OrderDate in the schema.
         /// </summary>
@@ -1858,7 +1821,7 @@ namespace testlinq
         /// <summary>
         /// There are no comments for Customers in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Orders_CustomerID_CustomerID", "Customers")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_Orders_CustomerID_CustomerID", "Customers")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -1866,11 +1829,11 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Customers>("northwindModel.FK_Orders_CustomerID_CustomerID", "Customers").Value;
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Customers>("northwindEFModel.FK_Orders_CustomerID_CustomerID", "Customers").Value;
             }
             set
             {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Customers>("northwindModel.FK_Orders_CustomerID_CustomerID", "Customers").Value = value;
+                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Customers>("northwindEFModel.FK_Orders_CustomerID_CustomerID", "Customers").Value = value;
             }
         }
         /// <summary>
@@ -1882,119 +1845,499 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Customers>("northwindModel.FK_Orders_CustomerID_CustomerID", "Customers");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Customers>("northwindEFModel.FK_Orders_CustomerID_CustomerID", "Customers");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Customers>("northwindModel.FK_Orders_CustomerID_CustomerID", "Customers", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Customers>("northwindEFModel.FK_Orders_CustomerID_CustomerID", "Customers", value);
                 }
             }
         }
         /// <summary>
-        /// There are no comments for Employees in the schema.
+        /// There are no comments for InternationalOrders in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Orders_EmployeeID_EmployeeID", "Employees")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_InternationalOrders_OrderID_OrderID", "InternationalOrders")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public Employees Employees
+        public InternationalOrders InternationalOrders
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Employees>("northwindModel.FK_Orders_EmployeeID_EmployeeID", "Employees").Value;
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<InternationalOrders>("northwindEFModel.FK_InternationalOrders_OrderID_OrderID", "InternationalOrders").Value;
             }
             set
             {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Employees>("northwindModel.FK_Orders_EmployeeID_EmployeeID", "Employees").Value = value;
+                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<InternationalOrders>("northwindEFModel.FK_InternationalOrders_OrderID_OrderID", "InternationalOrders").Value = value;
             }
         }
         /// <summary>
-        /// There are no comments for Employees in the schema.
+        /// There are no comments for InternationalOrders in the schema.
         /// </summary>
         [global::System.ComponentModel.BrowsableAttribute(false)]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityReference<Employees> EmployeesReference
+        public global::System.Data.Objects.DataClasses.EntityReference<InternationalOrders> InternationalOrdersReference
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Employees>("northwindModel.FK_Orders_EmployeeID_EmployeeID", "Employees");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<InternationalOrders>("northwindEFModel.FK_InternationalOrders_OrderID_OrderID", "InternationalOrders");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Employees>("northwindModel.FK_Orders_EmployeeID_EmployeeID", "Employees", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<InternationalOrders>("northwindEFModel.FK_InternationalOrders_OrderID_OrderID", "InternationalOrders", value);
                 }
             }
         }
         /// <summary>
-        /// There are no comments for Order_Details in the schema.
+        /// There are no comments for OrderDetails in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Order_Details_OrderID_OrderID", "Order_Details")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_OrderDetails_OrderID_OrderID", "OrderDetails")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityCollection<Order_Details> Order_Details
+        public global::System.Data.Objects.DataClasses.EntityCollection<OrderDetails> OrderDetails
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Order_Details>("northwindModel.FK_Order_Details_OrderID_OrderID", "Order_Details");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<OrderDetails>("northwindEFModel.FK_OrderDetails_OrderID_OrderID", "OrderDetails");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Order_Details>("northwindModel.FK_Order_Details_OrderID_OrderID", "Order_Details", value);
-                }
-            }
-        }
-        /// <summary>
-        /// There are no comments for Shippers in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Orders_ShipVia_ShipperID", "Shippers")]
-        [global::System.Xml.Serialization.XmlIgnoreAttribute()]
-        [global::System.Xml.Serialization.SoapIgnoreAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public Shippers Shippers
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Shippers>("northwindModel.FK_Orders_ShipVia_ShipperID", "Shippers").Value;
-            }
-            set
-            {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Shippers>("northwindModel.FK_Orders_ShipVia_ShipperID", "Shippers").Value = value;
-            }
-        }
-        /// <summary>
-        /// There are no comments for Shippers in the schema.
-        /// </summary>
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityReference<Shippers> ShippersReference
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Shippers>("northwindModel.FK_Orders_ShipVia_ShipperID", "Shippers");
-            }
-            set
-            {
-                if ((value != null))
-                {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Shippers>("northwindModel.FK_Orders_ShipVia_ShipperID", "Shippers", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<OrderDetails>("northwindEFModel.FK_OrderDetails_OrderID_OrderID", "OrderDetails", value);
                 }
             }
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.Products in the schema.
+    /// There are no comments for northwindEFModel.PreviousEmployees in the schema.
+    /// </summary>
+    /// <KeyProperties>
+    /// EmployeeID
+    /// </KeyProperties>
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="PreviousEmployees")]
+    [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
+    [global::System.Serializable()]
+    public partial class PreviousEmployees : global::System.Data.Objects.DataClasses.EntityObject
+    {
+        /// <summary>
+        /// Create a new PreviousEmployees object.
+        /// </summary>
+        /// <param name="employeeID">Initial value of EmployeeID.</param>
+        /// <param name="lastName">Initial value of LastName.</param>
+        /// <param name="firstName">Initial value of FirstName.</param>
+        public static PreviousEmployees CreatePreviousEmployees(long employeeID, string lastName, string firstName)
+        {
+            PreviousEmployees previousEmployees = new PreviousEmployees();
+            previousEmployees.EmployeeID = employeeID;
+            previousEmployees.LastName = lastName;
+            previousEmployees.FirstName = firstName;
+            return previousEmployees;
+        }
+        /// <summary>
+        /// There are no comments for Property EmployeeID in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public long EmployeeID
+        {
+            get
+            {
+                return this._EmployeeID;
+            }
+            set
+            {
+                this.OnEmployeeIDChanging(value);
+                this.ReportPropertyChanging("EmployeeID");
+                this._EmployeeID = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
+                this.ReportPropertyChanged("EmployeeID");
+                this.OnEmployeeIDChanged();
+            }
+        }
+        private long _EmployeeID;
+        partial void OnEmployeeIDChanging(long value);
+        partial void OnEmployeeIDChanged();
+        /// <summary>
+        /// There are no comments for Property LastName in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(IsNullable=false)]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string LastName
+        {
+            get
+            {
+                return this._LastName;
+            }
+            set
+            {
+                this.OnLastNameChanging(value);
+                this.ReportPropertyChanging("LastName");
+                this._LastName = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, false);
+                this.ReportPropertyChanged("LastName");
+                this.OnLastNameChanged();
+            }
+        }
+        private string _LastName;
+        partial void OnLastNameChanging(string value);
+        partial void OnLastNameChanged();
+        /// <summary>
+        /// There are no comments for Property FirstName in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(IsNullable=false)]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string FirstName
+        {
+            get
+            {
+                return this._FirstName;
+            }
+            set
+            {
+                this.OnFirstNameChanging(value);
+                this.ReportPropertyChanging("FirstName");
+                this._FirstName = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, false);
+                this.ReportPropertyChanged("FirstName");
+                this.OnFirstNameChanged();
+            }
+        }
+        private string _FirstName;
+        partial void OnFirstNameChanging(string value);
+        partial void OnFirstNameChanged();
+        /// <summary>
+        /// There are no comments for Property Title in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string Title
+        {
+            get
+            {
+                return this._Title;
+            }
+            set
+            {
+                this.OnTitleChanging(value);
+                this.ReportPropertyChanging("Title");
+                this._Title = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("Title");
+                this.OnTitleChanged();
+            }
+        }
+        private string _Title;
+        partial void OnTitleChanging(string value);
+        partial void OnTitleChanged();
+        /// <summary>
+        /// There are no comments for Property TitleOfCourtesy in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string TitleOfCourtesy
+        {
+            get
+            {
+                return this._TitleOfCourtesy;
+            }
+            set
+            {
+                this.OnTitleOfCourtesyChanging(value);
+                this.ReportPropertyChanging("TitleOfCourtesy");
+                this._TitleOfCourtesy = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("TitleOfCourtesy");
+                this.OnTitleOfCourtesyChanged();
+            }
+        }
+        private string _TitleOfCourtesy;
+        partial void OnTitleOfCourtesyChanging(string value);
+        partial void OnTitleOfCourtesyChanged();
+        /// <summary>
+        /// There are no comments for Property BirthDate in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public global::System.Nullable<global::System.DateTime> BirthDate
+        {
+            get
+            {
+                return this._BirthDate;
+            }
+            set
+            {
+                this.OnBirthDateChanging(value);
+                this.ReportPropertyChanging("BirthDate");
+                this._BirthDate = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
+                this.ReportPropertyChanged("BirthDate");
+                this.OnBirthDateChanged();
+            }
+        }
+        private global::System.Nullable<global::System.DateTime> _BirthDate;
+        partial void OnBirthDateChanging(global::System.Nullable<global::System.DateTime> value);
+        partial void OnBirthDateChanged();
+        /// <summary>
+        /// There are no comments for Property HireDate in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public global::System.Nullable<global::System.DateTime> HireDate
+        {
+            get
+            {
+                return this._HireDate;
+            }
+            set
+            {
+                this.OnHireDateChanging(value);
+                this.ReportPropertyChanging("HireDate");
+                this._HireDate = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
+                this.ReportPropertyChanged("HireDate");
+                this.OnHireDateChanged();
+            }
+        }
+        private global::System.Nullable<global::System.DateTime> _HireDate;
+        partial void OnHireDateChanging(global::System.Nullable<global::System.DateTime> value);
+        partial void OnHireDateChanged();
+        /// <summary>
+        /// There are no comments for Property Address in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string Address
+        {
+            get
+            {
+                return this._Address;
+            }
+            set
+            {
+                this.OnAddressChanging(value);
+                this.ReportPropertyChanging("Address");
+                this._Address = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("Address");
+                this.OnAddressChanged();
+            }
+        }
+        private string _Address;
+        partial void OnAddressChanging(string value);
+        partial void OnAddressChanged();
+        /// <summary>
+        /// There are no comments for Property City in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string City
+        {
+            get
+            {
+                return this._City;
+            }
+            set
+            {
+                this.OnCityChanging(value);
+                this.ReportPropertyChanging("City");
+                this._City = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("City");
+                this.OnCityChanged();
+            }
+        }
+        private string _City;
+        partial void OnCityChanging(string value);
+        partial void OnCityChanged();
+        /// <summary>
+        /// There are no comments for Property Region in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string Region
+        {
+            get
+            {
+                return this._Region;
+            }
+            set
+            {
+                this.OnRegionChanging(value);
+                this.ReportPropertyChanging("Region");
+                this._Region = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("Region");
+                this.OnRegionChanged();
+            }
+        }
+        private string _Region;
+        partial void OnRegionChanging(string value);
+        partial void OnRegionChanged();
+        /// <summary>
+        /// There are no comments for Property PostalCode in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string PostalCode
+        {
+            get
+            {
+                return this._PostalCode;
+            }
+            set
+            {
+                this.OnPostalCodeChanging(value);
+                this.ReportPropertyChanging("PostalCode");
+                this._PostalCode = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("PostalCode");
+                this.OnPostalCodeChanged();
+            }
+        }
+        private string _PostalCode;
+        partial void OnPostalCodeChanging(string value);
+        partial void OnPostalCodeChanged();
+        /// <summary>
+        /// There are no comments for Property Country in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string Country
+        {
+            get
+            {
+                return this._Country;
+            }
+            set
+            {
+                this.OnCountryChanging(value);
+                this.ReportPropertyChanging("Country");
+                this._Country = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("Country");
+                this.OnCountryChanged();
+            }
+        }
+        private string _Country;
+        partial void OnCountryChanging(string value);
+        partial void OnCountryChanged();
+        /// <summary>
+        /// There are no comments for Property HomePhone in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string HomePhone
+        {
+            get
+            {
+                return this._HomePhone;
+            }
+            set
+            {
+                this.OnHomePhoneChanging(value);
+                this.ReportPropertyChanging("HomePhone");
+                this._HomePhone = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("HomePhone");
+                this.OnHomePhoneChanged();
+            }
+        }
+        private string _HomePhone;
+        partial void OnHomePhoneChanging(string value);
+        partial void OnHomePhoneChanged();
+        /// <summary>
+        /// There are no comments for Property Extension in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string Extension
+        {
+            get
+            {
+                return this._Extension;
+            }
+            set
+            {
+                this.OnExtensionChanging(value);
+                this.ReportPropertyChanging("Extension");
+                this._Extension = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("Extension");
+                this.OnExtensionChanged();
+            }
+        }
+        private string _Extension;
+        partial void OnExtensionChanging(string value);
+        partial void OnExtensionChanged();
+        /// <summary>
+        /// There are no comments for Property Photo in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public byte[] Photo
+        {
+            get
+            {
+                return global::System.Data.Objects.DataClasses.StructuralObject.GetValidValue(this._Photo);
+            }
+            set
+            {
+                this.OnPhotoChanging(value);
+                this.ReportPropertyChanging("Photo");
+                this._Photo = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("Photo");
+                this.OnPhotoChanged();
+            }
+        }
+        private byte[] _Photo;
+        partial void OnPhotoChanging(byte[] value);
+        partial void OnPhotoChanged();
+        /// <summary>
+        /// There are no comments for Property Notes in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string Notes
+        {
+            get
+            {
+                return this._Notes;
+            }
+            set
+            {
+                this.OnNotesChanging(value);
+                this.ReportPropertyChanging("Notes");
+                this._Notes = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("Notes");
+                this.OnNotesChanged();
+            }
+        }
+        private string _Notes;
+        partial void OnNotesChanging(string value);
+        partial void OnNotesChanged();
+        /// <summary>
+        /// There are no comments for Property PhotoPath in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public string PhotoPath
+        {
+            get
+            {
+                return this._PhotoPath;
+            }
+            set
+            {
+                this.OnPhotoPathChanging(value);
+                this.ReportPropertyChanging("PhotoPath");
+                this._PhotoPath = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
+                this.ReportPropertyChanged("PhotoPath");
+                this.OnPhotoPathChanged();
+            }
+        }
+        private string _PhotoPath;
+        partial void OnPhotoPathChanging(string value);
+        partial void OnPhotoPathChanged();
+    }
+    /// <summary>
+    /// There are no comments for northwindEFModel.Products in the schema.
     /// </summary>
     /// <KeyProperties>
     /// ProductID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Products")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="Products")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
     public partial class Products : global::System.Data.Objects.DataClasses.EntityObject
@@ -2198,9 +2541,32 @@ namespace testlinq
         partial void OnDiscontinuedChanging(bool value);
         partial void OnDiscontinuedChanged();
         /// <summary>
+        /// There are no comments for Property DiscontinuedDate in the schema.
+        /// </summary>
+        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
+        [global::System.Runtime.Serialization.DataMemberAttribute()]
+        public global::System.Nullable<global::System.DateTime> DiscontinuedDate
+        {
+            get
+            {
+                return this._DiscontinuedDate;
+            }
+            set
+            {
+                this.OnDiscontinuedDateChanging(value);
+                this.ReportPropertyChanging("DiscontinuedDate");
+                this._DiscontinuedDate = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
+                this.ReportPropertyChanged("DiscontinuedDate");
+                this.OnDiscontinuedDateChanged();
+            }
+        }
+        private global::System.Nullable<global::System.DateTime> _DiscontinuedDate;
+        partial void OnDiscontinuedDateChanging(global::System.Nullable<global::System.DateTime> value);
+        partial void OnDiscontinuedDateChanged();
+        /// <summary>
         /// There are no comments for Categories in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Products_CategoryID_CategoryID", "Categories")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_Products_CategoryID_CategoryID", "Categories")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -2208,11 +2574,11 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Categories>("northwindModel.FK_Products_CategoryID_CategoryID", "Categories").Value;
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Categories>("northwindEFModel.FK_Products_CategoryID_CategoryID", "Categories").Value;
             }
             set
             {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Categories>("northwindModel.FK_Products_CategoryID_CategoryID", "Categories").Value = value;
+                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Categories>("northwindEFModel.FK_Products_CategoryID_CategoryID", "Categories").Value = value;
             }
         }
         /// <summary>
@@ -2224,41 +2590,41 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Categories>("northwindModel.FK_Products_CategoryID_CategoryID", "Categories");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Categories>("northwindEFModel.FK_Products_CategoryID_CategoryID", "Categories");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Categories>("northwindModel.FK_Products_CategoryID_CategoryID", "Categories", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Categories>("northwindEFModel.FK_Products_CategoryID_CategoryID", "Categories", value);
                 }
             }
         }
         /// <summary>
-        /// There are no comments for Order_Details in the schema.
+        /// There are no comments for OrderDetails in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Order_Details_ProductID_ProductID", "Order_Details")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_OrderDetails_ProductID_ProductID", "OrderDetails")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityCollection<Order_Details> Order_Details
+        public global::System.Data.Objects.DataClasses.EntityCollection<OrderDetails> OrderDetails
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Order_Details>("northwindModel.FK_Order_Details_ProductID_ProductID", "Order_Details");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<OrderDetails>("northwindEFModel.FK_OrderDetails_ProductID_ProductID", "OrderDetails");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Order_Details>("northwindModel.FK_Order_Details_ProductID_ProductID", "Order_Details", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<OrderDetails>("northwindEFModel.FK_OrderDetails_ProductID_ProductID", "OrderDetails", value);
                 }
             }
         }
         /// <summary>
         /// There are no comments for Suppliers in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Products_SupplierID_SupplierID", "Suppliers")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_Products_SupplierID_SupplierID", "Suppliers")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -2266,11 +2632,11 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Suppliers>("northwindModel.FK_Products_SupplierID_SupplierID", "Suppliers").Value;
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Suppliers>("northwindEFModel.FK_Products_SupplierID_SupplierID", "Suppliers").Value;
             }
             set
             {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Suppliers>("northwindModel.FK_Products_SupplierID_SupplierID", "Suppliers").Value = value;
+                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Suppliers>("northwindEFModel.FK_Products_SupplierID_SupplierID", "Suppliers").Value = value;
             }
         }
         /// <summary>
@@ -2282,39 +2648,39 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Suppliers>("northwindModel.FK_Products_SupplierID_SupplierID", "Suppliers");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Suppliers>("northwindEFModel.FK_Products_SupplierID_SupplierID", "Suppliers");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Suppliers>("northwindModel.FK_Products_SupplierID_SupplierID", "Suppliers", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Suppliers>("northwindEFModel.FK_Products_SupplierID_SupplierID", "Suppliers", value);
                 }
             }
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.Region in the schema.
+    /// There are no comments for northwindEFModel.Regions in the schema.
     /// </summary>
     /// <KeyProperties>
     /// RegionID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Region")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="Regions")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
-    public partial class Region : global::System.Data.Objects.DataClasses.EntityObject
+    public partial class Regions : global::System.Data.Objects.DataClasses.EntityObject
     {
         /// <summary>
-        /// Create a new Region object.
+        /// Create a new Regions object.
         /// </summary>
         /// <param name="regionID">Initial value of RegionID.</param>
         /// <param name="regionDescription">Initial value of RegionDescription.</param>
-        public static Region CreateRegion(long regionID, string regionDescription)
+        public static Regions CreateRegions(long regionID, string regionDescription)
         {
-            Region region = new Region();
-            region.RegionID = regionID;
-            region.RegionDescription = regionDescription;
-            return region;
+            Regions regions = new Regions();
+            regions.RegionID = regionID;
+            regions.RegionDescription = regionDescription;
+            return regions;
         }
         /// <summary>
         /// There are no comments for Property RegionID in the schema.
@@ -2365,7 +2731,7 @@ namespace testlinq
         /// <summary>
         /// There are no comments for Territories in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Territories_RegionID_RegionID", "Territories")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_Territories_RegionID_RegionID", "Territories")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -2373,138 +2739,24 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Territories>("northwindModel.FK_Territories_RegionID_RegionID", "Territories");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Territories>("northwindEFModel.FK_Territories_RegionID_RegionID", "Territories");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Territories>("northwindModel.FK_Territories_RegionID_RegionID", "Territories", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Territories>("northwindEFModel.FK_Territories_RegionID_RegionID", "Territories", value);
                 }
             }
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.Shippers in the schema.
-    /// </summary>
-    /// <KeyProperties>
-    /// ShipperID
-    /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Shippers")]
-    [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
-    [global::System.Serializable()]
-    public partial class Shippers : global::System.Data.Objects.DataClasses.EntityObject
-    {
-        /// <summary>
-        /// Create a new Shippers object.
-        /// </summary>
-        /// <param name="shipperID">Initial value of ShipperID.</param>
-        /// <param name="companyName">Initial value of CompanyName.</param>
-        public static Shippers CreateShippers(long shipperID, string companyName)
-        {
-            Shippers shippers = new Shippers();
-            shippers.ShipperID = shipperID;
-            shippers.CompanyName = companyName;
-            return shippers;
-        }
-        /// <summary>
-        /// There are no comments for Property ShipperID in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public long ShipperID
-        {
-            get
-            {
-                return this._ShipperID;
-            }
-            set
-            {
-                this.OnShipperIDChanging(value);
-                this.ReportPropertyChanging("ShipperID");
-                this._ShipperID = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
-                this.ReportPropertyChanged("ShipperID");
-                this.OnShipperIDChanged();
-            }
-        }
-        private long _ShipperID;
-        partial void OnShipperIDChanging(long value);
-        partial void OnShipperIDChanged();
-        /// <summary>
-        /// There are no comments for Property CompanyName in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(IsNullable=false)]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public string CompanyName
-        {
-            get
-            {
-                return this._CompanyName;
-            }
-            set
-            {
-                this.OnCompanyNameChanging(value);
-                this.ReportPropertyChanging("CompanyName");
-                this._CompanyName = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, false);
-                this.ReportPropertyChanged("CompanyName");
-                this.OnCompanyNameChanged();
-            }
-        }
-        private string _CompanyName;
-        partial void OnCompanyNameChanging(string value);
-        partial void OnCompanyNameChanged();
-        /// <summary>
-        /// There are no comments for Property Phone in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public string Phone
-        {
-            get
-            {
-                return this._Phone;
-            }
-            set
-            {
-                this.OnPhoneChanging(value);
-                this.ReportPropertyChanging("Phone");
-                this._Phone = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, true);
-                this.ReportPropertyChanged("Phone");
-                this.OnPhoneChanged();
-            }
-        }
-        private string _Phone;
-        partial void OnPhoneChanging(string value);
-        partial void OnPhoneChanged();
-        /// <summary>
-        /// There are no comments for Orders in the schema.
-        /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Orders_ShipVia_ShipperID", "Orders")]
-        [global::System.Xml.Serialization.XmlIgnoreAttribute()]
-        [global::System.Xml.Serialization.SoapIgnoreAttribute()]
-        [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityCollection<Orders> Orders
-        {
-            get
-            {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Orders>("northwindModel.FK_Orders_ShipVia_ShipperID", "Orders");
-            }
-            set
-            {
-                if ((value != null))
-                {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Orders>("northwindModel.FK_Orders_ShipVia_ShipperID", "Orders", value);
-                }
-            }
-        }
-    }
-    /// <summary>
-    /// There are no comments for northwindModel.Suppliers in the schema.
+    /// There are no comments for northwindEFModel.Suppliers in the schema.
     /// </summary>
     /// <KeyProperties>
     /// SupplierID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Suppliers")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="Suppliers")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
     public partial class Suppliers : global::System.Data.Objects.DataClasses.EntityObject
@@ -2800,7 +3052,7 @@ namespace testlinq
         /// <summary>
         /// There are no comments for Products in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Products_SupplierID_SupplierID", "Products")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_Products_SupplierID_SupplierID", "Products")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -2808,24 +3060,24 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Products>("northwindModel.FK_Products_SupplierID_SupplierID", "Products");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Products>("northwindEFModel.FK_Products_SupplierID_SupplierID", "Products");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Products>("northwindModel.FK_Products_SupplierID_SupplierID", "Products", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Products>("northwindEFModel.FK_Products_SupplierID_SupplierID", "Products", value);
                 }
             }
         }
     }
     /// <summary>
-    /// There are no comments for northwindModel.Territories in the schema.
+    /// There are no comments for northwindEFModel.Territories in the schema.
     /// </summary>
     /// <KeyProperties>
     /// TerritoryID
     /// </KeyProperties>
-    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindModel", Name="Territories")]
+    [global::System.Data.Objects.DataClasses.EdmEntityTypeAttribute(NamespaceName="northwindEFModel", Name="Territories")]
     [global::System.Runtime.Serialization.DataContractAttribute(IsReference=true)]
     [global::System.Serializable()]
     public partial class Territories : global::System.Data.Objects.DataClasses.EntityObject
@@ -2835,7 +3087,7 @@ namespace testlinq
         /// </summary>
         /// <param name="territoryID">Initial value of TerritoryID.</param>
         /// <param name="territoryDescription">Initial value of TerritoryDescription.</param>
-        public static Territories CreateTerritories(string territoryID, string territoryDescription)
+        public static Territories CreateTerritories(long territoryID, string territoryDescription)
         {
             Territories territories = new Territories();
             territories.TerritoryID = territoryID;
@@ -2847,7 +3099,7 @@ namespace testlinq
         /// </summary>
         [global::System.Data.Objects.DataClasses.EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public string TerritoryID
+        public long TerritoryID
         {
             get
             {
@@ -2857,13 +3109,13 @@ namespace testlinq
             {
                 this.OnTerritoryIDChanging(value);
                 this.ReportPropertyChanging("TerritoryID");
-                this._TerritoryID = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value, false);
+                this._TerritoryID = global::System.Data.Objects.DataClasses.StructuralObject.SetValidValue(value);
                 this.ReportPropertyChanged("TerritoryID");
                 this.OnTerritoryIDChanged();
             }
         }
-        private string _TerritoryID;
-        partial void OnTerritoryIDChanging(string value);
+        private long _TerritoryID;
+        partial void OnTerritoryIDChanging(long value);
         partial void OnTerritoryIDChanged();
         /// <summary>
         /// There are no comments for Property TerritoryDescription in the schema.
@@ -2889,46 +3141,46 @@ namespace testlinq
         partial void OnTerritoryDescriptionChanging(string value);
         partial void OnTerritoryDescriptionChanged();
         /// <summary>
-        /// There are no comments for Region in the schema.
+        /// There are no comments for Regions in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "FK_Territories_RegionID_RegionID", "Region")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "FK_Territories_RegionID_RegionID", "Regions")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public Region Region
+        public Regions Regions
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Region>("northwindModel.FK_Territories_RegionID_RegionID", "Region").Value;
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Regions>("northwindEFModel.FK_Territories_RegionID_RegionID", "Regions").Value;
             }
             set
             {
-                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Region>("northwindModel.FK_Territories_RegionID_RegionID", "Region").Value = value;
+                ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Regions>("northwindEFModel.FK_Territories_RegionID_RegionID", "Regions").Value = value;
             }
         }
         /// <summary>
-        /// There are no comments for Region in the schema.
+        /// There are no comments for Regions in the schema.
         /// </summary>
         [global::System.ComponentModel.BrowsableAttribute(false)]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
-        public global::System.Data.Objects.DataClasses.EntityReference<Region> RegionReference
+        public global::System.Data.Objects.DataClasses.EntityReference<Regions> RegionsReference
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Region>("northwindModel.FK_Territories_RegionID_RegionID", "Region");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedReference<Regions>("northwindEFModel.FK_Territories_RegionID_RegionID", "Regions");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Region>("northwindModel.FK_Territories_RegionID_RegionID", "Region", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedReference<Regions>("northwindEFModel.FK_Territories_RegionID_RegionID", "Regions", value);
                 }
             }
         }
         /// <summary>
         /// There are no comments for Employees in the schema.
         /// </summary>
-        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindModel", "EmployeeTerritories", "Employees")]
+        [global::System.Data.Objects.DataClasses.EdmRelationshipNavigationPropertyAttribute("northwindEFModel", "EmployeesTerritories", "Employees")]
         [global::System.Xml.Serialization.XmlIgnoreAttribute()]
         [global::System.Xml.Serialization.SoapIgnoreAttribute()]
         [global::System.Runtime.Serialization.DataMemberAttribute()]
@@ -2936,13 +3188,13 @@ namespace testlinq
         {
             get
             {
-                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Employees>("northwindModel.EmployeeTerritories", "Employees");
+                return ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.GetRelatedCollection<Employees>("northwindEFModel.EmployeesTerritories", "Employees");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Employees>("northwindModel.EmployeeTerritories", "Employees", value);
+                    ((global::System.Data.Objects.DataClasses.IEntityWithRelationships)(this)).RelationshipManager.InitializeRelatedCollection<Employees>("northwindEFModel.EmployeesTerritories", "Employees", value);
                 }
             }
         }

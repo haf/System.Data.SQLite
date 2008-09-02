@@ -24,7 +24,7 @@ namespace test
           string prov = row[2].ToString();
 
           if (prov.IndexOf("SQLite", 0, StringComparison.OrdinalIgnoreCase) != -1
-            //|| prov.IndexOf("SqlClient", 0, StringComparison.OrdinalIgnoreCase) != -1
+            || prov.IndexOf("SqlClient", 0, StringComparison.OrdinalIgnoreCase) != -1
             )
             _provider.Items.Add(prov);
           if (prov == "System.Data.SQLite") _provider.SelectedItem = prov;

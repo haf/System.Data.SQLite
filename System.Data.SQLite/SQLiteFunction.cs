@@ -31,6 +31,12 @@ namespace System.Data.SQLite
   /// </remarks>
   public abstract class SQLiteFunction : IDisposable
   {
+    private class AggregateData
+    {
+      internal int _count = 1;
+      internal object _data = null;
+    }
+
     /// <summary>
     /// The base connection this function is attached to
     /// </summary>
@@ -39,7 +45,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Internal array used to keep track of aggregate function context data
     /// </summary>
-    private Dictionary<long, object> _contextDataList;
+    private Dictionary<long, AggregateData> _contextDataList;
 
     /// <summary>
     /// Holds a reference to the callback function for user functions
@@ -65,8 +71,6 @@ namespace System.Data.SQLite
     /// </summary>
     internal IntPtr _context;
 
-    private int _count = 1;
-
     /// <summary>
     /// This static list contains all the user-defined functions declared using the proper attributes.
     /// </summary>
@@ -77,7 +81,7 @@ namespace System.Data.SQLite
     /// </summary>
     protected SQLiteFunction()
     {
-      _contextDataList = new Dictionary<long, object>();
+      _contextDataList = new Dictionary<long, AggregateData>();
     }
 
     /// <summary>
@@ -305,22 +309,24 @@ namespace System.Data.SQLite
     /// <param name="argsptr">A pointer to the array of arguments</param>
     internal void StepCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
-      int n = _count;
       long nAux;
-      object obj = null;
+      AggregateData data;
 
       nAux = (long)_base.AggregateContext(context);
-      if (n > 1) obj = _contextDataList[nAux];
+      if (_contextDataList.TryGetValue(nAux, out data) == false)
+      {
+        data = new AggregateData();
+        _contextDataList[nAux] = data;
+      }
 
       try
       {
         _context = context;
-        Step(ConvertParams(nArgs, argsptr), n, ref obj);
-        _contextDataList[nAux] = obj;
+        Step(ConvertParams(nArgs, argsptr), data._count, ref data._data);
       }
       finally
       {
-        _count++;
+        data._count++;
       }
     }
 
@@ -333,10 +339,9 @@ namespace System.Data.SQLite
       long n = (long)_base.AggregateContext(context);
       object obj = null;
 
-      _count = 1;
       if (_contextDataList.ContainsKey(n))
       {
-        obj = _contextDataList[n];
+        obj = _contextDataList[n]._data;
         _contextDataList.Remove(n);
       }
 
@@ -357,9 +362,9 @@ namespace System.Data.SQLite
       {
         IDisposable disp;
 
-        foreach (KeyValuePair<long, object> kv in _contextDataList)
+        foreach (KeyValuePair<long, AggregateData> kv in _contextDataList)
         {
-          disp = kv.Value as IDisposable;
+          disp = kv.Value._data as IDisposable;
           if (disp != null)
             disp.Dispose();
         }

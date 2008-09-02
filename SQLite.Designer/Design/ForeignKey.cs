@@ -214,7 +214,7 @@ namespace SQLite.Designer.Design
     }
 
     [Editor(typeof(ColumnsTypeEditor), typeof(UITypeEditor))]
-    [Description("The primary (parent) column of the foreign key relationship")]
+    [Description("The column of the current table that refers to the foreign key relationship")]
     public new string Column
     {
       get { return base.Column; }
@@ -235,7 +235,7 @@ namespace SQLite.Designer.Design
     {
       get
       {
-        return base.Table;
+        return base.DesignTable.Name;
       }
     }
   }
@@ -265,7 +265,7 @@ namespace SQLite.Designer.Design
 
     [DisplayName("Base Table")]
     [Editor(typeof(TablesTypeEditor), typeof(UITypeEditor))]
-    [Description("The child table to which the foreign key refers.")]
+    [Description("The table to which the foreign key refers.")]
     public new string Table
     {
       get { return base.Table; }
@@ -273,7 +273,7 @@ namespace SQLite.Designer.Design
     }
 
     [Editor(typeof(ColumnsTypeEditor), typeof(UITypeEditor))]
-    [Description("The child column to which the foreign key refers.")]
+    [Description("The column to which the foreign key refers.")]
     public new string Column
     {
       get { return base.Column; }
@@ -332,14 +332,14 @@ namespace SQLite.Designer.Design
       }
     }
 
-    internal void WriteSql(StringBuilder builder)
-    {
-      if (String.IsNullOrEmpty(_from.Column) == false && String.IsNullOrEmpty(_to.Catalog) == false &&
-        String.IsNullOrEmpty(_to.Table) == false && String.IsNullOrEmpty(_to.Column) == false)
-      {
-        builder.AppendFormat("CONSTRAINT [{0}] FOREIGN KEY ([{1}]) REFERENCES [{3}] ([{4}])", Name, _from.Column, _to.Catalog, _to.Table, _to.Column);
-      }
-    }
+    //internal void WriteSql(StringBuilder builder)
+    //{
+    //  if (String.IsNullOrEmpty(_from.Column) == false && String.IsNullOrEmpty(_to.Catalog) == false &&
+    //    String.IsNullOrEmpty(_to.Table) == false && String.IsNullOrEmpty(_to.Column) == false)
+    //  {
+    //    builder.AppendFormat("CONSTRAINT [{0}] FOREIGN KEY ([{1}]) REFERENCES [{3}] ([{4}])", Name, _from.Column, _to.Catalog, _to.Table, _to.Column);
+    //  }
+    //}
 
     [ParenthesizePropertyName(true)]
     [Category("Identity")]
@@ -377,17 +377,17 @@ namespace SQLite.Designer.Design
 
     #endregion
 
-    [DisplayName("Primary/Unique Key")]
-    [Category("Source")]
-    [Description("The source (parent) column in the current table that is to be the unique value of the foreign key.")]
+    [DisplayName("From Key")]
+    [Category("From")]
+    [Description("The source column in the current table that refers to the foreign key.")]
     public ForeignKeyFromItem From
     {
       get { return _from; }
     }
 
-    [DisplayName("Foreign Key")]
-    [Category("Target")]
-    [Description("The child table and column to which the specified parent column is related.")]
+    [DisplayName("To Key")]
+    [Category("To")]
+    [Description("The table and column to which the specified from column is related.")]
     public ForeignKeyToItem To
     {
       get { return _to; }

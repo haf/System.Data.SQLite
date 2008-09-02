@@ -209,6 +209,9 @@ namespace System.Data.SQLite
             _sql.Bind_Text(this, index, obj.ToString());
 
           break;
+        case DbType.Decimal: // Dont store decimal as double ... loses precision
+          _sql.Bind_Text(this, index, Convert.ToDecimal(obj, CultureInfo.CurrentCulture).ToString(CultureInfo.InvariantCulture));
+          break;
         default:
           _sql.Bind_Text(this, index, obj.ToString());
           break;

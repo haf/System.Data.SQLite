@@ -10,7 +10,7 @@ namespace testlinq
   {
     static void Main(string[] args)
     {
-      using (northwindEntities db = new northwindEntities())
+      using (northwindEFEntities db = new northwindEFEntities())
       {
         {
           string entitySQL = "SELECT VALUE o FROM Orders AS o WHERE SQLite.DatePart('yyyy', o.OrderDate) = 1997;";
@@ -28,10 +28,18 @@ namespace testlinq
                       orderby c.CompanyName
                       select c;
 
+          int cc = query.Count();
+
           foreach (Customers c in query)
           {
             Console.WriteLine(c.CompanyName);
           }
+        }
+
+        {
+          string scity = "London";
+          Customers c = db.Customers.FirstOrDefault(cd => cd.City == scity);
+          Console.WriteLine(c.CompanyName);
         }
 
         {
@@ -59,6 +67,21 @@ namespace testlinq
           db.SaveChanges();
 
           db.DeleteObject(c);
+          db.SaveChanges();
+        }
+
+        {
+          Customers cust = new Customers();
+          cust.CustomerID = "MTMTM";
+          cust.ContactName = "My Name";
+          cust.CompanyName = "SQLite Company";
+          cust.Country = "Netherlands";
+          cust.City = "Amsterdam";
+          cust.Phone = "012345677";
+          db.AddToCustomers(cust);
+          db.SaveChanges();
+
+          db.DeleteObject(cust);
           db.SaveChanges();
         }
 
@@ -103,17 +126,17 @@ namespace testlinq
           }
         }
 
-         //This query fails due to a SQLite core issue.  Currently pending review by Dr. Hipp
-        //{
-        //  var query = from p in db.Products
-        //              where p.Order_Details.Count(od => od.Orders.Customers.Country == p.Suppliers.Country) > 2
-        //              select p;
+        // This query requires SQLite 3.6.2 to function correctly
+        {
+          var query = from p in db.Products
+                      where p.OrderDetails.Count(od => od.Orders.Customers.Country == p.Suppliers.Country) > 2
+                      select p;
 
-        //  foreach (Products p in query)
-        //  {
-        //    Console.WriteLine(p.ProductName);
-        //  }
-        //}
+          foreach (Products p in query)
+          {
+            Console.WriteLine(p.ProductName);
+          }
+        }
       }
       Console.ReadKey();
     }

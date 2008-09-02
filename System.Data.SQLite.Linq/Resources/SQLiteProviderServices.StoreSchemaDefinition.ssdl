@@ -35,7 +35,7 @@
         ,   c.CHARACTER_SET_SCHEMA [CharacterSetSchema]
         ,   c.CHARACTER_SET_NAME [CharacterSetName]
         ,   0 as [IsMultiSet]
-        ,   c.PRIMARY_KEY as [IsIdentity]
+        ,   c.[AUTOINCREMENT] as [IsIdentity]
         ,   0 as [IsStoreGenerated]
         , c.COLUMN_DEFAULT as [Default]
         FROM
@@ -60,9 +60,9 @@
     <EntitySet Name="SViewColumns" EntityType="Self.ViewColumn">
       <DefiningQuery>
         SELECT
-        '[' || c.TABLE_NAME || ']' || '[' || c.COLUMN_NAME || ']' COLLATE NOCASE [Id]
-        ,   '[' || c.TABLE_NAME || ']' COLLATE NOCASE                             [ParentId]
-        ,   c.COLUMN_NAME   [Name]
+        '[' || c.VIEW_NAME || ']' || '[' || c.VIEW_COLUMN_NAME || ']' COLLATE NOCASE [Id]
+        ,   '[' || c.VIEW_NAME || ']' COLLATE NOCASE                             [ParentId]
+        ,   c.VIEW_COLUMN_NAME   [Name]
         ,   c.ORDINAL_POSITION [Ordinal]
         ,   c.IS_NULLABLE [IsNullable]
         ,   c.EDM_TYPE [TypeName]
@@ -77,7 +77,7 @@
         ,   c.CHARACTER_SET_SCHEMA [CharacterSetSchema]
         ,   c.CHARACTER_SET_NAME [CharacterSetName]
         ,   0 as [IsMultiSet]
-        ,   c.PRIMARY_KEY as [IsIdentity]
+        ,   c.[AUTOINCREMENT] as [IsIdentity]
         ,   0 as [IsStoreGenerated]
         ,   c.COLUMN_DEFAULT [Default]
         FROM
@@ -207,7 +207,7 @@
 
     <EntitySet Name="SForeignKeyConstraints" EntityType="Self.ForeignKeyConstraint">
       <DefiningQuery>
-        SELECT
+        SELECT DISTINCT
         '[' || rc.CONSTRAINT_NAME || ']'  COLLATE NOCASE [Id]
         , 'NO ACTION'  COLLATE NOCASE [UpdateRule]
         , 'NO ACTION'  COLLATE NOCASE [DeleteRule]

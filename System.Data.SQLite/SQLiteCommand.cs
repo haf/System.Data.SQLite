@@ -17,7 +17,7 @@ namespace System.Data.SQLite
   /// SQLite implementation of DbCommand.
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
-  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.35.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
+  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.36.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
 #endif
   public sealed class SQLiteCommand : DbCommand, ICloneable
   {
@@ -130,7 +130,7 @@ namespace System.Data.SQLite
       _commandTimeout = 30;
       _parameterCollection = new SQLiteParameterCollection(this);
       _designTimeVisible = true;
-      _updateRowSource = UpdateRowSource.FirstReturnedRecord;
+      _updateRowSource = UpdateRowSource.None;
       _transaction = null;
 
       if (commandText != null)
@@ -597,7 +597,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Sets the method the SQLiteCommandBuilder uses to determine how to update inserted or updated rows in a DataTable.
     /// </summary>
-    [DefaultValue(UpdateRowSource.FirstReturnedRecord)]
+    [DefaultValue(UpdateRowSource.None)]
     public override UpdateRowSource UpdatedRowSource
     {
       get

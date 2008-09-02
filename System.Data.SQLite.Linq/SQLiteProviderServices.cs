@@ -1,4 +1,11 @@
-﻿namespace System.Data.SQLite
+﻿/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
+
+namespace System.Data.SQLite
 {
   using System;
   using System.Data.Common;
@@ -160,8 +167,6 @@
 
       size = default(int?);
 
-
-      // TODO add logic for Xml here
       switch (primitiveTypeKind)
       {
         case PrimitiveTypeKind.Binary:
@@ -252,34 +257,28 @@
         PrimitiveTypeKind.String == ((PrimitiveType)type.EdmType).PrimitiveTypeKind, "only valid for string type");
 
       DbType dbType;
-      if (type.EdmType.Name.ToLowerInvariant() == "xml")
+
+      // Specific type depends on whether the string is a unicode string and whether it is a fixed length string.
+      // By default, assume widest type (unicode) and most common type (variable length)
+      bool unicode;
+      bool fixedLength;
+      if (!MetadataHelpers.TryGetIsFixedLength(type, out fixedLength))
       {
-        dbType = DbType.Xml;
+        fixedLength = false;
+      }
+
+      if (!MetadataHelpers.TryGetIsUnicode(type, out unicode))
+      {
+        unicode = true;
+      }
+
+      if (fixedLength)
+      {
+        dbType = (unicode ? DbType.StringFixedLength : DbType.AnsiStringFixedLength);
       }
       else
       {
-        // Specific type depends on whether the string is a unicode string and whether it is a fixed length string.
-        // By default, assume widest type (unicode) and most common type (variable length)
-        bool unicode;
-        bool fixedLength;
-        if (!MetadataHelpers.TryGetIsFixedLength(type, out fixedLength))
-        {
-          fixedLength = false;
-        }
-
-        if (!MetadataHelpers.TryGetIsUnicode(type, out unicode))
-        {
-          unicode = true;
-        }
-
-        if (fixedLength)
-        {
-          dbType = (unicode ? DbType.StringFixedLength : DbType.AnsiStringFixedLength);
-        }
-        else
-        {
-          dbType = (unicode ? DbType.String : DbType.AnsiString);
-        }
+        dbType = (unicode ? DbType.String : DbType.AnsiString);
       }
       return dbType;
     }
@@ -305,11 +304,22 @@
 
     #region ISQLiteSchemaExtensions Members
 
+    /// <summary>
+    /// Creates temporary tables on the connection so schema information can be queried
+    /// </summary>
+    /// <remarks>
+    /// There's a lot of work involved in getting schema information out of SQLite, but LINQ expects to
+    /// be able to query on schema tables.  Therefore we need to "fake" it by generating temporary tables
+    /// filled with the schema of the current connection.  We get away with making this information static
+    /// because schema information seems to always be queried on a new connection object, so the schema is
+    /// always fresh.
+    /// </remarks>
+    /// <param name="cnn">The connection upon which to build the schema tables</param>
     void ISQLiteSchemaExtensions.BuildTempSchema(SQLiteConnection cnn)
     {
       string[] arr = new string[] { "TABLES", "COLUMNS", "VIEWS", "VIEWCOLUMNS", "INDEXES", "INDEXCOLUMNS", "FOREIGNKEYS", "CATALOGS" };
 
-      using (DataTable table = cnn.GetSchema("Tables", new string[] { "TEMP", null, String.Format("SCHEMA{0}", arr[0]) }))
+      using (DataTable table = cnn.GetSchema("Tables", new string[] { "temp", null, String.Format("SCHEMA{0}", arr[0]) }))
       {
         if (table.Rows.Count > 0) return;
       }
@@ -332,6 +342,12 @@
       }
     }
 
+    /// <summary>
+    /// Turn a datatable into a table in the temporary database for the connection
+    /// </summary>
+    /// <param name="cnn">The connection to make the temporary table in</param>
+    /// <param name="table">The table to write out</param>
+    /// <param name="dest">The temporary table name to write to</param>
     private void DataTableToTable(SQLiteConnection cnn, DataTable table, string dest)
     {
       StringBuilder sql = new StringBuilder();
@@ -365,9 +381,6 @@
           foreach (DataRow row in table.Rows)
           {
             object[] arr = row.ItemArray;
-
-            //for (int n = 0; n < arr.Length; n++)
-            //  if (arr[n] is string) arr[n] = ((string)arr[n]).ToLower();
 
             source.Rows.Add(arr);
           }

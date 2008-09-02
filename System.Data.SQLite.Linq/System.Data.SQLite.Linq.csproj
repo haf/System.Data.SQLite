@@ -63,6 +63,7 @@
     <Compile Include="SQL Generation\JoinSymbol.cs" />
     <Compile Include="SQL Generation\MetadataHelpers.cs" />
     <Compile Include="SQL Generation\SqlBuilder.cs" />
+    <Compile Include="SQL Generation\SqlChecker.cs" />
     <Compile Include="SQL Generation\SqlGenerator.cs" />
     <Compile Include="SQL Generation\SqlSelectStatement.cs" />
     <Compile Include="SQL Generation\SqlWriter.cs" />

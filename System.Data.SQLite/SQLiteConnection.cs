@@ -627,7 +627,7 @@ namespace System.Data.SQLite
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
     [RefreshProperties(RefreshProperties.All), DefaultValue("")]
-    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.35.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.36.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
     public override string ConnectionString
     {
@@ -900,6 +900,15 @@ namespace System.Data.SQLite
             cmd.ExecuteNonQuery();
           }
         }
+
+        if (_commitHandler != null)
+          _sql.SetCommitHook(_commitCallback);
+
+        if (_updateHandler != null)
+          _sql.SetUpdateHook(_updateCallback);
+
+        if (_rollbackHandler != null)
+          _sql.SetRollbackHook(_rollbackCallback);
 
 #if !PLATFORM_COMPACTFRAMEWORK
         if (Transactions.Transaction.Current != null && SQLiteConvert.ToBoolean(FindKey(opts, "Enlist", Boolean.TrueString)) == true)
@@ -2037,7 +2046,7 @@ namespace System.Data.SQLite
                     row["ORDINAL_POSITION"] = viewRow[SchemaTableColumn.ColumnOrdinal];
                     row["IS_NULLABLE"] = viewRow[SchemaTableColumn.AllowDBNull];
                     row["DATA_TYPE"] = viewRow["DataTypeName"]; // SQLiteConvert.DbTypeToType((DbType)viewRow[SchemaTableColumn.ProviderType]).ToString();
-                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)viewRow[SchemaTableColumn.ProviderType]).ToString();
+                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)viewRow[SchemaTableColumn.ProviderType]).ToString().ToLower(CultureInfo.InvariantCulture);
                     row["CHARACTER_MAXIMUM_LENGTH"] = viewRow[SchemaTableColumn.ColumnSize];
                     row["TABLE_SCHEMA"] = viewRow[SchemaTableColumn.BaseSchemaName];
                     row["PRIMARY_KEY"] = viewRow[SchemaTableColumn.IsKey];
@@ -2104,8 +2113,8 @@ namespace System.Data.SQLite
             try
             {
               using (SQLiteCommandBuilder builder = new SQLiteCommandBuilder())
-              using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
-              using (SQLiteDataReader rdTable = cmdTable.ExecuteReader(CommandBehavior.SchemaOnly))
+              //using (SQLiteCommand cmdTable = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdTables.GetString(2)), this))
+              //using (SQLiteDataReader rdTable = cmdTable.ExecuteReader(CommandBehavior.SchemaOnly))
               using (SQLiteCommand cmdKey = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "PRAGMA [{0}].foreign_key_list([{1}])", strCatalog, rdTables.GetString(2)), this))
               using (SQLiteDataReader rdKey = cmdKey.ExecuteReader())
               {
@@ -2113,17 +2122,17 @@ namespace System.Data.SQLite
                 {
                   row = tbl.NewRow();
                   row["CONSTRAINT_CATALOG"] = strCatalog;
-                  row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}", rdTables[2], rdKey[3], rdKey[4]);
+                  row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}", rdTables[2], rdKey.GetInt32(0));
                   row["TABLE_CATALOG"] = strCatalog;
                   row["TABLE_NAME"] = builder.UnquoteIdentifier(rdTables.GetString(2));
                   row["CONSTRAINT_TYPE"] = "FOREIGN KEY";
                   row["IS_DEFERRABLE"] = false;
                   row["INITIALLY_DEFERRED"] = false;
                   row["FKEY_FROM_COLUMN"] = builder.UnquoteIdentifier(rdKey[3].ToString());
-                  row["FKEY_FROM_ORDINAL_POSITION"] = rdTable.GetOrdinal(row["FKEY_FROM_COLUMN"].ToString());
                   row["FKEY_TO_CATALOG"] = strCatalog;
                   row["FKEY_TO_TABLE"] = builder.UnquoteIdentifier(rdKey[2].ToString());
                   row["FKEY_TO_COLUMN"] = builder.UnquoteIdentifier(rdKey[4].ToString());
+                  row["FKEY_FROM_ORDINAL_POSITION"] = rdKey[1];
 
                   if (String.IsNullOrEmpty(strKeyName) || String.Compare(strKeyName, row["CONSTRAINT_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
                     tbl.Rows.Add(row);
@@ -2154,7 +2163,7 @@ namespace System.Data.SQLite
         if (_updateHandler == null)
         {
           _updateCallback = new SQLiteUpdateCallback(UpdateCallback);
-          _sql.SetUpdateHook(_updateCallback);
+          if (_sql != null) _sql.SetUpdateHook(_updateCallback);
         }
         _updateHandler += value;
       }
@@ -2163,7 +2172,7 @@ namespace System.Data.SQLite
         _updateHandler -= value;
         if (_updateHandler == null)
         {
-          _sql.SetUpdateHook(null);
+          if (_sql != null) _sql.SetUpdateHook(null);
           _updateCallback = null;
         }
       }
@@ -2189,7 +2198,7 @@ namespace System.Data.SQLite
         if (_commitHandler == null)
         {
           _commitCallback = new SQLiteCommitCallback(CommitCallback);
-          _sql.SetCommitHook(_commitCallback);
+          if (_sql != null) _sql.SetCommitHook(_commitCallback);
         }
         _commitHandler += value;
       }
@@ -2198,7 +2207,7 @@ namespace System.Data.SQLite
         _commitHandler -= value;
         if (_commitHandler == null)
         {
-          _sql.SetCommitHook(null);
+          if (_sql != null) _sql.SetCommitHook(null);
           _commitCallback = null;
         }
       }
@@ -2215,7 +2224,7 @@ namespace System.Data.SQLite
         if (_rollbackHandler == null)
         {
           _rollbackCallback = new SQLiteRollbackCallback(RollbackCallback);
-          _sql.SetRollbackHook(_rollbackCallback);
+          if (_sql != null) _sql.SetRollbackHook(_rollbackCallback);
         }
         _rollbackHandler += value;
       }
@@ -2224,7 +2233,7 @@ namespace System.Data.SQLite
         _rollbackHandler -= value;
         if (_rollbackHandler == null)
         {
-          _sql.SetRollbackHook(null);
+          if (_sql != null) _sql.SetRollbackHook(null);
           _rollbackCallback = null;
         }
       }
