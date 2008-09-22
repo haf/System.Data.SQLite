@@ -12,7 +12,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop", "SQLite.Interop\SQLite.Interop.vcproj", "{10B51CE8-A838-44DE-BD82-B658F0296F80}"
 	ProjectSection(ProjectDependencies) = postProject
-		{AC139951-261A-4463-B6FA-AEBC25283A66} = {AC139951-261A-4463-B6FA-AEBC25283A66}
 		{AC139952-261A-4463-B6FA-AEBC25283A66} = {AC139952-261A-4463-B6FA-AEBC25283A66}
 	EndProjectSection
 EndProject
@@ -137,9 +136,9 @@ Global
 		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release|x64.ActiveCfg = Release|x64
 		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release|x64.Build.0 = Release|x64
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Any CPU.ActiveCfg = Debug|x64
-		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Compact Framework (ARMV4).ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
-		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Compact Framework (ARMV4).Build.0 = Debug|Pocket PC 2003 (ARMV4)
-		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Compact Framework (ARMV4).Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
+		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Compact Framework (ARMV4).ActiveCfg = StockDebug|Pocket PC 2003 (ARMV4)
+		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Compact Framework (ARMV4).Build.0 = StockDebug|Pocket PC 2003 (ARMV4)
+		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Compact Framework (ARMV4).Deploy.0 = StockDebug|Pocket PC 2003 (ARMV4)
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Itanium.ActiveCfg = Debug|Itanium
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Itanium.Build.0 = Debug|Itanium
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Itanium.Deploy.0 = Debug|Itanium
@@ -180,7 +179,6 @@ Global
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Release|Any CPU.ActiveCfg = Release|x64
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Release|Compact Framework (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Release|Compact Framework (ARMV4).Build.0 = Release|Pocket PC 2003 (ARMV4)
-		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Release|Compact Framework (ARMV4).Deploy.0 = Release|Pocket PC 2003 (ARMV4)
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Release|Itanium.ActiveCfg = Release|Itanium
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Release|Itanium.Build.0 = Release|Itanium
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Release|Mixed Platforms.ActiveCfg = Release|x64

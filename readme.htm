@@ -4,9 +4,9 @@
     <title></title>
   </head>
   <body>
-    ADO.NET 2.0 SQLite Data Provider<br>
-    Version 1.0.58.0 August 30, 2008<br>
-    Using SQLite 3.6.2<br>
+    ADO.NET 2.0/3.5 SQLite Data Provider<br>
+    Version 1.0.59.0 September 22, 2008<br>
+    Using SQLite 3.6.3<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -42,7 +42,7 @@
       drag-and-drop tables onto a Typed DataSet, etc.<LI>
         Full SQLite schema editing inside Visual Studio.&nbsp;
         You can create/edit tables, views, triggers, indexes, check constraints and foreign keys.<LI>
-      Single file redistributable.&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
+      Single file redistributable (except on Compact Framework).&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
       are combined into one multi-module assembly.
       <LI>
               Binaries included for Itanium, x64, x86 and ARM processors.<LI>
@@ -111,9 +111,13 @@
     <h2>
       <b><A name="redist"></A>Distributing The SQLite Engine and ADO.NET Assembly</b></h2>
     <P>
-      Only the <STRONG>System.Data.SQLite.DLL</STRONG> file needs to be distributed with your 
+      On the desktop, only the <STRONG>System.Data.SQLite.DLL</STRONG> file needs to be distributed with your 
       application(s).&nbsp; This DLL contains both the managed wrapper and the native 
-      SQLite3 codebase.</P>
+      SQLite3 codebase.&nbsp; For the Compact Framework, you will have to distribute 
+      both the CF version of System.Data.SQLite.DLL, as well as the 
+      SQLite.Interop.XXX.DLL.&nbsp; This is a breaking change as of 1.0.59.0.&nbsp; 
+      Recent Windows Mobile frameworks are not supporting the mixed CF assembly I was 
+      building prior to this version.</P>
     <H2><B>Development Notes Regarding the SQLite 3 Source Code</B></H2>
     <p>
       The core sqlite engine is compiled directly from the unmodified source code available
@@ -122,24 +126,36 @@
     <p></p>
     <p>
       <b>Version History</b></p>
-    <p><b>1.0.59.0 - September 0, 2008</b></p>
+    <p><b>1.0.59.0 - September 22, 2008</b></p>
     <ul>
-      <li>Compiled against SQLite 3.6.2 with bug
-        <a href="http://www.sqlite.org/cvstrac/tktview?tn=3346">#3346</a> fixed.&nbsp; 
-        Solves at least one case I was seeing during EF unit testing where the core 
-        engine crashed executing a query.</li>
-      <li>Fixed the parsing of literal binaries in the EF SqlGen routine.&nbsp; SQLite 
-        now passes nearly all the testcases in Microsoft&#39;s EF Query Samples application 
-        -- the exception being the datetimeoffset and time constants test which are 
-        unsupported at this time.</li>
+      <li>Code merge with SQLite 3.6.3.&nbsp; Solves 
+        a couple different EF issues that were either giving inconsistent results or 
+        crashing the engine.</li>
+      <li>Fixed the parsing of literal binaries in the EF SqlGen code.&nbsp; SQLite now 
+        passes nearly all the testcases in 
+        <a href="http://sqlite.phxsoftware.com/forums/p/1377/5921.aspx#5921">Microsoft's EF Query Samples</a> application -- 
+        the exception being the <i>datetimeoffset </i>and<i> time</i> constants tests, and tests 
+        that use the <i>APPLY </i>keyword which are unsupported for now.</li>
+      <li>Revamped the Compact Framework mixed-mode assembly.&nbsp; Tired of playing cat 
+        and mouse with the Compact Framework&#39;s support for mixed-mode assemblies.&nbsp; 
+        The CF build now requires that you distribute both the System.Data.SQLite 
+        library and the paired SQLite.Interop.XXX library.&nbsp;&nbsp; The XXX denotes 
+        the build number of the library.</li>
+      <li>Implemented a workaround for Vista&#39;s overzealous caching by turning off 
+        FILE_FLAG_RANDOM_ACCESS for OS versions above XP.&nbsp; This is implemented 
+        as a custom (default override) VFS in the interop.c file, so no changes are made 
+        to the SQLite source code.</li>
+      <li>Fixed some registry issues in the designer install.exe, which prevented some 
+        design-time stuff from working on the Compact Framework when .NET 3.5 was 
+        installed.</li>
     </ul>
     <p><b>1.0.58.0 - August 30, 2008</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.2.&nbsp; If only I&#39;d waited one more day to release 
         57!&nbsp; Several LINQ issues have been resolved with this engine release 
         relating to deeply-nested subqueries that the EF SqlGen creates.</li>
-      <li>Fixed the Rollback SQLiteConnection event to not require a connection be 
-        opened first.</li>
+      <li>The Rollback SQLiteConnection event no longer requires an open connection in 
+        order to subscribe to it.&nbsp; Missed this one in the 57 release.</li>
     </ul>
     <p><b>1.0.57.0 - August 29, 2008</b></p>
     <ul>
