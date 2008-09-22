@@ -55,6 +55,29 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.59.0 - September 22, 2008</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.6.3.&nbsp; Solves 
+        a couple different EF issues that were either giving inconsistent results or 
+        crashing the engine.</li>
+      <li>Fixed the parsing of literal binaries in the EF SqlGen code.&nbsp; SQLite now 
+        passes nearly all the testcases in 
+        <a href="http://sqlite.phxsoftware.com/forums/p/1377/5921.aspx#5921">Microsoft's EF Query Samples</a> application -- 
+        the exception being the <i>datetimeoffset </i>and<i> time</i> constants tests, and tests 
+        that use the <i>APPLY </i>keyword which are unsupported for now.</li>
+      <li>Revamped the Compact Framework mixed-mode assembly.&nbsp; Tired of playing cat 
+        and mouse with the Compact Framework&#39;s support for mixed-mode assemblies.&nbsp; 
+        The CF build now requires that you distribute both the System.Data.SQLite 
+        library and the paired SQLite.Interop.XXX library.&nbsp;&nbsp; The XXX denotes 
+        the build number of the library.</li>
+      <li>Implemented a workaround for Vista&#39;s overzealous caching by turning off 
+        FILE_FLAG_RANDOM_ACCESS for OS versions above XP.&nbsp; This is implemented 
+        as a custom (default override) VFS in the interop.c file, so no changes are made 
+        to the SQLite source code.</li>
+      <li>Fixed some registry issues in the designer install.exe, which prevented some 
+        design-time stuff from working on the Compact Framework when .NET 3.5 was 
+        installed.</li>
+    </ul>
     <p><b>1.0.58.0 - August 30, 2008</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.2.&nbsp; If only I&#39;d waited one more day to release 

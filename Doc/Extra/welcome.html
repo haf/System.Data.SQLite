@@ -108,7 +108,7 @@
             <li>Full SQLite schema editing inside Visual Studio.&nbsp; You can create/edit 
               tables, views, triggers, indexes, check constraints and foreign keys. </li>
         <li>
-        Single file redistributable.&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
+        Single file redistributable (except Compact Framework).&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
         are combined into one multi-module assembly. </li>
         <li>Binaries included for Itanium, x64, x86 and ARM processors. </li>
         <li>
@@ -145,23 +145,23 @@
           Public Domain.&nbsp; 100% free for commercial and non-commercial use.&nbsp;</li>
       </UL>
       <br>
-      <h1 class="heading">Distributing the Binaries</h1>
+      <h1 class="heading">Distributing the Binaries (Desktop)</h1>
       <p><b>System.Data.SQLite.DLL</b> is a mixed assembly signed with a strong name 
         in case you want to add it to the Global Assembly Cache (GAC). This is the only DLL required to be redistributed with 
         your SQLite.NET application(s).&nbsp; It 
-        comes in&nbsp;4
-        flavors: Win32, Itanium, X64 (AMD64) and ARM (Compact Framework).&nbsp; The Compact
-        Framework library is signed with a separate strong name, but all the other
-        versions share the same strong name so they can be interchanged where appropriate without
-        any change to your application.</p>
+        comes in&nbsp;3
+        flavors: Win32, Itanium and x64 (AMD64).</p>
+      <h1 class="heading">Distributing the Binaries (Compact Framework)</h1>
+      <p><b>System.Data.SQLite.DLL </b>and <b>SQLite.Interop.XXX.DLL</b> must be 
+        deployed on the Compact Framework.&nbsp; The XXX is the build number of the 
+        System.Data.SQLite library (e.g. &quot;059&quot;).&nbsp; SQLite.Interop.XXX is a fully 
+        native assembly compiled for the ARM processor, and System.Data.SQLite is the 
+        fully-managed Compact Framework assembly.</p>
       <hr />
       <div id="footer">
         <p>
-          <a href="mailto:robert@blackcastlesoft.com?subject=SQLite%20ADO.NET%202.0%20Provider%201.0.0.0%20Documentation%20Feedback:%20Welcome">Send comments on this topic.</a>
-        </p>
-        <p />
-        <p />
-      </div><!--[if gte IE 5]><tool:tip element="seeAlsoToolTip" avoidmouse="false" /><tool:tip element="languageFilterToolTip" avoidmouse="false" /><![endif]-->    </div>
+          <a href="mailto:robert@blackcastlesoft.com?subject=SQLite%20ADO.NET%202.0%20Provider%201.0.0.0%20Documentation%20Feedback:%20Welcome">
+          Send comments on this topic.<!--[if gte IE 5]><tool:tip element="seeAlsoToolTip" avoidmouse="false" /><tool:tip element="languageFilterToolTip" avoidmouse="false" /><![endif]-->    </div>
     </div>
   </body>
 </html>
