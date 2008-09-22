@@ -13,7 +13,7 @@
 #ifdef NDEBUG
 
 #if _WIN32_WCE
-#include "merge.h"
+//#include "merge.h"
 #else
 #include "merge_full.h"
 #endif // _WIN32_WCE
@@ -37,6 +37,160 @@ typedef HANDLE (WINAPI *CREATEFILEW)(
     DWORD,
     DWORD,
     HANDLE);
+
+
+/*
+** Vista cache hack.  Open a file, but don't use FILE_FLAG_RANDOM_ACCESS -- Vista and above only.
+*/
+static int winOpenVista(
+  sqlite3_vfs *pVfs,        /* Not used */
+  const char *zName,        /* Name of the file (UTF-8) */
+  sqlite3_file *id,         /* Write the SQLite file handle here */
+  int flags,                /* Open mode flags */
+  int *pOutFlags            /* Status return flags */
+){
+  HANDLE h;
+  DWORD dwDesiredAccess;
+  DWORD dwShareMode;
+  DWORD dwCreationDisposition;
+  DWORD dwFlagsAndAttributes = 0;
+  int isTemp;
+  winFile *pFile = (winFile*)id;
+  void *zConverted;                 /* Filename in OS encoding */
+  const char *zUtf8Name = zName;    /* Filename in UTF-8 encoding */
+  char zTmpname[MAX_PATH+1];        /* Buffer used to create temp filename */
+
+  /* If the second argument to this function is NULL, generate a 
+  ** temporary file name to use 
+  */
+  if( !zUtf8Name ){
+    int rc = getTempname(MAX_PATH+1, zTmpname);
+    if( rc!=SQLITE_OK ){
+      return rc;
+    }
+    zUtf8Name = zTmpname;
+  }
+
+  /* Convert the filename to the system encoding. */
+  zConverted = convertUtf8Filename(zUtf8Name);
+  if( zConverted==0 ){
+    return SQLITE_NOMEM;
+  }
+
+  if( flags & SQLITE_OPEN_READWRITE ){
+    dwDesiredAccess = GENERIC_READ | GENERIC_WRITE;
+  }else{
+    dwDesiredAccess = GENERIC_READ;
+  }
+  if( flags & SQLITE_OPEN_CREATE ){
+    dwCreationDisposition = OPEN_ALWAYS;
+  }else{
+    dwCreationDisposition = OPEN_EXISTING;
+  }
+  if( flags & SQLITE_OPEN_MAIN_DB ){
+    dwShareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+  }else{
+    dwShareMode = 0;
+  }
+  if( flags & SQLITE_OPEN_DELETEONCLOSE ){
+#if SQLITE_OS_WINCE
+    dwFlagsAndAttributes = FILE_ATTRIBUTE_HIDDEN;
+#else
+    dwFlagsAndAttributes = FILE_ATTRIBUTE_TEMPORARY
+                               | FILE_ATTRIBUTE_HIDDEN
+                               | FILE_FLAG_DELETE_ON_CLOSE;
+#endif
+    isTemp = 1;
+  }else{
+    dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL;
+    isTemp = 0;
+  }
+  /* Reports from the internet are that performance is always
+  ** better if FILE_FLAG_RANDOM_ACCESS is used.  Ticket #2699. */
+  //dwFlagsAndAttributes |= FILE_FLAG_RANDOM_ACCESS;
+  if( isNT() ){
+    h = CreateFileW((WCHAR*)zConverted,
+       dwDesiredAccess,
+       dwShareMode,
+       NULL,
+       dwCreationDisposition,
+       dwFlagsAndAttributes,
+       NULL
+    );
+  }else{
+    h = CreateFileA((char*)zConverted,
+       dwDesiredAccess,
+       dwShareMode,
+       NULL,
+       dwCreationDisposition,
+       dwFlagsAndAttributes,
+       NULL
+    );
+  }
+  if( h==INVALID_HANDLE_VALUE ){
+    free(zConverted);
+    if( flags & SQLITE_OPEN_READWRITE ){
+      return winOpen(0, zName, id, 
+             ((flags|SQLITE_OPEN_READONLY)&~SQLITE_OPEN_READWRITE), pOutFlags);
+    }else{
+      return SQLITE_CANTOPEN;
+    }
+  }
+  if( pOutFlags ){
+    if( flags & SQLITE_OPEN_READWRITE ){
+      *pOutFlags = SQLITE_OPEN_READWRITE;
+    }else{
+      *pOutFlags = SQLITE_OPEN_READONLY;
+    }
+  }
+  memset(pFile, 0, sizeof(*pFile));
+  pFile->pMethod = &winIoMethod;
+  pFile->h = h;
+#if SQLITE_OS_WINCE
+  if( (flags & (SQLITE_OPEN_READWRITE|SQLITE_OPEN_MAIN_DB)) ==
+               (SQLITE_OPEN_READWRITE|SQLITE_OPEN_MAIN_DB)
+       && !winceCreateLock(zName, pFile)
+  ){
+    CloseHandle(h);
+    free(zConverted);
+    return SQLITE_CANTOPEN;
+  }
+  if( isTemp ){
+    pFile->zDeleteOnClose = zConverted;
+  }else
+#endif
+  {
+    free(zConverted);
+  }
+  OpenCounter(+1);
+  return SQLITE_OK;
+}
+
+int sqlite3_vista_init(void){
+  static sqlite3_vfs winVfs = {
+    1,                 /* iVersion */
+    sizeof(winFile),   /* szOsFile */
+    MAX_PATH,          /* mxPathname */
+    0,                 /* pNext */
+    "win32",           /* zName */
+    0,                 /* pAppData */
+ 
+    winOpenVista,      /* xOpen */
+    winDelete,         /* xDelete */
+    winAccess,         /* xAccess */
+    winFullPathname,   /* xFullPathname */
+    winDlOpen,         /* xDlOpen */
+    winDlError,        /* xDlError */
+    winDlSym,          /* xDlSym */
+    winDlClose,        /* xDlClose */
+    winRandomness,     /* xRandomness */
+    winSleep,          /* xSleep */
+    winCurrentTime,    /* xCurrentTime */
+    winGetLastError    /* xGetLastError */
+  };
+  sqlite3_vfs_register(&winVfs, 1);
+  return SQLITE_OK; 
+}
 
 int SetCompression(const wchar_t *pwszFilename, unsigned short ufLevel)
 {
@@ -83,6 +237,23 @@ __declspec(dllexport) int WINAPI sqlite3_compressfile(const wchar_t *pwszFilenam
 __declspec(dllexport) int WINAPI sqlite3_decompressfile(const wchar_t *pwszFilename)
 {
   return SetCompression(pwszFilename, COMPRESSION_FORMAT_NONE);
+}
+
+__declspec(dllexport) int WINAPI sqlite3_initialize_interop()
+{
+  int ret = sqlite3_initialize();
+  if (ret == SQLITE_OK)
+  {
+    // Override Vista and abov OS's so they use our hack open() function
+    OSVERSIONINFO osi;
+    osi.dwOSVersionInfoSize = sizeof(osi);
+    if (GetVersionEx(&osi))
+    {
+      if (osi.dwMajorVersion > 5)
+        ret = sqlite3_vista_init();
+    }
+  }
+  return ret;
 }
 
 /*

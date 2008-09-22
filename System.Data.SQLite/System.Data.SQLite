@@ -4,88 +4,74 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AC139952-261A-4463-B6FA-AEBC25283A66}</ProjectGuid>
+    <ProjectGuid>{AC139951-261A-4463-B6FA-AEBC25283A66}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Data.SQLite</RootNamespace>
     <AssemblyName>System.Data.SQLite</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>WindowsCE</PlatformFamilyName>
+    <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
+    <OSVersion>5.00</OSVersion>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FormFactorID>
+    </FormFactorID>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>System.Data.SQLite.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>System.Data.SQLite.CF.snk</AssemblyOriginatorKeyFile>
+    <DeployDirSuffix>testce</DeployDirSuffix>
+    <DeployDirPrefix>%25CSIDL_PROGRAM_FILES%25</DeployDirPrefix>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
+    <NativePlatformName>Windows CE</NativePlatformName>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;USE_INTEROP_DLL</DefineConstants>
+    <OutputPath>..\bin\CompactFramework\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;PocketPC;PLATFORM_COMPACTFRAMEWORK;USE_INTEROP_DLL</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>
     </DocumentationFile>
     <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
-    <FileAlignment>512</FileAlignment>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
     <DebugType>none</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\CompactFramework\</OutputPath>
+    <DefineConstants>PocketPC;PLATFORM_COMPACTFRAMEWORK</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <FileAlignment>512</FileAlignment>
-    <DocumentationFile>..\bin\System.Data.SQLite.XML</DocumentationFile>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'StockDebug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\bin\ManagedOnly\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SQLITE_STANDARD</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'StockRelease|AnyCPU' ">
-    <OutputPath>..\bin\ManagedOnly\</OutputPath>
-    <DocumentationFile>..\bin\ManagedOnly\System.Data.SQLite.XML</DocumentationFile>
-    <Optimize>true</Optimize>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <ErrorReport>prompt</ErrorReport>
-    <DefineConstants>SQLITE_STANDARD</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="LINQ\SQLiteConnection_Linq.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="LINQ\SQLiteFactory_Linq.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SQLite3.cs" />
     <Compile Include="SQLite3_UTF16.cs" />
     <Compile Include="SQLiteBase.cs" />
@@ -105,7 +91,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="SQLiteDataReader.cs" />
-    <Compile Include="SQLiteEnlistment.cs" />
     <Compile Include="SQLiteException.cs" />
     <Compile Include="SQLiteFactory.cs" />
     <Compile Include="SQLiteFunction.cs" />
@@ -140,22 +125,20 @@
     <None Include="MetaDataCollections.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SQLiteCommand.bmp" />
-    <EmbeddedResource Include="SQLiteConnection.bmp" />
-    <EmbeddedResource Include="SQLiteDataAdapter.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)bin\tools\mergebin.exe" /p:"$(TargetPath)" &gt;"$(SolutionDir)SQLite.Interop\merge_full.h"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v3.5'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
 </Project>

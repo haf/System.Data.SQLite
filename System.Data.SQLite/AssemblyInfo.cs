@@ -25,7 +25,6 @@ using System.Runtime.ConstrainedExecution;
 [assembly: AssemblyFlags(AssemblyNameFlags.Retargetable)]
 #endif
 
-
 //  Setting ComVisible to false makes the types in this assembly not visible 
 //  to COM componenets.  If you need to access a type in this assembly from 
 //  COM, set the ComVisible attribute to true on that type.
@@ -48,7 +47,7 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.58.0")]
+[assembly: AssemblyVersion("1.0.59.0")]
 #if !PLATFORM_COMPACTFRAMEWORK
-[assembly: AssemblyFileVersion("1.0.58.0")]
+[assembly: AssemblyFileVersion("1.0.59.0")]
 #endif

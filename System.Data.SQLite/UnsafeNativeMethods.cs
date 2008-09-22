@@ -17,11 +17,19 @@ namespace System.Data.SQLite
   internal static class UnsafeNativeMethods
   {
 #if !SQLITE_STANDARD
+
 #if !USE_INTEROP_DLL
+
+#if !PLATFORM_COMPACTFRAMEWORK
     private const string SQLITE_DLL = "System.Data.SQLite.DLL";
 #else
+    internal const string SQLITE_DLL = "SQLite.Interop.059.DLL";
+#endif // PLATFORM_COMPACTFRAMEWORK
+
+#else
     private const string SQLITE_DLL = "SQLite.Interop.DLL";
-#endif
+#endif // USE_INTEROP_DLL
+
 #else
     private const string SQLITE_DLL = "sqlite3";
 #endif
@@ -110,6 +118,10 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_reset_interop(IntPtr stmt);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_initialize_interop();
+
 #endif
 
     #endregion

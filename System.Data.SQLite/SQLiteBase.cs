@@ -18,6 +18,13 @@ namespace System.Data.SQLite
   /// </summary>
   internal abstract class SQLiteBase : SQLiteConvert, IDisposable
   {
+    static SQLiteBase()
+    {
+#if !SQLITE_STANDARD
+      UnsafeNativeMethods.sqlite3_initialize_interop();
+#endif
+    }
+
     internal SQLiteBase(SQLiteDateFormats fmt)
       : base(fmt) { }
 

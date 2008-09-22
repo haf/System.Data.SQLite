@@ -154,13 +154,12 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
-				Description="Fixing .bss section"
-				CommandLine="..\bin\tools\mergebin.exe /B:&quot;$(IntDir)\interop.obj&quot;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
-				OutputFile="../bin/CompactFramework/System.Data.SQLite.DLL"
+				OutputFile="../bin/CompactFramework/$(InputName).059.DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -188,8 +187,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Merging binaries ..."
-				CommandLine="..\bin\tools\mergebin.exe /S:.clr ..\System.Data.SQLite\bin\CompactFramework\$(TargetFileName) &quot;$(TargetPath)&quot;&#x0D;&#x0A;sn -Ra &quot;$(TargetPath)&quot; ..\System.Data.SQLite\System.Data.SQLite.CF.snk&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
@@ -499,7 +497,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				OutputFile="../bin/CompactFramework/$(InputName).DLL"
+				OutputFile="../bin/CompactFramework/$(InputName).059.DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -827,7 +825,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				OutputFile="../bin/CompactFramework/$(InputName).DLL"
+				OutputFile="../bin/CompactFramework/sqlite3.dll"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -857,7 +855,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory=""
+				RemoteDirectory="\Program Files\testce"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
