@@ -23,7 +23,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     private const string SQLITE_DLL = "System.Data.SQLite.DLL";
 #else
-    internal const string SQLITE_DLL = "SQLite.Interop.059.DLL";
+    internal const string SQLITE_DLL = "SQLite.Interop.060.DLL";
 #endif // PLATFORM_COMPACTFRAMEWORK
 
 #else
@@ -118,9 +118,6 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_reset_interop(IntPtr stmt);
-
-    [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_initialize_interop();
 
 #endif
 

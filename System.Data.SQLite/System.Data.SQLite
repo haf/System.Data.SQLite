@@ -34,7 +34,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\bin\CompactFramework\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;PocketPC;PLATFORM_COMPACTFRAMEWORK;USE_INTEROP_DLL</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;PocketPC;PLATFORM_COMPACTFRAMEWORK</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
