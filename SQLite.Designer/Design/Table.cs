@@ -94,6 +94,7 @@ namespace SQLite.Designer.Design
         {
           _exists = true;
           _origSql = tbl.Rows[0]["TABLE_DEFINITION"].ToString().Trim().TrimEnd(';');
+          _oldname = Name;
         }
         else
         {

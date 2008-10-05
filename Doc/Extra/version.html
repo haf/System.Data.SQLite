@@ -55,6 +55,21 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.60.0 - October 3, 2008</b></p>
+    <ul>
+      <li>Throw a NotSupported exception in the EF Sql Gen code instead of parsing 
+        illegal SQL during an update/insert/delete where no primary key is defined.</li>
+      <li>Fixed the Compact Framework interop library.&nbsp; Since the linker flag 
+        /subsystem had no version specified, it was causing a problem for many CE-based 
+        platforms.</li>
+      <li>Incorporated SQLite patch for ticket
+        <a href="http://www.sqlite.org/cvstrac/tktview?tn=3387">#3387</a> and reverted 
+        out the vfs override code I added in build 59 to work around this problem.</li>
+      <li>Fixed a designer issue when creating a new table from the Server Explorer.&nbsp; 
+        After initially saving it, if you then continued to edit it and tried to save it 
+        again, it would generate the change SQL using the old temporary table name 
+        rather than the new name.</li>
+    </ul>
     <p><b>1.0.59.0 - September 22, 2008</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.3.&nbsp; Solves 
