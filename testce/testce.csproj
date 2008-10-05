@@ -11,8 +11,8 @@
     <AssemblyName>testce</AssemblyName>
     <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
-    <PlatformID>b2c48bd2-963d-4549-9169-1fa021dce484</PlatformID>
-    <OSVersion>5.02</OSVersion>
+    <PlatformID>3C41C503-53EF-4c2a-8DD4-A8217CAD115E</PlatformID>
+    <OSVersion>4.20</OSVersion>
     <DeployDirSuffix>testce</DeployDirSuffix>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FormFactorID>
@@ -23,7 +23,7 @@
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
-    <NativePlatformName>Windows Mobile 6 Professional SDK</NativePlatformName>
+    <NativePlatformName>Pocket PC 2003</NativePlatformName>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
   </PropertyGroup>
@@ -63,6 +63,7 @@
     </Reference>
     <Reference Include="System.Data.SQLite, Version=1.0.47.0, Culture=neutral, PublicKeyToken=1fdb50b1b62b4c84, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Drawing">
       <Private>False</Private>

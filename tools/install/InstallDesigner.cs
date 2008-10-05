@@ -295,6 +295,21 @@ namespace install
               }
             }
           }
+
+          for (int n = 0; n < compactFrameworks.Length; n++)
+          {
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v3.5.0.0\\{0}\\AssemblyFoldersEx", compactFrameworks[n]), true))
+            {
+
+              if (key != null)
+              {
+                using (RegistryKey subkey = key.CreateSubKey("SQLite", RegistryKeyPermissionCheck.ReadWriteSubTree))
+                {
+                  subkey.SetValue(null, path);
+                }
+              }
+            }
+          }
         }
 
         for (int n = 0; n < 2; n++)
@@ -358,16 +373,20 @@ namespace install
         {
           Registry.LocalMachine.DeleteSubKey("Software\\Microsoft\\.NETFramework\\v2.0.50727\\AssemblyFoldersEx\\SQLite");
 
-          for (int n = 0; n < compactFrameworks.Length; n++)
+          string[] versions = { "v2.0.0.0", "v3.5.0.0" };
+          for (int x = 0; x < versions.Length; x++)
           {
-            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\DataProviders", compactFrameworks[n]), true))
+            for (int n = 0; n < compactFrameworks.Length; n++)
             {
-              try
+              using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\{1}\\{0}\\DataProviders", compactFrameworks[n], versions[x]), true))
               {
-                if (key != null) key.DeleteSubKey(standardDataProviderGuid.ToString("B"));
-              }
-              catch
-              {
+                try
+                {
+                  if (key != null) key.DeleteSubKey(standardDataProviderGuid.ToString("B"));
+                }
+                catch
+                {
+                }
               }
             }
           }
@@ -475,8 +494,8 @@ namespace install
           finally
           {
             File.Delete(tempPath);
-            if (File.Exists(Path.GetFullPath("System.Data.SQLite.Linq.DLL")) == true)
-              AssemblyCache.InstallAssembly(Path.GetFullPath("System.Data.SQLite.Linq.DLL"), null, AssemblyCommitFlags.Default);
+            if (File.Exists(Path.GetFullPath("..\\System.Data.SQLite.Linq.DLL")) == true)
+              AssemblyCache.InstallAssembly(Path.GetFullPath("..\\System.Data.SQLite.Linq.DLL"), null, AssemblyCommitFlags.Default);
 
             AssemblyCache.InstallAssembly(Path.GetFullPath("SQLite.Designer.DLL"), null, AssemblyCommitFlags.Default);
             AssemblyCache.InstallAssembly(SQLiteLocation, null, AssemblyCommitFlags.Default);
@@ -636,17 +655,22 @@ namespace install
       //{
       //}
 
-      for (int n = 0; n < compactFrameworks.Length; n++)
+      string[] versions = { "v2.0.0.0", "v3.5.0.0" };
+
+      for (int x = 0; x < versions.Length; x++)
       {
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\v2.0.0.0\\{0}\\DataProviders", compactFrameworks[n]), true))
+        for (int n = 0; n < compactFrameworks.Length; n++)
         {
-          if (key != null)
+          using (RegistryKey key = Registry.LocalMachine.CreateSubKey(String.Format("Software\\Microsoft\\.NETCompactFramework\\{1}\\{0}\\DataProviders", compactFrameworks[n], versions[x])))
           {
-            using (RegistryKey subkey = key.CreateSubKey(standardDataProviderGuid.ToString("B"), RegistryKeyPermissionCheck.ReadWriteSubTree))
+            if (key != null)
             {
-              subkey.SetValue(null, ".NET Framework Data Provider for SQLite");
-              subkey.SetValue("InvariantName", "System.Data.SQLite");
-              subkey.SetValue("RuntimeAssembly", "System.Data.SQLite.DLL");
+              using (RegistryKey subkey = key.CreateSubKey(standardDataProviderGuid.ToString("B"), RegistryKeyPermissionCheck.ReadWriteSubTree))
+              {
+                subkey.SetValue(null, ".NET Framework Data Provider for SQLite");
+                subkey.SetValue("InvariantName", "System.Data.SQLite");
+                subkey.SetValue("RuntimeAssembly", "System.Data.SQLite.DLL");
+              }
             }
           }
         }
