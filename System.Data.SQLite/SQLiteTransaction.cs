@@ -100,10 +100,13 @@ namespace System.Data.SQLite
     {
       if (disposing)
       {
-        if (IsValid(false))
-          Rollback();
+        lock (this)
+        {
+          if (IsValid(false))
+            Rollback();
 
-        _cnn = null;
+          _cnn = null;
+        }
       }
       base.Dispose(disposing);
     }

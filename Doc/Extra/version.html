@@ -55,6 +55,13 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.61.0 - April 28, 2009</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.6.13.  The new backup features are as yet unimplemented in the provider, but will be forthcoming in a subsequent release</li>
+      <li>Fixed the default-value lookups in SQLiteConnectionStringBuilder when accessing properties</li>
+      <li>Lock the SQLiteTransaction object during dispose to avoid potential race condition during cleanup</li>
+      <li>Fixed SQLiteDataReader.GetDecimal() processing and parsing of decimal values for cases when SQLite returns things like "1.0e-05" instead of "0.0001"</li>
+    </ul>
     <p><b>1.0.60.0 - October 3, 2008</b></p>
     <ul>
       <li>Throw a NotSupported exception in the EF Sql Gen code instead of parsing 

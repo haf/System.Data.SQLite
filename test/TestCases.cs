@@ -1041,6 +1041,16 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     }
 
     [Test]
+    internal void ConnectionStringBuilder()
+    {
+      DbConnectionStringBuilder builder = _fact.CreateConnectionStringBuilder();
+      if (builder is SQLiteConnectionStringBuilder)
+      {
+        bool pool = ((SQLiteConnectionStringBuilder)builder).Pooling;
+      }
+    }
+
+    [Test]
     internal void LeakyCommands()
     {
       for (int n = 0; n < 100000; n++)
@@ -1583,6 +1593,26 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           if (b[1000] != 3) throw new Exception("Binary value non-match byte 1000");
           if (b[2000] != 4) throw new Exception("Binary value non-match byte 2000");
           if (b[3000] != 5) throw new Exception("Binary value non-match byte 3000");
+        }
+      }
+    }
+
+    [Test]
+    internal void DecimalTest()
+    {
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        cmd.CommandText = "CREATE TEMP TABLE DECTEST(x DECIMAL)";
+        cmd.ExecuteNonQuery();
+        cmd.CommandText = "INSERT INTO DECTEST(x) VALUES(0.00001)";
+        cmd.ExecuteNonQuery();
+        
+        cmd.CommandText = "SELECT * FROM DECTEST";
+        using (DbDataReader reader = cmd.ExecuteReader())
+        {
+          reader.Read();
+          decimal d = (decimal)reader.GetValue(0);
+          d = reader.GetDecimal(0);
         }
       }
     }

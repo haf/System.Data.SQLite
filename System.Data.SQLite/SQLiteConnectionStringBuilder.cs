@@ -55,7 +55,7 @@ namespace System.Data.SQLite
     /// <param name="cnnString">The connection string to assign</param>
     private void Initialize(string cnnString)
     {
-      _properties = new Hashtable();
+      _properties = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
       try
       {
         base.GetProperties(_properties);

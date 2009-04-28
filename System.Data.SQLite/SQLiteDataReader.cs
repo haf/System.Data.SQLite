@@ -402,7 +402,7 @@ namespace System.Data.SQLite
         return _keyInfo.GetDecimal(i - VisibleFieldCount);
 
       VerifyType(i, DbType.Decimal);
-      return Convert.ToDecimal(_activeStatement._sql.GetText(_activeStatement, i), CultureInfo.InvariantCulture);
+      return Decimal.Parse(_activeStatement._sql.GetText(_activeStatement, i), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
     }
 
     /// <summary>

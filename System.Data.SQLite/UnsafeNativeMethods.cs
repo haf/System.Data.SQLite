@@ -23,7 +23,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     private const string SQLITE_DLL = "System.Data.SQLite.DLL";
 #else
-    internal const string SQLITE_DLL = "SQLite.Interop.060.DLL";
+    internal const string SQLITE_DLL = "SQLite.Interop.061.DLL";
 #endif // PLATFORM_COMPACTFRAMEWORK
 
 #else

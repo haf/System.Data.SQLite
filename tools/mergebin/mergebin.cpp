@@ -494,6 +494,8 @@ void MergeModules(LPCTSTR pszAssembly, LPCTSTR pszNative, LPCTSTR pszSection, DW
   // Fixup the DLL entrypoints
   if (pNT)
   {
+    pNT->OptionalHeader.MajorOperatingSystemVersion = 4;
+    pNT->OptionalHeader.MajorSubsystemVersion = 4;
     if (pNT->OptionalHeader.AddressOfEntryPoint != dwNewEntrypoint)
     {
       pCor->EntryPointToken = pNT->OptionalHeader.AddressOfEntryPoint;
