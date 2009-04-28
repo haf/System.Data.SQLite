@@ -1798,7 +1798,7 @@ int RegisterExtensionFunctions(sqlite3 *db){
       struct FuncDef *pFunc = sqlite3FindFunction(db, aFuncs[i].zName, 
           strlen(aFuncs[i].zName), aFuncs[i].nArg, aFuncs[i].eTextRep, 0);
       if( pFunc && aFuncs[i].needCollSeq ){
-        pFunc->needCollSeq = 1;
+        pFunc->flags |= SQLITE_FUNC_NEEDCOLL;
       }
     }
 #endif

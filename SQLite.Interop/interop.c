@@ -313,7 +313,7 @@ __declspec(dllexport) int WINAPI sqlite3_create_function_interop(sqlite3 *psql, 
       FuncDef *pFunc = sqlite3FindFunction(psql, zFunctionName, strlen(zFunctionName), nArg, eTextRep, 0);
       if( pFunc )
       {
-        pFunc->needCollSeq = 1;
+        pFunc->flags |= SQLITE_FUNC_NEEDCOLL;
       }
     }
   }
@@ -357,7 +357,7 @@ __declspec(dllexport) void WINAPI sqlite3_result_int64_interop(sqlite3_context *
 
 __declspec(dllexport) int WINAPI sqlite3_context_collcompare(sqlite3_context *ctx, const void *p1, int p1len, const void *p2, int p2len)
 {
-  if (ctx->pFunc->needCollSeq == 0) return 2;
+  if ((ctx->pFunc->flags & SQLITE_FUNC_NEEDCOLL) == 0) return 2;
   return ctx->pColl->xCmp(ctx->pColl->pUser, p1len, p1, p2len, p2);
 }
 
@@ -368,7 +368,7 @@ __declspec(dllexport) const char * WINAPI sqlite3_context_collseq(sqlite3_contex
   *plen = 0;
   *enc = 0;
 
-  if (ctx->pFunc->needCollSeq == 0) return NULL;
+  if ((ctx->pFunc->flags & SQLITE_FUNC_NEEDCOLL) == 0) return NULL;
 
   if (pColl)
   {
@@ -488,7 +488,7 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
   Vdbe *p = (Vdbe *)pstmt;
   sqlite3 *db = (p == NULL) ? NULL : p->db;
   int rc = 0;
-  Cursor *pC;
+  VdbeCursor *pC;
   int ret = 0;
 
   sqlite3_mutex_enter(db->mutex);
