@@ -16,10 +16,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop", "SQLite.In
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testce", "testce\testce.csproj", "{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}"
-	ProjectSection(ProjectDependencies) = postProject
-		{AC139951-261A-4463-B6FA-AEBC25283A66} = {AC139951-261A-4463-B6FA-AEBC25283A66}
-		{10B51CE8-A838-44DE-BD82-B658F0296F80} = {10B51CE8-A838-44DE-BD82-B658F0296F80}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite - Full", "System.Data.SQLite\System.Data.SQLite - Full.csproj", "{AC139952-261A-4463-B6FA-AEBC25283A66}"
 EndProject

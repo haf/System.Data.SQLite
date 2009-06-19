@@ -10,6 +10,10 @@ namespace test
 {
   internal class TestCases : TestCaseBase
   {
+    internal TestCases()
+    {
+    }
+
     internal TestCases(DbProviderFactory factory, string connectionString)
       : base(factory, connectionString)
     {
@@ -893,10 +897,9 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     }
 
     [Test]
-    internal string IterationTest()
+    internal string IterationTest1()
     {
       CheckSQLite();
-      StringBuilder builder = new StringBuilder();
       using (DbCommand cmd = _cnn.CreateCommand())
       {
         int dtStart;
@@ -917,7 +920,20 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           }
           dtEnd = Environment.TickCount;
         }
-        builder.AppendLine(String.Format("User Function iteration of {0} records in {1} ms", nCount, (dtEnd - dtStart)));
+        return String.Format("User Function iteration of {0} records in {1} ms", nCount, (dtEnd - dtStart));
+      }
+    }
+
+    [Test]
+    internal string IterationTest2()
+    {
+      StringBuilder builder = new StringBuilder();
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        int dtStart;
+        int dtEnd;
+        int nCount;
+        long n;
 
         cmd.CommandText = "SELECT ID FROM TestCase";
         cmd.Prepare();
@@ -932,7 +948,20 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           }
           dtEnd = Environment.TickCount;
         }
-        builder.AppendLine(String.Format("Raw iteration of {0} records in {1} ms", nCount, (dtEnd - dtStart)));
+        return String.Format("Raw iteration of {0} records in {1} ms", nCount, (dtEnd - dtStart));
+      }
+    }
+
+    [Test]
+    internal string IterationTest3()
+    {
+      StringBuilder builder = new StringBuilder();
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        int dtStart;
+        int dtEnd;
+        int nCount;
+        long n;
 
         cmd.CommandText = "SELECT ABS(ID) FROM TestCase";
         cmd.Prepare();
@@ -947,96 +976,88 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           }
           dtEnd = Environment.TickCount;
         }
-        builder.Append(String.Format("Intrinsic Function iteration of {0} records in {1} ms", nCount, (dtEnd - dtStart)));
+        return String.Format("Intrinsic Function iteration of {0} records in {1} ms", nCount, (dtEnd - dtStart));
       }
-      return builder.ToString();
     }
 
     [Test(Sequence=21)]
     internal void KeyInfoTest()
     {
-      try
+      using (DbCommand cmd = _cnn.CreateCommand())
       {
-        using (DbCommand cmd = _cnn.CreateCommand())
+        try
         {
-          try
-          {
-            // First test against integer primary key (optimized) keyinfo fetch
-            cmd.CommandText = "Create table keyinfotest (id integer primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
-            cmd.ExecuteNonQuery();
-
-            cmd.CommandText = "Select * from keyinfotest";
-            using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
-            {
-              using (DataTable tbl = reader.GetSchemaTable())
-              {
-                if (tbl.Rows.Count != 3) throw new Exception("Wrong number of columns returned");
-              }
-            }
-
-            cmd.CommandText = "SELECT MyValue FROM keyinfotest";
-            using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
-            {
-              using (DataTable tbl = reader.GetSchemaTable())
-              {
-                if (tbl.Rows.Count != 2) throw new Exception("Wrong number of columns returned");
-              }
-            }
-          }
-          finally
-          {
-          }
-
-          cmd.CommandText = "DROP TABLE keyinfotest";
+          // First test against integer primary key (optimized) keyinfo fetch
+          cmd.CommandText = "Create table keyinfotest (id integer primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
           cmd.ExecuteNonQuery();
 
-          try
+          cmd.CommandText = "Select * from keyinfotest";
+          using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
           {
-            // Now test against non-integer primary key (unoptimized) subquery keyinfo fetch
-            cmd.CommandText = "Create table keyinfotest (id char primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
-            cmd.ExecuteNonQuery();
-
-            cmd.CommandText = "SELECT MyValue FROM keyinfotest";
-            using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+            using (DataTable tbl = reader.GetSchemaTable())
             {
-              using (DataTable tbl = reader.GetSchemaTable())
-              {
-                if (tbl.Rows.Count != 2) throw new Exception("Wrong number of columns returned");
-              }
-            }
-
-            cmd.CommandText = "Select * from keyinfotest";
-            using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
-            {
-              using (DataTable tbl = reader.GetSchemaTable())
-              {
-                if (tbl.Rows.Count != 3) throw new Exception("Wrong number of columns returned");
-              }
-            }
-
-            // Make sure commandbuilder can generate an update command with the correct parameter count
-            using (DbDataAdapter adp = _fact.CreateDataAdapter())
-            using (DbCommandBuilder builder = _fact.CreateCommandBuilder())
-            {
-              adp.SelectCommand = cmd;
-              builder.DataAdapter = adp;
-              builder.ConflictOption = ConflictOption.OverwriteChanges;
-
-              using (DbCommand updatecmd = builder.GetUpdateCommand())
-              {
-                if (updatecmd.Parameters.Count != 4)
-                  throw new Exception("Wrong number of parameters in update command!");
-              }
+              if (tbl.Rows.Count != 3) throw new Exception("Wrong number of columns returned");
             }
           }
-          finally
+
+          cmd.CommandText = "SELECT MyValue FROM keyinfotest";
+          using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
           {
+            using (DataTable tbl = reader.GetSchemaTable())
+            {
+              if (tbl.Rows.Count != 2) throw new Exception("Wrong number of columns returned");
+            }
           }
         }
-      }
-      catch (Exception e)
-      {
-        Console.WriteLine(e.Message);
+        finally
+        {
+        }
+
+        cmd.CommandText = "DROP TABLE keyinfotest";
+        cmd.ExecuteNonQuery();
+
+        try
+        {
+          // Now test against non-integer primary key (unoptimized) subquery keyinfo fetch
+          cmd.CommandText = "Create table keyinfotest (id char primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
+          cmd.ExecuteNonQuery();
+
+          cmd.CommandText = "SELECT MyValue FROM keyinfotest";
+          using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+          {
+            using (DataTable tbl = reader.GetSchemaTable())
+            {
+              if (tbl.Rows.Count != 2) throw new Exception("Wrong number of columns returned");
+            }
+          }
+
+          cmd.CommandText = "Select * from keyinfotest";
+          using (DbDataReader reader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SchemaOnly))
+          {
+            using (DataTable tbl = reader.GetSchemaTable())
+            {
+              if (tbl.Rows.Count != 3) throw new Exception("Wrong number of columns returned");
+            }
+          }
+
+          // Make sure commandbuilder can generate an update command with the correct parameter count
+          using (DbDataAdapter adp = _fact.CreateDataAdapter())
+          using (DbCommandBuilder builder = _fact.CreateCommandBuilder())
+          {
+            adp.SelectCommand = cmd;
+            builder.DataAdapter = adp;
+            builder.ConflictOption = ConflictOption.OverwriteChanges;
+
+            using (DbCommand updatecmd = builder.GetUpdateCommand())
+            {
+              if (updatecmd.Parameters.Count != 4)
+                throw new Exception("Wrong number of parameters in update command!");
+            }
+          }
+        }
+        finally
+        {
+        }
       }
     }
 
@@ -1166,7 +1187,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         arr[n].t.Start(arr[n]);
       }
 
-      System.Threading.Thread.CurrentThread.Join(8000);
+      System.Threading.Thread.Sleep(8000);
       bool failed = false;
       Exception e = null;
       for (int n = 0; n < arr.Length; n++)
@@ -1510,11 +1531,9 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     /// </summary>
     /// <returns></returns>
     [Test]
-    internal string UserFunction()
+    internal string UserFunction1()
     {
       CheckSQLite();
-
-      StringBuilder builder = new StringBuilder();
       using (DbCommand cmd = _cnn.CreateCommand())
       {
         int nTimes;
@@ -1528,7 +1547,18 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           cmd.ExecuteNonQuery();
           nTimes++;
         }
-        builder.AppendLine(String.Format("User (text)  command executed {0} times in 1 second.", nTimes));
+        return String.Format("User (text) command executed {0} times in 1 second.", nTimes);
+      }
+    }
+
+    [Test]
+    internal string UserFunction2()
+    {
+      CheckSQLite();
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        int nTimes;
+        int dtStart;
 
         nTimes = 0;
         cmd.CommandText = "SELECT Foo(10,11)";
@@ -1538,7 +1568,18 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           cmd.ExecuteNonQuery();
           nTimes++;
         }
-        builder.AppendLine(String.Format("UserFunction command executed {0} times in 1 second.", nTimes));
+        return String.Format("UserFunction command executed {0} times in 1 second.", nTimes);
+      }
+    }
+
+    [Test]
+    internal string UserFunction3()
+    {
+      CheckSQLite();
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        int nTimes;
+        int dtStart;
 
         nTimes = 0;
         cmd.CommandText = "SELECT ABS(1)";
@@ -1548,7 +1589,18 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           cmd.ExecuteNonQuery();
           nTimes++;
         }
-        builder.AppendLine(String.Format("Intrinsic    command executed {0} times in 1 second.", nTimes));
+        return String.Format("Intrinsic command executed {0} times in 1 second.", nTimes);
+      }
+    }
+
+    [Test]
+    internal string UserFunction4()
+    {
+      CheckSQLite();
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        int nTimes;
+        int dtStart;
 
         nTimes = 0;
         cmd.CommandText = "SELECT lower('FOO')";
@@ -1558,7 +1610,18 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           cmd.ExecuteNonQuery();
           nTimes++;
         }
-        builder.AppendLine(String.Format("Intrin (txt) command executed {0} times in 1 second.", nTimes));
+        return String.Format("Intrin (txt) command executed {0} times in 1 second.", nTimes);
+      }
+    }
+
+    [Test]
+    internal string UserFunction5()
+    {
+      CheckSQLite();
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        int nTimes;
+        int dtStart;
 
         nTimes = 0;
         cmd.CommandText = "SELECT 1";
@@ -1568,11 +1631,10 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           cmd.ExecuteNonQuery();
           nTimes++;
         }
-        builder.Append(String.Format("Raw Value    command executed {0} times in 1 second.", nTimes));
+        return String.Format("Raw Value command executed {0} times in 1 second.", nTimes);
       }
-      return builder.ToString();
     }
-
+    
     [Test(Sequence = 42)]
     internal void VerifyBinaryData()
     {
@@ -1806,10 +1868,29 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     protected DbProviderFactory _fact;
     protected DbConnection _cnn = null;
     protected DbConnectionStringBuilder _cnnstring;
+    protected Dictionary<string, bool> _tests = new Dictionary<string,bool>();
 
     public event TestCompletedEvent OnTestFinished;
     public event TestStartingEvent OnTestStarting;
     public event EventHandler OnAllTestsDone;
+
+    protected TestCaseBase()
+    {
+      SortedList<TestAttribute, System.Reflection.MethodInfo> items = new SortedList<TestAttribute, System.Reflection.MethodInfo>();
+      foreach (System.Reflection.MethodInfo mi in GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.InvokeMethod))
+      {
+        object[] att = mi.GetCustomAttributes(typeof(TestAttribute), false);
+        if (att.Length == 1)
+        {
+          items.Add((TestAttribute)att[0], mi);
+        }
+      }
+
+      foreach (KeyValuePair<TestAttribute, System.Reflection.MethodInfo> pair in items)
+      {
+        _tests.Add(pair.Value.Name, true);
+      }
+    }
 
     protected TestCaseBase(DbProviderFactory factory, string connectionString)
     {
@@ -1821,13 +1902,25 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       _cnn.Open();
     }
 
+    internal Dictionary<string, bool> Tests
+    {
+      get
+      {
+        return _tests;
+      }
+      set
+      {
+        _tests = value;
+      }
+    }
+
     internal void Run()
     {
       SortedList<TestAttribute, System.Reflection.MethodInfo> items = new SortedList<TestAttribute, System.Reflection.MethodInfo>();
       foreach (System.Reflection.MethodInfo mi in GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.InvokeMethod))
       {
         object[] att = mi.GetCustomAttributes(typeof(TestAttribute), false);
-        if (att.Length == 1)
+        if (att.Length == 1 && _tests[mi.Name] == true)
         {
           items.Add((TestAttribute)att[0], mi);
         }

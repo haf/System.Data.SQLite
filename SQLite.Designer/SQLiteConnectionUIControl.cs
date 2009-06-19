@@ -58,9 +58,13 @@ namespace SQLite.Designer
     {
       if (ConnectionProperties.Contains("data source"))
         fileTextBox.Text = ConnectionProperties["data source"] as string;
+      else
+        fileTextBox.Text = String.Empty;
 
       if (ConnectionProperties.Contains("password"))
         passwordTextBox.Text = ConnectionProperties["password"] as string;
+      else
+        passwordTextBox.Text = String.Empty;
     }
 
     #endregion

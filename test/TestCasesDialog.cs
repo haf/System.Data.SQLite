@@ -12,6 +12,7 @@ namespace test
   public partial class TestCasesDialog : Form
   {
     private TestCases _test;
+    private TestCases _testitems;
 
     public TestCasesDialog()
     {
@@ -31,12 +32,29 @@ namespace test
         }
       }
       _connectionString.Text = "Data Source=Test.db3;Pooling=true;FailIfMissing=false";
+
+      _testitems = new TestCases();
+      foreach (KeyValuePair<string, bool> pair in _testitems.Tests)
+      {
+        ToolStripMenuItem item = (ToolStripMenuItem)testMenu.DropDownItems.Add(pair.Key, null, new EventHandler(_tests_Clicked));
+        item.Checked = true;
+        item.CheckOnClick = true;
+      }
+    }
+
+    void _tests_Clicked(object sender, EventArgs e)
+    {
+      ToolStripMenuItem item = sender as ToolStripMenuItem;
+      if (item != null)
+        _testitems.Tests[item.Text] = item.Checked;
     }
 
     private void runButton_Click(object sender, EventArgs e)
     {
       DbProviderFactory factory = DbProviderFactories.GetFactory(_provider.SelectedItem.ToString());
       _test = new TestCases(factory, _connectionString.Text);
+      _test.Tests = _testitems.Tests;
+
       _test.OnTestStarting += new TestStartingEvent(_test_OnTestStarting);
       _test.OnTestFinished += new TestCompletedEvent(_test_OnTestFinished);
       _test.OnAllTestsDone += new EventHandler(_test_OnAllTestsDone);

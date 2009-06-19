@@ -55,6 +55,18 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.62.0 - June 20, 2009</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.6.15</li>
+      <li>Fixed the decimal reading bug in the SQLiteDataReader</li>
+      <li>Changed Join()&#39;s to Sleep()&#39;s in the statement retry code to prevent message 
+        pumping</li>
+      <li>Fixed a bad pointer conversion when retrieving blobs using GetBytes() in 
+        64-bit land</li>
+      <li>Several changes to the Test program that comes with the provider.&nbsp; Tests 
+        can now be individually disabled, and the test program can run against several 
+        provider back-ends</li>
+    </ul>
     <p><b>1.0.61.0 - April 28, 2009</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.13.  The new backup features are as yet unimplemented in the provider, but will be forthcoming in a subsequent release</li>

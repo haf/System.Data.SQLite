@@ -36,21 +36,24 @@
       this._provider = new System.Windows.Forms.ComboBox();
       this._connectionString = new System.Windows.Forms.ComboBox();
       this._grid = new System.Windows.Forms.DataGridView();
-      this.runButton = new System.Windows.Forms.Button();
       this.Test = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.Result = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.Information = new System.Windows.Forms.DataGridViewTextBoxColumn();
+      this.runButton = new System.Windows.Forms.Button();
+      this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+      this.testMenu = new System.Windows.Forms.ToolStripMenuItem();
       label1 = new System.Windows.Forms.Label();
       label2 = new System.Windows.Forms.Label();
       closeButton = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this._grid)).BeginInit();
+      this.menuStrip1.SuspendLayout();
       this.SuspendLayout();
       // 
       // label1
       // 
       label1.AutoSize = true;
-      label1.Location = new System.Drawing.Point(14, 16);
+      label1.Location = new System.Drawing.Point(14, 35);
       label1.Name = "label1";
       label1.Size = new System.Drawing.Size(46, 13);
       label1.TabIndex = 0;
@@ -59,7 +62,7 @@
       // label2
       // 
       label2.AutoSize = true;
-      label2.Location = new System.Drawing.Point(250, 16);
+      label2.Location = new System.Drawing.Point(250, 35);
       label2.Name = "label2";
       label2.Size = new System.Drawing.Size(91, 13);
       label2.TabIndex = 2;
@@ -69,7 +72,7 @@
       // 
       closeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      closeButton.Location = new System.Drawing.Point(534, 482);
+      closeButton.Location = new System.Drawing.Point(534, 514);
       closeButton.Name = "closeButton";
       closeButton.Size = new System.Drawing.Size(75, 23);
       closeButton.TabIndex = 5;
@@ -81,7 +84,7 @@
       // 
       this._provider.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this._provider.FormattingEnabled = true;
-      this._provider.Location = new System.Drawing.Point(66, 13);
+      this._provider.Location = new System.Drawing.Point(66, 32);
       this._provider.Name = "_provider";
       this._provider.Size = new System.Drawing.Size(178, 21);
       this._provider.TabIndex = 1;
@@ -91,7 +94,7 @@
       this._connectionString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                   | System.Windows.Forms.AnchorStyles.Right)));
       this._connectionString.FormattingEnabled = true;
-      this._connectionString.Location = new System.Drawing.Point(347, 13);
+      this._connectionString.Location = new System.Drawing.Point(347, 32);
       this._connectionString.Name = "_connectionString";
       this._connectionString.Size = new System.Drawing.Size(262, 21);
       this._connectionString.TabIndex = 3;
@@ -111,23 +114,12 @@
             this.Time,
             this.Information});
       this._grid.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-      this._grid.Location = new System.Drawing.Point(12, 41);
+      this._grid.Location = new System.Drawing.Point(12, 58);
       this._grid.Name = "_grid";
       this._grid.ReadOnly = true;
       this._grid.RowHeadersVisible = false;
-      this._grid.Size = new System.Drawing.Size(597, 435);
+      this._grid.Size = new System.Drawing.Size(597, 450);
       this._grid.TabIndex = 4;
-      // 
-      // runButton
-      // 
-      this.runButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-      this.runButton.Location = new System.Drawing.Point(453, 482);
-      this.runButton.Name = "runButton";
-      this.runButton.Size = new System.Drawing.Size(75, 23);
-      this.runButton.TabIndex = 6;
-      this.runButton.Text = "&Run";
-      this.runButton.UseVisualStyleBackColor = true;
-      this.runButton.Click += new System.EventHandler(this.runButton_Click);
       // 
       // Test
       // 
@@ -163,13 +155,41 @@
       this.Information.Name = "Information";
       this.Information.ReadOnly = true;
       // 
+      // runButton
+      // 
+      this.runButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+      this.runButton.Location = new System.Drawing.Point(453, 514);
+      this.runButton.Name = "runButton";
+      this.runButton.Size = new System.Drawing.Size(75, 23);
+      this.runButton.TabIndex = 6;
+      this.runButton.Text = "&Run";
+      this.runButton.UseVisualStyleBackColor = true;
+      this.runButton.Click += new System.EventHandler(this.runButton_Click);
+      // 
+      // menuStrip1
+      // 
+      this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.testMenu});
+      this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+      this.menuStrip1.Name = "menuStrip1";
+      this.menuStrip1.Size = new System.Drawing.Size(621, 24);
+      this.menuStrip1.TabIndex = 7;
+      this.menuStrip1.Text = "menuStrip1";
+      // 
+      // testMenu
+      // 
+      this.testMenu.Name = "testMenu";
+      this.testMenu.Size = new System.Drawing.Size(46, 20);
+      this.testMenu.Text = "&Tests";
+      // 
       // TestCasesDialog
       // 
       this.AcceptButton = this.runButton;
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.CancelButton = closeButton;
-      this.ClientSize = new System.Drawing.Size(621, 517);
+      this.ClientSize = new System.Drawing.Size(621, 549);
+      this.Controls.Add(this.menuStrip1);
       this.Controls.Add(this.runButton);
       this.Controls.Add(closeButton);
       this.Controls.Add(this._grid);
@@ -177,9 +197,12 @@
       this.Controls.Add(label2);
       this.Controls.Add(this._provider);
       this.Controls.Add(label1);
+      this.MainMenuStrip = this.menuStrip1;
       this.Name = "TestCasesDialog";
       this.Text = "ADO.NET Provider Test";
       ((System.ComponentModel.ISupportInitialize)(this._grid)).EndInit();
+      this.menuStrip1.ResumeLayout(false);
+      this.menuStrip1.PerformLayout();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -195,5 +218,7 @@
     private System.Windows.Forms.DataGridViewTextBoxColumn Result;
     private System.Windows.Forms.DataGridViewTextBoxColumn Time;
     private System.Windows.Forms.DataGridViewTextBoxColumn Information;
+    private System.Windows.Forms.MenuStrip menuStrip1;
+    private System.Windows.Forms.ToolStripMenuItem testMenu;
   }
 }
