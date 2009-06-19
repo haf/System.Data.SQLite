@@ -174,7 +174,7 @@ namespace System.Data.SQLite
             else
             {
               // Otherwise sleep for a random amount of time up to 150ms
-              System.Threading.Thread.CurrentThread.Join(rnd.Next(1, 150));
+              System.Threading.Thread.Sleep(rnd.Next(1, 150));
             }
           }
         }
@@ -315,7 +315,7 @@ namespace System.Data.SQLite
             else
             {
               // Otherwise sleep for a random amount of time up to 150ms
-              System.Threading.Thread.CurrentThread.Join(rnd.Next(1, 150));
+              System.Threading.Thread.Sleep(rnd.Next(1, 150));
             }
           }
         }
@@ -594,7 +594,7 @@ namespace System.Data.SQLite
       if (nCopied + nDataOffset > nlen) nCopied = nlen - nDataOffset;
 
       if (nCopied > 0)
-        Marshal.Copy((IntPtr)(ptr.ToInt32() + nDataOffset), bDest, nStart, nCopied);
+        Marshal.Copy((IntPtr)(ptr.ToInt64() + nDataOffset), bDest, nStart, nCopied);
       else nCopied = 0;
 
       return nCopied;
