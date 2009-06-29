@@ -47,6 +47,15 @@
             If the version numbers don't match between the connection and the pool, then the handle is discarded.
             </remarks>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteConnectionPool.ResizePool(System.Data.SQLite.SQLiteConnectionPool.Pool,System.Boolean)">
+            <summary>
+            We don't have to thread-lock anything in this function, because it's only called by other functions above
+            which already have a thread-safe lock.
+            </summary>
+            <param name="queue">The queue to resize</param>
+            <param name="forAdding">If a function intends to add to the pool, this is true, which forces the resize
+            to take one more than it needs from the pool</param>
+        </member>
         <member name="T:System.Data.SQLite.SQLiteConnectionPool.Pool">
             <summary>
             Keeps track of connections made on a specified file.  The PoolVersion dictates whether old objects get

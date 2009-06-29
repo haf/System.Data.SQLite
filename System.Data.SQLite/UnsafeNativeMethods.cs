@@ -11,7 +11,7 @@ namespace System.Data.SQLite
   using System.Security;
   using System.Runtime.InteropServices;
 
-#if !PLATFORM_COMPACTFRAMEWORK
+#if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
   [SuppressUnmanagedCodeSecurity]
 #endif
   internal static class UnsafeNativeMethods
@@ -23,7 +23,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     private const string SQLITE_DLL = "System.Data.SQLite.DLL";
 #else
-    internal const string SQLITE_DLL = "SQLite.Interop.062.DLL";
+    internal const string SQLITE_DLL = "SQLite.Interop.063.DLL";
 #endif // PLATFORM_COMPACTFRAMEWORK
 
 #else
@@ -320,19 +320,6 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_table_cursor(IntPtr stmt, int db, int tableRootPage);
-#endif
-
-    #endregion
-
-    // These are obsolete and will be removed in the future 
-    #region windows ntfs filesystem only
-
-#if !SQLITE_STANDARD
-    [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode, SetLastError = true)]
-    internal static extern int sqlite3_compressfile(string fileName);
-
-    [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode, SetLastError = true)]
-    internal static extern int sqlite3_decompressfile(string fileName);
 #endif
 
     #endregion
@@ -677,6 +664,13 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern int sqlite3_exec(IntPtr db, byte[] strSql, IntPtr pvCallback, IntPtr pvParam, out IntPtr errMsg);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_get_autocommit(IntPtr db);
 
     #endregion
   }

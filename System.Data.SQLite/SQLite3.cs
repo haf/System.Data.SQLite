@@ -85,6 +85,14 @@ namespace System.Data.SQLite
       }
     }
 
+    internal override bool AutoCommit
+    {
+      get
+      {
+        return IsAutocommit(_sql);
+      }
+    }
+
     internal override int Changes
     {
       get
@@ -520,6 +528,7 @@ namespace System.Data.SQLite
 #else
       dtLen = -1;
       csLen = -1;
+
       n = UnsafeNativeMethods.sqlite3_table_column_metadata(_sql, ToUTF8(dataBase), ToUTF8(table), ToUTF8(column), out dataTypePtr, out collSeqPtr, out nnotNull, out nprimaryKey, out nautoInc);
 #endif
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());

@@ -103,7 +103,7 @@ namespace System.Data.SQLite
         lock (this)
         {
           if (IsValid(false))
-            Rollback();
+            IssueRollback(_cnn);
 
           _cnn = null;
         }
@@ -125,10 +125,7 @@ namespace System.Data.SQLite
     public override void Rollback()
     {
       IsValid(true);
-
       IssueRollback(_cnn);
-
-      _cnn._transactionLevel = 0;
       _cnn = null;
     }
 
@@ -139,6 +136,7 @@ namespace System.Data.SQLite
         cmd.CommandText = "ROLLBACK";
         cmd.ExecuteNonQuery();
       }
+      cnn._transactionLevel = 0;
     }
 
     internal bool IsValid(bool throwError)
@@ -149,19 +147,21 @@ namespace System.Data.SQLite
         else return false;
       }
 
-      if (_cnn._transactionLevel == 0)
-      {
-        if (throwError == true) throw new SQLiteException((int)SQLiteErrorCode.Misuse, "No transaction is active on this connection");
-        else return false;
-      }
       if (_cnn._version != _version)
       {
-        if (throwError == true) throw new SQLiteException((int)SQLiteErrorCode.Misuse, "The connection was closed and re-opened, changes were rolled back");
+        if (throwError == true) throw new SQLiteException((int)SQLiteErrorCode.Misuse, "The connection was closed and re-opened, changes were already rolled back");
         else return false;
       }
       if (_cnn.State != ConnectionState.Open)
       {
         if (throwError == true) throw new SQLiteException((int)SQLiteErrorCode.Misuse, "Connection was closed");
+        else return false;
+      }
+
+      if (_cnn._transactionLevel == 0 || _cnn._sql.AutoCommit == true)
+      {
+        _cnn._transactionLevel = 0; // Make sure the transaction level is reset before returning
+        if (throwError == true) throw new SQLiteException((int)SQLiteErrorCode.Misuse, "No transaction is active on this connection");
         else return false;
       }
 

@@ -28,7 +28,7 @@ HCRYPTPROV g_hProvider = 0; // Global instance of the cryptographic provider
 // Needed for re-keying
 static void * sqlite3pager_get_codecarg(Pager *pPager)
 {
-  return (pPager->xCodec) ? pPager->pCodecArg: NULL;
+  return (pPager->xCodec) ? pPager->pCodec: NULL;
 }
 
 void sqlite3_activate_see(const char *info)
@@ -52,7 +52,7 @@ static BOOL InitializeProvider()
 // This function will automatically determine if the encryption algorithm requires
 // extra padding, and if it does, will create a temp buffer big enough to provide
 // space to hold it.
-static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK pExisting)
+static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, int pageSize, LPCRYPTBLOCK pExisting)
 {
   LPCRYPTBLOCK pBlock;
 
@@ -70,8 +70,11 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
     pBlock = pExisting;
   }
 
+  if (pageSize == -1)
+    pageSize = pager->pageSize;
+
   pBlock->pPager = pager;
-  pBlock->dwPageSize = (DWORD)pager->pageSize;
+  pBlock->dwPageSize = (DWORD)pageSize;
   pBlock->dwCryptSize = pBlock->dwPageSize;
 
   // Existing cryptblocks may have a buffer, if so, delete it
@@ -94,8 +97,9 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, LPCRYPTBLOCK 
 }
 
 // Destroy a cryptographic context and any buffers and keys allocated therein
-static void DestroyCryptBlock(LPCRYPTBLOCK pBlock)
+static void sqlite3CodecFree(LPVOID pv)
 {
+  LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)pv;
   // Destroy the read key if there is one
   if (pBlock->hReadKey)
   {
@@ -118,6 +122,14 @@ static void DestroyCryptBlock(LPCRYPTBLOCK pBlock)
   sqlite3_free(pBlock);
 }
 
+void sqlite3CodecSizeChange(void *pArg, int pageSize, int reservedSize)
+{
+  LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)pArg;
+
+  if (pBlock->dwPageSize != pageSize)
+      CreateCryptBlock(pBlock->hReadKey, pBlock->pPager, pageSize, pBlock);
+}
+
 // Encrypt/Decrypt functionality, called by pager.c
 void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
 {
@@ -127,16 +139,16 @@ void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
 
   if (!pBlock) return data;
 
-  // Make sure the page size for the pager is still the same as the page size
-  // for the cryptblock.  If the user changed it, we need to adjust!
-  if (nMode != 2)
-  {
-    if (pBlock->pPager->pageSize != pBlock->dwPageSize)
-    {
-      // Update the cryptblock to reflect the new page size
-      CreateCryptBlock(pBlock->hReadKey, pBlock->pPager, pBlock);
-    }
-  }
+  //// Make sure the page size for the pager is still the same as the page size
+  //// for the cryptblock.  If the user changed it, we need to adjust!
+  //if (nMode != 2)
+  //{
+  //  if (pBlock->pPager->pageSize != pBlock->dwPageSize)
+  //  {
+  //    // Update the cryptblock to reflect the new page size
+  //    CreateCryptBlock(pBlock->hReadKey, pBlock->pPager, pBlock);
+  //  }
+  //}
 
   switch(nMode)
   {
@@ -230,6 +242,7 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
 {
   int rc = SQLITE_ERROR;
   HCRYPTKEY hKey = 0;
+  Pager *p = sqlite3BtreePager(db->aDb[nDb].pBt);
 
   // No key specified, could mean either use the main db's encryption or no encryption
   if (!pKey || !nKeyLen)
@@ -242,7 +255,7 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
     {
       // Get the encryption block for the main database and attempt to duplicate the key
       // for use by the attached database
-      LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)sqlite3pager_get_codecarg(sqlite3BtreePager(db->aDb[0].pBt));
+      LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)sqlite3pager_get_codecarg(p);
 
       if (!pBlock) return SQLITE_OK; // Main database is not encrypted so neither will be any attached database
       if (!pBlock->hReadKey) return SQLITE_OK; // Not encrypted
@@ -264,10 +277,10 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
   // Create a new encryption block and assign the codec to the new attached database
   if (hKey)
   {
-    LPCRYPTBLOCK pBlock = CreateCryptBlock(hKey, sqlite3BtreePager(db->aDb[nDb].pBt), NULL);
-    sqlite3PagerSetCodec(sqlite3BtreePager(db->aDb[nDb].pBt), sqlite3Codec, pBlock);
-    db->aDb[nDb].pAux = pBlock;
-    db->aDb[nDb].xFreeAux = DestroyCryptBlock;
+    LPCRYPTBLOCK pBlock = CreateCryptBlock(hKey, p, -1, NULL);
+    sqlite3PagerSetCodec(p, sqlite3Codec, sqlite3CodecSizeChange, sqlite3CodecFree, pBlock);
+    //db->aDb[nDb].pAux = pBlock;
+    //db->aDb[nDb].xFreeAux = DestroyCryptBlock;
 
     rc = SQLITE_OK;
   }
@@ -287,13 +300,13 @@ void sqlite3CodecGetKey(sqlite3 *db, int nDb, void **ppKey, int *pnKeyLen)
 }
 
 // We do not attach this key to the temp store, only the main database.
-int sqlite3_key(sqlite3 *db, const void *pKey, int nKeySize)
+int sqlite3_key(sqlite3 *db, const unsigned char *pKey, int nKeySize)
 {
   return sqlite3CodecAttach(db, 0, pKey, nKeySize);
 }
 
 // Changes the encryption key for an existing database.
-int sqlite3_rekey(sqlite3 *db, const void *pKey, int nKeySize)
+int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySize)
 {
   Btree *pbt = db->aDb[0].pBt;
   Pager *p = sqlite3BtreePager(pbt);
@@ -313,14 +326,14 @@ int sqlite3_rekey(sqlite3 *db, const void *pKey, int nKeySize)
   // the same
   if (!pBlock) // Encrypt an unencrypted database
   {
-    pBlock = CreateCryptBlock(hKey, p, NULL);
+    pBlock = CreateCryptBlock(hKey, p, -1, NULL);
     if (!pBlock)
       return SQLITE_NOMEM;
 
     pBlock->hReadKey = 0; // Original database is not encrypted
-    sqlite3PagerSetCodec(sqlite3BtreePager(pbt), sqlite3Codec, pBlock);
-    db->aDb[0].pAux = pBlock;
-    db->aDb[0].xFreeAux = DestroyCryptBlock;
+    sqlite3PagerSetCodec(sqlite3BtreePager(pbt), sqlite3Codec, sqlite3CodecSizeChange, sqlite3CodecFree, pBlock);
+    //db->aDb[0].pAux = pBlock;
+    //db->aDb[0].xFreeAux = DestroyCryptBlock;
   }
   else // Change the writekey for an already-encrypted database
   {
@@ -389,10 +402,10 @@ int sqlite3_rekey(sqlite3 *db, const void *pKey, int nKeySize)
   // pager anymore.  Destroy the crypt block and remove the codec from the pager.
   if (!pBlock->hReadKey && !pBlock->hWriteKey)
   {
-    sqlite3PagerSetCodec(p, NULL, NULL);
-    db->aDb[0].pAux = NULL;
-    db->aDb[0].xFreeAux = NULL;
-    DestroyCryptBlock(pBlock);
+    sqlite3PagerSetCodec(p, NULL, NULL, NULL, NULL);
+    //db->aDb[0].pAux = NULL;
+    //db->aDb[0].xFreeAux = NULL;
+    sqlite3CodecFree(pBlock);
   }
 
   return rc;

@@ -31,7 +31,9 @@ namespace test
           if (prov == "System.Data.SQLite") _provider.SelectedItem = prov;
         }
       }
-      _connectionString.Text = "Data Source=Test.db3;Pooling=true;FailIfMissing=false";
+      _connectionString.Items.Add("Data Source=Test.db3;Pooling=true;FailIfMissing=false");
+      _connectionString.Items.Add("Data Source=(local);Initial Catalog=sqlite;Integrated Security=True;Max Pool Size=10");
+      _connectionString.SelectedIndex = 0;
 
       _testitems = new TestCases();
       foreach (KeyValuePair<string, bool> pair in _testitems.Tests)

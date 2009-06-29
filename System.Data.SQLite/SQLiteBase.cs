@@ -162,6 +162,11 @@ namespace System.Data.SQLite
 
     internal abstract object GetValue(SQLiteStatement stmt, int index, SQLiteType typ);
 
+    internal abstract bool AutoCommit
+    {
+      get;
+    }
+
     protected virtual void Dispose(bool bDisposing)
     {
     }
@@ -232,9 +237,17 @@ namespace System.Data.SQLite
           }
         } while (stmt != IntPtr.Zero);
 
-        // Not overly concerned with the return value from a rollback.
-        UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+        if (IsAutocommit(db) == false) // a transaction is pending on the connection
+        {
+          // Not really concerned with the return value from a rollback.
+          UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+        }
       }
+    }
+
+    internal static bool IsAutocommit(SQLiteConnectionHandle hdl)
+    {
+      return (UnsafeNativeMethods.sqlite3_get_autocommit(hdl) == 1);
     }
   }
 

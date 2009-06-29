@@ -458,6 +458,7 @@ namespace System.Data.SQLite
       {
       }
     }
+
     /// <summary>
     /// Manual method of registering a function.  The type must still have the SQLiteFunctionAttributes in order to work
     /// properly, but this is a workaround for the Compact Framework where enumerating assemblies is not currently supported.

@@ -5,8 +5,8 @@
   </head>
   <body>
     ADO.NET 2.0/3.5 SQLite Data Provider<br>
-    Version 1.0.62.0 June 19, 2009<br>
-    Using SQLite 3.6.15<br>
+    Version 1.0.63.0 June 29, 2009<br>
+    Using SQLite 3.6.16<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
     Official provider website:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
@@ -126,7 +126,24 @@
     <p></p>
     <p>
       <b>Version History</b></p>
-    <p><b>1.0.62.0 - June 20, 2009</b></p>
+    <p><b>1.0.63.0 - June 29, 2009</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.6.16</li>
+      <li>Check the autocommit mode of the connection to which a transaction is bound 
+        during the disposal of the transaction.&nbsp; If autocommit is enabled, then the 
+        database has already rolled back the transaction and we don&#39;t need to do it 
+        during dispose, and can quietly ignore the step without throwing an error.</li>
+      <li>Eliminated the mergebin step altogether.&nbsp; It was developed primarily to 
+        merge the Compact Framework binaries together, but since we&#39;re not doing that 
+        anymore, its use is limited.&nbsp; Its non-standard method of merging a binary 
+        on the desktop framework is redundant as well.&nbsp; The desktop binary now 
+        hard-links to MSCOREE, but as of Windows XP, this was redundant as well since XP 
+        and beyond automatically attempt to load MSCOREE on startup when a DLL has a 
+        .NET header.</li>
+      <li>More improvements to the test.exe program for running the tests against Sql 
+        Server for comparison purposes.</li>
+    </ul>
+    <p><b>1.0.62.0 - June 19, 2009</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.15</li>
       <li>Fixed the decimal reading bug in the SQLiteDataReader</li>

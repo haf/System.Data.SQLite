@@ -1,23 +1,6 @@
-#ifndef SQLITE_DEBUG
 #include "src/sqlite3.c"
-#else
-#include "splitsource\btreeint.h"
-#include "splitsource\vdbeint.h"
-#include "splitsource\sqliteInt.h"
-#endif
-
 #include "extension-functions.c"
 #include "crypt.c"
-#include <tchar.h>
-
-#ifdef NDEBUG
-
-#if _WIN32_WCE
-//#include "merge.h"
-#else
-#include "merge_full.h"
-#endif // _WIN32_WCE
-#endif // NDEBUG
 
 extern int RegisterExtensionFunctions(sqlite3 *db);
 
@@ -28,63 +11,6 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 
 typedef void (*SQLITEUSERFUNC)(sqlite3_context *, int, sqlite3_value **);
 typedef void (*SQLITEFUNCFINAL)(sqlite3_context *);
-
-typedef HANDLE (WINAPI *CREATEFILEW)(
-    LPCWSTR,
-    DWORD,
-    DWORD,
-    LPSECURITY_ATTRIBUTES,
-    DWORD,
-    DWORD,
-    HANDLE);
-
-
-int SetCompression(const wchar_t *pwszFilename, unsigned short ufLevel)
-{
-#ifdef FSCTL_SET_COMPRESSION
-  HMODULE hMod = GetModuleHandle(_T("KERNEL32"));
-  CREATEFILEW pfunc;
-  HANDLE hFile;
-  unsigned long dw = 0;
-  int n;
-
-  if (hMod == NULL)
-  {
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return 0;
-  }
-
-  pfunc = (CREATEFILEW)GetProcAddress(hMod, _T("CreateFileW"));
-  if (pfunc == NULL)
-  {
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return 0;
-  }
-
-  hFile = pfunc(pwszFilename, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (hFile == NULL)
-    return 0;
-
-  n = DeviceIoControl(hFile, FSCTL_SET_COMPRESSION, &ufLevel, sizeof(ufLevel), NULL, 0, &dw, NULL);
-
-  CloseHandle(hFile);
-
-  return n;
-#else
-  SetLastError(ERROR_NOT_SUPPORTED);
-  return 0;
-#endif
-}
-
-__declspec(dllexport) int WINAPI sqlite3_compressfile(const wchar_t *pwszFilename)
-{
-  return SetCompression(pwszFilename, COMPRESSION_FORMAT_DEFAULT);
-}
-
-__declspec(dllexport) int WINAPI sqlite3_decompressfile(const wchar_t *pwszFilename)
-{
-  return SetCompression(pwszFilename, COMPRESSION_FORMAT_NONE);
-}
 
 /*
     The goal of this version of close is different than that of sqlite3_close(), and is designed to lend itself better to .NET's non-deterministic finalizers and
@@ -517,7 +443,7 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
     }
     else if(pC->pseudoTable)
     {
-      *prowid = keyToInt(pC->iKey);
+      *prowid = pC->iKey;
     }
     else if(pC->nullRow || pC->pCursor==0)
     {
@@ -532,7 +458,7 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
         break;
       }
       sqlite3BtreeKeySize(pC->pCursor, prowid);
-      *prowid = keyToInt(*prowid);
+      *prowid = *prowid;
     }
     break;
   }

@@ -10,6 +10,9 @@ namespace test
 {
   internal class TestCases : TestCaseBase
   {
+    private List<string> droptables = new List<string>();
+    private List<string> maydroptable = new List<string>();
+
     internal TestCases()
     {
     }
@@ -64,6 +67,19 @@ namespace test
         throw new InconclusiveException("Not a SQLite database");
     }
 
+    [Test(Sequence=1)]
+    internal string VersionTest()
+    {
+      CheckSQLite();
+      string[] version = _cnn.ServerVersion.Split('.');
+      if (Convert.ToInt32(version[0]) < 3
+        || Convert.ToInt32(version[1]) < 6
+        || Convert.ToInt32(version[2]) < 1
+        ) throw new Exception(String.Format("SQLite Engine is {0}.  Minimum supported version is 3.6.1", _cnn.ServerVersion));
+
+      return String.Format("SQLite Engine is {0}", _cnn.ServerVersion);
+    }
+
     //[Test(Sequence = 1)]
     internal void ParseTest()
     {
@@ -111,6 +127,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test(Sequence = 39)]
     internal void MultipleFunctions()
     {
+      CheckSQLite();
       using (DbCommand cmd = _cnn.CreateCommand())
       {
         cmd.CommandText = "SELECT MYCOUNT(Field1), MYCOUNT(Field2) FROM TestCase";
@@ -124,6 +141,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test(Sequence = 8)]
     internal void FunctionWithCollation()
     {
+      CheckSQLite();
       using (DbCommand cmd = _cnn.CreateCommand())
       {
         cmd.CommandText = "SELECT CHARINDEX('pat', 'thepat'), CHARINDEX('pat', 'THEPAT'), CHARINDEX('pat' COLLATE NOCASE, 'THEPAT' COLLATE NOCASE)";
@@ -139,6 +157,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test(Sequence = 9)]
     internal void FunctionWithCollation2()
     {
+      CheckSQLite();
       using (DbCommand cmd = _cnn.CreateCommand())
       {
         cmd.CommandText = "SELECT CASETEST('pat', 'pat'), CASETEST('pat', 'PAT'), CASETEST('pat' COLLATE NOCASE, 'PAT' COLLATE NOCASE), CASETEST('pat' COLLATE MYSEQUENCE, 'PAT' COLLATE MYSEQUENCE), CASETEST('tap', 'TAP' COLLATE NOCASE)";
@@ -157,13 +176,20 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test(Sequence=90)]
     internal void ClearPoolTest()
     {
-      CheckSQLite();
+      string table = "clearpool";
+      string temp = "TEMP";
+
+      if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) == -1)
+      {
+        temp = String.Empty;
+        table = "#clearpool";
+      }
 
       object value;
       if (_cnnstring.TryGetValue("Pooling", out value) == false) throw new Exception("Pooling not present in connection string");
       if ((bool)value == false) throw new InconclusiveException("Pooling not enabled in the connection string");
 
-      string sql = "CREATE TEMP TABLE clearpool(id int primary key);";
+      string sql = String.Format("CREATE {0} TABLE {1}(id int primary key);", temp, table);
       using (DbCommand cmd = _cnn.CreateCommand())
       {
         // Create a temp table in the main connection so we can confirm our new connections are using true new connections
@@ -198,13 +224,22 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test(Sequence = 100)]
     internal void ClearAllPoolsTest()
     {
-      CheckSQLite();
+      string table = "clearpool";
+      string temp = "TEMP";
+      string exists = " IF NOT EXISTS ";
+
+      if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) == -1)
+      {
+        temp = String.Empty;
+        exists = String.Empty;
+        table = "#clearpool";
+      }
 
       object value;
       if (_cnnstring.TryGetValue("Pooling", out value) == false) throw new Exception("Pooling not present in connection string");
       if ((bool)value == false) throw new InconclusiveException("Pooling not enabled in the connection string");
 
-      string sql = "CREATE TEMP TABLE IF NOT EXISTS clearpool(id int primary key);";
+      string sql = String.Format("CREATE {0} TABLE {2}{1}(id int primary key);", temp, table, exists);
 
       _cnn.GetType().InvokeMember("ClearAllPools", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Public, null, null, null);
 
@@ -222,7 +257,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           {
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
-            cmd.CommandText = String.Format("INSERT INTO clearpool (id) VALUES({0})", n);
+            cmd.CommandText = String.Format("INSERT INTO {1} (id) VALUES({0})", n, table);
             cmd.ExecuteNonQuery();
           }
 
@@ -260,7 +295,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           {
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
-            cmd.CommandText = "SELECT [id] FROM clearpool";
+            cmd.CommandText = String.Format("SELECT [id] FROM {0}", table);
             object o = cmd.ExecuteScalar();
 
             if (o == null || o == DBNull.Value)
@@ -327,7 +362,6 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
             }
             Field3 = rd.GetString(2);
             Field4 = rd.GetString(3);
-            Field5 = rd.GetString(4);
 
             Field1 = rd.GetInt32(0);
 
@@ -366,8 +400,6 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
             {
             }
 
-            Field1 = rd.GetDecimal(0);
-            Field2 = rd.GetDecimal(1);
             try
             {
               Field3 = rd.GetDecimal(2);
@@ -410,12 +442,12 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test(Sequence = 10)]
     internal void CreateTable()
     {
-      DropTables(false);
+      droptables.Add("TestCase");
 
       using (DbCommand cmd = _cnn.CreateCommand())
       {
         if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) == -1)
-          cmd.CommandText = "CREATE TABLE TestCase (ID bigint primary key identity, Field1 bigint, Field2 Float, [Fiëld3] VARCHAR(50), [Fiæld4] CHAR(10), Field5 DateTime, Field6 Image)";
+          cmd.CommandText = "CREATE TABLE TestCase (ID bigint primary key identity, Field1 integer, Field2 Float, [Fiëld3] VARCHAR(50), [Fiæld4] CHAR(10), Field5 DateTime, Field6 Image)";
         else
           cmd.CommandText = "CREATE TABLE TestCase (ID integer primary key autoincrement, Field1 int, Field2 Float, [Fiëld3] VARCHAR(50), [Fiæld4] CHAR(10), Field5 DateTime, Field6 Image)";
 
@@ -462,7 +494,10 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
               {
                 if (bWithIdentity)
                 {
-                  adp.InsertCommand.CommandText += ";SELECT last_insert_rowid() AS [ID]";
+                  if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) == -1)
+                    adp.InsertCommand.CommandText += ";SELECT SCOPE_IDENTITY() AS [ID]";
+                  else
+                    adp.InsertCommand.CommandText += ";SELECT last_insert_rowid() AS [ID]";
                   adp.InsertCommand.UpdatedRowSource = UpdateRowSource.FirstReturnedRecord;
                 }
                 bld.DataAdapter = null;
@@ -563,12 +598,15 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     internal void DataTypeTest()
     {
       DateTime now = DateTime.Now;
+
       using (DbCommand cmd = _cnn.CreateCommand())
       {
+        droptables.Add("datatypetest");
+
         if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) == -1)
-          cmd.CommandText = "create table datatypetest(id bigint identity primary key, myvalue sql_variant, datetimevalue datetime, decimalvalue decimal)";
+          cmd.CommandText = "create table datatypetest(id bigint identity primary key, myvalue sql_variant, datetimevalue datetime, decimalvalue decimal(38,18))";
         else
-          cmd.CommandText = "create table datatypetest(id integer primary key, myvalue sql_variant, datetimevalue datetime, decimalvalue decimal)";
+          cmd.CommandText = "create table datatypetest(id integer primary key, myvalue sql_variant, datetimevalue datetime, decimalvalue decimal(38,18))";
 
         cmd.ExecuteNonQuery();
 
@@ -594,7 +632,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           p2.ParameterName = "@p2";
           p3.ParameterName = "@p3";
 
-          p1.Value = 1;
+          p1.Value = (long)1;
           p2.Value = new DateTime(1753, 1, 1);
           p3.Value = (Decimal)1.05;
           cmd.ExecuteNonQuery();
@@ -657,7 +695,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
                 case 2:
                   if (reader.GetValue(0).GetType() != typeof(double)) throw new Exception("Double type non-match");
                   if (reader.GetValue(0).Equals(1.01) == false) throw new Exception("Double value non-match");
-                  if (reader.GetValue(1).Equals(now) == false) throw new Exception(String.Format("DateTime value non-match, expected {0} got {1}", now, reader.GetValue(1)));
+                  if (reader.GetValue(1).ToString() != now.ToString()) throw new Exception(String.Format("DateTime value non-match, expected {0} got {1}", now, reader.GetValue(1)));
                   if (reader.GetValue(2).Equals((Decimal)9.91) == false) throw new Exception("Decimal value non-match");
 
                   if (reader.GetDouble(0) != 1.01) throw new Exception("Double value non-match");
@@ -736,23 +774,41 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
 
     internal void DropTables(bool throwError)
     {
-      string[] arr = new string[] { "TestCase", "datatypetest", "MultiThreadedTest", "fulltext", "guidtest", "keyinfotest", "stepreader", "nonexistent" };
+      //string[] arr = new string[] { "TestCase", "datatypetest", "MultiThreadedTest", "fulltext", "guidtest", "keyinfotest", "stepreader", "nonexistent" };
+      string errors = String.Empty;
 
       using (DbCommand cmd = _cnn.CreateCommand())
       {
-        for (int n = 0; n < arr.Length; n++)
+        foreach(string table in droptables)
         {
           try
           {
-            cmd.CommandText = String.Format("DROP TABLE{1} [{0}]", arr[n], (throwError == false) ? " IF EXISTS" : "");
+            cmd.CommandText = String.Format("DROP TABLE{1} [{0}]", table, (throwError == false) ? " IF EXISTS" : "");
+            cmd.ExecuteNonQuery();
+          }
+          catch (Exception e)
+          {
+            if (throwError == true)
+              errors += String.Format("{0}\r\n", e.Message);
+          }
+        }
+
+        foreach (string table in maydroptable)
+        {
+          try
+          {
+            cmd.CommandText = String.Format("DROP TABLE{1} [{0}]", table, (throwError == false) ? " IF EXISTS" : "");
             cmd.ExecuteNonQuery();
           }
           catch (Exception)
           {
-            if (throwError == true) throw;
           }
         }
       }
+
+      if (String.IsNullOrEmpty(errors) == false)
+        throw new Exception(errors);
+
     }
 
     [Test(Sequence = 1000)]
@@ -802,6 +858,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
 
       using (DbCommand cmd = _cnn.CreateCommand())
       {
+        droptables.Add("FullText");
         cmd.CommandText = "CREATE VIRTUAL TABLE FullText USING FTS3(name, ingredients);";
         cmd.ExecuteNonQuery();
 
@@ -852,6 +909,8 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       using (DbCommand cmd = _cnn.CreateCommand())
       {
         Guid guid = Guid.NewGuid();
+
+        droptables.Add("GuidTest");
 
         cmd.CommandText = "CREATE TABLE GuidTest(MyGuid uniqueidentifier)";
         cmd.ExecuteNonQuery();
@@ -988,6 +1047,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         try
         {
           // First test against integer primary key (optimized) keyinfo fetch
+          droptables.Add("keyinfotest");
           cmd.CommandText = "Create table keyinfotest (id integer primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
           cmd.ExecuteNonQuery();
 
@@ -1016,9 +1076,12 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         cmd.CommandText = "DROP TABLE keyinfotest";
         cmd.ExecuteNonQuery();
 
+        droptables.Remove("keyinfotest");
+
         try
         {
           // Now test against non-integer primary key (unoptimized) subquery keyinfo fetch
+          droptables.Add("keyinfotest");
           cmd.CommandText = "Create table keyinfotest (id char primary key, myuniquevalue integer unique not null, myvalue varchar(50))";
           cmd.ExecuteNonQuery();
 
@@ -1144,6 +1207,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     {
       using (DbCommand cmd = _cnn.CreateCommand())
       {
+        droptables.Add("stepreader");
         cmd.CommandText = "CREATE TABLE stepreader (id int primary key);INSERT INTO stepreader values(1);SELECT * FROM stepreader;UPDATE stepreader set id = id + 1;";
         using (DbDataReader reader = cmd.ExecuteReader())
         {
@@ -1172,7 +1236,12 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     {
       using (DbCommand cmd = _cnn.CreateCommand())
       {
-        cmd.CommandText = "CREATE TABLE MultiThreadedTest(ID integer primary key, ThreadId integer, MyValue integer)";
+        droptables.Add("MultiThreadedTest");
+        if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) == -1)
+          cmd.CommandText = "CREATE TABLE MultiThreadedTest(ID integer identity primary key, ThreadId integer, MyValue integer)";
+        else
+          cmd.CommandText = "CREATE TABLE MultiThreadedTest(ID integer primary key, ThreadId integer, MyValue integer)";
+
         cmd.ExecuteNonQuery();
       }
 
@@ -1222,6 +1291,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
             using (DbTransaction trans = test.cnn.BeginTransaction())
             {
               cmd.CommandText = String.Format("SELECT * FROM MultiThreadedTest WHERE ThreadId = {0}", test.t.ManagedThreadId);
+              cmd.Transaction = trans;
               using (DbDataReader reader = cmd.ExecuteReader())
               {
                 while (reader.Read())
@@ -1328,9 +1398,11 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     {
       using (DbCommand cmd = _cnn.CreateCommand())
       {
+        droptables.Add("nonexistent");
         cmd.CommandText = "CREATE TABLE nonexistent(id int primary key);SELECT id FROM nonexistent UNION SELECT 1";
         cmd.Prepare();
         object ob = cmd.ExecuteScalar();
+
         if (ob == null || ob == DBNull.Value) throw new Exception("Multiple statements may not be supported");
         if (Convert.ToInt32(ob) != 1) throw new Exception(String.Format("Expected {0} got {1}", 1, ob));
       }
@@ -1346,6 +1418,8 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       if (_cnnstring.TryGetValue("Pooling", out value) == false) throw new Exception("Pooling not present in connection string");
       if ((bool)value == false) throw new InconclusiveException("Pooling not enabled in the connection string");
 
+      maydroptable.Add("PoolTest");
+
       for (int n = 0; n < 100; n++)
       {
         using (DbConnection newcnn = ((ICloneable)_cnn).Clone() as DbConnection)
@@ -1353,7 +1427,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           if (newcnn.State != ConnectionState.Open) newcnn.Open();
           using (DbCommand cmd = newcnn.CreateCommand())
           {
-            cmd.CommandText = "BEGIN IMMEDIATE";
+            cmd.CommandText = "BEGIN TRANSACTION";
             cmd.ExecuteNonQuery();
 
             cmd.CommandText = "CREATE TABLE PoolTest(ID int primary key)";
@@ -1373,6 +1447,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       if (_cnnstring.TryGetValue("Pooling", out value) == false) throw new Exception("Pooling not present in connection string");
       if ((bool)value == false) throw new InconclusiveException("Pooling not enabled in the connection string");
 
+      maydroptable.Add("PoolTest");
       for (int n = 0; n < 100; n++)
       {
         using (DbConnection newcnn = ((ICloneable)_cnn).Clone() as DbConnection)
@@ -1381,6 +1456,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
           DbTransaction trans = newcnn.BeginTransaction();
           using (DbCommand cmd = newcnn.CreateCommand())
           {
+            cmd.Transaction = trans;
             cmd.CommandText = "CREATE TABLE PoolTest(ID int primary key)";
             cmd.ExecuteNonQuery();
           }
@@ -1440,6 +1516,8 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
             // Created a table inside the transaction scope
             cmd.CommandText = "CREATE TABLE VolatileTable (ID INTEGER PRIMARY KEY, MyValue VARCHAR(50))";
             cmd.ExecuteNonQuery();
+
+            maydroptable.Add("VolatileTable");
 
             using (DbCommand cmd2 = cnn2.CreateCommand())
             {
@@ -1648,6 +1726,9 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         {
           if (rd.Read() == false) throw new Exception("No data to read!");
 
+          long n = rd.GetBytes(0, 0, null, 0, 0);
+          if (n != 4000) throw new Exception("Invalid byte length!");
+
           rd.GetBytes(0, 0, b, 0, 4000);
 
           if (b[0] != 1) throw new Exception("Binary value non-match byte 0");
@@ -1664,8 +1745,11 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     {
       using (DbCommand cmd = _cnn.CreateCommand())
       {
-        cmd.CommandText = "CREATE TEMP TABLE DECTEST(x DECIMAL)";
+        droptables.Add("DECTEST");
+
+        cmd.CommandText = "CREATE TABLE DECTEST(x DECIMAL(38,18))";
         cmd.ExecuteNonQuery();
+
         cmd.CommandText = "INSERT INTO DECTEST(x) VALUES(0.00001)";
         cmd.ExecuteNonQuery();
         
@@ -1690,7 +1774,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         {
           if (rd.Read())
           {
-            long Field1 = rd.GetInt64(0);
+            int Field1 = rd.GetInt32(0);
             double Field2 = rd.GetDouble(1);
             string Field3 = rd.GetString(2);
             string Field4 = rd.GetString(3).TrimEnd();

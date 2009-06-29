@@ -9,19 +9,27 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite - Compact", "System.Data.SQLite\System.Data.SQLite - Compact.csproj", "{AC139951-261A-4463-B6FA-AEBC25283A66}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}"
+	ProjectSection(ProjectDependencies) = postProject
+		{10B51CE8-A838-44DE-BD82-B658F0296F80} = {10B51CE8-A838-44DE-BD82-B658F0296F80}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop", "SQLite.Interop\SQLite.Interop.vcproj", "{10B51CE8-A838-44DE-BD82-B658F0296F80}"
 	ProjectSection(ProjectDependencies) = postProject
-		{AC139952-261A-4463-B6FA-AEBC25283A66} = {AC139952-261A-4463-B6FA-AEBC25283A66}
+		{AC139952-261A-4463-B6FA-AEBC25284A66} = {AC139952-261A-4463-B6FA-AEBC25284A66}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testce", "testce\testce.csproj", "{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite - Full", "System.Data.SQLite\System.Data.SQLite - Full.csproj", "{AC139952-261A-4463-B6FA-AEBC25283A66}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite - ManagedOnly", "System.Data.SQLite\System.Data.SQLite - ManagedOnly.csproj", "{AC139952-261A-4463-B6FA-AEBC25283A66}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite.Linq", "System.Data.SQLite.Linq\System.Data.SQLite.Linq.csproj", "{E6BF9F74-58E2-413B-A7CE-EA653ECB728D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{10B51CE8-A838-44DE-BD82-B658F0296F80} = {10B51CE8-A838-44DE-BD82-B658F0296F80}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testlinq", "testlinq\testlinq.csproj", "{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite - Netmodule", "System.Data.SQLite\System.Data.SQLite - Netmodule.csproj", "{AC139952-261A-4463-B6FA-AEBC25284A66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,7 +149,6 @@ Global
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Mixed Platforms.ActiveCfg = Debug|x64
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Mixed Platforms.Build.0 = Debug|x64
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Win32.ActiveCfg = StockDebug|Win32
-		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Win32.Build.0 = StockDebug|Win32
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|Win32.Deploy.0 = StockDebug|Win32
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|x64.ActiveCfg = Debug|x64
 		{10B51CE8-A838-44DE-BD82-B658F0296F80}.Debug - Stock|x64.Build.0 = Debug|x64
@@ -268,13 +275,10 @@ Global
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Compact Framework (ARMV4).ActiveCfg = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Itanium.ActiveCfg = Release|Any CPU
-		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Itanium.Build.0 = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Win32.ActiveCfg = Release|Any CPU
-		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|Win32.Build.0 = Release|Any CPU
 		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|x64.ActiveCfg = Release|Any CPU
-		{AC139952-261A-4463-B6FA-AEBC25283A66}.Release|x64.Build.0 = Release|Any CPU
 		{E6BF9F74-58E2-413B-A7CE-EA653ECB728D}.Debug - Stock|Any CPU.ActiveCfg = Debug|Any CPU
 		{E6BF9F74-58E2-413B-A7CE-EA653ECB728D}.Debug - Stock|Any CPU.Build.0 = Debug|Any CPU
 		{E6BF9F74-58E2-413B-A7CE-EA653ECB728D}.Debug - Stock|Compact Framework (ARMV4).ActiveCfg = Debug|Any CPU
@@ -326,7 +330,6 @@ Global
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Debug - Stock|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Debug - Stock|Mixed Platforms.Build.0 = Debug|Any CPU
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Debug - Stock|Win32.ActiveCfg = Debug|Any CPU
-		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Debug - Stock|Win32.Build.0 = Debug|Any CPU
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Debug - Stock|x64.ActiveCfg = Debug|Any CPU
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -353,6 +356,41 @@ Global
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Release|Win32.ActiveCfg = Release|Any CPU
 		{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}.Release|x64.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug - Stock|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug - Stock|Any CPU.Build.0 = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug - Stock|Compact Framework (ARMV4).ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug - Stock|Itanium.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug - Stock|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug - Stock|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug - Stock|Win32.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug - Stock|x64.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug|Compact Framework (ARMV4).ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug|Itanium.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release - Stock|Any CPU.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release - Stock|Any CPU.Build.0 = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release - Stock|Compact Framework (ARMV4).ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release - Stock|Itanium.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release - Stock|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release - Stock|Mixed Platforms.Build.0 = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release - Stock|Win32.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release - Stock|x64.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Compact Framework (ARMV4).ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Itanium.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Itanium.Build.0 = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Win32.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|Win32.Build.0 = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|x64.ActiveCfg = Release|Any CPU
+		{AC139952-261A-4463-B6FA-AEBC25284A66}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

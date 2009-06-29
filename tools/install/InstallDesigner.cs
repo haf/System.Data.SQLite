@@ -102,6 +102,7 @@ namespace install
 
       _regRoots.Add("8.0", "2005");
       _regRoots.Add("9.0", "2008");
+      //_regRoots.Add("10.0", "2010");
 
       for (int n = 0; n < args.Length; n++)
       {

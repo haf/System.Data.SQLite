@@ -319,32 +319,6 @@ namespace System.Data.SQLite
       fs.Close();
     }
 
-#if !SQLITE_STANDARD
-    /// <summary>
-    /// On NTFS volumes, this function turns on the compression attribute for the given file.
-    /// It must not be open or referenced at the time of the function call.
-    /// </summary>
-    /// <param name="databaseFileName">The file to compress</param>
-    [Obsolete("This functionality is being removed from a future version of the SQLite provider")]
-    static public void CompressFile(string databaseFileName)
-    {
-      UnsafeNativeMethods.sqlite3_compressfile(databaseFileName);
-    }
-#endif
-
-#if !SQLITE_STANDARD
-    /// <summary>
-    /// On NTFS volumes, this function removes the compression attribute for the given file.
-    /// It must not be open or referenced at the time of the function call.
-    /// </summary>
-    /// <param name="databaseFileName">The file to decompress</param>
-    [Obsolete("This functionality is being removed from a future version of the SQLite provider")]
-    static public void DecompressFile(string databaseFileName)
-    {
-      UnsafeNativeMethods.sqlite3_decompressfile(databaseFileName);
-    }
-#endif
-
     /// <summary>
     /// Raises the state change event when the state of the connection changes
     /// </summary>
@@ -851,7 +825,6 @@ namespace System.Data.SQLite
 
         _dataSource = Path.GetFileNameWithoutExtension(fileName);
 
-        OnStateChange(ConnectionState.Open);
         _version++;
 
         using (SQLiteCommand cmd = CreateCommand())
@@ -914,6 +887,7 @@ namespace System.Data.SQLite
         if (Transactions.Transaction.Current != null && SQLiteConvert.ToBoolean(FindKey(opts, "Enlist", Boolean.TrueString)) == true)
           EnlistTransaction(Transactions.Transaction.Current);
 #endif
+        OnStateChange(ConnectionState.Open);
       }
       catch (SQLiteException)
       {

@@ -112,7 +112,7 @@ namespace System.Data.SQLite
         }
         // All pools are cleared and we have a new highest version number to force all old version active items to get discarded
         // instead of going back to the queue when they are closed.
-        // We can get away with this because we're pumped up the _poolVersion out of range of all active connections, so they
+        // We can get away with this because we've pumped up the _poolVersion out of range of all active connections, so they
         // will all get discarded when they try to put themselves back in their pool.
         _connections.Clear();
       }
@@ -172,6 +172,13 @@ namespace System.Data.SQLite
       }
     }
 
+    /// <summary>
+    /// We don't have to thread-lock anything in this function, because it's only called by other functions above
+    /// which already have a thread-safe lock.
+    /// </summary>
+    /// <param name="queue">The queue to resize</param>
+    /// <param name="forAdding">If a function intends to add to the pool, this is true, which forces the resize
+    /// to take one more than it needs from the pool</param>
     private static void ResizePool(Pool queue, bool forAdding)
     {
       int target = queue.MaxPoolSize;
