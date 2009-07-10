@@ -9,9 +9,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite - Compact", "System.Data.SQLite\System.Data.SQLite - Compact.csproj", "{AC139951-261A-4463-B6FA-AEBC25283A66}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}"
-	ProjectSection(ProjectDependencies) = postProject
-		{10B51CE8-A838-44DE-BD82-B658F0296F80} = {10B51CE8-A838-44DE-BD82-B658F0296F80}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop", "SQLite.Interop\SQLite.Interop.vcproj", "{10B51CE8-A838-44DE-BD82-B658F0296F80}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -124,8 +121,8 @@ Global
 		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|Itanium.Build.0 = Release|Itanium
 		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|Mixed Platforms.Build.0 = Release|Any CPU
-		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|Win32.ActiveCfg = Release|x86
-		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|Win32.Build.0 = Release|x86
+		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|Win32.ActiveCfg = Release|Any CPU
+		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|Win32.Build.0 = Release|Any CPU
 		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|x64.ActiveCfg = Release|x64
 		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release - Stock|x64.Build.0 = Release|x64
 		{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -719,7 +719,9 @@ namespace System.Data.SQLite
       if (_transactionLevel > 0 && transaction != null)
         throw new ArgumentException("Unable to enlist in transaction, a local transaction already exists");
 
-      if (_enlistment != null && transaction != _enlistment._scope)
+      if (_enlistment != null && transaction == _enlistment._scope)
+        return;
+      else if (_enlistment != null)
         throw new ArgumentException("Already enlisted in a transaction");
 
       _enlistment = new SQLiteEnlistment(this, transaction);
@@ -827,67 +829,79 @@ namespace System.Data.SQLite
 
         _version++;
 
-        using (SQLiteCommand cmd = CreateCommand())
+        ConnectionState oldstate = _connectionState;
+        _connectionState = ConnectionState.Open;
+        try
         {
-          string defValue;
-
-          if (fileName != ":memory:")
+          using (SQLiteCommand cmd = CreateCommand())
           {
-            defValue = FindKey(opts, "Page Size", "1024");
-            if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 1024)
+            string defValue;
+
+            if (fileName != ":memory:")
             {
-              cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA page_size={0}", defValue);
+              defValue = FindKey(opts, "Page Size", "1024");
+              if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 1024)
+              {
+                cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA page_size={0}", defValue);
+                cmd.ExecuteNonQuery();
+              }
+            }
+
+            defValue = FindKey(opts, "Max Page Count", "0");
+            if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 0)
+            {
+              cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA max_page_count={0}", defValue);
+              cmd.ExecuteNonQuery();
+            }
+
+            defValue = FindKey(opts, "Legacy Format", Boolean.FalseString);
+            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA legacy_file_format={0}", SQLiteConvert.ToBoolean(defValue) == true ? "ON" : "OFF");
+            cmd.ExecuteNonQuery();
+
+            defValue = FindKey(opts, "Synchronous", "Normal");
+            if (String.Compare(defValue, "Full", StringComparison.OrdinalIgnoreCase) != 0)
+            {
+              cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA synchronous={0}", defValue);
+              cmd.ExecuteNonQuery();
+            }
+
+            defValue = FindKey(opts, "Cache Size", "2000");
+            if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 2000)
+            {
+              cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA cache_size={0}", defValue);
+              cmd.ExecuteNonQuery();
+            }
+
+            defValue = FindKey(opts, "Journal Mode", "Delete");
+            if (String.Compare(defValue, "Default", StringComparison.OrdinalIgnoreCase) != 0)
+            {
+              cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA journal_mode={0}", defValue);
               cmd.ExecuteNonQuery();
             }
           }
 
-          defValue = FindKey(opts, "Max Page Count", "0");
-          if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 0)
-          {
-            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA max_page_count={0}", defValue);
-            cmd.ExecuteNonQuery();
-          }
+          if (_commitHandler != null)
+            _sql.SetCommitHook(_commitCallback);
 
-          defValue = FindKey(opts, "Legacy Format", Boolean.FalseString);
-          cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA legacy_file_format={0}", SQLiteConvert.ToBoolean(defValue) == true ? "ON" : "OFF");
-          cmd.ExecuteNonQuery();
+          if (_updateHandler != null)
+            _sql.SetUpdateHook(_updateCallback);
 
-          defValue = FindKey(opts, "Synchronous", "Normal");
-          if (String.Compare(defValue, "Full", StringComparison.OrdinalIgnoreCase) != 0)
-          {
-            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA synchronous={0}", defValue);
-            cmd.ExecuteNonQuery();
-          }
-
-          defValue = FindKey(opts, "Cache Size", "2000");
-          if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 2000)
-          {
-            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA cache_size={0}", defValue);
-            cmd.ExecuteNonQuery();
-          }
-
-          defValue = FindKey(opts, "Journal Mode", "Delete");
-          if (String.Compare(defValue, "Default", StringComparison.OrdinalIgnoreCase) != 0)
-          {
-            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA journal_mode={0}", defValue);
-            cmd.ExecuteNonQuery();
-          }
-        }
-
-        if (_commitHandler != null)
-          _sql.SetCommitHook(_commitCallback);
-
-        if (_updateHandler != null)
-          _sql.SetUpdateHook(_updateCallback);
-
-        if (_rollbackHandler != null)
-          _sql.SetRollbackHook(_rollbackCallback);
+          if (_rollbackHandler != null)
+            _sql.SetRollbackHook(_rollbackCallback);
 
 #if !PLATFORM_COMPACTFRAMEWORK
-        if (Transactions.Transaction.Current != null && SQLiteConvert.ToBoolean(FindKey(opts, "Enlist", Boolean.TrueString)) == true)
-          EnlistTransaction(Transactions.Transaction.Current);
+          if (Transactions.Transaction.Current != null && SQLiteConvert.ToBoolean(FindKey(opts, "Enlist", Boolean.TrueString)) == true)
+            EnlistTransaction(Transactions.Transaction.Current);
 #endif
-        OnStateChange(ConnectionState.Open);
+
+          _connectionState = oldstate;
+          OnStateChange(ConnectionState.Open);
+        }
+        catch
+        {
+          _connectionState = oldstate;
+          throw;
+        }
       }
       catch (SQLiteException)
       {
@@ -917,10 +931,11 @@ namespace System.Data.SQLite
     {
       get
       {
-        if (_connectionState != ConnectionState.Open)
-          throw new InvalidOperationException();
+        return SQLiteVersion;
+        //if (_connectionState != ConnectionState.Open)
+        //  throw new InvalidOperationException();
 
-        return _sql.Version;
+        //return _sql.Version;
       }
     }
 

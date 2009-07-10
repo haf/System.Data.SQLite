@@ -170,6 +170,14 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       }
     }
 
+    [Test]
+    internal void DataTypesSchema()
+    {
+      using (DataTable tbl = _cnn.GetSchema("DataTypes"))
+      {
+      }
+    }
+
     /// <summary>
     /// Make sure our implementation of ClearPool() behaves exactly as the SqlClient version is documented to behave.
     /// </summary>

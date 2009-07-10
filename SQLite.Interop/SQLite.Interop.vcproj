@@ -61,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
+				ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
@@ -70,6 +71,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp"
 				AdditionalDependencies="..\System.Data.SQLite\bin\System.Data.SQLite.netmodule"
 				OutputFile="../bin/System.Data.SQLite.DLL"
 				GenerateManifest="false"
@@ -146,6 +148,7 @@
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
+				ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
@@ -161,7 +164,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /ARMPADCODE"
-				OutputFile="../bin/CompactFramework/$(InputName).063.DLL"
+				OutputFile="../bin/CompactFramework/$(InputName).064.DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -239,6 +242,7 @@
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
+				ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
@@ -248,6 +252,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp"
 				AdditionalDependencies="..\System.Data.SQLite\bin\System.Data.SQLite.netmodule"
 				OutputFile="../bin/Itanium/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -324,6 +329,7 @@
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
+				ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
@@ -333,6 +339,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp"
 				AdditionalDependencies="..\System.Data.SQLite\bin\System.Data.SQLite.netmodule"
 				OutputFile="../bin/x64/System.Data.SQLite.DLL"
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -402,7 +409,6 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="false"
-				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -498,7 +504,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /ARMPADCODE"
-				OutputFile="../bin/CompactFramework/$(InputName).061.DLL"
+				OutputFile="../bin/CompactFramework/$(InputName).064.DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -1026,6 +1032,11 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<AssemblyReference
+			RelativePath="System.Drawing.dll"
+			AssemblyName="System.Drawing, Version=2.0.0.0, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
+			MinFrameworkVersion="131072"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -1050,10 +1061,119 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\SQLite.Interop.rc"
+		<Filter
+			Name="Managed Resources"
 			>
-		</File>
+			<File
+				RelativePath="..\System.Data.SQLite\SR.resx"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+						ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Pocket PC 2003 (ARMV4)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+						ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Itanium"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+						ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+						ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Pocket PC 2003 (ARMV4)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Itanium"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StockDebug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StockDebug|Pocket PC 2003 (ARMV4)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StockDebug|Itanium"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StockDebug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCManagedResourceCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resources"
+			>
+			<File
+				RelativePath=".\SQLite.Interop.rc"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

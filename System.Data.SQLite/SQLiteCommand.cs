@@ -466,7 +466,7 @@ namespace System.Data.SQLite
         }
         else
         {
-          Connection = value.Connection;
+          if (value != null) Connection = value.Connection;
           _transaction = value;
         }
       }

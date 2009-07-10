@@ -5,7 +5,7 @@
   </head>
   <body>
     ADO.NET 2.0/3.5 SQLite Data Provider<br>
-    Version 1.0.63.0 June 29, 2009<br>
+    Version 1.0.64.0 July 9, 2009<br>
     Using SQLite 3.6.16<br>
     Written by Robert Simpson (<a href="mailto:robert@blackcastlesoft.com">robert@blackcastlesoft.com</a>)<br>
     Released to the public domain, use at your own risk!<br>
@@ -126,6 +126,15 @@
     <p></p>
     <p>
       <b>Version History</b></p>
+    <p><b>1.0.64.0 - July 9, 2009</b></p>
+    <ul>
+      <li>Fixed the missing resources problem from the 63 release.</li>
+      <li>Added preliminary support for the Visual Studio 2010 beta.</li>
+      <li>Fixed a bug in SQLiteCommand that threw a null reference exception when 
+        setting the Transaction object to null.</li>
+      <li>If SQLiteConnection.EnlistTransaction is called multiple times for the same 
+        transaction scope, just return without throwing an error.</li>
+    </ul>
     <p><b>1.0.63.0 - June 29, 2009</b></p>
     <ul>
       <li>Code merge with SQLite 3.6.16</li>
