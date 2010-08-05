@@ -81,9 +81,7 @@ namespace System.Data.SQLite
 
       _commandBehavior = behave;
       _activeStatementIndex = -1;
-      _activeStatement = null;
       _rowsAffected = -1;
-      _fieldCount = 0;
 
       if (_command != null)
         NextResult();
@@ -116,7 +114,7 @@ namespace System.Data.SQLite
                   {
                   }
                 }
-                catch
+                catch(SQLiteException)
                 {
                 }
               }
@@ -619,7 +617,7 @@ namespace System.Data.SQLite
         if (String.IsNullOrEmpty(strColumn) == false) row[SchemaTableColumn.BaseColumnName] = strColumn;
 
         row[SchemaTableColumn.IsExpression] = String.IsNullOrEmpty(strColumn);
-        row[SchemaTableColumn.IsAliased] = (String.Compare(GetName(n), strColumn, true, CultureInfo.InvariantCulture) != 0);
+        row[SchemaTableColumn.IsAliased] = (String.Compare(GetName(n), strColumn, StringComparison.OrdinalIgnoreCase) != 0);
 
         temp = _command.Connection._sql.ColumnTableName(_activeStatement, n);
         if (String.IsNullOrEmpty(temp) == false) row[SchemaTableColumn.BaseTableName] = temp;
@@ -684,7 +682,7 @@ namespace System.Data.SQLite
               // Find the matching column
               while (rdTable.Read())
               {
-                if (String.Compare((string)row[SchemaTableColumn.BaseColumnName], rdTable.GetString(1), true, CultureInfo.InvariantCulture) == 0)
+                if (String.Compare((string)row[SchemaTableColumn.BaseColumnName], rdTable.GetString(1), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                   if (rdTable.IsDBNull(4) == false)
                     row[SchemaTableOptionalColumn.DefaultValue] = rdTable[4];
@@ -722,7 +720,7 @@ namespace System.Data.SQLite
                 });
               foreach (DataRow rowColumnIndex in tblIndexColumns.Rows)
               {
-                if (String.Compare((string)rowColumnIndex["COLUMN_NAME"], strColumn, true, CultureInfo.InvariantCulture) == 0)
+                if (String.Compare((string)rowColumnIndex["COLUMN_NAME"], strColumn, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                   if (tblIndexColumns.Rows.Count == 1 && (bool)row[SchemaTableColumn.AllowDBNull] == false)
                     row[SchemaTableColumn.IsUnique] = rowIndexes["UNIQUE"];
@@ -733,7 +731,7 @@ namespace System.Data.SQLite
                   //        It is safer to only set Autoincrement on tables where we're SURE the user specified AUTOINCREMENT, even if its a rowid column.
 
                   if (tblIndexColumns.Rows.Count == 1 && (bool)rowIndexes["PRIMARY_KEY"] == true && String.IsNullOrEmpty(dataType) == false &&
-                    String.Compare(dataType, "integer", true, CultureInfo.InvariantCulture) == 0)
+                    String.Compare(dataType, "integer", StringComparison.OrdinalIgnoreCase) == 0)
                   {
                     //  row[SchemaTableOptionalColumn.IsAutoIncrement] = true;
                   }

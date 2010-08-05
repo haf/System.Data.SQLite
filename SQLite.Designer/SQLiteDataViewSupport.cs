@@ -10,6 +10,7 @@ namespace SQLite.Designer
   using System;
   using System.Collections.Generic;
   using System.Text;
+  using System.Globalization;
   using Microsoft.VisualStudio.Data;
   using Microsoft.VisualStudio.OLE.Interop;
   using Microsoft.VisualStudio.Data.AdoDotNet;
@@ -20,7 +21,7 @@ namespace SQLite.Designer
   internal sealed class SQLiteDataViewSupport : DataViewSupport
   {
     public SQLiteDataViewSupport()
-      : base(String.Format("SQLite.Designer.SQLiteDataViewSupport{0}", GetVSVersion()), typeof(SQLiteDataViewSupport).Assembly)
+      : base(String.Format(CultureInfo.InvariantCulture, "SQLite.Designer.SQLiteDataViewSupport{0}", GetVSVersion()), typeof(SQLiteDataViewSupport).Assembly)
     {
     }
 

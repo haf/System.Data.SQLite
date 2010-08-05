@@ -11,6 +11,7 @@ namespace System.Data.SQLite
   using System.Data;
   using System.Data.Common;
   using System.Collections.Generic;
+  using System.Globalization;
 
   /// <summary>
   /// This class provides key info for a given SQLite statement.
@@ -57,13 +58,12 @@ namespace System.Data.SQLite
             columns[n] = builder.QuoteIdentifier(columns[n]);
           }
         }
-        _command.CommandText = String.Format("SELECT {0} FROM [{1}].[{2}] WHERE ROWID = ?", String.Join(",", columns), database, table);
+        _command.CommandText = String.Format(CultureInfo.InvariantCulture, "SELECT {0} FROM [{1}].[{2}] WHERE ROWID = ?", String.Join(",", columns), database, table);
         _command.Parameters.AddWithValue(null, (long)0);
       }
 
       internal bool IsValid
       {
-        get { return (_reader != null); }
         set
         {
           if (value != false) throw new ArgumentException();
@@ -114,7 +114,7 @@ namespace System.Data.SQLite
       {
         foreach (DataRow row in tbl.Rows)
         {
-          catalogs.Add((string)row["CATALOG_NAME"], Convert.ToInt32(row["ID"]));
+          catalogs.Add((string)row["CATALOG_NAME"], Convert.ToInt32(row["ID"], CultureInfo.InvariantCulture));
         }
       }
 
@@ -182,7 +182,7 @@ namespace System.Data.SQLite
                 {
                   // Find the root page of the table in the current statement and get the cursor that's iterating it
                   int database = catalogs[pair.Key];
-                  int rootPage = Convert.ToInt32(tblTables.Rows[0]["TABLE_ROOTPAGE"]);
+                  int rootPage = Convert.ToInt32(tblTables.Rows[0]["TABLE_ROOTPAGE"], CultureInfo.InvariantCulture);
                   int cursor = stmt._sql.GetCursorForTable(stmt, database, rootPage);
 
                   // Now enumerate the members of the index we're going to use

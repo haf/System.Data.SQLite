@@ -174,6 +174,7 @@ namespace System.Data.SQLite
     public void Dispose()
     {
       Dispose(true);
+      GC.SuppressFinalize(this);
     }
 
     // These statics are here for lack of a better place to put them.
@@ -223,24 +224,24 @@ namespace System.Data.SQLite
       lock (_lock)
       {
         IntPtr stmt = IntPtr.Zero;
-
+        int n;
         do
         {
           stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
           if (stmt != IntPtr.Zero)
           {
 #if !SQLITE_STANDARD
-            UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+            n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
 #else
-          UnsafeNativeMethods.sqlite3_reset(stmt);
+            n = UnsafeNativeMethods.sqlite3_reset(stmt);
 #endif
           }
         } while (stmt != IntPtr.Zero);
 
         if (IsAutocommit(db) == false) // a transaction is pending on the connection
         {
-          // Not really concerned with the return value from a rollback.
-          UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+          n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+          if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
         }
       }
     }

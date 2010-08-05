@@ -184,9 +184,7 @@ namespace System.Data.SQLite
       _dbType = (int)parameterType;
       _sourceColumn = sourceColumn;
       _rowVersion = rowVersion;
-      _objValue = null;
       _dataSize = parameterSize;
-      _nullMapping = false;
       _nullable = true;
     }
 

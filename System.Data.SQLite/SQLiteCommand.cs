@@ -17,7 +17,7 @@ namespace System.Data.SQLite
   /// SQLite implementation of DbCommand.
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
-  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.36.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
+  [Designer("SQLite.Designer.SQLiteCommandDesigner, SQLite.Designer, Version=1.0.37.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"), ToolboxItem(true)]
 #endif
   public sealed class SQLiteCommand : DbCommand, ICloneable
   {
@@ -125,13 +125,10 @@ namespace System.Data.SQLite
     /// <param name="transaction">The transaction the command should be associated with</param>
     public SQLiteCommand(string commandText, SQLiteConnection connection, SQLiteTransaction transaction)
     {
-      _statementList = null;
-      _activeReader = null;
       _commandTimeout = 30;
       _parameterCollection = new SQLiteParameterCollection(this);
       _designTimeVisible = true;
       _updateRowSource = UpdateRowSource.None;
-      _transaction = null;
 
       if (commandText != null)
         CommandText = commandText;
@@ -164,7 +161,7 @@ namespace System.Data.SQLite
           {
             reader = _activeReader.Target as SQLiteDataReader;
           }
-          catch
+          catch(InvalidOperationException)
           {
           }
         }
@@ -194,7 +191,7 @@ namespace System.Data.SQLite
         {
           reader = _activeReader.Target as SQLiteDataReader;
         }
-        catch
+        catch(InvalidOperationException)
         {
         }
 

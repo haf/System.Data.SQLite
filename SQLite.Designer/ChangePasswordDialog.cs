@@ -22,7 +22,7 @@ namespace SQLite.Designer
 
   public partial class ChangePasswordDialog : Form
   {
-    internal string Password = null;
+    internal string Password;
 
     private SQLiteConnectionProperties _props;
 

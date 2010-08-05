@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Security;
+using System.Resources;
 
 #if !PLATFORM_COMPACTFRAMEWORK
 using System.Runtime.ConstrainedExecution;
@@ -31,6 +32,7 @@ using System.Runtime.ConstrainedExecution;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 [assembly: InternalsVisibleTo("System.Data.SQLite.Linq, PublicKey=002400000480000094000000060200000024000052534131000400000100010005a288de5687c4e1b621ddff5d844727418956997f475eb829429e411aff3e93f97b70de698b972640925bdd44280df0a25a843266973704137cbb0e7441c1fe7cae4e2440ae91ab8cde3933febcb1ac48dd33b40e13c421d8215c18a4349a436dd499e3c385cc683015f886f6c10bd90115eb2bd61b67750839e3a19941dc9c")]
+[assembly: NeutralResourcesLanguage("en")]
 
 #if !PLATFORM_COMPACTFRAMEWORK
 [assembly: AllowPartiallyTrustedCallers]
@@ -47,7 +49,7 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.64.0")]
+[assembly: AssemblyVersion("1.0.66.0")]
 #if !PLATFORM_COMPACTFRAMEWORK
-[assembly: AssemblyFileVersion("1.0.64.0")]
+[assembly: AssemblyFileVersion("1.0.66.0")]
 #endif

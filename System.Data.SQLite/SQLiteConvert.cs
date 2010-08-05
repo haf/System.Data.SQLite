@@ -317,7 +317,7 @@ namespace System.Data.SQLite
       if (String.Compare(source, bool.TrueString, StringComparison.OrdinalIgnoreCase) == 0) return true;
       else if (String.Compare(source, bool.FalseString, StringComparison.OrdinalIgnoreCase) == 0) return false;
 
-      switch(source.ToLower())
+      switch(source.ToLower(CultureInfo.InvariantCulture))
       {
         case "yes":
         case "y":
@@ -633,7 +633,7 @@ namespace System.Data.SQLite
       int x = _typeNames.Length;
       for (int n = 0; n < x; n++)
       {
-        if (String.Compare(Name, 0, _typeNames[n].typeName, 0, _typeNames[n].typeName.Length, true, CultureInfo.InvariantCulture) == 0)
+        if (String.Compare(Name, 0, _typeNames[n].typeName, 0, _typeNames[n].typeName.Length, StringComparison.OrdinalIgnoreCase) == 0)
           return _typeNames[n].dataType; 
       }
       return DbType.Object;

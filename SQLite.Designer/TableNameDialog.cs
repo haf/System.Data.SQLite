@@ -26,7 +26,7 @@ namespace SQLite.Designer
     {
       InitializeComponent();
       Text = Text.Replace("%", type);
-      label1.Text = label1.Text.Replace("%", type.ToLower());
+      label1.Text = label1.Text.Replace("%", type.ToLowerInvariant());
       _name.Text = defaultName;
     }
 

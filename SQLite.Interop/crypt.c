@@ -1,9 +1,9 @@
 #ifndef SQLITE_OMIT_DISKIO
 #ifdef SQLITE_HAS_CODEC
 
-#ifdef SQLITE_DEBUG
-#include "splitsource\pager.c"
-#endif
+//#ifdef SQLITE_DEBUG
+//#include "splitsource\pager.c"
+//#endif
 
 #include <windows.h>
 #include <wincrypt.h>
@@ -89,7 +89,10 @@ static LPCRYPTBLOCK CreateCryptBlock(HCRYPTKEY hKey, Pager *pager, int pageSize,
   pBlock->pvCrypt = sqlite3_malloc(pBlock->dwCryptSize + (CRYPT_OFFSET * 2));
   if (!pBlock->pvCrypt)
   {
-    sqlite3_free(pBlock);
+    // We created a new block in here, so free it.  Otherwise leave the original intact
+    if (pBlock != pExisting) 
+      sqlite3_free(pBlock);
+
     return NULL;
   }
 
@@ -127,7 +130,10 @@ void sqlite3CodecSizeChange(void *pArg, int pageSize, int reservedSize)
   LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)pArg;
 
   if (pBlock->dwPageSize != pageSize)
-      CreateCryptBlock(pBlock->hReadKey, pBlock->pPager, pageSize, pBlock);
+  {
+    CreateCryptBlock(pBlock->hReadKey, pBlock->pPager, pageSize, pBlock);
+    // If this fails, pvCrypt will be NULL, and the next time sqlite3Codec() is called, it will result in an error
+  }
 }
 
 // Encrypt/Decrypt functionality, called by pager.c
@@ -138,17 +144,7 @@ void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
   LPVOID pvTemp;
 
   if (!pBlock) return data;
-
-  //// Make sure the page size for the pager is still the same as the page size
-  //// for the cryptblock.  If the user changed it, we need to adjust!
-  //if (nMode != 2)
-  //{
-  //  if (pBlock->pPager->pageSize != pBlock->dwPageSize)
-  //  {
-  //    // Update the cryptblock to reflect the new page size
-  //    CreateCryptBlock(pBlock->hReadKey, pBlock->pPager, pBlock);
-  //  }
-  //}
+  if (pBlock->pvCrypt == NULL) return NULL; // This only happens if CreateCryptBlock() failed to make scratch space
 
   switch(nMode)
   {
@@ -242,7 +238,6 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
 {
   int rc = SQLITE_ERROR;
   HCRYPTKEY hKey = 0;
-  Pager *p = sqlite3BtreePager(db->aDb[nDb].pBt);
 
   // No key specified, could mean either use the main db's encryption or no encryption
   if (!pKey || !nKeyLen)
@@ -255,6 +250,7 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
     {
       // Get the encryption block for the main database and attempt to duplicate the key
       // for use by the attached database
+      Pager *p = sqlite3BtreePager(db->aDb[0].pBt);
       LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)sqlite3pager_get_codecarg(p);
 
       if (!pBlock) return SQLITE_OK; // Main database is not encrypted so neither will be any attached database
@@ -277,7 +273,10 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
   // Create a new encryption block and assign the codec to the new attached database
   if (hKey)
   {
+    Pager *p = sqlite3BtreePager(db->aDb[nDb].pBt);
     LPCRYPTBLOCK pBlock = CreateCryptBlock(hKey, p, -1, NULL);
+    if (!pBlock) return SQLITE_NOMEM;
+
     sqlite3PagerSetCodec(p, sqlite3Codec, sqlite3CodecSizeChange, sqlite3CodecFree, pBlock);
     //db->aDb[nDb].pAux = pBlock;
     //db->aDb[nDb].xFreeAux = DestroyCryptBlock;
@@ -403,9 +402,6 @@ int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySize)
   if (!pBlock->hReadKey && !pBlock->hWriteKey)
   {
     sqlite3PagerSetCodec(p, NULL, NULL, NULL, NULL);
-    //db->aDb[0].pAux = NULL;
-    //db->aDb[0].xFreeAux = NULL;
-    sqlite3CodecFree(pBlock);
   }
 
   return rc;

@@ -24,9 +24,9 @@ namespace SQLite.Designer
   /// </summary>
   internal sealed class SQLiteConnectionStringEditor : ObjectSelectorEditor
   {
-    private ObjectSelectorEditor.Selector _selector = null;
+    private ObjectSelectorEditor.Selector _selector;
 
-    private static Type _managerType = null;
+    private static Type _managerType;
 
     static SQLiteConnectionStringEditor()
     {
@@ -104,11 +104,11 @@ namespace SQLite.Designer
           connectionString = (string)_managerType.InvokeMember("GetConnectionString", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { n });
           connectionName = (string)_managerType.InvokeMember("GetConnectionName", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { n });
           dataProvider = (string)_managerType.InvokeMember("GetProvider", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { n });
-          if (String.Compare(dataProvider, "System.Data.SQLite", true) == 0)
+          if (String.Compare(dataProvider, "System.Data.SQLite", StringComparison.OrdinalIgnoreCase) == 0)
           {
             node = selector.AddNode(connectionName, connectionString, null);
             
-            if (String.Compare(connectionString, connection.ConnectionString, true) == 0)
+            if (String.Compare(connectionString, connection.ConnectionString, StringComparison.OrdinalIgnoreCase) == 0)
               selector.SelectedNode = node;
           }
         }

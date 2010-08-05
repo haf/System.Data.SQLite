@@ -23,7 +23,6 @@ namespace System.Data.SQLite
     {
       _transaction = cnn.BeginTransaction();
       _scope = scope;
-      _disposeConnection = false;
 
       _scope.EnlistVolatile(this, System.Transactions.EnlistmentOptions.None);
     }

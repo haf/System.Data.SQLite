@@ -22,7 +22,7 @@ namespace SQLite.Designer
   /// </summary>
   internal sealed class SQLiteAdapterDesigner : ComponentDesigner, IExtenderProvider
   {
-    private ComponentDesigner _designer = null;
+    private ComponentDesigner _designer;
 
     /// <summary>
     /// Empty constructor

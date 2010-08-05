@@ -10,6 +10,7 @@ namespace System.Data.SQLite
   using System;
   using System.Data;
   using System.Data.Common;
+  using System.Threading;
 
   /// <summary>
   /// SQLite implementation of DbTransaction.
@@ -100,12 +101,9 @@ namespace System.Data.SQLite
     {
       if (disposing)
       {
-        lock (this)
+        if (IsValid(false))
         {
-          if (IsValid(false))
-            IssueRollback(_cnn);
-
-          _cnn = null;
+          IssueRollback();
         }
       }
       base.Dispose(disposing);
@@ -125,18 +123,22 @@ namespace System.Data.SQLite
     public override void Rollback()
     {
       IsValid(true);
-      IssueRollback(_cnn);
-      _cnn = null;
+      IssueRollback();
     }
 
-    internal static void IssueRollback(SQLiteConnection cnn)
+    internal void IssueRollback()
     {
-      using (SQLiteCommand cmd = cnn.CreateCommand())
+      SQLiteConnection cnn = Interlocked.Exchange(ref _cnn, null);
+
+      if (cnn != null)
       {
-        cmd.CommandText = "ROLLBACK";
-        cmd.ExecuteNonQuery();
+        using (SQLiteCommand cmd = cnn.CreateCommand())
+        {
+          cmd.CommandText = "ROLLBACK";
+          cmd.ExecuteNonQuery();
+        }
+        cnn._transactionLevel = 0;
       }
-      cnn._transactionLevel = 0;
     }
 
     internal bool IsValid(bool throwError)

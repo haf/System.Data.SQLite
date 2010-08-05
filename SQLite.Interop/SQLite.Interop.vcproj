@@ -164,7 +164,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /ARMPADCODE"
-				OutputFile="../bin/CompactFramework/$(InputName).064.DLL"
+				OutputFile="../bin/CompactFramework/$(InputName).066.DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -504,7 +504,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /ARMPADCODE"
-				OutputFile="../bin/CompactFramework/$(InputName).064.DLL"
+				OutputFile="../bin/CompactFramework/$(InputName).065.DLL"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="src\sqlite3.def"
@@ -1032,11 +1032,6 @@
 		</Configuration>
 	</Configurations>
 	<References>
-		<AssemblyReference
-			RelativePath="System.Drawing.dll"
-			AssemblyName="System.Drawing, Version=2.0.0.0, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
-			MinFrameworkVersion="131072"
-		/>
 	</References>
 	<Files>
 		<Filter

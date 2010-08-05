@@ -14,6 +14,7 @@ namespace SQLite.Designer
   using Microsoft.VisualStudio;
   using Microsoft.VisualStudio.OLE.Interop;
   using System.Data.Common;
+  using System.Globalization;
   using SQLite.Designer.Editors;
 
   enum cmdid
@@ -104,7 +105,7 @@ namespace SQLite.Designer
           parts = DataViewHierarchyAccessor.GetObjectIdentifier(items[n]);
           if (parts == null) return true;
 
-          if (parts[2].ToString().StartsWith("sqlite_", StringComparison.InvariantCultureIgnoreCase))
+          if (parts[2].ToString().StartsWith("sqlite_", StringComparison.OrdinalIgnoreCase))
             return true;
         }
         return false;
@@ -124,13 +125,13 @@ namespace SQLite.Designer
           parts = DataViewHierarchyAccessor.GetObjectIdentifier(items[n]);
           if (parts == null) return true;
 
-          if (parts[2].ToString().StartsWith("sqlite_", StringComparison.InvariantCultureIgnoreCase))
+          if (parts[2].ToString().StartsWith("sqlite_", StringComparison.OrdinalIgnoreCase))
             return true;
 
           if (parts.Length > 3)
           {
-            if (parts[3].ToString().StartsWith("sqlite_autoindex_", StringComparison.InvariantCultureIgnoreCase)
-              || parts[3].ToString().StartsWith("sqlite_master_PK_", StringComparison.InvariantCultureIgnoreCase))
+            if (parts[3].ToString().StartsWith("sqlite_autoindex_", StringComparison.OrdinalIgnoreCase)
+              || parts[3].ToString().StartsWith("sqlite_master_PK_", StringComparison.OrdinalIgnoreCase))
               return true;
           }
         }
@@ -299,9 +300,9 @@ namespace SQLite.Designer
         parts = DataViewHierarchyAccessor.GetObjectIdentifier(items[n]);
         if (parts == null) continue;
 
-        if (System.Windows.Forms.MessageBox.Show(String.Format("Drop table {0} ({1}), are you sure?", parts[2], parts[0]), "Confirm delete", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+        if (System.Windows.Forms.MessageBox.Show(String.Format(CultureInfo.InvariantCulture, "Drop table {0} ({1}), are you sure?", parts[2], parts[0]), "Confirm delete", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
         {
-          string sql = String.Format("DROP TABLE [{0}].[{1}]", parts[0], parts[2]);
+          string sql = String.Format(CultureInfo.InvariantCulture, "DROP TABLE [{0}].[{1}]", parts[0], parts[2]);
 
           DataViewHierarchyAccessor.Connection.Command.ExecuteWithoutResults(sql, (int)System.Data.CommandType.Text, null, 0);
           DataViewHierarchyAccessor.DropObjectNode(items[n]);
@@ -321,9 +322,9 @@ namespace SQLite.Designer
         parts = DataViewHierarchyAccessor.GetObjectIdentifier(items[n]);
         if (parts == null) continue;
 
-        if (System.Windows.Forms.MessageBox.Show(String.Format("Drop view {0} ({1}), are you sure?", parts[2], parts[0]), "Confirm delete", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+        if (System.Windows.Forms.MessageBox.Show(String.Format(CultureInfo.InvariantCulture, "Drop view {0} ({1}), are you sure?", parts[2], parts[0]), "Confirm delete", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
         {
-          string sql = String.Format("DROP VIEW [{0}].[{1}]", parts[0], parts[2]);
+          string sql = String.Format(CultureInfo.InvariantCulture, "DROP VIEW [{0}].[{1}]", parts[0], parts[2]);
 
           DataViewHierarchyAccessor.Connection.Command.ExecuteWithoutResults(sql, (int)System.Data.CommandType.Text, null, 0);
           DataViewHierarchyAccessor.DropObjectNode(items[n]);
@@ -343,9 +344,9 @@ namespace SQLite.Designer
         parts = DataViewHierarchyAccessor.GetObjectIdentifier(items[n]);
         if (parts == null) continue;
 
-        if (System.Windows.Forms.MessageBox.Show(String.Format("Drop index {0} ({1}), are you sure?", parts[3], parts[0]), "Confirm delete", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+        if (System.Windows.Forms.MessageBox.Show(String.Format(CultureInfo.InvariantCulture, "Drop index {0} ({1}), are you sure?", parts[3], parts[0]), "Confirm delete", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
         {
-          string sql = String.Format("DROP INDEX [{0}].[{1}]", parts[0], parts[3]);
+          string sql = String.Format(CultureInfo.InvariantCulture, "DROP INDEX [{0}].[{1}]", parts[0], parts[3]);
 
           DataViewHierarchyAccessor.Connection.Command.ExecuteWithoutResults(sql, (int)System.Data.CommandType.Text, null, 0);
           DataViewHierarchyAccessor.DropObjectNode(items[n]);

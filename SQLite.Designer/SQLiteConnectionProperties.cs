@@ -92,11 +92,11 @@ namespace SQLite.Designer
 
     internal static string MapUriPath(string path)
     {
-      if (path.StartsWith("file://"))
+      if (path.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
         return path.Substring(7);
-      else if (path.StartsWith("file:"))
+      else if (path.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
         return path.Substring(5);
-      else if (path.StartsWith("/"))
+      else if (path.StartsWith("/", StringComparison.OrdinalIgnoreCase))
         return path;
       else
         return String.Empty;

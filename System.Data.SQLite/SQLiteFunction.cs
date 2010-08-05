@@ -34,7 +34,7 @@ namespace System.Data.SQLite
     private class AggregateData
     {
       internal int _count = 1;
-      internal object _data = null;
+      internal object _data;
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// This static list contains all the user-defined functions declared using the proper attributes.
     /// </summary>
-    private static List<SQLiteFunctionAttribute> _registeredFunctions = new List<SQLiteFunctionAttribute>();
+    private static List<SQLiteFunctionAttribute> _registeredFunctions;
 
     /// <summary>
     /// Internal constructor, initializes the function's internal variables.
@@ -386,6 +386,7 @@ namespace System.Data.SQLite
     public void Dispose()
     {
       Dispose(true);
+      GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -397,6 +398,7 @@ namespace System.Data.SQLite
 #endif
     static SQLiteFunction()
     {
+      _registeredFunctions = new List<SQLiteFunctionAttribute>();
       try
       {
 #if !PLATFORM_COMPACTFRAMEWORK

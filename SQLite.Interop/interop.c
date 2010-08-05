@@ -441,9 +441,10 @@ __declspec(dllexport) int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int c
     {
       *prowid = pC->lastRowid;
     }
-    else if(pC->pseudoTable)
+    else if(pC->pseudoTableReg > 0)
     {
-      *prowid = pC->iKey;
+      ret = SQLITE_ERROR;
+      break;
     }
     else if(pC->nullRow || pC->pCursor==0)
     {

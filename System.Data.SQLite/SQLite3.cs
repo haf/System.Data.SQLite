@@ -23,10 +23,10 @@ namespace System.Data.SQLite
     protected SQLiteConnectionHandle _sql;
     protected string _fileName;
     protected bool _usePool;
-    protected int _poolVersion = 0;
+    protected int _poolVersion;
 
 #if !PLATFORM_COMPACTFRAMEWORK
-    private bool _buildingSchema = false;
+    private bool _buildingSchema;
 #endif
     /// <summary>
     /// The user-defined functions registered on this connection
@@ -476,7 +476,7 @@ namespace System.Data.SQLite
 
       for (int n = 0; n < x; n++)
       {
-        if (String.Compare(columnName, ColumnName(stmt, n), true, CultureInfo.InvariantCulture) == 0)
+        if (String.Compare(columnName, ColumnName(stmt, n), StringComparison.OrdinalIgnoreCase) == 0)
           return n;
       }
       return -1;
@@ -656,7 +656,7 @@ namespace System.Data.SQLite
     internal override void CreateCollation(string strCollation, SQLiteCollation func, SQLiteCollation func16)
     {
       int n = UnsafeNativeMethods.sqlite3_create_collation(_sql, ToUTF8(strCollation), 2, IntPtr.Zero, func16);
-      if (n == 0) UnsafeNativeMethods.sqlite3_create_collation(_sql, ToUTF8(strCollation), 1, IntPtr.Zero, func);
+      if (n == 0) n = UnsafeNativeMethods.sqlite3_create_collation(_sql, ToUTF8(strCollation), 1, IntPtr.Zero, func);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
 

@@ -115,6 +115,11 @@ namespace install
       string[] frameworkfolders = Directory.GetDirectories(frameworkpath);
       foreach (string framework in frameworkfolders)
       {
+        // Don't do this on frameworks before 2.0
+        string version = Path.GetFileNameWithoutExtension(framework);
+        if (String.Compare(version, "v2.0", StringComparison.OrdinalIgnoreCase) < 0)
+          continue;
+
         if (File.Exists(Path.Combine(framework, "CONFIG\\machine.config")))
           _frameworks.Add(Path.GetFileName(framework));
       }

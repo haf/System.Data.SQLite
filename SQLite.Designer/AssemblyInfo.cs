@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.ConstrainedExecution;
+using System.Resources;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -22,6 +23,7 @@ using System.Runtime.ConstrainedExecution;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+[assembly: NeutralResourcesLanguage("en")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,8 +34,8 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.36.0")]
-[assembly: AssemblyFileVersion("1.0.36.0")]
+[assembly: AssemblyVersion("1.0.37.0")]
+[assembly: AssemblyFileVersion("1.0.37.0")]
 [assembly: AssemblyDelaySignAttribute(false)]
 [assembly: AssemblyKeyFileAttribute("..\\System.Data.SQLite\\System.Data.SQLite.snk")]
 [assembly: AssemblyKeyNameAttribute("")]

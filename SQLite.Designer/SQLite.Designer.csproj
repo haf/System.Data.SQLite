@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30703</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9B4A5CF6-5BE5-4926-ACC7-B729A8C05198}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -50,6 +50,7 @@
     <RegisterOutputPackage>false</RegisterOutputPackage>
     <RegisterWithCodebase>false</RegisterWithCodebase>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

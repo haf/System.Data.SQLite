@@ -17,6 +17,7 @@ namespace SQLite.Designer
   using System.Windows.Forms;
   using System.Drawing;
   using System.Runtime.Serialization;
+  using System.Globalization;
 
   /// <summary>
   /// Provides a toolboxitem for a SQLiteDataAdapter.  This is required in order for us to 
@@ -31,9 +32,9 @@ namespace SQLite.Designer
   [ToolboxItem(typeof(SQLiteDataAdapterToolboxItem))]
   internal sealed class SQLiteDataAdapterToolboxItem : ToolboxItem
   {
-    private static Type _wizard = null;
+    private static Type _wizard;
     
-    internal static Assembly _vsdesigner = null;
+    internal static Assembly _vsdesigner;
 
     static SQLiteDataAdapterToolboxItem()
     {
@@ -69,17 +70,19 @@ namespace SQLite.Designer
       
       using (DbCommand adapterCommand = fact.CreateCommand())
       {
+        ICloneable adapter = (ICloneable)adapterCommand;
+
         adapterCommand.DesignTimeVisible = false;
-        dataAdapter.SelectCommand = (DbCommand)((ICloneable)adapterCommand).Clone();
+        dataAdapter.SelectCommand = (DbCommand)adapter.Clone();
         container.Add(dataAdapter.SelectCommand, GenerateName(container, "SelectCommand"));
 
-        dataAdapter.InsertCommand = (DbCommand)((ICloneable)adapterCommand).Clone();
+        dataAdapter.InsertCommand = (DbCommand)adapter.Clone();
         container.Add(dataAdapter.InsertCommand, GenerateName(container, "InsertCommand"));
 
-        dataAdapter.UpdateCommand = (DbCommand)((ICloneable)adapterCommand).Clone();
+        dataAdapter.UpdateCommand = (DbCommand)adapter.Clone();
         container.Add(dataAdapter.UpdateCommand, GenerateName(container, "UpdateCommand"));
 
-        dataAdapter.DeleteCommand = (DbCommand)((ICloneable)adapterCommand).Clone();
+        dataAdapter.DeleteCommand = (DbCommand)adapter.Clone();
         container.Add(dataAdapter.DeleteCommand, GenerateName(container, "DeleteCommand"));
       }
 
@@ -124,7 +127,7 @@ namespace SQLite.Designer
       int n = 1;
       do
       {
-        uniqueName = String.Format("sqlite{0}{1}", baseName, n++);
+        uniqueName = String.Format(CultureInfo.InvariantCulture, "sqlite{0}{1}", baseName, n++);
       } while (coll[uniqueName] != null);
 
       return uniqueName;

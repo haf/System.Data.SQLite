@@ -14,6 +14,7 @@ namespace SQLite.Designer
   using System.Drawing;
   using System.Text;
   using System.Windows.Forms;
+  using System.Globalization;
   using SQLite.Designer.Design;
 
   public partial class ChangeScriptDialog : Form
@@ -59,7 +60,7 @@ namespace SQLite.Designer
         save.DefaultExt = "sql";
         save.OverwritePrompt = true;
         save.Filter = "SQL Script Files (*.sql)|*.sql|All Files (*.*)|*.*";
-        save.FileName = String.Format("{0}.sql", _tableName);
+        save.FileName = String.Format(CultureInfo.InvariantCulture, "{0}.sql", _tableName);
         save.Title = "Save SQLite Change Script";
 
         DialogResult = save.ShowDialog(this);

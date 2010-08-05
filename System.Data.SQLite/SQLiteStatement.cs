@@ -109,7 +109,7 @@ namespace System.Data.SQLite
       int x = _paramNames.Length;
       for (int n = 0; n < x; n++)
       {
-        if (String.Compare(_paramNames[n], startAt, s, 0, Math.Max(_paramNames[n].Length - startAt, s.Length), true, CultureInfo.InvariantCulture) == 0)
+        if (String.Compare(_paramNames[n], startAt, s, 0, Math.Max(_paramNames[n].Length - startAt, s.Length), StringComparison.OrdinalIgnoreCase) == 0)
         {
           _paramValues[n] = p;
           return true;

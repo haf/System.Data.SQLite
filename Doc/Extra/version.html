@@ -55,6 +55,22 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.66.0 - April 18, 2010</b></p>
+    <ul>
+      <li>Code merge with SQLite 3.6.23.1</li>
+      <li>Fixed a bug in the installer that accidentally modified the machine.config on .NET versions prior to 2.0, invaliding the config file.</li>
+      <li>Fixed INTERSECT and EXCEPT union query generation in EF</li>
+      <li>Fixed an out of memory error in the trigger designer in cases where a WHEN clause is used in the trigger</li>
+    </ul>
+    <p><b>1.0.65.0 - July 26, 2009</b></p>
+    <ul>
+      <li>Fixed a bug in the encryption module to prevent a double free() when rekeying a database.</li>
+      <li>Fixed a bug in the encryption module when ATTACHing an encrypted database.</li>
+      <li>Incorporated the WinCE locking fix from ticket
+        <a href="http://www.sqlite.org/cvstrac/tktview?tn=3991">#3991</a></li>
+      <li>Added &quot;bigint&quot; to the dropdown in the table designer, plus other minor table 
+        designer bugfixes.</li>
+    </ul>
     <p><b>1.0.64.0 - July 9, 2009</b></p>
     <ul>
       <li>Fixed the missing resources problem from the 63 release.</li>

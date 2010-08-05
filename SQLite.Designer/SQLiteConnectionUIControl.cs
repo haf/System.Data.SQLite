@@ -14,6 +14,7 @@ namespace SQLite.Designer
   using System.Drawing;
   using System.Text;
   using System.Windows.Forms;
+  using System.Globalization;
   using Microsoft.VisualStudio.Data;
   using Microsoft.Win32;
 
@@ -109,13 +110,13 @@ namespace SQLite.Designer
 
     private void pageSizeTextBox_Leave(object sender, EventArgs e)
     {
-      int n = Convert.ToInt32(pageSizeTextBox.Text);
+      int n = Convert.ToInt32(pageSizeTextBox.Text, CultureInfo.CurrentCulture);
       ConnectionProperties["page size"] = n;
     }
 
     private void cacheSizeTextbox_Leave(object sender, EventArgs e)
     {
-      int n = Convert.ToInt32(cacheSizeTextbox.Text);
+      int n = Convert.ToInt32(cacheSizeTextbox.Text, CultureInfo.CurrentCulture);
       ConnectionProperties["cache size"] = n;
     }
 

@@ -227,11 +227,8 @@ namespace System.Data.SQLite
     /// <param name="connectionString">The connection string to use on the connection</param>
     public SQLiteConnection(string connectionString)
     {
-      _sql = null;
       _connectionState = ConnectionState.Closed;
       _connectionString = "";
-      _transactionLevel = 0;
-      _version = 0;
       //_commandList = new List<WeakReference>();
 
       if (connectionString != null)
@@ -259,8 +256,8 @@ namespace System.Data.SQLite
           foreach (DataRow row in tbl.Rows)
           {
             str = row[0].ToString();
-            if (String.Compare(str, "main", true, CultureInfo.InvariantCulture) != 0
-              && String.Compare(str, "temp", true, CultureInfo.InvariantCulture) != 0)
+            if (String.Compare(str, "main", StringComparison.OrdinalIgnoreCase) != 0
+              && String.Compare(str, "temp", StringComparison.OrdinalIgnoreCase) != 0)
             {
               using (SQLiteCommand cmd = CreateCommand())
               {
@@ -601,7 +598,7 @@ namespace System.Data.SQLite
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
     [RefreshProperties(RefreshProperties.All), DefaultValue("")]
-    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.36.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.37.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
     public override string ConnectionString
     {
@@ -669,11 +666,11 @@ namespace System.Data.SQLite
 
     internal static string MapUriPath(string path)
     {
-	    if (path.StartsWith ("file://"))
+	    if (path.StartsWith ("file://", StringComparison.OrdinalIgnoreCase))
 		    return path.Substring (7);
-      else if (path.StartsWith ("file:"))
+      else if (path.StartsWith ("file:", StringComparison.OrdinalIgnoreCase))
 		    return path.Substring (5);
-      else if (path.StartsWith ("/"))
+      else if (path.StartsWith ("/", StringComparison.OrdinalIgnoreCase))
 		    return path;
       else
 		    throw new InvalidOperationException ("Invalid connection string: invalid URI");
@@ -771,7 +768,7 @@ namespace System.Data.SQLite
           fileName = MapUriPath(fileName);
       }
 
-      if (String.Compare(fileName, ":MEMORY:", true, CultureInfo.InvariantCulture) == 0)
+      if (String.Compare(fileName, ":MEMORY:", StringComparison.OrdinalIgnoreCase) == 0)
         fileName = ":memory:";
       else
       {
@@ -785,7 +782,7 @@ namespace System.Data.SQLite
       {
         bool usePooling = (SQLiteConvert.ToBoolean(FindKey(opts, "Pooling", Boolean.FalseString)) == true);
         bool bUTF16 = (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding", Boolean.FalseString)) == true);
-        int maxPoolSize = Convert.ToInt32(FindKey(opts, "Max Pool Size", "100"));
+        int maxPoolSize = Convert.ToInt32(FindKey(opts, "Max Pool Size", "100"), CultureInfo.InvariantCulture);
 
         _defaultTimeout = Convert.ToInt32(FindKey(opts, "Default Timeout", "30"), CultureInfo.CurrentCulture);
 
@@ -795,8 +792,8 @@ namespace System.Data.SQLite
 
         SQLiteDateFormats dateFormat = (SQLiteDateFormats)Enum.Parse(typeof(SQLiteDateFormats), FindKey(opts, "DateTimeFormat", "ISO8601"), true);
         //string temp = FindKey(opts, "DateTimeFormat", "ISO8601");
-        //if (String.Compare(temp, "ticks", true, CultureInfo.InvariantCulture) == 0) dateFormat = SQLiteDateFormats.Ticks;
-        //else if (String.Compare(temp, "julianday", true, CultureInfo.InvariantCulture) == 0) dateFormat = SQLiteDateFormats.JulianDay;
+        //if (String.Compare(temp, "ticks", StringComparison.OrdinalIgnoreCase) == 0) dateFormat = SQLiteDateFormats.Ticks;
+        //else if (String.Compare(temp, "julianday", StringComparison.OrdinalIgnoreCase) == 0) dateFormat = SQLiteDateFormats.JulianDay;
 
         if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
           _sql = new SQLite3_UTF16(dateFormat);
@@ -1312,14 +1309,14 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
 
       using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'table' OR [type] LIKE 'view'", strCatalog, master), this))
       using (SQLiteDataReader rdTables = cmdTables.ExecuteReader())
       {
         while (rdTables.Read())
         {
-          if (String.IsNullOrEmpty(strTable) || String.Compare(strTable, rdTables.GetString(2), true, CultureInfo.InvariantCulture) == 0)
+          if (String.IsNullOrEmpty(strTable) || String.Compare(strTable, rdTables.GetString(2), StringComparison.OrdinalIgnoreCase) == 0)
           {
             try
             {
@@ -1329,7 +1326,7 @@ namespace System.Data.SQLite
               {
                 foreach (DataRow schemaRow in tblSchema.Rows)
                 {
-                  if (String.Compare(schemaRow[SchemaTableColumn.ColumnName].ToString(), strColumn, true, CultureInfo.InvariantCulture) == 0
+                  if (String.Compare(schemaRow[SchemaTableColumn.ColumnName].ToString(), strColumn, StringComparison.OrdinalIgnoreCase) == 0
                     || strColumn == null)
                   {
                     row = tbl.NewRow();
@@ -1415,7 +1412,7 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
       
       using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'table'", strCatalog, master), this))
       using (SQLiteDataReader rdTables = cmdTables.ExecuteReader())
@@ -1424,7 +1421,7 @@ namespace System.Data.SQLite
         {
           maybeRowId = false;
           primaryKeys.Clear();
-          if (String.IsNullOrEmpty(strTable) || String.Compare(rdTables.GetString(2), strTable, true, CultureInfo.InvariantCulture) == 0)
+          if (String.IsNullOrEmpty(strTable) || String.Compare(rdTables.GetString(2), strTable, StringComparison.OrdinalIgnoreCase) == 0)
           {
             // First, look for any rowid indexes -- which sqlite defines are INTEGER PRIMARY KEY columns.
             // Such indexes are not listed in the indexes list but count as indexes just the same.
@@ -1440,7 +1437,7 @@ namespace System.Data.SQLite
                     primaryKeys.Add(rdTable.GetInt32(0));
 
                     // If the primary key is of type INTEGER, then its a rowid and we need to make a fake index entry for it.
-                    if (String.Compare(rdTable.GetString(2), "INTEGER", true, CultureInfo.InvariantCulture) == 0)
+                    if (String.Compare(rdTable.GetString(2), "INTEGER", StringComparison.OrdinalIgnoreCase) == 0)
                       maybeRowId = true;
                   }
                 }
@@ -1460,7 +1457,7 @@ namespace System.Data.SQLite
               row["INDEX_NAME"] = String.Format(CultureInfo.InvariantCulture, "{1}_PK_{0}", rdTables.GetString(2), master);
               row["UNIQUE"] = true;
 
-              if (String.Compare((string)row["INDEX_NAME"], strIndex, true, CultureInfo.InvariantCulture) == 0
+              if (String.Compare((string)row["INDEX_NAME"], strIndex, StringComparison.OrdinalIgnoreCase) == 0
               || strIndex == null)
               {
                 tbl.Rows.Add(row);
@@ -1477,7 +1474,7 @@ namespace System.Data.SQLite
               {
                 while (rd.Read())
                 {
-                  if (String.Compare(rd.GetString(1), strIndex, true, CultureInfo.InvariantCulture) == 0
+                  if (String.Compare(rd.GetString(1), strIndex, StringComparison.OrdinalIgnoreCase) == 0
                   || strIndex == null)
                   {
                     row = tbl.NewRow();
@@ -1561,17 +1558,17 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(table)) table = null;
       if (String.IsNullOrEmpty(catalog)) catalog = "main";
-      string master = (String.Compare(catalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      string master = (String.Compare(catalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
 
       using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT [type], [name], [tbl_name], [rootpage], [sql], [rowid] FROM [{0}].[{1}] WHERE [type] LIKE 'trigger'", catalog, master), this))
       using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
       {
         while (rd.Read())
         {
-          if (String.Compare(rd.GetString(1), triggerName, true, CultureInfo.InvariantCulture) == 0
+          if (String.Compare(rd.GetString(1), triggerName, StringComparison.OrdinalIgnoreCase) == 0
             || triggerName == null)
           {
-            if (table == null || String.Compare(table, rd.GetString(2), true, CultureInfo.InvariantCulture) == 0)
+            if (table == null || String.Compare(table, rd.GetString(2), StringComparison.OrdinalIgnoreCase) == 0)
             {
               row = tbl.NewRow();
 
@@ -1616,7 +1613,7 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
 
       using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT [type], [name], [tbl_name], [rootpage], [sql], [rowid] FROM [{0}].[{1}] WHERE [type] LIKE 'table'", strCatalog, master), this))
       using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
@@ -1624,13 +1621,13 @@ namespace System.Data.SQLite
         while (rd.Read())
         {
           strItem = rd.GetString(0);
-          if (String.Compare(rd.GetString(2), 0, "SQLITE_", 0, 7, true, CultureInfo.InvariantCulture) == 0)
+          if (String.Compare(rd.GetString(2), 0, "SQLITE_", 0, 7, StringComparison.OrdinalIgnoreCase) == 0)
             strItem = "SYSTEM_TABLE";
 
-          if (String.Compare(strType, strItem, true, CultureInfo.InvariantCulture) == 0
+          if (String.Compare(strType, strItem, StringComparison.OrdinalIgnoreCase) == 0
             || strType == null)
           {
-            if (String.Compare(rd.GetString(2), strTable, true, CultureInfo.InvariantCulture) == 0
+            if (String.Compare(rd.GetString(2), strTable, StringComparison.OrdinalIgnoreCase) == 0
               || strTable == null)
             {
               row = tbl.NewRow();
@@ -1682,14 +1679,14 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
 
       using (SQLiteCommand cmd = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'view'", strCatalog, master), this))
       using (SQLiteDataReader rd = (SQLiteDataReader)cmd.ExecuteReader())
       {
         while (rd.Read())
         {
-          if (String.Compare(rd.GetString(1), strView, true, CultureInfo.InvariantCulture) == 0
+          if (String.Compare(rd.GetString(1), strView, StringComparison.OrdinalIgnoreCase) == 0
             || String.IsNullOrEmpty(strView))
           {
             strItem = rd.GetString(4).Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ');
@@ -1738,7 +1735,7 @@ namespace System.Data.SQLite
       {
         while (rd.Read())
         {
-          if (String.Compare(rd.GetString(1), strCatalog, true, CultureInfo.InvariantCulture) == 0
+          if (String.Compare(rd.GetString(1), strCatalog, StringComparison.OrdinalIgnoreCase) == 0
             || strCatalog == null)
           {
             row = tbl.NewRow();
@@ -1829,7 +1826,7 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
 
       tbl.BeginLoadData();
 
@@ -1840,7 +1837,7 @@ namespace System.Data.SQLite
         {
           maybeRowId = false;
           primaryKeys.Clear();
-          if (String.IsNullOrEmpty(strTable) || String.Compare(rdTables.GetString(2), strTable, true, CultureInfo.InvariantCulture) == 0)
+          if (String.IsNullOrEmpty(strTable) || String.Compare(rdTables.GetString(2), strTable, StringComparison.OrdinalIgnoreCase) == 0)
           {
             try
             {
@@ -1853,7 +1850,7 @@ namespace System.Data.SQLite
                   {
                     primaryKeys.Add(new KeyValuePair<int, string>(rdTable.GetInt32(0), rdTable.GetString(1)));
                     // Is an integer -- could be a rowid if no other primary keys exist in the table
-                    if (String.Compare(rdTable.GetString(2), "INTEGER", true, CultureInfo.InvariantCulture) == 0)
+                    if (String.Compare(rdTable.GetString(2), "INTEGER", StringComparison.OrdinalIgnoreCase) == 0)
                       maybeRowId = true;
                   }
                 }
@@ -1877,7 +1874,7 @@ namespace System.Data.SQLite
               row["SORT_MODE"] = "ASC";
               row["CONFLICT_OPTION"] = 2;
 
-              if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, (string)row["INDEX_NAME"], true, CultureInfo.InvariantCulture) == 0)
+              if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, (string)row["INDEX_NAME"], StringComparison.OrdinalIgnoreCase) == 0)
                 tbl.Rows.Add(row);
             }
 
@@ -1887,7 +1884,7 @@ namespace System.Data.SQLite
               while (rdIndexes.Read())
               {
                 int ordinal = 0;
-                if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, rdIndexes.GetString(1), true, CultureInfo.InvariantCulture) == 0)
+                if (String.IsNullOrEmpty(strIndex) || String.Compare(strIndex, rdIndexes.GetString(1), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                   try
                   {
@@ -1918,7 +1915,7 @@ namespace System.Data.SQLite
 
                         ordinal++;
 
-                        if (String.IsNullOrEmpty(strColumn) || String.Compare(strColumn, row["COLUMN_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
+                        if (String.IsNullOrEmpty(strColumn) || String.Compare(strColumn, row["COLUMN_NAME"].ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                           tbl.Rows.Add(row);
                       }
                     }
@@ -1987,7 +1984,7 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
       
       tbl.BeginLoadData();
 
@@ -1996,7 +1993,7 @@ namespace System.Data.SQLite
       {
         while (rdViews.Read())
         {
-          if (String.IsNullOrEmpty(strView) || String.Compare(strView, rdViews.GetString(2), true, CultureInfo.InvariantCulture) == 0)
+          if (String.IsNullOrEmpty(strView) || String.Compare(strView, rdViews.GetString(2), StringComparison.OrdinalIgnoreCase) == 0)
           {
             using (SQLiteCommand cmdViewSelect = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}]", strCatalog, rdViews.GetString(2)), this))
             {
@@ -2018,7 +2015,7 @@ namespace System.Data.SQLite
                   viewRow = tblSchemaView.Rows[n];
                   schemaRow = tblSchema.Rows[n];
 
-                  if (String.Compare(viewRow[SchemaTableColumn.ColumnName].ToString(), strColumn, true, CultureInfo.InvariantCulture) == 0
+                  if (String.Compare(viewRow[SchemaTableColumn.ColumnName].ToString(), strColumn, StringComparison.OrdinalIgnoreCase) == 0
                     || strColumn == null)
                   {
                     row = tbl.NewRow();
@@ -2088,7 +2085,7 @@ namespace System.Data.SQLite
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
-      string master = (String.Compare(strCatalog, "temp", true, CultureInfo.InvariantCulture) == 0) ? _tempmasterdb : _masterdb;
+      string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
 
       tbl.BeginLoadData();
 
@@ -2097,7 +2094,7 @@ namespace System.Data.SQLite
       {
         while (rdTables.Read())
         {
-          if (String.IsNullOrEmpty(strTable) || String.Compare(strTable, rdTables.GetString(2), true, CultureInfo.InvariantCulture) == 0)
+          if (String.IsNullOrEmpty(strTable) || String.Compare(strTable, rdTables.GetString(2), StringComparison.OrdinalIgnoreCase) == 0)
           {
             try
             {
@@ -2123,7 +2120,7 @@ namespace System.Data.SQLite
                   row["FKEY_TO_COLUMN"] = builder.UnquoteIdentifier(rdKey[4].ToString());
                   row["FKEY_FROM_ORDINAL_POSITION"] = rdKey[1];
 
-                  if (String.IsNullOrEmpty(strKeyName) || String.Compare(strKeyName, row["CONSTRAINT_NAME"].ToString(), true, CultureInfo.InvariantCulture) == 0)
+                  if (String.IsNullOrEmpty(strKeyName) || String.Compare(strKeyName, row["CONSTRAINT_NAME"].ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                     tbl.Rows.Add(row);
                 }
               }
