@@ -143,6 +143,12 @@ namespace System.Data.SQLite
   /// <description>N</description>
   /// <description>Serializable</description>
   /// </item>
+  /// <item>
+  /// <description>Foreign Keys</description>
+  /// <description><b>True</b> - Enables foreign key enforcement<br/><b>False</b> - Disables foreign key enforcement</description>
+  /// <description>N</description>
+  /// <description>False</description>
+  /// </item>
   /// </list>
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
@@ -594,6 +600,12 @@ namespace System.Data.SQLite
     /// <description>N</description>
     /// <description>Serializable</description>
     /// </item>
+    /// <item>
+    /// <description>Foreign Keys</description>
+    /// <description><b>True</b> - Enables foreign key enforcement<br/><b>False</b> - Disables foreign key enforcement</description>
+    /// <description>N</description>
+    /// <description>False</description>
+    /// </item>
     /// </list>
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -870,11 +882,15 @@ namespace System.Data.SQLite
             }
 
             defValue = FindKey(opts, "Journal Mode", "Delete");
-            if (String.Compare(defValue, "Default", StringComparison.OrdinalIgnoreCase) != 0)
+            if (String.Compare(defValue, "Delete", StringComparison.OrdinalIgnoreCase) != 0)
             {
               cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA journal_mode={0}", defValue);
               cmd.ExecuteNonQuery();
             }
+
+            defValue = FindKey(opts, "Foreign Keys", Boolean.FalseString);
+            cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA foreign_keys={0}", SQLiteConvert.ToBoolean(defValue) == true ? "ON" : "OFF");
+            cmd.ExecuteNonQuery();
           }
 
           if (_commitHandler != null)
@@ -1155,7 +1171,7 @@ namespace System.Data.SQLite
 
     private static DataTable Schema_ReservedWords()
     {
-      DataTable tbl = new DataTable("MetaDataCollections");
+      DataTable tbl = new DataTable("ReservedWords");
 
       tbl.Locale = CultureInfo.InvariantCulture;
       tbl.Columns.Add("ReservedWord", typeof(string));

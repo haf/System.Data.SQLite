@@ -459,6 +459,26 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// If enabled, use foreign key constraints
+    /// </summary>
+    [DisplayName("Foreign Keys")]
+    [Browsable(true)]
+    [DefaultValue(false)]
+    public bool ForeignKeys
+    {
+        get
+        {
+            object value;
+            TryGetValue("foreign keys", out value);
+            return SQLiteConvert.ToBoolean(value);
+        }
+        set
+        {
+            this["foreign keys"] = value;
+        }
+    }
+
+    /// <summary>
     /// Helper function for retrieving values from the connectionstring
     /// </summary>
     /// <param name="keyword">The keyword to retrieve settings for</param>
