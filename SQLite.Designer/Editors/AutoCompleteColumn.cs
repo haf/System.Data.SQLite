@@ -33,8 +33,8 @@ namespace SQLite.Designer.Editors
 
   public class AutoCompleteEditingControl : DataGridViewComboBoxEditingControl
   {
-    private bool inPrepare = false;
-    private bool isDeleting = false;
+    private bool inPrepare;
+    private bool isDeleting;
 
     public override object EditingControlFormattedValue
     {
@@ -58,6 +58,7 @@ namespace SQLite.Designer.Editors
         base.Items.Add("int");
         base.Items.Add("smallint");
         base.Items.Add("tinyint");
+        base.Items.Add("bigint");
         base.Items.Add("bit");
         base.Items.Add("varchar(50)");
         base.Items.Add("nvarchar(50)");

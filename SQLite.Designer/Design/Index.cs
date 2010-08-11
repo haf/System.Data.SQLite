@@ -17,12 +17,14 @@ namespace SQLite.Designer.Design
   using System.ComponentModel.Design;
   using System.Drawing.Design;
   using System.Windows.Forms;
+  using System.Security.Permissions;
+  using System.Globalization;
 
   internal class IndexEditor : CollectionEditor
   {
     Table _table;
     CollectionEditor.CollectionForm _form;
-    object[] _items = null;
+    object[] _items;
     object[] _orig;
     int _count;
 
@@ -114,8 +116,6 @@ namespace SQLite.Designer.Design
 
       if (editValue != null)
       {
-        int length = this.GetItems(editValue).Length;
-        int num2 = value.Length;
         if (!(editValue is IList))
         {
           return editValue;
@@ -224,8 +224,6 @@ namespace SQLite.Designer.Design
 
       if (editValue != null)
       {
-        int length = this.GetItems(editValue).Length;
-        int num2 = value.Length;
         if (!(editValue is IList))
         {
           return editValue;
@@ -451,13 +449,13 @@ namespace SQLite.Designer.Design
   internal class Index : IHaveConnection, ICloneable
   {
     private Table _table;
-    internal string _name = null;
+    internal string _name;
     private bool _unique;
     private List<IndexColumn> _columns = new List<IndexColumn>();
     private string _definition;
     private bool _calcname;
     internal ConflictEnum _conflict = ConflictEnum.Abort;
-    bool _dirty = false;
+    bool _dirty;
 
     protected Index(Index source)
     {
@@ -521,16 +519,16 @@ namespace SQLite.Designer.Design
     internal virtual void WriteSql(StringBuilder builder)
     {
       string separator = "";
-      builder.AppendFormat("CREATE {0}INDEX [{1}].[{2}] ON [{3}] (", (_unique == true) ? "UNIQUE " : "", _table.Catalog, Name, _table.Name);
+      builder.AppendFormat(CultureInfo.InvariantCulture, "CREATE {0}INDEX [{1}].[{2}] ON [{3}] (", (_unique == true) ? "UNIQUE " : "", _table.Catalog, Name, _table.Name);
       foreach (IndexColumn c in Columns)
       {
-        builder.AppendFormat("{0}[{1}]", separator, c.Column);
+        builder.AppendFormat(CultureInfo.InvariantCulture, "{0}[{1}]", separator, c.Column);
         
         if (c.SortMode != ColumnSortMode.Ascending)
           builder.Append(" DESC");
 
         if (String.IsNullOrEmpty(c.Collate) && String.Compare(c.Collate,"BINARY", StringComparison.OrdinalIgnoreCase) != 0)
-          builder.AppendFormat(" COLLATE {0}", c.Collate.ToUpperInvariant());
+          builder.AppendFormat(CultureInfo.InvariantCulture, " COLLATE {0}", c.Collate.ToUpperInvariant());
 
         separator = ", ";
       }
@@ -604,10 +602,10 @@ namespace SQLite.Designer.Design
         {
           if (_calcname == true) return GetHashCode().ToString();
 
-          string name = String.Format("{0}_{1}", NamePrefix, NewName);
+          string name = String.Format(CultureInfo.InvariantCulture, "{0}_{1}", NamePrefix, NewName);
           if (Columns.Count > 0 && NewName != Table.Name)
           {
-            name = String.Format("{0}_", NamePrefix);
+            name = String.Format(CultureInfo.InvariantCulture, "{0}_", NamePrefix);
             for (int n = 0; n < Columns.Count; n++)
             {
               if (n > 0) name += "_";
@@ -621,7 +619,7 @@ namespace SQLite.Designer.Design
           for (int n = 0; n < _table.Indexes.Count; n++)
           {
             Index idx = _table.Indexes[n];
-            proposed = string.Format("{0}{1}", name, (count > 0) ? count.ToString() : "");
+            proposed = String.Format(CultureInfo.InvariantCulture, "{0}{1}", name, (count > 0) ? count.ToString() : "");
             if (idx.Name == proposed)
             {
               count++;
@@ -680,11 +678,13 @@ namespace SQLite.Designer.Design
       _list.KeyPress += new KeyPressEventHandler(_list_KeyPress);
     }
 
+    [PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
     override public UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext ctx)
     {
       return UITypeEditorEditStyle.DropDown;
     }
 
+    [PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
     override public object EditValue(ITypeDescriptorContext ctx, IServiceProvider provider, object value)
     {
       Index idx = ctx.Instance as Index;
@@ -714,7 +714,7 @@ namespace SQLite.Designer.Design
           CheckState check = CheckState.Unchecked;
           for (int n = 0; n < values.Length; n++)
           {
-            if (values[n].Trim() == String.Format("[{0}]", c.ColumnName))
+            if (values[n].Trim() == String.Format(CultureInfo.InvariantCulture, "[{0}]", c.ColumnName))
             {
               check = CheckState.Checked;
               break;
@@ -738,7 +738,7 @@ namespace SQLite.Designer.Design
                 CheckState check = CheckState.Unchecked;
                 for (int n = 0; n < values.Length; n++)
                 {
-                  if (values[n].Trim() == String.Format("[{0}]", row[SchemaTableColumn.ColumnName]))
+                  if (values[n].Trim() == String.Format(CultureInfo.InvariantCulture, "[{0}]", row[SchemaTableColumn.ColumnName]))
                   {
                     check = CheckState.Checked;
                     break;
@@ -834,10 +834,26 @@ namespace SQLite.Designer.Design
         }
       }
     }
+
+    public override bool IsDropDownResizable
+    {
+      get
+      {
+        return true;
+      }
+    }
   }
 
   internal class TablesTypeEditor : ObjectSelectorEditor
   {
+    public override bool IsDropDownResizable
+    {
+      get
+      {
+        return true;
+      }
+    }
+
     public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
     {
       return UITypeEditorEditStyle.DropDown;

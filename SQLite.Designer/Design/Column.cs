@@ -16,10 +16,11 @@ namespace SQLite.Designer.Design
   using System.Drawing.Design;
   using System.Data;
   using System.Data.Common;
+  using System.Globalization;
 
   internal class Column : IHaveConnection
   {
-    private bool _allowNulls = false;
+    private bool _allowNulls;
     private string _dataType = "";
     private string _defaultValue = "";
     private string _columnName = "";
@@ -54,19 +55,19 @@ namespace SQLite.Designer.Design
       string edmtype = (row.IsNull("EDM_TYPE") == false) ? row["EDM_TYPE"].ToString() : String.Empty;
       if (edmtype == "nvarchar" || edmtype == "varchar" || edmtype == "blob" || edmtype == "nchar" || edmtype == "char")
       {
-        int size = (row.IsNull("CHARACTER_MAXIMUM_LENGTH") == false) ? Convert.ToInt32(row["CHARACTER_MAXIMUM_LENGTH"]) : int.MaxValue;
+        int size = (row.IsNull("CHARACTER_MAXIMUM_LENGTH") == false) ? Convert.ToInt32(row["CHARACTER_MAXIMUM_LENGTH"], CultureInfo.InvariantCulture) : int.MaxValue;
         if (size != int.MaxValue)
-          _dataType = string.Format("{0}({1})", _dataType, size);
+          _dataType = string.Format(CultureInfo.InvariantCulture, "{0}({1})", _dataType, size);
       }
       else if (edmtype == "decimal")
       {
-        int size = (row.IsNull("NUMERIC_PRECISION") == false) ? Convert.ToInt32(row["NUMERIC_PRECISION"]) : 53;
-        int scale = (row.IsNull("NUMERIC_SCALE") == false) ? Convert.ToInt32(row["NUMERIC_SCALE"]) : int.MaxValue;
+        int size = (row.IsNull("NUMERIC_PRECISION") == false) ? Convert.ToInt32(row["NUMERIC_PRECISION"], CultureInfo.InvariantCulture) : 53;
+        int scale = (row.IsNull("NUMERIC_SCALE") == false) ? Convert.ToInt32(row["NUMERIC_SCALE"], CultureInfo.InvariantCulture) : int.MaxValue;
 
         if (size != 53)
         {
-          string scalestr = (scale == int.MaxValue) ? "" : String.Format(",{0}", scale);
-          _dataType = string.Format("{0}({1}{2})", _dataType, size, scalestr);
+          string scalestr = (scale == int.MaxValue) ? "" : String.Format(CultureInfo.InvariantCulture, ",{0}", scale);
+          _dataType = string.Format(CultureInfo.InvariantCulture, "{0}({1}{2})", _dataType, size, scalestr);
         }
       }
     }
@@ -144,7 +145,7 @@ namespace SQLite.Designer.Design
         case 2:
           try
           {
-            AllowNulls = Convert.ToBoolean(value);
+            AllowNulls = Convert.ToBoolean(value, CultureInfo.InvariantCulture);
           }
           catch
           {

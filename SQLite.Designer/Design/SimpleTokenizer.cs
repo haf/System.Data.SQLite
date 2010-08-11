@@ -10,6 +10,7 @@ namespace SQLite.Designer.Design
   using System;
   using System.Collections.Generic;
   using System.Text;
+  using System.Globalization;
 
   internal static class SimpleTokenizer
   {
@@ -25,7 +26,7 @@ namespace SQLite.Designer.Design
 
       public override string ToString()
       {
-        return String.Format("{0} {1} at {2} {3} depth {4}", value, quote, position, sep == true ? "(sep)" : "", depth);
+        return String.Format(CultureInfo.InvariantCulture, "{0} {1} at {2} {3} depth {4}", value, quote, position, sep == true ? "(sep)" : "", depth);
       }
     }
 
@@ -64,7 +65,7 @@ namespace SQLite.Designer.Design
         {
           StringParts tok = new StringParts();
           tok.position = startat;
-          x = source.IndexOf("*/");
+          x = source.IndexOf("*/", StringComparison.Ordinal);
           if (x == -1) tok.value = source;
           else tok.value = source.Substring(0, x + 2);
 
@@ -73,8 +74,8 @@ namespace SQLite.Designer.Design
           startat += tok.value.Length;
           continue;
         }
-        int comment = source.IndexOf("--", n);
-        if (comment == -1) comment = source.IndexOf("/*", n);
+        int comment = source.IndexOf("--", n, StringComparison.Ordinal);
+        if (comment == -1) comment = source.IndexOf("/*", n, StringComparison.Ordinal);
 
         if (n > 0)
           n = source.IndexOfAny(opens2, n);
@@ -129,7 +130,7 @@ namespace SQLite.Designer.Design
             x = opensstr.IndexOf(tok.value[0]);
             if (x != -1 && tok.value[tok.value.Length - 1] == closes[x])
             {
-              tok.quote = String.Format("{0}{1}", tok.value[0], tok.value[tok.value.Length - 1]);
+              tok.quote = String.Format(CultureInfo.InvariantCulture, "{0}{1}", tok.value[0], tok.value[tok.value.Length - 1]);
               tok.value = tok.value.Substring(1, tok.value.Length - 2);
             }
             else
@@ -172,7 +173,7 @@ namespace SQLite.Designer.Design
           x = opensstr.IndexOf(tok.value[0]);
           if (x != -1 && tok.value[tok.value.Length - 1] == closes[x])
           {
-            tok.quote = String.Format("{0}{1}", tok.value[0], tok.value[tok.value.Length - 1]);
+            tok.quote = String.Format(CultureInfo.InvariantCulture, "{0}{1}", tok.value[0], tok.value[tok.value.Length - 1]);
             tok.value = tok.value.Substring(1, tok.value.Length - 2);
           }
           else

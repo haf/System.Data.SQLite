@@ -15,6 +15,7 @@ namespace SQLite.Designer.Design
   using System.Collections.Generic;
   using System.Data;
   using System.Text;
+  using System.Globalization;
   using SQLite.Designer.Editors;
 
   internal abstract class ViewTableBase: IHaveConnection
@@ -34,7 +35,7 @@ namespace SQLite.Designer.Design
     private string _oldname;
     private string _catalog;
     private List<Column> _columns = new List<Column>();
-    private bool _exists = false;
+    private bool _exists;
     private string _origSql = String.Empty;
     private List<Index> _indexes = new List<Index>();
     private List<Index> _oldindexes = new List<Index>();
@@ -297,7 +298,7 @@ namespace SQLite.Designer.Design
 
     public override string ToString()
     {
-      return String.Format("[{0}].[{1}]", Catalog, Name);
+      return String.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", Catalog, Name);
     }
 
     [Category("Storage")]
@@ -329,7 +330,7 @@ namespace SQLite.Designer.Design
       if (_exists)
       {
         Guid g = Guid.NewGuid();
-        altName = String.Format("{0}_{1}", Name, g.ToString("N"));
+        altName = String.Format(CultureInfo.InvariantCulture, "{0}_{1}", Name, g.ToString("N"));
 
         if (_oldindexes.Count > 0)
         {
@@ -372,22 +373,22 @@ namespace SQLite.Designer.Design
       if (_key.Columns.Count > 1)
       {
         string innersep = "";
-        builder.AppendFormat("{0}CONSTRAINT [PK_{1}] PRIMARY KEY (", separator, Name);
+        builder.AppendFormat(CultureInfo.InvariantCulture, "{0}CONSTRAINT [PK_{1}] PRIMARY KEY (", separator, Name);
         foreach (IndexColumn c in _key.Columns)
         {
-          builder.AppendFormat("{0}[{1}]", innersep, c.Column);
+          builder.AppendFormat(CultureInfo.InvariantCulture, "{0}[{1}]", innersep, c.Column);
           if (String.IsNullOrEmpty(c.Collate) == false && String.Compare(c.Collate, "BINARY", StringComparison.OrdinalIgnoreCase) != 0)
-            builder.AppendFormat(" COLLATE {0}", c.Collate.ToUpperInvariant());
+            builder.AppendFormat(CultureInfo.InvariantCulture, " COLLATE {0}", c.Collate.ToUpperInvariant());
 
           if (c.SortMode != ColumnSortMode.Ascending)
-            builder.AppendFormat(" DESC");
+            builder.Append(" DESC");
 
           innersep = ", ";
         }
         builder.Append(")");
 
         if (_key.Conflict != ConflictEnum.Abort)
-          builder.AppendFormat(" ON CONFLICT {0}", _key.Conflict.ToString().ToUpperInvariant());
+          builder.AppendFormat(CultureInfo.InvariantCulture, " ON CONFLICT {0}", _key.Conflict.ToString().ToUpperInvariant());
       }
 
       for (int n = 0; n < Check.Count; n++)
@@ -400,7 +401,7 @@ namespace SQLite.Designer.Design
         {
           if (arr[x].depth == 0)
           {
-            check = String.Format("({0})", check);
+            check = String.Format(CultureInfo.InvariantCulture, "({0})", check);
             break;
           }
         }
@@ -612,6 +613,14 @@ namespace SQLite.Designer.Design
 
   internal class CollationTypeEditor : ObjectSelectorEditor
   {
+    public override bool IsDropDownResizable
+    {
+      get
+      {
+        return true;
+      }
+    }
+
     public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
     {
       return UITypeEditorEditStyle.DropDown;
@@ -627,6 +636,14 @@ namespace SQLite.Designer.Design
 
   internal class CatalogTypeEditor : ObjectSelectorEditor
   {
+    public override bool IsDropDownResizable
+    {
+      get
+      {
+        return true;
+      }
+    }
+
     public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
     {
       return UITypeEditorEditStyle.DropDown;

@@ -22,6 +22,7 @@ namespace SQLite.Designer.Editors
   using SQLite.Designer.Design;
   using System.ComponentModel.Design;
   using System.Runtime.InteropServices;
+  using System.Globalization;
 
   public partial class ViewDesignerDoc : DesignerDocBase,
     IVsPersistDocData,
@@ -33,11 +34,11 @@ namespace SQLite.Designer.Editors
   {
     private static Dictionary<int, string> _editingTables = new Dictionary<int, string>();
 
-    private bool _qdinit = false;
-    private bool _init = false;
+    private bool _qdinit;
+    private bool _init;
     internal DataConnection _connection;
     internal Microsoft.VisualStudio.Data.ServiceProvider _serviceProvider;
-    internal bool _dirty = false;
+    internal bool _dirty;
     internal UserControl _queryDesigner;
     internal Type _typeQB;
     internal SQLite.Designer.Design.View _view;
@@ -46,11 +47,11 @@ namespace SQLite.Designer.Editors
     private IntPtr _qbsql;
     internal DataViewHierarchyAccessor _accessor;
     internal int _itemId;
-    static private bool _warned = false;
+    static private bool _warned;
 
     public delegate bool EnumWindowsCallback(IntPtr hwnd, IntPtr lParam);
     [DllImport("user32.Dll")]
-    public static extern bool EnumChildWindows(IntPtr parentHandle, EnumWindowsCallback callback, IntPtr lParam);
+    static extern bool EnumChildWindows(IntPtr parentHandle, EnumWindowsCallback callback, IntPtr lParam);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
@@ -103,7 +104,7 @@ namespace SQLite.Designer.Editors
 
           do
           {
-            viewName = String.Format("View{0}", n);
+            viewName = String.Format(CultureInfo.InvariantCulture, "View{0}", n);
             n++;
           } while (alltables.IndexOf(viewName + ",", StringComparison.OrdinalIgnoreCase) > -1 || _editingTables.ContainsValue(viewName));
 
@@ -145,7 +146,7 @@ namespace SQLite.Designer.Editors
         string catalog = "main";
         if (_view != null) catalog = _view.Catalog;
 
-        return String.Format("{0}.{1} View (SQLite [{2}])", catalog, base.Name, ((DbConnection)_connection.ConnectionSupport.ProviderObject).DataSource);
+        return String.Format(CultureInfo.InvariantCulture, "{0}.{1} View (SQLite [{2}])", catalog, base.Name, ((DbConnection)_connection.ConnectionSupport.ProviderObject).DataSource);
       }
     }
 

@@ -17,6 +17,7 @@ namespace SQLite.Designer.Design
   using System.ComponentModel.Design;
   using System.Drawing.Design;
   using System.Windows.Forms;
+  using System.Globalization;
 
   internal class ForeignKeyEditor : CollectionEditor
   {
@@ -84,8 +85,6 @@ namespace SQLite.Designer.Design
 
       if (editValue != null)
       {
-        int length = this.GetItems(editValue).Length;
-        int num2 = value.Length;
         if (!(editValue is IList))
         {
           return editValue;
@@ -128,7 +127,7 @@ namespace SQLite.Designer.Design
 
     public override string ToString()
     {
-      return String.Format("[{0}].[{1}].[{2}]", _catalog, _table, _column);
+      return String.Format(CultureInfo.InvariantCulture, "[{0}].[{1}].[{2}]", _catalog, _table, _column);
     }
 
     #region IHaveConnection Members
@@ -288,7 +287,7 @@ namespace SQLite.Designer.Design
     internal ForeignKeyFromItem _from;
     internal ForeignKeyToItem _to;
     internal string _name;
-    private bool _dirty = false;
+    private bool _dirty;
 
     private ForeignKey(ForeignKey source)
     {
@@ -326,7 +325,6 @@ namespace SQLite.Designer.Design
       }
       else
       {
-        _name = null;
         _from = new ForeignKeyFromItem(this, "");
         _to = new ForeignKeyToItem(this, _table.Catalog, "", "");
       }
@@ -350,7 +348,7 @@ namespace SQLite.Designer.Design
       {
         if (String.IsNullOrEmpty(_name) == false) return _name;
 
-        return String.Format("FK_{0}_{1}_{2}_{3}", _from.Table, _from.Column, _to.Table, _to.Column);
+        return String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}_{3}", _from.Table, _from.Column, _to.Table, _to.Column);
       }
       set
       {

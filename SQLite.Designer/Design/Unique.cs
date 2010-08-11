@@ -13,6 +13,7 @@ namespace SQLite.Designer.Design
   using System.ComponentModel;
   using System.Data;
   using System.Data.Common;
+  using System.Globalization;
 
   [TypeConverter(typeof(ExpandableObjectConverter))]
   [DefaultProperty("Enabled")]
@@ -93,9 +94,9 @@ namespace SQLite.Designer.Design
     public override string ToString()
     {
       if (_isUnique == false)
-        return Convert.ToString(false);
+        return Convert.ToString(false, CultureInfo.InvariantCulture);
       else
-        return String.Format("{0} ({1})", Convert.ToString(true), Convert.ToString(Conflict));
+        return String.Format(CultureInfo.InvariantCulture, "{0} ({1})", Convert.ToString(true, CultureInfo.InvariantCulture), Convert.ToString(Conflict, CultureInfo.InvariantCulture));
         //return Convert.ToString(true);
     }
   }

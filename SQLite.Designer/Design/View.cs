@@ -15,6 +15,7 @@ namespace SQLite.Designer.Design
   using System.Collections.Generic;
   using System.Data;
   using System.Text;
+  using System.Globalization;
   using SQLite.Designer.Editors;
 
   internal class View : ViewTableBase, ICustomTypeDescriptor
@@ -100,7 +101,7 @@ namespace SQLite.Designer.Design
 
     public override string ToString()
     {
-      return String.Format("[{0}].[{1}]", Catalog, Name);
+      return String.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", Catalog, Name);
     }
 
     [Category("Storage")]

@@ -17,6 +17,7 @@ namespace SQLite.Designer.Design
   using System.Drawing.Design;
   using System.Data;
   using System.Data.Common;
+  using System.Globalization;
 
   public enum TriggerOccurs
   {
@@ -85,7 +86,7 @@ namespace SQLite.Designer.Design
     private string _action;
     private bool _calcname;
     private string _origsql;
-    private bool _dirty = false;
+    private bool _dirty;
 
     protected Trigger(Trigger source)
     {
@@ -126,9 +127,9 @@ namespace SQLite.Designer.Design
       string name = Name;
 
       if (temp == true)
-        name = String.Format("{0}_{1}", name, Guid.NewGuid().ToString("N"));
+        name = String.Format(CultureInfo.InvariantCulture, "{0}_{1}", name, Guid.NewGuid().ToString("N"));
 
-      builder.AppendFormat("CREATE TRIGGER [{0}].[{1}]", _table.Catalog, name);
+      builder.AppendFormat(CultureInfo.InvariantCulture, "CREATE TRIGGER [{0}].[{1}]", _table.Catalog, name);
       switch (_triggerOccurs)
       {
         case 0:
@@ -142,18 +143,18 @@ namespace SQLite.Designer.Design
           break;
       }
 
-      builder.AppendFormat(" {0}", _type.ToString().ToUpperInvariant());
+      builder.AppendFormat(CultureInfo.InvariantCulture, " {0}", _type.ToString().ToUpperInvariant());
       if (_type == TriggerType.Update && String.IsNullOrEmpty(Columns) == false)
-        builder.AppendFormat(" OF {0}", Columns);
+        builder.AppendFormat(CultureInfo.InvariantCulture, " OF {0}", Columns);
 
-      builder.AppendFormat(" ON [{0}].[{1}]", _table.Catalog, _table.Name);
+      builder.AppendFormat(CultureInfo.InvariantCulture, " ON [{0}].[{1}]", _table.Catalog, _table.Name);
 
       if (EachRow)
-        builder.AppendFormat(" FOR EACH ROW");
+        builder.Append(" FOR EACH ROW");
       if (String.IsNullOrEmpty(When) == false)
-        builder.AppendFormat(" WHEN {0}", When);
+        builder.AppendFormat(CultureInfo.InvariantCulture, " WHEN {0}", When);
 
-      builder.AppendFormat("\r\nBEGIN\r\n{0}", SQL);
+      builder.AppendFormat(CultureInfo.InvariantCulture, "\r\nBEGIN\r\n{0}", SQL);
       SimpleTokenizer.StringParts[] arr = SimpleTokenizer.BreakString(SQL);
       if (arr[arr.Length - 1].sepchar != ';')
         builder.Append(";");
@@ -247,7 +248,7 @@ namespace SQLite.Designer.Design
         {
           if (_calcname == true) return GetHashCode().ToString();
 
-          string name = String.Format("{0}_{1}", NamePrefix, NewName);
+          string name = String.Format(CultureInfo.InvariantCulture, "{0}_{1}", NamePrefix, NewName);
           int count = 0;
           string proposed = name;
 
@@ -255,7 +256,7 @@ namespace SQLite.Designer.Design
           for (int n = 0; n < ((IList)_table.Triggers).Count; n++)
           {
             Trigger idx = ((IList)_table.Triggers)[n] as Trigger;
-            proposed = string.Format("{0}{1}", name, (count > 0) ? count.ToString() : "");
+            proposed = string.Format(CultureInfo.InvariantCulture, "{0}{1}", name, (count > 0) ? count.ToString() : "");
             if (idx.Name == proposed)
             {
               count++;
@@ -415,6 +416,7 @@ namespace SQLite.Designer.Design
               builder.Append(arr[x].value);
               if (String.IsNullOrEmpty(arr[x].quote) == false)
                 builder.Append(arr[x].quote[1]);
+              x++;
             }
             while (depth > 0)
             {
@@ -536,8 +538,6 @@ namespace SQLite.Designer.Design
 
       if (editValue != null)
       {
-        int length = this.GetItems(editValue).Length;
-        int num2 = value.Length;
         if (!(editValue is IList))
         {
           return editValue;

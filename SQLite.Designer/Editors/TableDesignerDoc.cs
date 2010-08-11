@@ -19,8 +19,9 @@ namespace SQLite.Designer.Editors
   using Microsoft.VisualStudio.OLE.Interop;
   using Microsoft.VisualStudio;
   using Microsoft.VisualStudio.Data;
-  using SQLite.Designer.Design;
   using System.ComponentModel.Design;
+  using System.Globalization;
+  using SQLite.Designer.Design;
 
   public partial class TableDesignerDoc : DesignerDocBase,
     IVsPersistDocData,
@@ -36,10 +37,10 @@ namespace SQLite.Designer.Editors
     internal Microsoft.VisualStudio.Data.ServiceProvider _serviceProvider;
     internal Table _table;
     internal bool _dirty;
-    internal bool _init = false;
+    internal bool _init;
     internal DataViewHierarchyAccessor _accessor;
     internal int _itemId;
-    static private bool _warned = false;
+    static private bool _warned;
 
     public TableDesignerDoc(int itemId, DataViewHierarchyAccessor accessor, string tableName)
     {
@@ -69,7 +70,7 @@ namespace SQLite.Designer.Editors
 
         do
         {
-          tableName = String.Format("Table{0}", n);
+          tableName = String.Format(CultureInfo.InvariantCulture, "Table{0}", n);
           n++;
         } while (alltables.IndexOf(tableName + ",", StringComparison.OrdinalIgnoreCase) > -1 || _editingTables.ContainsValue(tableName));
 
@@ -115,7 +116,7 @@ namespace SQLite.Designer.Editors
         string catalog = "main";
         if (_table != null) catalog = _table.Catalog;
 
-        return String.Format("{0}.{1} Table (SQLite [{2}])", catalog, base.Name, ((DbConnection)_connection.ConnectionSupport.ProviderObject).DataSource);
+        return String.Format(CultureInfo.InvariantCulture, "{0}.{1} Table (SQLite [{2}])", catalog, base.Name, ((DbConnection)_connection.ConnectionSupport.ProviderObject).DataSource);
       }
     }
 
@@ -508,7 +509,7 @@ namespace SQLite.Designer.Editors
                 while (String.IsNullOrEmpty(c.ColumnName) == true)
                 {
                   bool found = false;
-                  string proposed = String.Format("{0}{1}", oc.ColumnName, num);
+                  string proposed = String.Format(CultureInfo.InvariantCulture, "{0}{1}", oc.ColumnName, num);
                   foreach (Column cc in _table.Columns)
                   {
                     if (String.Compare(cc.ColumnName, proposed, StringComparison.OrdinalIgnoreCase) == 0)

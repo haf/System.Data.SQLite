@@ -70,8 +70,6 @@ namespace SQLite.Designer.Design
       bool dirty = false;
       if (editValue != null)
       {
-        int length = this.GetItems(editValue).Length;
-        int num2 = value.Length;
         if (!(editValue is IList))
         {
           return editValue;
