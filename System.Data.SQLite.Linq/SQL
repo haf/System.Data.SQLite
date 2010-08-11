@@ -1,359 +1,356 @@
-﻿/********************************************************
- * ADO.NET 2.0 Data Provider for SQLite Version 3.X
- * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
- * Released to the public domain, use at your own risk!
- ********************************************************/
+//---------------------------------------------------------------------
+// <copyright file="SqlSelectStatement.cs" company="Microsoft">
+//      Copyright (c) Microsoft Corporation.  All rights reserved.
+// </copyright>
+//---------------------------------------------------------------------
 
 namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
-  using System.Data;
+  using System.Diagnostics;
+  using System.IO;
+  using System.Text;
+  using System.Data.Metadata.Edm;
   using System.Data.Common.CommandTrees;
-  using System.Data.Entity;
-  using System.Runtime.CompilerServices;
 
-  internal class SqlChecker : DbExpressionVisitor<bool>
+  /// <summary>
+  /// A SqlSelectStatement represents a canonical SQL SELECT statement.
+  /// It has fields for the 6 main clauses
+  /// <list type="number">
+  /// <item>SELECT</item>
+  /// <item>FROM</item>
+  /// <item>WHERE</item>
+  /// <item>GROUP BY</item>
+  /// <item>ORDER BY</item>
+  /// <item>LIMIT</item>
+  /// </list>
+  /// We do not have HAVING, since it does not correspond to anything in the DbCommandTree.
+  /// Each of the fields is a SqlBuilder, so we can keep appending SQL strings
+  /// or other fragments to build up the clause.
+  ///
+  /// We have a IsDistinct property to indicate that we want distict columns.
+  /// This is given out of band, since the input expression to the select clause
+  /// may already have some columns projected out, and we use append-only SqlBuilders.
+  /// The DISTINCT is inserted when we finally write the object into a string.
+  /// 
+  /// Also, we have a Top property, which is non-null if the number of results should
+  /// be limited to certain number. It is given out of band for the same reasons as DISTINCT.
+  ///
+  /// The FromExtents contains the list of inputs in use for the select statement.
+  /// There is usually just one element in this - Select statements for joins may
+  /// temporarily have more than one.
+  ///
+  /// If the select statement is created by a Join node, we maintain a list of
+  /// all the extents that have been flattened in the join in AllJoinExtents
+  /// <example>
+  /// in J(j1= J(a,b), c)
+  /// FromExtents has 2 nodes JoinSymbol(name=j1, ...) and Symbol(name=c)
+  /// AllJoinExtents has 3 nodes Symbol(name=a), Symbol(name=b), Symbol(name=c)
+  /// </example>
+  ///
+  /// If any expression in the non-FROM clause refers to an extent in a higher scope,
+  /// we add that extent to the OuterExtents list.  This list denotes the list
+  /// of extent aliases that may collide with the aliases used in this select statement.
+  /// It is set by <see cref="SqlGenerator.Visit(DbVariableReferenceExpression)"/>.
+  /// An extent is an outer extent if it is not one of the FromExtents.
+  ///
+  ///
+  /// </summary>
+  internal sealed class SqlSelectStatement : ISqlFragment
   {
-    private static Type sql8rewriter;
-
-    static SqlChecker()
-    {
-      sql8rewriter = Type.GetType("System.Data.SqlClient.SqlGen.Sql8ExpressionRewriter, System.Data.Entity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", false);
-    }
-
-    private SqlChecker()
-    {
-    }
+    private bool isDistinct;
 
     /// <summary>
-    /// SQLite doesn't support things like SKIP and a few other things.  So determine if the query has to be rewritten
+    /// Do we need to add a DISTINCT at the beginning of the SELECT
     /// </summary>
-    /// <remarks>
-    /// Microsoft went to all the trouble of making things like SKIP work on Sql Server 2000 by doing a rewrite of the commandtree.
-    /// However, all that fancy stuff is hidden from us.  Thanks to reflection however, we can go ahead and use the Sql 2000 rewriter code
-    /// they made.
-    /// </remarks>
-    /// <param name="tree">The tree to inspect for a rewrite</param>
-    /// <returns>Returns a new query tree if it needs rewriting</returns>
-    internal static DbQueryCommandTree Rewrite(DbQueryCommandTree tree)
+    internal bool IsDistinct
     {
-      SqlChecker visitor = new SqlChecker();
-      if (tree.Query.Accept<bool>(visitor))
+      get { return isDistinct; }
+      set { isDistinct = value; }
+    }
+
+    private List<Symbol> allJoinExtents;
+    internal List<Symbol> AllJoinExtents
+    {
+      get { return allJoinExtents; }
+      // We have a setter as well, even though this is a list,
+      // since we use this field only in special cases.
+      set { allJoinExtents = value; }
+    }
+
+    private List<Symbol> fromExtents;
+    internal List<Symbol> FromExtents
+    {
+      get
       {
-        tree = sql8rewriter.InvokeMember("Rewrite", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Static, null, null, new object[] { tree }) as DbQueryCommandTree;
-      }      
-      return tree;
-    }
-
-    public override bool Visit(DbAndExpression expression)
-    {
-      return VisitBinaryExpression(expression);
-    }
-
-    public override bool Visit(DbApplyExpression expression)
-    {
-      throw new NotSupportedException("apply expression");
-    }
-
-    public override bool Visit(DbArithmeticExpression expression)
-    {
-      return VisitExpressionList(expression.Arguments);
-    }
-
-    public override bool Visit(DbCaseExpression expression)
-    {
-      bool flag1 = VisitExpressionList(expression.When);
-      bool flag2 = VisitExpressionList(expression.Then);
-      bool flag3 = VisitExpression(expression.Else);
-
-      return (flag1 || flag2 || flag3);
-    }
-
-    public override bool Visit(DbCastExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbComparisonExpression expression)
-    {
-      return VisitBinaryExpression(expression);
-    }
-
-    public override bool Visit(DbConstantExpression expression)
-    {
-      return false;
-    }
-
-    public override bool Visit(DbCrossJoinExpression expression)
-    {
-      return VisitExpressionBindingList(expression.Inputs);
-    }
-
-    public override bool Visit(DbDerefExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbDistinctExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbElementExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbEntityRefExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbExceptExpression expression)
-    {
-      bool flag1 = VisitExpression(expression.Left);
-      bool flag2 = VisitExpression(expression.Right);
-      return (flag1 || flag2);
-    }
-
-    public override bool Visit(DbExpression expression)
-    {
-      throw new NotSupportedException(expression.GetType().FullName);
-    }
-
-    public override bool Visit(DbFilterExpression expression)
-    {
-      bool flag1 = VisitExpressionBinding(expression.Input);
-      bool flag2 = VisitExpression(expression.Predicate);
-
-      return (flag1 || flag2);
-    }
-
-    public override bool Visit(DbFunctionExpression expression)
-    {
-      return VisitExpressionList(expression.Arguments);
-    }
-
-    public override bool Visit(DbGroupByExpression expression)
-    {
-      bool flag1 = VisitExpression(expression.Input.Expression);
-      bool flag2 = VisitExpressionList(expression.Keys);
-      bool flag3 = VisitAggregateList(expression.Aggregates);
-
-      return (flag1 || flag2 || flag3);
-    }
-
-    public override bool Visit(DbIntersectExpression expression)
-    {
-      bool flag1 = VisitExpression(expression.Left);
-      bool flag2 = VisitExpression(expression.Right);
-      return (flag1 || flag2);
-    }
-
-    public override bool Visit(DbIsEmptyExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbIsNullExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbIsOfExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbJoinExpression expression)
-    {
-      bool flag1 = VisitExpressionBinding(expression.Left);
-      bool flag2 = VisitExpressionBinding(expression.Right);
-      bool flag3 = VisitExpression(expression.JoinCondition);
-      return (flag1 || flag2 || flag3);
-    }
-
-    public override bool Visit(DbLikeExpression expression)
-    {
-      bool flag1 = VisitExpression(expression.Argument);
-      bool flag2 = VisitExpression(expression.Pattern);
-      bool flag3 = VisitExpression(expression.Escape);
-      return (flag1 || flag2 || flag3);
-    }
-
-    public override bool Visit(DbLimitExpression expression)
-    {
-      return VisitExpression(expression.Argument);
-    }
-
-    public override bool Visit(DbNewInstanceExpression expression)
-    {
-      return VisitExpressionList(expression.Arguments);
-    }
-
-    public override bool Visit(DbNotExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbNullExpression expression)
-    {
-      return false;
-    }
-
-    public override bool Visit(DbOfTypeExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbOrExpression expression)
-    {
-      return VisitBinaryExpression(expression);
-    }
-
-    public override bool Visit(DbParameterReferenceExpression expression)
-    {
-      return false;
-    }
-
-    public override bool Visit(DbProjectExpression expression)
-    {
-      bool flag1 = VisitExpressionBinding(expression.Input);
-      bool flag2 = VisitExpression(expression.Projection);
-      return (flag1 || flag2);
-    }
-
-    public override bool Visit(DbPropertyExpression expression)
-    {
-      return VisitExpression(expression.Instance);
-    }
-
-    public override bool Visit(DbQuantifierExpression expression)
-    {
-      bool flag1 = VisitExpressionBinding(expression.Input);
-      bool flag2 = VisitExpression(expression.Predicate);
-      return (flag1 || flag2);
-    }
-
-    public override bool Visit(DbRefExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbRefKeyExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbRelationshipNavigationExpression expression)
-    {
-      return VisitExpression(expression.NavigationSource);
-    }
-
-    public override bool Visit(DbScanExpression expression)
-    {
-      return false;
-    }
-
-    public override bool Visit(DbSkipExpression expression)
-    {
-      VisitExpressionBinding(expression.Input);
-      VisitSortClauseList(expression.SortOrder);
-      VisitExpression(expression.Count);
-      return true;
-    }
-
-    public override bool Visit(DbSortExpression expression)
-    {
-      bool flag1 = VisitExpressionBinding(expression.Input);
-      bool flag2 = VisitSortClauseList(expression.SortOrder);
-      return (flag1 || flag2);
-    }
-
-    public override bool Visit(DbTreatExpression expression)
-    {
-      return VisitUnaryExpression(expression);
-    }
-
-    public override bool Visit(DbUnionAllExpression expression)
-    {
-      return VisitBinaryExpression(expression);
-    }
-
-    public override bool Visit(DbVariableReferenceExpression expression)
-    {
-      return false;
-    }
-
-    private bool VisitAggregate(DbAggregate aggregate)
-    {
-      return VisitExpressionList(aggregate.Arguments);
-    }
-
-    private bool VisitAggregateList(IList<DbAggregate> list)
-    {
-      return VisitList<DbAggregate>(new ListElementHandler<DbAggregate>(VisitAggregate), list);
-    }
-
-    private bool VisitBinaryExpression(DbBinaryExpression expr)
-    {
-      bool flag1 = VisitExpression(expr.Left);
-      bool flag2 = VisitExpression(expr.Right);
-      return (flag1 || flag2);
-    }
-
-    private bool VisitExpression(DbExpression expression)
-    {
-      if (expression == null)
-      {
-        return false;
+        if (null == fromExtents)
+        {
+          fromExtents = new List<Symbol>();
+        }
+        return fromExtents;
       }
-      return expression.Accept<bool>(this);
     }
 
-    private bool VisitExpressionBinding(DbExpressionBinding expressionBinding)
+    private Dictionary<Symbol, bool> outerExtents;
+    internal Dictionary<Symbol, bool> OuterExtents
     {
-      return VisitExpression(expressionBinding.Expression);
-    }
-
-    private bool VisitExpressionBindingList(IList<DbExpressionBinding> list)
-    {
-      return VisitList<DbExpressionBinding>(new ListElementHandler<DbExpressionBinding>(VisitExpressionBinding), list);
-    }
-
-    private bool VisitExpressionList(IList<DbExpression> list)
-    {
-      return VisitList<DbExpression>(new ListElementHandler<DbExpression>(VisitExpression), list);
-    }
-
-    private static bool VisitList<TElementType>(ListElementHandler<TElementType> handler, IList<TElementType> list)
-    {
-      bool flag = false;
-      foreach (TElementType local in list)
+      get
       {
-        bool flag2 = handler(local);
-        flag = flag || flag2;
+        if (null == outerExtents)
+        {
+          outerExtents = new Dictionary<Symbol, bool>();
+        }
+        return outerExtents;
       }
-      return flag;
     }
 
-    private bool VisitSortClause(DbSortClause sortClause)
+    private TopClause top;
+    internal TopClause Top
     {
-      return VisitExpression(sortClause.Expression);
+      get { return top; }
+      set
+      {
+        Debug.Assert(top == null, "SqlSelectStatement.Top has already been set");
+        top = value;
+      }
     }
 
-    private bool VisitSortClauseList(IList<DbSortClause> list)
+    private SqlBuilder select = new SqlBuilder();
+    internal SqlBuilder Select
     {
-      return VisitList<DbSortClause>(new ListElementHandler<DbSortClause>(VisitSortClause), list);
+      get { return select; }
     }
 
-    private bool VisitUnaryExpression(DbUnaryExpression expr)
+    private SqlBuilder from = new SqlBuilder();
+    internal SqlBuilder From
     {
-      return VisitExpression(expr.Argument);
+      get { return from; }
     }
 
-    private delegate bool ListElementHandler<TElementType>(TElementType element);
+
+    private SqlBuilder where;
+    internal SqlBuilder Where
+    {
+      get
+      {
+        if (null == where)
+        {
+          where = new SqlBuilder();
+        }
+        return where;
+      }
+    }
+
+    private SqlBuilder groupBy;
+    internal SqlBuilder GroupBy
+    {
+      get
+      {
+        if (null == groupBy)
+        {
+          groupBy = new SqlBuilder();
+        }
+        return groupBy;
+      }
+    }
+
+    private SqlBuilder orderBy;
+    public SqlBuilder OrderBy
+    {
+      get
+      {
+        if (null == orderBy)
+        {
+          orderBy = new SqlBuilder();
+        }
+        return orderBy;
+      }
+    }
+
+    private string limit;
+    public string Limit
+    {
+      get
+      {
+        return limit;
+      }
+
+      set
+      {
+        limit = value;
+      }
+    }
+
+    private string offset;
+    public string OffSet
+    {
+      get
+      { return offset; }
+      set
+      { offset = value; }
+    }
+
+    //indicates whether it is the top most select statement, 
+    // if not Order By should be omitted unless there is a corresponding TOP
+    private bool isTopMost;
+    internal bool IsTopMost
+    {
+      get { return this.isTopMost; }
+      set { this.isTopMost = value; }
+    }
+
+    #region ISqlFragment Members
+
+    /// <summary>
+    /// Write out a SQL select statement as a string.
+    /// We have to
+    /// <list type="number">
+    /// <item>Check whether the aliases extents we use in this statement have
+    /// to be renamed.
+    /// We first create a list of all the aliases used by the outer extents.
+    /// For each of the FromExtents( or AllJoinExtents if it is non-null),
+    /// rename it if it collides with the previous list.
+    /// </item>
+    /// <item>Write each of the clauses (if it exists) as a string</item>
+    /// </list>
+    /// </summary>
+    /// <param name="writer"></param>
+    /// <param name="sqlGenerator"></param>
+    public void WriteSql(SqlWriter writer, SqlGenerator sqlGenerator)
+    {
+      #region Check if FROM aliases need to be renamed
+
+      // Create a list of the aliases used by the outer extents
+      // JoinSymbols have to be treated specially.
+      List<string> outerExtentAliases = null;
+      if ((null != outerExtents) && (0 < outerExtents.Count))
+      {
+        foreach (Symbol outerExtent in outerExtents.Keys)
+        {
+          JoinSymbol joinSymbol = outerExtent as JoinSymbol;
+          if (joinSymbol != null)
+          {
+            foreach (Symbol symbol in joinSymbol.FlattenedExtentList)
+            {
+              if (null == outerExtentAliases) { outerExtentAliases = new List<string>(); }
+              outerExtentAliases.Add(symbol.NewName);
+            }
+          }
+          else
+          {
+            if (null == outerExtentAliases) { outerExtentAliases = new List<string>(); }
+            outerExtentAliases.Add(outerExtent.NewName);
+          }
+        }
+      }
+
+      // An then rename each of the FromExtents we have
+      // If AllJoinExtents is non-null - it has precedence.
+      // The new name is derived from the old name - we append an increasing int.
+      List<Symbol> extentList = this.AllJoinExtents ?? this.fromExtents;
+      if (null != extentList)
+      {
+        foreach (Symbol fromAlias in extentList)
+        {
+          if ((null != outerExtentAliases) && outerExtentAliases.Contains(fromAlias.Name))
+          {
+            int i = sqlGenerator.AllExtentNames[fromAlias.Name];
+            string newName;
+            do
+            {
+              ++i;
+              newName = fromAlias.Name + i.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+            while (sqlGenerator.AllExtentNames.ContainsKey(newName));
+            sqlGenerator.AllExtentNames[fromAlias.Name] = i;
+            fromAlias.NewName = newName;
+
+            // Add extent to list of known names (although i is always incrementing, "prefix11" can
+            // eventually collide with "prefix1" when it is extended)
+            sqlGenerator.AllExtentNames[newName] = 0;
+          }
+
+          // Add the current alias to the list, so that the extents
+          // that follow do not collide with me.
+          if (null == outerExtentAliases) { outerExtentAliases = new List<string>(); }
+          outerExtentAliases.Add(fromAlias.NewName);
+        }
+      }
+      #endregion
+
+      // Increase the indent, so that the Sql statement is nested by one tab.
+      writer.Indent += 1; // ++ can be confusing in this context
+
+      writer.Write("SELECT ");
+      if (IsDistinct)
+      {
+        writer.Write("DISTINCT ");
+      }
+
+      if ((null == this.select) || this.Select.IsEmpty)
+      {
+        Debug.Assert(false);  // we have removed all possibilities of SELECT *.
+        writer.Write("*");
+      }
+      else
+      {
+        this.Select.WriteSql(writer, sqlGenerator);
+      }
+
+      writer.WriteLine();
+      writer.Write("FROM ");
+      this.From.WriteSql(writer, sqlGenerator);
+
+      if ((null != this.where) && !this.Where.IsEmpty)
+      {
+        writer.WriteLine();
+        writer.Write("WHERE ");
+        this.Where.WriteSql(writer, sqlGenerator);
+      }
+
+      if ((null != this.groupBy) && !this.GroupBy.IsEmpty)
+      {
+        writer.WriteLine();
+        writer.Write("GROUP BY ");
+        this.GroupBy.WriteSql(writer, sqlGenerator);
+      }
+
+      if ((null != this.orderBy) && !this.OrderBy.IsEmpty && (this.IsTopMost || this.Top != null))
+      {
+        writer.WriteLine();
+        writer.Write("ORDER BY ");
+        this.OrderBy.WriteSql(writer, sqlGenerator);
+      }
+
+      if ((null != this.limit) && this.limit.Length != 0) //&& (this.IsTopMost || this.Top != null))
+      {
+        writer.WriteLine();
+        writer.Write(string.Format("LIMIT {0} ", limit));
+      }
+
+      if ((null != this.offset) && this.offset.Length != 0)// && (this.IsTopMost || this.Top != null))
+      {
+
+        if (this.limit != null && this.limit.Length != 0)
+          writer.Write(string.Format("OFFSET {0} ", offset));
+        else
+        {
+          writer.WriteLine();
+          writer.Write(string.Format("LIMIT 8999999999999999999 OFFSET {0} ", offset));
+        }
+
+      }
+
+      if (this.Top != null)
+      {
+        this.Top.WriteSql(writer, sqlGenerator);
+      }
+
+
+      --writer.Indent;
+    }
+
+    #endregion
   }
 }
