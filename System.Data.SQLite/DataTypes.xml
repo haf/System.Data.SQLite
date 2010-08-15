@@ -742,7 +742,7 @@
   </DataTypes>
   <DataTypes>
     <TypeName>uniqueidentifier</TypeName>
-    <ProviderDbType>4</ProviderDbType>
+    <ProviderDbType>9</ProviderDbType>
     <ColumnSize>16</ColumnSize>
     <DataType>System.Guid</DataType>
     <CreateFormat>uniqueidentifier</CreateFormat>
@@ -760,7 +760,7 @@
   </DataTypes>
   <DataTypes>
     <TypeName>guid</TypeName>
-    <ProviderDbType>4</ProviderDbType>
+    <ProviderDbType>9</ProviderDbType>
     <ColumnSize>16</ColumnSize>
     <DataType>System.Guid</DataType>
     <CreateFormat>guid</CreateFormat>
