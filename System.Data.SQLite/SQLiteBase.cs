@@ -155,6 +155,7 @@ namespace System.Data.SQLite
 
     internal abstract void SetUpdateHook(SQLiteUpdateCallback func);
     internal abstract void SetCommitHook(SQLiteCommitCallback func);
+    internal abstract void SetTraceCallback(SQLiteTraceCallback func);
     internal abstract void SetRollbackHook(SQLiteRollbackCallback func);
 
     internal abstract int GetCursorForTable(SQLiteStatement stmt, int database, int rootPage);

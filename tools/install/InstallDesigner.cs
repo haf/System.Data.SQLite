@@ -29,7 +29,7 @@ namespace install
     private static Guid oledbAltDataProviderGuid = new Guid("{7F041D59-D76A-44ed-9AA2-FBF6B0548B81}");
     private static Guid jetDataSourcesGuid = new Guid("{466CE797-67A4-4495-B75C-A3FD282E7FC3}");
     private static Guid jetAltDataSourcesGuid = new Guid("{466CE797-67A4-4495-B75C-A3FD282E7FC4}");
-    private static string[] compactFrameworks = new string[] { "PocketPC", "SmartPhone", "WindowsCE" };
+    private static string[] compactFrameworks = new string[] { /*"PocketPC", "SmartPhone", "WindowsCE"*/ };
 
     internal bool _remove = false;
     //private string _regRoot = "8.0";
@@ -103,8 +103,8 @@ namespace install
       RegistryKey key;
       string frameworkpath;
 
-      _regRoots.Add("8.0", "2005");
-      _regRoots.Add("9.0", "2008");
+      //_regRoots.Add("8.0", "2005");
+      //_regRoots.Add("9.0", "2008");
       _regRoots.Add("10.0", "2010");
 
       using (key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\.NETFramework"))
@@ -115,9 +115,9 @@ namespace install
       string[] frameworkfolders = Directory.GetDirectories(frameworkpath);
       foreach (string framework in frameworkfolders)
       {
-        // Don't do this on frameworks before 2.0
+        // Don't do this on frameworks before 4.0
         string version = Path.GetFileNameWithoutExtension(framework);
-        if (String.Compare(version, "v2.0", StringComparison.OrdinalIgnoreCase) < 0)
+        if (String.Compare(version, "v4.0", StringComparison.OrdinalIgnoreCase) < 0)
           continue;
 
         if (File.Exists(Path.Combine(framework, "CONFIG\\machine.config")))
@@ -401,7 +401,7 @@ namespace install
             Registry.LocalMachine.DeleteSubKey(String.Format("Software\\Microsoft\\.NETFramework\\{0}\\AssemblyFoldersEx\\SQLite", framework));
           }
 
-          string[] versions = { "v2.0.0.0", "v3.5.0.0" };
+          string[] versions = { /*"v2.0.0.0", "v3.5.0.0"*/ };
           for (int x = 0; x < versions.Length; x++)
           {
             for (int n = 0; n < compactFrameworks.Length; n++)
@@ -686,7 +686,7 @@ namespace install
       //{
       //}
 
-      string[] versions = { "v2.0.0.0", "v3.5.0.0" };
+      string[] versions = { /*"v2.0.0.0", "v3.5.0.0"*/ };
 
       for (int x = 0; x < versions.Length; x++)
       {

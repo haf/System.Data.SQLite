@@ -22,7 +22,7 @@ namespace System.Data.SQLite
 
     static SQLiteFactory()
     {
-      _dbProviderServicesType = Type.GetType("System.Data.Common.DbProviderServices, System.Data.Entity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", false);
+      _dbProviderServicesType = Type.GetType("System.Data.Common.DbProviderServices, System.Data.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", false);
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ namespace System.Data.SQLite
     {
       if (_sqliteServices == null)
       {
-        Type type = Type.GetType("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version=2.0.38.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", false);
+        Type type = Type.GetType("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version=1.0.38.1, Culture=neutral, PublicKeyToken=db937bc2d44ff139", false);
         if (type != null)
         {
           FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);

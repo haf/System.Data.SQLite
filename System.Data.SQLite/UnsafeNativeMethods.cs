@@ -23,7 +23,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     private const string SQLITE_DLL = "System.Data.SQLite.DLL";
 #else
-    internal const string SQLITE_DLL = "SQLite.Interop.067.DLL";
+    internal const string SQLITE_DLL = "SQLite.Interop.066.DLL";
 #endif // PLATFORM_COMPACTFRAMEWORK
 
 #else
@@ -636,6 +636,13 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern IntPtr sqlite3_commit_hook(IntPtr db, SQLiteCommitCallback func, IntPtr pvUser);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_trace(IntPtr db, SQLiteTraceCallback func, IntPtr pvUser);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

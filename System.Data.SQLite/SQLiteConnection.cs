@@ -145,7 +145,7 @@ namespace System.Data.SQLite
   /// </item>
   /// <item>
   /// <description>Foreign Keys</description>
-  /// <description><b>True</b> - Enables foreign key enforcement<br/><b>False</b> - Disables foreign key enforcement</description>
+  /// <description>Enable foreign key constraints</description>
   /// <description>N</description>
   /// <description>False</description>
   /// </item>
@@ -205,10 +205,12 @@ namespace System.Data.SQLite
 
     private event SQLiteUpdateEventHandler _updateHandler;
     private event SQLiteCommitHandler _commitHandler;
+    private event SQLiteTraceEventHandler _traceHandler;
     private event EventHandler _rollbackHandler;
 
     private SQLiteUpdateCallback _updateCallback;
     private SQLiteCommitCallback _commitCallback;
+    private SQLiteTraceCallback _traceCallback;
     private SQLiteRollbackCallback _rollbackCallback;
 
     /// <summary>
@@ -600,17 +602,11 @@ namespace System.Data.SQLite
     /// <description>N</description>
     /// <description>Serializable</description>
     /// </item>
-    /// <item>
-    /// <description>Foreign Keys</description>
-    /// <description><b>True</b> - Enables foreign key enforcement<br/><b>False</b> - Disables foreign key enforcement</description>
-    /// <description>N</description>
-    /// <description>False</description>
-    /// </item>
     /// </list>
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
     [RefreshProperties(RefreshProperties.All), DefaultValue("")]
-    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.37.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+	[Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.38.1, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
     public override string ConnectionString
     {
@@ -882,7 +878,7 @@ namespace System.Data.SQLite
             }
 
             defValue = FindKey(opts, "Journal Mode", "Delete");
-            if (String.Compare(defValue, "Delete", StringComparison.OrdinalIgnoreCase) != 0)
+            if (String.Compare(defValue, "Default", StringComparison.OrdinalIgnoreCase) != 0)
             {
               cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA journal_mode={0}", defValue);
               cmd.ExecuteNonQuery();
@@ -1171,7 +1167,7 @@ namespace System.Data.SQLite
 
     private static DataTable Schema_ReservedWords()
     {
-      DataTable tbl = new DataTable("ReservedWords");
+      DataTable tbl = new DataTable("MetaDataCollections");
 
       tbl.Locale = CultureInfo.InvariantCulture;
       tbl.Columns.Add("ReservedWord", typeof(string));
@@ -2216,6 +2212,38 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// This event is raised whenever SQLite statement first begins executing on
+    /// this connection.  It only applies to the given connection.
+    /// </summary>
+    public event SQLiteTraceEventHandler Trace
+    {
+      add
+      {
+        if (_traceHandler == null)
+        {
+          _traceCallback = new SQLiteTraceCallback(TraceCallback);
+          if (_sql != null) _sql.SetTraceCallback(_traceCallback);
+        }
+        _traceHandler += value;
+      }
+      remove
+      {
+        _traceHandler -= value;
+        if (_traceHandler == null)
+        {
+          if (_sql != null) _sql.SetTraceCallback(null);
+            _traceCallback = null;
+        }
+      }
+    }
+
+    private void TraceCallback(IntPtr puser, IntPtr statement)
+    {
+      _traceHandler(this, new TraceEventArgs(
+        SQLiteBase.UTF8ToString(statement, -1)));
+    }
+
+    /// <summary>
     /// This event is raised whenever SQLite is committing a transaction.
     /// Return non-zero to trigger a rollback
     /// </summary>
@@ -2285,6 +2313,10 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
+  internal delegate void SQLiteTraceCallback(IntPtr puser, IntPtr statement);
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
   internal delegate void SQLiteRollbackCallback(IntPtr puser);
 
   /// <summary>
@@ -2301,6 +2333,13 @@ namespace System.Data.SQLite
   /// <param name="sender">The connection committing the transaction</param>
   /// <param name="e">The event parameters which triggered the event</param>
   public delegate void SQLiteUpdateEventHandler(object sender, UpdateEventArgs e);
+
+  /// <summary>
+  /// Raised when a statement first begins executing on a given connection
+  /// </summary>
+  /// <param name="sender">The connection executing the statement</param>
+  /// <param name="e">Event arguments on the trace</param>
+  public delegate void SQLiteTraceEventHandler(object sender, TraceEventArgs e);
 
   /// <summary>
   /// Whenever an update event is triggered on a connection, this enum will indicate
@@ -2370,6 +2409,22 @@ namespace System.Data.SQLite
     /// Set to true to abort the transaction and trigger a rollback
     /// </summary>
     public bool AbortTransaction;
+  }
+
+  /// <summary>
+  /// Passed during an Trace callback, these event arguments contain the UTF-8 rendering of the SQL statement text
+  /// </summary>
+  public class TraceEventArgs : EventArgs
+  {
+    /// <summary>
+    /// SQL statement text as the statement first begins executing
+    /// </summary>
+    public readonly string Statement;
+
+    internal TraceEventArgs(string statement)
+    {
+      Statement = statement;
+    }
   }
 
 }

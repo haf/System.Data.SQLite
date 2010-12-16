@@ -782,12 +782,7 @@ namespace System.Data.SQLite
     /// This option disables the rollback journal entirely.  Interrupted transactions or a program crash can cause database
     /// corruption in this mode!
     /// </summary>
-    Off = 2,
-    /// <summary>
-    /// This option commits transactions by truncating the rollback journal to zero-length instead of deleting it. On many systems,
-    /// truncating a file is much faster than deleting the file since the containing directory does not need to be changed.
-    /// </summary>
-    Truncate = 3,
+    Off = 2
   }
 
   /// <summary>
