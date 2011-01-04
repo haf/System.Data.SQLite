@@ -74,7 +74,7 @@ namespace test
       string[] version = _cnn.ServerVersion.Split('.');
       if (Convert.ToInt32(version[0]) < 3
         || (Convert.ToInt32(version[0]) == 3 && Convert.ToInt32(version[1]) < 6)
-        || (Convert.ToInt32(version[1]) == 6 && Convert.ToInt32(version[2]) < 1)
+        || (Convert.ToInt32(version[0]) == 3 && Convert.ToInt32(version[1]) == 6 && Convert.ToInt32(version[2]) < 1)
         ) throw new Exception(String.Format("SQLite Engine is {0}.  Minimum supported version is 3.6.1", _cnn.ServerVersion));
 
       return String.Format("SQLite Engine is {0}", _cnn.ServerVersion);

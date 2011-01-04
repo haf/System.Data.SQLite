@@ -10,10 +10,6 @@
 **
 *************************************************************************
 **
-** $Id: fault.c,v 1.1 2008/08/06 21:48:06 rmsimpson Exp $
-*/
-
-/*
 ** This file contains code to support the concept of "benign" 
 ** malloc failures (when the xMalloc() or xRealloc() method of the
 ** sqlite3_mem_methods structure fails to allocate a block of memory
@@ -35,10 +31,27 @@
 /*
 ** Global variables.
 */
-static struct BenignMallocHooks {
+typedef struct BenignMallocHooks BenignMallocHooks;
+static SQLITE_WSD struct BenignMallocHooks {
   void (*xBenignBegin)(void);
   void (*xBenignEnd)(void);
-} hooks;
+} sqlite3Hooks = { 0, 0 };
+
+/* The "wsdHooks" macro will resolve to the appropriate BenignMallocHooks
+** structure.  If writable static data is unsupported on the target,
+** we have to locate the state vector at run-time.  In the more common
+** case where writable static data is supported, wsdHooks can refer directly
+** to the "sqlite3Hooks" state vector declared above.
+*/
+#ifdef SQLITE_OMIT_WSD
+# define wsdHooksInit \
+  BenignMallocHooks *x = &GLOBAL(BenignMallocHooks,sqlite3Hooks)
+# define wsdHooks x[0]
+#else
+# define wsdHooksInit
+# define wsdHooks sqlite3Hooks
+#endif
+
 
 /*
 ** Register hooks to call when sqlite3BeginBenignMalloc() and
@@ -48,8 +61,9 @@ void sqlite3BenignMallocHooks(
   void (*xBenignBegin)(void),
   void (*xBenignEnd)(void)
 ){
-  hooks.xBenignBegin = xBenignBegin;
-  hooks.xBenignEnd = xBenignEnd;
+  wsdHooksInit;
+  wsdHooks.xBenignBegin = xBenignBegin;
+  wsdHooks.xBenignEnd = xBenignEnd;
 }
 
 /*
@@ -58,13 +72,15 @@ void sqlite3BenignMallocHooks(
 ** indicates that subsequent malloc failures are non-benign.
 */
 void sqlite3BeginBenignMalloc(void){
-  if( hooks.xBenignBegin ){
-    hooks.xBenignBegin();
+  wsdHooksInit;
+  if( wsdHooks.xBenignBegin ){
+    wsdHooks.xBenignBegin();
   }
 }
 void sqlite3EndBenignMalloc(void){
-  if( hooks.xBenignEnd ){
-    hooks.xBenignEnd();
+  wsdHooksInit;
+  if( wsdHooks.xBenignEnd ){
+    wsdHooks.xBenignEnd();
   }
 }
 

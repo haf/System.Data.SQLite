@@ -11,8 +11,6 @@
 *************************************************************************
 ** 
 ** This file defines various limits of what SQLite can process.
-**
-** @(#) $Id: sqliteLimit.h,v 1.1 2008/08/06 21:48:07 rmsimpson Exp $
 */
 
 /*
@@ -96,7 +94,7 @@
 ** The maximum number of arguments to an SQL function.
 */
 #ifndef SQLITE_MAX_FUNCTION_ARG
-# define SQLITE_MAX_FUNCTION_ARG 100
+# define SQLITE_MAX_FUNCTION_ARG 127
 #endif
 
 /*
@@ -108,6 +106,14 @@
 #endif
 #ifndef SQLITE_DEFAULT_TEMP_CACHE_SIZE
 # define SQLITE_DEFAULT_TEMP_CACHE_SIZE  500
+#endif
+
+/*
+** The default number of frames to accumulate in the log file before
+** checkpointing the database in WAL mode.
+*/
+#ifndef SQLITE_DEFAULT_WAL_AUTOCHECKPOINT
+# define SQLITE_DEFAULT_WAL_AUTOCHECKPOINT  1000
 #endif
 
 /*
@@ -127,13 +133,21 @@
 # define SQLITE_MAX_VARIABLE_NUMBER 999
 #endif
 
-/* Maximum page size.  The upper bound on this value is 32768.  This a limit
-** imposed by the necessity of storing the value in a 2-byte unsigned integer
-** and the fact that the page size must be a power of 2.
+/* Maximum page size.  The upper bound on this value is 65536.  This a limit
+** imposed by the use of 16-bit offsets within each page.
+**
+** Earlier versions of SQLite allowed the user to change this value at
+** compile time. This is no longer permitted, on the grounds that it creates
+** a library that is technically incompatible with an SQLite library 
+** compiled with a different limit. If a process operating on a database 
+** with a page-size of 65536 bytes crashes, then an instance of SQLite 
+** compiled with the default page-size limit will not be able to rollback 
+** the aborted transaction. This could lead to database corruption.
 */
-#ifndef SQLITE_MAX_PAGE_SIZE
-# define SQLITE_MAX_PAGE_SIZE 32768
+#ifdef SQLITE_MAX_PAGE_SIZE
+# undef SQLITE_MAX_PAGE_SIZE
 #endif
+#define SQLITE_MAX_PAGE_SIZE 65536
 
 
 /*
@@ -180,4 +194,15 @@
 */
 #ifndef SQLITE_MAX_LIKE_PATTERN_LENGTH
 # define SQLITE_MAX_LIKE_PATTERN_LENGTH 50000
+#endif
+
+/*
+** Maximum depth of recursion for triggers.
+**
+** A value of 1 means that a trigger program will not be able to itself
+** fire any triggers. A value of 0 means that no trigger programs at all 
+** may be executed.
+*/
+#ifndef SQLITE_MAX_TRIGGER_DEPTH
+# define SQLITE_MAX_TRIGGER_DEPTH 1000
 #endif

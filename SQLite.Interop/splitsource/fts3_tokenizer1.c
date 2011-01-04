@@ -24,12 +24,12 @@
 */
 #if !defined(SQLITE_CORE) || defined(SQLITE_ENABLE_FTS3)
 
+#include "fts3Int.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "fts3_tokenizer.h"
 
@@ -49,11 +49,11 @@ typedef struct simple_tokenizer_cursor {
 } simple_tokenizer_cursor;
 
 
-/* Forward declaration */
-static const sqlite3_tokenizer_module simpleTokenizerModule;
-
 static int simpleDelim(simple_tokenizer *t, unsigned char c){
   return c<0x80 && t->delim[c];
+}
+static int fts3_isalnum(int x){
+  return (x>='0' && x<='9') || (x>='A' && x<='Z') || (x>='a' && x<='z');
 }
 
 /*
@@ -75,7 +75,7 @@ static int simpleCreate(
   ** information on the initial create.
   */
   if( argc>1 ){
-    int i, n = strlen(argv[1]);
+    int i, n = (int)strlen(argv[1]);
     for(i=0; i<n; i++){
       unsigned char ch = argv[1][i];
       /* We explicitly don't support UTF-8 delimiters for now. */
@@ -89,7 +89,7 @@ static int simpleCreate(
     /* Mark non-alphanumeric ASCII characters as delimiters */
     int i;
     for(i=1; i<0x80; i++){
-      t->delim[i] = !isalnum(i);
+      t->delim[i] = !fts3_isalnum(i) ? -1 : 0;
     }
   }
 
@@ -117,6 +117,8 @@ static int simpleOpen(
   sqlite3_tokenizer_cursor **ppCursor    /* OUT: Tokenization cursor */
 ){
   simple_tokenizer_cursor *c;
+
+  UNUSED_PARAMETER(pTokenizer);
 
   c = (simple_tokenizer_cursor *) sqlite3_malloc(sizeof(*c));
   if( c==NULL ) return SQLITE_NOMEM;
@@ -182,16 +184,18 @@ static int simpleNext(
     if( c->iOffset>iStartOffset ){
       int i, n = c->iOffset-iStartOffset;
       if( n>c->nTokenAllocated ){
+        char *pNew;
         c->nTokenAllocated = n+20;
-        c->pToken = sqlite3_realloc(c->pToken, c->nTokenAllocated);
-        if( c->pToken==NULL ) return SQLITE_NOMEM;
+        pNew = sqlite3_realloc(c->pToken, c->nTokenAllocated);
+        if( !pNew ) return SQLITE_NOMEM;
+        c->pToken = pNew;
       }
       for(i=0; i<n; i++){
         /* TODO(shess) This needs expansion to handle UTF-8
         ** case-insensitivity.
         */
         unsigned char ch = p[iStartOffset+i];
-        c->pToken[i] = ch<0x80 ? tolower(ch) : ch;
+        c->pToken[i] = (char)((ch>='A' && ch<='Z') ? ch-'A'+'a' : ch);
       }
       *ppToken = c->pToken;
       *pnBytes = n;

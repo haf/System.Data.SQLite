@@ -872,6 +872,11 @@ namespace System.Data.SQLite
       UnsafeNativeMethods.sqlite3_commit_hook(_sql, func, IntPtr.Zero);
     }
 
+    internal override void SetTraceCallback(SQLiteTraceCallback func)
+    {
+      UnsafeNativeMethods.sqlite3_trace(_sql, func, IntPtr.Zero);
+    }
+
     internal override void SetRollbackHook(SQLiteRollbackCallback func)
     {
       UnsafeNativeMethods.sqlite3_rollback_hook(_sql, func, IntPtr.Zero);

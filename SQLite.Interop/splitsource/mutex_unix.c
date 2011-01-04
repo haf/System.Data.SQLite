@@ -10,8 +10,6 @@
 **
 *************************************************************************
 ** This file contains the C functions that implement mutexes for pthreads
-**
-** $Id: mutex_unix.c,v 1.1 2008/08/06 21:48:06 rmsimpson Exp $
 */
 #include "sqliteInt.h"
 
@@ -26,23 +24,33 @@
 
 #include <pthread.h>
 
+/*
+** The sqlite3_mutex.id, sqlite3_mutex.nRef, and sqlite3_mutex.owner fields
+** are necessary under two condidtions:  (1) Debug builds and (2) using
+** home-grown mutexes.  Encapsulate these conditions into a single #define.
+*/
+#if defined(SQLITE_DEBUG) || defined(SQLITE_HOMEGROWN_RECURSIVE_MUTEX)
+# define SQLITE_MUTEX_NREF 1
+#else
+# define SQLITE_MUTEX_NREF 0
+#endif
 
 /*
 ** Each recursive mutex is an instance of the following structure.
 */
 struct sqlite3_mutex {
   pthread_mutex_t mutex;     /* Mutex controlling the lock */
+#if SQLITE_MUTEX_NREF
   int id;                    /* Mutex type */
-  int nRef;                  /* Number of entrances */
-  pthread_t owner;           /* Thread that is within this mutex */
-#ifdef SQLITE_DEBUG
+  volatile int nRef;         /* Number of entrances */
+  volatile pthread_t owner;  /* Thread that is within this mutex */
   int trace;                 /* True to trace changes */
 #endif
 };
-#ifdef SQLITE_DEBUG
+#if SQLITE_MUTEX_NREF
 #define SQLITE3_MUTEX_INITIALIZER { PTHREAD_MUTEX_INITIALIZER, 0, 0, (pthread_t)0, 0 }
 #else
-#define SQLITE3_MUTEX_INITIALIZER { PTHREAD_MUTEX_INITIALIZER, 0, 0, (pthread_t)0 }
+#define SQLITE3_MUTEX_INITIALIZER { PTHREAD_MUTEX_INITIALIZER }
 #endif
 
 /*
@@ -61,7 +69,7 @@ struct sqlite3_mutex {
 ** make sure no assert() statements are evaluated and hence these
 ** routines are never called.
 */
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(SQLITE_DEBUG)
 static int pthreadMutexHeld(sqlite3_mutex *p){
   return (p->nRef!=0 && pthread_equal(p->owner, pthread_self()));
 }
@@ -91,6 +99,7 @@ static int pthreadMutexEnd(void){ return SQLITE_OK; }
 ** <li>  SQLITE_MUTEX_STATIC_MEM2
 ** <li>  SQLITE_MUTEX_STATIC_PRNG
 ** <li>  SQLITE_MUTEX_STATIC_LRU
+** <li>  SQLITE_MUTEX_STATIC_LRU2
 ** </ul>
 **
 ** The first two constants cause sqlite3_mutex_alloc() to create
@@ -104,7 +113,7 @@ static int pthreadMutexEnd(void){ return SQLITE_OK; }
 ** might return such a mutex in response to SQLITE_MUTEX_FAST.
 **
 ** The other allowed parameters to sqlite3_mutex_alloc() each return
-** a pointer to a static preexisting mutex.  Three static mutexes are
+** a pointer to a static preexisting mutex.  Six static mutexes are
 ** used by the current version of SQLite.  Future versions of SQLite
 ** may add additional static mutexes.  Static mutexes are for internal
 ** use by SQLite only.  Applications that use SQLite mutexes should
@@ -143,23 +152,29 @@ static sqlite3_mutex *pthreadMutexAlloc(int iType){
         pthread_mutex_init(&p->mutex, &recursiveAttr);
         pthread_mutexattr_destroy(&recursiveAttr);
 #endif
+#if SQLITE_MUTEX_NREF
         p->id = iType;
+#endif
       }
       break;
     }
     case SQLITE_MUTEX_FAST: {
       p = sqlite3MallocZero( sizeof(*p) );
       if( p ){
+#if SQLITE_MUTEX_NREF
         p->id = iType;
+#endif
         pthread_mutex_init(&p->mutex, 0);
       }
       break;
     }
     default: {
       assert( iType-2 >= 0 );
-      assert( iType-2 < sizeof(staticMutexes)/sizeof(staticMutexes[0]) );
+      assert( iType-2 < ArraySize(staticMutexes) );
       p = &staticMutexes[iType-2];
+#if SQLITE_MUTEX_NREF
       p->id = iType;
+#endif
       break;
     }
   }
@@ -219,8 +234,11 @@ static void pthreadMutexEnter(sqlite3_mutex *p){
   /* Use the built-in recursive mutexes if they are available.
   */
   pthread_mutex_lock(&p->mutex);
+#if SQLITE_MUTEX_NREF
+  assert( p->nRef>0 || p->owner==0 );
   p->owner = pthread_self();
   p->nRef++;
+#endif
 #endif
 
 #ifdef SQLITE_DEBUG
@@ -262,8 +280,10 @@ static int pthreadMutexTry(sqlite3_mutex *p){
   /* Use the built-in recursive mutexes if they are available.
   */
   if( pthread_mutex_trylock(&p->mutex)==0 ){
+#if SQLITE_MUTEX_NREF
     p->owner = pthread_self();
     p->nRef++;
+#endif
     rc = SQLITE_OK;
   }else{
     rc = SQLITE_BUSY;
@@ -286,7 +306,10 @@ static int pthreadMutexTry(sqlite3_mutex *p){
 */
 static void pthreadMutexLeave(sqlite3_mutex *p){
   assert( pthreadMutexHeld(p) );
+#if SQLITE_MUTEX_NREF
   p->nRef--;
+  if( p->nRef==0 ) p->owner = 0;
+#endif
   assert( p->nRef==0 || p->id==SQLITE_MUTEX_RECURSIVE );
 
 #ifdef SQLITE_HOMEGROWN_RECURSIVE_MUTEX
@@ -304,8 +327,8 @@ static void pthreadMutexLeave(sqlite3_mutex *p){
 #endif
 }
 
-sqlite3_mutex_methods *sqlite3DefaultMutex(void){
-  static sqlite3_mutex_methods sMutex = {
+sqlite3_mutex_methods const *sqlite3DefaultMutex(void){
+  static const sqlite3_mutex_methods sMutex = {
     pthreadMutexInit,
     pthreadMutexEnd,
     pthreadMutexAlloc,
@@ -316,6 +339,9 @@ sqlite3_mutex_methods *sqlite3DefaultMutex(void){
 #ifdef SQLITE_DEBUG
     pthreadMutexHeld,
     pthreadMutexNotheld
+#else
+    0,
+    0
 #endif
   };
 

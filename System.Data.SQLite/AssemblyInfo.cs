@@ -14,7 +14,7 @@ using System.Runtime.ConstrainedExecution;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("System.Data.SQLite")]
-[assembly: AssemblyDescription("ADO.NET 2.0 Data Provider for SQLite")]
+[assembly: AssemblyDescription("ADO.NET 4.0 Data Provider for SQLite")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("http://sqlite.phxsoftware.com")]
 [assembly: AssemblyProduct("System.Data.SQLite")]
@@ -37,7 +37,7 @@ using System.Runtime.ConstrainedExecution;
 #if !PLATFORM_COMPACTFRAMEWORK
 [assembly: AllowPartiallyTrustedCallers]
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+[assembly: SecurityRules(System.Security.SecurityRuleSet.Level1)]
 #endif
 
 // Version information for an assembly consists of the following four values:

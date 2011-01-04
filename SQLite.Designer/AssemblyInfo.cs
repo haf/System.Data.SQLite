@@ -9,7 +9,7 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SQLite.Designer")]
-[assembly: AssemblyDescription("ADO.NET 2.0 Data Designer for SQLite")]
+[assembly: AssemblyDescription("ADO.NET 4.0 Data Designer for SQLite")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("http://sqlite.phxsoftware.com")]
 [assembly: AssemblyProduct("SQLite Designer")]
@@ -34,8 +34,8 @@ using System.Resources;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.37.0")]
-[assembly: AssemblyFileVersion("1.0.37.0")]
+[assembly: AssemblyVersion("1.0.38.1")]
+[assembly: AssemblyFileVersion("1.0.38.1")]
 [assembly: AssemblyDelaySignAttribute(false)]
 [assembly: AssemblyKeyFileAttribute("..\\System.Data.SQLite\\System.Data.SQLite.snk")]
 [assembly: AssemblyKeyNameAttribute("")]

@@ -12,34 +12,41 @@
 **
 ** This module implements the sqlite3_status() interface and related
 ** functionality.
-**
-** $Id: status.c,v 1.1 2008/08/06 21:48:07 rmsimpson Exp $
 */
 #include "sqliteInt.h"
+#include "vdbeInt.h"
 
 /*
 ** Variables in which to record status information.
 */
-static struct {
-  int nowValue[9];         /* Current value */
-  int mxValue[9];          /* Maximum value */
-} sqlite3Stat;
+typedef struct sqlite3StatType sqlite3StatType;
+static SQLITE_WSD struct sqlite3StatType {
+  int nowValue[10];         /* Current value */
+  int mxValue[10];          /* Maximum value */
+} sqlite3Stat = { {0,}, {0,} };
 
 
-/*
-** Reset the status records.  This routine is called by
-** sqlite3_initialize().
+/* The "wsdStat" macro will resolve to the status information
+** state vector.  If writable static data is unsupported on the target,
+** we have to locate the state vector at run-time.  In the more common
+** case where writable static data is supported, wsdStat can refer directly
+** to the "sqlite3Stat" state vector declared above.
 */
-void sqlite3StatusReset(void){
-  memset(&sqlite3Stat, 0, sizeof(sqlite3Stat));
-}
+#ifdef SQLITE_OMIT_WSD
+# define wsdStatInit  sqlite3StatType *x = &GLOBAL(sqlite3StatType,sqlite3Stat)
+# define wsdStat x[0]
+#else
+# define wsdStatInit
+# define wsdStat sqlite3Stat
+#endif
 
 /*
 ** Return the current value of a status parameter.
 */
 int sqlite3StatusValue(int op){
-  assert( op>=0 && op<ArraySize(sqlite3Stat.nowValue) );
-  return sqlite3Stat.nowValue[op];
+  wsdStatInit;
+  assert( op>=0 && op<ArraySize(wsdStat.nowValue) );
+  return wsdStat.nowValue[op];
 }
 
 /*
@@ -47,10 +54,11 @@ int sqlite3StatusValue(int op){
 ** caller holds appropriate locks.
 */
 void sqlite3StatusAdd(int op, int N){
-  assert( op>=0 && op<ArraySize(sqlite3Stat.nowValue) );
-  sqlite3Stat.nowValue[op] += N;
-  if( sqlite3Stat.nowValue[op]>sqlite3Stat.mxValue[op] ){
-    sqlite3Stat.mxValue[op] = sqlite3Stat.nowValue[op];
+  wsdStatInit;
+  assert( op>=0 && op<ArraySize(wsdStat.nowValue) );
+  wsdStat.nowValue[op] += N;
+  if( wsdStat.nowValue[op]>wsdStat.mxValue[op] ){
+    wsdStat.mxValue[op] = wsdStat.nowValue[op];
   }
 }
 
@@ -58,10 +66,11 @@ void sqlite3StatusAdd(int op, int N){
 ** Set the value of a status to X.
 */
 void sqlite3StatusSet(int op, int X){
-  assert( op>=0 && op<ArraySize(sqlite3Stat.nowValue) );
-  sqlite3Stat.nowValue[op] = X;
-  if( sqlite3Stat.nowValue[op]>sqlite3Stat.mxValue[op] ){
-    sqlite3Stat.mxValue[op] = sqlite3Stat.nowValue[op];
+  wsdStatInit;
+  assert( op>=0 && op<ArraySize(wsdStat.nowValue) );
+  wsdStat.nowValue[op] = X;
+  if( wsdStat.nowValue[op]>wsdStat.mxValue[op] ){
+    wsdStat.mxValue[op] = wsdStat.nowValue[op];
   }
 }
 
@@ -73,13 +82,14 @@ void sqlite3StatusSet(int op, int X){
 ** then this routine is not threadsafe.
 */
 int sqlite3_status(int op, int *pCurrent, int *pHighwater, int resetFlag){
-  if( op<0 || op>=ArraySize(sqlite3Stat.nowValue) ){
-    return SQLITE_MISUSE;
+  wsdStatInit;
+  if( op<0 || op>=ArraySize(wsdStat.nowValue) ){
+    return SQLITE_MISUSE_BKPT;
   }
-  *pCurrent = sqlite3Stat.nowValue[op];
-  *pHighwater = sqlite3Stat.mxValue[op];
+  *pCurrent = wsdStat.nowValue[op];
+  *pHighwater = wsdStat.mxValue[op];
   if( resetFlag ){
-    sqlite3Stat.mxValue[op] = sqlite3Stat.nowValue[op];
+    wsdStat.mxValue[op] = wsdStat.nowValue[op];
   }
   return SQLITE_OK;
 }
@@ -94,6 +104,8 @@ int sqlite3_db_status(
   int *pHighwater,      /* Write high-water mark here */
   int resetFlag         /* Reset high-water mark if true */
 ){
+  int rc = SQLITE_OK;   /* Return code */
+  sqlite3_mutex_enter(db->mutex);
   switch( op ){
     case SQLITE_DBSTATUS_LOOKASIDE_USED: {
       *pCurrent = db->lookaside.nOut;
@@ -103,9 +115,95 @@ int sqlite3_db_status(
       }
       break;
     }
+
+    /* 
+    ** Return an approximation for the amount of memory currently used
+    ** by all pagers associated with the given database connection.  The
+    ** highwater mark is meaningless and is returned as zero.
+    */
+    case SQLITE_DBSTATUS_CACHE_USED: {
+      int totalUsed = 0;
+      int i;
+      sqlite3BtreeEnterAll(db);
+      for(i=0; i<db->nDb; i++){
+        Btree *pBt = db->aDb[i].pBt;
+        if( pBt ){
+          Pager *pPager = sqlite3BtreePager(pBt);
+          totalUsed += sqlite3PagerMemUsed(pPager);
+        }
+      }
+      sqlite3BtreeLeaveAll(db);
+      *pCurrent = totalUsed;
+      *pHighwater = 0;
+      break;
+    }
+
+    /*
+    ** *pCurrent gets an accurate estimate of the amount of memory used
+    ** to store the schema for all databases (main, temp, and any ATTACHed
+    ** databases.  *pHighwater is set to zero.
+    */
+    case SQLITE_DBSTATUS_SCHEMA_USED: {
+      int i;                      /* Used to iterate through schemas */
+      int nByte = 0;              /* Used to accumulate return value */
+
+      db->pnBytesFreed = &nByte;
+      for(i=0; i<db->nDb; i++){
+        Schema *pSchema = db->aDb[i].pSchema;
+        if( ALWAYS(pSchema!=0) ){
+          HashElem *p;
+
+          nByte += sqlite3GlobalConfig.m.xRoundup(sizeof(HashElem)) * (
+              pSchema->tblHash.count 
+            + pSchema->trigHash.count
+            + pSchema->idxHash.count
+            + pSchema->fkeyHash.count
+          );
+          nByte += sqlite3MallocSize(pSchema->tblHash.ht);
+          nByte += sqlite3MallocSize(pSchema->trigHash.ht);
+          nByte += sqlite3MallocSize(pSchema->idxHash.ht);
+          nByte += sqlite3MallocSize(pSchema->fkeyHash.ht);
+
+          for(p=sqliteHashFirst(&pSchema->trigHash); p; p=sqliteHashNext(p)){
+            sqlite3DeleteTrigger(db, (Trigger*)sqliteHashData(p));
+          }
+          for(p=sqliteHashFirst(&pSchema->tblHash); p; p=sqliteHashNext(p)){
+            sqlite3DeleteTable(db, (Table *)sqliteHashData(p));
+          }
+        }
+      }
+      db->pnBytesFreed = 0;
+
+      *pHighwater = 0;
+      *pCurrent = nByte;
+      break;
+    }
+
+    /*
+    ** *pCurrent gets an accurate estimate of the amount of memory used
+    ** to store all prepared statements.
+    ** *pHighwater is set to zero.
+    */
+    case SQLITE_DBSTATUS_STMT_USED: {
+      struct Vdbe *pVdbe;         /* Used to iterate through VMs */
+      int nByte = 0;              /* Used to accumulate return value */
+
+      db->pnBytesFreed = &nByte;
+      for(pVdbe=db->pVdbe; pVdbe; pVdbe=pVdbe->pNext){
+        sqlite3VdbeDeleteObject(db, pVdbe);
+      }
+      db->pnBytesFreed = 0;
+
+      *pHighwater = 0;
+      *pCurrent = nByte;
+
+      break;
+    }
+
     default: {
-      return SQLITE_ERROR;
+      rc = SQLITE_ERROR;
     }
   }
-  return SQLITE_OK;
+  sqlite3_mutex_leave(db->mutex);
+  return rc;
 }

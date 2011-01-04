@@ -18,29 +18,20 @@
 ** NOTE:  source files should *not* #include this header file directly.
 ** Source files should #include the sqliteInt.h file and let that file
 ** include this one indirectly.
-**
-** $Id: mutex.h,v 1.1 2008/08/06 21:48:06 rmsimpson Exp $
 */
 
 
-#ifdef SQLITE_MUTEX_APPDEF
-/*
-** If SQLITE_MUTEX_APPDEF is defined, then this whole module is
-** omitted and equivalent functionality must be provided by the
-** application that links against the SQLite library.
-*/
-#else
 /*
 ** Figure out what version of the code to use.  The choices are
 **
-**   SQLITE_MUTEX_NOOP         For single-threaded applications that
-**                             do not desire error checking.
+**   SQLITE_MUTEX_OMIT         No mutex logic.  Not even stubs.  The
+**                             mutexes implemention cannot be overridden
+**                             at start-time.
 **
-**   SQLITE_MUTEX_NOOP_DEBUG   For single-threaded applications with
-**                             error checking to help verify that mutexes
-**                             are being used correctly even though they
-**                             are not needed.  Used when SQLITE_DEBUG is
-**                             defined on single-threaded builds.
+**   SQLITE_MUTEX_NOOP         For single-threaded applications.  No
+**                             mutual exclusion is provided.  But this
+**                             implementation can be overridden at
+**                             start-time.
 **
 **   SQLITE_MUTEX_PTHREADS     For multi-threaded applications on Unix.
 **
@@ -48,25 +39,22 @@
 **
 **   SQLITE_MUTEX_OS2          For multi-threaded applications on OS/2.
 */
-#define SQLITE_MUTEX_NOOP 1   /* The default */
-#if defined(SQLITE_DEBUG) && !SQLITE_THREADSAFE
-# undef SQLITE_MUTEX_NOOP
-# define SQLITE_MUTEX_NOOP_DEBUG
+#if !SQLITE_THREADSAFE
+# define SQLITE_MUTEX_OMIT
 #endif
-#if defined(SQLITE_MUTEX_NOOP) && SQLITE_THREADSAFE && SQLITE_OS_UNIX
-# undef SQLITE_MUTEX_NOOP
-# define SQLITE_MUTEX_PTHREADS
-#endif
-#if defined(SQLITE_MUTEX_NOOP) && SQLITE_THREADSAFE && SQLITE_OS_WIN
-# undef SQLITE_MUTEX_NOOP
-# define SQLITE_MUTEX_W32
-#endif
-#if defined(SQLITE_MUTEX_NOOP) && SQLITE_THREADSAFE && SQLITE_OS_OS2
-# undef SQLITE_MUTEX_NOOP
-# define SQLITE_MUTEX_OS2
+#if SQLITE_THREADSAFE && !defined(SQLITE_MUTEX_NOOP)
+#  if SQLITE_OS_UNIX
+#    define SQLITE_MUTEX_PTHREADS
+#  elif SQLITE_OS_WIN
+#    define SQLITE_MUTEX_W32
+#  elif SQLITE_OS_OS2
+#    define SQLITE_MUTEX_OS2
+#  else
+#    define SQLITE_MUTEX_NOOP
+#  endif
 #endif
 
-#ifdef SQLITE_MUTEX_NOOP
+#ifdef SQLITE_MUTEX_OMIT
 /*
 ** If this is a no-op implementation, implement everything as macros.
 */
@@ -75,11 +63,9 @@
 #define sqlite3_mutex_enter(X)
 #define sqlite3_mutex_try(X)      SQLITE_OK
 #define sqlite3_mutex_leave(X)
-#define sqlite3_mutex_held(X)     1
-#define sqlite3_mutex_notheld(X)  1
+#define sqlite3_mutex_held(X)     ((void)(X),1)
+#define sqlite3_mutex_notheld(X)  ((void)(X),1)
 #define sqlite3MutexAlloc(X)      ((sqlite3_mutex*)8)
 #define sqlite3MutexInit()        SQLITE_OK
 #define sqlite3MutexEnd()
-#endif
-
-#endif /* SQLITE_MUTEX_APPDEF */
+#endif /* defined(SQLITE_MUTEX_OMIT) */
