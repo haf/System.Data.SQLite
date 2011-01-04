@@ -12,8 +12,6 @@
 **
 ** This file contains inline asm code for retrieving "high-performance"
 ** counters for x86 class CPUs.
-**
-** $Id: hwtime.h,v 1.1 2008/08/06 21:48:06 rmsimpson Exp $
 */
 #ifndef _HWTIME_H_
 #define _HWTIME_H_

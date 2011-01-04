@@ -10,12 +10,6 @@
 **
 *************************************************************************
 **
-** @(#) $Id: journal.c,v 1.1 2008/08/06 21:48:06 rmsimpson Exp $
-*/
-
-#ifdef SQLITE_ENABLE_ATOMIC_WRITE
-
-/*
 ** This file implements a special kind of sqlite3_file object used
 ** by SQLite to create journal files if the atomic-write optimization
 ** is enabled.
@@ -28,9 +22,9 @@
 **
 **   1) The in-memory representation grows too large for the allocated 
 **      buffer, or
-**   2) The xSync() method is called.
+**   2) The sqlite3JournalCreate() function is called.
 */
-
+#ifdef SQLITE_ENABLE_ATOMIC_WRITE
 #include "sqliteInt.h"
 
 
@@ -95,8 +89,9 @@ static int jrnlRead(
   JournalFile *p = (JournalFile *)pJfd;
   if( p->pReal ){
     rc = sqlite3OsRead(p->pReal, zBuf, iAmt, iOfst);
+  }else if( (iAmt+iOfst)>p->iSize ){
+    rc = SQLITE_IOERR_SHORT_READ;
   }else{
-    assert( iAmt+iOfst<=p->iSize );
     memcpy(zBuf, &p->zBuf[iOfst], iAmt);
   }
   return rc;
@@ -187,7 +182,11 @@ static struct sqlite3_io_methods JournalFileMethods = {
   0,             /* xCheckReservedLock */
   0,             /* xFileControl */
   0,             /* xSectorSize */
-  0              /* xDeviceCharacteristics */
+  0,             /* xDeviceCharacteristics */
+  0,             /* xShmMap */
+  0,             /* xShmLock */
+  0,             /* xShmBarrier */
+  0              /* xShmUnmap */
 };
 
 /* 
