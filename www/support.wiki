@@ -50,8 +50,3 @@ unless:</p>
 <p>You are welcomed to use SQLite in closed source, proprietary, and/or commercial projects and to 
 ask questions about such use on the public mailing list. But please do not ask to receive free direct 
 technical support. The software is free; direct technical support is not.</p>
-
-
-              <h1>Documentation</h1>
-
-  *  [./release.wiki | Release Procedures]
