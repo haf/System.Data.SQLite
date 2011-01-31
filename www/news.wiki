@@ -1,0 +1,19 @@
+<title>News</title>
+
+<b>Version History</b>
+
+<p>
+  <b>1.0.68.0 - February 2011</b>
+</p>
+<ul>
+  <li>Code merge with SQLite 3.7.5</li>
+  <li>Continuing work on supporting Visual Studio 2010</li>
+</ul>
+<p>
+  <b>1.0.67.0 - January 3, 2011</b>
+</p>
+<ul>
+  <li>Code merge with SQLite 3.7.4</li>
+  <li>Continuing work on supporting Visual Studio 2010</li>
+</ul>
+

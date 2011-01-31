@@ -1,0 +1,18 @@
+<title>About</title>
+
+<div style="float:right">
+  *  [./features.wiki | Features]
+  *  [./news.wiki | News]
+  *  [./support.wiki | Support]
+  *  [./release.wiki | Release Procedures]
+</div>
+
+<p>This is a fork of the popular ADO.NET 4.0 adaptor for <a href="http://www.sqlite.org">SQLite</a> known 
+as System.Data.SQLite. The originator of System.Data.SQLite, <a href="mailto:robert@blackcastlesoft.com">Robert Simpson</a>, 
+is aware of this fork, has expressed his approval, and has commit privileges on the new Fossil repository. 
+The SQLite development team intends to maintain System.Data.SQLite moving forward. </p>
+
+<p>Historical versions, as well as the original support forums, may still be found
+at <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a>, though
+there have been no updates to this version since April of 2010.</p>
+

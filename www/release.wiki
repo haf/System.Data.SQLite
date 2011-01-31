@@ -1,0 +1,68 @@
+<title>Release Procedures</title>
+
+<p>Follow these steps to build a new release of SQLite.NET.  Unless otherwise noted, all steps need to be done in the order specified.</p>
+
+<p>You will need a Visual Studio 2010 development environment for this build.</p>
+
+<ol type="A">
+
+  <li><b>Build runtime components</b>
+
+  <ol type="1">
+
+    <li>Build SQLite.NET.sln for Release/ia64
+
+    <li>Change to Release/x64 and rebuild
+
+    <li>Change to Release/x86 and rebuild
+
+  </ol>
+
+  <li><b>Build designer components</b>
+
+  <ol type="1">
+
+    <li>Build SQLite.Designer.sln for Release
+
+  </ol>
+
+  <li><b>Update documentation</b>
+
+  <ol type="1">
+
+    <li>Update the readme.htm file with the latest version changes
+
+    <li>Copy the version changes from readme.htm into doc\extra\version.html
+
+    <li>Update doc\extra\dbfactorysupport.html to reflect the latest version # of the DLL
+
+    <li>Copy over doc\extra\dbfactorysupport.html and version.html to my temp
+    ndoc2 location where all my intermediate files are for the CHM
+
+    <li>Run HTML Help Workshop on the HHP project to get my CHM
+
+    <li>Copy the CHM file over to \doc
+
+  </ol>
+
+  <li><b>Build install and setup packages</b>
+
+  <ol type="1">
+
+    <li>Load up the \tools\setup\sqlite_setup.sln solution
+
+    <li>Change the "Version" property of the sqlite project (this is the MSI
+    file project) to reflect the new version of the release.
+
+    <li>Edit the setup.rc file of the setup project, drilling down to the
+    Version resource, and editing VS_VERSION_INFO, and populating the version
+    info with the newest version #.
+
+    <li>Build both projects.
+
+    <li>Copy the and rename the resulting \tools\setup\release\setup.exe to
+    SQLite-1.0.xx.0-setup.exe
+
+  </ol>
+
+</ol>
