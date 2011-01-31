@@ -43,7 +43,7 @@ sqlite-users</a> list are available at:
 unless:</p>
 
 <ul>
-<li>You have or intend to acquire <a href="http://www.sqlite.org/draft/support.html">professional support contract</a>
+<li>You have or intend to acquire a <a href="http://www.sqlite.org/draft/support.html">professional support contract</a>
 <li>You are working on an open source project.
 </ul>
 
