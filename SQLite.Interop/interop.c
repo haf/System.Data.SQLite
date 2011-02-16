@@ -199,10 +199,9 @@ __declspec(dllexport) int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
   int ret;
 
   p = (Vdbe *)stmt;
-  db = (p == NULL) ? NULL : p->db;
-
-  if (p->magic == VDBE_MAGIC_DEAD)
+  if (p && p->magic == VDBE_MAGIC_DEAD)
   {
+    db = p->db;
     if (db == NULL)
     {
       sqlite3_free(p);
