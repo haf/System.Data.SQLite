@@ -1473,6 +1473,38 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     }
 
     /// <summary>
+    /// Checks to make sure we can open DB read only.
+    /// </summary>
+    [Test]
+    internal void ReadOnlyTest()
+    {
+      string RO_connectionString = _cnnstring.ConnectionString;
+      object value;
+      if (_cnnstring.TryGetValue("Read Only", out value) == false)
+      {
+        throw new Exception("Read Only not supported by connection string");
+      }
+      if ((bool)value == false)
+      {
+        // "Read Only" not present in connection string - add it
+        RO_connectionString += ";Read Only=true";
+      }
+
+      maydroptable.Add("ReadOnlyTest");
+
+      using (DbConnection newcnn = ((ICloneable)_cnn).Clone() as DbConnection)
+      {
+        if (newcnn.State == ConnectionState.Open) 
+        {
+          newcnn.Close();
+        }
+        newcnn.ConnectionString = RO_connectionString;
+        newcnn.Open();
+        newcnn.Dispose();
+      } 
+    }
+
+    /// <summary>
     /// Open a reader and then attempt to write to test the writer's command timeout property
     /// SQLite doesn't allow a write when a reader is active.
     /// *** NOTE AS OF 3.3.8 this test no longer blocks because SQLite now allows you to update table(s)

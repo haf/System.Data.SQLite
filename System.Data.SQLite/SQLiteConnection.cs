@@ -814,9 +814,15 @@ namespace System.Data.SQLite
           flags |= SQLiteOpenFlagsEnum.Create;
 
         if (SQLiteConvert.ToBoolean(FindKey(opts, "Read Only", Boolean.FalseString)) == true)
+        {
           flags |= SQLiteOpenFlagsEnum.ReadOnly;
+          // SQLite will return SQLITE_MISUSE on ReadOnly and Create
+          flags &= ~SQLiteOpenFlagsEnum.Create;
+        }
         else
+        {
           flags |= SQLiteOpenFlagsEnum.ReadWrite;
+        }
 
         _sql.Open(fileName, flags, maxPoolSize, usePooling);
 
