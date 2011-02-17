@@ -88,14 +88,22 @@
 
     <!--
         NOTE: For interaction with the native SQLite implementation, use the
-              standard DLL (i.e. "sqlite3.dll")?
+              standard DLL (i.e. "sqlite3.dll")?  By default, this is enabled.
+              This property is mutually exclusive with the "UseInteropDll" one,
+              above.
     -->
-    <UseSqliteStandard Condition="'$(UseSqliteStandard)' == ''">false</UseSqliteStandard>
+    <UseSqliteStandard Condition="'$(UseSqliteStandard)' == ''">true</UseSqliteStandard>
 
     <!--
         NOTE: Is the project being built to support the .NET Compact Framework?
     -->
     <IsCompactFramework Condition="'$(IsCompactFramework)' == ''">false</IsCompactFramework>
+
+    <!--
+        NOTE: Emit an AssemblyFlags attribute that includes the Retargetable
+              flag from the AssemblyNameFlags enumeration?
+    -->
+    <IsRetargetable Condition="'$(IsRetargetable)' == ''">false</IsRetargetable>
   </PropertyGroup>
 
   <!--
@@ -177,6 +185,7 @@
     <!--
         NOTE: The full path and file name for the strong name key pair to use.
     -->
-    <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == ''">$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == '' And '$(IsCompactFramework)' == 'false'">$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == '' And '$(IsCompactFramework)' != 'false'">$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.CF.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 </Project>

@@ -40,4 +40,12 @@
   <PropertyGroup Condition="'$(IsCompactFramework)' != 'false'">
     <DefineConstants>$(DefineConstants);PLATFORM_COMPACTFRAMEWORK</DefineConstants>
   </PropertyGroup>
+
+  <!--
+      NOTE: Emit an AssemblyFlags attribute that includes the Retargetable
+            flag from the AssemblyNameFlags enumeration?
+  -->
+  <PropertyGroup Condition="'$(IsRetargetable)' != 'false'">
+    <DefineConstants>$(DefineConstants);RETARGETABLE</DefineConstants>
+  </PropertyGroup>
 </Project>

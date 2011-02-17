@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * System.Data.SQLite.2010.csproj -
+ * System.Data.SQLite.Module.2010.csproj -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -13,14 +13,15 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.30319</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AC139952-261A-4463-B6FA-AEBC25283A66}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{AC139952-261A-4463-B6FA-AEBC25284A66}</ProjectGuid>
+    <OutputType>Module</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Data.SQLite</RootNamespace>
     <AssemblyName>System.Data.SQLite</AssemblyName>
     <OldToolsVersion>3.5</OldToolsVersion>
+    <SignAssembly>false</SignAssembly>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
-    <ConfigurationSuffix>ManagedOnly</ConfigurationSuffix>
+    <ConfigurationSuffix>Module</ConfigurationSuffix>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
