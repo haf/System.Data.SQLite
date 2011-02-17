@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * System.Data.SQLite.2010.csproj -
+ * test.2010.csproj -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -13,11 +13,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.30319</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AC139952-261A-4463-B6FA-AEBC25283A66}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}</ProjectGuid>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>System.Data.SQLite</RootNamespace>
-    <AssemblyName>System.Data.SQLite</AssemblyName>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>test</RootNamespace>
+    <AssemblyName>test</AssemblyName>
     <OldToolsVersion>3.5</OldToolsVersion>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
   </PropertyGroup>
@@ -39,9 +39,49 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.References.targets" />
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Properties.targets" />
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Files.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\System.Data.SQLite\System.Data.SQLite.2010.csproj">
+      <Project>{AC139952-261A-4463-B6FA-AEBC25283A66}</Project>
+      <Name>System.Data.SQLite.2010</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="TestCases.cs" />
+    <Compile Include="TestCasesDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestCasesDialog.Designer.cs">
+      <DependentUpon>TestCasesDialog.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestCasesDialog.resx">
+      <DependentUpon>TestCasesDialog.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
