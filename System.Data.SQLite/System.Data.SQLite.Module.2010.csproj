@@ -22,6 +22,8 @@
     <SignAssembly>false</SignAssembly>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <ConfigurationSuffix>Module</ConfigurationSuffix>
+    <UseInteropDll>false</UseInteropDll>
+    <UseSqliteStandard>false</UseSqliteStandard>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">

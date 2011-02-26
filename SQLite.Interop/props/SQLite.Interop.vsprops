@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!--
+ *
+ * SQLite.Interop.vsprops -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="SQLite.Interop"
+	>
+	<UserMacro
+		Name="INTEROP_MANIFEST_VERSION"
+		Value="1.0.67.0"
+		PerformEnvironmentSet="true"
+	/>
+	<UserMacro
+		Name="INTEROP_RC_VERSION"
+		Value="1,0,67,0"
+		PerformEnvironmentSet="true"
+	/>
+	<UserMacro
+		Name="INTEROP_ASSEMBLY_RESOURCES"
+		Value="..\System.Data.SQLite\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp"
+		PerformEnvironmentSet="true"
+	/>
+	<UserMacro
+		Name="INTEROP_KEY_FILE"
+		Value="..\System.Data.SQLite\System.Data.SQLite.snk"
+		PerformEnvironmentSet="true"
+	/>
+</VisualStudioPropertySheet>
