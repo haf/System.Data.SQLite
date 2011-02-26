@@ -32,4 +32,14 @@
 		Value="$(ProjectDir)..\System.Data.SQLite\System.Data.SQLite.snk"
 		PerformEnvironmentSet="true"
 	/>
+	<UserMacro
+		Name="INTEROP_NATIVE_NAME"
+		Value="SQLite.Interop"
+		PerformEnvironmentSet="true"
+	/>
+	<UserMacro
+		Name="INTEROP_MIXED_NAME"
+		Value="System.Data.SQLite"
+		PerformEnvironmentSet="true"
+	/>
 </VisualStudioPropertySheet>

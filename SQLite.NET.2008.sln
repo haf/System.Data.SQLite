@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite.Compact.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.2008", "test\test.2008.csproj", "{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop", "SQLite.Interop\SQLite.Interop.2008.vcproj", "{53784BC1-A8BC-4AC8-8A3E-158D6807345A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop.2008", "SQLite.Interop\SQLite.Interop.2008.vcproj", "{53784BC1-A8BC-4AC8-8A3E-158D6807345A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AC139952-261A-4463-B6FA-AEBC25284A66} = {AC139952-261A-4463-B6FA-AEBC25284A66}
 	EndProjectSection

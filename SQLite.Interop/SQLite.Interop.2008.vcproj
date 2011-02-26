@@ -10,7 +10,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="SQLite.Interop"
+	Name="SQLite.Interop.2008"
 	ProjectGUID="{53784BC1-A8BC-4AC8-8A3E-158D6807345A}"
 	RootNamespace="SQLite.Interop"
 	Keyword="Win32Proj"
@@ -76,17 +76,20 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="$(INTEROP_ASSEMBLY_RESOURCES)"
 				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
+				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
 				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
+				ProgramDatabaseFile="$(TargetDir)$(INTEROP_MIXED_NAME).pdb"
 				GenerateMapFile="true"
 				MapExports="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				LinkTimeCodeGeneration="1"
+				ImportLibrary="$(TargetDir)$(INTEROP_MIXED_NAME).lib"
 				TargetMachine="1"
 				CLRUnmanagedCodeCheck="true"
 				KeyFile="$(INTEROP_KEY_FILE)"
@@ -106,6 +109,7 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+				OutputFile="$(OutDir)/$(INTEROP_MIXED_NAME).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -115,7 +119,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="&quot;$(FrameworkSDKDir)Bin\sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(INTEROP_KEY_FILE)&quot;"
+				CommandLine="&quot;$(FrameworkSDKDir)Bin\sn.exe&quot; -Ra &quot;$(OutDir)\$(INTEROP_MIXED_NAME).dll&quot; &quot;$(INTEROP_KEY_FILE)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -172,10 +176,12 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="$(INTEROP_ASSEMBLY_RESOURCES)"
 				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
+				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
 				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)$(INTEROP_MIXED_NAME).pdb"
 				GenerateMapFile="true"
 				MapExports="true"
 				SubSystem="2"
@@ -183,6 +189,7 @@
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				LinkTimeCodeGeneration="1"
+				ImportLibrary="$(TargetDir)$(INTEROP_MIXED_NAME).lib"
 				TargetMachine="1"
 				CLRUnmanagedCodeCheck="true"
 				KeyFile="$(INTEROP_KEY_FILE)"
@@ -202,6 +209,7 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+				OutputFile="$(OutDir)/$(INTEROP_MIXED_NAME).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -211,7 +219,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="&quot;$(FrameworkSDKDir)Bin\sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(INTEROP_KEY_FILE)&quot;"
+				CommandLine="&quot;$(FrameworkSDKDir)Bin\sn.exe&quot; -Ra &quot;$(OutDir)\$(INTEROP_MIXED_NAME).dll&quot; &quot;$(INTEROP_KEY_FILE)&quot;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -343,7 +351,7 @@
 					>
 					<Tool
 						Name="VCManagedResourceCompilerTool"
-						ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
+						ResourceFileName="$(IntDir)\$(INTEROP_MIXED_NAME).$(InputName).resources"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -351,7 +359,7 @@
 					>
 					<Tool
 						Name="VCManagedResourceCompilerTool"
-						ResourceFileName="$(IntDir)\System.Data.SQLite.$(InputName).resources"
+						ResourceFileName="$(IntDir)\$(INTEROP_MIXED_NAME).$(InputName).resources"
 					/>
 				</FileConfiguration>
 			</File>
