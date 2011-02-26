@@ -58,7 +58,7 @@
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
@@ -104,7 +104,7 @@
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
