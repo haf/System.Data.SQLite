@@ -24,7 +24,7 @@
 	/>
 	<UserMacro
 		Name="INTEROP_ASSEMBLY_RESOURCES"
-		Value="..\System.Data.SQLite\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp&#x0D;&#x0A;/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp"
+		Value="/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp /ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp /ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro

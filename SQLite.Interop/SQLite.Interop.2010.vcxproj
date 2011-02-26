@@ -61,7 +61,7 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>/ASSEMBLYRESOURCE:$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
       <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
@@ -107,7 +107,7 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>/ASSEMBLYRESOURCE:$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
       <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>

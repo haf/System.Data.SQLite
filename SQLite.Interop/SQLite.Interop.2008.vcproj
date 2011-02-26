@@ -74,7 +74,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/ASSEMBLYRESOURCE:$(INTEROP_ASSEMBLY_RESOURCES)"
+				AdditionalOptions="$(INTEROP_ASSEMBLY_RESOURCES)"
 				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
@@ -170,7 +170,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/ASSEMBLYRESOURCE:$(INTEROP_ASSEMBLY_RESOURCES)"
+				AdditionalOptions="$(INTEROP_ASSEMBLY_RESOURCES)"
 				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
