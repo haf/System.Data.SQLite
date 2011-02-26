@@ -29,7 +29,7 @@
 	/>
 	<UserMacro
 		Name="INTEROP_KEY_FILE"
-		Value="..\System.Data.SQLite\System.Data.SQLite.snk"
+		Value="$(ProjectDir)..\System.Data.SQLite\System.Data.SQLite.snk"
 		PerformEnvironmentSet="true"
 	/>
 </VisualStudioPropertySheet>

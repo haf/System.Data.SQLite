@@ -90,6 +90,7 @@
 				TargetMachine="1"
 				CLRUnmanagedCodeCheck="true"
 				KeyFile="$(INTEROP_KEY_FILE)"
+				DelaySign="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -114,6 +115,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="&quot;$(FrameworkSDKDir)Bin\sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(INTEROP_KEY_FILE)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -184,6 +186,7 @@
 				TargetMachine="1"
 				CLRUnmanagedCodeCheck="true"
 				KeyFile="$(INTEROP_KEY_FILE)"
+				DelaySign="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -208,6 +211,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="&quot;$(FrameworkSDKDir)Bin\sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(INTEROP_KEY_FILE)&quot;"
 			/>
 		</Configuration>
 	</Configurations>

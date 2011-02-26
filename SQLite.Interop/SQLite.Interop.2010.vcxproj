@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * SQLite.Interop.2010.vcxproj -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>SQLite.Interop</ProjectName>
+    <ProjectGuid>{53784BC1-A8BC-4AC8-8A3E-158D6807345A}</ProjectGuid>
+    <RootNamespace>SQLite.Interop</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="props\sqlite3.props" />
+  <Import Project="props\SQLite.Interop.props" />
+  <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir>$(ProjectDir)..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>..\obj\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_DEBUG_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/ASSEMBLYRESOURCE:$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <Version>$(INTEROP_MANIFEST_VERSION)</Version>
+      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapExports>true</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <TargetMachine>MachineX86</TargetMachine>
+      <CLRUnmanagedCodeCheck>true</CLRUnmanagedCodeCheck>
+      <KeyFile>$(INTEROP_KEY_FILE)</KeyFile>
+      <DelaySign>true</DelaySign>
+    </Link>
+    <Manifest>
+      <VerboseOutput>true</VerboseOutput>
+      <AssemblyIdentity>$(ProjectName), processorArchitecture=x86, version=$(INTEROP_MANIFEST_VERSION), type=win32</AssemblyIdentity>
+      <UpdateFileHashes>true</UpdateFileHashes>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>"$(FrameworkSDKDir)Bin\sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/ASSEMBLYRESOURCE:$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <Version>$(INTEROP_MANIFEST_VERSION)</Version>
+      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapExports>true</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <TargetMachine>MachineX86</TargetMachine>
+      <CLRUnmanagedCodeCheck>true</CLRUnmanagedCodeCheck>
+      <KeyFile>$(INTEROP_KEY_FILE)</KeyFile>
+      <DelaySign>true</DelaySign>
+    </Link>
+    <Manifest>
+      <VerboseOutput>true</VerboseOutput>
+      <AssemblyIdentity>$(ProjectName), processorArchitecture=x86, version=$(INTEROP_MANIFEST_VERSION), type=win32</AssemblyIdentity>
+      <UpdateFileHashes>true</UpdateFileHashes>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>"$(FrameworkSDKDir)Bin\sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\win\AssemblyInfo.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\win\crypt.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\contrib\extension-functions.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\win\interop.c" />
+    <ClCompile Include="src\core\sqlite3.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\core\sqlite3.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\sqlite3.h" />
+    <ClInclude Include="src\core\sqlite3ext.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\win\SQLite.Interop.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\System.Data.SQLite\SR.resx">
+      <LogicalName>$(IntDir)System.Data.SQLite.%(Filename).resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
