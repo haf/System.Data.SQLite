@@ -1,0 +1,6 @@
+<title>System.Data.SQLite Download Page</title>
+
+Downloads will be available soon.
+
+The complete source tree for any [/timeline?n=20&y=ci | check-in] may 
+always be downloaded using the "ZIP archive" link available from the check-in detail page.
