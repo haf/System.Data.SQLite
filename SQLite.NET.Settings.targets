@@ -80,21 +80,21 @@
 
     <!--
         NOTE: For interaction with the native SQLite implementation, use the
-              custom build interop DLL (i.e. "SQLite.Interop.DLL")?  By default,
-              this is disabled.  This property is mutually exclusive with the
+              custom built interop DLL (i.e. "SQLite.Interop.dll")?  By default,
+              this is enabled.  This property is mutually exclusive with the
               "UseSqliteStandard" one, below.  This should always be disabled in
               the project file that builds the NetModule target.
     -->
-    <UseInteropDll Condition="'$(UseInteropDll)' == ''">false</UseInteropDll>
+    <UseInteropDll Condition="'$(UseInteropDll)' == ''">true</UseInteropDll>
 
     <!--
         NOTE: For interaction with the native SQLite implementation, use the
-              standard DLL (i.e. "sqlite3.dll")?  By default, this is enabled.
+              standard DLL (i.e. "sqlite3.dll")?  By default, this is disabled.
               This property is mutually exclusive with the "UseInteropDll" one,
               above.  This should always be disabled in the project file that
               builds the NetModule target.
     -->
-    <UseSqliteStandard Condition="'$(UseSqliteStandard)' == ''">true</UseSqliteStandard>
+    <UseSqliteStandard Condition="'$(UseSqliteStandard)' == ''">false</UseSqliteStandard>
 
     <!--
         NOTE: Is the project being built to support the .NET Compact Framework?
