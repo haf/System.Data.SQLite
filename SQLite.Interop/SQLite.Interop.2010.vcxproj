@@ -51,6 +51,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="props\sqlite3.props" />
   <Import Project="props\SQLite.Interop.props" />
+  <PropertyGroup Condition="'$(Platform)'=='Win32' And '$(PROCESSOR_ARCHITECTURE)' == 'AMD64'">
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64' And '$(PROCESSOR_ARCHITECTURE)' == 'x86'">
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <TargetName>$(INTEROP_MIXED_NAME)</TargetName>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -225,6 +231,9 @@
       <AssemblyIdentity>$(ProjectName), processorArchitecture=x86, version=$(INTEROP_MANIFEST_VERSION), type=win32</AssemblyIdentity>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
+    <PostBuildEvent>
+      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin" /D /E /V /I /F /H /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugNativeOnly|x64'">
     <ClCompile>
@@ -258,6 +267,9 @@
       <AssemblyIdentity>$(ProjectName), processorArchitecture=amd64, version=$(INTEROP_MANIFEST_VERSION), type=win32</AssemblyIdentity>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
+    <PostBuildEvent>
+      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin" /D /E /V /I /F /H /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -380,6 +392,9 @@
       <AssemblyIdentity>$(ProjectName), processorArchitecture=x86, version=$(INTEROP_MANIFEST_VERSION), type=win32</AssemblyIdentity>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
+    <PostBuildEvent>
+      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin" /D /E /V /I /F /H /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNativeOnly|x64'">
     <ClCompile>
@@ -416,6 +431,9 @@
       <AssemblyIdentity>$(ProjectName), processorArchitecture=amd64, version=$(INTEROP_MANIFEST_VERSION), type=win32</AssemblyIdentity>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
+    <PostBuildEvent>
+      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin" /D /E /V /I /F /H /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\win\AssemblyInfo.cpp">
