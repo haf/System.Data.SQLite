@@ -34,7 +34,12 @@
 	/>
 	<UserMacro
 		Name="SQLITE_DISABLE_WARNINGS"
-		Value="4018;4055;4090;4100;4127;4132;4146;4152;4210;4244;4245;4389;4701;4706;4996"
+		Value="4018;4055;4057;4090;4100;4127;4132;4146;4152;4210;4244;4245;4389;4701;4706;4996"
+		PerformEnvironmentSet="true"
+	/>
+	<UserMacro
+		Name="SQLITE_DISABLE_X64_WARNINGS"
+		Value="4267;4306"
 		PerformEnvironmentSet="true"
 	/>
 </VisualStudioPropertySheet>
