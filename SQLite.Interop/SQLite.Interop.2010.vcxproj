@@ -51,10 +51,10 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="props\sqlite3.props" />
   <Import Project="props\SQLite.Interop.props" />
-  <PropertyGroup Condition="'$(Platform)'=='Win32' And '$(PROCESSOR_ARCHITECTURE)' == 'AMD64'">
+  <PropertyGroup Condition="'$(Platform)' == 'Win32' And '$(PROCESSOR_ARCHITECTURE)' != 'x86'">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Platform)'=='x64' And '$(PROCESSOR_ARCHITECTURE)' == 'x86'">
+  <PropertyGroup Condition="'$(Platform)' == 'x64' And '$(PROCESSOR_ARCHITECTURE)' != 'AMD64'">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
