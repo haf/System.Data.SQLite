@@ -1,3 +1,10 @@
+;
+; SQLite.iss --
+;
+; Written by Joe Mistachkin.
+; Released to the public domain, use at your own risk!
+;
+
 [Setup]
 AllowNoIcons=true
 ArchitecturesInstallIn64BitMode=x64
