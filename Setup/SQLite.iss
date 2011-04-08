@@ -1,26 +1,26 @@
 [Setup]
-AllowNoIcons=yes
+AllowNoIcons=true
 ArchitecturesInstallIn64BitMode=x64
-AlwaysShowComponentsList=no
+AlwaysShowComponentsList=false
 AppCopyright=Public Domain
-AppID={{02E43EC2-6B1C-45B5-9E48-941C3E1B204A}
+AppID={#AppId}
 AppName=System.Data.SQLite
 AppPublisher=System.Data.SQLite Team
-AppPublisherURL=http://system.data.sqlite.org/
-AppSupportURL=http://system.data.sqlite.org/
-AppUpdatesURL=http://system.data.sqlite.org/
-AppVerName=System.Data.SQLite v1.0.67
-AppVersion=1.0.67.0
+AppPublisherURL={#AppURL}
+AppSupportURL={#AppURL}
+AppUpdatesURL={#AppURL}
+AppVerName=System.Data.SQLite v{#AppVersion}
+AppVersion={#AppVersion}
 AppComments=The ADO.NET adapter for the SQLite database engine.
-AppReadmeFile={app}\README.HTM
+AppReadmeFile={app}\readme.htm
 DefaultDirName={pf}\System.Data.SQLite
 DefaultGroupName=System.Data.SQLite
-OutputBaseFilename=System.Data.SQLite.Setup
-OutputManifestFile=System.Data.SQLite.Setup-manifest.txt
-SetupLogging=yes
+OutputBaseFilename=System.Data.SQLite.Setup_{#AppProcessor}_{#VcRuntime}
+SetupLogging=true
 UninstallFilesDir={app}\uninstall
+VersionInfoVersion={#AppVersion}
 ExtraDiskSpaceRequired=2097152
-
+
 [Code]
 var
   IsNetFx2Setup : Boolean;
@@ -42,7 +42,7 @@ var
   NetFx4HasServicePack: String;
   NetFx4ServicePack: Cardinal;
   NetFx4ErrorMessage: String;
-
+
 function CheckForNetFx2(NeedServicePack: Cardinal): Boolean;
 var
   SubKeyName: String;
@@ -69,7 +69,7 @@ begin
     end;
   end;
 end;
-
+
 function CheckForNetFx4(NeedServicePack: Cardinal): Boolean;
 var
   SubKeyName: String;
@@ -96,7 +96,7 @@ begin
     end;
   end;
 end;
-
+
 function GetNetFx2InstallRoot(FileName: String): String;
 var
   InstallRoot: String;
@@ -114,7 +114,7 @@ begin
     end;
   end;
 end;
-
+
 function GetNetFx4InstallRoot(FileName: String): String;
 var
   InstallRoot: String;
@@ -132,23 +132,24 @@ begin
     end;
   end;
 end;
-
+
 function CheckIsNetFx2Setup(): Boolean;
 begin
   Result := IsNetFx2Setup;
 end;
-
+
 function CheckIsNetFx4Setup(): Boolean;
 begin
   Result := IsNetFx4Setup;
 end;
-
+
 function ExtractAndInstallVcRuntime(var ResultCode: Integer): Boolean;
 begin
-  ExtractTemporaryFile('vcredist_x86_2008_SP1.exe');
+  ExtractTemporaryFile('vcredist_{#AppProcessor}_{#VcRuntime}_SP1.exe');
 
-  if Exec(ExpandConstant('{tmp}\vcredist_x86_2008_SP1.exe'), '/q', '',
-      SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+  if Exec(ExpandConstant(
+      '{tmp}\vcredist_{#AppProcessor}_{#VcRuntime}_SP1.exe'),
+      '/q', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
   begin
     Result := True;
   end
@@ -156,12 +157,12 @@ begin
     Result := False;
   end;
 end;
-
+
 function InitializeSetup(): Boolean;
 var
   ResultCode: Integer;
 begin
-  IsNetFx2Setup := True;
+  IsNetFx2Setup := {#IsNetFx2};
   IsNetFx4Setup := not IsNetFx2Setup;
 
   NetFxSubKeyName := 'Software\Microsoft\.NETFramework';
@@ -214,46 +215,46 @@ begin
     end;
   end;
 end;
-
+
 [Components]
 Name: Application; Description: System.Data.SQLite components.; Types: custom compact full
 Name: Application\Core; Description: Core components.; Types: custom compact full
 Name: Application\Core\MSIL; Description: Core managed components.; Types: custom compact full
-Name: Application\Core\x86; Description: Core native components.; Types: custom compact full
+Name: Application\Core\{#AppProcessor}; Description: Core native components.; Types: custom compact full
 Name: Application\Symbols; Description: Debugging symbol components.; Types: custom compact full
 Name: Application\Documentation; Description: Documentation components.; Types: custom compact full
 Name: Application\Test; Description: Test components.; Types: custom compact full
-
+
 [Tasks]
 Components: Application\Core\MSIL; Name: GAC; Description: Install the assemblies into the global assembly cache.; Flags: unchecked; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
 Components: Application\Core\MSIL; Name: NGEN; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
-
+
 [Run]
 Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
 Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
-
+
 [UninstallRun]
 Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
-
+
 [Dirs]
 Name: {app}\bin
 Name: {app}\doc
 Name: {app}\GAC
-
+
 [Files]
-Components: Application\Core\x86; Source: ..\Externals\MSVCPP\vcredist_x86_2008_SP1.exe; DestDir: {tmp}; Flags: dontcopy
+Components: Application\Core\{#AppProcessor}; Source: ..\Externals\MSVCPP\vcredist_{#AppProcessor}_{#VcRuntime}_SP1.exe; DestDir: {tmp}; Flags: dontcopy
 Components: Application; Source: ..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
-Components: Application\Core\MSIL; Tasks: GAC; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version=1.0.67.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+Components: Application\Core\MSIL; Tasks: GAC; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
 Components: Application\Core\MSIL; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\Release\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Core\x86; Source: ..\bin\Win32\ReleaseNativeOnly\SQLite.Interop.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Core\x86 and Application\Symbols; Source: ..\bin\Win32\ReleaseNativeOnly\SQLite.Interop.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\{#AppProcessor}; Source: ..\bin\{#AppPlatform}\ReleaseNativeOnly\SQLite.Interop.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\{#AppProcessor} and Application\Symbols; Source: ..\bin\{#AppPlatform}\ReleaseNativeOnly\SQLite.Interop.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Documentation; Source: ..\doc\SQLite.NET.chm; DestDir: {app}\doc; Flags: restartreplace uninsrestartdelete
 Components: Application\Test; Source: ..\bin\Release\bin\test.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test and Application\Symbols; Source: ..\bin\Release\bin\test.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test; Source: ..\bin\Release\bin\test.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-
+
 [Icons]
 Name: {group}\Test Suite; Filename: {app}\bin\test.exe; WorkingDir: {app}\bin; IconFilename: {app}\bin\test.exe; Comment: Launch Test Suite; IconIndex: 0; Flags: createonlyiffileexists
 Name: {group}\Class Library Documentation; Filename: {app}\doc\SQLite.NET.chm; WorkingDir: {app}\doc; Comment: Launch Class Library Documentation; Flags: createonlyiffileexists
