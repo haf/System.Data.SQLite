@@ -232,7 +232,7 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin" /D /E /V /I /F /H /Y</Command>
+      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugNativeOnly|x64'">
@@ -268,7 +268,7 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin" /D /E /V /I /F /H /Y</Command>
+      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -393,7 +393,7 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin" /D /E /V /I /F /H /Y</Command>
+      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNativeOnly|x64'">
@@ -432,7 +432,7 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin" /D /E /V /I /F /H /Y</Command>
+      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
