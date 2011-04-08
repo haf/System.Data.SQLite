@@ -239,11 +239,12 @@ Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx2Install
 [Dirs]
 Name: {app}\bin
 Name: {app}\doc
+Name: {app}\GAC
 
 [Files]
 Components: Application\Core\x86; Source: ..\Externals\MSVCPP\vcredist_x86_2008_SP1.exe; DestDir: {tmp}; Flags: dontcopy
 Components: Application; Source: ..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
-Components: Application\Core\MSIL; Tasks: GAC; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}; StrongAssemblyName: "System.Data.SQLite, Version=1.0.67.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete sharedfile gacinstall
+Components: Application\Core\MSIL; Tasks: GAC; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version=1.0.67.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
 Components: Application\Core\MSIL; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\Release\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Core\x86; Source: ..\bin\Win32\ReleaseNativeOnly\SQLite.Interop.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
