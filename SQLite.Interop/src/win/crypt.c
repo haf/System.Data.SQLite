@@ -349,8 +349,10 @@ int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySize)
     Pgno nSkip = PAGER_MJ_PGNO(p);
     DbPage *pPage;
     Pgno n;
+    int count;
 
-    sqlite3PagerPagecount(p, &nPage);
+    sqlite3PagerPagecount(p, &count);
+    nPage = (Pgno)count;
 
     for(n = 1; n <= nPage; n ++)
     {
