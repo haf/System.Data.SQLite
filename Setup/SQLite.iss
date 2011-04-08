@@ -1,5 +1,6 @@
 [Setup]
 AllowNoIcons=yes
+ArchitecturesInstallIn64BitMode=x64
 AlwaysShowComponentsList=no
 AppCopyright=Public Domain
 AppID={{02E43EC2-6B1C-45B5-9E48-941C3E1B204A}
@@ -34,16 +35,12 @@ var
   NetFx2SetupVersion: String;
   NetFx2HasServicePack: String;
   NetFx2ServicePack: Cardinal;
-  NetFx2SdkSubKeyName: String;
-  NetFx2SdkInstallRoot: String;
   NetFx2ErrorMessage: String;
 
   NetFx4Version: String;
   NetFx4SetupVersion: String;
   NetFx4HasServicePack: String;
   NetFx4ServicePack: Cardinal;
-  NetFx4SdkSubKeyName: String;
-  NetFx4SdkInstallRoot: String;
   NetFx4ErrorMessage: String;
 
 function CheckForNetFx2(NeedServicePack: Cardinal): Boolean;
@@ -136,42 +133,6 @@ begin
   end;
 end;
 
-function GetNetFx2SdkInstallRoot(FileName: String): String;
-var
-  InstallRoot: String;
-begin
-  Result := '';
-
-  if RegQueryStringValue(HKEY_LOCAL_MACHINE, NetFx2SdkSubKeyName,
-      NetFx2SdkInstallRoot, InstallRoot) then
-  begin
-    Result := InstallRoot;
-
-    if FileName <> '' then
-    begin
-      Result := Result + '\' + FileName;
-    end;
-  end;
-end;
-
-function GetNetFx4SdkInstallRoot(FileName: String): String;
-var
-  InstallRoot: String;
-begin
-  Result := '';
-
-  if RegQueryStringValue(HKEY_LOCAL_MACHINE, NetFx4SdkSubKeyName,
-      NetFx4SdkInstallRoot, InstallRoot) then
-  begin
-    Result := InstallRoot;
-
-    if FileName <> '' then
-    begin
-      Result := Result + '\' + FileName;
-    end;
-  end;
-end;
-
 function CheckIsNetFx2Setup(): Boolean;
 begin
   Result := IsNetFx2Setup;
@@ -182,7 +143,23 @@ begin
   Result := IsNetFx4Setup;
 end;
 
+function ExtractAndInstallVcRuntime(var ResultCode: Integer): Boolean;
+begin
+  ExtractTemporaryFile('vcredist_x86_2008_SP1.exe');
+
+  if Exec(ExpandConstant('{tmp}\vcredist_x86_2008_SP1.exe'), '/q', '',
+      SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+  begin
+    Result := True;
+  end
+  else begin
+    Result := False;
+  end;
+end;
+
 function InitializeSetup(): Boolean;
+var
+  ResultCode: Integer;
 begin
   IsNetFx2Setup := True;
   IsNetFx4Setup := not IsNetFx2Setup;
@@ -196,8 +173,6 @@ begin
   NetFx2SetupVersion := 'v2.0.50727';
   NetFx2HasServicePack := 'SP';
   NetFx2ServicePack := 2;
-  NetFx2SdkSubKeyName := NetFxSubKeyName
-  NetFx2SdkInstallRoot := 'sdkInstallRootv2.0';
   NetFx2ErrorMessage := 'The Microsoft .NET Framework v2.0 with Service Pack '
       + IntToStr(NetFx2ServicePack) + ' or higher is required.';
 
@@ -205,10 +180,6 @@ begin
   NetFx4SetupVersion := 'v4\Full';
   NetFx4HasServicePack := 'Servicing';
   NetFx4ServicePack := 0;
-  NetFx4SdkSubKeyName :=
-      'Software\Microsoft\Microsoft SDKs\Windows\v7.0A\WinSDK-NetFx40Tools';
-
-  NetFx4SdkInstallRoot := 'InstallationFolder';
   NetFx4ErrorMessage := 'The Microsoft .NET Framework v4.0 with Service Pack '
       + IntToStr(NetFx4ServicePack) + ' or higher is required.';
 
@@ -231,6 +202,17 @@ begin
       MsgBox(NetFx4ErrorMessage, mbError, MB_OK);
     end;
   end;
+
+  if Result then
+  begin
+    Result := ExtractAndInstallVcRuntime(ResultCode);
+
+    if not Result then
+    begin
+      MsgBox('Failed to install Microsoft Visual C++ Runtime: ' +
+          SysErrorMessage(ResultCode), mbError, MB_OK);
+    end;
+  end;
 end;
 
 [Components]
@@ -247,23 +229,21 @@ Components: Application\Core\MSIL; Name: GAC; Description: Install the assemblie
 Components: Application\Core\MSIL; Name: NGEN; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
 
 [Run]
-Components: Application\Core\MSIL; Tasks: GAC; Filename: {code:GetNetFx2SdkInstallRoot|bin\Gacutil.exe}; Parameters: "/nologo /if ""{app}\bin\System.Data.SQLite.dll"""; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
 Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
-Components: Application\Core\MSIL; Tasks: GAC; Filename: {code:GetNetFx4SdkInstallRoot|Gacutil.exe}; Parameters: "/nologo /if ""{app}\bin\System.Data.SQLite.dll"""; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 
 [UninstallRun]
 Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
-Components: Application\Core\MSIL; Tasks: GAC; Filename: {code:GetNetFx4SdkInstallRoot|Gacutil.exe}; Parameters: "/nologo /uf System.Data.SQLite"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 Components: Application\Core\MSIL; Tasks: NGEN; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
-Components: Application\Core\MSIL; Tasks: GAC; Filename: {code:GetNetFx2SdkInstallRoot|bin\Gacutil.exe}; Parameters: "/nologo /uf System.Data.SQLite"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
 
 [Dirs]
 Name: {app}\bin
 Name: {app}\doc
 
 [Files]
-Components: Application; Source: ..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\x86; Source: ..\Externals\MSVCPP\vcredist_x86_2008_SP1.exe; DestDir: {tmp}; Flags: dontcopy
+Components: Application; Source: ..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
+Components: Application\Core\MSIL; Tasks: GAC; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}; StrongAssemblyName: "System.Data.SQLite, Version=1.0.67.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete sharedfile gacinstall
 Components: Application\Core\MSIL; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\Release\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Core\x86; Source: ..\bin\Win32\ReleaseNativeOnly\SQLite.Interop.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
