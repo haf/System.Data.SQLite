@@ -16,7 +16,9 @@ namespace System.Data.SQLite
 	internal abstract class InternalBase
 	{
 		// Methods
+#if !NET_20
 		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
+#endif
 		protected InternalBase()
 		{
 		}
@@ -29,7 +31,9 @@ namespace System.Data.SQLite
 			return builder.ToString();
 		}
 
+#if !NET_20
 		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
+#endif
 		internal virtual void ToFullString(StringBuilder builder)
 		{
 			this.ToCompactString(builder);

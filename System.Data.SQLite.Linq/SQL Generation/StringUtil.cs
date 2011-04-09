@@ -84,7 +84,9 @@ namespace System.Data.SQLite
 			return string.Format(CultureInfo.InvariantCulture, "{0}", new object[] { value });
 		}
 
+#if !NET_20
 		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
+#endif
 		internal static bool IsNullOrEmptyOrWhiteSpace(string value)
 		{
 			return IsNullOrEmptyOrWhiteSpace(value, 0);
@@ -162,7 +164,9 @@ namespace System.Data.SQLite
 			ToSeparatedStringPrivate(builder, list, separator, string.Empty, false);
 		}
 
+#if !NET_20
 		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
+#endif
 		internal static void ToSeparatedString(StringBuilder stringBuilder, IEnumerable list, string separator, string nullValue)
 		{
 			ToSeparatedStringPrivate(stringBuilder, list, separator, nullValue, false);

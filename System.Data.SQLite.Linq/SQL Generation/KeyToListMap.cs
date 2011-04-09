@@ -119,7 +119,9 @@ namespace System.Data.SQLite
 
 		internal IEnumerable<KeyValuePair<TKey, List<TValue>>> KeyValuePairs
 		{
+#if !NET_20
 			[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
+#endif
 			get
 			{
 				return this.m_map;
