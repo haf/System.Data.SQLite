@@ -20,6 +20,8 @@ IF NOT DEFINED _VECHO (SET _VECHO=REM)
 
 SET PATH=%ProgramFiles%\Inno Setup 5;%PATH%
 
+%_VECHO% Path = '%PATH%'
+
 %_ECHO% ISCC.exe SQLite.iss "/dAppId=%APPID%" "/dAppVersion=%VERSION%" "/dAppPublicKey=%PUBLICKEY%" "/dAppURL=%URL%" "/dIsNetFx2=%ISNETFX2%" "/dVcRuntime=%VCRUNTIME%" "/dAppPlatform=%PLATFORM%" "/dAppProcessor=%PROCESSOR%" "/dYear=%YEAR%"
 
 IF %ERRORLEVEL% NEQ 0 (
