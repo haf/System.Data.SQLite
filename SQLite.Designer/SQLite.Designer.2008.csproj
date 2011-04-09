@@ -190,6 +190,7 @@
   <ItemGroup>
     <None Include="Resources\info.png" />
     <None Include="Resources\ToolboxItems.txt" />
+    <None Include="source.extension.vsixmanifest" />
   </ItemGroup>
   <Import Project="$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.Properties.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
