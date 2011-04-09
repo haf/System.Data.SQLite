@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.ConstrainedExecution;
 using System.Resources;
@@ -36,6 +35,3 @@ using System.Resources;
 // by using the '*' as shown below:
 [assembly: AssemblyVersion("1.0.38.1")]
 [assembly: AssemblyFileVersion("1.0.38.1")]
-[assembly: AssemblyDelaySignAttribute(false)]
-[assembly: AssemblyKeyFileAttribute("..\\System.Data.SQLite\\System.Data.SQLite.snk")]
-[assembly: AssemblyKeyNameAttribute("")]
