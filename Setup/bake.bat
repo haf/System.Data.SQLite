@@ -11,9 +11,16 @@
 
 SETLOCAL
 
+REM SET _ECHO=ECHO
+IF NOT DEFINED _AECHO (SET _AECHO=REM)
+IF NOT DEFINED _CECHO (SET _CECHO=REM)
+IF NOT DEFINED _VECHO (SET _VECHO=REM)
+
+%_AECHO% Running %0 %*
+
 SET PATH=%ProgramFiles%\Inno Setup 5;%PATH%
 
-ISCC.exe SQLite.iss "/dAppId=%APPID%" "/dAppVersion=%VERSION%" "/dAppPublicKey=%PUBLICKEY%" "/dAppURL=%URL%" "/dIsNetFx2=%ISNETFX2%" "/dVcRuntime=%VCRUNTIME%" "/dAppPlatform=%PLATFORM%" "/dAppProcessor=%PROCESSOR%"
+%_ECHO% ISCC.exe SQLite.iss "/dAppId=%APPID%" "/dAppVersion=%VERSION%" "/dAppPublicKey=%PUBLICKEY%" "/dAppURL=%URL%" "/dIsNetFx2=%ISNETFX2%" "/dVcRuntime=%VCRUNTIME%" "/dAppPlatform=%PLATFORM%" "/dAppProcessor=%PROCESSOR%"
 
 IF %ERRORLEVEL% NEQ 0 (
   ECHO Failed to compile setup.
@@ -34,15 +41,15 @@ GOTO no_errors
   CALL :fn_SetErrorLevel
   ENDLOCAL
   ECHO.
-  ECHO Failure, errors were encountered.
+  ECHO Bake failure, errors were encountered.
   GOTO end_of_file
 
 :no_errors
   CALL :fn_ResetErrorLevel
   ENDLOCAL
   ECHO.
-  ECHO Success, no errors were encountered.
+  ECHO Bake success, no errors were encountered.
   GOTO end_of_file
 
 :end_of_file
-EXIT /B %ERRORLEVEL%
+%_ECHO% EXIT /B %ERRORLEVEL%

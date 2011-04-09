@@ -58,7 +58,6 @@
   <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.References.targets" />
   <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Properties.targets" />
   <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Files.targets" />
-  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v3.5'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

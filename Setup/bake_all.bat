@@ -11,26 +11,47 @@
 
 SETLOCAL
 
+REM SET _ECHO=ECHO
+IF NOT DEFINED _AECHO (SET _AECHO=REM)
+IF NOT DEFINED _CECHO (SET _CECHO=REM)
+IF NOT DEFINED _VECHO (SET _VECHO=REM)
+
+%_AECHO% Running %0 %*
+
 SET TOOLS=%~dp0
 SET TOOLS=%TOOLS:~0,-1%
 
-CALL "%TOOLS%\set_common.bat"
+%_VECHO% Tools = '%TOOLS%'
+
+%_ECHO% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not set common variables.
   GOTO errors
 )
 
+IF NOT DEFINED PROCESSORS (
+  SET PROCESSORS=x86
+)
+
+%_VECHO% Processors = '%PROCESSORS%'
+
+IF NOT DEFINED YEARS (
+  SET YEARS=2008
+)
+
+%_VECHO% Years = '%YEARS%'
+
 FOR %%P IN (%PROCESSORS%) DO (
   FOR %%Y IN (%YEARS%) DO (
-    CALL "%TOOLS%\set_%%P_%%Y.bat"
+    %_ECHO% CALL "%TOOLS%\set_%%P_%%Y.bat"
 
     IF ERRORLEVEL 1 (
       ECHO Could not set variables for %%P/%%Y.
       GOTO errors
     )
 
-    CALL "%TOOLS%\bake.bat"
+    %_ECHO% CALL "%TOOLS%\bake.bat"
 
     IF ERRORLEVEL 1 (
       ECHO Could not bake setup for %%P/%%Y.
@@ -64,4 +85,4 @@ GOTO no_errors
   GOTO end_of_file
 
 :end_of_file
-EXIT /B %ERRORLEVEL%
+%_ECHO% EXIT /B %ERRORLEVEL%
