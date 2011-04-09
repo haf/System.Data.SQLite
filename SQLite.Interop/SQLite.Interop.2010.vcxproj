@@ -151,6 +151,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <TargetMachine>MachineX86</TargetMachine>
       <CLRUnmanagedCodeCheck>true</CLRUnmanagedCodeCheck>
+      <KeyFile>$(INTEROP_KEY_FILE)</KeyFile>
+      <DelaySign>true</DelaySign>
     </Link>
     <Manifest>
       <VerboseOutput>true</VerboseOutput>
@@ -192,6 +194,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <TargetMachine>MachineX64</TargetMachine>
       <CLRUnmanagedCodeCheck>true</CLRUnmanagedCodeCheck>
+      <KeyFile>$(INTEROP_KEY_FILE)</KeyFile>
+      <DelaySign>true</DelaySign>
     </Link>
     <Manifest>
       <VerboseOutput>true</VerboseOutput>
@@ -307,6 +311,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <TargetMachine>MachineX86</TargetMachine>
       <CLRUnmanagedCodeCheck>true</CLRUnmanagedCodeCheck>
+      <KeyFile>$(INTEROP_KEY_FILE)</KeyFile>
+      <DelaySign>true</DelaySign>
     </Link>
     <Manifest>
       <VerboseOutput>true</VerboseOutput>
@@ -350,6 +356,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <TargetMachine>MachineX64</TargetMachine>
       <CLRUnmanagedCodeCheck>true</CLRUnmanagedCodeCheck>
+      <KeyFile>$(INTEROP_KEY_FILE)</KeyFile>
+      <DelaySign>true</DelaySign>
     </Link>
     <Manifest>
       <VerboseOutput>true</VerboseOutput>
