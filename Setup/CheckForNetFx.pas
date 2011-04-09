@@ -207,7 +207,7 @@ begin
   NetFx4ErrorMessage := 'The Microsoft .NET Framework v4.0 with Service Pack '
       + IntToStr(NetFx4ServicePack) + ' or higher is required.';
 
-  VcRuntimeRedistributable := 'vcredist_{#AppProcessor}_{#VcRuntime}_SP1.exe';
+  VcRuntimeRedistributable := 'vcredist_{#AppProcessor}_{#VcRuntime}.exe';
 
   if IsNetFx2Setup then
   begin
