@@ -10,7 +10,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SQLite.Designer</RootNamespace>
     <AssemblyName>SQLite.Designer</AssemblyName>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\System.Data.SQLite\System.Data.SQLite.snk</AssemblyOriginatorKeyFile>
     <RegisterOutputPackage>false</RegisterOutputPackage>
     <RegisterWithCodebase>false</RegisterWithCodebase>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>

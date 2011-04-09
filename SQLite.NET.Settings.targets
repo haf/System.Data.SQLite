@@ -120,7 +120,7 @@
               warnings that tend to cause too much noise.
     -->
     <WarningLevel>4</WarningLevel>
-    <NoWarn>618,1591</NoWarn>
+    <NoWarn>618,1591;3001</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -129,7 +129,7 @@
               warnings that tend to cause too much noise.
     -->
     <WarningLevel>4</WarningLevel>
-    <NoWarn>618,1591</NoWarn>
+    <NoWarn>618,1591;3001</NoWarn>
   </PropertyGroup>
 
   <!--
