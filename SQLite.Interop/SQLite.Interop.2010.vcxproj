@@ -462,6 +462,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="props\SQLite.Interop.props" />
+    <None Include="props\sqlite3.props" />
     <None Include="src\core\sqlite3.def" />
   </ItemGroup>
   <ItemGroup>

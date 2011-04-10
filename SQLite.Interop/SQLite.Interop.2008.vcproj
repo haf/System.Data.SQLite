@@ -1181,6 +1181,18 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Property Files"
+			>
+			<File
+				RelativePath=".\props\SQLite.Interop.vsprops"
+				>
+			</File>
+			<File
+				RelativePath=".\props\sqlite3.vsprops"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

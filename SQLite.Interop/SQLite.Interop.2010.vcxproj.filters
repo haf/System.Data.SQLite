@@ -21,6 +21,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Property Files">
+      <UniqueIdentifier>{d69d5c95-1d03-4325-ad06-fce223ab4e42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\win\AssemblyInfo.cpp">
@@ -40,6 +43,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="props\sqlite3.props">
+      <Filter>Property Files</Filter>
+    </None>
+    <None Include="props\SQLite.Interop.props">
+      <Filter>Property Files</Filter>
+    </None>
     <None Include="src\core\sqlite3.def">
       <Filter>Source Files</Filter>
     </None>
