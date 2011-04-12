@@ -9,7 +9,8 @@
   <li>
     Supports the Full
     and Compact .NET Framework, and native C/C++ development.  100% binary
-    compatible with the original sqlite3.dll.
+    compatible with the original sqlite3.dll.<br>
+    <font color="red">Currently not included.  We hope to have this feature included again soon.</font>
   </li>
   <li>
     Full support for Mono via a &quot;managed only&quot; provider that runs against the
@@ -18,7 +19,8 @@
   <li>Full Entity Framework support (ADO.NET 3.5 SP1)</li>
   <li>
     On the Compact Framework, it is faster than SQL Server
-    Mobile.  SQLite's installed size is a fraction of SQL Mobile's. It uses less memory at runtime, runs queries faster,
+    Mobile.  SQLite's installed size is a fraction of SQL Mobile's. 
+    It uses less memory at runtime, runs queries faster,
     and has a smaller database file size as well.
   </li>
   <li>
@@ -29,18 +31,25 @@
     Visual Studio 2005/2008 Design-Time Support, works with all versions of VS2005/2008,
     including all Express Editions of VS2005.  You can add a SQLite
     database to the Servers list, design queries with the Query Designer,
-    drag-and-drop tables onto a Typed DataSet, etc.
+    drag-and-drop tables onto a Typed DataSet, etc.<br>
+    <font color="red">Currently not included.  We are still updating the Design-Time
+    support installer.</font>
   </li>
   <li>
     Full SQLite schema editing inside Visual Studio.
     You can create/edit tables, views, triggers, indexes, check constraints and foreign keys.
   </li>
   <li>
-    Single file redistributable (except on Compact Framework).  The core sqlite3 codebase and the ADO.NET wrapper
-    are combined into one multi-module assembly.
+    Single file redistributable (except on Compact Framework).  
+    The core sqlite3 codebase and the ADO.NET wrapper
+    are combined into one multi-module assembly.<br>
+    <font color="red">Currently all versions provided as System.Data.SQLite.dll and SQLite.Interop.dll.
+    This provides consistency across all packages, including Compact and Mono.</font>
   </li>
   <li>
-    Binaries included for Itanium, x64, x86 and ARM processors.
+    Binaries included for Itanium, x64, x86 and ARM processors.<br>
+    <font color="red">Currently only x64 and x86 included.  
+    We hope to have more processorts included again soon.</font>
   </li>
   <li>
     DbProviderFactory support.
