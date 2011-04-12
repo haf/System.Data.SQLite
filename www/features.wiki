@@ -12,7 +12,7 @@
   <li>
     Supports the Full
     and Compact .NET Framework, and native C/C++ development.  100% binary
-    compatible with the original sqlite3.dll.<br>
+    compatible with the original sqlite3.dll.<br />
     <font color="red">Compact framework not currently not included.  
     We hope to have this feature included again soon.</font>
   </li>
@@ -40,7 +40,7 @@
     Visual Studio 2005/2008 Design-Time Support, works with all versions of VS2005/2008,
     including all Express Editions of VS2005.  You can add a SQLite
     database to the Servers list, design queries with the Query Designer,
-    drag-and-drop tables onto a Typed DataSet, etc.<br>
+    drag-and-drop tables onto a Typed DataSet, etc.<br />
     <font color="red">Currently not included.  We are still updating the Design-Time
     support installer.</font>
   </li>
@@ -53,13 +53,13 @@
   <li>
     Single file redistributable (except on Compact Framework).  
     The core sqlite3 codebase and the ADO.NET wrapper
-    are combined into one multi-module assembly.<br>
+    are combined into one multi-module assembly.<br />
     <font color="red">Currently all versions provided as System.Data.SQLite.dll and SQLite.Interop.dll.
     This provides consistency across all packages, including Compact and Mono.</font>
   </li>
 
   <li>
-    Binaries included for Itanium, x64, x86 and ARM processors.<br>
+    Binaries included for Itanium, x64, x86 and ARM processors.<br />
     <font color="red">Currently only x64 and x86 included.  
     We hope to have more processors included again soon.</font>
   </li>

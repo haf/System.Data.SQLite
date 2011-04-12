@@ -188,7 +188,7 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
   <li>Make sure everything succeeds with no errors.  InnoSetup should produce
   "success" messages very similar to the following:
 
-  Successful compile (X.XXX sec). Resulting Setup program filename is:
+  Successful compile (X.XXX sec). Resulting Setup program filename is: abc
   </li>
 </ol>
 

@@ -1,59 +1,49 @@
 <title>Release Procedures</title>
 
-<p>Follow these steps to build a new release of SQLite.NET.  Unless otherwise noted, all steps need to be done in the order specified.</p>
+<h2>Release Procedures</h2>
 
-<p>You will need a Visual Studio 2010 development environment for this build.</p>
+<p>Follow these steps to prepare a new release of System.Data.SQLite.  
+Unless otherwise noted, all steps need to be done in the order specified.</p>
 
 <ol type="A">
-  <li>
-    <b>[./build.wiki | Build] runtime and design time components</b>
-  </li>
-  <li>
-    <b>Update documentation</b>
-    <ol type="1">
-      <li>
-        Update the readme.htm file with the latest version changes
-      </li>
-      <li>
-        Copy the version changes from readme.htm into doc\extra\version.html
-      </li>
-      <li>
-        Update doc\extra\dbfactorysupport.html to reflect the latest version # of the DLL
-      </li>
-      <li>
-        Copy over doc\extra\dbfactorysupport.html and version.html to my temp
-        ndoc2 location where all my intermediate files are for the CHM
-      </li>
-      <li>
-        Run HTML Help Workshop on the HHP project to get my CHM
-      </li>
-      <li>
-        Copy the CHM file over to \doc
-      </li>
-    </ol>
-  </li>
-  <li>
-    <b>Build install and setup packages</b>
-    <ol type="1">
-      <li>
-        Load up the \tools\setup\sqlite_setup.sln solution
-      </li>
-      <li>
-        Change the "Version" property of the sqlite project (this is the MSI
-        file project) to reflect the new version of the release.
-      </li>
-      <li>
-        Edit the setup.rc file of the setup project, drilling down to the
-        Version resource, and editing VS_VERSION_INFO, and populating the version
-        info with the newest version #.
-      </li>
-      <li>
-        Build both projects.
-      </li>
-      <li>
-        Copy the and rename the resulting \tools\setup\release\setup.exe to
-        SQLite-1.0.xx.0-setup.exe
-      </li>
-    </ol>
-  </li>
+<li>
+<b>Build Runtime Packages</b>
+<ul>
+1. [./build.wiki | Build] the runtime and design time components, and setup package.<br />
+2. Copy the and rename the resulting setup.exe to sqlite-dotnet-1xxyyzz.exe<br />
+</ul>
+</li>
+<li>
+<b>Build Source Package</b>
+<ul>
+1. Get a fresh checkout of the "dotnet" Fossil repository.<br />
+2. Run fossil close to remove the _FOSSIL_ file.<br />
+3. Remove the bin, obj, and Externals directories.<br />
+4. Rename the subdirectory to sqlite-dotnetsrc-1xxyyzz<br />
+5. Package this subdirectory as sqlite-dotnetsrc-1xxyyzz.zip<br />
+6. Move the ZIP archive to the doc/ folder of the build area.<br />
+</ul>
+</li>
+<li>
+<b>Update documentation</b>
+<font color="red">This section needs updating.</font>
+<ul>
+1. Update the readme.htm file with the latest version changes<br />
+2. Copy the version changes from readme.htm into doc\extra\version.html<br />
+3. Update doc\extra\dbfactorysupport.html to reflect the latest version # of the DLL<br />
+4. Copy over doc\extra\dbfactorysupport.html and version.html to my temp
+ndoc2 location where all my intermediate files are for the CHM<br />
+5. Run HTML Help Workshop on the HHP project to get my CHM<br />
+6. Copy the CHM file over to \doc<br />
+</ul>
+</li>
+<li>
+<b>Publish the release</b>
+<ul>
+1. Update the news.wiki page and the downloads.wiki page.<br />
+2. Tag the release in Fossil.<br />
+3. Upload the distributables.<br />
+4. Announce the release on the mailing list.<br />
+</ul>
+</li>
 </ol>

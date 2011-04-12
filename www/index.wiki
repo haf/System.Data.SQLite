@@ -17,7 +17,7 @@
 </table>
 
 <p>
-  This is a fork of the popular ADO.NET 4.0 adaptor for <a href="http://www.sqlite.org">SQLite</a> known
+  This is a fork of the popular ADO.NET 2.0 adaptor for <a href="http://www.sqlite.org">SQLite</a> known
   as System.Data.SQLite. The originator of System.Data.SQLite, Robert Simpson,
   is aware of this fork, has expressed his approval, and has commit privileges on the new Fossil repository.
   The SQLite development team intends to maintain System.Data.SQLite moving forward.
