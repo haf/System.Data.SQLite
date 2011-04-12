@@ -14,7 +14,9 @@
             Framework 2.0 (if necessary, it will typically be enabled from
             within the project file itself).
   -->
-  <PropertyGroup Condition="'$(NetFx20)' != 'false'">
+  <PropertyGroup Condition="'$(NetFx20)' != 'false' Or
+                            '$(TargetFrameworkVersion)' == 'v2.0' Or
+                            '$(TargetFrameworkVersion)' == 'v3.5'">
     <DefineConstants>$(DefineConstants);NET_20</DefineConstants>
   </PropertyGroup>
 
