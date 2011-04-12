@@ -131,6 +131,11 @@ SET PATH=%FRAMEWORKDIR%;%PATH%
 
 IF NOT DEFINED SOLUTION (
   %_AECHO% Building all projects...
+  SET SOLUTION=.\SQLite.NET.%YEAR%.MSBuild.sln
+)
+
+IF NOT EXIST "%SOLUTION%" (
+  %_AECHO% Building all projects...
   SET SOLUTION=.\SQLite.NET.%YEAR%.sln
 )
 
