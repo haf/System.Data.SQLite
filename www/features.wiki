@@ -10,7 +10,8 @@
     Supports the Full
     and Compact .NET Framework, and native C/C++ development.  100% binary
     compatible with the original sqlite3.dll.<br>
-    <font color="red">Currently not included.  We hope to have this feature included again soon.</font>
+    <font color="red">Compact framework not currently not included.  
+    We hope to have this feature included again soon.</font>
   </li>
   <li>
     Full support for Mono via a &quot;managed only&quot; provider that runs against the
