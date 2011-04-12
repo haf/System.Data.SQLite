@@ -77,8 +77,6 @@
     <EmbeddedResource Include="Resources\Common.ConceptualSchemaDefinition.csdl" />
     <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.ssdl" />
     <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaMapping.msl" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

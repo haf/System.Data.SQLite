@@ -56,7 +56,8 @@
                             (('$(Platform)' == 'Win32' And
                               '$(PROCESSOR_ARCHITECTURE)' != 'x86') Or
                              ('$(Platform)' == 'x64' And
-                              '$(PROCESSOR_ARCHITECTURE)' != 'AMD64'))"
+                              '$(PROCESSOR_ARCHITECTURE)' != 'AMD64' And
+                              '$(PROCESSOR_ARCHITEW6432)' != 'AMD64'))"
                  Label="PostBuildEvent">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
