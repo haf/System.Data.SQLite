@@ -6,26 +6,7 @@
 
 <ol type="A">
   <li>
-    <b>Build runtime components</b>
-    <ol type="1">
-      <li>
-        Build SQLite.NET.sln for Release/ia64
-      </li>
-      <li>
-        Change to Release/x64 and rebuild
-      </li>
-      <li>
-        Change to Release/x86 and rebuild
-      </li>
-    </ol>
-  </li>
-  <li>
-    <b>Build designer components</b>
-    <ol type="1">
-      <li>
-        Build SQLite.Designer.sln for Release
-      </li>
-    </ol>
+    <b>[./build.wiki | Build] runtime and design time components</b>
   </li>
   <li>
     <b>Update documentation</b>

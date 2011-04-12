@@ -9,6 +9,7 @@
         <li>[./support.wiki | Support]</li>
         <li>[./downloads.wiki | Downloads]</li>
         <li>[./contribute.wiki | Contributing]</li>
+        <li>[./build.wiki | Build Procedures]</li>
         <li>[./release.wiki | Release Procedures]</li>
       </ul>
     </td>
