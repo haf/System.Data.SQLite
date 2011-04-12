@@ -7,6 +7,7 @@
 :: Released to the public domain, use at your own risk!
 ::
 
+
 IF NOT DEFINED APPID (
   SET APPID={{02E43EC2-6B1C-45B5-9E48-941C3E1B204A}
 )
@@ -16,7 +17,7 @@ IF NOT DEFINED URL (
 )
 
 IF NOT DEFINED VERSION (
-  SET VERSION=1.0.67.0
+  SET VERSION=1.0.69.0
 )
 
 IF NOT DEFINED PUBLICKEY (
