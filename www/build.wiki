@@ -24,10 +24,11 @@ you should make changes to both to keep them in sync.
 </p>
 
 <p>
-You can either manually build the SDS using the supplied Visual Studio solutions,
-or follow the steps outlined in the Build Automation section below.
+You can either [./build.wiki#manual | manually build] the SDS using the supplied Visual Studio solutions,
+or follow the steps outlined in the [./build.wiki#automated | Automated Build] section below.
 </p>
 
+<a name="assumptions"></a>
 <h2>Build Assumptions</h2>
 <ol>
   <li>
@@ -52,7 +53,7 @@ or follow the steps outlined in the Build Automation section below.
   <li>
     The machine used to prepare the official releases will have the
     [http://www.microsoft.com/downloads/en/details.aspx?FamilyID=ab99342f-5d1a-413d-8319-81da479ab0d7 | .NET Framework 3.5 SP1]
-    and the corresponding [http://msdn.microsoft.com/en-us/windowsserver/bb980924.aspx | SDK] installed.
+    and the corresponding [http://www.microsoft.com/downloads/details.aspx?FamilyId=E6E1C3DF-A74F-4207-8586-711EBE331CDC | SDK] installed.
   </li>
 
   <li>
@@ -68,15 +69,16 @@ or follow the steps outlined in the Build Automation section below.
   </li>
 </ol>
 
-<h2>Build Automation</h2>
+<a name="manual"></a>
+<h2>Manual Build</h2>
 
 <ol>
   <li>Make sure the version information is correct for SQLite in the following
   files:
 
   <ul>
-    <li>&lt;root&gt;\SQLite.Interop\props\sqlite3.vsprops</li>
-    <li>&lt;root&gt;\SQLite.Interop\props\sqlite3.props</li>
+    &lt;root&gt;\SQLite.Interop\props\sqlite3.vsprops<br />
+    &lt;root&gt;\SQLite.Interop\props\sqlite3.props<br />
   </ul>
 
   You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties.
@@ -88,10 +90,58 @@ or follow the steps outlined in the Build Automation section below.
   the following files:
 
   <ul>
-    <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops</li>
-    <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props</li>
-    <li>&lt;root&gt;\SQLite.Interop\src\win\interop.h</li>
-    <li>&lt;root&gt;\Setup\set_common.bat</li>
+    &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops<br />
+    &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props<br />
+    &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
+  </ul>
+
+  You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties
+  in the .vsprops and .props files, and the INTEROP_VERSION define in interop.h.
+  This version number should track the release versions of the System.Data.SQLite packages
+  (ie. [./news.wiki | 1.0.x]).
+  </li>
+
+  <li>Open the appropriate solution for your build platform.
+
+    <ul>
+        SQLite.NET.2008.sln is the top level solution for VS2008.<br />
+        SQLite.NET.2010.sln is the top level solution for VS2010.<br />
+    </ul>
+  </li>
+
+  <li>Select the desired solution configuration (eg. ReleaseNativeOnly) and 
+  and solution platform (eg. x64), then "Build->Rebuild Solution".
+
+  Alternatively, you can select "Build->Batch Build", "Select All", and then "Rebuild".
+  </li>
+
+</ol>
+
+<a name="automated"></a>
+<h2>Automated Build</h2>
+
+<ol>
+  <li>Make sure the version information is correct for SQLite in the following
+  files:
+
+  <ul>
+      &lt;root&gt;\SQLite.Interop\props\sqlite3.vsprops<br />
+      &lt;root&gt;\SQLite.Interop\props\sqlite3.props<br />
+  </ul>
+
+  You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties.
+  This version number should track the release versions of SQLite 
+  (ie. [http://www.sqlite.org/changes.html | 3.7.x]).
+  </li>
+
+  <li>Make sure the version information is correct for System.Data.SQLite in
+  the following files:
+
+  <ul>
+    &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops<br />
+    &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props<br />
+    &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
+    &lt;root&gt;\Setup\set_common.bat<br />
   </ul>
 
   You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties
@@ -102,9 +152,7 @@ or follow the steps outlined in the Build Automation section below.
   </li>
 
   <li>Make sure the "&lt;root&gt;\bin" and "&lt;root&gt;\obj" directories are completely
-  free of all output files.  In theory, you could simply delete these directories;
-  however, the file "&lt;root&gt;\bin\test.exe." is presently in the source tree.  I have
-  no idea why; however, it's been there since 2005 [557ac901aff91f5da6bc7634ee1c75988ea9dec9].
+  free of all output files.  In theory, you should be able to simply delete these directories.
   </li>
 
   <li>Open a normal command prompt window with "cmd.exe".</li>
