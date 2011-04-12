@@ -11,11 +11,14 @@ Unless otherwise noted, all steps need to be done in the order specified.
 
 <p>
 Thanks to the hard work of Joe Mistachkin, the build environment has been setup
-using modular solution and property files.  SQLite.NET.2008.sln is the top level solution
-for VS2008 and SQLite.NET.2010.sln for VS2010.  In general, files with 2008 in the 
-name (eg. SQLite.Interop.2008.vcproj) or files ending in .vsprops are 
-project and property files for the VS2008 solution.  Files with 2010 in the 
-name (eg. SQLite.Interop.2010.vcxproj) or files ending in .props are 
+using modular solution and property files.
+<ul>
+SQLite.NET.2008.sln is the top level solution for VS2008.<br />
+SQLite.NET.2010.sln is the top level solution for VS2010.<br />
+</ul>
+<p>In general, files with 2008 in the name (eg. SQLite.Interop.2008.vcproj) 
+or files ending in .vsprops are project and property files for the VS2008 solution. 
+Files with 2010 in the name (eg. SQLite.Interop.2010.vcxproj) or files ending in .props are 
 property and project files for the VS2010 solution.  When making changes, 
 you should make changes to both to keep them in sync.
 </p>
@@ -141,35 +144,36 @@ or follow the steps outlined in the Build Automation section below.
   </li>
 </ol>
 
-<h3><a name="build.bat">build.bat Desription</a></h3>
+<a name="build.bat"></a>
+<h3>build.bat Desription</h3>
 
 <p>
   build.bat is the top level batch file for build automation and should be called
   with the configuration and platform to build:
   <ul>
-    build.bat &lt;CONFIGURATION&gt; &lt;PLATFORM&gt;<br>
+    build.bat &lt;CONFIGURATION&gt; &lt;PLATFORM&gt;<br />
   </ul>
   This starts by setting 3 environment variables:
   <ul>
-    ROOT (eg. &lt;pwd&gt;\..)<br>
-    CONFIGURATION (eg. ReleaseNativeOnly)<br>
-    PLATFORM (eg. Win32)<br>
+    ROOT (eg. &lt;pwd&gt;\..)<br />
+    CONFIGURATION (eg. ReleaseNativeOnly)<br />
+    PLATFORM (eg. Win32)<br />
   </ul>
   These are used to call another .bat file (eg. set_ReleaseNativeOnly_x64.bat)
   which calls set_ReleaseNativeOnly.bat to setup more variables to specify
   which .NET Framework to use:
   <ul>
-    NETFX35ONLY=1 - set from set_ReleaseNativeOnly.bat<br>
-    YEAR=2008 - set from set_ReleaseNativeOnly.bat<br>
-    YEARS=%YEAR% - set from set_ReleaseNativeOnly.bat<br>
+    NETFX35ONLY=1 - set from set_ReleaseNativeOnly.bat<br />
+    YEAR=2008 - set from set_ReleaseNativeOnly.bat<br />
+    YEARS=%YEAR% - set from set_ReleaseNativeOnly.bat<br />
   </ul>
   build.bat attempts to set additional variables based on the chosen
   and available .NET Framework.
   <ul>
-    YEAR (eg. 2008)<br>
-    FRAMEWORKDIR (eg. %windir%\Microsoft.NET\Framework\v3.5)<br>
+    YEAR (eg. 2008)<br />
+    FRAMEWORKDIR (eg. %windir%\Microsoft.NET\Framework\v3.5)<br />
   </ul>
-  The PATH variable is updated to include the directory specified by FRAMEWORKDIR.<br>
+  The PATH variable is updated to include the directory specified by FRAMEWORKDIR.<br />
   At this point, several variables are setup for the call to 
   [http://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx | MSBuild]
   <ul>
