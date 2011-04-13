@@ -18,12 +18,14 @@ IF NOT DEFINED _VECHO (SET _VECHO=REM)
 
 %_AECHO% Running %0 %*
 
-IF "%PROCESSOR_ARCHITECTURE%"=="x86" GOTO set_path_32
-SET PATH=%ProgramFiles(x86)%\Inno Setup 5;%PATH%
-GOTO set_path_done
-:set_path_32
-SET PATH=%ProgramFiles%\Inno Setup 5;%PATH%
-:set_path_done
+SET PATH=%PATH:(=^^(%
+SET PATH=%PATH:)=^^)%
+
+IF "%PROCESSOR_ARCHITECTURE%" == "x86" (
+  SET PATH=%ProgramFiles%\Inno Setup 5;%PATH%
+) ELSE (
+  SET PATH=%ProgramFiles^(x86^)%\Inno Setup 5;%PATH%
+)
 
 %_VECHO% Path = '%PATH%'
 
