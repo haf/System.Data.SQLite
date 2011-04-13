@@ -1,6 +1,104 @@
 <title>System.Data.SQLite Download Page</title>
 
-Downloads will be available soon.
+<h3>SQLite Download Page</h3>
+<table width="100%" cellpadding="5">
+  <tr>
+    <td colspan="4">
+      <b>Source Code</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="10">&nbsp;</td>
+    <td valign="top" align="right">
+      <a name="dotnetsrc"></a>
+      <a href="sqlite-dotnetsrc-1xxyyzz.zip">sqlite-dotnetsrc-1xxyyzz.zip</a>
+      <br />(#.## MiB)
+    </td>
+    <td width="5"></td>
+    <td valign="top">
+      This ZIP archive contains all source code for System.Data.SQLite 1.0.69.0 (3.7.6)
+      combined into a single archive file.<br />
+      (sha1: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4">
+      <b>Precompiled Binaries For Windows</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="10">&nbsp;</td>
+    <td valign="top" align="right">
+      <a name="dotnet"></a>
+      <a href="sqlite-dotnet-1xxyyzz.exe">sqlite-dotnet-1xxyyzz.exe</a>
+      <br />(#.## MiB)
+    </td>
+    <td width="5"></td>
+    <td valign="top">
+      This setup package will install all the runtime components
+      for System.Data.SQLite 1.0.69.0 (3.7.6).<br />
+      (sha1: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4">
+      <b>Legacy Versions</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="10">&nbsp;</td>
+    <td valign="top" align="right">
+      <a name="legacy"></a>
+      <a href="http://sqlite.phxsoftware.com">SQLite-1.0.66.0-setup.exe</a>
+      <br />(3.2 MiB)
+    </td>
+    <td width="5"></td>
+    <td valign="top">
+      Legacy versions, as well as the original support forums, may still be 
+      found at [http://sqlite.phxsoftware.com], though there have been no updates 
+      to this version since April of 2010.
+    </td>
+  </tr>
+</table>
 
-The complete source tree for any [/timeline?n=20&y=ci | check-in] may 
-always be downloaded using the "ZIP archive" link available from the check-in detail page.
+<h3>Build Product Names</h3>
+
+<p>
+  Beginning with System.Data.SQLite version 1.0.69.0 (3.7.6), the following 
+  templates will be used for the names of the build products:
+  <ul>
+    1. sqlite-product-version.zip<br />
+    2. sqlite-product-version.tar.gz<br />
+    3. sqlite-product-version.exe<br />
+    4. sqlite-product-date.zip<br />
+  </ul>
+</p>
+<p>
+  Templates (1) and (2) are used for source-code products. Template (1) is used for
+  generic source-code products and templates (2) is used for source-code products
+  that are generally only useful on unix-like platforms. Template (3) is used for
+  precompiled binaries products like the setup package. Template (4) is used for unofficial
+  pre-release "snapshots" of source code.
+</p>
+<p>
+  The version is encoded so that filenames sort in order of increasing version number
+  when viewed using "ls". For version 1.X.Y the filename encoding is 1XXYY00.
+  For branch version 1.X.Y.Z, the encoding is 1XXYYZZ.
+</p>
+<p>
+  The date in template (4) is of the form: YYYYMMDDHHMM
+</p>
+
+<h3>Canonical Source Code</h3>
+
+<p>
+  The canonical System.Data.SQLite source code is maintained in a Fossil
+  repository that is available for anonymous read-only access. Anyone can view the
+  repository contents and download historical versions of individual files or
+  ZIP archives of historical check-ins.
+</p>
+<p>
+  The complete source tree for any [/timeline?n=20&y=ci | check-in] may
+  always be downloaded using the "ZIP archive" link available from the check-in detail page.
+</p>
+

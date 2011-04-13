@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
  *
  * SQLite.Designer.2010.csproj -
@@ -118,9 +118,7 @@
     <Compile Include="SQLiteCommandHandler.cs" />
     <Compile Include="SQLiteConnectionProperties.cs" />
     <Compile Include="SQLiteConnectionStringEditor.cs" />
-    <Compile Include="SQLiteConnectionUIControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="SQLiteConnectionUIControl.cs" />
     <Compile Include="SQLiteConnectionUIControl.Designer.cs">
       <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>
     </Compile>

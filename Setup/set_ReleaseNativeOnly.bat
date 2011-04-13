@@ -14,9 +14,9 @@ REM       that only rely upon the .NET Framework 2.0 which is very widely
 REM       deployed and because those binaries will also work with projects
 REM       using the .NET Framework 4.0.
 REM
-SET NETFX35ONLY=1
-REM SET MSBUILD_ARGS=/property:TargetFrameworkVersion=v3.5
-SET YEAR=2008
+REM SET NETFX35ONLY=1
+SET MSBUILD_ARGS=/property:TargetFrameworkVersion=v3.5
+SET YEAR=2010
 SET YEARS=%YEAR%
 
 ECHO WARNING: Forcing the use of the .NET Framework 3.5...
