@@ -1,79 +1,9 @@
 <title>System.Data.SQLite Download Page</title>
 
 <h3>SQLite Download Page</h3>
-<table width="100%" cellpadding="5">
-  <tr>
-    <td colspan="4">
-      <b>Source Code</b>
-    </td>
-  </tr>
-  <tr>
-    <td width="10">&nbsp;</td>
-    <td valign="top" align="right">
-      <a name="dotnetsrc"></a>
-      <a href="sqlite-dotnetsrc-1006900.zip">sqlite-dotnetsrc-1006900.zip</a>
-      <br />(3.09 MiB)
-    </td>
-    <td width="5"></td>
-    <td valign="top">
-      This ZIP archive contains all source code for System.Data.SQLite 1.0.69.0 (3.7.6)
-      combined into a single archive file.<br />
-      (sha1: 446c733a08e3072f4c57c595beb45b8bcee4fdc9)
-    </td>
-  </tr>
-  <tr>
-    <td colspan="4">
-      <b>Precompiled Binaries For Windows</b>
-    </td>
-  </tr>
-  <tr>
-    <td width="10">&nbsp;</td>
-    <td valign="top" align="right">
-      <a name="dotnet-x86"></a>
-      <a href="sqlite-dotnet-x86-1006900.exe">sqlite-dotnet-x86-1006900.exe</a>
-      <br />(10.1 MiB)
-    </td>
-    <td width="5"></td>
-    <td valign="top">
-      This setup package will install all the runtime components and dependencies
-      for the x86/win32 version of the System.Data.SQLite 1.0.69.0 (3.7.6) package.<br />
-      (sha1: e93406c9400d8198cd5db3901752119bcd02ed15)
-    </td>
-  </tr>
-  <tr>
-    <td width="10">&nbsp;</td>
-    <td valign="top" align="right">
-      <a name="dotnet-x64"></a>
-      <a href="sqlite-dotnet-x64-1006900.exe">sqlite-dotnet-x64-1006900.exe</a>
-      <br />(11.3 MiB)
-    </td>
-    <td width="5"></td>
-    <td valign="top">
-      This setup package will install all the runtime components and dependencies
-      for the x64 version of the System.Data.SQLite 1.0.69.0 (3.7.6) package.<br />
-      (sha1: db0a8dd5f72f39348b37d0bac387c07f45e39f91)
-    </td>
-  </tr>
-  <tr>
-    <td colspan="4">
-      <b>Legacy Versions</b>
-    </td>
-  </tr>
-  <tr>
-    <td width="10">&nbsp;</td>
-    <td valign="top" align="right">
-      <a name="legacy"></a>
-      <a href="http://sqlite.phxsoftware.com">SQLite-1.0.66.0-setup.exe</a>
-      <br />(3.2 MiB)
-    </td>
-    <td width="5"></td>
-    <td valign="top">
-      Legacy versions, as well as the original support forums, may still be 
-      found at [http://sqlite.phxsoftware.com], though there have been no updates 
-      to this version since April of 2010.
-    </td>
-  </tr>
-</table>
+
+Downloads will be available soon.
+
 
 <h3>Build Product Names</h3>
 
