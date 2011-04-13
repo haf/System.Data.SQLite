@@ -93,6 +93,8 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
     &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops<br />
     &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props<br />
     &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
+    &lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs<br />
+    &lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs<br />
   </ul>
 
   You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties
@@ -141,6 +143,8 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
     &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops<br />
     &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props<br />
     &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
+    &lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs<br />
+    &lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs<br />
     &lt;root&gt;\Setup\set_common.bat<br />
   </ul>
 
@@ -155,13 +159,20 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
   free of all output files.  In theory, you should be able to simply delete these directories.
   </li>
 
-  <li>Open a normal command prompt window with "cmd.exe".</li>
+  <li>Open a normal command prompt window with "cmd.exe".<br />
+
+  <i>If you are using Visual Studio 2010, you may need to open a 
+  "Windows SDK Command Prompt" from the "Microsoft Windows SDK" start menu
+  and perform your builds there.</i></li>
 
   <li>Change the current directory to "&lt;root&gt;\Setup".</li>
 
   <li>Enter the following command to build the binaries for Win32 (x86):
 
-  [./build.wiki#build.bat | build.bat] ReleaseNativeOnly Win32
+  [./build.wiki#build.bat | build.bat] ReleaseNativeOnly Win32<br />
+
+  <i>You may need to enter the command "setenv /x86" first if you are using a 
+  Windows SDK or Visual Studio command prompt.</i>
   </li>
 
   <li>Make sure everything succeeds with no errors; the log file
@@ -170,7 +181,10 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
 
   <li>Enter the following command to build the binaries for x64:
 
-  build.bat ReleaseNativeOnly x64
+  build.bat ReleaseNativeOnly x64<br />
+
+  <i>You may need to enter the command "setenv /x64" first if you are using a 
+  Windows SDK or Visual Studio command prompt.</i>
   </li>
 
   <li>Make sure everything succeeds with no errors; the log file
