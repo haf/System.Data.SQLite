@@ -11,14 +11,14 @@
     <td width="10">&nbsp;</td>
     <td valign="top" align="right">
       <a name="dotnetsrc"></a>
-      <a href="sqlite-dotnetsrc-1xxyyzz.zip">sqlite-dotnetsrc-1xxyyzz.zip</a>
-      <br />(#.## MiB)
+      <a href="sqlite-dotnetsrc-1006900.zip">sqlite-dotnetsrc-1006900.zip</a>
+      <br />(3.09 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
       This ZIP archive contains all source code for System.Data.SQLite 1.0.69.0 (3.7.6)
       combined into a single archive file.<br />
-      (sha1: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+      (sha1: 446c733a08e3072f4c57c595beb45b8bcee4fdc9)
     </td>
   </tr>
   <tr>
@@ -29,15 +29,29 @@
   <tr>
     <td width="10">&nbsp;</td>
     <td valign="top" align="right">
-      <a name="dotnet"></a>
-      <a href="sqlite-dotnet-1xxyyzz.exe">sqlite-dotnet-1xxyyzz.exe</a>
-      <br />(#.## MiB)
+      <a name="dotnet-x86"></a>
+      <a href="sqlite-dotnet-x86-1006900.exe">sqlite-dotnet-x86-1006900.exe</a>
+      <br />(10.1 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
-      This setup package will install all the runtime components
-      for System.Data.SQLite 1.0.69.0 (3.7.6).<br />
-      (sha1: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+      This setup package will install all the runtime components and dependencies
+      for the x86/win32 version of the System.Data.SQLite 1.0.69.0 (3.7.6) package.<br />
+      (sha1: e93406c9400d8198cd5db3901752119bcd02ed15)
+    </td>
+  </tr>
+  <tr>
+    <td width="10">&nbsp;</td>
+    <td valign="top" align="right">
+      <a name="dotnet-x64"></a>
+      <a href="sqlite-dotnet-x64-1006900.exe">sqlite-dotnet-x64-1006900.exe</a>
+      <br />(11.3 MiB)
+    </td>
+    <td width="5"></td>
+    <td valign="top">
+      This setup package will install all the runtime components and dependencies
+      for the x64 version of the System.Data.SQLite 1.0.69.0 (3.7.6) package.<br />
+      (sha1: db0a8dd5f72f39348b37d0bac387c07f45e39f91)
     </td>
   </tr>
   <tr>
@@ -69,7 +83,7 @@
   <ul>
     1. sqlite-product-version.zip<br />
     2. sqlite-product-version.tar.gz<br />
-    3. sqlite-product-version.exe<br />
+    3. sqlite-product-processor-version.exe<br />
     4. sqlite-product-date.zip<br />
   </ul>
 </p>
