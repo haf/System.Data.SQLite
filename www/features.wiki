@@ -29,6 +29,8 @@
     Mobile.  SQLite's installed size is a fraction of SQL Mobile's. 
     It uses less memory at runtime, runs queries faster,
     and has a smaller database file size as well.
+    <font color="red">Compact framework not currently not included.  
+    We hope to have this feature included again soon.</font>
   </li>
 
   <li>
