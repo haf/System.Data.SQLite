@@ -51,8 +51,9 @@ namespace test
 
     private void runButton_Click(object sender, EventArgs e)
     {
-      DbProviderFactory factory = DbProviderFactories.GetFactory(_provider.SelectedItem.ToString());
-      _test = new TestCases(factory, _connectionString.Text);
+      string factoryString = _provider.SelectedItem.ToString();
+      DbProviderFactory factory = DbProviderFactories.GetFactory(factoryString);
+      _test = new TestCases(factory, _connectionString.Text, factoryString);
       _test.Tests = _testitems.Tests;
 
       _test.OnTestStarting += new TestStartingEvent(_test_OnTestStarting);

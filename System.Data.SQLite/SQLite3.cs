@@ -850,6 +850,34 @@ namespace System.Data.SQLite
       return UnsafeNativeMethods.sqlite3_aggregate_context(context, 1);
     }
 
+    /// Enables or disabled extended result codes returned by SQLite
+    internal override void SetExtendedResultCodes(bool bOnOff)
+    {
+#if !SQLITE_STANDARD
+      UnsafeNativeMethods.sqlite3_extended_result_codes_interop(_sql, (bOnOff ? -1 : 0));
+#else
+      UnsafeNativeMethods.sqlite3_extended_result_codes(_sql, (bOnOff ? -1 : 0));
+#endif
+    }
+    /// Gets the last SQLite error code
+    internal override int ResultCode()
+    {
+#if !SQLITE_STANDARD
+      return UnsafeNativeMethods.sqlite3_errcode_interop(_sql);
+#else
+      return UnsafeNativeMethods.sqlite3_errcode(_sql);
+#endif
+    }
+    /// Gets the last SQLite extended error code
+    internal override int ExtendedResultCode()
+    {
+#if !SQLITE_STANDARD
+      return UnsafeNativeMethods.sqlite3_extended_errcode_interop(_sql);
+#else
+      return UnsafeNativeMethods.sqlite3_extended_errcode(_sql);
+#endif
+    }
+
     internal override void SetPassword(byte[] passwordBytes)
     {
       int n = UnsafeNativeMethods.sqlite3_key(_sql, passwordBytes, passwordBytes.Length);

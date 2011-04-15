@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.Transactions;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace test
 {
@@ -12,13 +13,14 @@ namespace test
   {
     private List<string> droptables = new List<string>();
     private List<string> maydroptable = new List<string>();
+    
 
     internal TestCases()
     {
     }
 
-    internal TestCases(DbProviderFactory factory, string connectionString)
-      : base(factory, connectionString)
+    internal TestCases(DbProviderFactory factory, string connectionString, string factoryString)
+      : base(factory, connectionString, factoryString)
     {
     }
 
@@ -1505,6 +1507,28 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     }
 
     /// <summary>
+    /// Checks to extended error code result support.
+    /// </summary>
+    [Test]
+    internal void ExtendedResultCodesTest()
+    {
+      if (_factstring.ToLower().Contains("sqlite"))
+      {
+        SQLiteConnection cnn = new SQLiteConnection(_cnnstring.ConnectionString);
+
+        cnn.Open();
+
+        // Turn on extended result codes
+        cnn.SetExtendedResultCodes(true);
+
+        int rc = cnn.ResultCode();
+        int xrc = cnn.ExtendedResultCode();
+
+        cnn.Close();
+      }
+    }
+
+    /// <summary>
     /// Open a reader and then attempt to write to test the writer's command timeout property
     /// SQLite doesn't allow a write when a reader is active.
     /// *** NOTE AS OF 3.3.8 this test no longer blocks because SQLite now allows you to update table(s)
@@ -1990,6 +2014,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
   internal abstract class TestCaseBase
   {
     protected DbProviderFactory _fact;
+    protected string _factstring;
     protected DbConnection _cnn = null;
     protected DbConnectionStringBuilder _cnnstring;
     protected Dictionary<string, bool> _tests = new Dictionary<string,bool>();
@@ -2016,9 +2041,10 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       }
     }
 
-    protected TestCaseBase(DbProviderFactory factory, string connectionString)
+    protected TestCaseBase(DbProviderFactory factory, string connectionString, string factoryString)
     {
       _fact = factory;
+      _factstring = factoryString;
       _cnn = _fact.CreateConnection();
       _cnn.ConnectionString = connectionString;
       _cnnstring = _fact.CreateConnectionStringBuilder();

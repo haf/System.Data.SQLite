@@ -79,6 +79,15 @@ namespace System.Data.SQLite
     internal static extern IntPtr sqlite3_column_text16_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_extended_result_codes_interop(IntPtr db, int onoff);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_errcode_interop(IntPtr db);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_extended_errcode_interop(IntPtr db);
+
+    [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_errmsg_interop(IntPtr db, out int len);
 
     [DllImport(SQLITE_DLL)]
@@ -259,6 +268,27 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern IntPtr sqlite3_column_text16(IntPtr stmt, int index);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_extended_result_codes(IntPtr db, int onoff);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_errcode(IntPtr db);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_extended_errcode(IntPtr db);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

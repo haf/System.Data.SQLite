@@ -976,6 +976,26 @@ namespace System.Data.SQLite
       }
     }
 
+    /// Enables or disabled extended result codes returned by SQLite
+    public void SetExtendedResultCodes(bool bOnOff)
+    {
+      if (_sql != null) _sql.SetExtendedResultCodes(bOnOff);
+    }
+    /// Enables or disabled extended result codes returned by SQLite
+    public int ResultCode()
+    {
+      if (_sql == null) 
+        throw new InvalidOperationException("Database connection not valid for getting result code.");
+      return _sql.ResultCode();
+    }
+    /// Enables or disabled extended result codes returned by SQLite
+    public int ExtendedResultCode()
+    {
+      if (_sql == null)
+        throw new InvalidOperationException("Database connection not valid for getting extended result code.");
+      return _sql.ExtendedResultCode();
+    }
+
     /// <summary>
     /// Change the password (or assign a password) to an open database.
     /// </summary>

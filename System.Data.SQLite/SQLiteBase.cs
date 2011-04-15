@@ -150,6 +150,25 @@ namespace System.Data.SQLite
     internal abstract void ReturnNull(IntPtr context);
     internal abstract void ReturnText(IntPtr context, string value);
 
+    /// <summary>
+    /// Enables or disabled extened result codes returned by SQLite
+    /// </summary>
+    /// <param name="bOnOff">true to enable extended result codes, false to disable.</param>
+    /// <returns></returns>
+    internal abstract void SetExtendedResultCodes(bool bOnOff);
+    /// <summary>
+    /// Returns the numeric result code for the most recent failed SQLite API call 
+    /// associated with the database connection. 
+    /// </summary>
+    /// <returns>Result code</returns>
+    internal abstract int ResultCode();
+    /// <summary>
+    /// Returns the extended numeric result code for the most recent failed SQLite API call 
+    /// associated with the database connection. 
+    /// </summary>
+    /// <returns>Extended result code</returns>
+    internal abstract int ExtendedResultCode();
+
     internal abstract void SetPassword(byte[] passwordBytes);
     internal abstract void ChangePassword(byte[] newPasswordBytes);
 
@@ -251,6 +270,7 @@ namespace System.Data.SQLite
     {
       return (UnsafeNativeMethods.sqlite3_get_autocommit(hdl) == 1);
     }
+
   }
 
   internal interface ISQLiteSchemaExtensions
