@@ -5,7 +5,7 @@
 </head>
 <body>
 ADO.NET 2.0 SQLite Data Provider<br />
-Version 1.0.69.0 April 12, 2011<br />
+Version 1.0.70.0 April 22, 2011<br />
 Using SQLite 3.7.6<br />
 Originally written by Robert Simpson<br />
 Released to the public domain, use at your own risk!<br />
@@ -157,6 +157,14 @@ it to extend its functionality, but the core engine's source is not changed.</p>
 
 <h2><b>Version History</b></h2>
 
+<p>
+  <b>1.0.70.0 - April 22, 2011</b>
+</p>
+<ul>
+  <li>Added support for sqlite3_extended_result_codes(), sqlite3_errcode(), and sqlite3_extended_errcode() 
+        via SetExtendedResultCodes(), ResultCode(), and ExtendedResultCode().</li>
+  <li>Added support for SQLITE_CONFIG_LOG via SQLiteLogEventHandler().</li>
+</ul>
 <p>
   <b>1.0.69.0 - April 12, 2011</b>
 </p>
