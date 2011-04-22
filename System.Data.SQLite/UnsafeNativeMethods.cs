@@ -35,10 +35,12 @@ namespace System.Data.SQLite
 #endif
 
     // This section uses interop calls that also fetch text length to optimize conversion.  
-    // When using the standard dll, we can replace these calls with normal sqlite calls and do unoptimized conversions instead afterwards
+    // When using the standard dll, we can replace these calls with normal sqlite calls and 
+    // do unoptimized conversions instead afterwards
     #region interop added textlength calls
 
 #if !SQLITE_STANDARD
+
     [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_bind_parameter_name_interop(IntPtr stmt, int index, out int len);
 
@@ -79,15 +81,6 @@ namespace System.Data.SQLite
     internal static extern IntPtr sqlite3_column_text16_interop(IntPtr stmt, int index, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_extended_result_codes_interop(IntPtr db, int onoff);
-
-    [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_errcode_interop(IntPtr db);
-
-    [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_extended_errcode_interop(IntPtr db);
-
-    [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_errmsg_interop(IntPtr db, out int len);
 
     [DllImport(SQLITE_DLL)]
@@ -101,7 +94,9 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_value_text16_interop(IntPtr p, out int len);
+
 #endif
+// !SQLITE_STANDARD
 
     #endregion
 
@@ -110,6 +105,7 @@ namespace System.Data.SQLite
     #region interop added functionality
 
 #if !SQLITE_STANDARD
+
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_close_interop(IntPtr db);
 
@@ -129,6 +125,7 @@ namespace System.Data.SQLite
     internal static extern int sqlite3_reset_interop(IntPtr stmt);
 
 #endif
+// !SQLITE_STANDARD
 
     #endregion
 
@@ -136,6 +133,7 @@ namespace System.Data.SQLite
     #region standard versions of interop functions
 
 #if SQLITE_STANDARD
+
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 #else
@@ -274,27 +272,6 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
-    internal static extern int sqlite3_extended_result_codes(IntPtr db, int onoff);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
-    internal static extern int sqlite3_errcode(IntPtr db);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
-    internal static extern int sqlite3_extended_errcode(IntPtr db);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
     internal static extern IntPtr sqlite3_errmsg(IntPtr db);
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -324,7 +301,9 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern IntPtr sqlite3_value_text16(IntPtr p);
+
 #endif
+// SQLITE_STANDARD
 
     #endregion
 
@@ -333,6 +312,7 @@ namespace System.Data.SQLite
     #region no equivalent standard method
 
 #if !SQLITE_STANDARD
+
     [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_context_collseq(IntPtr context, out int type, out int enc, out int len);
 
@@ -350,7 +330,9 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_table_cursor(IntPtr stmt, int db, int tableRootPage);
+
 #endif
+// !SQLITE_STANDARD
 
     #endregion
 
@@ -378,6 +360,13 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern int sqlite3_changes(IntPtr db);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_shutdown();
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -674,6 +663,15 @@ namespace System.Data.SQLite
 #endif
     internal static extern IntPtr sqlite3_trace(IntPtr db, SQLiteTraceCallback func, IntPtr pvUser);
 
+    // Since sqlite3_config() takes a variable argument list, we have to overload declarations
+    // for all possible calls.  For now, we are only exposing the SQLITE_CONFIG_LOG call.
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_config(int op, SQLiteLogCallback func, IntPtr pvUser);
+
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 #else
@@ -708,6 +706,28 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern int sqlite3_get_autocommit(IntPtr db);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_extended_result_codes(IntPtr db, int onoff);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_errcode(IntPtr db);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_extended_errcode(IntPtr db);
+
 
     #endregion
   }

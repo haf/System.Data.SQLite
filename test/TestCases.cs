@@ -1528,6 +1528,48 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       }
     }
 
+    //Applying EventHandler
+    public void OnLogEvent(object sender, LogEventArgs logEvent)
+    {
+        int err_code = logEvent.ErrorCode;
+        string err_msg = logEvent.Message;
+    }
+
+    /// <summary>
+    /// Tests SQLITE_CONFIG_LOG support.
+    /// </summary>
+    [Test]
+    internal void SetLogCallbackTest()
+    {
+        if (_factstring.ToLower().Contains("sqlite"))
+        {
+            SQLiteConnection cnn = new SQLiteConnection(_cnnstring.ConnectionString);
+
+            cnn.Shutdown();  // we need to shutdown so that we can change config options
+
+            SQLiteLogEventHandler logHandler = new SQLiteLogEventHandler(OnLogEvent); 
+            cnn.Log += logHandler;
+
+            cnn.Open();
+
+            maydroptable.Add("LogCallbackTest");
+            if (cnn.State != ConnectionState.Open) cnn.Open();
+            using (DbCommand cmd = cnn.CreateCommand())
+            {
+                cmd.CommandText = "CREATE TABLE LogCallbackTest(ID int primary key)";
+                cmd.ExecuteNonQuery();
+            }
+
+            cnn.Close();
+
+            cnn.Shutdown();  // we need to shutdown so that we can change config options
+
+            // remove the log handler before the connection is closed.
+            cnn.Log -= logHandler;
+
+        }
+    }
+
     /// <summary>
     /// Open a reader and then attempt to write to test the writer's command timeout property
     /// SQLite doesn't allow a write when a reader is active.

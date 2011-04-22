@@ -32,6 +32,11 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract int Changes { get; }
     /// <summary>
+    /// Shutdown the SQLite engine so that it can be restarted with different config options.
+    /// We depend on auto initialization to recover.
+    /// </summary>
+    internal abstract int Shutdown();
+    /// <summary>
     /// Opens a database.
     /// </summary>
     /// <remarks>
@@ -176,6 +181,7 @@ namespace System.Data.SQLite
     internal abstract void SetCommitHook(SQLiteCommitCallback func);
     internal abstract void SetTraceCallback(SQLiteTraceCallback func);
     internal abstract void SetRollbackHook(SQLiteRollbackCallback func);
+    internal abstract int SetLogCallback(SQLiteLogCallback func);
 
     internal abstract int GetCursorForTable(SQLiteStatement stmt, int database, int rootPage);
     internal abstract long GetRowIdForCursor(SQLiteStatement stmt, int cursor);
@@ -288,4 +294,26 @@ namespace System.Data.SQLite
     SharedCache = 0x01000000,
     Default = 0x06,
   }
+
+  // These are the options to the internal sqlite3_config call.
+  internal enum SQLiteConfigOpsEnum
+  {
+    SQLITE_CONFIG_SINGLETHREAD = 1, // nil 
+    SQLITE_CONFIG_MULTITHREAD = 2, // nil 
+    SQLITE_CONFIG_SERIALIZED = 3, // nil 
+    SQLITE_CONFIG_MALLOC = 4, // sqlite3_mem_methods* 
+    SQLITE_CONFIG_GETMALLOC = 5, // sqlite3_mem_methods* 
+    SQLITE_CONFIG_SCRATCH = 6, // void*, int sz, int N 
+    SQLITE_CONFIG_PAGECACHE = 7, // void*, int sz, int N 
+    SQLITE_CONFIG_HEAP = 8, // void*, int nByte, int min 
+    SQLITE_CONFIG_MEMSTATUS = 9, // boolean 
+    SQLITE_CONFIG_MUTEX = 10, // sqlite3_mutex_methods* 
+    SQLITE_CONFIG_GETMUTEX = 11, // sqlite3_mutex_methods* 
+    // previously SQLITE_CONFIG_CHUNKALLOC 12 which is now unused
+    SQLITE_CONFIG_LOOKASIDE = 13, // int int 
+    SQLITE_CONFIG_PCACHE = 14, // sqlite3_pcache_methods* 
+    SQLITE_CONFIG_GETPCACHE = 15, // sqlite3_pcache_methods* 
+    SQLITE_CONFIG_LOG = 16, // xFunc, void* 
+  }
+
 }

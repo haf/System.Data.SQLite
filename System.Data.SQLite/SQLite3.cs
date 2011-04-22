@@ -101,6 +101,17 @@ namespace System.Data.SQLite
       }
     }
 
+    /// <summary>
+    /// Shutdown the SQLite engine so that it can be restarted with different config options.
+    /// We depend on auto initialization to recover.
+    /// </summary>
+    /// <returns>Returns a result code</returns>
+    internal override int Shutdown()
+    {
+        int rc = UnsafeNativeMethods.sqlite3_shutdown();
+        return rc;
+    }
+
     internal override void Open(string strFilename, SQLiteOpenFlagsEnum flags, int maxPoolSize, bool usePool)
     {
       if (_sql != null) return;
@@ -853,29 +864,17 @@ namespace System.Data.SQLite
     /// Enables or disabled extended result codes returned by SQLite
     internal override void SetExtendedResultCodes(bool bOnOff)
     {
-#if !SQLITE_STANDARD
-      UnsafeNativeMethods.sqlite3_extended_result_codes_interop(_sql, (bOnOff ? -1 : 0));
-#else
       UnsafeNativeMethods.sqlite3_extended_result_codes(_sql, (bOnOff ? -1 : 0));
-#endif
     }
     /// Gets the last SQLite error code
     internal override int ResultCode()
     {
-#if !SQLITE_STANDARD
-      return UnsafeNativeMethods.sqlite3_errcode_interop(_sql);
-#else
       return UnsafeNativeMethods.sqlite3_errcode(_sql);
-#endif
     }
     /// Gets the last SQLite extended error code
     internal override int ExtendedResultCode()
     {
-#if !SQLITE_STANDARD
-      return UnsafeNativeMethods.sqlite3_extended_errcode_interop(_sql);
-#else
       return UnsafeNativeMethods.sqlite3_extended_errcode(_sql);
-#endif
     }
 
     internal override void SetPassword(byte[] passwordBytes)
@@ -908,6 +907,19 @@ namespace System.Data.SQLite
     internal override void SetRollbackHook(SQLiteRollbackCallback func)
     {
       UnsafeNativeMethods.sqlite3_rollback_hook(_sql, func, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Allows the setting of a logging callback invoked by SQLite when a
+    /// log event occurs.  Only one callback may be set.  If NULL is passed,
+    /// the logging callback is unregistered.
+    /// </summary>
+    /// <param name="func">The callback function to invoke.</param>
+    /// <returns>Returns a result code</returns>
+    internal override int SetLogCallback(SQLiteLogCallback func)
+    {
+        int rc = UnsafeNativeMethods.sqlite3_config((int)SQLiteConfigOpsEnum.SQLITE_CONFIG_LOG, func, (IntPtr)0);
+        return rc;
     }
 
     /// <summary>

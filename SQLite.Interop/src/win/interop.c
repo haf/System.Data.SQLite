@@ -96,24 +96,6 @@ __declspec(dllexport) int WINAPI sqlite3_open16_interop(const char *filename, in
   return ret;
 }
 
-__declspec(dllexport) int WINAPI sqlite3_extended_result_codes_interop(sqlite3 *db, int onoff)
-{
-  int rc = sqlite3_extended_result_codes(db, onoff);
-  return rc;
-}
-
-__declspec(dllexport) int WINAPI sqlite3_errcode_interop(sqlite3 *db)
-{
-  int rc = sqlite3_errcode(db);
-  return rc;
-}
-
-__declspec(dllexport) int WINAPI sqlite3_extended_errcode_interop(sqlite3 *db)
-{
-  int rc = sqlite3_extended_errcode(db);
-  return rc;
-}
-
 __declspec(dllexport) const char * WINAPI sqlite3_errmsg_interop(sqlite3 *db, int *plen)
 {
   const char *pval = sqlite3_errmsg(db);

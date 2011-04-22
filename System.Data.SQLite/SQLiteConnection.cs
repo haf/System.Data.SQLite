@@ -207,11 +207,13 @@ namespace System.Data.SQLite
     private event SQLiteCommitHandler _commitHandler;
     private event SQLiteTraceEventHandler _traceHandler;
     private event EventHandler _rollbackHandler;
+    private event SQLiteLogEventHandler _logHandler;
 
     private SQLiteUpdateCallback _updateCallback;
     private SQLiteCommitCallback _commitCallback;
     private SQLiteTraceCallback _traceCallback;
     private SQLiteRollbackCallback _rollbackCallback;
+    private SQLiteLogCallback _logCallback;
 
     /// <summary>
     /// This event is raised whenever the database is opened or closed.
@@ -444,6 +446,7 @@ namespace System.Data.SQLite
 
           cnn._enlistment._transaction._cnn = cnn;
           cnn._enlistment._disposeConnection = true;
+
           _sql = null;
           _enlistment = null;
         }
@@ -789,7 +792,6 @@ namespace System.Data.SQLite
       try
       {
         bool usePooling = (SQLiteConvert.ToBoolean(FindKey(opts, "Pooling", Boolean.FalseString)) == true);
-        bool bUTF16 = (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding", Boolean.FalseString)) == true);
         int maxPoolSize = Convert.ToInt32(FindKey(opts, "Max Pool Size", "100"), CultureInfo.InvariantCulture);
 
         _defaultTimeout = Convert.ToInt32(FindKey(opts, "Default Timeout", "30"), CultureInfo.CurrentCulture);
@@ -798,15 +800,28 @@ namespace System.Data.SQLite
         if (_defaultIsolation != IsolationLevel.Serializable && _defaultIsolation != IsolationLevel.ReadCommitted)
           throw new NotSupportedException("Invalid Default IsolationLevel specified");
 
-        SQLiteDateFormats dateFormat = (SQLiteDateFormats)Enum.Parse(typeof(SQLiteDateFormats), FindKey(opts, "DateTimeFormat", "ISO8601"), true);
         //string temp = FindKey(opts, "DateTimeFormat", "ISO8601");
         //if (String.Compare(temp, "ticks", StringComparison.OrdinalIgnoreCase) == 0) dateFormat = SQLiteDateFormats.Ticks;
         //else if (String.Compare(temp, "julianday", StringComparison.OrdinalIgnoreCase) == 0) dateFormat = SQLiteDateFormats.JulianDay;
 
-        if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
-          _sql = new SQLite3_UTF16(dateFormat);
-        else
-          _sql = new SQLite3(dateFormat);
+        if (_sql == null)
+        {
+          bool bUTF16 = (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding", Boolean.FalseString)) == true);
+          SQLiteDateFormats dateFormat = (SQLiteDateFormats)Enum.Parse(typeof(SQLiteDateFormats),
+                                                                       FindKey(opts, "DateTimeFormat", "ISO8601"),
+                                                                       true);
+
+          if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
+            _sql = new SQLite3_UTF16(dateFormat);
+          else
+            _sql = new SQLite3(dateFormat);
+
+          if (_sql != null && _logHandler != null)
+          {
+              if (_logCallback == null) _logCallback = new SQLiteLogCallback(LogCallback);
+              if (_logCallback != null) _sql.SetLogCallback(_logCallback);
+          }
+        }
 
         SQLiteOpenFlagsEnum flags = SQLiteOpenFlagsEnum.None;
 
@@ -974,6 +989,28 @@ namespace System.Data.SQLite
       {
         return _connectionState;
       }
+    }
+
+    /// Passes a shutdown request off to SQLite.
+    public int Shutdown()
+    {
+        // make sure we have an instance of the base class
+        if (_sql == null)
+        {
+            SortedList<string, string> opts = ParseConnectionString(_connectionString);
+
+            bool bUTF16 = (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding", Boolean.FalseString)) == true);
+            SQLiteDateFormats dateFormat = (SQLiteDateFormats)Enum.Parse(typeof(SQLiteDateFormats),
+                                                                         FindKey(opts, "DateTimeFormat", "ISO8601"),
+                                                                         true);
+
+            if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
+                _sql = new SQLite3_UTF16(dateFormat);
+            else
+                _sql = new SQLite3(dateFormat);
+        }
+        if (_sql != null) return _sql.Shutdown();
+        throw new InvalidOperationException("Database connection not active.");
     }
 
     /// Enables or disabled extended result codes returned by SQLite
@@ -2307,6 +2344,38 @@ namespace System.Data.SQLite
     {
       _rollbackHandler(this, EventArgs.Empty);
     }
+
+    /// <summary>
+    /// This event is raised whenever SQLite raises a logging event.
+    /// </summary>
+    public event SQLiteLogEventHandler Log
+    {
+        add
+        {
+            _logHandler += value;
+            // callback handler will be set/removed at open/close
+        }
+        remove
+        {
+            _logHandler -= value;
+            if (_logHandler==null)
+            {
+                _sql.SetLogCallback(null);
+                _logCallback = null;
+            }
+
+        }
+    }
+
+    private void LogCallback(IntPtr puser, int err_code, IntPtr message)
+    {
+        if (_logHandler != null) 
+            _logHandler(this, 
+                        new LogEventArgs(puser, 
+                                         err_code,
+                                         SQLiteBase.UTF8ToString(message, -1)));
+    }
+
   }
 
   /// <summary>
@@ -2332,18 +2401,26 @@ namespace System.Data.SQLite
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
   internal delegate void SQLiteUpdateCallback(IntPtr puser, int type, IntPtr database, IntPtr table, Int64 rowid);
+
 #if !PLATFORM_COMPACTFRAMEWORK
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
   internal delegate int SQLiteCommitCallback(IntPtr puser);
+
 #if !PLATFORM_COMPACTFRAMEWORK
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
   internal delegate void SQLiteTraceCallback(IntPtr puser, IntPtr statement);
+
 #if !PLATFORM_COMPACTFRAMEWORK
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
   internal delegate void SQLiteRollbackCallback(IntPtr puser);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+  internal delegate void SQLiteLogCallback(IntPtr puser, int err_code, IntPtr message);
 
   /// <summary>
   /// Raised when a transaction is about to be committed.  To roll back a transaction, set the 
@@ -2366,6 +2443,13 @@ namespace System.Data.SQLite
   /// <param name="sender">The connection executing the statement</param>
   /// <param name="e">Event arguments on the trace</param>
   public delegate void SQLiteTraceEventHandler(object sender, TraceEventArgs e);
+
+  /// <summary>
+  /// Raised when a log event occurs.
+  /// </summary>
+  /// <param name="sender">The current connection</param>
+  /// <param name="e">Event arguments on the trace</param>
+  public delegate void SQLiteLogEventHandler(object sender, LogEventArgs e);
 
   /// <summary>
   /// Whenever an update event is triggered on a connection, this enum will indicate
@@ -2451,6 +2535,29 @@ namespace System.Data.SQLite
     {
       Statement = statement;
     }
+  }
+
+  /// <summary>
+  /// Passed during an Log callback
+  /// </summary>
+  public class LogEventArgs : EventArgs
+  {
+      /// <summary>
+      /// The error code.
+      /// </summary>
+      public readonly int ErrorCode;
+
+      /// <summary>
+      /// SQL statement text as the statement first begins executing
+      /// </summary>
+      public readonly string Message;
+
+      internal LogEventArgs(IntPtr puser, int err_code, string message)
+      {
+          // puser should be NULL
+          ErrorCode = err_code;
+          Message = message;
+      }
   }
 
 }
