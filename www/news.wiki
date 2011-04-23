@@ -3,6 +3,16 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.70.0 - April 22, 2011</b>
+</p>
+<ul>
+    <li>
+        Added support for sqlite3_extended_result_codes(), sqlite3_errcode(), and sqlite3_extended_errcode()
+        via SetExtendedResultCodes(), ResultCode(), and ExtendedResultCode().
+    </li>
+    <li>Added support for SQLITE_CONFIG_LOG via SQLiteLogEventHandler().</li>
+</ul>
+<p>
   <b>1.0.69.0 - April 12, 2011</b>
 </p>
 <ul>
