@@ -69,6 +69,53 @@ namespace test
         throw new InconclusiveException("Not a SQLite database");
     }
 
+    /// <summary>
+    /// Tests changing password on an encrypted database.
+    /// </summary>
+    [Test]
+    internal void ChangePasswordTest()
+    {
+        if (_factstring.ToLower().Contains("sqlite"))
+        {
+            // Opens an unencrypted database
+            SQLiteConnection cnn = new SQLiteConnection(_cnnstring.ConnectionString);
+
+            cnn.Open();
+
+            // Encrypts the database. The connection remains valid and usable afterwards.
+            cnn.ChangePassword("mypassword");
+
+            maydroptable.Add("ChangePasswordTest");
+            if (cnn.State != ConnectionState.Open) cnn.Open();
+            using (DbCommand cmd = cnn.CreateCommand())
+            {
+                cmd.CommandText = "CREATE TABLE ChangePasswordTest(ID int primary key)";
+                cmd.ExecuteNonQuery();
+            }
+
+            cnn.Close();
+
+            // Try re-opening with bad password
+            cnn.SetPassword("!mypassword");
+            cnn.Open();
+            cnn.Close();
+
+            // Try re-opening with good password
+            cnn.SetPassword("mypassword");
+            cnn.Open();
+
+            // Decrpyt database
+            cnn.ChangePassword("");
+
+            cnn.Close();
+
+            // Try opening now without password
+            cnn.Open();
+            cnn.Close();
+
+        }
+    }
+
     [Test(Sequence=1)]
     internal string VersionTest()
     {

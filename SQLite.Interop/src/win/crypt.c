@@ -299,13 +299,13 @@ void sqlite3CodecGetKey(sqlite3 *db, int nDb, void **ppKey, int *pnKeyLen)
 }
 
 // We do not attach this key to the temp store, only the main database.
-int sqlite3_key(sqlite3 *db, const unsigned char *pKey, int nKeySize)
+SQLITE_API int sqlite3_key(sqlite3 *db, const unsigned char *pKey, int nKeySize)
 {
   return sqlite3CodecAttach(db, 0, pKey, nKeySize);
 }
 
 // Changes the encryption key for an existing database.
-int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySize)
+SQLITE_API int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySize)
 {
   Btree *pbt = db->aDb[0].pBt;
   Pager *p = sqlite3BtreePager(pbt);

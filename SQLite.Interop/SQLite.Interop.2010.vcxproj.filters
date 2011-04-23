@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
  *
  * SQLite.Interop.2010.vcxproj.filters -
@@ -48,9 +48,6 @@
     </None>
     <None Include="props\SQLite.Interop.props">
       <Filter>Property Files</Filter>
-    </None>
-    <None Include="src\core\sqlite3.def">
-      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

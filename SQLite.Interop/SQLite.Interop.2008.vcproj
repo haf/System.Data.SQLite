@@ -81,7 +81,6 @@
 				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
-				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				ProgramDatabaseFile="$(TargetDir)$(INTEROP_MIXED_NAME).pdb"
@@ -179,7 +178,6 @@
 				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
-				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				ProgramDatabaseFile="$(TargetDir)$(INTEROP_MIXED_NAME).pdb"
@@ -274,7 +272,6 @@
 				OutputFile="$(OutDir)\$(INTEROP_NATIVE_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
-				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				ProgramDatabaseFile="$(TargetDir)$(INTEROP_NATIVE_NAME).pdb"
@@ -366,7 +363,6 @@
 				OutputFile="$(OutDir)\$(INTEROP_NATIVE_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
-				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				ProgramDatabaseFile="$(TargetDir)$(INTEROP_NATIVE_NAME).pdb"
@@ -461,7 +457,6 @@
 				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
-				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(INTEROP_MIXED_NAME).pdb"
 				GenerateMapFile="true"
@@ -561,7 +556,6 @@
 				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
-				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(INTEROP_MIXED_NAME).pdb"
 				GenerateMapFile="true"
@@ -658,7 +652,6 @@
 				OutputFile="$(OutDir)\$(INTEROP_NATIVE_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
-				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(INTEROP_NATIVE_NAME).pdb"
 				GenerateMapFile="true"
@@ -752,7 +745,6 @@
 				OutputFile="$(OutDir)\$(INTEROP_NATIVE_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
-				ModuleDefinitionFile="src\core\sqlite3.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(INTEROP_NATIVE_NAME).pdb"
 				GenerateMapFile="true"
@@ -1075,10 +1067,6 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\core\sqlite3.def"
-				>
 			</File>
 		</Filter>
 		<Filter

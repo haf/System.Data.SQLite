@@ -1,3 +1,4 @@
+#define SQLITE_API __declspec(dllexport)
 #include "../core/sqlite3.c"
 #include "../contrib/extension-functions.c"
 #include "crypt.c"

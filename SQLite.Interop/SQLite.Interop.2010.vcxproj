@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
  *
  * SQLite.Interop.2010.vcxproj -
@@ -140,7 +140,6 @@
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
-      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
@@ -182,7 +181,6 @@
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
-      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
@@ -222,7 +220,6 @@
     </ResourceCompile>
     <Link>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
-      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
@@ -257,7 +254,6 @@
     </ResourceCompile>
     <Link>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
-      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
@@ -297,7 +293,6 @@
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
-      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
@@ -341,7 +336,6 @@
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
-      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
@@ -383,7 +377,6 @@
     </ResourceCompile>
     <Link>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
-      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
@@ -421,7 +414,6 @@
     </ResourceCompile>
     <Link>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
-      <ModuleDefinitionFile>src\core\sqlite3.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
@@ -457,7 +449,6 @@
   <ItemGroup>
     <None Include="props\SQLite.Interop.props" />
     <None Include="props\sqlite3.props" />
-    <None Include="src\core\sqlite3.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\sqlite3.h" />
