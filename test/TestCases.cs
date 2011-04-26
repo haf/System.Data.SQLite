@@ -13,6 +13,7 @@ namespace test
   {
     private List<string> droptables = new List<string>();
     private List<string> maydroptable = new List<string>();
+    private long logevents = 0;
     
 
     internal TestCases()
@@ -1580,6 +1581,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     {
         int err_code = logEvent.ErrorCode;
         string err_msg = logEvent.Message;
+        logevents++;
     }
 
     /// <summary>
@@ -1594,18 +1596,18 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
 
             cnn.Shutdown();  // we need to shutdown so that we can change config options
 
+            // create and add a log event handler
             SQLiteLogEventHandler logHandler = new SQLiteLogEventHandler(OnLogEvent); 
             cnn.Log += logHandler;
 
             cnn.Open();
 
-            maydroptable.Add("LogCallbackTest");
-            if (cnn.State != ConnectionState.Open) cnn.Open();
-            using (DbCommand cmd = cnn.CreateCommand())
-            {
-                cmd.CommandText = "CREATE TABLE LogCallbackTest(ID int primary key)";
-                cmd.ExecuteNonQuery();
-            }
+            logevents = 0;
+
+            cnn.LogMessage(1, "test log event");
+
+            if (logevents != 1)
+                throw new Exception("Log event count incorrect.");
 
             cnn.Close();
 

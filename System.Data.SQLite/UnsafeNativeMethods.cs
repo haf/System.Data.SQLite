@@ -728,6 +728,15 @@ namespace System.Data.SQLite
 #endif
     internal static extern int sqlite3_extended_errcode(IntPtr db);
 
+    // Since sqlite3_log() takes a variable argument list, we have to overload declarations
+    // for all possible calls.  For now, we are only exposing a single string, and 
+    // depend on the caller to format the string.
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern void sqlite3_log(int iErrCode, byte[] zFormat);
 
     #endregion
   }

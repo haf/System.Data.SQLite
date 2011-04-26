@@ -877,6 +877,12 @@ namespace System.Data.SQLite
       return UnsafeNativeMethods.sqlite3_extended_errcode(_sql);
     }
 
+    /// Add a log message via the SQLite sqlite3_log interface.
+    internal override void LogMessage(int iErrCode, string zMessage)
+    {
+      UnsafeNativeMethods.sqlite3_log(iErrCode, ToUTF8(zMessage));
+    }
+
     internal override void SetPassword(byte[] passwordBytes)
     {
       int n = UnsafeNativeMethods.sqlite3_key(_sql, passwordBytes, passwordBytes.Length);

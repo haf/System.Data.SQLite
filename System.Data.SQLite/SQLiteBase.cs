@@ -174,6 +174,16 @@ namespace System.Data.SQLite
     /// <returns>Extended result code</returns>
     internal abstract int ExtendedResultCode();
 
+    /// <summary>
+    /// Add a log message via the SQLite sqlite3_log interface.
+    /// </summary>
+    /// <param name="iErrCode">Error code to be logged with the message.</param>
+    /// <param name="zMessage">String to be logged.  Unlike the SQLite sqlite3_log() 
+    /// interface, this should be pre-formatted.  Consider using the 
+    /// String.Format() function.</param>
+    /// <returns></returns>
+    internal abstract void LogMessage(int iErrCode, string zMessage);
+
     internal abstract void SetPassword(byte[] passwordBytes);
     internal abstract void ChangePassword(byte[] newPasswordBytes);
 

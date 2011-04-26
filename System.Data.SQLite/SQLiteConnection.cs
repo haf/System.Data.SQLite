@@ -1033,6 +1033,12 @@ namespace System.Data.SQLite
       return _sql.ExtendedResultCode();
     }
 
+    /// Add a log message via the SQLite sqlite3_log interface.
+    public void LogMessage(int iErrCode, string zMessage)
+    {
+      _sql.LogMessage(iErrCode, zMessage);
+    }
+
     /// <summary>
     /// Change the password (or assign a password) to an open database.
     /// </summary>
