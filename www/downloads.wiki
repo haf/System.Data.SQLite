@@ -11,14 +11,14 @@
     <td width="10">&nbsp;</td>
     <td valign="top" align="right">
       <a name="dotnetsrc"></a>
-      <a href="http://system.data.sqlite.org/sqlite-dotnetsrc-1007000.zip">sqlite-dotnetsrc-1007000.zip</a>
-      <br />(3.09 MiB)
+      <a href="http://system.data.sqlite.org/sqlite-dotnetsrc-1007100.zip">sqlite-dotnetsrc-1007100.zip</a>
+      <br />(3.10 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
-      This ZIP archive contains all source code for System.Data.SQLite 1.0.70.0 (3.7.6)
-      combined into a single archive file.<br />
-      (sha1: 726f17d245529b7d87e96c6405b3235a955f2860)
+        This ZIP archive contains all source code for System.Data.SQLite 1.0.71.0 (3.7.6+)
+        combined into a single archive file.<br />
+        (sha1: 35df7e0681e703d34c634aa7da59105c2943f3a6)
     </td>
   </tr>
   <tr>
@@ -30,28 +30,28 @@
     <td width="10">&nbsp;</td>
     <td valign="top" align="right">
       <a name="dotnet-x86"></a>
-      <a href="http://system.data.sqlite.org/sqlite-dotnet-x86-1007000.exe">sqlite-dotnet-x86-1007000.exe</a>
-      <br />(10.1 MiB)
+      <a href="http://system.data.sqlite.org/sqlite-dotnet-x86-1007100.exe">sqlite-dotnet-x86-1007100.exe</a>
+      <br />(5.8 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
-      This setup package will install all the runtime components and dependencies
-      for the x86/win32 version of the System.Data.SQLite 1.0.70.0 (3.7.6) package.<br />
-      (sha1: ef06348f897909c801a361919c86b5391cb2fe30)
+        This setup package will install all the runtime components and dependencies
+        for the x86/win32 version of the System.Data.SQLite 1.0.71.0 (3.7.6+) package.<br />
+        (sha1: 809747b1b5890f0194d86a94bd266d3e7b4c47f5)
     </td>
   </tr>
   <tr>
     <td width="10">&nbsp;</td>
     <td valign="top" align="right">
       <a name="dotnet-x64"></a>
-      <a href="http://system.data.sqlite.org/sqlite-dotnet-x64-1007000.exe">sqlite-dotnet-x64-1007000.exe</a>
-      <br />(11.3 MiB)
+      <a href="http://system.data.sqlite.org/sqlite-dotnet-x64-1007100.exe">sqlite-dotnet-x64-1007100.exe</a>
+      <br />(6.5 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
-      This setup package will install all the runtime components and dependencies
-      for the x64 version of the System.Data.SQLite 1.0.70.0 (3.7.6) package.<br />
-      (sha1: 8d451ec1eaec7ff6704e4a95fec5059d0471660f)
+        This setup package will install all the runtime components and dependencies
+        for the x64 version of the System.Data.SQLite 1.0.71.0 (3.7.6+) package.<br />
+        (sha1: f83d4bac0dd4f74c66b9142c0c1b20412b25f7db)
     </td>
   </tr>
   <tr>

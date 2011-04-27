@@ -3,14 +3,14 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.70.0 - April 22, 2011</b>
+    <b>1.0.71.0 - April 27, 2011</b>
 </p>
 <ul>
     <li>
-        Added support for sqlite3_extended_result_codes(), sqlite3_errcode(), and sqlite3_extended_errcode()
-        via SetExtendedResultCodes(), ResultCode(), and ExtendedResultCode().
+        Updated to SQLite 3.7.6+ <a href="http://www.sqlite.org/src/info/1bd1484cd7">[1bd1484cd7]</a>
+        to get additional Windows error logging.
     </li>
-    <li>Added support for SQLITE_CONFIG_LOG via SQLiteLogEventHandler().</li>
+    <li>Updated setup to optionally add install directory to PATH if GAC option selected.</li>
 </ul>
 <p>
   <b>1.0.69.0 - April 12, 2011</b>
