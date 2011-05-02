@@ -19,27 +19,27 @@
     <li>Updated setup to optionally add install directory to PATH if GAC option selected.</li>
 </ul>
 <p>
-  <b>1.0.69.0 - April 12, 2011</b>
+    <b>1.0.69.0 - April 12, 2011</b>
 </p>
 <ul>
-  <li>Code merge with [http://www.sqlite.org/releaselog/3_7_6.html | SQLite 3.7.6]</li>
-  <li>New VS2008 and VS2010 solution files</li>
-  <li>Build and packaging automation</li>
-  <li>New Inno Setup files</li>
-  <li>Designer support currently not ready for release</li>
+    <li>Code merge with [http://www.sqlite.org/releaselog/3_7_6.html | SQLite 3.7.6]</li>
+    <li>New VS2008 and VS2010 solution files</li>
+    <li>Build and packaging automation</li>
+    <li>New Inno Setup files</li>
+    <li>Designer support currently not ready for release</li>
 </ul>
 <p>
-  <b>1.0.68.0 - February 2011</b>
+    <b>1.0.68.0 - February 2011</b>
 </p>
 <ul>
-  <li>Code merge with [http://www.sqlite.org/releaselog/3_7_5.html | SQLite 3.7.5]</li>
-  <li>Continuing work on supporting Visual Studio 2010</li>
+    <li>Code merge with [http://www.sqlite.org/releaselog/3_7_5.html | SQLite 3.7.5]</li>
+    <li>Continuing work on supporting Visual Studio 2010</li>
 </ul>
 <p>
-  <b>1.0.67.0 - January 3, 2011</b>
+    <b>1.0.67.0 - January 3, 2011</b>
 </p>
 <ul>
-  <li>Code merge with [http://www.sqlite.org/releaselog/3_7_4.html | SQLite 3.7.4]</li>
-  <li>Continuing work on supporting Visual Studio 2010</li>
+    <li>Code merge with [http://www.sqlite.org/releaselog/3_7_4.html | SQLite 3.7.4]</li>
+    <li>Continuing work on supporting Visual Studio 2010</li>
 </ul>
 
