@@ -3,6 +3,12 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.72.0 - May 1, 2011</b>
+</p>
+<ul>
+    <li>Add the correct directory to the path. Fix for [50515a0c8e].</li>
+</ul>
+<p>
     <b>1.0.71.0 - April 27, 2011</b>
 </p>
 <ul>
