@@ -8,6 +8,19 @@
 ; modpath (c)2010 by Jared Breland, and licensed under the Creative Commons Attribution-ShareAlike 3.0
 ;
 
+; Extract version information from binary and format for OutputBaseFilename
+#define MainBinaryName  "..\bin\Release\bin\System.Data.SQLite.dll"
+#define AppVersion      GetFileVersion(AddBackslash(SourcePath) + MainBinaryName)
+#define AVF1a           "00" + Copy(AppVersion, 1)
+#define AVF1b           Copy(AVF1a, Pos(".", AVF1a) - 1, 1)
+#define AVF2a           "00" + Copy(AVF1a, Pos(".", AVF1a) + 1)
+#define AVF2b           Copy(AVF2a, Pos(".", AVF2a) - 2, 2)
+#define AVF3a           "00" + Copy(AVF2a, Pos(".", AVF2a) + 1)
+#define AVF3b           Copy(AVF3a, Pos(".", AVF3a) - 2, 2)
+#define AVF4a           "00" + Copy(AVF3a, Pos(".", AVF3a) + 1)
+#define AVF4b           Copy(AVF4a, Pos(".", AVF4a) - 2, 2)
+#define AppVersionFile  AVF1b + AVF2b + AVF3b + AVF4b
+
 [Setup]
 AllowNoIcons=true
 ArchitecturesInstallIn64BitMode=x64
@@ -25,7 +38,7 @@ AppComments=The ADO.NET adapter for the SQLite database engine.
 AppReadmeFile={app}\readme.htm
 DefaultDirName={pf}\System.Data.SQLite
 DefaultGroupName=System.Data.SQLite
-OutputBaseFilename=sqlite-dotnet-{#AppProcessor}-{#AppVersion}
+OutputBaseFilename=sqlite-dotnet-{#AppProcessor}-{#AppVersionFile}
 SetupLogging=true
 UninstallFilesDir={app}\uninstall
 VersionInfoVersion={#AppVersion}

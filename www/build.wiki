@@ -145,7 +145,6 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
     &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
     &lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs<br />
     &lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs<br />
-    &lt;root&gt;\Setup\set_common.bat<br />
   </ul>
 
   You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties
