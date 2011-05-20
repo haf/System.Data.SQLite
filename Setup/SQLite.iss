@@ -23,7 +23,12 @@
 
 [Setup]
 AllowNoIcons=true
-ArchitecturesInstallIn64BitMode=x64
+
+#if AppProcessor != "x86"
+ArchitecturesAllowed={#AppProcessor}
+ArchitecturesInstallIn64BitMode={#AppProcessor}
+#endif
+
 AlwaysShowComponentsList=false
 AppCopyright=Public Domain
 AppID={#AppId}
