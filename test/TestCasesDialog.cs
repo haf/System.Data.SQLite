@@ -53,7 +53,7 @@ namespace test
     {
       string factoryString = _provider.SelectedItem.ToString();
       DbProviderFactory factory = DbProviderFactories.GetFactory(factoryString);
-      _test = new TestCases(factory, _connectionString.Text, factoryString);
+      _test = new TestCases(factory, _connectionString.Text);
       _test.Tests = _testitems.Tests;
 
       _test.OnTestStarting += new TestStartingEvent(_test_OnTestStarting);

@@ -20,8 +20,8 @@ namespace test
     {
     }
 
-    internal TestCases(DbProviderFactory factory, string connectionString, string factoryString)
-      : base(factory, connectionString, factoryString)
+    internal TestCases(DbProviderFactory factory, string connectionString)
+      : base(factory, connectionString)
     {
     }
 
@@ -76,7 +76,7 @@ namespace test
     [Test]
     internal void ChangePasswordTest()
     {
-        if (_factstring.ToLower().Contains("sqlite"))
+        if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) > -1)
         {
             // Opens an unencrypted database
             SQLiteConnection cnn = new SQLiteConnection(_cnnstring.ConnectionString);
@@ -1560,7 +1560,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test]
     internal void ExtendedResultCodesTest()
     {
-      if (_factstring.ToLower().Contains("sqlite"))
+      if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) > -1)
       {
         SQLiteConnection cnn = new SQLiteConnection(_cnnstring.ConnectionString);
 
@@ -1576,7 +1576,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       }
     }
 
-    //Applying EventHandler
+    //Logging EventHandler
     public void OnLogEvent(object sender, LogEventArgs logEvent)
     {
         int err_code = logEvent.ErrorCode;
@@ -1590,14 +1590,14 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test]
     internal void SetLogCallbackTest()
     {
-        if (_factstring.ToLower().Contains("sqlite"))
+        if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) > -1)
         {
             SQLiteConnection cnn = new SQLiteConnection(_cnnstring.ConnectionString);
 
             cnn.Shutdown();  // we need to shutdown so that we can change config options
 
             // create and add a log event handler
-            SQLiteLogEventHandler logHandler = new SQLiteLogEventHandler(OnLogEvent); 
+            SQLiteLogEventHandler logHandler = new SQLiteLogEventHandler(OnLogEvent);
             cnn.Log += logHandler;
 
             cnn.Open();
@@ -2105,7 +2105,6 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
   internal abstract class TestCaseBase
   {
     protected DbProviderFactory _fact;
-    protected string _factstring;
     protected DbConnection _cnn = null;
     protected DbConnectionStringBuilder _cnnstring;
     protected Dictionary<string, bool> _tests = new Dictionary<string,bool>();
@@ -2132,10 +2131,9 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       }
     }
 
-    protected TestCaseBase(DbProviderFactory factory, string connectionString, string factoryString)
+    protected TestCaseBase(DbProviderFactory factory, string connectionString)
     {
       _fact = factory;
-      _factstring = factoryString;
       _cnn = _fact.CreateConnection();
       _cnn.ConnectionString = connectionString;
       _cnnstring = _fact.CreateConnectionStringBuilder();
