@@ -207,13 +207,11 @@ namespace System.Data.SQLite
     private event SQLiteCommitHandler _commitHandler;
     private event SQLiteTraceEventHandler _traceHandler;
     private event EventHandler _rollbackHandler;
-    private event SQLiteLogEventHandler _logHandler;
 
     private SQLiteUpdateCallback _updateCallback;
     private SQLiteCommitCallback _commitCallback;
     private SQLiteTraceCallback _traceCallback;
     private SQLiteRollbackCallback _rollbackCallback;
-    private SQLiteLogCallback _logCallback;
 
     /// <summary>
     /// This event is raised whenever the database is opened or closed.
@@ -815,12 +813,6 @@ namespace System.Data.SQLite
             _sql = new SQLite3_UTF16(dateFormat);
           else
             _sql = new SQLite3(dateFormat);
-
-          if (_sql != null && _logHandler != null)
-          {
-              if (_logCallback == null) _logCallback = new SQLiteLogCallback(LogCallback);
-              if (_logCallback != null) _sql.SetLogCallback(_logCallback);
-          }
         }
 
         SQLiteOpenFlagsEnum flags = SQLiteOpenFlagsEnum.None;
@@ -2351,37 +2343,6 @@ namespace System.Data.SQLite
       _rollbackHandler(this, EventArgs.Empty);
     }
 
-    /// <summary>
-    /// This event is raised whenever SQLite raises a logging event.
-    /// </summary>
-    public event SQLiteLogEventHandler Log
-    {
-        add
-        {
-            _logHandler += value;
-            // callback handler will be set/removed at open/close
-        }
-        remove
-        {
-            _logHandler -= value;
-            if (_logHandler==null)
-            {
-                _sql.SetLogCallback(null);
-                _logCallback = null;
-            }
-
-        }
-    }
-
-    private void LogCallback(IntPtr puser, int err_code, IntPtr message)
-    {
-        if (_logHandler != null) 
-            _logHandler(this, 
-                        new LogEventArgs(puser, 
-                                         err_code,
-                                         SQLiteBase.UTF8ToString(message, -1)));
-    }
-
   }
 
   /// <summary>
@@ -2423,11 +2384,6 @@ namespace System.Data.SQLite
 #endif
   internal delegate void SQLiteRollbackCallback(IntPtr puser);
 
-#if !PLATFORM_COMPACTFRAMEWORK
-  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-#endif
-  internal delegate void SQLiteLogCallback(IntPtr puser, int err_code, IntPtr message);
-
   /// <summary>
   /// Raised when a transaction is about to be committed.  To roll back a transaction, set the 
   /// rollbackTrans boolean value to true.
@@ -2447,15 +2403,8 @@ namespace System.Data.SQLite
   /// Raised when a statement first begins executing on a given connection
   /// </summary>
   /// <param name="sender">The connection executing the statement</param>
-  /// <param name="e">Event arguments on the trace</param>
+  /// <param name="e">Event arguments of the trace</param>
   public delegate void SQLiteTraceEventHandler(object sender, TraceEventArgs e);
-
-  /// <summary>
-  /// Raised when a log event occurs.
-  /// </summary>
-  /// <param name="sender">The current connection</param>
-  /// <param name="e">Event arguments on the trace</param>
-  public delegate void SQLiteLogEventHandler(object sender, LogEventArgs e);
 
   /// <summary>
   /// Whenever an update event is triggered on a connection, this enum will indicate
@@ -2541,29 +2490,6 @@ namespace System.Data.SQLite
     {
       Statement = statement;
     }
-  }
-
-  /// <summary>
-  /// Passed during an Log callback
-  /// </summary>
-  public class LogEventArgs : EventArgs
-  {
-      /// <summary>
-      /// The error code.
-      /// </summary>
-      public readonly int ErrorCode;
-
-      /// <summary>
-      /// SQL statement text as the statement first begins executing
-      /// </summary>
-      public readonly string Message;
-
-      internal LogEventArgs(IntPtr puser, int err_code, string message)
-      {
-          // puser should be NULL
-          ErrorCode = err_code;
-          Message = message;
-      }
   }
 
 }

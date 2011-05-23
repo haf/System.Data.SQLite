@@ -1594,11 +1594,11 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         {
             SQLiteConnection cnn = new SQLiteConnection(_cnnstring.ConnectionString);
 
-            cnn.Shutdown();  // we need to shutdown so that we can change config options
-
             // create and add a log event handler
             SQLiteLogEventHandler logHandler = new SQLiteLogEventHandler(OnLogEvent);
-            cnn.Log += logHandler;
+            SQLiteFactory sqlite_fact = (SQLiteFactory)_fact;
+
+            sqlite_fact.Log += logHandler;
 
             cnn.Open();
 
@@ -1611,10 +1611,8 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
 
             cnn.Close();
 
-            cnn.Shutdown();  // we need to shutdown so that we can change config options
-
             // remove the log handler before the connection is closed.
-            cnn.Log -= logHandler;
+            sqlite_fact.Log -= logHandler;
 
         }
     }

@@ -12,6 +12,11 @@ namespace System.Data.SQLite
   using System.Collections.Generic;
   using System.Globalization;
 
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+  internal delegate void SQLiteLogCallback(IntPtr puser, int err_code, IntPtr message);
+
   /// <summary>
   /// This class implements SQLiteBase completely, and is the guts of the code that interop's SQLite with .NET
   /// </summary>
