@@ -611,16 +611,21 @@ namespace System.Data.SQLite
       int nCopied = nLength;
 
       nlen = UnsafeNativeMethods.sqlite3_column_bytes(stmt._sqlite_stmt, index);
-      ptr = UnsafeNativeMethods.sqlite3_column_blob(stmt._sqlite_stmt, index);
-
+      // If no destination buffer, return the size needed.
       if (bDest == null) return nlen;
 
       if (nCopied + nStart > bDest.Length) nCopied = bDest.Length - nStart;
       if (nCopied + nDataOffset > nlen) nCopied = nlen - nDataOffset;
 
       if (nCopied > 0)
+      {
+        ptr = UnsafeNativeMethods.sqlite3_column_blob(stmt._sqlite_stmt, index);
         Marshal.Copy((IntPtr)(ptr.ToInt64() + nDataOffset), bDest, nStart, nCopied);
-      else nCopied = 0;
+      }
+      else
+      {
+        nCopied = 0;
+      }
 
       return nCopied;
     }
