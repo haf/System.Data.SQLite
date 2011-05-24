@@ -43,7 +43,7 @@ namespace System.Data.SQLite
 
     internal static XmlReader GetProviderManifest()
     {
-      return GetXmlResource("System.Data.SQLite.Resources.SQLiteProviderServices.ProviderManifest.xml");
+      return GetXmlResource("System.Data.SQLite.Linq.Resources.SQLiteProviderServices.ProviderManifest.xml");
     }
 
     /// <summary>
@@ -302,12 +302,12 @@ namespace System.Data.SQLite
 
     private XmlReader GetStoreSchemaMapping()
     {
-      return GetXmlResource("System.Data.SQLite.Resources.SQLiteProviderServices.StoreSchemaMapping.msl");
+      return GetXmlResource("System.Data.SQLite.Linq.Resources.SQLiteProviderServices.StoreSchemaMapping.msl");
     }
 
     private XmlReader GetStoreSchemaDescription()
     {
-      return GetXmlResource("System.Data.SQLite.Resources.SQLiteProviderServices.StoreSchemaDefinition.ssdl");
+      return GetXmlResource("System.Data.SQLite.Linq.Resources.SQLiteProviderServices.StoreSchemaDefinition.ssdl");
     }
 
     internal static XmlReader GetXmlResource(string resourceName)

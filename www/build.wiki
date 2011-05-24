@@ -95,6 +95,7 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
     &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
     &lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs<br />
     &lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs<br />
+    &lt;root&gt;\System.Data.SQLite\LINQ\SQLiteFactory_Linq.cs<br />
   </ul>
 
   You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties
@@ -145,11 +146,11 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
     &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
     &lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs<br />
     &lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs<br />
+    &lt;root&gt;\System.Data.SQLite\LINQ\SQLiteFactory_Linq.cs<br />
   </ul>
 
   You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties
-  in the .vsprops and .props files, the INTEROP_VERSION define in interop.h,
-  and the VERSION environment variable in set_common.bat.
+  in the .vsprops and .props files, and the INTEROP_VERSION define in interop.h.
   This version number should track the release versions of the System.Data.SQLite packages
   (ie. [./news.wiki | 1.0.x]).
   </li>
