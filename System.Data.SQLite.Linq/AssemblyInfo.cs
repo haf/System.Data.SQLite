@@ -12,7 +12,7 @@ using System.Runtime.ConstrainedExecution;
 [assembly: AssemblyTitle("System.Data.SQLite.Linq")]
 [assembly: AssemblyDescription("ADO.NET 4.0 Entity Framework support for SQLite")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("http://sqlite.phxsoftware.com")]
+[assembly: AssemblyCompany("http://system.data.sqlite.org")]
 [assembly: AssemblyProduct("System.Data.SQLite")]
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]

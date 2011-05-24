@@ -10,7 +10,7 @@ using System.Resources;
 [assembly: AssemblyTitle("SQLite.Designer")]
 [assembly: AssemblyDescription("ADO.NET 4.0 Data Designer for SQLite")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("http://sqlite.phxsoftware.com")]
+[assembly: AssemblyCompany("http://system.data.sqlite.org")]
 [assembly: AssemblyProduct("SQLite Designer")]
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]
