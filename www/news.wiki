@@ -3,6 +3,17 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.73.0 - June 2, 2011</b>
+</p>
+<ul>
+    <li>Updated to SQLite 3.7.6.3 <a href="http://www.sqlite.org/src/info/ed1da510a2">[ed1da510a2]</a>.</li>
+    <li>Minor optimization to GetBytes(). Fix for [8c1650482e].</li>
+    <li>Update various assembly information settings.</li>
+    <li>Correct System.Data.SQLite.Linq version and resource information. Fix for [6489c5a396] and [133daf50d6].</li>
+    <li>Moved log handler from SQLiteConnection object to SQLiteFactory object to prevent if from being prematurely GCed.</li>
+    <li>We should block x64 installs on x86 and we should install native only if the setup package itself is native. Fix for [e058ce156e].</li>
+</ul>
+<p>
     <b>1.0.72.0 - May 1, 2011</b>
 </p>
 <ul>
