@@ -5,8 +5,8 @@
 </head>
 <body>
 ADO.NET 2.0 SQLite Data Provider<br />
-Version 1.0.72.0 May 1, 2011<br />
-Using SQLite 3.7.6+ <a href="http://www.sqlite.org/src/info/1bd1484cd7">[1bd1484cd7]</a><br />
+Version 1.0.73.0 June 2, 2011<br />
+Using SQLite 3.7.6.3 <a href="http://www.sqlite.org/src/info/ed1da510a2">[ed1da510a2]</a><br />
 Originally written by Robert Simpson<br />
 Released to the public domain, use at your own risk!<br />
 Official provider website:&nbsp; <a href="http://system.data.sqlite.org">http://system.data.sqlite.org</a><br />
@@ -157,6 +157,17 @@ it to extend its functionality, but the core engine's source is not changed.</p>
 
 <h2><b>Version History</b></h2>
 
+<p>
+  <b>1.0.73.0 - June 2, 2011</b>
+</p>
+<ul>
+  <li>Updated to SQLite 3.7.6.3 <a href="http://www.sqlite.org/src/info/ed1da510a2">[ed1da510a2]</a>
+  <li>Minor optimization to GetBytes(). Fix for [8c1650482e].</li>
+  <li>Update various assembly information settings.</li>
+  <li>Correct System.Data.SQLite.Linq version and resource information. Fix for [6489c5a396] and [133daf50d6].</li>
+  <li>Moved log handler from SQLiteConnection object to SQLiteFactory object to prevent if from being prematurely GCed.</li>
+  <li>We should block x64 installs on x86 and we should install native only if the setup package itself is native. Fix for [e058ce156e].</li>
+</ul>
 <p>
   <b>1.0.72.0 - May 1, 2011</b>
 </p>
