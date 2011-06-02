@@ -45,7 +45,7 @@ namespace System.Data.SQLite
     {
       if (_sqliteServices == null)
       {
-        Type type = Type.GetType("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version=1.0.72.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", false);
+        Type type = Type.GetType("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version=1.0.73.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", false);
         if (type != null)
         {
           FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
