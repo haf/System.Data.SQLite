@@ -13,6 +13,11 @@
 	Name="SQLite.Interop"
 	>
 	<UserMacro
+		Name="ConfigurationYear"
+		Value="2008"
+		PerformEnvironmentSet="true"
+	/>
+	<UserMacro
 		Name="INTEROP_MANIFEST_VERSION"
 		Value="1.0.73.0"
 		PerformEnvironmentSet="true"

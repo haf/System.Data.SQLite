@@ -21,6 +21,7 @@
     <OldToolsVersion>2.0</OldToolsVersion>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <NetFx20>true</NetFx20>
+    <ConfigurationYear>2008</ConfigurationYear>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">

@@ -21,6 +21,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <SignAssembly>false</SignAssembly>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+    <ConfigurationYear>2010</ConfigurationYear>
     <ConfigurationSuffix>Module</ConfigurationSuffix>
     <UseInteropDll>false</UseInteropDll>
     <UseSqliteStandard>false</UseSqliteStandard>

@@ -29,6 +29,7 @@
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <NetFx20>true</NetFx20>
     <IsCompactFramework>true</IsCompactFramework>
+    <ConfigurationYear>2008</ConfigurationYear>
     <ConfigurationSuffix>Compact</ConfigurationSuffix>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />

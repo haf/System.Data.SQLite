@@ -20,6 +20,7 @@
     <AssemblyName>System.Data.SQLite</AssemblyName>
     <OldToolsVersion>3.5</OldToolsVersion>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+    <ConfigurationYear>2010</ConfigurationYear>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">

@@ -30,6 +30,12 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
+IF NOT DEFINED CONFIGURATIONS (
+  SET CONFIGURATIONS=Release
+)
+
+%_VECHO% Configurations = '%CONFIGURATIONS%'
+
 IF NOT DEFINED PROCESSORS (
   SET PROCESSORS=x86
 )
@@ -42,20 +48,22 @@ IF NOT DEFINED YEARS (
 
 %_VECHO% Years = '%YEARS%'
 
-FOR %%P IN (%PROCESSORS%) DO (
-  FOR %%Y IN (%YEARS%) DO (
-    %_ECHO% CALL "%TOOLS%\set_%%P_%%Y.bat"
-
-    IF ERRORLEVEL 1 (
-      ECHO Could not set variables for %%P/%%Y.
-      GOTO errors
-    )
-
-    %_ECHO% CALL "%TOOLS%\bake.bat"
-
-    IF ERRORLEVEL 1 (
-      ECHO Could not bake setup for %%P/%%Y.
-      GOTO errors
+FOR %%C IN (%CONFIGURATIONS%) DO (
+  FOR %%P IN (%PROCESSORS%) DO (
+    FOR %%Y IN (%YEARS%) DO (
+      %_ECHO% CALL "%TOOLS%\set_%%C_%%P_%%Y.bat"
+  
+      IF ERRORLEVEL 1 (
+        ECHO Could not set variables for %%C/%%P/%%Y.
+        GOTO errors
+      )
+  
+      %_ECHO% CALL "%TOOLS%\bake.bat"
+  
+      IF ERRORLEVEL 1 (
+        ECHO Could not bake setup for %%C/%%P/%%Y.
+        GOTO errors
+      )
     )
   )
 )

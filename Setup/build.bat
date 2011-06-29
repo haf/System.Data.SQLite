@@ -30,7 +30,7 @@ IF DEFINED CONFIGURATION (
   REM "
 ) ELSE (
   %_AECHO% No configuration specified, using default...
-  SET CONFIGURATION=ReleaseNativeOnly
+  SET CONFIGURATION=Release
 )
 
 %_VECHO% Configuration = '%CONFIGURATION%'

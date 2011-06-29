@@ -4,22 +4,9 @@
 ; Written by Joe Mistachkin.
 ; Released to the public domain, use at your own risk!
 ;
-;
-; modpath (c)2010 by Jared Breland, and licensed under the Creative Commons Attribution-ShareAlike 3.0
-;
 
-; Extract version information from binary and format for OutputBaseFilename
-#define MainBinaryName  "..\bin\Release\bin\System.Data.SQLite.dll"
-#define AppVersion      GetFileVersion(AddBackslash(SourcePath) + MainBinaryName)
-#define AVF1a           "00" + Copy(AppVersion, 1)
-#define AVF1b           Copy(AVF1a, Pos(".", AVF1a) - 1, 1)
-#define AVF2a           "00" + Copy(AVF1a, Pos(".", AVF1a) + 1)
-#define AVF2b           Copy(AVF2a, Pos(".", AVF2a) - 2, 2)
-#define AVF3a           "00" + Copy(AVF2a, Pos(".", AVF2a) + 1)
-#define AVF3b           Copy(AVF3a, Pos(".", AVF3a) - 2, 2)
-#define AVF4a           "00" + Copy(AVF3a, Pos(".", AVF3a) + 1)
-#define AVF4b           Copy(AVF4a, Pos(".", AVF4a) - 2, 2)
-#define AppVersionFile  AVF1b + AVF2b + AVF3b + AVF4b
+#define BaseConfiguration StringChange(AppConfiguration, "NativeOnly", "")
+#define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + BaseConfiguration + "\bin\System.Data.SQLite.dll", PRODUCT_VERSION)
 
 [Setup]
 AllowNoIcons=true
@@ -43,7 +30,7 @@ AppComments=The ADO.NET adapter for the SQLite database engine.
 AppReadmeFile={app}\readme.htm
 DefaultDirName={pf}\System.Data.SQLite
 DefaultGroupName=System.Data.SQLite
-OutputBaseFilename=sqlite-dotnet-{#AppProcessor}-{#AppVersionFile}
+OutputBaseFilename=sqlite-dotnet-{#AppConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}
 SetupLogging=true
 UninstallFilesDir={app}\uninstall
 VersionInfoVersion={#AppVersion}
@@ -53,15 +40,6 @@ ChangesEnvironment=true
 [Code]
 #include "CheckForNetFx.pas"
 #include "InitializeSetup.pas"
-const
-	ModPathName = 'gac\modifypath';
-	ModPathType = 'system';
-function ModPathDir(): TArrayOfString;
-begin
-	setArrayLength(Result, 1)
-	Result[0] := ExpandConstant('{app}\bin');
-end;
-#include "modpath.iss"
 
 [Components]
 Name: Application; Description: System.Data.SQLite components.; Types: custom compact full
@@ -76,7 +54,6 @@ Name: Application\Test; Description: Test components.; Types: custom compact ful
 [Tasks]
 Components: Application\Core\MSIL Or Application\LINQ; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
 Components: Application\Core\MSIL Or Application\LINQ; Name: gac; Description: Install the assemblies into the global assembly cache.; Flags: unchecked; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
-Components: Application\Core\MSIL Or Application\LINQ; Name: gac\modifypath; Description: &Add application directory to your environmental path; Flags: unchecked
 
 [Run]
 Components: Application\Core\MSIL; Tasks: ngen; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
@@ -98,18 +75,22 @@ Name: {app}\GAC
 [Files]
 Components: Application\Core\{#AppProcessor}; Source: ..\Externals\MSVCPP\vcredist_{#AppProcessor}_{#VcRuntime}.exe; DestDir: {tmp}; Flags: dontcopy
 Components: Application; Source: ..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
-Components: Application\Core\MSIL; Tasks: gac; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
-Components: Application\Core\MSIL; Source: ..\bin\Release\bin\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\Release\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\LINQ; Tasks: gac; Source: ..\bin\Release\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
-Components: Application\LINQ; Source: ..\bin\Release\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\LINQ and Application\Symbols; Source: ..\bin\Release\bin\System.Data.SQLite.Linq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Core\{#AppProcessor}; Source: ..\bin\{#AppPlatform}\ReleaseNativeOnly\SQLite.Interop.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Core\{#AppProcessor} and Application\Symbols; Source: ..\bin\{#AppPlatform}\ReleaseNativeOnly\SQLite.Interop.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\MSIL; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\LINQ; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+Components: Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\LINQ and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+
+#if Pos("NativeOnly", AppConfiguration) != 0
+Components: Application\Core\{#AppProcessor}; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\SQLite.Interop.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\{#AppProcessor} and Application\Symbols; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\SQLite.Interop.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#endif
+
 Components: Application\Documentation; Source: ..\doc\SQLite.NET.chm; DestDir: {app}\doc; Flags: restartreplace uninsrestartdelete
-Components: Application\Test; Source: ..\bin\Release\bin\test.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test and Application\Symbols; Source: ..\bin\Release\bin\test.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test; Source: ..\bin\Release\bin\test.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 
 [Icons]
 Name: {group}\Test Application; Filename: {app}\bin\test.exe; WorkingDir: {app}\bin; IconFilename: {app}\bin\test.exe; Comment: Launch Test Application; IconIndex: 0; Flags: createonlyiffileexists

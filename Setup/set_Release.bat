@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: set_ReleaseNativeOnly.bat --
+:: set_Release.bat --
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!

@@ -1,0 +1,53 @@
+###############################################################################
+#
+# basic.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+set test_configuration Release
+
+object load -loadtype File [file join [file dirname $path] bin \
+    $test_configuration bin System.Data.SQLite.dll]
+
+###############################################################################
+
+runTest {test basic-1.1 {simple INSERT / SELECT} -setup {
+  set fileName [file join [getTemporaryPath] test.sqlite3]
+  set connection [sql open -type SQLite [subst {Data Source=${fileName}}]]
+} -body {
+  set result [list]
+
+  lappend result [sql execute -execute scalar $connection \
+      "SELECT sqlite_source_id();"]
+
+  sql execute $connection "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y, z);"
+  sql execute $connection "INSERT INTO t1 (x, y, z) VALUES(1, 'foo', 1234);"
+
+  sql execute -execute reader $connection "SELECT * FROM t1;"
+
+  foreach name [lsort [array names rows]] {
+    lappend result [list $name $rows($name)]
+  }
+
+  set result
+} -cleanup {
+  catch {sql close $connection}
+  catch {file delete $fileName}
+  unset -nocomplain name rows result connection fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA} -match regexp \
+-result {^\{\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [0-9a-f]{40}\} \{1 \{\{x 1\}\
+\{y foo\} \{z 1234\}\}\} \{count 1\} \{names \{x y z\}\}$}}
+
+###############################################################################
+
+runTestEpilogue

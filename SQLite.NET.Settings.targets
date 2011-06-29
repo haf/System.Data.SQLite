@@ -146,8 +146,8 @@
               the output does not end up where it expects the output to be.  The
               value of this property must have a trailing backslash.
     -->
-    <BaseIntermediateOutputPath Condition="'$(ConfigurationSuffix)' == ''">$(SQLiteNetDir)\obj\</BaseIntermediateOutputPath>
-    <BaseIntermediateOutputPath Condition="'$(ConfigurationSuffix)' != ''">$(SQLiteNetDir)\obj\$(ConfigurationSuffix)\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(ConfigurationSuffix)' == ''">$(SQLiteNetDir)\obj\$(ConfigurationYear)\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(ConfigurationSuffix)' != ''">$(SQLiteNetDir)\obj\$(ConfigurationYear)\$(ConfigurationSuffix)\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
   <!--
@@ -161,7 +161,7 @@
         NOTE: The final output files need to end up in one place.  The value of
               this property must have a trailing backslash.
     -->
-    <BinaryOutputPath Condition="'$(BinaryOutputPath)' == ''">$(SQLiteNetDir)\bin\$(Configuration)$(ConfigurationSuffix)\bin\</BinaryOutputPath>
+    <BinaryOutputPath Condition="'$(BinaryOutputPath)' == ''">$(SQLiteNetDir)\bin\$(ConfigurationYear)\$(Configuration)$(ConfigurationSuffix)\bin\</BinaryOutputPath>
   </PropertyGroup>
 
   <!--
