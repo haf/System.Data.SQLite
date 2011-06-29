@@ -53,7 +53,10 @@ Name: Application\Test; Description: Test components.; Types: custom compact ful
 
 [Tasks]
 Components: Application\Core\MSIL Or Application\LINQ; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
+
+#if Pos("NativeOnly", AppConfiguration) == 0
 Components: Application\Core\MSIL Or Application\LINQ; Name: gac; Description: Install the assemblies into the global assembly cache.; Flags: unchecked; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
+#endif
 
 [Run]
 Components: Application\Core\MSIL; Tasks: ngen; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
@@ -70,15 +73,26 @@ Components: Application\Core\MSIL; Tasks: ngen; Filename: {code:GetNetFx2Install
 [Dirs]
 Name: {app}\bin
 Name: {app}\doc
+
+#if Pos("NativeOnly", AppConfiguration) == 0
 Name: {app}\GAC
+#endif
 
 [Files]
 Components: Application\Core\{#AppProcessor}; Source: ..\Externals\MSVCPP\vcredist_{#AppProcessor}_{#VcRuntime}.exe; DestDir: {tmp}; Flags: dontcopy
 Components: Application; Source: ..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
+
+#if Pos("NativeOnly", AppConfiguration) == 0
 Components: Application\Core\MSIL; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+#endif
+
 Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+
+#if Pos("NativeOnly", AppConfiguration) == 0
 Components: Application\LINQ; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+#endif
+
 Components: Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\LINQ and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 

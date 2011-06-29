@@ -1,9 +1,9 @@
 @ECHO OFF
 
 ::
-:: bake_all.bat --
+:: build_all.bat --
 ::
-:: Multi-Setup Preparation & Baking Tool
+:: Multi-MSBuild Wrapper Tool
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!
@@ -49,19 +49,19 @@ IF NOT DEFINED YEARS (
 %_VECHO% Years = '%YEARS%'
 
 FOR %%C IN (%CONFIGURATIONS%) DO (
-  FOR %%P IN (%PROCESSORS%) DO (
+  FOR %%P IN (%PLATFORMS%) DO (
     FOR %%Y IN (%YEARS%) DO (
-      %_ECHO% CALL "%TOOLS%\set_%%C_%%P_%%Y.bat"
+      %_ECHO% CALL "%TOOLS%\set_%%Y.bat"
 
       IF ERRORLEVEL 1 (
-        ECHO Could not set variables for %%C/%%P/%%Y.
+        ECHO Could not set variables for %%Y.
         GOTO errors
       )
 
-      %_ECHO% CALL "%TOOLS%\bake.bat"
+      %_ECHO% CALL "%TOOLS%\build.bat" "%%C" "%%P"
 
       IF ERRORLEVEL 1 (
-        ECHO Could not bake setup for %%C/%%P/%%Y.
+        ECHO Could not build binaries for %%C/%%P/%%Y.
         GOTO errors
       )
     )

@@ -1,10 +1,12 @@
 @ECHO OFF
 
 ::
-:: set_Release.bat --
+:: set_2010.bat --
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!
 ::
 
-REM SET MSBUILD_ARGS=/property:TargetFrameworkVersion=v3.5
+SET NETFX20ONLY=
+SET NETFX35ONLY=
+SET NETFX40ONLY=1

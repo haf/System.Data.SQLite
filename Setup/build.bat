@@ -175,7 +175,7 @@ IF NOT DEFINED LOGSUFFIX (
 IF DEFINED LOGGING GOTO skip_setLogging
 IF DEFINED NOLOG GOTO skip_setLogging
 
-SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREFIX%_%CONFIGURATION%_%PLATFORM%_%LOGSUFFIX%.log;Verbosity=diagnostic"
+SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREFIX%_%CONFIGURATION%_%PLATFORM%_%YEAR%_%LOGSUFFIX%.log;Verbosity=diagnostic"
 
 :skip_setLogging
 
