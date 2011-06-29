@@ -31,6 +31,7 @@ AppReadmeFile={app}\readme.htm
 DefaultDirName={pf}\System.Data.SQLite
 DefaultGroupName=System.Data.SQLite
 OutputBaseFilename=sqlite-dotnet-{#AppConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}
+OutputManifestFile=sqlite-dotnet-{#AppConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}-manifest.txt
 SetupLogging=true
 UninstallFilesDir={app}\uninstall
 VersionInfoVersion={#AppVersion}
