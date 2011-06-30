@@ -23,6 +23,13 @@ SET TOOLS=%TOOLS:~0,-1%
 
 %_VECHO% Tools = '%TOOLS%'
 
+%_ECHO% CALL "%TOOLS%\vsSp.bat"
+
+IF ERRORLEVEL 1 (
+  ECHO Could not detect Visual Studio.
+  GOTO errors
+)
+
 %_ECHO% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (
