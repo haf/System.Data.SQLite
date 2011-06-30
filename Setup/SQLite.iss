@@ -7,6 +7,7 @@
 
 #define BaseConfiguration StringChange(AppConfiguration, "NativeOnly", "")
 #define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + BaseConfiguration + "\bin\System.Data.SQLite.dll", PRODUCT_VERSION)
+#define OutputConfiguration StringChange(StringChange(StringChange(AppConfiguration, "NativeOnly", "-bundle"), "Debug", "setup"), "Release", "setup")
 
 [Setup]
 AllowNoIcons=true
@@ -30,8 +31,8 @@ AppComments=The ADO.NET adapter for the SQLite database engine.
 AppReadmeFile={app}\readme.htm
 DefaultDirName={pf}\System.Data.SQLite
 DefaultGroupName=System.Data.SQLite
-OutputBaseFilename=sqlite-dotnet-{#AppConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}
-OutputManifestFile=sqlite-dotnet-{#AppConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}-manifest.txt
+OutputBaseFilename=sqlite-dotnet-{#OutputConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}
+OutputManifestFile=sqlite-dotnet-{#OutputConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}-manifest.txt
 SetupLogging=true
 UninstallFilesDir={app}\uninstall
 VersionInfoVersion={#AppVersion}
