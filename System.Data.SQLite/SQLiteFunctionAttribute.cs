@@ -8,7 +8,6 @@
 namespace System.Data.SQLite
 {
   using System;
-  using System.Runtime.InteropServices;
 
   /// <summary>
   /// A simple custom attribute to enable us to easily find user-defined functions in

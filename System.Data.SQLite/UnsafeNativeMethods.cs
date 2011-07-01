@@ -8,7 +8,11 @@
 namespace System.Data.SQLite
 {
   using System;
+
+#if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
   using System.Security;
+#endif
+
   using System.Runtime.InteropServices;
 
 #if !PLATFORM_COMPACTFRAMEWORK && !DEBUG

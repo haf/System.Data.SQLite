@@ -15,8 +15,6 @@ namespace System.Data.SQLite
   using System.Reflection;
 
 #if !PLATFORM_COMPACTFRAMEWORK
-  using System.ComponentModel.Design;
-
   /// <summary>
   /// SQLite implementation of DbConnectionStringBuilder.
   /// </summary>

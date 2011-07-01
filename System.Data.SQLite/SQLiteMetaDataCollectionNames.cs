@@ -7,8 +7,6 @@
 
 namespace System.Data.SQLite
 {
-  using System;
-
   /// <summary>
   /// MetaDataCollections specific to SQLite
   /// </summary>
