@@ -28,6 +28,8 @@
     <FormFactorID></FormFactorID>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <NetFx20>true</NetFx20>
+    <UseInteropDll>false</UseInteropDll>
+    <UseSqliteStandard>false</UseSqliteStandard>
     <IsCompactFramework>true</IsCompactFramework>
     <ConfigurationYear>2008</ConfigurationYear>
     <ConfigurationSuffix>Compact</ConfigurationSuffix>

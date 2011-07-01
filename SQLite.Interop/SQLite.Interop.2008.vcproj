@@ -1082,6 +1082,10 @@
 				RelativePath=".\src\core\sqlite3ext.h"
 				>
 			</File>
+			<File
+				RelativePath=".\src\win\interop.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

@@ -1,9 +1,15 @@
 //
 // Microsoft Visual C++ generated resource script.
 //
+
+#if !defined(_WIN32_WCE)
+#include "winresrc.h"
+#else
+#include "windows.h"
+#endif
+
 #include "..\core\sqlite3.h"
 #include "interop.h"
-#include "windows.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources

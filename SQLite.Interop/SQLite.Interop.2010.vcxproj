@@ -453,6 +453,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\sqlite3.h" />
     <ClInclude Include="src\core\sqlite3ext.h" />
+    <ClInclude Include="src\win\interop.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\win\SQLite.Interop.rc" />
