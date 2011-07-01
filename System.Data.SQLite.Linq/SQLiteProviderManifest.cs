@@ -12,12 +12,7 @@ namespace System.Data.SQLite
   using System.Reflection;
   using System.IO;
   using System.Xml;
-  using System.Collections.Generic;
-  using System.Collections.ObjectModel;
-  using System.Data.EntityModel.SchemaObjectModel;
-  using System.Data.EntityModel;
   using System.Data.Common;
-  using System.Data.Entity;
   using System.Data.Metadata.Edm;
 
   /// <summary>

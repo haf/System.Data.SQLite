@@ -8,7 +8,7 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SQLite.Designer")]
-[assembly: AssemblyDescription("ADO.NET 4.0 Data Designer for SQLite")]
+[assembly: AssemblyDescription("ADO.NET Data Designer for SQLite")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("http://system.data.sqlite.org")]
 [assembly: AssemblyProduct("SQLite Designer")]

@@ -12,13 +12,9 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
-  using System.Diagnostics;
-  using System.IO;
-  using System.Text;
   using System.Data.Metadata.Edm;
-  using System.Data.Common.CommandTrees;
 
-  /// <summary>
+    /// <summary>
   /// <see cref="SymbolTable"/>
   /// This class represents an extent/nested select statement,
   /// or a column.

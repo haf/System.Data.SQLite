@@ -13,7 +13,6 @@ namespace System.Data.SQLite
   using System.Data.Metadata.Edm;
   using System.Diagnostics;
   using System.Collections.Generic;
-  using System.Data.SQLite;
   using System.Text;
   using System.Globalization;
 

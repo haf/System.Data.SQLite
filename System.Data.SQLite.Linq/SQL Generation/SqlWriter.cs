@@ -10,15 +10,10 @@
 
 namespace System.Data.SQLite
 {
-  using System;
-  using System.Collections.Generic;
-  using System.Diagnostics;
   using System.IO;
   using System.Text;
-  using System.Data.Metadata.Edm;
-  using System.Data.Common.CommandTrees;
 
-  /// <summary>
+    /// <summary>
   /// This extends StringWriter primarily to add the ability to add an indent
   /// to each line that is written out.
   /// </summary>

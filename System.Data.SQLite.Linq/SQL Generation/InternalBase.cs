@@ -5,11 +5,11 @@
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+
+#if !NET_20
 using System.Runtime;
+#endif
 
 namespace System.Data.SQLite
 {

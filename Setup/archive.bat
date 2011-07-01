@@ -66,7 +66,7 @@ REM "
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% zip.exe -r sqlite-dotnet-source-%VERSION%.zip * -x@exclude_src.txt
+%_ECHO% zip.exe -r Setup\Output\sqlite-dotnet-source-%VERSION%.zip * -x@exclude_src.txt
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive source files.

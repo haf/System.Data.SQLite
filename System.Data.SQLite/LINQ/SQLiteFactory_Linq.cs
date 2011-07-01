@@ -43,16 +43,18 @@ namespace System.Data.SQLite
     [ReflectionPermission(SecurityAction.Assert, MemberAccess = true)]
     private object GetSQLiteProviderServicesInstance()
     {
-      if (_sqliteServices == null)
-      {
-        Type type = Type.GetType("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version=1.0.73.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", false);
-        if (type != null)
+        if (_sqliteServices == null)
         {
-          FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-          _sqliteServices = field.GetValue(null);
+            Version version = this.GetType().Assembly.GetName().Version;
+            Type type = Type.GetType(String.Format("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version={0}, Culture=neutral, PublicKeyToken=db937bc2d44ff139", version), false);
+
+            if (type != null)
+            {
+                FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+                _sqliteServices = field.GetValue(null);
+            }
         }
-      }
-      return _sqliteServices;
+        return _sqliteServices;
     }
   }
 }

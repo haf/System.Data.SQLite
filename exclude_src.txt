@@ -12,6 +12,8 @@ Membership/obj/*
 obj/*
 Setup/Output/*
 SQLite.Designer/obj/*
+SQLite.Designer/Properties/*
+SQLite.Designer/VSDesign/*
 System.Data.SQLite.Linq/obj/*
 System.Data.SQLite/obj/*
 System.Data.SQLite/Properties/*

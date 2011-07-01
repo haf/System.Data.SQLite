@@ -616,7 +616,7 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:SQLite ADO.NET 4.0 Provider"
+        "ProductName" = "8:SQLite ADO.NET Provider"
         "ProductCode" = "8:{902C69AF-5B0C-4E21-89F2-064462C2BBC4}"
         "PackageCode" = "8:{73B9EABC-05DF-499D-B771-8FB6F1E5AF1B}"
         "UpgradeCode" = "8:{E779C0FF-CCE2-493A-B8C2-6DD04E26072C}"
@@ -629,7 +629,7 @@
         "Manufacturer" = "8:Phoenix Software Solutions, LLC"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://sqlite.phxsoftware.com"
-        "Title" = "8:SQLite ADO.NET 4.0 Provider"
+        "Title" = "8:SQLite ADO.NET Provider"
         "Subject" = "8:"
         "ARPCONTACT" = "8:Phoenix Software Solutions, LLC"
         "Keywords" = "8:"

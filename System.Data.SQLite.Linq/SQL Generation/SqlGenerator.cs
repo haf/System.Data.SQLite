@@ -14,7 +14,6 @@ namespace System.Data.SQLite
   using System.Linq;
   using System.Diagnostics;
   using System.Globalization;
-  using System.IO;
   using System.Text;
   using System.Data.Common;
   using System.Data.Metadata.Edm;

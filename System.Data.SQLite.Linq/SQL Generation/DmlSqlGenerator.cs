@@ -14,16 +14,13 @@ namespace System.Data.SQLite
   using System.Collections.Generic;
   using System.Diagnostics;
   using System.Globalization;
-  using System.IO;
   using System.Text;
   using System.Data;
   using System.Data.Common;
   using System.Data.Metadata.Edm;
   using System.Data.Common.CommandTrees;
-  using System.Data.Common.Utils;
-  using System.Data.Mapping.Update.Internal;
 
-  /// <summary>
+    /// <summary>
   /// Class generating SQL for a DML command tree.
   /// </summary>
   internal static class DmlSqlGenerator
