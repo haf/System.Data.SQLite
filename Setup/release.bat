@@ -18,6 +18,11 @@ IF NOT DEFINED _VECHO (SET _VECHO=REM)
 
 %_AECHO% Running %0 %*
 
+SET TOOLS=%~dp0
+SET TOOLS=%TOOLS:~0,-1%
+
+%_VECHO% Tools = '%TOOLS%'
+
 SET CONFIGURATION=%1
 
 IF DEFINED CONFIGURATION (
@@ -66,6 +71,23 @@ IF "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
 
 %_VECHO% Type = '%TYPE%'
 
+%_ECHO% CALL "%TOOLS%\set_common.bat"
+
+IF ERRORLEVEL 1 (
+  ECHO Could not set common variables.
+  GOTO errors
+)
+
+IF NOT DEFINED FRAMEWORK (
+  IF DEFINED YEAR (
+    CALL :fn_SetVariable FRAMEWORK FRAMEWORK%YEAR%
+  ) ELSE (
+    SET FRAMEWORK=netFx20
+  )
+)
+
+%_VECHO% Framework = '%FRAMEWORK%'
+
 SET ROOT=%~dp0\..
 SET ROOT=%ROOT:\\=\%
 
@@ -84,9 +106,38 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
+FOR /F "delims=" %%V IN ('find.exe "AssemblyVersion" System.Data.SQLite\AssemblyInfo.cs') DO (
+  SET VERSION=%%V
+)
+
+IF NOT DEFINED VERSION (
+  SET VERSION=1.0.0.0
+  GOTO skip_mungeVersion
+)
+
+REM
+REM NOTE: Strip off all the extra stuff from the AssemblyVersion line we found
+REM       in the AssemblyInfo.cs file that we do not need (i.e. everything
+REM       except the raw version number itself).
+REM
+SET VERSION=%VERSION:(=%
+SET VERSION=%VERSION:)=%
+SET VERSION=%VERSION:[=%
+SET VERSION=%VERSION:]=%
+SET VERSION=%VERSION: =%
+SET VERSION=%VERSION:assembly:=%
+SET VERSION=%VERSION:AssemblyVersion=%
+SET VERSION=%VERSION:"=%
+REM "
+
+:skip_mungeVersion
+
+%_VECHO% Version = '%VERSION%'
+
 CALL :fn_ResetErrorLevel
 
-%_ECHO% zip.exe -r Setup\Output\sqlite-dotnet-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip * -x@exclude_bin.txt
+%_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x@exclude_bin.txt
+%_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%" -x@exclude_bin.txt
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive binary files.
@@ -101,6 +152,17 @@ IF ERRORLEVEL 1 (
 )
 
 GOTO no_errors
+
+:fn_SetVariable
+  SETLOCAL
+  SET _ECHO_CMD=ECHO %%%2%%
+  FOR /F %%V IN ('%_ECHO_CMD%') DO (
+    SET VALUE=%%V
+  )
+  ENDLOCAL && (
+    SET %1=%VALUE%
+  )
+  GOTO :EOF
 
 :fn_ResetErrorLevel
   VERIFY > NUL

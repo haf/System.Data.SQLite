@@ -1,4 +1,5 @@
+*.db
 *.exp
 *.lib
 *.map
-Microsoft.*
+*Microsoft*
