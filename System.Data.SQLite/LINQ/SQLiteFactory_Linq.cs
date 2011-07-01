@@ -21,7 +21,14 @@ namespace System.Data.SQLite
 
     static SQLiteFactory()
     {
-      _dbProviderServicesType = Type.GetType("System.Data.Common.DbProviderServices, System.Data.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", false);
+        string version =
+#if NET_20
+            "3.5.0.0";
+#else
+            "4.0.0.0";
+#endif
+
+        _dbProviderServicesType = Type.GetType(String.Format("System.Data.Common.DbProviderServices, System.Data.Entity, Version={0}, Culture=neutral, PublicKeyToken=b77a5c561934e089", version), false);
     }
 
     /// <summary>
