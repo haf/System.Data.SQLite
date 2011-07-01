@@ -110,7 +110,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory=""
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\testce"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
@@ -208,7 +208,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory=""
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\testce"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
@@ -301,7 +301,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory=""
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\testce"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
@@ -394,7 +394,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory=""
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\testce"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
@@ -489,7 +489,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory=""
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\testce"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
@@ -584,7 +584,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory=""
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\testce"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
@@ -819,15 +819,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\win\interop.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\core\sqlite3.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\core\sqlite3ext.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\win\interop.h"
 				>
 			</File>
 		</Filter>

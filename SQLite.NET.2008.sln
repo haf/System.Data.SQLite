@@ -14,6 +14,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite.Module.2008", "System.Data.SQLite\System.Data.SQLite.Module.2008.csproj", "{AC139952-261A-4463-B6FA-AEBC25284A66}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite.Compact.2008", "System.Data.SQLite\System.Data.SQLite.Compact.2008.csproj", "{AC139951-261A-4463-B6FA-AEBC25283A66}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6} = {9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.2008", "test\test.2008.csproj", "{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}"
 EndProject
@@ -137,6 +140,8 @@ Global
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Pocket PC 2003 (ARMV4).Build.0 = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Win32.Build.0 = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -146,6 +151,8 @@ Global
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.DebugNativeOnly|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.DebugNativeOnly|Mixed Platforms.Build.0 = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.DebugNativeOnly|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.DebugNativeOnly|Pocket PC 2003 (ARMV4).Build.0 = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.DebugNativeOnly|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.DebugNativeOnly|Win32.ActiveCfg = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.DebugNativeOnly|Win32.Build.0 = Debug|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.DebugNativeOnly|x64.ActiveCfg = Debug|Any CPU
@@ -155,6 +162,8 @@ Global
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Win32.ActiveCfg = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Win32.Build.0 = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|x64.ActiveCfg = Release|Any CPU
@@ -164,6 +173,8 @@ Global
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.ReleaseNativeOnly|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.ReleaseNativeOnly|Mixed Platforms.Build.0 = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.ReleaseNativeOnly|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.ReleaseNativeOnly|Pocket PC 2003 (ARMV4).Build.0 = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.ReleaseNativeOnly|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.ReleaseNativeOnly|Win32.ActiveCfg = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.ReleaseNativeOnly|Win32.Build.0 = Release|Any CPU
 		{AC139951-261A-4463-B6FA-AEBC25283A66}.ReleaseNativeOnly|x64.ActiveCfg = Release|Any CPU
@@ -355,6 +366,8 @@ Global
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Pocket PC 2003 (ARMV4).Build.0 = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Win32.Build.0 = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Win32.Deploy.0 = Debug|Any CPU
@@ -368,6 +381,8 @@ Global
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.DebugNativeOnly|Mixed Platforms.Build.0 = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.DebugNativeOnly|Mixed Platforms.Deploy.0 = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.DebugNativeOnly|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.DebugNativeOnly|Pocket PC 2003 (ARMV4).Build.0 = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.DebugNativeOnly|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.DebugNativeOnly|Win32.ActiveCfg = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.DebugNativeOnly|Win32.Build.0 = Debug|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.DebugNativeOnly|Win32.Deploy.0 = Debug|Any CPU
@@ -381,6 +396,8 @@ Global
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Win32.ActiveCfg = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Win32.Build.0 = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Win32.Deploy.0 = Release|Any CPU
@@ -394,6 +411,8 @@ Global
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.ReleaseNativeOnly|Mixed Platforms.Build.0 = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.ReleaseNativeOnly|Mixed Platforms.Deploy.0 = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.ReleaseNativeOnly|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.ReleaseNativeOnly|Pocket PC 2003 (ARMV4).Build.0 = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.ReleaseNativeOnly|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.ReleaseNativeOnly|Win32.ActiveCfg = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.ReleaseNativeOnly|Win32.Build.0 = Release|Any CPU
 		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.ReleaseNativeOnly|Win32.Deploy.0 = Release|Any CPU
