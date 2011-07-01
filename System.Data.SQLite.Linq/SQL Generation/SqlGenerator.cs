@@ -435,10 +435,11 @@ namespace System.Data.SQLite
     /// <summary>
     /// General purpose static function that can be called from System.Data assembly
     /// </summary>
-    /// <param name="sqlVersion">Server version</param>
+    /// <param name="manifest"></param>
     /// <param name="tree">command tree</param>
     /// <param name="parameters">Parameters to add to the command tree corresponding
     /// to constants in the command tree. Used only in ModificationCommandTrees.</param>
+    /// <param name="commandType"></param>
     /// <returns>The string representing the SQL to be executed.</returns>
     internal static string GenerateSql(SQLiteProviderManifest manifest, DbCommandTree tree, out List<DbParameter> parameters, out CommandType commandType)
     {
@@ -2383,7 +2384,6 @@ namespace System.Data.SQLite
     /// We write out the translation of each of the columns in the record.
     /// </summary>
     /// <param name="e"></param>
-
     /// <returns>A <see cref="SqlBuilder"/></returns>
     ISqlFragment VisitNewInstanceExpression(DbNewInstanceExpression e)
     {
@@ -3236,7 +3236,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// <see cref="CreateNewSelectStatement(SqlSelectStatement oldStatement, string inputVarName, TypeUsage inputVarType, bool finalizeOldStatement, out Symbol fromSymbol) "/>
+    /// <see cref="CreateNewSelectStatement(SqlSelectStatement, string, TypeUsage, bool, out Symbol) " />
     /// </summary>
     /// <param name="oldStatement"></param>
     /// <param name="inputVarName"></param>
@@ -3600,8 +3600,8 @@ namespace System.Data.SQLite
       else
       {
         this.ParanthesizeExpressionIfNeeded(value, sqlBuilder);
-		  }
-	  }
+          }
+      }
 
     private void ParanthesizeExpressionIfNeeded(DbExpression e, SqlBuilder result)
     {

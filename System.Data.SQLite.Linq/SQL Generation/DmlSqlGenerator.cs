@@ -246,6 +246,7 @@ namespace System.Data.SQLite
       /// <param name="commandTree">Command tree generating SQL</param>
       /// <param name="preserveMemberValues">Indicates whether the translator should preserve
       /// member values while compiling t-SQL (only needed for server generation)</param>
+      /// <param name="kind"></param>
       internal ExpressionTranslator(StringBuilder commandText, DbModificationCommandTree commandTree,
           bool preserveMemberValues, string kind)
       {
