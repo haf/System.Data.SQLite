@@ -6,6 +6,7 @@
 ;
 
 #define BaseConfiguration StringChange(AppConfiguration, "NativeOnly", "")
+#define GacProcessor StringChange(AppProcessor, "x64", "amd64")
 
 #if Pos("NativeOnly", AppConfiguration) == 0
 #define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + AppPlatform + "\" + AppConfiguration + "\System.Data.SQLite.dll", PRODUCT_VERSION)
@@ -91,7 +92,7 @@ Components: Application\Core\{#AppProcessor}; Source: ..\Externals\MSVCPP\vcredi
 Components: Application; Source: ..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
 
 #if Pos("NativeOnly", AppConfiguration) == 0
-Components: Application\Core\MSIL; Tasks: gac; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+Components: Application\Core\MSIL; Tasks: gac; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture={#GacProcessor}"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
 Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #else
@@ -100,7 +101,7 @@ Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\{#Year
 #endif
 
 #if Pos("NativeOnly", AppConfiguration) == 0
-Components: Application\LINQ; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+Components: Application\LINQ; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
 #endif
 
 Components: Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
