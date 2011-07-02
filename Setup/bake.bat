@@ -54,7 +54,7 @@ GOTO no_errors
 :fn_SetVariable
   SETLOCAL
   SET _ECHO_CMD=ECHO %%%2%%
-  FOR /F %%V IN ('%_ECHO_CMD%') DO (
+  FOR /F "delims=" %%V IN ('%_ECHO_CMD%') DO (
     SET VALUE=%%V
   )
   ENDLOCAL && (

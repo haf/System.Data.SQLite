@@ -1,9 +1,9 @@
 @ECHO OFF
 
 ::
-:: build_all.bat --
+:: release_all.bat --
 ::
-:: Multi-MSBuild Wrapper Tool
+:: Multi-Binary Release Tool
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!
@@ -58,17 +58,10 @@ IF NOT DEFINED YEARS (
 FOR %%C IN (%CONFIGURATIONS%) DO (
   FOR %%P IN (%PLATFORMS%) DO (
     FOR %%Y IN (%YEARS%) DO (
-      %_ECHO% CALL "%TOOLS%\set_%%Y.bat"
+      %_ECHO% CALL "%TOOLS%\release.bat" %%C %%P %%Y
 
       IF ERRORLEVEL 1 (
-        ECHO Could not set variables for %%Y.
-        GOTO errors
-      )
-
-      %_ECHO% CALL "%TOOLS%\build.bat" %%C %%P
-
-      IF ERRORLEVEL 1 (
-        ECHO Could not build binaries for %%C/%%P/%%Y.
+        ECHO Could not build release archive for %%C/%%P/%%Y.
         GOTO errors
       )
     )

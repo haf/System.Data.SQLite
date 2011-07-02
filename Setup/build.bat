@@ -26,8 +26,7 @@ SET ROOT=%ROOT:\\=\%
 SET CONFIGURATION=%1
 
 IF DEFINED CONFIGURATION (
-  SET CONFIGURATION=%CONFIGURATION:"=%
-  REM "
+  CALL :fn_UnquoteVariable CONFIGURATION
 ) ELSE (
   %_AECHO% No configuration specified, using default...
   SET CONFIGURATION=Release
@@ -38,8 +37,7 @@ IF DEFINED CONFIGURATION (
 SET PLATFORM=%2
 
 IF DEFINED PLATFORM (
-  SET PLATFORM=%PLATFORM:"=%
-  REM "
+  CALL :fn_UnquoteVariable PLATFORM
 ) ELSE (
   %_AECHO% No platform specified, using default...
   SET PLATFORM=Win32
@@ -196,6 +194,18 @@ IF ERRORLEVEL 1 (
 )
 
 GOTO no_errors
+
+:fn_UnquoteVariable
+  SETLOCAL
+  IF NOT DEFINED %1 GOTO :EOF
+  SET _ECHO_CMD=ECHO %%%1%%
+  FOR /F "delims=" %%V IN ('%_ECHO_CMD%') DO (
+    SET VALUE=%%V
+  )
+  SET VALUE=%VALUE:"=%
+  REM "
+  ENDLOCAL && SET %1=%VALUE%
+  GOTO :EOF
 
 :fn_UnsetVariable
   IF NOT "%1" == "" (
