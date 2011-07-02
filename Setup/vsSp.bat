@@ -86,11 +86,11 @@ GOTO no_errors
   GOTO end_of_file
 
 :no_errors
-  CALL :fn_ResetErrorLevel
   ENDLOCAL && (
     SET VS2008SP=%VS2008SP%
     SET VS2010SP=%VS2010SP%
   )
+  CALL :fn_ResetErrorLevel
   GOTO end_of_file
 
 :end_of_file
