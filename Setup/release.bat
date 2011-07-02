@@ -63,7 +63,7 @@ SET BASE_CONFIGURATION=%CONFIGURATION:NativeOnly=%
 
 %_VECHO% BaseConfiguration = '%BASE_CONFIGURATION%'
 
-IF "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
+IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
   SET TYPE=binary-bundle
 ) ELSE (
   SET TYPE=binary
@@ -136,8 +136,12 @@ REM "
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x@exclude_bin.txt
-%_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%" -x@exclude_bin.txt
+%_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
+
+IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
+  %_ECHO% zip -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
+  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%" -x @exclude_bin.txt
+)
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive binary files.
