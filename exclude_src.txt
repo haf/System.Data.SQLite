@@ -9,6 +9,8 @@ _FOSSIL_
 bin/*
 Externals/*
 Membership/obj/*
+Membership/Profile/*
+Membership/SiteMap/*
 obj/*
 Setup/Output/*
 SQLite.Designer/obj/*
