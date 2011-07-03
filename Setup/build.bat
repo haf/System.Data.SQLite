@@ -3,7 +3,7 @@
 ::
 :: build.bat --
 ::
-:: MSBuild Wrapper Tool
+:: Wrapper Tool for MSBuild
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!

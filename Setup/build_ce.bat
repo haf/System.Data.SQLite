@@ -1,9 +1,9 @@
 @ECHO OFF
 
 ::
-:: release_ce.bat --
+:: build_ce.bat --
 ::
-:: WinCE Binary Release Tool
+:: WinCE Wrapper Tool for MSBuild
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!
@@ -29,12 +29,11 @@ SET PLATFORMS="Pocket PC 2003 (ARMV4)"
 SET PROCESSORS=arm
 SET YEARS=2008
 SET BASE_PLATFORM=PocketPC
-SET TYPE=binary
 
-%_ECHO% CALL "%TOOLS%\release_all.bat"
+%_ECHO% CALL "%TOOLS%\build_all.bat"
 
 IF ERRORLEVEL 1 (
-  ECHO Failed to build PocketPC release files.
+  ECHO Failed to build PocketPC binaries.
   GOTO errors
 )
 
@@ -56,14 +55,14 @@ IF ERRORLEVEL 1 (
   CALL :fn_SetErrorLevel
   ENDLOCAL
   ECHO.
-  ECHO Release failure, errors were encountered.
+  ECHO Build failure, errors were encountered.
   GOTO end_of_file
 
 :no_errors
   CALL :fn_ResetErrorLevel
   ENDLOCAL
   ECHO.
-  ECHO Release success, no errors were encountered.
+  ECHO Build success, no errors were encountered.
   GOTO end_of_file
 
 :end_of_file

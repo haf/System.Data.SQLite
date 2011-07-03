@@ -63,10 +63,18 @@ SET BASE_CONFIGURATION=%BASE_CONFIGURATION:NativeOnly=%
 
 %_VECHO% BaseConfiguration = '%BASE_CONFIGURATION%'
 
-IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
-  SET TYPE=binary-bundle
-) ELSE (
-  SET TYPE=binary
+IF NOT DEFINED BASE_PLATFORM (
+  CALL :fn_SetVariable BASE_PLATFORM PLATFORM
+)
+
+%_VECHO% BasePlatform = '%BASE_PLATFORM%'
+
+IF NOT DEFINED TYPE (
+  IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
+    SET TYPE=binary-bundle
+  ) ELSE (
+    SET TYPE=binary
+  )
 )
 
 %_VECHO% Type = '%TYPE%'
@@ -137,17 +145,17 @@ REM "
 CALL :fn_ResetErrorLevel
 
 IF DEFINED CONFIGURATIONSUFFIX (
-  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
+  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
 ) ELSE (
-  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
+  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
 )
 
 IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
   IF NOT DEFINED CONFIGURATIONSUFFIX (
-    %_ECHO% zip -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
+    %_ECHO% zip -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
   )
 
-  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%" -x @exclude_bin.txt
+  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%" -x @exclude_bin.txt
 )
 
 IF ERRORLEVEL 1 (
