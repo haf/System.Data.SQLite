@@ -154,9 +154,9 @@ IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
   IF NOT DEFINED CONFIGURATIONSUFFIX (
     %_ECHO% zip -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
   )
-
-  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%" -x @exclude_bin.txt
 )
+
+%_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%" -x @exclude_bin.txt
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive binary files.
