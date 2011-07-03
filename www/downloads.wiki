@@ -14,14 +14,14 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx-source-1.0.74.0.zip">sqlite-netFx-source-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (2.45 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
       This ZIP archive contains all current source code for System.Data.SQLite
       1.0.74.0 (3.7.7.1) combined into a single archive file.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 22b9421fe6ddfd4d2c45dc80afdec86b3eea3beb)
     </td>
   </tr>
 
@@ -36,7 +36,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-setup-x86-2008-1.0.74.0.exe">sqlite-netFx35-setup-x86-2008-1.0.74.0.exe</a>
       <br />
-      (0.0 MiB)
+      (5.82 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -45,7 +45,7 @@
       (3.7.7.1) package.  The Visual C++ 2008 SP1 runtime for x86 is included.
       The .NET Framework 3.5 SP1 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: f077f17a52de05fd9aa3632e66a36388329c9318)
     </td>
   </tr>
 
@@ -54,7 +54,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-setup-bundle-x86-2008-1.0.74.0.exe">sqlite-netFx35-setup-bundle-x86-2008-1.0.74.0.exe</a>
       <br />
-      (0.0 MiB)
+      (5.83 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -63,7 +63,7 @@
       the System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2008
       SP1 runtime for x86 is included.  The .NET Framework 3.5 SP1 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: d20aaeeba73ddf8796449aefd06c887970fd94c4)
     </td>
   </tr>
 
@@ -72,7 +72,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-setup-x64-2008-1.0.74.0.exe">sqlite-netFx35-setup-x64-2008-1.0.74.0.exe</a>
       <br />
-      (0.0 MiB)
+      (6.56 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -81,7 +81,7 @@
       (3.7.7.1) package.  The Visual C++ 2008 SP1 runtime for x64 is included.
       The .NET Framework 3.5 SP1 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 1ad120e0b3e838253f5f0c181d63f812ee6dcccf)
     </td>
   </tr>
 
@@ -90,7 +90,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-setup-bundle-x64-2008-1.0.74.0.exe">sqlite-netFx35-setup-bundle-x64-2008-1.0.74.0.exe</a>
       <br />
-      (0.0 MiB)
+      (6.56 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -99,7 +99,7 @@
       the System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2008
       SP1 runtime for x64 is included.  The .NET Framework 3.5 SP1 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 567ff1db02755f3f7770acc0805a54b8846103c8)
     </td>
   </tr>
 
@@ -108,7 +108,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx40-setup-x86-2010-1.0.74.0.exe">sqlite-netFx40-setup-x86-2010-1.0.74.0.exe</a>
       <br />
-      (0.0 MiB)
+      (10.19 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -117,7 +117,7 @@
       (3.7.7.1) package.  The Visual C++ 2010 SP1 runtime for x86 is included.
       The .NET Framework 4.0 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 96e682d8f5be9c8231b0c942637858d58fbb48c8)
     </td>
   </tr>
 
@@ -126,7 +126,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx40-setup-bundle-x86-2010-1.0.74.0.exe">sqlite-netFx40-setup-bundle-x86-2010-1.0.74.0.exe</a>
       <br />
-      (0.0 MiB)
+      (10.19 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -135,7 +135,7 @@
       the System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010
       SP1 runtime for x86 is included.  The .NET Framework 4.0 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 7c7834ff8eb7b48c2f8fdccf2cc4cb7f9c80db74)
     </td>
   </tr>
 
@@ -144,7 +144,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx40-setup-x64-2010-1.0.74.0.exe">sqlite-netFx40-setup-x64-2010-1.0.74.0.exe</a>
       <br />
-      (0.0 MiB)
+      (11.39 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -153,7 +153,7 @@
       (3.7.7.1) package.  The Visual C++ 2010 SP1 runtime for x64 is included.
       The .NET Framework 4.0 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 1046a59fc15e0b983b17b02588d4469ba1c4022a)
     </td>
   </tr>
 
@@ -162,7 +162,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx40-setup-bundle-x64-2010-1.0.74.0.exe">sqlite-netFx40-setup-bundle-x64-2010-1.0.74.0.exe</a>
       <br />
-      (0.0 MiB)
+      (11.40 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -171,7 +171,7 @@
       the System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010
       SP1 runtime for x64 is included.  The .NET Framework 4.0 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: d9005699989fc01081ec54410b8489a6dee73ab7)
     </td>
   </tr>
 
@@ -186,7 +186,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-binary-Win32-2008-1.0.74.0.zip">sqlite-netFx35-binary-Win32-2008-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (0.89 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -194,7 +194,7 @@
       System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2008 SP1
       runtime for x86 and the .NET Framework 3.5 SP1 are required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: b3e83e57606549b616220fb7029e366c02403f4c)
     </td>
   </tr>
 
@@ -203,7 +203,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-binary-bundle-Win32-2008-1.0.74.0.zip">sqlite-netFx35-binary-bundle-Win32-2008-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (1.33 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -212,7 +212,7 @@
       package.  The Visual C++ 2008 SP1 runtime for x86 and the .NET Framework
       3.5 SP1 are required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 35ff1c2138d71602d10fd288636ab3e6fd32c931)
     </td>
   </tr>
 
@@ -221,7 +221,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-binary-x64-2008-1.0.74.0.zip">sqlite-netFx35-binary-x64-2008-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (0.89 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -229,7 +229,7 @@
       System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2008 SP1
       runtime for x64 and the .NET Framework 3.5 SP1 are required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: b3e83e57606549b616220fb7029e366c02403f4c)
     </td>
   </tr>
 
@@ -238,7 +238,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-binary-bundle-x64-2008-1.0.74.0.zip">sqlite-netFx35-binary-bundle-x64-2008-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (1.40 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -247,7 +247,7 @@
       package.  The Visual C++ 2008 SP1 runtime for x64 and the .NET Framework
       3.5 SP1 are required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 7dcc7fb52bba647c14bba5934059d039cc73373c)
     </td>
   </tr>
 
@@ -256,7 +256,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx40-binary-Win32-2010-1.0.74.0.zip">sqlite-netFx40-binary-Win32-2010-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (0.91 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -264,7 +264,7 @@
       System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010 SP1
       runtime for x86 and the .NET Framework 4.0 are required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 590b24b6b67f92363a48d44057365bc31f8767d1)
     </td>
   </tr>
 
@@ -273,7 +273,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx40-binary-bundle-Win32-2010-1.0.74.0.zip">sqlite-netFx40-binary-bundle-Win32-2010-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (1.38 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -282,7 +282,7 @@
       package.  The Visual C++ 2010 SP1 runtime for x86 and the .NET Framework
       3.5 SP1 are required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 9496739eeca0910395fae41b54eba70dcabdaa77)
     </td>
   </tr>
 
@@ -291,7 +291,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx40-binary-x64-2010-1.0.74.0.zip">sqlite-netFx40-binary-x64-2010-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (0.91 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -299,7 +299,7 @@
       System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010 SP1
       runtime for x64 and the .NET Framework 4.0 SP1 are required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 590b24b6b67f92363a48d44057365bc31f8767d1)
     </td>
   </tr>
 
@@ -308,7 +308,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx40-binary-bundle-x64-2010-1.0.74.0.zip">sqlite-netFx40-binary-bundle-x64-2010-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (1.40 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -317,7 +317,7 @@
       package.  The Visual C++ 2010 SP1 runtime for x64 and the .NET Framework
       3.5 SP1 are required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 03374aa96654d7e9a57a63d51b2d106b25542b1b)
     </td>
   </tr>
 
@@ -326,7 +326,7 @@
     <td valign="top" align="right">
       <a href="/sqlite-netFx35-binary-PocketPC-2008-1.0.74.0.zip">sqlite-netFx35-binary-PocketPC-2008-1.0.74.0.zip</a>
       <br />
-      (0.0 MiB)
+      (0.76 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -334,7 +334,7 @@
       the System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The .NET Compact
       Framework 3.5 is required.
       <br />
-      (sha1: 0000000000000000000000000000000000000000)
+      (sha1: 0bf68d78083dfbe4fa84eab3eb59c051bfdd53f6)
     </td>
   </tr>
 
