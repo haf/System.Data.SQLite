@@ -8,7 +8,6 @@
 namespace System.Data.SQLite
 {
   using System;
-  using System.Data.Common;
   using System.Reflection;
   using System.Security.Permissions;
 
@@ -22,7 +21,14 @@ namespace System.Data.SQLite
 
     static SQLiteFactory()
     {
-      _dbProviderServicesType = Type.GetType("System.Data.Common.DbProviderServices, System.Data.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", false);
+        string version =
+#if NET_20
+            "3.5.0.0";
+#else
+            "4.0.0.0";
+#endif
+
+        _dbProviderServicesType = Type.GetType(String.Format("System.Data.Common.DbProviderServices, System.Data.Entity, Version={0}, Culture=neutral, PublicKeyToken=b77a5c561934e089", version), false);
     }
 
     /// <summary>
@@ -43,16 +49,18 @@ namespace System.Data.SQLite
     [ReflectionPermission(SecurityAction.Assert, MemberAccess = true)]
     private object GetSQLiteProviderServicesInstance()
     {
-      if (_sqliteServices == null)
-      {
-        Type type = Type.GetType("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version=1.0.73.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139", false);
-        if (type != null)
+        if (_sqliteServices == null)
         {
-          FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-          _sqliteServices = field.GetValue(null);
+            Version version = this.GetType().Assembly.GetName().Version;
+            Type type = Type.GetType(String.Format("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version={0}, Culture=neutral, PublicKeyToken=db937bc2d44ff139", version), false);
+
+            if (type != null)
+            {
+                FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+                _sqliteServices = field.GetValue(null);
+            }
         }
-      }
-      return _sqliteServices;
+        return _sqliteServices;
     }
   }
 }

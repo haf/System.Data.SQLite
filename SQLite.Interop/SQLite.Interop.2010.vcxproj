@@ -109,8 +109,8 @@
   <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir>$(ProjectDir)..\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>..\obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>..\obj\$(ConfigurationYear)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <LinkKeyFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(INTEROP_KEY_FILE)</LinkKeyFile>
     <LinkKeyFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(INTEROP_KEY_FILE)</LinkKeyFile>
@@ -138,7 +138,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
@@ -179,7 +179,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
@@ -291,7 +291,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -334,7 +334,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ProjectDir)..\bin\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_MANIFEST_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -453,6 +453,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\sqlite3.h" />
     <ClInclude Include="src\core\sqlite3ext.h" />
+    <ClInclude Include="src\win\interop.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\win\SQLite.Interop.rc" />

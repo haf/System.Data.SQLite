@@ -9,12 +9,9 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
-  using System.Data;
   using System.Data.Common.CommandTrees;
-  using System.Data.Entity;
-  using System.Runtime.CompilerServices;
 
-  internal class SqlChecker : DbExpressionVisitor<bool>
+    internal class SqlChecker : DbExpressionVisitor<bool>
   {
     private static Type sql8rewriter;
 

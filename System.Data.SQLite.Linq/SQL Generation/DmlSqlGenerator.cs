@@ -14,16 +14,13 @@ namespace System.Data.SQLite
   using System.Collections.Generic;
   using System.Diagnostics;
   using System.Globalization;
-  using System.IO;
   using System.Text;
   using System.Data;
   using System.Data.Common;
   using System.Data.Metadata.Edm;
   using System.Data.Common.CommandTrees;
-  using System.Data.Common.Utils;
-  using System.Data.Mapping.Update.Internal;
 
-  /// <summary>
+    /// <summary>
   /// Class generating SQL for a DML command tree.
   /// </summary>
   internal static class DmlSqlGenerator
@@ -246,6 +243,7 @@ namespace System.Data.SQLite
       /// <param name="commandTree">Command tree generating SQL</param>
       /// <param name="preserveMemberValues">Indicates whether the translator should preserve
       /// member values while compiling t-SQL (only needed for server generation)</param>
+      /// <param name="kind"></param>
       internal ExpressionTranslator(StringBuilder commandText, DbModificationCommandTree commandTree,
           bool preserveMemberValues, string kind)
       {

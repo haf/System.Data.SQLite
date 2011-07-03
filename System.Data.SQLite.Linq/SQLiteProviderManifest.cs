@@ -12,12 +12,7 @@ namespace System.Data.SQLite
   using System.Reflection;
   using System.IO;
   using System.Xml;
-  using System.Collections.Generic;
-  using System.Collections.ObjectModel;
-  using System.Data.EntityModel.SchemaObjectModel;
-  using System.Data.EntityModel;
   using System.Data.Common;
-  using System.Data.Entity;
   using System.Data.Metadata.Edm;
 
   /// <summary>
@@ -188,7 +183,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// This method takes a type and a set of facets and returns the best mapped equivalent type 
     /// </summary>
-    /// <param name="storeType">A TypeUsage encapsulating an EDM type and a set of facets</param>
+    /// <param name="edmType">A TypeUsage encapsulating an EDM type and a set of facets</param>
     /// <returns>A TypeUsage encapsulating a store type and a set of facets</returns>
     public override TypeUsage GetStoreType(TypeUsage edmType)
     {

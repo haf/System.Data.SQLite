@@ -8,8 +8,6 @@
 namespace System.Data.SQLite
 {
   using System;
-  using System.Collections.Generic;
-  using System.Text;
   using System.Data.Common;
 
 #if !PLATFORM_COMPACTFRAMEWORK

@@ -2,11 +2,10 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Security;
 using System.Resources;
 
 #if !PLATFORM_COMPACTFRAMEWORK
+using System.Security;
 using System.Runtime.ConstrainedExecution;
 #endif
 
@@ -55,7 +54,7 @@ using System.Runtime.ConstrainedExecution;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.73.0")]
+[assembly: AssemblyVersion("1.0.74.0")]
 #if !PLATFORM_COMPACTFRAMEWORK
-[assembly: AssemblyFileVersion("1.0.73.0")]
+[assembly: AssemblyFileVersion("1.0.74.0")]
 #endif

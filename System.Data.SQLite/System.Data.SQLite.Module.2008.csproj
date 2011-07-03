@@ -22,6 +22,7 @@
     <SignAssembly>false</SignAssembly>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <NetFx20>true</NetFx20>
+    <ConfigurationYear>2008</ConfigurationYear>
     <ConfigurationSuffix>Module</ConfigurationSuffix>
     <UseInteropDll>false</UseInteropDll>
     <UseSqliteStandard>false</UseSqliteStandard>

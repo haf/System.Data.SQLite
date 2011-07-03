@@ -29,8 +29,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ProjectDir)..\bin\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
 			CharacterSet="1"
@@ -77,7 +77,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="$(INTEROP_ASSEMBLY_RESOURCES)"
-				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
+				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationYear)\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
 				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
@@ -125,8 +125,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(ProjectDir)..\bin\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
 			CharacterSet="1"
@@ -174,7 +174,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="$(INTEROP_ASSEMBLY_RESOURCES)"
-				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
+				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationYear)\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
 				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
@@ -222,8 +222,8 @@
 		</Configuration>
 		<Configuration
 			Name="DebugNativeOnly|Win32"
-			OutputDirectory="$(ProjectDir)..\bin\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
 			CharacterSet="1"
@@ -307,13 +307,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="IF /I &quot;%PROCESSOR_ARCHITECTURE%&quot; == &quot;x86&quot; XCOPY &quot;$(TargetPath)&quot; &quot;$(OutDir)..\..\Debug\bin\&quot; /D /E /V /I /F /H /Y"
+				CommandLine="IF /I &quot;%PROCESSOR_ARCHITECTURE%&quot; == &quot;x86&quot; XCOPY &quot;$(TargetPath)&quot; &quot;$(OutDir)..\..\..\Debug\bin\&quot; /D /E /V /I /F /H /Y"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DebugNativeOnly|x64"
-			OutputDirectory="$(ProjectDir)..\bin\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
 			CharacterSet="1"
@@ -398,13 +398,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="IF /I &quot;%PROCESSOR_ARCHITECTURE%&quot; == &quot;AMD64&quot; XCOPY &quot;$(TargetPath)&quot; &quot;$(OutDir)..\..\Debug\bin\&quot; /D /E /V /I /F /H /Y"
+				CommandLine="IF /I &quot;%PROCESSOR_ARCHITECTURE%&quot; == &quot;AMD64&quot; XCOPY &quot;$(TargetPath)&quot; &quot;$(OutDir)..\..\..\Debug\bin\&quot; /D /E /V /I /F /H /Y"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)..\bin\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
 			CharacterSet="1"
@@ -453,7 +453,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="$(INTEROP_ASSEMBLY_RESOURCES)"
-				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
+				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationYear)\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
 				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
@@ -501,8 +501,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(ProjectDir)..\bin\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
 			CharacterSet="1"
@@ -552,7 +552,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="$(INTEROP_ASSEMBLY_RESOURCES)"
-				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
+				AdditionalDependencies="$(ProjectDir)..\bin\$(ConfigurationYear)\$(ConfigurationName)Module\bin\System.Data.SQLite.netmodule"
 				OutputFile="$(OutDir)\$(INTEROP_MIXED_NAME).dll"
 				Version="$(INTEROP_MANIFEST_VERSION)"
 				LinkIncremental="1"
@@ -600,8 +600,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNativeOnly|Win32"
-			OutputDirectory="$(ProjectDir)..\bin\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
 			CharacterSet="1"
@@ -687,13 +687,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="IF /I &quot;%PROCESSOR_ARCHITECTURE%&quot; == &quot;x86&quot; XCOPY &quot;$(TargetPath)&quot; &quot;$(OutDir)..\..\Release\bin\&quot; /D /E /V /I /F /H /Y"
+				CommandLine="IF /I &quot;%PROCESSOR_ARCHITECTURE%&quot; == &quot;x86&quot; XCOPY &quot;$(TargetPath)&quot; &quot;$(OutDir)..\..\..\Release\bin\&quot; /D /E /V /I /F /H /Y"
 			/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseNativeOnly|x64"
-			OutputDirectory="$(ProjectDir)..\bin\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
 			CharacterSet="1"
@@ -780,7 +780,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="IF /I &quot;%PROCESSOR_ARCHITECTURE%&quot; == &quot;AMD64&quot; XCOPY &quot;$(TargetPath)&quot; &quot;$(OutDir)..\..\Release\bin\&quot; /D /E /V /I /F /H /Y"
+				CommandLine="IF /I &quot;%PROCESSOR_ARCHITECTURE%&quot; == &quot;AMD64&quot; XCOPY &quot;$(TargetPath)&quot; &quot;$(OutDir)..\..\..\Release\bin\&quot; /D /E /V /I /F /H /Y"
 			/>
 		</Configuration>
 	</Configurations>
@@ -1080,6 +1080,10 @@
 			</File>
 			<File
 				RelativePath=".\src\core\sqlite3ext.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\win\interop.h"
 				>
 			</File>
 		</Filter>

@@ -1,0 +1,48 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=SQLite.NET.extra.chm
+Contents file=SQLite.NET.hhc
+Default topic=Extra\welcome.html
+Display compile progress=Yes
+Error log file=SQLite.NET.log
+Full-text search=Yes
+Language=0x409 English (United States)
+Title=SQLite.NET Help
+
+[FILES]
+Extra\ndoc.css
+Extra\dbfactorysupport.html
+Extra\designer.html
+Extra\lang_altertable.html
+Extra\lang_analyze.html
+Extra\lang_attach.html
+Extra\lang_comment.html
+Extra\lang_conflict.html
+Extra\lang_createindex.html
+Extra\lang_createtable.html
+Extra\lang_createtrigger.html
+Extra\lang_createview.html
+Extra\lang_createvtab.html
+Extra\lang_datetime.html
+Extra\lang_delete.html
+Extra\lang_detach.html
+Extra\lang_dropindex.html
+Extra\lang_droptable.html
+Extra\lang_droptrigger.html
+Extra\lang_dropview.html
+Extra\lang_explain.html
+Extra\lang_expr.html
+Extra\lang_insert.html
+Extra\lang_reindex.html
+Extra\lang_replace.html
+Extra\lang_select.html
+Extra\lang_transaction.html
+Extra\lang_types.html
+Extra\lang_update.html
+Extra\lang_vacuum.html
+Extra\limitations.html
+Extra\optimizing.html
+Extra\pragma.html
+Extra\syntax.html
+Extra\version.html
+Extra\welcome.html

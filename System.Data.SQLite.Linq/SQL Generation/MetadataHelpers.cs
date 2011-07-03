@@ -12,7 +12,6 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Data;
-  using System.Data.Common;
   using System.Collections.Generic;
   using System.Data.Metadata.Edm;
   using System.Diagnostics;
@@ -286,15 +285,7 @@ namespace System.Data.SQLite
     /// <typeparam name="T"></typeparam>
     /// <param name="type"></param>
     /// <param name="facetName"></param>
-    /// <returns></returns>
-    /// <summary>
-    /// Get the value specified on the given type usage for the given facet name.
-    /// If the faces does not have a value specifid or that value is null returns
-    /// the default value for that facet.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="type"></param>
-    /// <param name="facetName"></param>
+    /// <param name="defaultValue"></param>
     /// <returns></returns>
     internal static T GetFacetValueOrDefault<T>(TypeUsage type, string facetName, T defaultValue)
     {

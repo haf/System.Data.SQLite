@@ -9,8 +9,6 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Runtime.InteropServices;
-  using System.Collections.Generic;
-  using System.Globalization;
 
 #if !PLATFORM_COMPACTFRAMEWORK
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

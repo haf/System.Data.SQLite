@@ -1,33 +1,25 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <project SchemaVersion="2.0">
     <assemblies>
-        <assembly location="..\bin\System.Data.SQLite.DLL" documentation="..\bin\System.Data.SQLite.xml" />
+        <assembly location="..\bin\2008\Release\bin\System.Data.SQLite.dll" documentation="..\bin\2008\Release\bin\System.Data.SQLite.xml" />
     </assemblies>
     <documenters>
-        <documenter name="MSDN-Help2">
-            <property name="PlugInNamespace" value="ms.vscc" />
-            <property name="OutputDirectory" value=".\doc\" />
-            <property name="HtmlHelpName" value="Documentation" />
-            <property name="Title" value="An NDoc documented library" />
-        </documenter>
-        <documenter name="MSDN-CHM">
+        <documenter name="MSDN">
             <property name="IncludeFavorites" value="True" />
             <property name="SdkLinksOnWeb" value="True" />
-            <property name="OutputDirectory" value=".\" />
+            <property name="OutputDirectory" value=".\Output\" />
             <property name="HtmlHelpName" value="SQLite.NET" />
-            <property name="Title" value="SQLite ADO.NET 2.0 Provider" />
+            <property name="Title" value="SQLite ADO.NET Provider" />
             <property name="Version" value="" />
+            <property name="OutputTarget" value="HtmlHelp" />
+            <property name="BinaryTOC" value="False" />
             <property name="AdditionalContentResourceDirectory" value=".\Extra\" />
             <property name="AssemblyVersionInfo" value="AssemblyVersion" />
-            <property name="FeedbackEmailAddress" value="robert@blackcastlesoft.com" />
+            <property name="FeedbackEmailAddress" value="sqlite-users@sqlite.org" />
+            <property name="SdkDocVersion" value="SDK_v3_5" />
+            <property name="SdkDocVersionString" value="VS.90" />
             <property name="DocumentAttributes" value="False" />
             <property name="IncludeDefaultThreadSafety" value="False" />
-        </documenter>
-        <documenter name="XML">
-            <property name="OutputFile" value=".\doc\doc.xml" />
-        </documenter>
-        <documenter name="Intellisense">
-            <property name="OutputDirectory" value=".\intellisense\" />
         </documenter>
     </documenters>
 </project>

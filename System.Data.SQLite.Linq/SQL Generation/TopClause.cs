@@ -11,15 +11,9 @@
 namespace System.Data.SQLite
 {
   using System;
-  using System.Collections.Generic;
-  using System.Diagnostics;
   using System.Globalization;
-  using System.IO;
-  using System.Text;
-  using System.Data.Metadata.Edm;
-  using System.Data.Common.CommandTrees;
 
-  /// <summary>
+    /// <summary>
   /// TopClause represents the a TOP expression in a SqlSelectStatement. 
   /// It has a count property, which indicates how many TOP rows should be selected and a 
   /// boolen WithTies property.

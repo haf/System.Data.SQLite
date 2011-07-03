@@ -1,0 +1,4 @@
+*.exp
+*.lib
+*.map
+*Microsoft*

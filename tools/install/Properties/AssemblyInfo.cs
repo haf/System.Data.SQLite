@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SQLite.Designer Installer")]
-[assembly: AssemblyDescription("SQLite ADO.NET 4.0 Design-Time Installer")]
+[assembly: AssemblyDescription("SQLite ADO.NET Design-Time Installer")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("http://system.data.sqlite.org")]
 [assembly: AssemblyProduct("SQLite Installer")]

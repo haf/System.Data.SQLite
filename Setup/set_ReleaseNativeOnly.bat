@@ -7,16 +7,4 @@
 :: Released to the public domain, use at your own risk!
 ::
 
-REM
-REM NOTE: Force usage of the Visual Studio 2008 (.NET Framework 3.5) build
-REM       system.  This is very important because we want to ship binaries
-REM       that only rely upon the .NET Framework 2.0 which is very widely
-REM       deployed and because those binaries will also work with projects
-REM       using the .NET Framework 4.0.
-REM
-REM SET NETFX35ONLY=1
-SET MSBUILD_ARGS=/property:TargetFrameworkVersion=v3.5
-SET YEAR=2010
-SET YEARS=%YEAR%
-
-REM ECHO WARNING: Forcing the use of the .NET Framework 3.5...
+REM SET MSBUILD_ARGS=/property:TargetFrameworkVersion=v3.5

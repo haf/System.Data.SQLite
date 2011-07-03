@@ -74,7 +74,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "Comments", "http://sqlite.phxsoftware.com"
-            VALUE "FileDescription", "SQLite ADO.NET 4.0 Setup"
+            VALUE "FileDescription", "SQLite ADO.NET Setup"
             VALUE "FileVersion", "1.0.67.0"
             VALUE "InternalName", "setup"
             VALUE "LegalCopyright", "Released to the public domain"

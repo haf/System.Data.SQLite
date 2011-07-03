@@ -3,6 +3,25 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.74.0 - July 4, 2011</b>
+</p>
+<ul>
+    <li>Updated to SQLite 3.7.7.1 <a href="http://www.sqlite.org/src/info/af0d91adf4">[af0d91adf4]</a>.</li>
+    <li>Fix incorrect hard-coded .NET Framework version information SQLiteFactory_Linq.cs that was causing IServiceProvider.GetService to fail when running against the .NET Framework 3.5.</li>
+    <li>Fix all XML documentation warnings.</li>
+    <li>Restore support for the mixed-mode assembly (i.e. the one that can be registered in the Global Assembly Cache).</li>
+    <li>Restore support for the Compact Framework.</li>
+    <li>Remove unused &quot;using&quot; statements from the System.Data.SQLite and System.Data.SQLite.Linq projects.</li>
+    <li>Remove hard-coded System.Data.SQLite.Linq version from SQLiteFactory_Linq.cs</li>
+    <li>Modify the setup to support bundled packages (i.e. with the mixed-mode assembly) and standard packages (i.e. with the managed assembly separate from the native interop library).</li>
+    <li>Disable the ability to register with the Global Assembly Cache in the standard setup package (i.e. it is available in the bundled setup only).</li>
+    <li>Remove PATH modification from the setup.</li>
+    <li>Modify the naming scheme for the source, setup, and binary packages to allow for the necessary variants.</li>
+    <li>In the build automation, attempt to automatically detect if Visual Studio 2008 and/or 2010 are installed and support building binaries for both at once, when available.</li>
+    <li>Add release automation to build the source, setup, and binary packages in all supported build variants.</li>
+    <li>Add the testlinq project to the new build system and make it work properly with Visual Studio 2008 and 2010.</li>
+</ul>
+<p>
     <b>1.0.73.0 - June 2, 2011</b>
 </p>
 <ul>

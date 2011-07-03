@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Security;
 using System.Runtime.ConstrainedExecution;
 
@@ -10,7 +8,7 @@ using System.Runtime.ConstrainedExecution;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("System.Data.SQLite.Linq")]
-[assembly: AssemblyDescription("ADO.NET 4.0 Entity Framework support for SQLite")]
+[assembly: AssemblyDescription("ADO.NET Entity Framework support for SQLite")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("http://system.data.sqlite.org")]
 [assembly: AssemblyProduct("System.Data.SQLite")]
@@ -36,5 +34,5 @@ using System.Runtime.ConstrainedExecution;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.73.0")]
-[assembly: AssemblyFileVersion("1.0.73.0")]
+[assembly: AssemblyVersion("1.0.74.0")]
+[assembly: AssemblyFileVersion("1.0.74.0")]

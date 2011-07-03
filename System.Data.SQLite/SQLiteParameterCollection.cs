@@ -12,7 +12,11 @@ namespace System.Data.SQLite
   using System.Data.Common;
   using System.Collections.Generic;
   using System.Globalization;
+
+#if !PLATFORM_COMPACTFRAMEWORK
   using System.ComponentModel;
+#endif
+
   using System.Reflection;
 
   /// <summary>

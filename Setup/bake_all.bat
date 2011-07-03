@@ -23,12 +23,25 @@ SET TOOLS=%TOOLS:~0,-1%
 
 %_VECHO% Tools = '%TOOLS%'
 
+%_ECHO% CALL "%TOOLS%\vsSp.bat"
+
+IF ERRORLEVEL 1 (
+  ECHO Could not detect Visual Studio.
+  GOTO errors
+)
+
 %_ECHO% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not set common variables.
   GOTO errors
 )
+
+IF NOT DEFINED CONFIGURATIONS (
+  SET CONFIGURATIONS=Release
+)
+
+%_VECHO% Configurations = '%CONFIGURATIONS%'
 
 IF NOT DEFINED PROCESSORS (
   SET PROCESSORS=x86
@@ -37,25 +50,27 @@ IF NOT DEFINED PROCESSORS (
 %_VECHO% Processors = '%PROCESSORS%'
 
 IF NOT DEFINED YEARS (
-  SET YEARS=2010
+  SET YEARS=2008
 )
 
 %_VECHO% Years = '%YEARS%'
 
-FOR %%P IN (%PROCESSORS%) DO (
-  FOR %%Y IN (%YEARS%) DO (
-    %_ECHO% CALL "%TOOLS%\set_%%P_%%Y.bat"
+FOR %%C IN (%CONFIGURATIONS%) DO (
+  FOR %%P IN (%PROCESSORS%) DO (
+    FOR %%Y IN (%YEARS%) DO (
+      %_ECHO% CALL "%TOOLS%\set_%%C_%%P_%%Y.bat"
 
-    IF ERRORLEVEL 1 (
-      ECHO Could not set variables for %%P/%%Y.
-      GOTO errors
-    )
+      IF ERRORLEVEL 1 (
+        ECHO Could not set variables for %%C/%%P/%%Y.
+        GOTO errors
+      )
 
-    %_ECHO% CALL "%TOOLS%\bake.bat"
+      %_ECHO% CALL "%TOOLS%\bake.bat"
 
-    IF ERRORLEVEL 1 (
-      ECHO Could not bake setup for %%P/%%Y.
-      GOTO errors
+      IF ERRORLEVEL 1 (
+        ECHO Could not bake setup for %%C/%%P/%%Y.
+        GOTO errors
+      )
     )
   )
 )

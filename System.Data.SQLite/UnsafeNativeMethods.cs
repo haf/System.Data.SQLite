@@ -8,7 +8,11 @@
 namespace System.Data.SQLite
 {
   using System;
+
+#if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
   using System.Security;
+#endif
+
   using System.Runtime.InteropServices;
 
 #if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
@@ -23,7 +27,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     private const string SQLITE_DLL = "System.Data.SQLite.DLL";
 #else
-    internal const string SQLITE_DLL = "SQLite.Interop.066.DLL";
+    internal const string SQLITE_DLL = "SQLite.Interop.074.DLL";
 #endif // PLATFORM_COMPACTFRAMEWORK
 
 #else

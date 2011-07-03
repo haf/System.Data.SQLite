@@ -1,0 +1,60 @@
+###############################################################################
+#
+# all.eagle --
+#
+# This file contains a top-level script to run all of the tests.
+# Execute it by invoking "source all.eagle".
+#
+# Extensible Adaptable Generalized Logic Engine (Eagle)
+# Test Suite File
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+set no(prologue.eagle) true
+set no(epilogue.eagle) true
+
+#
+# NOTE: Run the local test prologue, if any.
+#
+if {[file exists [file join $path prologue.eagle]]} then {
+  source [file join $path prologue.eagle]
+}
+
+#
+# NOTE: Run all the unit tests.
+#
+set test_time [time {
+  runAllTests $test_channel $path \
+    [getTestFiles [list $path] $test_flags(-file) $test_flags(-notFile)] \
+    [list [file tail [info script]] \
+    *.tcl pkgIndex.eagle constraints.eagle epilogue.eagle prologue.eagle]
+}]
+
+#
+# NOTE: Run the local test epilogue, if any.
+#
+if {[file exists [file join $path epilogue.eagle]]} then {
+  source [file join $path epilogue.eagle]
+}
+
+tputs $test_channel [appendArgs "---- all tests completed in " $test_time \n]
+unset test_time
+
+unset no(epilogue.eagle)
+unset no(prologue.eagle)
+
+if {[array size no] == 0} then {unset no}
+
+###############################################################################
+
+runTestEpilogue

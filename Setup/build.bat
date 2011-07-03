@@ -3,7 +3,7 @@
 ::
 :: build.bat --
 ::
-:: MSBuild Wrapper Tool
+:: Wrapper Tool for MSBuild
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!
@@ -26,11 +26,10 @@ SET ROOT=%ROOT:\\=\%
 SET CONFIGURATION=%1
 
 IF DEFINED CONFIGURATION (
-  SET CONFIGURATION=%CONFIGURATION:"=%
-  REM "
+  CALL :fn_UnquoteVariable CONFIGURATION
 ) ELSE (
   %_AECHO% No configuration specified, using default...
-  SET CONFIGURATION=ReleaseNativeOnly
+  SET CONFIGURATION=Release
 )
 
 %_VECHO% Configuration = '%CONFIGURATION%'
@@ -38,8 +37,7 @@ IF DEFINED CONFIGURATION (
 SET PLATFORM=%2
 
 IF DEFINED PLATFORM (
-  SET PLATFORM=%PLATFORM:"=%
-  REM "
+  CALL :fn_UnquoteVariable PLATFORM
 ) ELSE (
   %_AECHO% No platform specified, using default...
   SET PLATFORM=Win32
@@ -175,7 +173,7 @@ IF NOT DEFINED LOGSUFFIX (
 IF DEFINED LOGGING GOTO skip_setLogging
 IF DEFINED NOLOG GOTO skip_setLogging
 
-SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREFIX%_%CONFIGURATION%_%PLATFORM%_%LOGSUFFIX%.log;Verbosity=diagnostic"
+SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREFIX%_%CONFIGURATION%_%PLATFORM%_%YEAR%_%LOGSUFFIX%.log;Verbosity=diagnostic"
 
 :skip_setLogging
 
@@ -196,6 +194,18 @@ IF ERRORLEVEL 1 (
 )
 
 GOTO no_errors
+
+:fn_UnquoteVariable
+  SETLOCAL
+  IF NOT DEFINED %1 GOTO :EOF
+  SET _ECHO_CMD=ECHO %%%1%%
+  FOR /F "delims=" %%V IN ('%_ECHO_CMD%') DO (
+    SET VALUE=%%V
+  )
+  SET VALUE=%VALUE:"=%
+  REM "
+  ENDLOCAL && SET %1=%VALUE%
+  GOTO :EOF
 
 :fn_UnsetVariable
   IF NOT "%1" == "" (

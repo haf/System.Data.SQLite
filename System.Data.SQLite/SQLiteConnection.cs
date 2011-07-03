@@ -13,7 +13,6 @@ namespace System.Data.SQLite
   using System.Collections.Generic;
   using System.Globalization;
   using System.ComponentModel;
-  using System.Text;
   using System.Runtime.InteropServices;
   using System.IO;
 
@@ -607,7 +606,7 @@ namespace System.Data.SQLite
     /// </remarks>
 #if !PLATFORM_COMPACTFRAMEWORK
     [RefreshProperties(RefreshProperties.All), DefaultValue("")]
-	[Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.38.1, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [Editor("SQLite.Designer.SQLiteConnectionStringEditor, SQLite.Designer, Version=1.0.38.1, Culture=neutral, PublicKeyToken=db937bc2d44ff139", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 #endif
     public override string ConnectionString
     {
@@ -675,14 +674,14 @@ namespace System.Data.SQLite
 
     internal static string MapUriPath(string path)
     {
-	    if (path.StartsWith ("file://", StringComparison.OrdinalIgnoreCase))
-		    return path.Substring (7);
+        if (path.StartsWith ("file://", StringComparison.OrdinalIgnoreCase))
+            return path.Substring (7);
       else if (path.StartsWith ("file:", StringComparison.OrdinalIgnoreCase))
-		    return path.Substring (5);
+            return path.Substring (5);
       else if (path.StartsWith ("/", StringComparison.OrdinalIgnoreCase))
-		    return path;
+            return path;
       else
-		    throw new InvalidOperationException ("Invalid connection string: invalid URI");
+            throw new InvalidOperationException ("Invalid connection string: invalid URI");
     }
     
     /// <summary>
