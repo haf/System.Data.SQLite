@@ -1,71 +1,129 @@
 <title>Build Procedures</title>
 
+<a name="procedures"></a>
 <h2>Build Procedures</h2>
 
 <p>
-Follow these steps to build a new release of System.Data.SQLite (SDS).
-Unless otherwise noted, all steps need to be done in the order specified.
-</p>
-
-<p>You will need a Visual Studio 2008, 2010, or 2010 SP1 development environment for this build.</p>
-
-<p>
-Thanks to the hard work of Joe Mistachkin, the build environment has been setup
-using modular solution and property files.
-<ul>
-SQLite.NET.2008.sln is the top level solution for VS2008.<br />
-SQLite.NET.2010.sln is the top level solution for VS2010.<br />
-</ul>
-<p>In general, files with 2008 in the name (eg. SQLite.Interop.2008.vcproj) 
-or files ending in .vsprops are project and property files for the VS2008 solution. 
-Files with 2010 in the name (eg. SQLite.Interop.2010.vcxproj) or files ending in .props are 
-property and project files for the VS2010 solution.  When making changes, 
-you should make changes to both to keep them in sync.
+  Follow these steps to build the System.Data.SQLite (SDS) binaries.
+  Unless otherwise noted, all steps need to be done in the order specified.
 </p>
 
 <p>
-You can either [./build.wiki#manual | manually build] the SDS using the supplied Visual Studio solutions,
-or follow the steps outlined in the [./build.wiki#automated | Automated Build] section below.
+  You will need a Visual Studio 2008, 2008 SP1, 2010, or 2010 SP1 development
+  environment for this build.
+</p>
+
+<p>
+  The new build system has been setup using modular solution, project, and
+  property files.
+</p>
+
+<p>
+  In general, files with 2008 in the name (e.g. SQLite.Interop.2008.vcproj) or
+  files ending in .vsprops are project and property files for the Visual Studio
+  2008 solution.  Files with 2010 in the name (e.g. SQLite.Interop.2010.vcxproj)
+  or files ending in .props are property and project files for the Visual Studio
+  2010 solution.  When making changes, you should make changes to both to keep
+  them in sync.
+</p>
+
+<p>
+  You can either [./build.wiki#manual | manually build] the System.Data.SQLite
+  binaries using one of the supplied Visual Studio solutions or follow the steps
+  outlined in the [./build.wiki#automated | Automated Build] section below.
 </p>
 
 <a name="assumptions"></a>
-<h2>Build Assumptions</h2>
+<h2>Build Assumptions &amp; Prerequisites</h2>
+
 <ol>
   <li>
-    We want to ship managed binaries that rely on the .NET Framework 2.0
-    SP2.  The .NET Framework 2.0 is very widely deployed and binaries produced for it can
-    also be referenced and used successfully from projects using the .NET Framework
-    4.0.
+    We want to ship managed binaries that rely on the .NET Framework 2.0 SP2 (or
+    for the LINQ assembly, the .NET Framework 3.5 SP1).  The .NET Framework 2.0
+    is very widely deployed and binaries produced for it can also be referenced
+    and used successfully from projects using the .NET Framework 4.0.
   </li>
 
   <li>
-    We want to ship native binaries that rely on the Visual C++ 2008 SP1
-    Runtime.
+    We want to ship native binaries that rely on the Visual C++ 2008 Runtime.
   </li>
 
   <li>
-    We do not want to ship the "monster DLL" (i.e. the "mixed-mode"
-    System.Data.SQLite.dll that includes native and managed code).  This
-    will make it far simpler to maintain and ship the included core SQLite code
-    (in the file "SQLite.Interop.dll").
+    We want to ship the separate managed-only System.Data.SQLite assembly and
+    the SQLite.Interop.dll native library.  This will make it easier to maintain
+    and deploy the included core SQLite code (in the &quot;SQLite.Interop.dll&quot;
+    native library).  We also want to ship the &quot;monster DLL&quot; (i.e. the
+    &quot;mixed-mode&quot; System.Data.SQLite assembly that includes all the
+    necessary native and managed code).  This will make it easier for developers
+    that wish to register the assembly in the Global Assembly Cache (GAC).
   </li>
 
   <li>
     The machine used to prepare the official releases will have the
     [http://www.microsoft.com/downloads/en/details.aspx?FamilyID=ab99342f-5d1a-413d-8319-81da479ab0d7 | .NET Framework 3.5 SP1]
-    and the corresponding [http://www.microsoft.com/downloads/details.aspx?FamilyId=E6E1C3DF-A74F-4207-8586-711EBE331CDC | SDK] installed.
+    and the corresponding [http://www.microsoft.com/downloads/details.aspx?FamilyId=E6E1C3DF-A74F-4207-8586-711EBE331CDC | SDK]
+    installed.
   </li>
 
   <li>
-    The machine used to prepare the official releases will have [http://www.jrsoftware.org/isdl.php | Inno Setup 5.4.2]
-    or higher installed in "%ProgramFiles%\Inno Setup 5" or
-    "%ProgramFiles(x86)%\Inno Setup 5" for an 64-bit machines.  Alternatively,
-    the InnoSetup directory may be included in the PATH environment variable.
+    The machine used to prepare the official releases will have
+    [http://www.jrsoftware.org/isdl.php | Inno Setup 5.4.2] or higher installed
+    in &quot;%ProgramFiles%\Inno Setup 5&quot; or &quot;%ProgramFiles(x86)%\Inno
+    Setup 5&quot; for an 64-bit machines.  Alternatively, the InnoSetup
+    directory may be included in the PATH environment variable.
   </li>
 
   <li>
-    The string "&lt;root&gt;" represents the root of your source tree for
-    System.Data.SQLite.
+    The string &quot;&lt;root&gt;&quot; represents the root of your source tree
+    for System.Data.SQLite.
+  </li>
+
+  <li>
+    The string &quot;&lt;year&gt;&quot; represents the version of Visual Studio
+    being used (e.g. 2008).
+  </li>
+</ol>
+
+<a name="all"></a>
+<h2>All Builds</h2>
+
+<ol>
+  <li>
+    Make sure the version information is correct for SQLite in all of the
+    following files:
+
+    <ul>
+      <li>&lt;root&gt;\SQLite.Interop\props\sqlite3.vsprops</li>
+      <li>&lt;root&gt;\SQLite.Interop\props\sqlite3.props</li>
+    </ul>
+
+    You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION
+    properties.  This version number should track the release versions of SQLite
+    (i.e. [http://www.sqlite.org/changes.html | 3.7.x]).
+  </li>
+
+  <li>
+    Make sure the version information is correct for System.Data.SQLite in the
+    following files:
+
+    <ul>
+      <li>&lt;root&gt;\Doc\Extra\dbfactorysupport.html</li>
+      <li>&lt;root&gt;\Doc\Extra\welcome.html</li>
+      <li>&lt;root&gt;\test\app.config</li>
+      <li>&lt;root&gt;\testlinq\2008\App.config</li>
+      <li>&lt;root&gt;\testlinq\2010\App.config</li>
+      <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops</li>
+      <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props</li>
+      <li>&lt;root&gt;\SQLite.Interop\src\win\interop.h</li>
+      <li>&lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs</li>
+      <li>&lt;root&gt;\System.Data.SQLite\UnsafeNativeMethods.cs</li>
+      <li>&lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs</li>
+    </ul>
+
+    You'll need to update the INTEROP_BUILD_NUMBER, INTEROP_MANIFEST_VERSION,
+    and INTEROP_RC_VERSION properties in the .vsprops and .props files, and the
+    INTEROP_VERSION define in interop.h.  This version number should track the
+    release versions of the System.Data.SQLite packages (i.e. [./news.wiki | 1.0.x]).
   </li>
 </ol>
 
@@ -73,176 +131,101 @@ or follow the steps outlined in the [./build.wiki#automated | Automated Build] s
 <h2>Manual Build</h2>
 
 <ol>
-  <li>Make sure the version information is correct for SQLite in the following
-  files:
-
-  <ul>
-    &lt;root&gt;\SQLite.Interop\props\sqlite3.vsprops<br />
-    &lt;root&gt;\SQLite.Interop\props\sqlite3.props<br />
-  </ul>
-
-  You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties.
-  This version number should track the release versions of SQLite 
-  (ie. [http://www.sqlite.org/changes.html | 3.7.x]).
-  </li>
-
-  <li>Make sure the version information is correct for System.Data.SQLite in
-  the following files:
-
-  <ul>
-    &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops<br />
-    &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props<br />
-    &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
-    &lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs<br />
-    &lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs<br />
-    &lt;root&gt;\System.Data.SQLite\LINQ\SQLiteFactory_Linq.cs<br />
-  </ul>
-
-  You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties
-  in the .vsprops and .props files, and the INTEROP_VERSION define in interop.h.
-  This version number should track the release versions of the System.Data.SQLite packages
-  (ie. [./news.wiki | 1.0.x]).
+  <li>
+    Complete the steps outlined in the [./build.wiki#all | All Builds] section
+    (above).
   </li>
 
   <li>Open the appropriate solution for your build platform.
-
     <ul>
-        SQLite.NET.2008.sln is the top level solution for VS2008.<br />
-        SQLite.NET.2010.sln is the top level solution for VS2010.<br />
+      <li>
+        SQLite.NET.2008.sln is the top-level solution primarily designed for use
+        with Visual Studio 2008 in the IDE; however, it may also be used from
+        the command line with MSBuild 3.5.
+      </li>
+
+      <li>
+        SQLite.NET.2010.sln is the top-level solution primarily designed for use
+        with Visual Studio 2010 in the IDE; however, it may also be used from
+        the command line with MSBuild 4.0.
+      </li>
+
+      <li>
+        SQLite.NET.2008.MSBuild.sln is the top-level solution primarily designed
+        for use with MSBuild 3.5 on the command line; however, it may also be
+        used from the Visual Studio 2008 IDE.
+      </li>
+
+      <li>
+        SQLite.NET.2010.MSBuild.sln is the top-level solution primarily designed
+        for use with MSBuild 4.0 on the command line; however, it may also be
+        used from the Visual Studio 2010 IDE.
+      </li>
     </ul>
   </li>
 
-  <li>Select the desired solution configuration (eg. ReleaseNativeOnly) and 
-  and solution platform (eg. x64), then "Build->Rebuild Solution".
-
-  Alternatively, you can select "Build->Batch Build", "Select All", and then "Rebuild".
+  <li>
+    Select the desired solution configuration (e.g. ReleaseNativeOnly) and and
+    solution platform (e.g. x64), then &quot;Build->Rebuild Solution&quot;.
+    Alternatively, you can select &quot;Build->Batch Build&quot;, &quot;Select
+    All&quot;, and then &quot;Rebuild&quot;.
   </li>
-
 </ol>
 
 <a name="automated"></a>
 <h2>Automated Build</h2>
 
 <ol>
-  <li>Make sure the version information is correct for SQLite in the following
-  files:
-
-  <ul>
-      &lt;root&gt;\SQLite.Interop\props\sqlite3.vsprops<br />
-      &lt;root&gt;\SQLite.Interop\props\sqlite3.props<br />
-  </ul>
-
-  You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties.
-  This version number should track the release versions of SQLite 
-  (ie. [http://www.sqlite.org/changes.html | 3.7.x]).
+  <li>
+    Complete the steps outlined in the [./build.wiki#all | All Builds] section
+    (above).
   </li>
 
-  <li>Make sure the version information is correct for System.Data.SQLite in
-  the following files:
-
-  <ul>
-    &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops<br />
-    &lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props<br />
-    &lt;root&gt;\SQLite.Interop\src\win\interop.h<br />
-    &lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs<br />
-    &lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs<br />
-    &lt;root&gt;\System.Data.SQLite\LINQ\SQLiteFactory_Linq.cs<br />
-  </ul>
-
-  You'll need to update the SQLITE_MANIFEST_VERSION and SQLITE_RC_VERSION properties
-  in the .vsprops and .props files, and the INTEROP_VERSION define in interop.h.
-  This version number should track the release versions of the System.Data.SQLite packages
-  (ie. [./news.wiki | 1.0.x]).
+  <li>
+    Make sure the &quot;&lt;root&gt;\bin&quot; and &quot;&lt;root&gt;\obj&quot;
+    directories are completely free of all output files.  In theory, you should
+    be able to simply delete these directories.
   </li>
 
-  <li>Make sure the "&lt;root&gt;\bin" and "&lt;root&gt;\obj" directories are completely
-  free of all output files.  In theory, you should be able to simply delete these directories.
+  <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+  <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
+
+  <li>
+    Enter the following command to build the binaries for Win32 (x86): build.bat
+    ReleaseNativeOnly Win32<br /><i>You may need to enter the command
+    &quot;setenv /x86&quot; first if you are using a &quot;Windows SDK Command
+    Prompt&quot; or &quot;Visual Studio Command Prompt&quot; window.</i>
   </li>
 
-  <li>Open a normal command prompt window with "cmd.exe".<br />
-
-  <i>If you are using Visual Studio 2010, you may need to open a 
-  "Windows SDK Command Prompt" from the "Microsoft Windows SDK" start menu
-  and perform your builds there.</i></li>
-
-  <li>Change the current directory to "&lt;root&gt;\Setup".</li>
-
-  <li>Enter the following command to build the binaries for Win32 (x86):
-
-  [./build.wiki#build.bat | build.bat] ReleaseNativeOnly Win32<br />
-
-  <i>You may need to enter the command "setenv /x86" first if you are using a 
-  Windows SDK or Visual Studio command prompt.</i>
+  <li>
+    Make sure everything succeeds with no errors; the log file
+    &quot;%TEMP%\System.Data.SQLite.Build_ReleaseNativeOnly_Win32_&lt;year&gt;_Unknown.log&quot;
+    may be checked if any errors should occur.
   </li>
 
-  <li>Make sure everything succeeds with no errors; the log file
-  "%TEMP%\System.Data.SQLite.Build_ReleaseNativeOnly_Win32_Unknown.log"
-  may be checked if any errors should occur.</li>
-
-  <li>Enter the following command to build the binaries for x64:
-
-  build.bat ReleaseNativeOnly x64<br />
-
-  <i>You may need to enter the command "setenv /x64" first if you are using a 
-  Windows SDK or Visual Studio command prompt.</i>
+  <li>
+    Enter the following command to build the binaries for x64: build.bat
+    ReleaseNativeOnly x64<br /><i>You may need to enter the command &quot;setenv
+    /x64&quot; first if you are using a &quot;Windows SDK Command Prompt&quot;
+    or &quot;Visual Studio Command Prompt&quot; window.</i>
   </li>
 
-  <li>Make sure everything succeeds with no errors; the log file
-  "%TEMP%\System.Data.SQLite.Build_ReleaseNativeOnly_x64_Unknown.log" may
-  be checked if any errors should occur.</li>
-
-  <li>Enter the following command to build the setup binaries for Win32 AND
-  x64 (unfortunately, it is not possible to build the setup using the
-  InnoSetup GUI.  It must be done using the provided command line tools due to its dynamic
-  nature):
-
-  bake_all.bat
+  <li>
+    Make sure everything succeeds with no errors; the log file
+    &quot;%TEMP%\System.Data.SQLite.Build_ReleaseNativeOnly_x64_&lt;year&gt;_Unknown.log&quot;
+    may be checked if any errors should occur.
   </li>
 
-  <li>Make sure everything succeeds with no errors.  InnoSetup should produce
-  "success" messages very similar to the following:
+  <li>
+    Enter the following command to build the setup binaries for all supported
+    build configurations (unfortunately, it is not possible to build the setup
+    using the InnoSetup IDE.  It must be done using the provided command line
+    tools due to its highly dynamic nature): bake_all.bat
+  </li>
 
-  Successful compile (X.XXX sec). Resulting Setup program filename is: abc
+  <li>
+    Make sure everything succeeds with no errors.  InnoSetup should produce
+    &quot;success&quot; messages very similar to the following: Successful
+    compile (X.XXX sec). Resulting Setup program filename is: abc
   </li>
 </ol>
-
-<a name="build.bat"></a>
-<h3>build.bat Desription</h3>
-
-<p>
-  build.bat is the top level batch file for build automation and should be called
-  with the configuration and platform to build:
-  <ul>
-    build.bat &lt;CONFIGURATION&gt; &lt;PLATFORM&gt;<br />
-  </ul>
-  This starts by setting 3 environment variables:
-  <ul>
-    ROOT (eg. &lt;pwd&gt;\..)<br />
-    CONFIGURATION (eg. ReleaseNativeOnly)<br />
-    PLATFORM (eg. Win32)<br />
-  </ul>
-  These are used to call another .bat file (eg. set_ReleaseNativeOnly_x64.bat)
-  which calls set_ReleaseNativeOnly.bat to setup more variables to specify
-  which .NET Framework to use:
-  <ul>
-    NETFX35ONLY=1 - set from set_ReleaseNativeOnly.bat<br />
-    YEAR=2008 - set from set_ReleaseNativeOnly.bat<br />
-    YEARS=%YEAR% - set from set_ReleaseNativeOnly.bat<br />
-  </ul>
-  build.bat attempts to set additional variables based on the chosen
-  and available .NET Framework.
-  <ul>
-    YEAR (eg. 2008)<br />
-    FRAMEWORKDIR (eg. %windir%\Microsoft.NET\Framework\v3.5)<br />
-  </ul>
-  The PATH variable is updated to include the directory specified by FRAMEWORKDIR.<br />
-  At this point, several variables are setup for the call to 
-  [http://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx | MSBuild]
-  <ul>
-    SOLUTION (eg. .\SQLite.NET.2008.sln)
-    TARGET (eg. Rebuild)
-    LOGGING
-  </ul>
-  MSBuild.exe is called to build the solution.
-</p>
-
