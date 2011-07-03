@@ -53,10 +53,8 @@ if {![file isdirectory $hhcPath]} then {
 #
 set outputPath [file join Output ndoc3_msdn_temp]
 
-set code [catch {
-  exec [file join $nDocPath bin NDoc3Console.exe] \
-      "-project=[file nativename [file join $path SQLite.NET.ndoc]]"
-} result]
+set code [catch {exec [file join $nDocPath bin NDoc3Console.exe] \
+    "-project=[file nativename [file join $path SQLite.NET.ndoc]]"} result]
 
 puts stdout $result; if {$code != 0} then {exit $code}
 
@@ -117,7 +115,8 @@ foreach fileName $fileNames {
   }
 }
 
-set code [catch {exec [file join $hhcPath hhc.exe] [file nativename [file join $path $outputPath SQLite.NET.hhp]]} result]
+set code [catch {exec [file join $hhcPath hhc.exe] \
+    [file nativename [file join $path $outputPath SQLite.NET.hhp]]} result]
 
 #
 # NOTE: For hhc.exe, zero means failure.
