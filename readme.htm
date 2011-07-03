@@ -4,13 +4,13 @@
 <title></title>
 </head>
 <body>
-ADO.NET 2.0 SQLite Data Provider<br />
-Version 1.0.73.0 June 2, 2011<br />
-Using SQLite 3.7.6.3 <a href="http://www.sqlite.org/src/info/ed1da510a2">[ed1da510a2]</a><br />
+ADO.NET SQLite Data Provider<br />
+Version 1.0.74.0 July 4, 2011<br />
+Using SQLite 3.7.7.1 <a href="http://www.sqlite.org/src/info/af0d91adf4">[af0d91adf4]</a><br />
 Originally written by Robert Simpson<br />
 Released to the public domain, use at your own risk!<br />
-Official provider website:&nbsp; <a href="http://system.data.sqlite.org">http://system.data.sqlite.org</a><br />
-Legacy versions:&nbsp; <a href="http://sqlite.phxsoftware.com">http://sqlite.phxsoftware.com</a><br />
+Official provider website:&nbsp; <a href="http://system.data.sqlite.org/">http://system.data.sqlite.org/</a><br />
+Legacy versions:&nbsp; <a href="http://sqlite.phxsoftware.com/">http://sqlite.phxsoftware.com/</a><br />
 <br />
 The current development version can be downloaded from <a href="http://system.data.sqlite.org/index.html/timeline?n=20&y=ci">
 http://system.data.sqlite.org/index.html/timeline?n=20&y=ci</a>
@@ -20,80 +20,114 @@ http://system.data.sqlite.org/index.html/timeline?n=20&y=ci</a>
 <h2><b>Features</b></h2>
 
 <ul>
-<li>Written from scratch on VS2008 specifically for ADO.NET 2.0, implementing all
-the base classes and features recently introduced in the framework, including automatic
-transaction enlistment.<li>Supports the Full and Compact .NET Framework, and native
-C/C++ development.&nbsp; 100% binary compatible with the original sqlite3.dll.<br />
-<font color="red">Compact framework not currently not included. We hope to have
-this feature included again soon.</font></li>
+  <li>
+    Written from scratch on Visual Studio 2008 specifically for ADO.NET,
+    implementing all the base classes and features recently introduced in the
+    framework, including automatic transaction enlistment.
+  </li>
 
-<li>Full support for Mono via a &quot;managed only&quot; provider that runs against
-the official SQLite 3.6.1 or higher library.</li>
+  <li>
+    Supports the Full and Compact .NET Framework, and native C/C++ development.
+    100% binary compatible with the original sqlite3.dll.
+  </li>
 
-<li>Full Entity Framework support (ADO.NET 3.5 SP1)</li>
+  <li>
+    Full support for Mono via a &quot;managed only&quot; provider that runs
+    against the official SQLite 3.6.1 or higher library.
+  </li>
 
-<li>On the Compact Framework, it is faster than Sql Server Mobile. SQLite's installed
-size is a fraction of Sql Mobile's. It uses less memory at runtime, runs queries
-faster, and has a smaller database file size as well. <font color="red">Compact
-framework not currently not included. We hope to have this feature included again
-soon.</font>
+  <li>Full Entity Framework support (ADO.NET 3.5 SP1).</li>
 
-<li>Encrypted database support.&nbsp; Encrypted databases are fully encrypted and
-support both binary and cleartext password types.</li>
+  <li>
+    On the Compact Framework, it is faster than SQL Server Mobile.  SQLite's
+    installed size is a fraction of SQL Mobile's.  It uses less memory at
+    runtime, runs queries faster, and has a smaller database file size as well.
+  </li>
 
-<li>Visual Studio 2005/2008 Design-Time Support, works with all versions of VS2005/2008,
-including all Express Editions of VS2005.&nbsp; You can add a SQLite database to
-the Servers list, design queries with the Query Designer, drag-and-drop tables onto
-a Typed DataSet, etc.<li>Full SQLite schema editing inside Visual Studio.&nbsp;
-You can create/edit tables, views, triggers, indexes, check constraints and foreign
-keys.<br />
-<font color="red">Currently not included.  We are still updating the Design-Time
-support installer.</font>
-</li>
+  <li>
+    Encrypted database support.  Encrypted databases are fully encrypted and
+    support both binary and cleartext password types.
+  </li>
 
-<li>Single file redistributable (except on Compact Framework).&nbsp; The core
-sqlite3 codebase and the ADO.NET wrapper are combined into one multi-module assembly.<br />
-<font color="red">Currently all versions provided as System.Data.SQLite.dll and SQLite.Interop.dll.
-This provides consistency across all packages, including Compact and Mono.</font>
-</li>
+  <li>
+    Visual Studio design-time Support, works with all versions of Visual Studio
+    2005/2008/2010.  You can add a SQLite database to the Servers list, design
+    queries with the Query Designer, drag-and-drop tables onto a Typed DataSet,
+    etc.
+    <br />
+    <font color="red">
+      Currently not included.  We are still updating the design-time support
+      installer.  Due to Visual Studio licensing restrictions, the Express
+      Editions can no longer be supported.
+    </font>
+  </li>
 
-<li>Binaries included for Itanium, x64, x86 and ARM processors.<br />
-<font color="red">Currently only x64 and x86 included.  
-We hope to have more processors included again soon.</font>
-</li>
+  <li>
+    Full SQLite schema editing inside Visual Studio.  You can create/edit tables,
+    views, triggers, indexes, check constraints and foreign keys.
+  </li>
 
-<li>DbProviderFactory support</li>
+  <li>
+    Single file redistributable (except on Compact Framework).  The core SQLite
+    native code and the ADO.NET managed wrapper are combined into one mixed-mode
+    assembly.
+  </li>
 
-<li>Full support for ATTACH'ed databases.&nbsp; Exposed as <i>Catalogs</i> in the
-schema.&nbsp; When cloning a connection, all attached databases are automatically
-re-attached to the new connection.
-</li>
+  <li>
+    Binaries included for x86, x64, Itanium, and ARM processors.
+    <br />
+    <font color="red">
+      Itanium processor support not currently included.
+    </font>
+  </li>
 
-<li>DbConnection.GetSchema(...) support includes <i>ReservedWords, MetaDataCollections</i>,
-<i>DataSourceInformation</i>, <i>DataTypes, Columns</i>, <i>Tables</i>, <i>Views,
-ViewColumns, </i><i>Catalogs, </i><i>Indexes, IndexColumns, </i><em>ForeignKeys
-</em>and<em> Triggers</em>.
+  <li>DbProviderFactory support.</li>
 
-<li>Enhanced DbDataReader.GetSchemaTable() functionality returns catalog, namespace
-and detailed schema information even for complex queries.
+  <li>
+    Full support for ATTACH'ed databases.  Exposed as <i>Catalogs</i> in the
+    schema.  When cloning a connection, all attached databases are automatically
+    re-attached to the new connection.
+  </li>
 
-<li>Named and unnamed parameters.
+  <li>
+    DbConnection.GetSchema(...) support includes <i>ReservedWords</i>,
+    <i>MetaDataCollections</i>, <i>DataSourceInformation</i>, <i>DataTypes</i>,
+    <i>Columns</i>, <i>Tables</i>, <i>Views</i>, <i>ViewColumns</i>,
+    <i>Catalogs</i>, <i>Indexes</i>, <i>IndexColumns</i>, <i>ForeignKeys</i> and
+    <i>Triggers</i>.
+  </li>
 
-<li>Full UTF-8 and UTF-16 support, each with optimized pipelines into the native
-database core.
+  <li>
+    Enhanced DbDataReader.GetSchemaTable() functionality returns catalog,
+    namespace and detailed schema information even for complex queries.
+  </li>
 
-<li>Multiple simultaneous DataReaders (one DataReader per Command however).
+  <li>Named and unnamed parameters.</li>
 
-<li>Full support for user-defined scalar and aggregate functions, encapsulated into
-an easy-to-use base class in which only a couple of overrides are necessary to implement
-new SQL functions.
+  <li>
+    Full UTF-8 and UTF-16 support, each with optimized pipelines into the native
+    database core.
+  </li>
 
-<li>Full support for user-defined collating sequences, every bit as simple to implement
-as user-defined functions and uses the same base class.
+  <li>
+    Multiple simultaneous DataReaders (one DataReader per Command however).
+  </li>
 
-<li>Full source for the entire engine and wrapper.&nbsp; No copyrights.&nbsp; Public
-Domain.&nbsp; 100% free for commercial and non-commercial use.&nbsp;</li>
+  <li>
+    Full support for user-defined scalar and aggregate functions, encapsulated
+    into an easy-to-use base class in which only a couple of overrides are
+    necessary to implement new SQL functions.
+  </li>
 
+  <li>
+    Full support for user-defined collating sequences, every bit as simple to
+    implement as user-defined functions and uses the same base class.
+  </li>
+
+  <li>
+    Full source for the entire engine and wrapper.  No copyrights.  Public
+    Domain.  100% free for commercial and non-commercial use.
+  </li>
 </ul>
 
 <h2><strong>Design-Time Support</strong></h2>
@@ -126,8 +160,7 @@ See the help documentation for further details on implementing both version-spec
 </p>
 
 <h2>Compiling for the Compact Framework</h2>
-<font color="red">Compact framework not currently not included. We hope to have
-this feature included again soon.</font></li>
+
 <p>
 Just change the target platform from Win32 to Compact Framework and recompile.&nbsp;
 <strong>The Compact Framework has no support for enumerating attributes in an assembly,
@@ -136,8 +169,7 @@ registered.</strong>&nbsp; See the <strong>testce</strong> sample application fo
 an example of how to explicitly register user-defined collating sequences and functions.</p>
 
 <h2><b><a name="redist"></a>Distributing The SQLite Engine and ADO.NET Assembly</b></h2>
-<font color="red">Currently all versions provided as System.Data.SQLite.dll and SQLite.Interop.dll.
-This provides consistency across all packages, including Compact and Mono.</font>
+
 <p>
 On the desktop, only the <strong>System.Data.SQLite.DLL</strong> file needs to be
 distributed with your application(s).&nbsp; This DLL contains both the managed wrapper
@@ -157,6 +189,25 @@ it to extend its functionality, but the core engine's source is not changed.</p>
 
 <h2><b>Version History</b></h2>
 
+<p>
+    <b>1.0.74.0 - July 4, 2011</b>
+</p>
+<ul>
+    <li>Updated to SQLite 3.7.7.1 <a href="http://www.sqlite.org/src/info/af0d91adf4">[af0d91adf4]</a>.</li>
+    <li>Fix incorrect hard-coded .NET Framework version information SQLiteFactory_Linq.cs that was causing IServiceProvider.GetService to fail when running against the .NET Framework 3.5.</li>
+    <li>Fix all XML documentation warnings.</li>
+    <li>Restore support for the mixed-mode assembly (i.e. the one that can be registered in the Global Assembly Cache).</li>
+    <li>Restore support for the Compact Framework.</li>
+    <li>Remove unused &quot;using&quot; statements from the System.Data.SQLite and System.Data.SQLite.Linq projects.</li>
+    <li>Remove hard-coded System.Data.SQLite.Linq version from SQLiteFactory_Linq.cs</li>
+    <li>Modify the setup to support bundled packages (i.e. with the mixed-mode assembly) and standard packages (i.e. with the managed assembly separate from the native interop library).</li>
+    <li>Disable the ability to register with the Global Assembly Cache in the standard setup package (i.e. it is available in the bundled setup only).</li>
+    <li>Remove PATH modification from the setup.</li>
+    <li>Modify the naming scheme for the source, setup, and binary packages to allow for the necessary variants.</li>
+    <li>In the build automation, attempt to automatically detect if Visual Studio 2008 and/or 2010 are installed and support building binaries for both at once, when available.</li>
+    <li>Add release automation to build the source, setup, and binary packages in all supported build variants.</li>
+    <li>Add the testlinq project to the new build system and make it work properly with Visual Studio 2008 and 2010.</li>
+</ul>
 <p>
   <b>1.0.73.0 - June 2, 2011</b>
 </p>
