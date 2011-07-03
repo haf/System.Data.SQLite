@@ -2,6 +2,8 @@
 
 <h2>Release Procedures</h2>
 
+<font color="red">This content on this page is outdated and needs to be updated.</font>
+
 <p>Follow these steps to prepare a new release of System.Data.SQLite.  
 Unless otherwise noted, all steps need to be done in the order specified.</p>
 
