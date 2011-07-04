@@ -14,10 +14,7 @@ runTestPrologue
 
 ###############################################################################
 
-set test_configuration Release
-
-object load -loadtype File [file join [file dirname $path] bin \
-    $test_configuration bin System.Data.SQLite.dll]
+source [file join $path common.eagle]
 
 ###############################################################################
 

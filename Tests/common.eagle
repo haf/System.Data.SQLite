@@ -1,0 +1,14 @@
+###############################################################################
+#
+# common.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+if {[isEagle]} then {
+  object load -loadtype File [file join [file dirname $path] bin \
+      [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
+      $test_configuration bin System.Data.SQLite.dll]
+}
