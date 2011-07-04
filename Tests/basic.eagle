@@ -15,11 +15,11 @@ runTestPrologue
 ###############################################################################
 
 source [file join $path common.eagle]
+loadAssembly System.Data.SQLite.dll
 
 ###############################################################################
 
-runTest {test basic-1.1 {simple INSERT / SELECT} -setup {
-  loadAssembly System.Data.SQLite.dll
+runTest {test basic-1.1 {SELECT scalar/reader, CREATE, INSERT} -setup {
   setupDb [set fileName basic-1.1.sqlite3]
 } -body {
   set result [list]
@@ -41,9 +41,9 @@ runTest {test basic-1.1 {simple INSERT / SELECT} -setup {
   cleanupDb $fileName
 
   unset -nocomplain name rows result db fileName
-} -constraints {eagle monoBug28 command.sql compile.DATA} -match regexp \
--result {^\{\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [0-9a-f]{40}\} \{1 \{\{x 1\}\
-\{y foo\} \{z 1234\}\}\} \{count 1\} \{names \{x y z\}\}$}}
+} -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-match regexp -result {^\{\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [0-9a-f]{40}\}\
+\{1 \{\{x 1\} \{y foo\} \{z 1234\}\}\} \{count 1\} \{names \{x y z\}\}$}}
 
 ###############################################################################
 

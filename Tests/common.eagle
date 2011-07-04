@@ -9,10 +9,17 @@
 
 if {[isEagle]} then {
   proc loadAssembly { fileName } {
-    object load -loadtype File \
-        [file join [file dirname $::path] bin \
+    set fileName [file join [file dirname $::path] bin \
         [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
         $::test_configuration bin $fileName]
+
+    if {[catch {set assembly \
+        [object load -loadtype File $fileName]}] == 0} then {
+      #
+      # NOTE: Now, add the necessary test constraint.
+      #
+      addConstraint [file rootname [file tail $fileName]]
+    }
   }
 
   proc setupDb {fileName {varName db}} {
