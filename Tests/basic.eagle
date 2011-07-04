@@ -19,18 +19,18 @@ source [file join $path common.eagle]
 ###############################################################################
 
 runTest {test basic-1.1 {simple INSERT / SELECT} -setup {
-  set fileName [file join [getTemporaryPath] test.sqlite3]
-  set connection [sql open -type SQLite [subst {Data Source=${fileName}}]]
+  loadAssembly System.Data.SQLite.dll
+  setupDb [set fileName basic-1.1.sqlite3]
 } -body {
   set result [list]
 
-  lappend result [sql execute -execute scalar $connection \
+  lappend result [sql execute -execute scalar $db \
       "SELECT sqlite_source_id();"]
 
-  sql execute $connection "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y, z);"
-  sql execute $connection "INSERT INTO t1 (x, y, z) VALUES(1, 'foo', 1234);"
+  sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y, z);"
+  sql execute $db "INSERT INTO t1 (x, y, z) VALUES(1, 'foo', 1234);"
 
-  sql execute -execute reader $connection "SELECT * FROM t1;"
+  sql execute -execute reader $db "SELECT * FROM t1;"
 
   foreach name [lsort [array names rows]] {
     lappend result [list $name $rows($name)]
@@ -38,9 +38,9 @@ runTest {test basic-1.1 {simple INSERT / SELECT} -setup {
 
   set result
 } -cleanup {
-  catch {sql close $connection}
-  catch {file delete $fileName}
-  unset -nocomplain name rows result connection fileName
+  cleanupDb $fileName
+
+  unset -nocomplain name rows result db fileName
 } -constraints {eagle monoBug28 command.sql compile.DATA} -match regexp \
 -result {^\{\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [0-9a-f]{40}\} \{1 \{\{x 1\}\
 \{y foo\} \{z 1234\}\}\} \{count 1\} \{names \{x y z\}\}$}}

@@ -1,0 +1,1471 @@
+###############################################################################
+#
+# prologue.eagle --
+#
+# Extensible Adaptable Generalized Logic Engine (Eagle)
+# Test Prologue File
+#
+# Copyright (c) 2007-2010 by Joe Mistachkin.  All rights reserved.
+#
+# See the file "license.terms" for information on usage and redistribution of
+# this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: $
+#
+###############################################################################
+
+if {![info exists no([file tail [info script]])]} then {
+  if {[info level] > 0} then {
+    error "cannot run, current level is not global"
+  }
+
+  #
+  # NOTE: Set the location of the test suite, if necessary.
+  #
+  if {![info exists test_path]} then {
+    set test_path [file normalize [file dirname [info script]]]
+  }
+
+  #
+  # NOTE: Set the location of the base Eagle directory, if
+  #       necessary.
+  #
+  if {![info exists base_path]} then {
+    #
+    # NOTE: Start out going up one level and check for a "lib"
+    #       sub-directory.  If not found, go up another level
+    #       because we will always be two levels down from the
+    #       base directory when running inside the source tree.
+    #
+    set base_path [file normalize [file dirname $test_path]]
+
+    #
+    # HACK: We must verify that the "init.eagle" file can eventually
+    #       be found under the "lib" directory since Visual Studio
+    #       insists on creating a superfluous (and empty) "lib\Eagle1.0"
+    #       sub-directory inside of the "Library" project directory
+    #       simply due to the links contained in the project file that
+    #       actually point to the "lib\Eagle1.0" sub-directory under the
+    #       solution directory.
+    #
+    # WARNING: The Eagle package name and version are hard-coded here.
+    #
+    if {![file exists [file join $base_path lib]] || \
+        ![file isdirectory [file join $base_path lib]] || \
+        ![file exists [file join $base_path lib Eagle1.0]] || \
+        ![file isdirectory [file join $base_path lib Eagle1.0]] || \
+        ![file exists [file join $base_path lib Eagle1.0 init.eagle]] || \
+        ![file isfile [file join $base_path lib Eagle1.0 init.eagle]]} then {
+      #
+      # NOTE: We do not bother to check if the "lib" sub-directory
+      #       actually exists as a child of this one.  This is the
+      #       previous (legacy) behavior (i.e. where we always went
+      #       up two levels to the base directory).
+      #
+      set base_path [file dirname $base_path]
+    }
+  }
+
+  #
+  # NOTE: Set the executable file name for the process, if
+  #       necessary.
+  #
+  if {![info exists bin_file]} then {
+    set bin_file [info nameofexecutable]
+  }
+
+  #
+  # NOTE: Set the location of the directory containing the
+  #       executable file for the process, if necessary.
+  #
+  if {![info exists bin_path]} then {
+    set bin_path [file normalize [file dirname $bin_file]]
+  }
+
+  #
+  # NOTE: Set the location of the [non-script] library directory
+  #       (i.e. the directory where the plugins are located), if
+  #       necessary.
+  #
+  if {![info exists lib_path]} then {
+    #
+    # NOTE: This should go one directory up from the directory
+    #       containing the executable file for the process (e.g.
+    #       the shell) and then into the "lib" directory just
+    #       beneath that.
+    #
+    set lib_path [file normalize [file join [file dirname $bin_path] lib]]
+  }
+
+  #
+  # NOTE: Set the web host to test against, if necessary.
+  #
+  if {![info exists test_host]} then {
+    set test_host eagle.to
+  }
+
+  #
+  # NOTE: Set the port to use for server sockets, if necessary.
+  #
+  if {![info exists test_port]} then {
+    set test_port 12346; # IANA, 12346-12752 Unassigned
+  }
+
+  #
+  # NOTE: Set the network timeout, if necessary.
+  #
+  if {![info exists test_timeout]} then {
+    set test_timeout 2000; # in milliseconds.
+  }
+
+  #
+  # NOTE: Set the channel to use for test output, if necessary.
+  #
+  if {![info exists test_channel]} then {
+    set test_channel stdout
+  }
+
+  #
+  # NOTE: Set the primary package path, if necessary.
+  #
+  if {![info exists test_package_path]} then {
+    set test_package_path [file join $base_path lib]
+  }
+
+  #
+  # NOTE: Make sure our primary package path is part of the auto path.
+  #
+  if {[lsearch -exact $auto_path $test_package_path] == -1} then {
+    lappend auto_path $test_package_path
+  }
+
+  #
+  # NOTE: Make sure our test package path is part of the auto path.
+  #
+  if {[lsearch -exact $auto_path $test_path] == -1} then {
+    lappend auto_path $test_path
+  }
+
+  #############################################################################
+
+  #
+  # NOTE: Check for and load the Eagle library package, if necessary.
+  #
+  if {[catch {package present EagleLibrary}]} then {
+    package require EagleLibrary
+  }
+
+  #
+  # NOTE: Check for and load the Eagle test package, if necessary.
+  #
+  if {[catch {package present EagleTest}]} then {
+    package require EagleTest
+  }
+
+  #
+  # NOTE: Check for and load the Eagle test constraints package, if
+  #       necessary.
+  #
+  if {[catch {package present EagleTestConstraints}]} then {
+    package require EagleTestConstraints
+  }
+
+  #############################################################################
+
+  #
+  # NOTE: If command line arguments were supplied, process them now.
+  #
+  set test_flags(-configuration) ""; # build configuration, default to empty.
+  set test_flags(-suffix) ""; # build suffix, default to empty.
+  set test_flags(-file) [list *.eagle]; # default to running all test files.
+  set test_flags(-notFile) [list l.*.eagle]; # COMPAT: Tcl.
+  set test_flags(-match) [list *]; # default to running all tests.
+  set test_flags(-skip) [list]; # default to skipping no tests.
+  set test_flags(-constraints) [list]; # default to no manual constraints.
+  set test_flags(-logFile) ""; # default to using standard log file naming.
+  set test_flags(-threshold) ""; # default to requiring all tests to pass.
+  set test_flags(-stopOnFailure) ""; # default to continue on failure.
+  set test_flags(-exitOnComplete) ""; # default to not exit after complete.
+
+  #
+  # NOTE: Check for and process any command line arguments.
+  #
+  if {[info exists argv]} then {
+    eval processTestArguments test_flags $argv
+
+    if {[info exists test_flags(-logFile)] && \
+        [string length $test_flags(-logFile)] > 0} then {
+      #
+      # NOTE: Set the log file name to the one provided by the command line.
+      #
+      set test_log $test_flags(-logFile)
+    }
+
+    if {[info exists test_flags(-threshold)] && \
+        [string is integer -strict $test_flags(-threshold)]} then {
+      #
+      # NOTE: Set the test pass threshold to the one provided by the command
+      #       line.
+      #
+      set test_threshold $test_flags(-threshold)
+    }
+
+    if {[info exists test_flags(-stopOnFailure)] && \
+        [string is boolean -strict $test_flags(-stopOnFailure)]} then {
+      #
+      # NOTE: Set the test stop-on-failure flag to the one provided by the
+      #       command line.
+      #
+      set test_stop_on_failure $test_flags(-stopOnFailure)
+    }
+
+    if {[info exists test_flags(-exitOnComplete)] && \
+        [string is boolean -strict $test_flags(-exitOnComplete)]} then {
+      #
+      # NOTE: Set the test exit-on-complete flag to the one provided by the
+      #       command line.
+      #
+      set test_exit_on_complete $test_flags(-exitOnComplete)
+    }
+  }
+
+  #
+  # NOTE: Set the default test configuration (i.e. Debug or Release), if
+  #       necessary.
+  #
+  if {![info exists test_configuration]} then {
+    set test_configuration [getPlatformInfo configuration Release]
+  }
+
+  #
+  # NOTE: Set the Tcl shell executable to use for those specialized
+  #       tests that may require it, if necessary.
+  #
+  if {![info exists test_tclsh]} then {
+    if {[isEagle] || ![string match tclsh* $bin_file]} then {
+      set test_tclsh tclsh
+    } else {
+      set test_tclsh $bin_file
+    }
+  }
+
+  #
+  # NOTE: Has logging been disabled?
+  #
+  if {![info exists no(log)]} then {
+    #
+    # NOTE: Set the log to use for test output, if necessary.
+    #
+    if {![info exists test_log]} then {
+      set test_log [file join [getTemporaryPath] [file tail [info \
+          nameofexecutable]][getTestLogId].test.[pid].log]
+    }
+  }
+
+  #
+  # NOTE: Check for and process any custom test prologue script that may be set
+  #       in the environment.  This must be done after the Eagle test package
+  #       has been made available and after the log file has been setup.
+  #
+  sourceIfValid prologue [getEnvironmentVariable testPrologue]
+
+  #
+  # NOTE: Show the name of the executable and the command line arguments, if
+  #       any.  This must be done after the log file has been setup; otherwise,
+  #       this information will not be visible in the log file.
+  #
+  tputs $test_channel [appendArgs "---- testRunId: " \
+      [getTestRunId] \n]
+
+  tputs $test_channel [appendArgs "---- processId: " \
+      [pid] \n]
+
+  tputs $test_channel [appendArgs "---- test channel: " \
+      $test_channel \n]
+
+  tputs $test_channel [appendArgs "---- test configuration: " \
+      $test_configuration \n]
+
+  if {[isEagle]} then {
+    tputs $test_channel [appendArgs "---- original command line: " \
+        [info cmdline] \n]
+
+    tputs $test_channel [appendArgs "---- threadId: " \
+        [info tid] \n]
+
+    tputs $test_channel [appendArgs "---- processors: " \
+        [info processors] \n]
+
+    tputs $test_channel [appendArgs "---- starting memory: " \
+        [formatListAsDict [debug memory]] \n]
+
+    catch {debug stack true} stack
+
+    tputs $test_channel [appendArgs "---- starting stack: " \
+        [formatListAsDict $stack] \n]
+
+    unset stack
+    catch {file drive} drive
+
+    tputs $test_channel [appendArgs "---- system drive: " \
+        [formatListAsDict $drive] \n]
+
+    unset drive
+  }
+
+  tputs $test_channel [appendArgs "---- executable: \"" \
+      $bin_file \"\n]
+
+  tputs $test_channel [appendArgs "---- command line: " \
+      [expr {[info exists argv] && [string length $argv] > 0 ? \
+          $argv : "<none>"}] \n]
+
+  tputs $test_channel [appendArgs "---- logging to: " \
+      [expr {[info exists test_log] && [string length $test_log] > 0 ? \
+          [appendArgs \" $test_log \"] : "<none>"}] \n]
+
+  tputs $test_channel [appendArgs "---- pass threshold: " \
+      [expr {[info exists test_threshold] && \
+          [string is integer -strict $test_threshold] ? \
+              [appendArgs $test_threshold %] : "<none>"}] \n]
+
+  tputs $test_channel [appendArgs "---- stop on failure: " \
+      [expr {[info exists test_stop_on_failure] && \
+          [string is boolean -strict $test_stop_on_failure] ? \
+              $test_stop_on_failure : "<none>"}] \n]
+
+  tputs $test_channel [appendArgs "---- exit on complete: " \
+      [expr {[info exists test_exit_on_complete] && \
+          [string is boolean -strict $test_exit_on_complete] ? \
+              $test_exit_on_complete : "<none>"}] \n]
+
+  #
+  # NOTE: Show the information about which tests and files are being run and/or
+  #       skipped (COMPAT: Tcl).
+  #
+  if {[llength $test_flags(-file)] > 0} then {
+    tputs $test_channel [appendArgs "---- running test files that match: " \
+        $test_flags(-file) \n]
+  }
+
+  if {[llength $test_flags(-notFile)] > 0} then {
+    tputs $test_channel [appendArgs "---- skipping test files that match: " \
+        $test_flags(-notFile) \n]
+  }
+
+  if {[llength $test_flags(-match)] > 0} then {
+    tputs $test_channel [appendArgs "---- running tests that match: " \
+        $test_flags(-match) \n]
+  }
+
+  if {[llength $test_flags(-skip)] > 0} then {
+    tputs $test_channel [appendArgs "---- skipping tests that match: " \
+        $test_flags(-skip) \n]
+  }
+
+  tputs $test_channel [appendArgs "---- path: \"" \
+      [expr {[info exists path] && [string length $path] > 0 ? \
+          $path : "<none>"}] \"\n]
+
+  tputs $test_channel [appendArgs "---- base path: \"" \
+      $base_path \"\n]
+
+  tputs $test_channel [appendArgs "---- binary path: \"" \
+      $bin_path \"\n]
+
+  tputs $test_channel [appendArgs "---- library path: \"" \
+      $lib_path \"\n]
+
+  tputs $test_channel [appendArgs "---- tests located in: \"" \
+      $test_path \"\n]
+
+  tputs $test_channel [appendArgs "---- tests running in: \"" \
+      [pwd] \"\n]
+
+  tputs $test_channel [appendArgs "---- temporary files stored in: \"" \
+      [getTemporaryPath] \"\n]
+
+  tputs $test_channel [appendArgs "---- native Tcl shell: \"" \
+      $test_tclsh \"\n]
+
+  #
+  # NOTE: Initialize the Eagle test constraints.
+  #
+  if {[isEagle]} then {
+    initializeTests
+
+    #
+    # NOTE: If the "no(mono)" variable is set (to anything) then any
+    #       special test suite hacks for Mono will be disabled. This
+    #       does not control or change any hacks for Mono that may
+    #       be present in the library itself.
+    #
+    # if {![info exists no(mono)] && [isMono]} then {
+    #   set no(mono) true
+    # }
+
+    #
+    # NOTE: Has administrator detection support been disabled?  We do
+    #       this check [nearly] first as it may [eventually] be used
+    #       to help determine if other constraints should be skipped.
+    #
+    if {![info exists no(administrator)]} then {
+      checkForAdministrator $test_channel
+    }
+
+    #
+    # NOTE: Has host detection support been disabled?
+    #
+    if {![info exists no(host)]} then {
+      checkForHost $test_channel
+    }
+
+    #
+    # NOTE: Has primary thread detection support been disabled?  We do
+    #       this check [nearly] first as it may [eventually] be used
+    #       to help determine if other constraints should be skipped.
+    #
+    if {![info exists no(primaryThread)]} then {
+      checkForPrimaryThread $test_channel
+    }
+
+    #
+    # NOTE: Has runtime detection support been disabled?  We do this
+    #       checking [nearly] first as it may skip other constraints.
+    #
+    if {![info exists no(runtime)]} then {
+      checkForRuntime $test_channel
+    }
+
+    #
+    # NOTE: Check the runtime version (i.e. what version of the runtime
+    #       are we currently running on?).
+    #
+    if {![info exists no(runtimeVersion)]} then {
+      checkForRuntimeVersion $test_channel
+    }
+
+    #
+    # NOTE: Check the image runtime version (i.e. what version of the
+    #       runtime was this assembly compiled against?).
+    #
+    if {![info exists no(imageRuntimeVersion)]} then {
+      checkForImageRuntimeVersion $test_channel
+    }
+
+    #
+    # NOTE: Has machine detection support been disabled?
+    #
+    if {![info exists no(machine)]} then {
+      checkForMachine $test_channel 32 intel; # (i.e. x86)
+      checkForMachine $test_channel 64 amd64; # (i.e. x64)
+    }
+
+    #
+    # NOTE: Has culture detection support been disabled?
+    #
+    if {![info exists no(culture)]} then {
+      checkForCulture $test_channel
+    }
+
+    #
+    # NOTE: Has software update trust detection support been disabled?
+    #
+    if {![info exists no(softwareUpdate)]} then {
+      checkForSoftwareUpdateTrust $test_channel
+    }
+
+    #
+    # NOTE: Has database testing support been disabled?
+    #
+    if {![info exists no(sql)]} then {
+      #
+      # NOTE: Set the server name, if necessary.
+      #
+      if {![info exists server]} then {
+        set server .
+      }
+
+      #
+      # NOTE: Set the database name, if necessary.
+      #
+      if {![info exists database]} then {
+        set database master
+      }
+
+      #
+      # NOTE: Set the connection timeout, if necessary.
+      #
+      if {![info exists timeout]} then {
+        set timeout [expr {$test_timeout / 1000}]; # milliseconds to seconds.
+      }
+
+      #
+      # NOTE: Set the test user name, if necessary.
+      #
+      if {![info exists user]} then {
+        set user [getEnvironmentVariable user]
+      }
+
+      #
+      # NOTE: Set the test password, if necessary.
+      #
+      if {![info exists password]} then {
+        set password [getEnvironmentVariable password]
+      }
+
+      #
+      # NOTE: Set the database connection string, if necessary.
+      #
+      if {![info exists test_database]} then {
+        #
+        # NOTE: Mono does not have support for trusted connections;
+        #       therefore, we must create a slightly different
+        #       connection string.
+        #
+        set test_database [subst \
+            {Data Source=${server};Initial Catalog=${database};Connect\
+            Timeout=${timeout};[expr {[isMono] ? [subst \
+            {User Id=${user};Password=${password};}] : {Integrated\
+            Security=SSPI;}}]}]
+      }
+
+      #
+      # NOTE: Can we access the local database?
+      #
+      checkForDatabase $test_channel $test_database
+      unset password user timeout database server
+    }
+
+    #
+    # NOTE: Has object handle reference count tracking support been disabled
+    #       (at compile-time)?
+    #
+    if {![info exists no(refCount)]} then {
+      #
+      # NOTE: For tests "excel-*", "object-2.*", "object-7.1", "object-8.*",
+      #       and "object-98.*".
+      #
+      checkForReferenceCountTracking $test_channel
+    }
+
+    #
+    # NOTE: Has compile/runtime option testing support been disabled?
+    #
+    if {![info exists no(compileOptions)]} then {
+      #
+      # NOTE: Has callback queue support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileCallbackQueue)]} then {
+        #
+        # NOTE: For test "commands-1.4".
+        #
+        checkForCompileOption $test_channel CALLBACK_QUEUE
+      }
+
+      #
+      # NOTE: Has console support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileConsole)]} then {
+        #
+        # NOTE: For test "host-1.2".
+        #
+        checkForCompileOption $test_channel CONSOLE
+      }
+
+      #
+      # NOTE: Has database support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileData)]} then {
+        #
+        # NOTE: For tests "sql-1.1" and "upvar-99.1".
+        #
+        checkForCompileOption $test_channel DATA
+      }
+
+      #
+      # NOTE: Has script debugger support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileDebugger)]} then {
+        #
+        # NOTE: For tests "debug-1.1", "debug-2.1", "debug-3.1" and
+        #       "debug-4.1".
+        #
+        checkForCompileOption $test_channel DEBUGGER
+      }
+
+      #
+      # NOTE: Has isolated interpreter support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileIsolatedInterpreters)]} then {
+        #
+        # NOTE: For test "xaml-1.2".
+        #
+        checkForCompileOption $test_channel ISOLATED_INTERPRETERS
+      }
+
+      #
+      # NOTE: Has isolated plugin support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileIsolatedPlugins)]} then {
+        #
+        # NOTE: For test "load-1.1.1".
+        #
+        checkForCompileOption $test_channel ISOLATED_PLUGINS
+      }
+
+      #
+      # NOTE: Has PowerShell approved-verbs support been enabled (at
+      #       compile-time)?
+      #
+      if {![info exists no(compileApprovedVerbs)]} then {
+        #
+        # NOTE: For test "object-4.8".
+        #
+        checkForCompileOption $test_channel APPROVED_VERBS
+      }
+
+      #
+      # NOTE: Has Mono support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileMono)]} then {
+        #
+        # NOTE: For test "object-4.13".
+        #
+        checkForCompileOption $test_channel MONO
+      }
+
+      #
+      # NOTE: Has Windows support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileWindows)]} then {
+        #
+        # NOTE: For test "garuda-1.0".
+        #
+        checkForCompileOption $test_channel WINDOWS
+      }
+
+      #
+      # NOTE: Has native code support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileNative)]} then {
+        #
+        # NOTE: For tests "debug-3.2", "expr-3.2", and "host-1.1".
+        #
+        checkForCompileOption $test_channel NATIVE
+      }
+
+      #
+      # NOTE: Has native package support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileNativePackage)]} then {
+        #
+        # NOTE: For test "garuda-1.0".
+        #
+        checkForCompileOption $test_channel NATIVE_PACKAGE
+      }
+
+      #
+      # NOTE: Has network support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileNetwork)]} then {
+        #
+        # NOTE: For tests "commands-1.4", "socket-1.*", "socket-2.1", and
+        #       "socket-3.1".
+        #
+        checkForCompileOption $test_channel NETWORK
+      }
+
+      #
+      # NOTE: Has native Tcl support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileTcl)]} then {
+        #
+        # NOTE: For tests "commands-1.1.*", "excel-2.2", "tclCancel-1.1",
+        #       "tclEncoding-1.*", "tclErrorInfo-1.*", "tclLoad-1.*",
+        #       "tclResetCancel-1.1", "tclResetCancel-2.1",
+        #       "tclResetCancel-2.2", "tclResetCancel-3.1",
+        #       "tclResetCancel-4.1", "tclSet-1.1", and "tclSubst-1.1".
+        #
+        checkForCompileOption $test_channel TCL
+      }
+
+      #
+      # NOTE: Has xml support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileXml)]} then {
+        #
+        # NOTE: For tests "commands-1.4", "object-7.3" and "xml-1.1.*".
+        #
+        checkForCompileOption $test_channel XML
+      }
+
+      #
+      # NOTE: Has dedicated test support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileTest)]} then {
+        #
+        # NOTE: For tests "basic-1.20", "basic-1.21", "function-1.1",
+        #       "object-2.1", "object-3.1", "object-4.1", "object-7.1",
+        #       "object-7.2", "object-7.4", "object-14.4", "object-14.5",
+        #       "object-14.6", "remotingServer-1.*", and "debug-5.*".
+        #
+        checkForCompileOption $test_channel TEST
+      }
+
+      #
+      # NOTE: Has threading support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileThreading)]} then {
+        #
+        # NOTE: For tests "object-10.2" and "object-10.3".
+        #
+        checkForCompileOption $test_channel THREADING
+      }
+
+      #
+      # NOTE: Has Tcl threading support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileTclThreaded)]} then {
+        #
+        # NOTE: For tests "tclLoad-1.5" and "tclLoad-1.6".
+        #
+        checkForCompileOption $test_channel TCL_THREADED
+      }
+
+      #
+      # NOTE: Has Tcl isolated interpreter thread support been enabled (at
+      #       compile-time)?
+      #
+      if {![info exists no(compileTclThreads)]} then {
+        #
+        # NOTE: For tests "tclLoad-1.5" and "tclLoad-1.6".
+        #
+        checkForCompileOption $test_channel TCL_THREADS
+      }
+    }
+
+    #
+    # NOTE: Has dynamic loading testing support been disabled?
+    #
+    if {![info exists no(dynamic)]} then {
+      #
+      # NOTE: For tests "commands-1.1.*", "library-3.*", and "tcl*-*.*".
+      #
+      checkForDynamicLoading $test_channel
+    }
+
+    #
+    # NOTE: Has Tcl testing support been disabled?
+    #
+    if {![info exists no(tcl)]} then {
+      if {![info exists no(tclInstalls)]} then {
+        #
+        # NOTE: For tests "commands-1.1.*", "library-3.*", and "tcl*-*.*".
+        #
+        checkForTclInstalls $test_channel
+      }
+
+      if {![info exists no(tclReady)]} then {
+        checkForTclReady $test_channel
+      }
+
+      if {![info exists no(tclShell)]} then {
+        #
+        # NOTE: For test "garuda-1.0".
+        #
+        checkForTclShell $test_channel
+      }
+    }
+
+    #
+    # NOTE: Has custom test method support been disabled?
+    #
+    if {![info exists no(test)]} then {
+      #
+      # NOTE: Has remoting testing support been disabled?
+      #
+      if {![info exists no(testRemoting)]} then {
+        #
+        # NOTE: For tests "remotingServer-1.*".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestRemoting*
+      }
+
+      #
+      # NOTE: Has asynchronous testing support been disabled?
+      #
+      if {![info exists no(testAsynchronous)]} then {
+        #
+        # NOTE: For tests "basic-1.20" and "basic-1.21".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestEvaluateAsync*
+      }
+
+      #
+      # NOTE: Has custom function testing support been disabled?
+      #
+      if {![info exists no(testFunction)]} then {
+        #
+        # NOTE: For test "function-1.1".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestAddFunction*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestRemoveFunction*
+      }
+
+      #
+      # NOTE: Has write-box testing support been disabled?
+      #
+      if {![info exists no(testWriteBox)]} then {
+        #
+        # NOTE: For tests "debug-5.*".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestWriteBox*
+      }
+
+      #
+      # NOTE: Has core marshaller testing support been disabled?
+      #
+      if {![info exists no(testMarshaller)]} then {
+        #
+        # NOTE: For test "object-2.1".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestComplexMethod*
+
+        #
+        # NOTE: For test "object-2.3".
+        #
+        checkForObjectMember $test_channel Eagle._Components.Private.ArrayOps \
+            *ToHexadecimalString*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestMulti2Array*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestMulti3Array*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestNestedArray*
+
+        #
+        # NOTE: For test "object-3.1".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *get_Item*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *set_Item*
+
+        #
+        # NOTE: For test "object-3.6.*".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestStringIListReturnValue*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestStringIListIListIListReturnValue*
+
+        #
+        # NOTE: For test "object-4.1".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestExpr*
+
+        #
+        # NOTE: For test "object-7.1".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestByRefValueTypeMethod*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestNullableValueTypeMethod*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestByRefNullableValueTypeMethod*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestIntArrayReturnValue*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestStringArrayReturnValue*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestStringListReturnValue*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestStringListArrayReturnValue*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestByRefStringListArray*
+
+        #
+        # NOTE: For tests "object-14.4" and "object-14.5".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *StaticObjectProperty*
+
+        #
+        # NOTE: For test "object-14.6".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TypeProperty*
+
+        #
+        # NOTE: For test "basic-1.29".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestExecuteStaticDelegates*
+
+        #
+        # NOTE: For tests "basic-1.30" and "basic-1.31".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestExecuteDelegateCommands*
+
+        #
+        # NOTE: For test "object-7.2" and "object-7.4".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestNullArray*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestOutArray*
+      }
+    }
+
+    #
+    # NOTE: Has Excel testing support been disabled?
+    #
+    if {![info exists no(excel)]} then {
+      #
+      # NOTE: For tests "excel-*.*".
+      #
+      checkForAssembly $test_channel Microsoft.Office.Interop.Excel
+    }
+
+    #
+    # NOTE: Has speech testing support been disabled?
+    #
+    if {![info exists no(speech)]} then {
+      #
+      # NOTE: Set the audio volume, if necessary.
+      #
+      if {![info exists test_volume]} then {
+        set test_volume 0; # in percent, 0 is silent.
+      }
+
+      #
+      # NOTE: For test "object-4.5".
+      #
+      checkForAssembly $test_channel System.Speech
+    }
+
+    #
+    # NOTE: Has WinForms testing support been disabled?
+    #
+    if {![info exists no(winForms)]} then {
+      #
+      # NOTE: For tests "object-13.1.*", "object-13.2.*", and
+      #       "winForms-*.*".
+      #
+      checkForWindowsForms $test_channel
+    }
+
+    #
+    # NOTE: Are we running in an STA thread?
+    #
+    if {![info exists no(staThread)]} then {
+      #
+      # NOTE: For test "xaml-1.*".
+      #
+      checkForStaThread $test_channel
+    }
+
+    #
+    # NOTE: Has WPF testing support been disabled?
+    #
+    if {![info exists no(wpf)]} then {
+      #
+      # NOTE: For test "xaml-1.*".
+      #
+      checkForWindowsPresentationFoundation $test_channel
+    }
+
+    #
+    # NOTE: Has PowerShell testing support been disabled?
+    #
+    if {![info exists no(powerShell)]} then {
+      #
+      # NOTE: For tests "object-4.7", "object-4.8", and "object-4.9".
+      #
+      checkForPowerShell $test_channel
+    }
+
+    #
+    # NOTE: Has WiX testing support been disabled?
+    #
+    if {![info exists no(wix)]} then {
+      #
+      # NOTE: For test "object-4.10".
+      #
+      checkForWix $test_channel
+    }
+
+    #
+    # NOTE: Has managed debugger testing support been disabled?
+    #
+    if {![info exists no(managedDebugger)]} then {
+      checkForManagedDebugger $test_channel
+    }
+
+    #
+    # NOTE: Has script debugger testing support been disabled?
+    #
+    if {![info exists no(scriptDebugger)]} then {
+      #
+      # NOTE: For tests "debug-1.1", "debug-2.1", "debug-3.1", and
+      #       "debug-4.1".
+      #
+      checkForScriptDebugger $test_channel
+    }
+
+    #
+    # NOTE: Has script debugger interpreter testing support been
+    #       disabled?
+    #
+    if {![info exists no(scriptDebuggerInterpreter)]} then {
+      #
+      # NOTE: For test "debug-2.1".
+      #
+      checkForScriptDebuggerInterpreter $test_channel
+    }
+
+    #
+    # NOTE: Are we running under the Mono debugger?  If so, several
+    #       tests will have to be disabled because they do not appear
+    #       to work there.
+    #
+    if {![info exists no(monoDebugger)]} then {
+      tputs $test_channel "---- checking for Mono debugger... "
+
+      if {[haveConstraint mono] && [haveConstraint managedDebugger]} then {
+        #
+        # NOTE: Add a special test constraint to simplify the Mono debugger
+        #       test constraint checking for the tests that need it.
+        #
+        addConstraint monoDebugger
+
+        tputs $test_channel yes\n
+      } else {
+        tputs $test_channel no\n
+      }
+    }
+
+    #
+    # NOTE: Has Garuda testing support been disabled?
+    #
+    if {![info exists no(garudaDll)]} then {
+      #
+      # NOTE: For test "garuda-1.0".
+      #
+      checkForGarudaDll $test_channel
+    }
+  } else {
+    #
+    # HACK: Reset the test counts for tcltest.
+    #
+    set ::tcltest::numTests(Total) 0
+    set ::tcltest::numTests(Skipped) 0
+    set ::tcltest::numTests(Passed) 0
+    set ::tcltest::numTests(Failed) 0
+
+    #
+    # HACK: Reset the list of failed files.
+    #
+    set ::tcltest::failFiles [list]
+  }
+
+  #
+  # NOTE: For test "package-1.0".
+  #
+  if {![info exists no(pkgAll.tcl)]} then {
+    checkForFile $test_channel [file join $base_path Package Tests all.tcl] \
+        pkgAll.tcl
+  }
+
+  #
+  # NOTE: For test "subst-1.*".
+  #
+  if {![info exists no(bad_subst.txt)]} then {
+    checkForFile $test_channel [file join $test_path bad_subst.txt]
+  }
+
+  #
+  # NOTE: For test "fileIO-1.*".
+  #
+  if {![info exists no(file.dat)]} then {
+    checkForFile $test_channel [file join $test_path file.dat]
+  }
+
+  #
+  # NOTE: For test "garbage-1.1".
+  #
+  if {![info exists no(garbage.txt)]} then {
+    checkForFile $test_channel [file join $test_path garbage.txt]
+  }
+
+  #
+  # NOTE: For test "xaml-1.*".
+  #
+  if {![info exists no(test.png)]} then {
+    checkForFile $test_channel [file join $test_path test.png]
+  }
+
+  #
+  # NOTE: For test "socket-1.2".
+  #
+  if {![info exists no(client.tcl)]} then {
+    checkForFile $test_channel [file join $test_path client.tcl]
+  }
+
+  #
+  # NOTE: For test "tclLoad-1.2".
+  #
+  if {![info exists no(tcl_unload.tcl)]} then {
+    checkForFile $test_channel [file join $test_path tcl_unload.tcl]
+  }
+
+  #
+  # NOTE: For test "read.eagle".
+  #
+  if {![info exists no(read.eagle)]} then {
+    checkForFile $test_channel [file join $test_path read.eagle]
+  }
+
+  #
+  # NOTE: For test "read2.eagle".
+  #
+  if {![info exists no(read2.eagle)]} then {
+    checkForFile $test_channel [file join $test_path read2.eagle]
+  }
+
+  #
+  # NOTE: For test "read3.eagle".
+  #
+  if {![info exists no(read3.eagle)]} then {
+    checkForFile $test_channel [file join $test_path read3.eagle]
+  }
+
+  #
+  # NOTE: For test "read4.eagle".
+  #
+  if {![info exists no(read4.eagle)]} then {
+    checkForFile $test_channel [file join $test_path read4.eagle]
+  }
+
+  #
+  # NOTE: For test "source.eagle".
+  #
+  if {![info exists no(source.eagle)]} then {
+    checkForFile $test_channel [file join $test_path source.eagle]
+  }
+
+  #
+  # NOTE: For test "unbalanced_brace.eagle".
+  #
+  if {![info exists no(unbalanced_brace.eagle)]} then {
+    checkForFile $test_channel [file join $test_path unbalanced_brace.eagle]
+  }
+
+  #
+  # NOTE: For test "unbalanced_brace2.eagle".
+  #
+  if {![info exists no(unbalanced_brace2.eagle)]} then {
+    checkForFile $test_channel [file join $test_path unbalanced_brace2.eagle]
+  }
+
+  #
+  # NOTE: For test "excel-2.*".
+  #
+  if {![info exists no(test.xls)]} then {
+    checkForFile $test_channel [file join $test_path test.xls]
+  }
+
+  #
+  # NOTE: For test "load-1.1.*".
+  #
+  if {![info exists no(Plugin.dll)]} then {
+    checkForFile $test_channel [file join $lib_path Plugin1.0 Plugin.dll]
+  }
+
+  #
+  # NOTE: For test "object-6.1".
+  #
+  if {![info exists no(Sample.exe)]} then {
+    checkForFile $test_channel [file join $bin_path Sample.exe]
+  }
+
+  #
+  # NOTE: For test "object-4.8".
+  #
+  if {![info exists no(EagleCmdlets.dll)]} then {
+    checkForFile $test_channel [file join $bin_path EagleCmdlets.dll]
+  }
+
+  #
+  # NOTE: For test "object-4.10".
+  #
+  if {![info exists no(EagleExtensions.dll)]} then {
+    checkForFile $test_channel [file join $bin_path EagleExtensions.dll]
+  }
+
+  #
+  # NOTE: For test "object-4.10".
+  #
+  if {![info exists no(test.wxs)]} then {
+    checkForFile $test_channel [file join $base_path Installer Tests test.wxs]
+  }
+
+  #
+  # NOTE: For test "sql-1.2".
+  #
+  if {![info exists no(sqlite3.dll)]} then {
+    checkForFile $test_channel [file join $bin_path sqlite3.dll]
+  }
+
+  if {![info exists no(System.Data.SQLite.dll)]} then {
+    checkForFile $test_channel [file join $bin_path System.Data.SQLite.dll]
+  }
+
+  if {![info exists no(test.sqlite3)]} then {
+    checkForFile $test_channel [file join $test_path test.sqlite3]
+  }
+
+  #
+  # NOTE: Check the core test constraints unless they have been
+  #       explicitly disabled.
+  #
+  if {![info exists no(platform)]} then {
+    checkForPlatform $test_channel
+  }
+
+  if {![info exists no(version)]} then {
+    checkForVersion $test_channel
+  }
+
+  if {![info exists no(eagle)]} then {
+    checkForEagle $test_channel
+  }
+
+  if {![info exists no(garuda)]} then {
+    checkForGaruda $test_channel
+  }
+
+  if {![info exists no(shell)]} then {
+    checkForShell $test_channel
+  }
+
+  if {![info exists no(debug)]} then {
+    checkForDebug $test_channel
+  }
+
+  #
+  # NOTE: Has native code detection support been disabled?
+  #
+  if {![info exists no(native)]} then {
+    checkForNativeCode $test_channel
+  }
+
+  #
+  # NOTE: Check for various extra commands that may be present.
+  #
+  if {![info exists no(callbackCommand)]} then {
+    checkForCommand $test_channel callback
+  }
+
+  if {![info exists no(libraryCommand)]} then {
+    checkForCommand $test_channel library
+  }
+
+  if {![info exists no(socketCommand)]} then {
+    checkForCommand $test_channel socket
+  }
+
+  if {![info exists no(sqlCommand)]} then {
+    checkForCommand $test_channel sql
+  }
+
+  if {![info exists no(tclCommand)]} then {
+    checkForCommand $test_channel tcl
+  }
+
+  if {![info exists no(xmlCommand)]} then {
+    checkForCommand $test_channel xml
+  }
+
+  #
+  # NOTE: Check for various features that were added through
+  #       the TIP process.
+  #
+  if {![info exists no(tip127)]} then {
+    checkForTip127 $test_channel
+  }
+
+  if {![info exists no(tip194)]} then {
+    checkForTip194 $test_channel
+  }
+
+  if {![info exists no(tip241)]} then {
+    checkForTip241 $test_channel
+  }
+
+  if {![info exists no(tip285)]} then {
+    checkForTip285 $test_channel
+  }
+
+  #
+  # NOTE: Has performance testing been disabled?
+  #
+  if {![info exists no(performance)]} then {
+    checkForPerformance $test_channel
+  }
+
+  #
+  # NOTE: Have precision timing tests been disabled?
+  #
+  if {![info exists no(timing)]} then {
+    checkForTiming $test_channel 50; # 1/20th second.
+  }
+
+  #
+  # NOTE: Has interactive testing been disabled?
+  #
+  if {![info exists no(interactive)]} then {
+    checkForInteractive $test_channel
+  }
+
+  if {![info exists no(userInteraction)]} then {
+    checkForUserInteraction $test_channel
+  }
+
+  #
+  # NOTE: Check for network connectivity to our test host (i.e.
+  #       the Eagle distribution site).
+  #
+  if {![info exists no(network)]} then {
+    checkForNetwork $test_channel $test_host $test_timeout
+  }
+
+  #
+  # NOTE: For Eagle, dump the platform information, including
+  #       the compile options.
+  #
+  if {[isEagle]} then {
+    #
+    # NOTE: Figure out the approximate relative performance
+    #       of this machine.
+    #
+    if {[haveConstraint performance]} then {
+      tputs $test_channel [appendArgs \
+          "---- checking for baseline BogoCops (commands-per-second)... "]
+
+      if {![info exists test_base_cops]} then {
+        #
+        # NOTE: The expected performance numbers for all the
+        #       performance tests will be calibrated based on
+        #       this number (which is based on the measured
+        #       performance of the actual machine that was
+        #       used to determine those expected performance
+        #       numbers).
+        #
+        set test_base_cops 36000.0
+      }
+
+      tputs $test_channel [appendArgs $test_base_cops \n]
+      tputs $test_channel [appendArgs \
+          "---- checking for current BogoCops (commands-per-second)... "]
+
+      if {![info exists test_cops]} then {
+        set test_cops [calculateBogoCops]
+      }
+
+      tputs $test_channel [appendArgs $test_cops \n]
+    }
+
+    ###########################################################################
+
+    set timeStamp [getPlatformInfo timeStamp ""]
+
+    if {[string length $timeStamp] > 0} then {
+      #########################################################################
+      # MONO: Bug, see: https://bugzilla.novell.com/show_bug.cgi?id=479061
+      #########################################################################
+
+      if {[isMono]} then {
+        #
+        # HACK: We need something to go into the log file.
+        #
+        set timeStamp [lindex $timeStamp 0]
+      } else {
+        set timeStamp [clock format [clock scan $timeStamp] -iso]
+      }
+    } else {
+      set timeStamp <none>
+    }
+
+    tputs $test_channel [appendArgs "---- build: " \
+        [getPlatformInfo engine <none>] " " \
+        [getPlatformInfo patchLevel <none>] " " \
+        [getPlatformInfo tag <none>] " " \
+        [getPlatformInfo text <none>] " " \
+        [getPlatformInfo configuration <none>] " " \
+        [getPlatformInfo suffix <none>] " " \
+        $timeStamp \n]
+
+    tputs $test_channel [appendArgs "---- os: " \
+        [getPlatformInfo os <none>] \n]
+
+    tputs $test_channel [appendArgs "---- globalAssemblyCache: " \
+        [getPlatformInfo globalAssemblyCache <none>] \n]
+
+    tputs $test_channel [appendArgs "---- moduleVersionId: " \
+        [getPlatformInfo moduleVersionId <none>] \n]
+
+    tputs $test_channel [appendArgs "---- compileOptions: " \
+        [formatList [getPlatformInfo compileOptions <none>]] \n]
+
+    tputs $test_channel [appendArgs "---- strongName: " \
+        [getPlatformInfo strongName <none>] \n]
+
+    tputs $test_channel [appendArgs "---- certificate: " \
+        [getPlatformInfo certificate <none>] \n]
+
+    unset timeStamp
+  }
+
+  #
+  # NOTE: Show the current test file name, if any.
+  #
+  tputs $test_channel [appendArgs "---- test file: " \
+      [expr {[info exists test_file] && [string length $test_file] > 0 ? \
+      $test_file : "<none>"}] \n]
+
+  #
+  # NOTE: Show the active test constraints.
+  #
+  tputs $test_channel [appendArgs "---- constraints: " \
+      [formatList [lsort [getConstraints]]] \n]
+
+  #
+  # NOTE: Show when the tests actually began (now).
+  #
+  tputs $test_channel [appendArgs "---- tests began at " \
+      [clock format [clock seconds]] \n]
+}

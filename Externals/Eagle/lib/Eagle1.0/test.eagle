@@ -1,0 +1,1322 @@
+###############################################################################
+#
+# test.eagle --
+#
+# Extensible Adaptable Generalized Logic Engine (Eagle)
+# Test Initialization File
+#
+# Copyright (c) 2007-2010 by Joe Mistachkin.  All rights reserved.
+#
+# See the file "license.terms" for information on usage and redistribution of
+# this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: $
+#
+###############################################################################
+
+#
+# NOTE: Use our own namespace here because even though we do not directly
+#       support namespaces ourselves, we do not want to pollute the global
+#       namespace if this script actually ends up being evaluated in Tcl.
+#
+namespace eval ::Eagle {
+  proc tputs { channel string } {
+    #
+    # NOTE: If an output channel was provided, use it; otherwise,
+    #       ignore the message.
+    #
+    if {[string length $channel] > 0} then {
+      #
+      # NOTE: Check if output is being actively intercepted by us.
+      #
+      if {![isEagle] && \
+          [llength [info commands ::tcl::save::puts]] > 0} then {
+        ::tcl::save::puts -nonewline $channel $string
+      } else {
+        puts -nonewline $channel $string
+      }
+    }
+
+    tlog $string
+  }
+
+  proc tlog { string } {
+    #
+    # NOTE: If a log file was configured, use it; otherwise,
+    #       ignore the message.
+    #
+    set fileName [getTestLog]
+
+    if {[string length $fileName] > 0} then {
+      appendSharedLogFile $fileName $string
+    }
+  }
+
+  proc haveConstraint { name } {
+    if {[isEagle]} then {
+      return [expr {
+          [info exists ::eagle_tests(constraints)] && \
+          [lsearch -exact $::eagle_tests(constraints) $name] != -1}]
+    } else {
+      return [expr {
+          [info exists ::tcltest::testConstraints($name)] && \
+          $::tcltest::testConstraints($name)}]
+    }
+  }
+
+  proc addConstraint { name {value 1} } {
+    if {[isEagle]} then {
+      if {[info exists ::eagle_tests(constraints)] && \
+          [lsearch -exact $::eagle_tests(constraints) $name] == -1 && \
+          $value} then {
+        lappend ::eagle_tests(constraints) $name
+      }
+    } else {
+      ::tcltest::testConstraint $name $value
+    }
+
+    return ""
+  }
+
+  proc haveOrAddConstraint { name {value ""} } {
+    if {[isEagle]} then {
+      if {[llength [info level 0]] == 2} then {
+        return [haveConstraint $name]
+      }
+
+      return [addConstraint $name [expr {bool($value)}]]
+    } else {
+      return [::tcltest::testConstraint $name $value]
+    }
+  }
+
+  proc getConstraints {} {
+    set result [list]
+
+    if {[isEagle]} then {
+      if {[catch {set ::eagle_tests(constraints)} constraints] == 0} then {
+        eval lappend result $constraints
+      }
+    } else {
+      foreach name [array names ::tcltest::testConstraints] {
+        if {$::tcltest::testConstraints($name)} then {
+          lappend result $name
+        }
+      }
+    }
+
+    return $result
+  }
+
+  proc fixConstraints { constraints } {
+    set result [string trim $constraints]
+
+    if {[string length $result] > 0} then {
+      #
+      # HACK: Fixup for the magic expression (via [expr]) test
+      #       constraint syntax supported by Tcltest and not by
+      #       EagleTest.  This needs to happen for Tcl in test
+      #       constraints that contain any characters that are
+      #       not alphanumeric, not a period, and not a colon
+      #       (e.g. in this case, the exclamation point);
+      #       however, it should only be required when the
+      #       number of test constraints is greater than one.
+      #
+      if {![isEagle]} then {
+        if {[string first ! $result] != -1} then {
+          #
+          # HACK: All of our test constraints assume they are
+          #       "logically and-ed" together.
+          #
+          set result [join [split $result] " && "]
+        }
+      }
+    }
+
+    return $result
+  }
+
+  proc calculateRelativePerformance { type value } {
+    #
+    # NOTE: Adjust the expected performance number based on the
+    #       relative performance of this machine, if available.
+    #
+    if {[info exists ::test_base_cops] && [info exists ::test_cops]} then {
+      #
+      # NOTE: Calibrate the expected performance numbers based
+      #       on the ratio of the baseline performace to the
+      #       current performance.
+      #
+      switch -exact -- $type {
+        elapsed {
+          if {$::test_cops != 0} then {
+            return [expr {double($value) * \
+                ($::test_base_cops / $::test_cops)}]
+          }
+        }
+        iterations {
+          if {$::test_base_cops != 0} then {
+            return [expr {double($value) * \
+                ($::test_cops / $::test_base_cops)}]
+          }
+        }
+      }
+    }
+
+    return $value
+  }
+
+  proc sourceIfValid { type fileName } {
+    if {[string length $fileName] > 0} then {
+      if {[file exists $fileName]} then {
+        tputs $::test_channel [appendArgs \
+            "---- evaluating $type file: \"" $fileName \"\n]
+
+        if {[catch {uplevel 1 [list source $fileName]} error] != 0} then {
+          tputs $::test_channel [appendArgs \
+              "---- error during $type file: " $error \n]
+
+          #
+          # NOTE: The error has been logged, now re-throw it.
+          #
+          error $error $::errorInfo $::errorCode
+        }
+      } else {
+        tputs $::test_channel [appendArgs \
+            "---- skipped $type file: \"" $fileName \
+            "\", it does not exist\n"]
+      }
+    }
+  }
+
+  proc processTestArguments { varName args } {
+    #
+    # NOTE: We are going to place the configured options in
+    #       the variable identified by the name provided by
+    #       the caller.
+    #
+    upvar 1 $varName array
+
+    #
+    # TODO: Add more support for standard tcltest options here.
+    #
+    set options [list -configuration -suffix -file -notFile -match -skip \
+        -constraints -logFile -threshold -stopOnFailure -exitOnComplete]
+
+    foreach {name value} $args {
+      if {[lsearch -exact $options $name] != -1} then {
+        set array($name) $value
+
+        tputs $::test_channel [appendArgs \
+            "---- overrode test option \"" $name "\" with value \"" $value \
+            \"\n]
+      } else {
+        tputs $::test_channel [appendArgs \
+            "---- unknown test option \"" $name "\" with value \"" $value \
+            "\" ignored\n"]
+      }
+    }
+  }
+
+  proc getTemporaryPath {} {
+    #
+    # NOTE: Build the list of "temporary directory" override
+    #       environment variables to check.
+    #
+    set names [list]
+
+    foreach name [list TEMP TMP] {
+      #
+      # NOTE: Make sure we handle all the reasonable "cases" of
+      #       the environment variable names.
+      #
+      lappend names [string toupper $name]
+      lappend names [string tolower $name]
+      lappend names [string totitle $name]
+    }
+
+    #
+    # NOTE: Check if we can use any of the environment variables.
+    #
+    foreach name $names {
+      set value [getEnvironmentVariable $name]
+
+      if {[string length $value] > 0} then {
+        return [file normalize $value]
+      }
+    }
+
+    if {[isEagle]} then {
+      #
+      # NOTE: Eagle fallback, use whatever is reported by the
+      #       underlying framework and/or operating system.
+      #
+      return [file normalize [object invoke System.IO.Path GetTempPath]]
+    } else {
+      #
+      # NOTE: Tcl fallback, *assume* that we can use the
+      #       directory where the executable is running for
+      #       temporary storage.
+      #
+      return [file normalize [file dirname [info nameofexecutable]]]
+    }
+  }
+
+  proc getFiles { directory pattern } {
+    if {[isEagle]} then {
+      return [lsort -dictionary [file list $directory $pattern]]
+    } else {
+      return [lsort -dictionary [glob -directory $directory -types \
+          {b c f p s} -nocomplain -- $pattern]]
+    }
+  }
+
+  proc getTestFiles { directories matchFilePatterns skipFilePatterns } {
+    set result [list]
+
+    foreach directory $directories {
+      set matchFileNames [list]
+
+      foreach pattern $matchFilePatterns {
+        eval lappend matchFileNames [getFiles $directory $pattern]
+      }
+
+      set skipFileNames [list]
+
+      foreach pattern $skipFilePatterns {
+        eval lappend skipFileNames [getFiles $directory $pattern]
+      }
+
+      foreach fileName $matchFileNames {
+        if {[lsearch -exact $skipFileNames $fileName] == -1} then {
+          lappend result $fileName
+        }
+      }
+    }
+
+    return $result
+  }
+
+  proc getTestRunId {} {
+    #
+    # HACK: Yes, this is a bit ugly; however, it creates a nice unique
+    #       identifier to represent the test run, which makes analyzing
+    #       the test log files a lot easier.
+    #
+    if {[isEagle]} then {
+      #
+      # BUGBUG: Tcl 8.4 does not like this expression (and Tcl tries to
+      #         compile it even though it will only actually ever be
+      #         evaluated in Eagle).
+      #
+      set expr {random()}
+
+      #
+      # HACK: Mono does not currently support calling the String.Format
+      #       overload that takes a variable number of arguments via
+      #       reflection (Mono bug #636939).
+      #
+      if {![isMono]} then {
+        return [string format "{0:X16}{1:X16}{2:X16}" \
+            [clock now] [clock clicks] [expr $expr]]
+      } else {
+        #
+        # NOTE: Strip any leading minus signs for cleanliness.
+        #
+        return [appendArgs \
+            [string trimleft [clock now] -] \
+            [string trimleft [clock clicks] -] \
+            [string trimleft [expr $expr] -]]
+      }
+    } else {
+      set seconds [clock seconds]; set clicks [clock clicks]
+      binary scan [binary format d* [expr {rand()}]] w* random
+
+      return [format [appendArgs % [getLengthModifier $seconds] X% \
+          [getLengthModifier $clicks] X% [getLengthModifier $random] X] \
+          $seconds $clicks $random]
+    }
+  }
+
+  proc getTestLogId {} {
+    return [expr {[info exists ::test_log_id] ? \
+        [append result . $::test_log_id] : ""}]
+  }
+
+  proc getTestLog {} {
+    return [expr {[info exists ::test_log] ? $::test_log : ""}]
+  }
+
+  proc testExec { commandName options args } {
+    set command [list exec]
+
+    if {[llength $options] > 0} then {eval lappend command $options}
+
+    lappend command --
+    lappend command $commandName
+
+    eval lappend command $args
+
+    tputs $::test_channel [appendArgs "---- running command: " $command \n]
+
+    return [uplevel 1 $command]
+  }
+
+  proc execTestShell { options args } {
+    tputs $::test_channel [appendArgs \
+        "---- running nested shell: exec " \
+        [string trim [appendArgs $options " " -- " \"" \
+        [info nameofexecutable] "\" " $args]] \n]
+
+    return [uplevel 1 execShell [list $options] $args]
+  }
+
+  proc isStopOnFailure {} {
+    return [expr {[info exists ::test_stop_on_failure] && \
+                  [string is boolean -strict $::test_stop_on_failure] && \
+                  $::test_stop_on_failure}]
+  }
+
+  proc isExitOnComplete {} {
+    return [expr {[info exists ::test_exit_on_complete] && \
+                  [string is boolean -strict $::test_exit_on_complete] && \
+                  $::test_exit_on_complete}]
+  }
+
+  proc runTestPrologue {} {
+    #
+    # HACK: We do not want to force every third-party test suite
+    #       to come up with a half-baked solution to finding its
+    #       own files.
+    #
+    if {![info exists ::no(prologue.eagle)] && ![info exists ::path]} then {
+      set ::path [file normalize [file dirname [info script]]]
+    }
+
+    #
+    # NOTE: Evaluate the standard test prologue in the context of
+    #       the caller.
+    #
+    uplevel 1 [list source [file join $::test_path prologue.eagle]]
+  }
+
+  proc runTestEpilogue {} {
+    #
+    # NOTE: Evaluate the standard test epilogue in the context of
+    #       the caller.
+    #
+    uplevel 1 [list source [file join $::test_path epilogue.eagle]]
+
+    #
+    # HACK: We do not want to force every third-party test suite
+    #       to come up with a half-baked solution to finding its
+    #       own files.
+    #
+    if {![info exists ::no(epilogue.eagle)] && [info exists ::path]} then {
+      unset ::path
+    }
+  }
+
+  proc hookPuts {} {
+    #
+    # NOTE: This code was stolen from tcltest and heavily modified to work
+    #       with Eagle.
+    #
+    proc [namespace current]::testPuts { args } {
+      switch [llength $args] {
+        1 {
+          #
+          # NOTE: Only the string to be printed is specified (stdout).
+          #
+          return [tputs $::test_channel [lindex $args 0]]
+        }
+        2 {
+          #
+          # NOTE: Either -nonewline or channelId has been specified.
+          #
+          if {[string equal [lindex $args 0] -nonewline]} then {
+            return [tputs $::test_channel [lindex $args end]]
+          } else {
+            set channel [lindex $args 0]
+            set newLine \n
+          }
+        }
+        3 {
+          #
+          # NOTE: Both -nonewline and channelId are specified, unless
+          #       it's an error.  The -nonewline option is supposed to
+          #       be argv[0].
+          #
+          if {[string equal [lindex $args 0] -nonewline]} then {
+            set channel [lindex $args 1]
+            set newLine ""
+          }
+        }
+      }
+
+      if {[info exists channel]} then {
+        if {[string equal $channel stdout]} then {
+          #
+          # NOTE: Write output for stdout to the test channel.
+          #
+          return [tputs $::test_channel [appendArgs [lindex $args end] \
+              $newLine]]
+        }
+      }
+
+      #
+      # NOTE: If we haven't returned by now, we don't know how to
+      #       handle the input.  Let puts handle it.
+      #
+      return [eval ::tcl::save::puts $args]
+    }
+
+    rename ::puts ::tcl::save::puts; # save Tcl command
+    rename [namespace current]::testPuts ::puts; # insert our proc
+  }
+
+  proc unhookPuts {} {
+    rename ::puts ""; # remove our proc
+    rename ::tcl::save::puts ::puts; # restore Tcl command
+  }
+
+  proc runTest { script } {
+    #
+    # NOTE: This should work properly in both Tcl and Eagle as long as the
+    #       "init" script has been evaluated first.
+    #
+    if {![isEagle]} then {
+      hookPuts
+    }
+
+    set code [catch {uplevel 1 $script} result]
+    set error [expr {$code == 0 ? false : true}]
+
+    if {[isEagle]} then {
+      if {$code == 0 && [regexp -- {\s==== (.*?) FAILED\s} $result]} then {
+        set code 1
+      }
+
+      #
+      # NOTE: Display and log the result of the test we just completed.
+      #
+      host result $code $result
+      tlog $result
+
+      #
+      # NOTE: If the test failed with an actual error (i.e. not just a
+      #       test failure), make sure we do not obscure the error
+      #       message with test suite output.
+      #
+      if {$error} then {
+        tputs $::test_channel \n; # emit a blank line.
+      }
+
+      #
+      # NOTE: If this test failed and the stop-on-failure flag is set,
+      #       raise an error now.  If we are being run from inside
+      #       runAllTests, this will also serve to signal it to stop
+      #       processing further test files.
+      #
+      if {$code != 0 && [isStopOnFailure]} then {
+        host result Error "OVERALL RESULT: STOP-ON-FAILURE\n"
+        tlog "OVERALL RESULT: STOP-ON-FAILURE\n"
+
+        error ""; # no message
+      }
+    } else {
+      if {$error} then {
+        tputs $::test_channel [appendArgs "ERROR (runTest): " $result \n]
+      }
+
+      unhookPuts
+    }
+  }
+
+  proc recordTestStatistics { varName index } {
+    #
+    # NOTE: Record counts of all object types that we track.
+    #
+    upvar 1 $varName array
+
+    set array(time,$index) [clock seconds]
+    set array(afters,$index) [llength [after info]]
+    set array(variables,$index) [llength [info globals]]
+    set array(commands,$index) [llength [info commands]]
+    set array(procedures,$index) [llength [info procs]]
+    set array(files,$index) [llength [getFiles $::test_path *]]
+    set array(temporaryFiles,$index) [llength [getFiles [getTemporaryPath] *]]
+    set array(channels,$index) [llength [file channels]]
+    set array(aliases,$index) [llength [interp aliases]]
+    set array(interpreters,$index) [llength [interp slaves]]
+    set array(environment,$index) [llength [array names env]]
+
+    if {[isEagle]} then {
+      set array(scopes,$index) [llength [scope list]]
+      set array(objects,$index) [llength [info objects]]
+      set array(callbacks,$index) [llength [info callbacks]]
+      set array(types,$index) [llength [object types]]
+      set array(interfaces,$index) [llength [object interfaces]]
+      set array(namespaces,$index) [llength [object namespaces]]
+      set array(processes,$index,list) [getProcesses ""]; # volatile, external
+      set array(processes,$index) [llength $array(processes,$index,list)]
+      set array(assemblies,$index) [llength [object assemblies]]
+
+      #
+      # NOTE: Support for some of all of these entity types may not be
+      #       present in the interpreter, initialize all these counts
+      #       to zero and then try to query each one individually below
+      #       wrapped in a catch.
+      #
+      set array(connections,$index) 0
+      set array(transactions,$index) 0
+      set array(modules,$index) 0
+      set array(delegates,$index) 0
+      set array(tcl,$index) 0
+      set array(tclinterps,$index) 0
+      set array(tclcommands,$index) 0
+
+      catch {set array(connections,$index) [llength [info connections]]}
+      catch {set array(transactions,$index) [llength [info transactions]]}
+      catch {set array(modules,$index) [llength [info modules]]}
+      catch {set array(delegates,$index) [llength [info delegates]]}
+
+      if {[llength [info commands tcl]] > 0} then {
+        set array(tcl,$index) [tcl ready]
+      }
+
+      catch {set array(tclinterps,$index) [llength [tcl interps]]}
+      catch {set array(tclcommands,$index) [llength [tcl command list]]}
+    }
+  }
+
+  proc reportTestStatistics { channel fileName varName } {
+    set statistics [list afters variables commands procedures files \
+        temporaryFiles channels aliases interpreters environment]
+
+    if {[isEagle]} then {
+      #
+      # TODO: For now, tracking "leaked" assemblies is meaningless because
+      #       the .NET Framework has no way to unload them without tearing
+      #       down the entire application domain.
+      #
+      lappend statistics scopes objects callbacks types interfaces \
+          namespaces processes connections transactions modules \
+          delegates tcl tclinterps tclcommands; # assemblies
+    }
+
+    #
+    # NOTE: Show what leaked, if anything.
+    #
+    upvar 1 $varName array
+
+    foreach statistic $statistics {
+      if {$array($statistic,after) > $array($statistic,before)} then {
+        tputs $channel [appendArgs "==== \"" $fileName "\" LEAKED " \
+            $statistic \n]
+
+        if {[info exists array($statistic,before,list)]} then {
+          tputs $channel [appendArgs "---- " $statistic " BEFORE: " \
+              $array($statistic,before,list) \n]
+        }
+
+        if {[info exists array($statistic,after,list)]} then {
+          tputs $channel [appendArgs "---- " $statistic " AFTER: " \
+              $array($statistic,after,list) \n]
+        }
+      }
+    }
+  }
+
+  proc formatList { list {columns 1} } {
+    set count 1
+    set result ""
+
+    foreach item $list {
+      if {[incr count -1] == 0} then {
+        set count $columns
+        append result \n
+      }
+
+      append result \t
+
+      if {[string length $item] > 0} then {
+        append result $item
+      } else {
+        append result <noItem>
+      }
+    }
+
+    return $result
+  }
+
+  proc formatListAsDict { list } {
+    set result ""
+
+    foreach {name value} $list {
+      append result \n\t
+
+      if {[string length $name] > 0} then {
+        append result $name
+      } else {
+        append result <noName>
+      }
+
+      append result ": "
+
+      if {[string length $value] > 0} then {
+        append result $value
+      } else {
+        append result <noValue>
+      }
+    }
+
+    return $result
+  }
+
+  proc inverseLsearchGlob { noCase patterns element } {
+    #
+    # NOTE: Perform the inverse of [lsearch -glob], attempt
+    #       to match an element against a list of patterns.
+    #
+    set command [list string match]
+    if {$noCase} then {lappend command -nocase}
+
+    for {set index 0} {$index < [llength $patterns]} {incr index} {
+      set pattern [lindex $patterns $index]
+      if {[eval $command [list $pattern] [list $element]]} then {return $index}
+    }
+
+    return -1
+  }
+
+  proc removePathFromFileNames { path fileNames } {
+    set result [list]
+
+    foreach fileName $fileNames {
+      if {[file normalize [file dirname $fileName]] eq \
+          [file normalize $path]} then {
+        #
+        # NOTE: Strip the path name from this file name.
+        #
+        lappend result [file tail $fileName]
+      } else {
+        lappend result $fileName
+      }
+    }
+
+    return $result
+  }
+
+  proc runAllTests { channel path fileNames skipFileNames } {
+    #
+    # NOTE: Show the exact arguments we received since they may not
+    #       have been displayed by the caller (or anybody else).
+    #
+    tputs $::test_channel [appendArgs "---- test run path: \"" $path \"\n]
+
+    tputs $::test_channel [appendArgs "---- test run file names: " \
+        [list [removePathFromFileNames $path $fileNames]] \n]
+
+    tputs $::test_channel [appendArgs "---- test run skip file names: " \
+        [list $skipFileNames] \n]
+
+    #
+    # NOTE: Keep going unless this becomes true (i.e. if one of the
+    #       test files signals us to stop).
+    #
+    set stop false
+
+    #
+    # NOTE: So far, we have run no tests.
+    #
+    set count 0
+
+    #
+    # NOTE: So far, no files have had no files with failing tests.
+    #
+    set failed [list]
+
+    #
+    # NOTE: Process each file name we have been given by the caller...
+    #
+    foreach fileName $fileNames {
+      #
+      # NOTE: Skipping over any file name that matches a pattern in the
+      #       list of file names to skip.
+      #
+      if {[inverseLsearchGlob false $skipFileNames \
+          [file tail $fileName]] == -1} then {
+        #
+        # NOTE: Does the file name contain directory information?
+        #
+        if {[string length [file dirname $fileName]] <= 1} then {
+          #
+          # NOTE: If not, assume it is under the supplied test path.
+          #
+          set fileName [file join $path $fileName]
+        }
+
+        #
+        # NOTE: The "magic" pattern we are looking for to determine if a
+        #       given file is part of the formal test suite.
+        #
+        set pattern {^(\s)*runTest .*$}
+
+        #
+        # NOTE: Skip files that are not part of the test suite.
+        #
+        set data [readFile $fileName]
+
+        #
+        # NOTE: Check for a match.
+        #
+        set match [regexp -line -- $pattern $data]
+
+        #
+        # NOTE: Failing that, in Eagle only, check if the data, when
+        #       interpreted as Unicode, matches the pattern.
+        #
+        if {!$match && [isEagle]} then {
+          set match [regexp -line -- $pattern \
+              [encoding convertfrom unicode $data]]
+        }
+
+        #
+        # NOTE: Does this "look" like an actual test suite file?
+        #
+        if {$match} then {
+          #
+          # BUGFIX: Unset the current test file name so that variable
+          #         accounting works correctly.  It will be reset below
+          #         prior to running any actual test(s).
+          #
+          unset -nocomplain ::test_file
+
+          #
+          # NOTE: Is resource leak checking explicitly disabled?
+          #
+          if {![info exists ::no(leak)]} then {
+            #
+            # NOTE: Get "before" resource counts for leak tracking.
+            #
+            recordTestStatistics leaks before
+          }
+
+          #
+          # NOTE: Let the test prologue code know which file we are
+          #       evaluating.
+          #
+          set ::test_file $fileName
+
+          #
+          # NOTE: Record failed test count before this file.
+          #
+          if {[isEagle]} then {
+            set before $::eagle_tests(failed)
+          } else {
+            set before $::tcltest::numTests(Failed)
+          }
+
+          #
+          # NOTE: Evaluate the file in the context of the caller,
+          #       catching any errors.  If an error is raised and the
+          #       stop-on-failure flag is set, assume it was a test
+          #       failure and that we need to stop any and all further
+          #       processing of test files.
+          #
+          if {[catch {uplevel 1 [list source $fileName]} error]} then {
+            #
+            # NOTE: Most likely, this error was caused by malformed or
+            #       incorrect code in-between the tests themselves.  We
+            #       need to report this.
+            #
+            tputs $::test_channel [appendArgs "==== \"" $fileName \
+                "\" ERROR \"" $error \"\n]
+
+            #
+            # NOTE: Stop further processing after this loop iteration?
+            #
+            if {[isStopOnFailure]} then {
+              #
+              # NOTE: This will terminate the loop right after the test
+              #       file cleanup code (i.e. at the bottom of the loop).
+              #
+              set stop true
+            }
+          }
+
+          #
+          # NOTE: We evaluated another test file.
+          #
+          incr count
+
+          #
+          # NOTE: Record failed test count after this file.
+          #
+          if {[isEagle]} then {
+            set after $::eagle_tests(failed)
+          } else {
+            set after $::tcltest::numTests(Failed)
+          }
+
+          #
+          # NOTE: Did this file have any failing tests?
+          #
+          if {$after > $before} then {
+            lappend failed [file tail $fileName]
+          }
+
+          #
+          # NOTE: Unset the current test file name, it is no longer
+          #       needed.
+          #
+          unset -nocomplain ::test_file
+
+          #
+          # NOTE: Is resource leak checking explicitly disabled?
+          #
+          if {![info exists ::no(leak)]} then {
+            #
+            # NOTE: Get "after" resource counts for leak tracking.
+            #
+            recordTestStatistics leaks after
+
+            #
+            # NOTE: Determine if any resource leaks have occurred and
+            #       output diagnostics as necessary if they have.
+            #
+            reportTestStatistics $channel $fileName leaks
+          }
+        }
+
+        #
+        # NOTE: If the test file raised an error (i.e. to indicate a
+        #       test failure with the stop-on-failure flag enabled),
+        #       break out of the test loop now.
+        #
+        if {$stop} then {
+          break
+        }
+      }
+    }
+
+    tputs $::test_channel [appendArgs "---- sourced " \
+        $count " test " [expr {$count > 1 ? "files" : "file"}] \n]
+
+    #
+    # NOTE: Show the files that had failing tests.
+    #
+    if {[llength $failed] > 0} then {
+      tputs $::test_channel [appendArgs "---- files with failing tests: " \
+          $failed \n]
+    }
+  }
+
+  proc configureTcltest { imports force } {
+    if {[isEagle]} then {
+      #
+      # NOTE: Fake having the tcltest package.
+      #
+      package provide tcltest 2.2.10; # Tcl 8.4
+
+      #
+      # HACK: Compatibility shim(s) for use with various tests in the Tcl
+      #       test suite.
+      #
+      interp alias {} testConstraint {} haveOrAddConstraint
+      interp alias {} ::tcltest::testConstraint {} haveOrAddConstraint
+
+      #
+      # NOTE: This is needed by most tests in the Tcl test suite.
+      #
+      proc ::tcltest::cleanupTests {} {}
+    } else {
+      #
+      # NOTE: Load the tcltest package.
+      #
+      package require tcltest
+
+      #
+      # NOTE: Configure tcltest for our use.
+      #
+      ::tcltest::configure -verbose bpste
+
+      #
+      # NOTE: We need the [test] command in the global namespace.
+      #
+      if {[llength $imports] > 0} then {
+        set command [list namespace import]
+
+        if {$force} then {
+          lappend command -force
+        }
+
+        foreach import $imports {
+          lappend command [appendArgs ::tcltest:: $import]
+        }
+
+        namespace eval :: $command
+      }
+    }
+  }
+
+  if {[isEagle]} then {
+    ###########################################################################
+    ############################ BEGIN Eagle ONLY #############################
+    ###########################################################################
+
+    proc initializeTests {} {
+      uplevel #0 {
+        #
+        # NOTE: Reset the information in the global "tests" array, which is
+        #       used to interface with the internal test tracking information
+        #       in the interpreter via a variable trace.
+        #
+        set eagle_tests(total) 0
+        set eagle_tests(skipped) 0
+        set eagle_tests(passed) 0
+        set eagle_tests(failed) 0
+
+        #
+        # NOTE: Setup the lists of patterns to match test names against.  In
+        #       Eagle, these originate from the command line arguments and are
+        #       passed to the interpreter via this virtual array.
+        #
+        if {[info exists test_flags(-match)]} then {
+          set eagle_tests(matchNames) $test_flags(-match); # run these tests.
+        } else {
+          set eagle_tests(matchNames) [list *]; # default to running all tests.
+        }
+
+        if {[info exists test_flags(-skip)]} then {
+          set eagle_tests(skipNames) $test_flags(-skip); # skip these tests.
+        } else {
+          set eagle_tests(skipNames) [list]; # default to skipping no tests.
+        }
+
+        #
+        # NOTE: What tests have failed, if any?
+        #
+        set eagle_tests(failedNames) [list]
+
+        #
+        # NOTE: Initialize the list of active test constraints from the
+        #       environment variable and/or the test flags.
+        #
+        set eagle_tests(constraints) [getEnvironmentVariable testConstraints]
+
+        if {[info exists test_flags(-constraints)]} then {
+            eval lappend eagle_tests(constraints) $test_flags(-constraints)
+        }
+      }
+    }
+
+    proc getPassPercentage {} {
+      if {$::eagle_tests(total) > 0} then {
+        return [expr \
+            {100.0 * (($::eagle_tests(passed) + \
+            $::eagle_tests(skipped)) / \
+            double($::eagle_tests(total)))}]
+      }
+
+      return 0; # no tests were run, etc.
+    }
+
+    proc getSkipPercentage {} {
+      if {$::eagle_tests(total) > 0} then {
+        return [expr \
+            {100.0 * ($::eagle_tests(skipped) / \
+            double($::eagle_tests(total)))}]
+      }
+
+      return 0; # no tests were run, etc.
+    }
+
+    proc cleanupThread { thread } {
+      if {[$thread IsAlive]} then {
+        if {[catch {$thread Interrupt} error]} then {
+          tputs $::test_channel [appendArgs \
+              "---- failed to interrupt test thread \"" \
+              $thread "\": " $error \n]
+        }
+
+        if {[$thread IsAlive]} then {
+          if {[catch {$thread Abort} error]} then {
+            tputs $::test_channel [appendArgs \
+                "---- failed to abort test thread \"" \
+                $thread "\": " $error \n]
+          }
+
+          if {![$thread IsAlive]} then {
+            tputs $::test_channel [appendArgs \
+                "---- test thread \"" $thread "\" aborted\n"]
+
+            return true; # aborted?
+          }
+        } else {
+          tputs $::test_channel [appendArgs \
+              "---- test thread \"" $thread "\" interrupted\n"]
+
+          return true; # interrupted?
+        }
+      } else {
+        return true; # already dead?
+      }
+
+      return false; # still alive (or error).
+    }
+
+    proc calculateBogoCops { {milliseconds 2000} } {
+      set bgerror [interp bgerror {}]
+      interp bgerror {} ""
+
+      try {
+        set flags [after flags]
+        after flags =Immediate
+
+        try {
+          set event [after $milliseconds [list interp cancel]]
+
+          set before [info cmdcount]
+          catch {time {nop} -1}; # internal busy loop.
+          set after [info cmdcount]
+
+          #
+          # HACK: Mono has a bug that results in excessive trailing zeros
+          #       here (Mono bug #655780).
+          #
+          if {[isMono]} then {
+            return [expr \
+                {double(($after - $before) / ($milliseconds / 1000.0))}]
+          } else {
+            return [expr {($after - $before) / ($milliseconds / 1000.0)}]
+          }
+        } finally {
+          catch {after cancel $event}
+          after flags =$flags
+        }
+      } finally {
+        interp bgerror {} $bgerror
+      }
+    }
+
+    proc getMachineForTclShell {} {
+      try {
+        #
+        # NOTE: Get a temporary file name for the script we are going to
+        #       use to query the machine type for the native Tcl shell.
+        #
+        set fileName [file tempname]
+
+        #
+        # NOTE: Since the native Tcl shell cannot simply evaluate a string
+        #       supplied via the command line, write the script to be
+        #       evaluated to the temporary file.
+        #
+        writeFile $fileName {puts -nonewline stdout $tcl_platform(machine)}
+
+        #
+        # NOTE: Evaluate the script using the native Tcl shell, trim the
+        #       excess whitespace from the output, and return it to the
+        #       caller.
+        #
+        if {[catch {string trim \
+            [testExec $::test_tclsh [list] \
+            [appendArgs \" $fileName \"]]} result] == 0} then {
+          #
+          # NOTE: Success, return the result to the caller.
+          #
+          return $result
+        } else {
+          #
+          # NOTE: We could not execute the native Tcl shell (perhaps one
+          #       is not available?).
+          #
+          return error
+        }
+      } finally {
+        #
+        # NOTE: Did we create a temporary file?
+        #
+        if {[info exists fileName] && \
+            [string length $fileName] > 0 && \
+            [file exists $fileName]} then {
+          #
+          # NOTE: Delete the temporary file we used to query the machine
+          #       type for the native Tcl shell.
+          #
+          catch {file delete $fileName}
+        }
+      }
+    }
+
+    proc machineToPlatform { machine } {
+      switch -exact -nocase -- $machine {
+        amd64 {
+          return x64
+        }
+        intel {
+          if {$::tcl_platform(platform) eq "windows"} then {
+            return Win32
+          } else {
+            return x86
+          }
+        }
+        default {
+          return unknown
+        }
+      }
+    }
+
+    proc cleanupExcel {} {
+      #
+      # TODO: These may need to be changed in later Excel versions.
+      #
+      object undeclare -declarepattern Microsoft.Office.Interop.Excel*
+      object unimport -importpattern Microsoft.Office.Interop.Excel
+    }
+
+    proc cleanupVisualBasic {} {
+      #
+      # TODO: These may need to be changed in later framework versions.
+      #
+      object unimport -importpattern Microsoft.VisualBasic*
+    }
+
+    proc cleanupXml {} {
+      #
+      # TODO: These may need to be changed in later framework versions.
+      #
+      object unimport -importpattern System.Xml*
+    }
+
+    proc cleanupWinForms {} {
+      #
+      # TODO: These may need to be changed in later framework versions.
+      #
+      object unimport -importpattern System.Resources
+      object unimport -importpattern System.Windows.Forms
+
+      object unimport -importpattern \
+          System.Windows.Forms.ComponentModel.Com2Interop
+
+      object unimport -importpattern System.Windows.Forms.Design
+      object unimport -importpattern System.Windows.Forms.Layout
+      object unimport -importpattern System.Windows.Forms.PropertyGridInternal
+      object unimport -importpattern System.Windows.Forms.VisualStyles
+    }
+
+    #
+    # NOTE: Setup the test path relative to the library path.
+    #
+    if {![interp issafe] && ![info exists test_path]} then {
+      #
+      # NOTE: Try the source release directory structure.
+      #
+      set ::test_path [file join [file normalize [file dirname [file dirname \
+          [info library]]]] Library Tests]
+
+      if {![file exists $::test_path] || \
+          ![file isdirectory $::test_path]} then {
+        #
+        # NOTE: Must be a binary release, no "Library" directory then.
+        #       Also, binary releases have a lower-case "tests" directory
+        #       name that originates from the "update.bat" tool.  Must
+        #       match casing with "update.bat".
+        #
+        set ::test_path [file join [file normalize [file dirname [file dirname \
+            [info library]]]] tests]
+      }
+    }
+
+    #
+    # NOTE: Fake having the tcltest package unless we are prevented.
+    #
+    if {![info exists ::no(configureTcltest)]} then {
+      configureTcltest [list] false
+    }
+
+    ###########################################################################
+    ############################# END Eagle ONLY ##############################
+    ###########################################################################
+  } else {
+    ###########################################################################
+    ############################# BEGIN Tcl ONLY ##############################
+    ###########################################################################
+
+    proc getPassPercentage {} {
+      if {$::tcltest::numTests(Total) > 0} then {
+        return [expr \
+            {100.0 * (($::tcltest::numTests(Passed) + \
+            $::tcltest::numTests(Skipped)) / \
+            double($::tcltest::numTests(Total)))}]
+      }
+
+      return 0; # no tests were run, etc.
+    }
+
+    proc getSkipPercentage {} {
+      if {$::tcltest::numTests(Total) > 0} then {
+        return [expr \
+            {100.0 * ($::tcltest::numTests(Skipped) / \
+            double($::tcltest::numTests(Total)))}]
+      }
+
+      return 0; # no tests were run, etc.
+    }
+
+    #
+    # NOTE: Setup the test path relative to the path of this file.
+    #
+    if {![info exists test_path]} then {
+      #
+      # NOTE: Try the source release directory structure.
+      #
+      set ::test_path [file join [file normalize [file dirname \
+          [file dirname [file dirname [info script]]]]] Library Tests]
+
+      if {![file exists $::test_path] || \
+          ![file isdirectory $::test_path]} then {
+        #
+        # NOTE: Must be a binary release, no "Library" directory then.
+        #       Also, binary releases have a lower-case "tests" directory
+        #       name that originates from the "update.bat" tool.  Must
+        #       match casing with "update.bat".
+        #
+        set ::test_path [file join [file normalize [file dirname \
+            [file dirname [file dirname [info script]]]]] tests]
+      }
+    }
+
+    #
+    # NOTE: Load and configure the tcltest package unless we are prevented.
+    #
+    if {![info exists ::no(configureTcltest)]} then {
+      configureTcltest [list test testConstraint] false
+    }
+
+    #
+    # NOTE: We need several of our test related commands in the global
+    #       namespace as well.
+    #
+    exportAndImportPackageCommands [namespace current] [list addConstraint \
+        calculateRelativePerformance haveConstraint haveOrAddConstraint \
+        processTestArguments getTemporaryPath getTestLog getTestLogId getFiles \
+        getConstraints getTestFiles getTestRunId execTestShell runTestPrologue \
+        runTestEpilogue runTest runAllTests fixConstraints sourceIfValid \
+        isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
+        tputs formatList configureTcltest] false false
+
+    ###########################################################################
+    ############################## END Tcl ONLY ###############################
+    ###########################################################################
+  }
+
+  #
+  # NOTE: Provide the Eagle test package to the interpreter.
+  #
+  package provide EagleTest \
+    [expr {[isEagle] ? [info engine PatchLevel] : 1.0}]
+}
+

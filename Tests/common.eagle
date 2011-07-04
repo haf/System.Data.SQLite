@@ -8,7 +8,23 @@
 ###############################################################################
 
 if {[isEagle]} then {
-  object load -loadtype File [file join [file dirname $path] bin \
-      [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
-      $test_configuration bin System.Data.SQLite.dll]
+  proc loadAssembly { fileName } {
+    object load -loadtype File \
+        [file join [file dirname $::path] bin \
+        [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
+        $::test_configuration bin $fileName]
+  }
+
+  proc setupDb {fileName {varName db}} {
+    set fileName [file join [getTemporaryPath] $fileName]
+    catch {file delete $fileName}
+    upvar 1 $varName db
+    set db [sql open -type SQLite [subst {Data Source=${fileName}}]]
+  }
+
+  proc cleanupDb {fileName {varName db}} {
+    upvar 1 $varName db
+    catch {sql close $db}
+    catch {file delete $fileName}
+  }
 }

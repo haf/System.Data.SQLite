@@ -1,0 +1,281 @@
+###############################################################################
+#
+# epilogue.eagle --
+#
+# Extensible Adaptable Generalized Logic Engine (Eagle)
+# Test Epilogue File
+#
+# Copyright (c) 2007-2010 by Joe Mistachkin.  All rights reserved.
+#
+# See the file "license.terms" for information on usage and redistribution of
+# this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: $
+#
+###############################################################################
+
+if {![info exists no([file tail [info script]])]} then {
+  if {[info level] > 0} then {
+    error "cannot run, current level is not global"
+  }
+
+  if {[isEagle]} then {
+    #
+    # NOTE: Show the current state of the memory.
+    #
+    tputs $test_channel [appendArgs "---- ending memory: " \
+        [formatListAsDict [debug memory]] \n]
+
+    #
+    # NOTE: Show the current state of the native stack.
+    #
+    catch {debug stack true} stack
+
+    tputs $test_channel [appendArgs "---- ending stack: " \
+        [formatListAsDict $stack] \n]
+
+    unset stack
+  }
+
+  #
+  # NOTE: Show when the tests actually ended (now).
+  #
+  tputs $test_channel [appendArgs "---- tests ended at " \
+      [clock format [clock seconds]] \n]
+
+  if {[isEagle]} then {
+    tputs $test_channel \n; # NOTE: Blank line.
+
+    if {$eagle_tests(passed) > 0} then {
+      host result Ok [appendArgs "PASSED: " $eagle_tests(passed) \n]
+      tlog [appendArgs "PASSED: " $eagle_tests(passed) \n]
+    }
+
+    if {$eagle_tests(failed) > 0} then {
+      host result Error [appendArgs "FAILED: " $eagle_tests(failed) \n]
+      tlog [appendArgs "FAILED: " $eagle_tests(failed) \n]
+
+      if {[llength $eagle_tests(failedNames)] > 0} then {
+        host result Error [appendArgs "FAILED: " $eagle_tests(failedNames) \n]
+        tlog [appendArgs "FAILED: " $eagle_tests(failedNames) \n]
+      }
+    }
+
+    if {$eagle_tests(skipped) > 0} then {
+      host result Break [appendArgs "SKIPPED: " $eagle_tests(skipped) \n]
+      tlog [appendArgs "SKIPPED: " $eagle_tests(skipped) \n]
+    }
+
+    if {$eagle_tests(total) > 0} then {
+      host result Return [appendArgs "TOTAL: " $eagle_tests(total) \n]
+      tlog [appendArgs "TOTAL: " $eagle_tests(total) \n]
+
+      #
+      # HACK: Temporarily modify the floating point precision so that the
+      #       pass percentage does not end up with excessive detail.  In
+      #       theory, we could use [string format] here; however, that
+      #       would fail under Mono.
+      #
+      if {$tcl_precision != 4} then {
+        set tcl_precision_save $tcl_precision
+        set tcl_precision 4
+      }
+
+      if {$eagle_tests(skipped) > 0} then {
+        set percent [getSkipPercentage]
+        host result Break [appendArgs "SKIP PERCENTAGE: " $percent %\n]
+        tlog [appendArgs "SKIP PERCENTAGE: " $percent %\n]
+      }
+
+      set percent [getPassPercentage]
+      host result Return [appendArgs "PASS PERCENTAGE: " $percent %\n]
+      tlog [appendArgs "PASS PERCENTAGE: " $percent% \n]
+
+      #
+      # NOTE: Restore the saved floating point precision.
+      #
+      if {[info exists tcl_precision_save]} then {
+        set tcl_precision $tcl_precision_save
+        unset tcl_precision_save
+      }
+    } else {
+      #
+      # NOTE: No tests.
+      #
+      set percent 0
+    }
+
+    #
+    # NOTE: Has the test pass threshold been set?  If so, is it set to
+    #       the default value?
+    #
+    if {![info exists test_threshold] || $test_threshold == 100} then {
+      #
+      # NOTE: The test pass threshold is set to the default value (100%).
+      #       Check to make sure that all tests pass and then set the
+      #       exit code to success; otherwise, we set it to failure.
+      #
+      set passedOrSkipped [expr {$eagle_tests(passed) + \
+          $eagle_tests(skipped)}]
+
+      if {$passedOrSkipped == $eagle_tests(total)} then {
+        set exitCode Success
+
+        host result Ok "OVERALL RESULT: SUCCESS\n"
+        tlog "OVERALL RESULT: SUCCESS\n"
+      } else {
+        set exitCode Failure
+
+        host result Error "OVERALL RESULT: FAILURE\n"
+        tlog "OVERALL RESULT: FAILURE\n"
+      }
+
+      unset passedOrSkipped
+    } else {
+      #
+      # NOTE: They specified a non-default test pass threshold.  Check to
+      #       make sure that we meet or exceed the requirement and then
+      #       set the exit code to success; otherwise, set it to failure.
+      #
+      if {$percent >= $test_threshold} then {
+        set exitCode Success
+
+        host result Ok [appendArgs "OVERALL RESULT: SUCCESS (" \
+            $percent "% >= " $test_threshold %)\n]
+
+        tlog [appendArgs "OVERALL RESULT: SUCCESS (" \
+            $percent "% >= " $test_threshold %)\n]
+      } else {
+        set exitCode Failure
+
+        host result Error [appendArgs \
+            "OVERALL RESULT: FAILURE (" $percent "% < " $test_threshold %)\n]
+
+        tlog [appendArgs \
+            "OVERALL RESULT: FAILURE (" $percent "% < " $test_threshold %)\n]
+      }
+    }
+
+    unset percent
+
+    tputs $test_channel \n; # NOTE: Blank line.
+  } else {
+    tputs $test_channel \n; # NOTE: Blank line.
+
+    if {$::tcltest::numTests(Passed) > 0} then {
+      tputs $test_channel \
+          [appendArgs "PASSED: " $::tcltest::numTests(Passed) \n]
+    }
+
+    if {$::tcltest::numTests(Failed) > 0} then {
+      tputs $test_channel \
+          [appendArgs "FAILED: " $::tcltest::numTests(Failed) \n]
+
+      if {[llength $::tcltest::failFiles] > 0} then {
+        tputs $test_channel \
+            [appendArgs "FAILED: " $::tcltest::failFiles \n]
+      }
+    }
+
+    if {$::tcltest::numTests(Skipped) > 0} then {
+      tputs $test_channel \
+          [appendArgs "SKIPPED: " $::tcltest::numTests(Skipped) \n]
+    }
+
+    if {$::tcltest::numTests(Total) > 0} then {
+      tputs $test_channel \
+          [appendArgs "TOTAL: " $::tcltest::numTests(Total) \n]
+
+      if {$::tcltest::numTests(Skipped) > 0} then {
+        set percent [getSkipPercentage]
+        tputs $test_channel [appendArgs "SKIP PERCENTAGE: " \
+            [format "%.4f" $percent] %\n]
+      }
+
+      set percent [getPassPercentage]
+      tputs $test_channel [appendArgs "PASS PERCENTAGE: " \
+          [format "%.4f" $percent] %\n]
+    } else {
+      #
+      # NOTE: No tests.
+      #
+      set percent 0
+    }
+
+    #
+    # NOTE: Has the test pass threshold been set?  If so, is it set to
+    #       the default value?
+    #
+    if {![info exists test_threshold] || $test_threshold == 100} then {
+      #
+      # NOTE: The test pass threshold is set to the default value (100%).
+      #       Check to make sure that all tests pass and then set the
+      #       exit code to success; otherwise, we set it to failure.
+      #
+      set passedOrSkipped [expr {$::tcltest::numTests(Passed) + \
+          $::tcltest::numTests(Skipped)}]
+
+      if {$passedOrSkipped == $::tcltest::numTests(Total)} then {
+        set exitCode 0; # Success.
+
+        tputs $test_channel "OVERALL RESULT: SUCCESS\n"
+      } else {
+        set exitCode 1; # Failure.
+
+        tputs $test_channel "OVERALL RESULT: FAILURE\n"
+      }
+
+      unset passedOrSkipped
+    } else {
+      #
+      # NOTE: They specified a non-default test pass threshold.  Check to
+      #       make sure that we meet or exceed the requirement and then
+      #       set the exit code to success; otherwise, set it to failure.
+      #
+      if {$percent >= $test_threshold} then {
+        set exitCode 0; # Success.
+
+        tputs $test_channel [appendArgs "OVERALL RESULT: SUCCESS (" \
+            $percent "% >= " $test_threshold %)\n]
+      } else {
+        set exitCode 1; # Failure.
+
+        tputs $test_channel [appendArgs "OVERALL RESULT: FAILURE (" \
+            $percent "% < " $test_threshold %)\n]
+      }
+    }
+
+    unset percent
+
+    tputs $test_channel \n; # NOTE: Blank line.
+  }
+
+  #
+  # NOTE: Check for and process any custom test epilogue script that may
+  #       be set in the environment.
+  #
+  sourceIfValid epilogue [getEnvironmentVariable testEpilogue]
+
+  #
+  # NOTE: Do we need to exit now?
+  #
+  if {[isExitOnComplete]} then {
+    #
+    # NOTE: Exit now.  In Eagle, this will not exit the entire process.
+    #       Zero (0) will be the exit code if all the selected tests have
+    #       succeeded or the test success threshold has been met or
+    #       exceeded; otherwise, one (1) will be the exit code.
+    #
+    exit $exitCode
+  } else {
+    #
+    # NOTE: For Eagle, even when not exiting, we still set the ExitCode
+    #       property of the interpreter.
+    #
+    if {[isEagle]} then {
+      object invoke -alias Interpreter.GetActive ExitCode $exitCode
+    }
+
+    unset exitCode
+  }
+}
