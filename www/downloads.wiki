@@ -21,7 +21,7 @@
       This ZIP archive contains all current source code for System.Data.SQLite
       1.0.74.0 (3.7.7.1) combined into a single archive file.
       <br />
-      (sha1: 475eeac108e62131bd1d793be75ba1bfcb1f0a55)
+      (sha1: 09cc9daf98d1378c00bbb10b041d1fb08ddc5c75)
     </td>
   </tr>
 
@@ -129,7 +129,7 @@
       the System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010
       SP1 runtime for x86 is included.  The .NET Framework 4.0 is required.
       <br />
-      (sha1: 7c7834ff8eb7b48c2f8fdccf2cc4cb7f9c80db74)
+      (sha1: 9e3cc891d61533e3bb254a8359727ef8a6116487)
     </td>
   </tr>
 
@@ -171,7 +171,7 @@
       the System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010
       SP1 runtime for x64 is included.  The .NET Framework 4.0 is required.
       <br />
-      (sha1: d9005699989fc01081ec54410b8489a6dee73ab7)
+      (sha1: 352a8b2506820a42cec9ea1a3d1e07ba4c37700c)
     </td>
   </tr>
 
@@ -295,7 +295,7 @@
       package.  The Visual C++ 2010 SP1 runtime for x86 and the .NET Framework
       3.5 SP1 are required.
       <br />
-      (sha1: 9496739eeca0910395fae41b54eba70dcabdaa77)
+      (sha1: 76d0e38e1a687d8ddaaa94744b4da5e2841492e8)
     </td>
   </tr>
 
@@ -336,7 +336,7 @@
       package.  The Visual C++ 2010 SP1 runtime for x64 and the .NET Framework
       3.5 SP1 are required.
       <br />
-      (sha1: 03374aa96654d7e9a57a63d51b2d106b25542b1b)
+      (sha1: a3648c38cf1522493e3641bfd590c093708c1fc9)
     </td>
   </tr>
 
