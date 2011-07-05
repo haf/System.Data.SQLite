@@ -20,7 +20,7 @@ loadAssembly System.Data.SQLite.dll
 ###############################################################################
 
 runTest {test basic-1.1 {SELECT scalar/reader, CREATE, INSERT} -setup {
-  setupDb [set fileName basic-1.1.sqlite3]
+  setupDb [set fileName basic-1.1.db]
 } -body {
   set result [list]
 

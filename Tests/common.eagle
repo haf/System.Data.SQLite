@@ -19,19 +19,33 @@ if {[isEagle]} then {
       # NOTE: Now, add the necessary test constraint.
       #
       addConstraint [file rootname [file tail $fileName]]
+
+      #
+      # NOTE: Return the full path of the loaded file.
+      #
+      return $fileName
     }
+
+    return ""
   }
 
-  proc setupDb {fileName {varName db}} {
+  proc setupDb {fileName {mode ""} {varName db}} {
     set fileName [file join [getTemporaryPath] $fileName]
     catch {file delete $fileName}
     upvar 1 $varName db
-    set db [sql open -type SQLite [subst {Data Source=${fileName}}]]
+
+    set connection {Data Source=${fileName}}
+
+    if {[string length $mode] > 0} then {
+      append connection {;Journal Mode=${mode}}
+    }
+
+    set db [sql open -type SQLite [subst $connection]]
   }
 
   proc cleanupDb {fileName {varName db}} {
     upvar 1 $varName db
     catch {sql close $db}
-    catch {file delete $fileName}
+    catch {file delete [file join [getTemporaryPath] $fileName]}
   }
 }

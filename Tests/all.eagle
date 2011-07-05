@@ -20,6 +20,16 @@ runTestPrologue
 
 ###############################################################################
 
+#
+# NOTE: Pre-load the assembly and the necessary helper procedures now, so that
+#       they do not count as being "leaked" (i.e. the test framework has no way
+#       to know who procedures actually belong to).
+#
+source [file join $path common.eagle]
+loadAssembly System.Data.SQLite.dll
+
+###############################################################################
+
 set no(prologue.eagle) true
 set no(epilogue.eagle) true
 

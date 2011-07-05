@@ -24,7 +24,7 @@ set y [list -1.79769e308 -3.40282e038 -1 0 1 3.40282e038 1.79769e308]
 ###############################################################################
 
 runTest {test tkt-2c630bffa7-1.1 {range of REAL type} -setup {
-  setupDb [set fileName tkt-2c630bffa7-1.1.sqlite3]
+  setupDb [set fileName tkt-2c630bffa7-1.1.db]
 } -body {
   sql execute $db "CREATE TABLE t1(x INTEGER, y REAL);"
 
@@ -46,7 +46,7 @@ runTest {test tkt-2c630bffa7-1.1 {range of REAL type} -setup {
 ###############################################################################
 
 runTest {test tkt-2c630bffa7-1.2 {range of FLOAT type} -setup {
-  setupDb [set fileName tkt-2c630bffa7-1.2.sqlite3]
+  setupDb [set fileName tkt-2c630bffa7-1.2.db]
 } -body {
   sql execute $db "CREATE TABLE t2(x INTEGER, y FLOAT);"
 
@@ -68,7 +68,7 @@ runTest {test tkt-2c630bffa7-1.2 {range of FLOAT type} -setup {
 ###############################################################################
 
 runTest {test tkt-2c630bffa7-1.3 {range of DOUBLE type} -setup {
-  setupDb [set fileName tkt-2c630bffa7-1.3.sqlite3]
+  setupDb [set fileName tkt-2c630bffa7-1.3.db]
 } -body {
   sql execute $db "CREATE TABLE t3(x INTEGER, y DOUBLE);"
 
