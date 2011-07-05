@@ -19,8 +19,8 @@ loadAssembly System.Data.SQLite.dll
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.1 {'Default' journal mode, new db} -body {
-  setupDb [set fileName tkt-448d663d11-1.1.db] Default
+runTest {test tkt-448d663d11-1.1 {missing journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.1.db]
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -30,11 +30,11 @@ runTest {test tkt-448d663d11-1.1 {'Default' journal mode, new db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.2 {'Default' journal mode, WAL db} -body {
+runTest {test tkt-448d663d11-1.2 {missing journal mode, WAL db} -body {
   set fileName tkt-448d663d11-1.2.db
   file copy -force [file join $path wal.db] \
       [file join [getTemporaryPath] $fileName]
-  setupDb $fileName Default
+  setupDb $fileName "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -44,11 +44,11 @@ runTest {test tkt-448d663d11-1.2 {'Default' journal mode, WAL db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.3 {'Default' journal mode, non-WAL db} -body {
+runTest {test tkt-448d663d11-1.3 {missing journal mode, non-WAL db} -body {
   set fileName tkt-448d663d11-1.3.db
   file copy -force [file join $path nonWal.db] \
       [file join [getTemporaryPath] $fileName]
-  setupDb $fileName Default
+  setupDb $fileName "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -58,8 +58,8 @@ runTest {test tkt-448d663d11-1.3 {'Default' journal mode, non-WAL db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.4 {'Delete' journal mode, new db} -body {
-  setupDb [set fileName tkt-448d663d11-1.4.db] Delete
+runTest {test tkt-448d663d11-1.4 {'Default' journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.4.db] Default
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -69,25 +69,25 @@ runTest {test tkt-448d663d11-1.4 {'Delete' journal mode, new db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.5 {'Delete' journal mode, WAL db} -body {
+runTest {test tkt-448d663d11-1.5 {'Default' journal mode, WAL db} -body {
   set fileName tkt-448d663d11-1.5.db
   file copy -force [file join $path wal.db] \
       [file join [getTemporaryPath] $fileName]
-  setupDb $fileName Delete
+  setupDb $fileName Default false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {wal}}
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.6 {'Delete' journal mode, non-WAL db} -body {
+runTest {test tkt-448d663d11-1.6 {'Default' journal mode, non-WAL db} -body {
   set fileName tkt-448d663d11-1.6.db
   file copy -force [file join $path nonWal.db] \
       [file join [getTemporaryPath] $fileName]
-  setupDb $fileName Delete
+  setupDb $fileName Default false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -97,8 +97,47 @@ runTest {test tkt-448d663d11-1.6 {'Delete' journal mode, non-WAL db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.7 {'Persist' journal mode, new db} -body {
-  setupDb [set fileName tkt-448d663d11-1.7.db] Persist
+runTest {test tkt-448d663d11-1.7 {'Delete' journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.7.db] Delete
+  sql execute -execute scalar $db "PRAGMA journal_mode;"
+} -cleanup {
+  cleanupDb $fileName
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+
+###############################################################################
+
+runTest {test tkt-448d663d11-1.8 {'Delete' journal mode, WAL db} -body {
+  set fileName tkt-448d663d11-1.8.db
+  file copy -force [file join $path wal.db] \
+      [file join [getTemporaryPath] $fileName]
+  setupDb $fileName Delete false
+  sql execute -execute scalar $db "PRAGMA journal_mode;"
+} -cleanup {
+  cleanupDb $fileName
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+
+###############################################################################
+
+runTest {test tkt-448d663d11-1.9 {'Delete' journal mode, non-WAL db} -body {
+  set fileName tkt-448d663d11-1.9.db
+  file copy -force [file join $path nonWal.db] \
+      [file join [getTemporaryPath] $fileName]
+  setupDb $fileName Delete false
+  sql execute -execute scalar $db "PRAGMA journal_mode;"
+} -cleanup {
+  cleanupDb $fileName
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+
+###############################################################################
+
+runTest {test tkt-448d663d11-1.10 {'Persist' journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.10.db] Persist
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -108,8 +147,8 @@ runTest {test tkt-448d663d11-1.7 {'Persist' journal mode, new db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.8 {'Off' journal mode, new db} -body {
-  setupDb [set fileName tkt-448d663d11-1.8.db] Off
+runTest {test tkt-448d663d11-1.11 {'Off' journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.11.db] Off
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -119,8 +158,8 @@ runTest {test tkt-448d663d11-1.8 {'Off' journal mode, new db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.9 {'Truncate' journal mode, new db} -body {
-  setupDb [set fileName tkt-448d663d11-1.9.db] Truncate
+runTest {test tkt-448d663d11-1.12 {'Truncate' journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.12.db] Truncate
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -130,8 +169,8 @@ runTest {test tkt-448d663d11-1.9 {'Truncate' journal mode, new db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.10 {'Memory' journal mode, new db} -body {
-  setupDb [set fileName tkt-448d663d11-1.10.db] Memory
+runTest {test tkt-448d663d11-1.13 {'Memory' journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.13.db] Memory
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -141,8 +180,8 @@ runTest {test tkt-448d663d11-1.10 {'Memory' journal mode, new db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.11 {'Wal' journal mode, new db} -body {
-  setupDb [set fileName tkt-448d663d11-1.11.db] Wal
+runTest {test tkt-448d663d11-1.14 {'Wal' journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.14.db] Wal
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -152,11 +191,11 @@ runTest {test tkt-448d663d11-1.11 {'Wal' journal mode, new db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.12 {'Wal' journal mode, non-WAL db} -body {
-  set fileName tkt-448d663d11-1.12.db
+runTest {test tkt-448d663d11-1.15 {'Wal' journal mode, non-WAL db} -body {
+  set fileName tkt-448d663d11-1.15.db
   file copy -force [file join $path nonWal.db] \
       [file join [getTemporaryPath] $fileName]
-  setupDb $fileName Wal
+  setupDb $fileName Wal false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -166,11 +205,50 @@ runTest {test tkt-448d663d11-1.12 {'Wal' journal mode, non-WAL db} -body {
 
 ###############################################################################
 
-runTest {test tkt-448d663d11-1.13 {'Wal' journal mode, WAL db} -body {
-  set fileName tkt-448d663d11-1.13.db
+runTest {test tkt-448d663d11-1.16 {'Wal' journal mode, WAL db} -body {
+  set fileName tkt-448d663d11-1.16.db
   file copy -force [file join $path wal.db] \
       [file join [getTemporaryPath] $fileName]
-  setupDb $fileName Wal
+  setupDb $fileName Wal false
+  sql execute -execute scalar $db "PRAGMA journal_mode;"
+} -cleanup {
+  cleanupDb $fileName
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {wal}}
+
+###############################################################################
+
+runTest {test tkt-448d663d11-1.17 {'Bad' journal mode, new db} -body {
+  setupDb [set fileName tkt-448d663d11-1.17.db] Bad
+  sql execute -execute scalar $db "PRAGMA journal_mode;"
+} -cleanup {
+  cleanupDb $fileName
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+
+###############################################################################
+
+runTest {test tkt-448d663d11-1.18 {'Bad' journal mode, non-WAL db} -body {
+  set fileName tkt-448d663d11-1.18.db
+  file copy -force [file join $path nonWal.db] \
+      [file join [getTemporaryPath] $fileName]
+  setupDb $fileName Bad false
+  sql execute -execute scalar $db "PRAGMA journal_mode;"
+} -cleanup {
+  cleanupDb $fileName
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+
+###############################################################################
+
+runTest {test tkt-448d663d11-1.19 {'Bad' journal mode, WAL db} -body {
+  set fileName tkt-448d663d11-1.19.db
+  file copy -force [file join $path wal.db] \
+      [file join [getTemporaryPath] $fileName]
+  setupDb $fileName Bad false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName

@@ -889,7 +889,7 @@ namespace System.Data.SQLite
               cmd.ExecuteNonQuery();
             }
 
-            defValue = FindKey(opts, "Journal Mode", "Delete");
+            defValue = FindKey(opts, "Journal Mode", "Default");
             if (String.Compare(defValue, "Default", StringComparison.OrdinalIgnoreCase) != 0)
             {
               cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA journal_mode={0}", defValue);

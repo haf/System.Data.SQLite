@@ -765,7 +765,11 @@ namespace System.Data.SQLite
   public enum SQLiteJournalModeEnum
   {
     /// <summary>
-    /// The default mode, this causes SQLite to create and destroy the journal file as-needed.
+    /// The default mode, this causes SQLite to use the existing journaling mode for the database.
+    /// </summary>
+    Default = -1,
+    /// <summary>
+    /// SQLite will create and destroy the journal file as-needed.
     /// </summary>
     Delete = 0,
     /// <summary>
@@ -777,7 +781,23 @@ namespace System.Data.SQLite
     /// This option disables the rollback journal entirely.  Interrupted transactions or a program crash can cause database
     /// corruption in this mode!
     /// </summary>
-    Off = 2
+    Off = 2,
+    /// <summary>
+    /// SQLite will truncate the journal file to zero-length instead of deleting it.
+    /// </summary>
+    Truncate = 3,
+    /// <summary>
+    /// SQLite will store the journal in volatile RAM.  This saves disk I/O but at the expense of database safety and integrity.
+    /// If the application using SQLite crashes in the middle of a transaction when the MEMORY journaling mode is set, then the
+    /// database file will very likely go corrupt.
+    /// </summary>
+    Memory = 4,
+    /// <summary>
+    /// SQLite uses a write-ahead log instead of a rollback journal to implement transactions.  The WAL journaling mode is persistent;
+    /// after being set it stays in effect across multiple database connections and after closing and reopening the database. A database
+    /// in WAL journaling mode can only be accessed by SQLite version 3.7.0 or later.
+    /// </summary>
+    Wal = 5
   }
 
   /// <summary>

@@ -29,9 +29,13 @@ if {[isEagle]} then {
     return ""
   }
 
-  proc setupDb {fileName {mode ""} {varName db}} {
+  proc setupDb {fileName {mode ""} {delete true} {varName db}} {
     set fileName [file join [getTemporaryPath] $fileName]
-    catch {file delete $fileName}
+
+    if {$delete} then {
+      catch {file delete $fileName}
+    }
+
     upvar 1 $varName db
 
     set connection {Data Source=${fileName}}
