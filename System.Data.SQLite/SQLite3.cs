@@ -759,14 +759,12 @@ namespace System.Data.SQLite
 
     internal override long GetParamValueBytes(IntPtr p, int nDataOffset, byte[] bDest, int nStart, int nLength)
     {
-      IntPtr ptr;
-      int nlen;
-      int nCopied = nLength;
-
-      nlen = UnsafeNativeMethods.sqlite3_value_bytes(p);
-      ptr = UnsafeNativeMethods.sqlite3_value_blob(p);
+      int nlen = UnsafeNativeMethods.sqlite3_value_bytes(p);
 
       if (bDest == null) return nlen;
+
+      IntPtr ptr = UnsafeNativeMethods.sqlite3_value_blob(p);
+      int nCopied = nLength;
 
       if (nCopied + nStart > bDest.Length) nCopied = bDest.Length - nStart;
       if (nCopied + nDataOffset > nlen) nCopied = nlen - nDataOffset;
