@@ -8,10 +8,25 @@
 ###############################################################################
 
 if {[isEagle]} then {
-  proc loadAssembly { fileName } {
-    set fileName [file join [file dirname $::path] bin \
+  proc getAssemblyFileName { fileName } {
+    return [file join [file dirname $::path] bin \
         [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
         $::test_configuration bin $fileName]
+  }
+
+  proc copyAssembly { fileName } {
+    #
+    # NOTE: If we cannot copy the file then it is probably already loaded,
+    #       ignore the error.
+    #
+    catch {
+      file copy -force [getAssemblyFileName $fileName] \
+          [file join [info binary] $fileName]
+    }
+  }
+
+  proc loadAssembly { fileName } {
+    set fileName [getAssemblyFileName $fileName]
 
     if {[catch {set assembly \
         [object load -loadtype File $fileName]}] == 0} then {

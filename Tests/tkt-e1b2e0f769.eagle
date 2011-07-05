@@ -1,0 +1,99 @@
+###############################################################################
+#
+# tkt-e1b2e0f769.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+source [file join $path common.eagle]
+loadAssembly System.Data.SQLite.dll
+
+###############################################################################
+
+runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
+  copyAssembly SQLite.Interop.dll
+  copyAssembly System.Data.SQLite.dll
+  setupDb [set fileName tkt-e1b2e0f769-1.1.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x INTEGER);"
+
+  foreach x [list 1 2 3] {
+    sql execute $db "INSERT INTO t1 (x) VALUES($x);"
+  }
+
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getTemporaryPath] tkt-e1b2e0f769-1.1.db]
+  set sql "SELECT * FROM t1 ORDER BY x ASC; SELECT * FROM t1 ORDER BY x DESC;"
+
+  unset -nocomplain results errors
+
+  set code [compileCSharp [subst {
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static bool Tkt_e1b2e0f769(SQLiteConnection connection)
+        {
+          using (SQLiteTransaction transaction = connection.BeginTransaction())
+          {
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "${sql}";
+
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                if (!dataReader.HasRows)
+                  return false;
+
+                while (dataReader.Read())
+                  ;
+
+                return true;
+              }
+            }
+
+            transaction.Commit();
+          }
+        }
+
+        public static void Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource}"))
+          {
+            connection.Open();
+
+            Tkt_e1b2e0f769(connection);
+            Tkt_e1b2e0f769(connection);
+          }
+        }
+      }
+    }
+  }] results errors ReferencedAssemblies.Add System.dll \
+      ReferencedAssemblies.Add System.Data.dll \
+      ReferencedAssemblies.Add [getAssemblyFileName System.Data.SQLite.dll]]
+
+  list $code $results [expr {[info exists errors] ? $errors : ""}] [expr {$code\
+      eq "Ok" ? [object invoke _Dynamic${id}.Test${id} Main] : ""}]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain code results errors x db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -match regexp \
+-result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} \{\}$}}
+
+###############################################################################
+
+runTestEpilogue
