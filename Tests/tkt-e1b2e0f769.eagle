@@ -89,7 +89,7 @@ runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain code results errors x db fileName
+  unset -nocomplain code results errors sql dataSource id x db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -match regexp \
 -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} \{\}$}}
