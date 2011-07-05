@@ -147,7 +147,7 @@
       (3.7.7.1) package.  The Visual C++ 2010 SP1 runtime for x86 is included.
       The .NET Framework 4.0 is required.
       <br />
-      (sha1: 96e682d8f5be9c8231b0c942637858d58fbb48c8)
+      (sha1: c16ad14d044b4cdcf159ca83c3eb198ba6f26f95)
     </td>
   </tr>
 
@@ -189,7 +189,7 @@
       (3.7.7.1) package.  The Visual C++ 2010 SP1 runtime for x64 is included.
       The .NET Framework 4.0 is required.
       <br />
-      (sha1: 1046a59fc15e0b983b17b02588d4469ba1c4022a)
+      (sha1: 0790a24b0058b5b88a7c537dcf71424bfed63ed2)
     </td>
   </tr>
 
@@ -312,7 +312,7 @@
       System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010 SP1
       runtime for x86 and the .NET Framework 4.0 are required.
       <br />
-      (sha1: 772e4f13ab95c82c4dd81e572e4e605e7d4e2275)
+      (sha1: e7d74609eae6f3799cbe3a9a8be86be1c2f49c04)
     </td>
   </tr>
 
@@ -353,7 +353,7 @@
       System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010 SP1
       runtime for x64 and the .NET Framework 4.0 SP1 are required.
       <br />
-      (sha1: 79dc9a261fd70c34fb1e5ed3008d7f862ac93313)
+      (sha1: 797fa10130f0177118daac2864be28a1ad04e8d4)
     </td>
   </tr>
 
