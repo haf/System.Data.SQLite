@@ -44,10 +44,10 @@ if {[isEagle]} then {
     return ""
   }
 
-  proc setupDb {fileName {mode ""} {delete true} {varName db}} {
+  proc setupDb {fileName {mode ""} {delete ""} {extra ""} {varName db}} {
     set fileName [file join [getTemporaryPath] $fileName]
 
-    if {$delete} then {
+    if {[string length $delete] == 0 || $delete} then {
       catch {file delete $fileName}
     }
 
@@ -57,6 +57,10 @@ if {[isEagle]} then {
 
     if {[string length $mode] > 0} then {
       append connection {;Journal Mode=${mode}}
+    }
+
+    if {[string length $extra] > 0} then {
+      append connection \; $extra
     }
 
     set db [sql open -type SQLite [subst $connection]]
