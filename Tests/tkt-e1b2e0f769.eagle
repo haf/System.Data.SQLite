@@ -27,7 +27,7 @@ runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
   sql execute $db "CREATE TABLE t1(x INTEGER);"
   sql execute $db "CREATE TABLE t2(x INTEGER);"
 
-  foreach x [list 1 2 3 NULL] {
+  foreach x [list 1 2 3] {
     sql execute $db "INSERT INTO t1 (x) VALUES($x);"
   }
 
@@ -75,13 +75,10 @@ runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
 
                   while (dataReader.Read())
                   {
-                    if (!dataReader.IsDBNull(0))
-                      result.Add((long?) dataReader\[0\]);
+                    result.Add((long?) dataReader\[0\]);
                   }
                 } // NOTE: Exception here when no data rows (see comment above).
               }
-
-              transaction.Rollback();
             }
 
             connection.Close();
@@ -115,8 +112,8 @@ runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result2 result1 code results errors sql dataSource id x db \
-      fileName
+  unset -nocomplain result2 result1 code results errors sql table dataSource \
+      id x db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -match regexp \
 -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 3 Ok\

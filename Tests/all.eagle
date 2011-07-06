@@ -46,8 +46,8 @@ if {[file exists [file join $path prologue.eagle]]} then {
 set test_time [time {
   runAllTests $test_channel $path \
     [getTestFiles [list $path] $test_flags(-file) $test_flags(-notFile)] \
-    [list [file tail [info script]] \
-    *.tcl pkgIndex.eagle constraints.eagle epilogue.eagle prologue.eagle]
+    [list [file tail [info script]] *.tcl pkgIndex.eagle common.eagle \
+    constraints.eagle epilogue.eagle prologue.eagle]
 }]
 
 #
