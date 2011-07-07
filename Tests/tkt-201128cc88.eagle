@@ -1,0 +1,101 @@
+###############################################################################
+#
+# tkt-201128cc88.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+source [file join $path common.eagle]
+loadAssembly System.Data.SQLite.dll
+
+###############################################################################
+
+runTest {test tkt-201128cc88-1.1 {custom function with byte[] arg} -setup {
+  copyAssembly SQLite.Interop.dll
+  copyAssembly System.Data.SQLite.dll
+  set fileName tkt-201128cc88-1.1.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      \[SQLiteFunction(Name = "Base64", FuncType = FunctionType.Scalar)\]
+      public class Test${id} : SQLiteFunction
+      {
+        public override object Invoke(object\[\] args)
+        {
+          if (args == null)
+            return null;
+
+          if (args.Length != 1)
+            return new ArgumentException(String.Format(
+              "need exactly one argument, got {0}", args.Length));
+
+          object arg = args\[0\];
+
+          if (arg == null)
+            return String.Empty;
+
+          Type type = arg.GetType();
+
+          if (type == typeof(DBNull))
+            return String.Empty;
+
+          if (type != typeof(byte\[\]))
+            return new ArgumentException(String.Format(
+              "argument must be byte array, got {0}", type));
+
+          return Convert.ToBase64String((byte\[\]) arg);
+        }
+
+        public static void Main()
+        {
+          SQLiteFunction.RegisterFunction(typeof(Test${id}));
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  #
+  # NOTE: Compile the C# code (above) to register the custom SQLite function
+  #       and then open the database for this test case and attempt to execute
+  #       the function.  Normally, we would open the database in the test setup
+  #       phase; however, that will not work correctly because newly registered
+  #       functions are only picked up and used by databases opened after they
+  #       have been registered.
+  #
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result [setupDb $fileName] \
+      [sql execute -execute scalar $db "SELECT Base64(CAST(NULL AS BLOB));"] \
+      [sql execute -execute scalar $db "SELECT Base64(CAST('' AS BLOB));"] \
+      [sql execute -execute scalar $db "SELECT Base64(CAST('foo' AS BLOB));"]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -match regexp \
+-result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}\
+SQLiteConnection#\d+ \{\} \{\} Zm9v$}}
+
+###############################################################################
+
+runTestEpilogue

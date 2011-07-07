@@ -44,6 +44,42 @@ if {[isEagle]} then {
     return ""
   }
 
+  proc compileCSharpWith { text resultsVarName errorsVarName fileNames args } {
+    #
+    # NOTE: Create the base command to evaluate and add the property settings
+    #       that are almost always needed by our unit tests (i.e. the System
+    #       and System.Data assembly references).
+    #
+    set command [list compileCSharp $text results errors \
+        ReferencedAssemblies.Add System.dll ReferencedAssemblies.Add \
+        System.Data.dll]
+
+    #
+    # NOTE: Add all the provided file names as assembly references.
+    #
+    foreach fileName $fileNames {
+      lappend command ReferencedAssemblies.Add [getAssemblyFileName $fileName]
+    }
+
+    #
+    # NOTE: Add the extra arguments, if any, to the command to evaluate.
+    #
+    eval lappend command $args
+
+    #
+    # NOTE: Alias the compiler local results and errors variables to the
+    #       variable names provided by our caller.
+    #
+    upvar 1 $resultsVarName results
+    upvar 1 $errorsVarName errors
+
+    #
+    # NOTE: Evaluate the constructed [compileCSharp] command and return the
+    #       result.
+    #
+    eval $command
+  }
+
   proc setupDb {fileName {mode ""} {delete ""} {extra ""} {varName db}} {
     set fileName [file join [getTemporaryPath] $fileName]
 

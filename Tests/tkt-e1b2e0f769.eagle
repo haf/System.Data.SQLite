@@ -19,7 +19,7 @@ loadAssembly System.Data.SQLite.dll
 
 ###############################################################################
 
-runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
+runTest {test tkt-e1b2e0f769-1.1 {data reader cleanup} -setup {
   copyAssembly SQLite.Interop.dll
   copyAssembly System.Data.SQLite.dll
   setupDb [set fileName tkt-e1b2e0f769-1.1.db]
@@ -40,7 +40,7 @@ runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
 
     unset -nocomplain results errors
 
-    set code [compileCSharp [subst {
+    set code [compileCSharpWith [subst {
       using System.Collections.Generic;
       using System.Data.SQLite;
 
@@ -104,9 +104,7 @@ runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
           }
         }
       }
-    }] results errors ReferencedAssemblies.Add System.dll \
-        ReferencedAssemblies.Add System.Data.dll \
-        ReferencedAssemblies.Add [getAssemblyFileName System.Data.SQLite.dll]]
+    }] results errors System.Data.SQLite.dll]
 
     lappend result1 $code $results \
         [expr {[info exists errors] ? $errors : ""}] \
