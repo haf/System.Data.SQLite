@@ -69,6 +69,13 @@ runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
                   //
                   if (!dataReader.HasRows)
                   {
+                    //
+                    // NOTE: Closing the connection here caused an exception to
+                    //       be raised when exiting the using block for the data
+                    //       reader (below) because the Dispose method for the
+                    //       data reader calls the Close method, which always
+                    //       assumed the underlying connection was still open.
+                    //
                     connection.Close();
                     return result;
                   }
@@ -117,8 +124,7 @@ runTest {test tkt-e1b2e0f769-1.1 {command cleanup} -setup {
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -match regexp \
 -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 3 Ok\
-System#CodeDom#Compiler#CompilerResults#\d+ \{\} 1 \{.* Connection was closed,\
-statement was terminated\s.*\}$}}
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 0$}}
 
 ###############################################################################
 

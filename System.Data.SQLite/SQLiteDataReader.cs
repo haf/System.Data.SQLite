@@ -61,6 +61,16 @@ namespace System.Data.SQLite
     internal bool _disposeCommand;
 
     /// <summary>
+    /// If set, then raise an exception when the object is accessed after being disposed.
+    /// </summary>
+    internal bool _throwOnDisposed;
+
+    /// <summary>
+    /// If set, then the object is currently being disposed.
+    /// </summary>
+    internal bool _disposing;
+
+    /// <summary>
     /// An array of rowid's for the active statement if CommandBehavior.KeyInfo is specified
     /// </summary>
     private SQLiteKeyReader _keyInfo;
@@ -74,6 +84,7 @@ namespace System.Data.SQLite
     /// <param name="behave">The expected behavior of the data reader</param>
     internal SQLiteDataReader(SQLiteCommand cmd, CommandBehavior behave)
     {
+      _throwOnDisposed = true;
       _command = cmd;
       _version = _command.Connection._version;
 
@@ -91,6 +102,22 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Dispose of all resources used by this datareader.
+    /// </summary>
+    /// <param name="disposing"></param>
+    protected override void Dispose(bool disposing)
+    {
+        //
+        // NOTE: Fix for ticket [e1b2e0f769], do NOT throw exceptions while we
+        //       are being disposed.
+        //
+        _disposing = true;
+        _throwOnDisposed = false;
+
+        base.Dispose(disposing);
+    }
+
+    /// <summary>
     /// Closes the datareader, potentially closing the connection as well if CommandBehavior.CloseConnection was specified.
     /// </summary>
     public override void Close()
@@ -104,7 +131,7 @@ namespace System.Data.SQLite
             try
             {
               // Make sure we've not been canceled
-              if (_version != 0)
+              if (!_disposing && (_version != 0))
               {
                 try
                 {
@@ -151,6 +178,9 @@ namespace System.Data.SQLite
     /// </summary>
     private void CheckClosed()
     {
+      if (!_throwOnDisposed)
+        return;
+
       if (_command == null)
         throw new InvalidOperationException("DataReader has been closed");
 
