@@ -604,20 +604,20 @@ namespace System.Data.SQLite
 
     internal override long GetBytes(SQLiteStatement stmt, int index, int nDataOffset, byte[] bDest, int nStart, int nLength)
     {
-      IntPtr ptr;
-      int nlen;
-      int nCopied = nLength;
+      int nlen = UnsafeNativeMethods.sqlite3_column_bytes(stmt._sqlite_stmt, index);
 
-      nlen = UnsafeNativeMethods.sqlite3_column_bytes(stmt._sqlite_stmt, index);
       // If no destination buffer, return the size needed.
       if (bDest == null) return nlen;
+
+      int nCopied = nLength;
 
       if (nCopied + nStart > bDest.Length) nCopied = bDest.Length - nStart;
       if (nCopied + nDataOffset > nlen) nCopied = nlen - nDataOffset;
 
       if (nCopied > 0)
       {
-        ptr = UnsafeNativeMethods.sqlite3_column_blob(stmt._sqlite_stmt, index);
+        IntPtr ptr = UnsafeNativeMethods.sqlite3_column_blob(stmt._sqlite_stmt, index);
+
         Marshal.Copy((IntPtr)(ptr.ToInt64() + nDataOffset), bDest, nStart, nCopied);
       }
       else
@@ -761,6 +761,7 @@ namespace System.Data.SQLite
     {
       int nlen = UnsafeNativeMethods.sqlite3_value_bytes(p);
 
+      // If no destination buffer, return the size needed.
       if (bDest == null) return nlen;
 
       int nCopied = nLength;
@@ -774,7 +775,10 @@ namespace System.Data.SQLite
 
         Marshal.Copy((IntPtr)(ptr.ToInt64() + nDataOffset), bDest, nStart, nCopied);
       }
-      else nCopied = 0;
+      else
+      {
+        nCopied = 0;
+      }
 
       return nCopied;
     }
