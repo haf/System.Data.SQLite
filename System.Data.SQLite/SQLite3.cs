@@ -763,14 +763,17 @@ namespace System.Data.SQLite
 
       if (bDest == null) return nlen;
 
-      IntPtr ptr = UnsafeNativeMethods.sqlite3_value_blob(p);
       int nCopied = nLength;
 
       if (nCopied + nStart > bDest.Length) nCopied = bDest.Length - nStart;
       if (nCopied + nDataOffset > nlen) nCopied = nlen - nDataOffset;
 
       if (nCopied > 0)
-        Marshal.Copy((IntPtr)(ptr.ToInt32() + nDataOffset), bDest, nStart, nCopied);
+      {
+        IntPtr ptr = UnsafeNativeMethods.sqlite3_value_blob(p);
+
+        Marshal.Copy((IntPtr)(ptr.ToInt64() + nDataOffset), bDest, nStart, nCopied);
+      }
       else nCopied = 0;
 
       return nCopied;
