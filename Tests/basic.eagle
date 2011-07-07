@@ -74,9 +74,9 @@ runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
   #       same as when the 'testlinq.out' file was created.
   #
   set savedEncoding [object invoke Console OutputEncoding]
+  set encoding [object invoke System.Text.Encoding GetEncoding Windows-1252]
 
-  object invoke Console OutputEncoding \
-      [object invoke System.Text.Encoding GetEncoding Windows-1252]
+  object invoke Console OutputEncoding $encoding
 } -body {
   set code [catch {
     testExec $testLinqExeFile [list -eventflags Wait -directory \
@@ -90,9 +90,9 @@ runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
   list $code [string equal $output [readFile $testLinqOutFile]] \
       [expr {$code == 0 ? "" : $error}]
 } -cleanup {
-  object invoke Console OutputEncoding $savedEncoding
+  catch {object invoke Console OutputEncoding $savedEncoding}
 
-  unset -nocomplain code output error savedEncoding
+  unset -nocomplain code output error savedEncoding encoding
 } -constraints {eagle System.Data.SQLite file_testlinq.exe file_northwindEF.db\
 file_testlinq.out} -result {0 True {}}}
 
