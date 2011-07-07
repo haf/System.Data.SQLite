@@ -116,6 +116,7 @@
       <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props</li>
       <li>&lt;root&gt;\SQLite.Interop\src\win\interop.h</li>
       <li>&lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs</li>
+      <li>&lt;root&gt;\System.Data.SQLite\SQLite3.cs</li>
       <li>&lt;root&gt;\System.Data.SQLite\UnsafeNativeMethods.cs</li>
       <li>&lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs</li>
     </ul>

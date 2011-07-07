@@ -10,7 +10,7 @@ using System.Resources;
 [assembly: AssemblyTitle("SQLite.Designer")]
 [assembly: AssemblyDescription("ADO.NET Data Designer for SQLite")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("http://system.data.sqlite.org")]
+[assembly: AssemblyCompany("http://system.data.sqlite.org/")]
 [assembly: AssemblyProduct("SQLite Designer")]
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]
@@ -33,5 +33,5 @@ using System.Resources;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.38.1")]
-[assembly: AssemblyFileVersion("1.0.38.1")]
+[assembly: AssemblyVersion("1.0.74.0")]
+[assembly: AssemblyFileVersion("1.0.74.0")]

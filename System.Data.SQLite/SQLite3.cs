@@ -20,6 +20,10 @@ namespace System.Data.SQLite
   /// </summary>
   internal class SQLite3 : SQLiteBase
   {
+#if !PLATFORM_COMPACTFRAMEWORK
+    internal const string DesignerVersion = "1.0.74.0";
+#endif
+
     /// <summary>
     /// The opaque pointer returned to us by the sqlite provider
     /// </summary>

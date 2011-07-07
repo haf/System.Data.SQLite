@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("SQLite.Designer Installer")]
 [assembly: AssemblyDescription("SQLite ADO.NET Design-Time Installer")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("http://system.data.sqlite.org")]
+[assembly: AssemblyCompany("http://system.data.sqlite.org/")]
 [assembly: AssemblyProduct("SQLite Installer")]
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]
