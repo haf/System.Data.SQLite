@@ -7,6 +7,7 @@
 #
 ###############################################################################
 
+package require Eagle
 package require EagleLibrary
 package require EagleTest
 
@@ -15,7 +16,7 @@ runTestPrologue
 ###############################################################################
 
 source [file join $path common.eagle]
-loadAssembly System.Data.SQLite.dll
+tryLoadAssembly System.Data.SQLite.dll
 
 ###############################################################################
 

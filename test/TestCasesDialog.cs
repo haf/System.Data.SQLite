@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 using System.Data.Common;
 
@@ -9,10 +10,22 @@ namespace test
 {
   public partial class TestCasesDialog : Form
   {
+    private delegate void DelegateWithNoArgs();
+
+    /// <summary>
+    /// The total number of tests that have failed during the previous test run.
+    /// </summary>
+    private int _failed;
+
+    /// <summary>
+    /// If set, then automatically run all the tests and exit.
+    /// </summary>
+    private bool _autoRun;
+
     private TestCases _test;
     private TestCases _testitems;
 
-    public TestCasesDialog()
+    public TestCasesDialog(bool autoRun)
     {
       InitializeComponent();
 
@@ -33,6 +46,7 @@ namespace test
       _connectionString.Items.Add("Data Source=(local);Initial Catalog=sqlite;Integrated Security=True;Max Pool Size=10");
       _connectionString.SelectedIndex = 0;
 
+      _autoRun = autoRun;
       _testitems = new TestCases();
       foreach (KeyValuePair<string, bool> pair in _testitems.Tests)
       {
@@ -40,6 +54,39 @@ namespace test
         item.Checked = true;
         item.CheckOnClick = true;
       }
+
+      this.Load += new EventHandler(TestCasesDialog_Load);
+    }
+
+    private StringBuilder GridToText()
+    {
+        StringBuilder result = new StringBuilder();
+
+        foreach (DataGridViewRow row in _grid.Rows)
+        {
+            if (result.Length > 0)
+                result.Append(Environment.NewLine);
+
+            result.AppendFormat("{0}\t{1}\t{2}\t{3}", row.Cells[0].Value,
+                row.Cells[1].Value, row.Cells[2].Value, row.Cells[3].Value);
+        }
+
+        return result;
+    }
+
+    void TestCasesDialog_Load(object sender, EventArgs e)
+    {
+        //
+        // NOTE: In "automatic" mode, run all the tests as soon as the form is
+        //       fully loaded.
+        //
+        if (_autoRun)
+        {
+            BeginInvoke(new DelegateWithNoArgs(delegate()
+            {
+                runButton_Click(sender, e);
+            }));
+        }
     }
 
     void _tests_Clicked(object sender, EventArgs e)
@@ -53,6 +100,9 @@ namespace test
     {
       string factoryString = _provider.SelectedItem.ToString();
       DbProviderFactory factory = DbProviderFactories.GetFactory(factoryString);
+
+      _failed = 0;
+
       _test = new TestCases(factory, _connectionString.Text);
       _test.Tests = _testitems.Tests;
 
@@ -73,6 +123,28 @@ namespace test
         Invoke(new EventHandler(_test_OnAllTestsDone), sender, e);
       else
         runButton.Enabled = true;
+
+      //
+      // NOTE: In "automatic" mode, check if any of the tests failed and return
+      //       the appropriate error code to the operating system as we exit
+      //       the process.  Also, attempt to write the entire contents of the
+      //       test grid to the standard output channel via the console.  This
+      //       may fail if we have no console; however, the failure will simply
+      //       be ignored.
+      //
+      if (_autoRun)
+      {
+          try
+          {
+              Console.Write("{0}", GridToText());
+          }
+          catch
+          {
+              // do nothing, ignored.
+          }
+
+          Environment.Exit(_failed != 0 ? 1 : 0);
+      }
     }
 
     void _threadFunc()
@@ -89,6 +161,8 @@ namespace test
         _grid.Rows[_grid.Rows.Count - 1].SetValues(args.TestName, args.Result, args.Duration, (args.Exception == null) ? args.Message : args.Exception.Message);
         if (args.Result == TestResultEnum.Failed)
         {
+          _failed++;
+
           _grid.Rows[_grid.Rows.Count - 1].Cells[1].Style.BackColor = Color.Red;
         }
         else if (args.Result == TestResultEnum.Inconclusive)

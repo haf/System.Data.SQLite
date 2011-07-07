@@ -296,6 +296,16 @@ if {![info exists no([file tail [info script]])]} then {
     tputs $test_channel [appendArgs "---- processors: " \
         [info processors] \n]
 
+    catch {object invoke Console.InputEncoding WebName} encoding
+
+    tputs $test_channel [appendArgs "---- input encoding: " \
+        $encoding \n]
+
+    catch {object invoke Console.OutputEncoding WebName} encoding
+
+    tputs $test_channel [appendArgs "---- output encoding: " \
+        $encoding \n]
+
     tputs $test_channel [appendArgs "---- starting memory: " \
         [formatListAsDict [debug memory]] \n]
 

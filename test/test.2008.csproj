@@ -15,7 +15,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E27B1B1E-19C0-45E8-AA74-B6E1C041A130}</ProjectGuid>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>test</RootNamespace>
     <AssemblyName>test</AssemblyName>
     <OldToolsVersion>2.0</OldToolsVersion>

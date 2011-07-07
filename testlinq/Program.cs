@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Data.Objects;
+using System.Text;
 
 namespace testlinq
 {
@@ -136,7 +137,12 @@ namespace testlinq
           }
         }
       }
-      Console.ReadKey();
+
+      //
+      // NOTE: (JJM) Removed on 2011/07/06, makes it harder to run this EXE via
+      //       the new unit test suite.
+      //
+      // Console.ReadKey();
     }
   }
 }

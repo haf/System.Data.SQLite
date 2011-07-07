@@ -8,7 +8,7 @@
 ###############################################################################
 
 if {[isEagle]} then {
-  proc getAssemblyFileName { fileName } {
+  proc getBuildFileName { fileName } {
     return [file join [file dirname $::path] bin \
         [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
         $::test_configuration bin $fileName]
@@ -20,13 +20,13 @@ if {[isEagle]} then {
     #       ignore the error.
     #
     catch {
-      file copy -force [getAssemblyFileName $fileName] \
+      file copy -force [getBuildFileName $fileName] \
           [file join [info binary] $fileName]
     }
   }
 
-  proc loadAssembly { fileName } {
-    set fileName [getAssemblyFileName $fileName]
+  proc tryLoadAssembly { fileName } {
+    set fileName [getBuildFileName $fileName]
 
     if {[catch {set assembly \
         [object load -loadtype File $fileName]}] == 0} then {
@@ -58,7 +58,7 @@ if {[isEagle]} then {
     # NOTE: Add all the provided file names as assembly references.
     #
     foreach fileName $fileNames {
-      lappend command ReferencedAssemblies.Add [getAssemblyFileName $fileName]
+      lappend command ReferencedAssemblies.Add [getBuildFileName $fileName]
     }
 
     #

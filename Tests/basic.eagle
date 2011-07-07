@@ -7,6 +7,7 @@
 #
 ###############################################################################
 
+package require Eagle
 package require EagleLibrary
 package require EagleTest
 
@@ -15,11 +16,89 @@ runTestPrologue
 ###############################################################################
 
 source [file join $path common.eagle]
-loadAssembly System.Data.SQLite.dll
+tryLoadAssembly System.Data.SQLite.dll
+tryLoadAssembly System.Data.SQLite.Linq.dll
 
 ###############################################################################
 
-runTest {test basic-1.1 {SELECT scalar/reader, CREATE, INSERT} -setup {
+#
+# NOTE: Setup the variables that refer to the various files required by the
+#       tests in this file.
+#
+set testExeFile [getBuildFileName test.exe]
+set testLinqExeFile [getBuildFileName testlinq.exe]
+set northwindEfDbFile [getBuildFileName northwindEF.db]
+set testLinqOutFile [file join $path testlinq.out]
+
+#
+# NOTE: Setup the test constraints specific to the tests in this file.
+#
+if {![haveConstraint file_[file tail $testExeFile]]} then {
+  checkForFile $test_channel $testExeFile
+}
+
+if {![haveConstraint file_[file tail $testLinqExeFile]]} then {
+  checkForFile $test_channel $testLinqExeFile
+}
+
+if {![haveConstraint file_[file tail $northwindEfDbFile]]} then {
+  checkForFile $test_channel $northwindEfDbFile
+}
+
+if {![haveConstraint file_[file tail $testLinqOutFile]]} then {
+  checkForFile $test_channel $testLinqOutFile
+}
+
+###############################################################################
+
+runTest {test basic-1.1 {unit tests from the 'test' project} -body {
+  set code [catch {
+    testExec $testExeFile [list -eventflags Wait -directory \
+    [file dirname $northwindEfDbFile] -stdout output -success 0] -autoRun
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  list $code [expr {$code == 0 ? "" : $error}]
+} -cleanup {
+  unset -nocomplain code output error
+} -constraints {eagle System.Data.SQLite file_test.exe} -result {0 {}}}
+
+###############################################################################
+
+runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
+  #
+  # NOTE: We need to make 100% sure that the console output encoding is the
+  #       same as when the 'testlinq.out' file was created.
+  #
+  set savedEncoding [object invoke Console OutputEncoding]
+
+  object invoke Console OutputEncoding \
+      [object invoke System.Text.Encoding GetEncoding Windows-1252]
+} -body {
+  set code [catch {
+    testExec $testLinqExeFile [list -eventflags Wait -directory \
+    [file dirname $northwindEfDbFile] -stdout output -success 0] -autoRun
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  list $code [string equal $output [readFile $testLinqOutFile]] \
+      [expr {$code == 0 ? "" : $error}]
+} -cleanup {
+  object invoke Console OutputEncoding $savedEncoding
+
+  unset -nocomplain code output error savedEncoding
+} -constraints {eagle System.Data.SQLite file_testlinq.exe file_northwindEF.db\
+file_testlinq.out} -result {0 True {}}}
+
+###############################################################################
+
+runTest {test basic-1.3 {SELECT scalar/reader, CREATE, INSERT} -setup {
   setupDb [set fileName basic-1.1.db]
 } -body {
   set result [list]
@@ -44,6 +123,10 @@ runTest {test basic-1.1 {SELECT scalar/reader, CREATE, INSERT} -setup {
 } -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
 -match regexp -result {^\{\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [0-9a-f]{40}\}\
 \{1 \{\{x 1\} \{y foo\} \{z 1234\}\}\} \{count 1\} \{names \{x y z\}\}$}}
+
+###############################################################################
+
+unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################
 
