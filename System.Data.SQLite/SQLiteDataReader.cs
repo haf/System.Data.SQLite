@@ -131,7 +131,7 @@ namespace System.Data.SQLite
             try
             {
               // Make sure we've not been canceled
-              if (!_disposing && (_version != 0))
+              if (_version != 0)
               {
                 try
                 {
@@ -884,7 +884,7 @@ namespace System.Data.SQLite
 
       while (true)
       {
-        if (_activeStatement != null && stmt == null)
+        if (_activeStatement != null && _activeStatement._sql != null && stmt == null)
         {
           // Reset the previously-executed statement
           _activeStatement._sql.Reset(_activeStatement);
