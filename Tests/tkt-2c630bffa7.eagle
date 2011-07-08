@@ -16,7 +16,7 @@ runTestPrologue
 ###############################################################################
 
 source [file join $path common.eagle]
-tryLoadAssembly System.Data.SQLite.dll
+runSQLiteTestPrologue
 
 ###############################################################################
 
@@ -94,4 +94,5 @@ unset -nocomplain y
 
 ###############################################################################
 
+runSQLiteTestEpilogue
 runTestEpilogue

@@ -27,8 +27,7 @@ runTestPrologue
 #       to know who procedures actually belong to).
 #
 source [file join $path common.eagle]
-tryLoadAssembly System.Data.SQLite.dll
-tryLoadAssembly System.Data.SQLite.Linq.dll
+runSQLiteTestPrologue
 
 ###############################################################################
 
@@ -69,4 +68,5 @@ if {[array size no] == 0} then {unset no}
 
 ###############################################################################
 
+runSQLiteTestEpilogue
 runTestEpilogue

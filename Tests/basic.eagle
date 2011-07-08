@@ -16,8 +16,7 @@ runTestPrologue
 ###############################################################################
 
 source [file join $path common.eagle]
-tryLoadAssembly System.Data.SQLite.dll
-tryLoadAssembly System.Data.SQLite.Linq.dll
+runSQLiteTestPrologue
 
 ###############################################################################
 
@@ -28,7 +27,7 @@ tryLoadAssembly System.Data.SQLite.Linq.dll
 set testExeFile [getBuildFileName test.exe]
 set testLinqExeFile [getBuildFileName testlinq.exe]
 set northwindEfDbFile [getBuildFileName northwindEF.db]
-set testLinqOutFile [file join $path testlinq.out]
+set testLinqOutFile [file nativename [file join $path testlinq.out]]
 
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
@@ -64,7 +63,7 @@ runTest {test basic-1.1 {unit tests from the 'test' project} -body {
   list $code [expr {$code == 0 ? "" : $error}]
 } -cleanup {
   unset -nocomplain code output error
-} -constraints {eagle System.Data.SQLite file_test.exe} -result {0 {}}}
+} -constraints {eagle file_test.exe} -result {0 {}}}
 
 ###############################################################################
 
@@ -93,8 +92,8 @@ runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
   catch {object invoke Console OutputEncoding $savedEncoding}
 
   unset -nocomplain code output error savedEncoding encoding
-} -constraints {eagle System.Data.SQLite file_testlinq.exe file_northwindEF.db\
-file_testlinq.out} -result {0 True {}}}
+} -constraints {eagle file_testlinq.exe file_northwindEF.db file_testlinq.out} \
+-result {0 True {}}}
 
 ###############################################################################
 
@@ -130,4 +129,5 @@ unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################
 
+runSQLiteTestEpilogue
 runTestEpilogue

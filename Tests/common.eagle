@@ -8,20 +8,86 @@
 ###############################################################################
 
 if {[isEagle]} then {
-  proc getBuildFileName { fileName } {
+  proc getBuildDirectory {} {
     return [file join [file dirname $::path] bin \
         [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
-        $::test_configuration bin $fileName]
+        $::test_configuration bin]
   }
 
-  proc copyAssembly { fileName } {
+  proc getBuildFileName { fileName } {
+    return [file nativename \
+        [file join [getBuildDirectory] [file tail $fileName]]]
+  }
+
+  proc getBinaryDirectory {} {
+    return [info binary]
+  }
+
+  proc getBinaryFileName { fileName } {
+    return [file nativename \
+        [file join [getBinaryDirectory] [file tail $fileName]]]
+  }
+
+  proc tryCopyBuildFile { fileName } {
     #
-    # NOTE: If we cannot copy the file then it is probably already loaded,
-    #       ignore the error.
+    # NOTE: If we cannot copy the assembly then it is probably already loaded.
     #
-    catch {
-      file copy -force [getBuildFileName $fileName] \
-          [file join [info binary] $fileName]
+    set sourceFileName [getBuildFileName $fileName]
+
+    if {![file exists $sourceFileName]} then {
+      tputs $::test_channel [appendArgs \
+          "---- skipped copying build file \"" $sourceFileName \
+          "\", it does not exist\n"]
+
+      return
+    }
+
+    set targetFileName [getBinaryFileName $fileName]
+
+    if {[catch {file copy -force $sourceFileName $targetFileName}] == 0} then {
+      tputs $::test_channel [appendArgs \
+          "---- copied build file from \"" $sourceFileName "\" to \"" \
+          $targetFileName \"\n]
+    } else {
+      tputs $::test_channel [appendArgs \
+          "---- failed to copy build file from \"" $sourceFileName "\" to \"" \
+          $targetFileName \"\n]
+    }
+  }
+
+  proc tryDeleteBinaryFile { fileName } {
+    set fileName [getBinaryFileName $fileName]
+
+    if {![file exists $fileName]} then {
+      tputs $::test_channel [appendArgs \
+          "---- skipped deleting binary file \"" $fileName \
+          "\", it does not exist\n"]
+
+      return
+    }
+
+    if {[catch {file delete $fileName}] == 0} then {
+      tputs $::test_channel [appendArgs \
+          "---- deleted binary file \"" $fileName \"\n]
+    } else {
+      tputs $::test_channel [appendArgs \
+          "---- failed to delete binary file \"" $fileName \"\n]
+    }
+  }
+
+  proc tryCopyAssembly { fileName {pdb true} } {
+    tryCopyBuildFile $fileName
+
+    if {$pdb} then {
+      tryCopyBuildFile [appendArgs [file rootname $fileName] .pdb]
+    }
+  }
+
+  proc tryDeleteAssembly { fileName {pdb true} } {
+    tryDeleteBinaryFile $fileName
+
+    if {$pdb} then {
+      tryDeleteBinaryFile [appendArgs [file rootname $fileName] .pdb]
     }
   }
 
@@ -106,5 +172,34 @@ if {[isEagle]} then {
     upvar 1 $varName db
     catch {sql close $db}
     catch {file delete [file join [getTemporaryPath] $fileName]}
+  }
+
+  proc runSQLiteTestPrologue {} {
+    #
+    # NOTE: Skip running our custom prologue if the main one has been skipped.
+    #
+    if {![info exists ::no(prologue.eagle)]} then {
+      tryDeleteAssembly SQLite.Interop.dll
+      tryDeleteAssembly System.Data.SQLite.dll
+      tryDeleteAssembly System.Data.SQLite.Linq.dll
+
+      tryCopyAssembly SQLite.Interop.dll
+      tryCopyAssembly System.Data.SQLite.dll
+      tryCopyAssembly System.Data.SQLite.Linq.dll
+
+      tryLoadAssembly System.Data.SQLite.dll
+      tryLoadAssembly System.Data.SQLite.Linq.dll
+    }
+  }
+
+  proc runSQLiteTestEpilogue {} {
+    #
+    # NOTE: Skip running our custom epilogue if the main one has been skipped.
+    #
+    if {![info exists ::no(epilogue.eagle)]} then {
+      #
+      # NOTE: For now, nothing is done here.
+      #
+    }
   }
 }
