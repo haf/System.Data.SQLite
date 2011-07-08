@@ -119,6 +119,11 @@ namespace System.Data.SQLite
         return rc;
     }
 
+    internal override bool IsOpen()
+    {
+        return (_sql != null);
+    }
+
     internal override void Open(string strFilename, SQLiteOpenFlagsEnum flags, int maxPoolSize, bool usePool)
     {
       if (_sql != null) return;

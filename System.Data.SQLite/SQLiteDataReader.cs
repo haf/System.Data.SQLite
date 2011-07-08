@@ -884,7 +884,7 @@ namespace System.Data.SQLite
 
       while (true)
       {
-        if (_activeStatement != null && _activeStatement._sql != null && stmt == null)
+        if (stmt == null && _activeStatement != null && _activeStatement._sql != null && _activeStatement._sql.IsOpen())
         {
           // Reset the previously-executed statement
           _activeStatement._sql.Reset(_activeStatement);

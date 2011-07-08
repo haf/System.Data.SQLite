@@ -34,6 +34,11 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract int Shutdown();
     /// <summary>
+    /// Returns non-zero if a database connection is open.
+    /// </summary>
+    /// <returns></returns>
+    internal abstract bool IsOpen();
+    /// <summary>
     /// Opens a database.
     /// </summary>
     /// <remarks>
