@@ -26,7 +26,7 @@ runSQLiteTestPrologue
 #
 set testExeFile [getBuildFileName test.exe]
 set testLinqExeFile [getBuildFileName testlinq.exe]
-set northwindEfDbFile [getBuildFileName northwindEF.db]
+set northwindEfDbFile [file join [file dirname $path] testlinq northwindEF.db]
 set testLinqOutFile [file nativename [file join $path testlinq.out]]
 
 #
@@ -53,7 +53,7 @@ if {![haveConstraint file_[file tail $testLinqOutFile]]} then {
 runTest {test basic-1.1 {unit tests from the 'test' project} -body {
   set code [catch {
     testExec $testExeFile [list -eventflags Wait -directory \
-    [file dirname $northwindEfDbFile] -stdout output -success 0] -autoRun
+    [file dirname $testExeFile] -stdout output -success 0] -autoRun
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
@@ -69,6 +69,13 @@ runTest {test basic-1.1 {unit tests from the 'test' project} -body {
 
 runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
   #
+  # NOTE: Re-copy the reference database file used for this unit test to the
+  #       build directory in case it has been changed by a previous test run.
+  #
+  file copy -force $northwindEfDbFile \
+      [file join [getBuildDirectory] [file tail $northwindEfDbFile]]
+
+  #
   # NOTE: We need to make 100% sure that the console output encoding is the
   #       same as when the 'testlinq.out' file was created.
   #
@@ -79,7 +86,7 @@ runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
 } -body {
   set code [catch {
     testExec $testLinqExeFile [list -eventflags Wait -directory \
-    [file dirname $northwindEfDbFile] -stdout output -success 0] -autoRun
+    [file dirname $testLinqExeFile] -stdout output -success 0] -autoRun
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
