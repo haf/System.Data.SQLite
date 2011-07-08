@@ -21,8 +21,6 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test tkt-201128cc88-1.1 {custom function with byte[] arg} -setup {
-  tryCopyAssembly SQLite.Interop.dll
-  tryCopyAssembly System.Data.SQLite.dll
   set fileName tkt-201128cc88-1.1.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]

@@ -21,8 +21,6 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test tkt-e1b2e0f769-1.1 {data reader cleanup} -setup {
-  tryCopyAssembly SQLite.Interop.dll
-  tryCopyAssembly System.Data.SQLite.dll
   setupDb [set fileName tkt-e1b2e0f769-1.1.db]
 } -body {
   sql execute $db "CREATE TABLE t1(x INTEGER);"
