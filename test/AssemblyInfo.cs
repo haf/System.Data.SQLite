@@ -4,14 +4,17 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("test")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("test")]
-[assembly: AssemblyCopyright("")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyTitle("System.Data.SQLite Tester")]
+[assembly: AssemblyDescription("ADO.NET Data Provider for SQLite")]
+[assembly: AssemblyCompany("http://system.data.sqlite.org/")]
+[assembly: AssemblyProduct("System.Data.SQLite")]
+[assembly: AssemblyCopyright("Public Domain")]
+
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#else
+[assembly: AssemblyConfiguration("Release")]
+#endif
 
 //  Setting ComVisible to false makes the types in this assembly not visible 
 //  to COM componenets.  If you need to access a type in this assembly from 

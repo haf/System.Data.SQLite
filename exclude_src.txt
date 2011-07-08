@@ -8,6 +8,7 @@
 _FOSSIL_
 bin/*
 Externals/*
+Membership/*
 Membership/obj/*
 Membership/Profile/*
 Membership/SiteMap/*
