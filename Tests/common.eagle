@@ -118,7 +118,7 @@ if {[isEagle]} then {
     #
     set command [list compileCSharp $text results errors \
         ReferencedAssemblies.Add System.dll ReferencedAssemblies.Add \
-        System.Data.dll]
+        System.Data.dll ReferencedAssemblies.Add System.Xml.dll]
 
     #
     # NOTE: Add all the provided file names as assembly references.

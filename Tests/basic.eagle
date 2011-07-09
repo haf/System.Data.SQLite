@@ -50,7 +50,9 @@ if {![haveConstraint file_[file tail $testLinqOutFile]]} then {
 
 ###############################################################################
 
-runTest {test basic-1.1 {unit tests from the 'test' project} -body {
+runTest {test basic-1.1 {unit tests from the 'test' project} -setup {
+  catch {file delete [file join [file dirname $testExeFile] Test.db3]}
+} -body {
   set code [catch {
     testExec $testExeFile [list -eventflags Wait -directory \
     [file dirname $testExeFile] -stdout output -success 0] -autoRun
@@ -105,7 +107,7 @@ runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
 ###############################################################################
 
 runTest {test basic-1.3 {SELECT scalar/reader, CREATE, INSERT} -setup {
-  setupDb [set fileName basic-1.1.db]
+  setupDb [set fileName basic-1.3.db]
 } -body {
   set result [list]
 
@@ -129,6 +131,56 @@ runTest {test basic-1.3 {SELECT scalar/reader, CREATE, INSERT} -setup {
 } -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
 -match regexp -result {^\{\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [0-9a-f]{40}\}\
 \{1 \{\{x 1\} \{y foo\} \{z 1234\}\}\} \{count 1\} \{names \{x y z\}\}$}}
+
+###############################################################################
+
+runTest {test basic-1.4 {GetSchema with ReservedWords} -setup {
+  setupDb [set fileName basic-1.4.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+
+  set dataSource [file join [getTemporaryPath] basic-1.4.db]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static DataTable GetReservedWords()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            return connection.GetSchema("ReservedWords");
+          }
+        }
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetReservedWords
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+  unset -nocomplain result results errors dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
+System#Data#DataTable#\d+$}}
 
 ###############################################################################
 

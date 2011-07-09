@@ -460,7 +460,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\System.Data.SQLite\SR.resx">
-      <LogicalName>$(IntDir)System.Data.SQLite.%(Filename).resources</LogicalName>
+      <LogicalName>System.Data.SQLite.%(Filename).resources</LogicalName>
       <SubType>Designer</SubType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNativeOnly|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNativeOnly|x64'">true</ExcludedFromBuild>
