@@ -115,6 +115,17 @@ namespace System.Data.SQLite
       }
     }
 
+    private SkipClause skip;
+    internal SkipClause Skip
+    {
+      get { return skip; }
+      set
+      {
+          Debug.Assert(skip == null, "SqlSelectStatement.Skip has already been set");
+          skip = value;
+      }
+    }
+
     private SqlBuilder select = new SqlBuilder();
     internal SqlBuilder Select
     {
@@ -304,6 +315,10 @@ namespace System.Data.SQLite
         this.Top.WriteSql(writer, sqlGenerator);
       }
 
+      if (this.skip != null)
+      {
+        this.Skip.WriteSql(writer, sqlGenerator);
+      }
 
       --writer.Indent;
     }

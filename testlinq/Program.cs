@@ -7,7 +7,78 @@ namespace testlinq
 {
   class Program
   {
-    static void Main(string[] args)
+      private static int Main(string[] args)
+      {
+          string arg = null;
+
+          if ((args != null) && (args.Length > 0))
+              arg = args[0];
+
+          if (arg == null)
+              arg = "";
+
+          arg = arg.Trim().TrimStart('-', '/').ToLowerInvariant();
+
+          switch (arg)
+          {
+              case "": // String.Empty
+              case "old":
+                  {
+                      return OldTests();
+                  }
+              case "skip":
+                  {
+                      int pageSize = 0;
+
+                      if (args.Length > 1)
+                      {
+                          arg = args[1];
+
+                          if (arg != null)
+                              pageSize = int.Parse(arg.Trim());
+                      }
+
+                      return SkipTest(pageSize);
+                  }
+              default:
+                  {
+                      Console.WriteLine("unknown test \"{0}\"", arg);
+                      return 1;
+                  }
+          }
+      }
+
+      private static int SkipTest(int pageSize)
+      {
+          using (northwindEFEntities db = new northwindEFEntities())
+          {
+              bool once = false;
+              int count = db.Customers.Count();
+
+              int PageCount = (pageSize != 0) ?
+                  (count / pageSize) + ((count % pageSize) == 0 ? 0 : 1) : 1;
+
+              for (int pageIndex = 0; pageIndex < PageCount; pageIndex++)
+              {
+                  var query = db.Customers.OrderBy(p => p.City).
+                      Skip(pageSize * pageIndex).Take(pageSize);
+
+                  foreach (Customers customers in query)
+                  {
+                      if (once)
+                          Console.Write(' ');
+
+                      Console.Write(customers.CustomerID);
+
+                      once = true;
+                  }
+              }
+          }
+
+          return 0;
+      }
+
+    private static int OldTests()
     {
       using (northwindEFEntities db = new northwindEFEntities())
       {
@@ -143,6 +214,8 @@ namespace testlinq
       //       the new unit test suite.
       //
       // Console.ReadKey();
+
+      return 0;
     }
   }
 }

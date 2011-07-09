@@ -67,7 +67,7 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Write out the TOP part of sql select statement 
-    /// It basically writes TOP (X) [WITH TIES].
+    /// It basically writes LIMIT (X).
     /// </summary>
     /// <param name="writer"></param>
     /// <param name="sqlGenerator"></param>

@@ -86,7 +86,7 @@ runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
 } -body {
   set code [catch {
     testExec $testLinqExeFile [list -eventflags Wait -directory \
-    [file dirname $testLinqExeFile] -stdout output -success 0] -autoRun
+    [file dirname $testLinqExeFile] -stdout output -success 0]
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"

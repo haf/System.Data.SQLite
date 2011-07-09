@@ -509,7 +509,10 @@ namespace System.Data.SQLite
     /// <returns>The string representing the SQL to be executed.</returns>
     private string GenerateSql(DbQueryCommandTree tree)
     {
+#if false
       tree = SqlChecker.Rewrite(tree);
+#endif
+
       selectStatementStack = new Stack<SqlSelectStatement>();
       isParentAJoinStack = new Stack<bool>();
 
@@ -1807,8 +1810,30 @@ namespace System.Data.SQLite
     /// <returns>A <see cref="SqlBuilder"/></returns>
     public override ISqlFragment Visit(DbSkipExpression e)
     {
-      // Should never get here.  The Sql2000 rewriter would've rewritten the command tree not to use this
-      throw new NotSupportedException();
+        Debug.Assert(e.Count is DbConstantExpression || e.Count is DbParameterReferenceExpression, "DbLimitExpression.Count is of invalid expression type");
+
+        Symbol fromSymbol;
+        SqlSelectStatement result = VisitInputExpression(e.Input.Expression, e.Input.VariableName, e.Input.VariableType, out fromSymbol);
+
+        if (!IsCompatible(result, e.ExpressionKind))
+        {
+            result = CreateNewSelectStatement(result, e.Input.VariableName, e.Input.VariableType, out fromSymbol);
+        }
+
+        selectStatementStack.Push(result);
+        symbolTable.EnterScope();
+
+        AddFromSymbol(result, e.Input.VariableName, fromSymbol);
+
+        AddSortKeys(result.OrderBy, e.SortOrder);
+
+        symbolTable.ExitScope();
+        selectStatementStack.Pop();
+
+        ISqlFragment skipCount = HandleCountExpression(e.Count);
+
+        result.Skip = new SkipClause(skipCount);
+        return result;
     }
 
     /// <summary>

@@ -13,6 +13,7 @@ namespace System.Data.SQLite
 
     internal class SqlChecker : DbExpressionVisitor<bool>
   {
+#if false
     private static Type sql8rewriter;
 
     static SqlChecker()
@@ -26,11 +27,13 @@ namespace System.Data.SQLite
 
         sql8rewriter = Type.GetType(String.Format("System.Data.SqlClient.SqlGen.Sql8ExpressionRewriter, System.Data.Entity, Version={0}, Culture=neutral, PublicKeyToken=b77a5c561934e089", version), false);
     }
+#endif
 
     private SqlChecker()
     {
     }
 
+#if false
     /// <summary>
     /// SQLite doesn't support things like SKIP and a few other things.  
     /// So determine if the query has to be rewritten
@@ -53,6 +56,7 @@ namespace System.Data.SQLite
       }      
       return tree;
     }
+#endif
 
     public override bool Visit(DbAndExpression expression)
     {
