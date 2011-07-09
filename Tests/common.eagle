@@ -9,9 +9,25 @@
 
 if {[isEagle]} then {
   proc getBuildDirectory {} {
-    return [file join [file dirname $::path] bin \
-        [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
-        $::test_configuration bin]
+    #
+    # NOTE: See if the "native" runtime option has been added.  If so, use the
+    #       directory for the mixed-mode assembly.  To enable this option via
+    #       the command line, enter a command similar to the following (all on
+    #       one line):
+    #
+    #       EagleShell.exe -preInitialize
+    #         "object invoke Interpreter.GetActive AddRuntimeOption native"
+    #         -file .\path\to\all.eagle
+    #
+    if {[object invoke Interpreter.GetActive HasRuntimeOption native]} then {
+      return [file join [file dirname $::path] bin \
+          [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
+          [machineToPlatform $::tcl_platform(machine)] $::test_configuration]
+    } else {
+      return [file join [file dirname $::path] bin \
+          [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
+          $::test_configuration bin]
+    }
   }
 
   proc getBuildFileName { fileName } {
