@@ -670,6 +670,13 @@ namespace eval ::Eagle {
           $::eagle_platform(administrator)}]
     }
 
+    proc hasRuntimeOption { name } {
+      #
+      # NOTE: Returns non-zero if the specified runtime option is set.
+      #
+      return [object invoke Interpreter.GetActive HasRuntimeOption $name]
+    }
+
     proc getPluginFlags { pattern } {
       foreach loaded [info loaded] {
         set plugin [lindex $loaded end]

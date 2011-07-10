@@ -306,6 +306,8 @@ if {![info exists no([file tail [info script]])]} then {
     tputs $test_channel [appendArgs "---- output encoding: " \
         $encoding \n]
 
+    unset encoding
+
     tputs $test_channel [appendArgs "---- starting memory: " \
         [formatListAsDict [debug memory]] \n]
 

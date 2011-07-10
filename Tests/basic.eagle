@@ -177,7 +177,7 @@ runTest {test basic-1.4 {GetSchema with ReservedWords} -setup {
       } result] : [set result ""]}] $result
 } -cleanup {
   cleanupDb $fileName
-  unset -nocomplain result results errors dataSource id db fileName
+  unset -nocomplain result results errors code dataSource id db fileName
 } -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
 -match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
 System#Data#DataTable#\d+$}}
