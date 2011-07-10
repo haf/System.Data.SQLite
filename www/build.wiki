@@ -19,12 +19,13 @@
 </p>
 
 <p>
-  In general, files with 2008 in the name (e.g. SQLite.Interop.2008.vcproj) or
-  files ending in .vsprops are project and property files for the Visual Studio
-  2008 solution.  Files with 2010 in the name (e.g. SQLite.Interop.2010.vcxproj)
-  or files ending in .props are property and project files for the Visual Studio
-  2010 solution.  When making changes, you should make changes to both to keep
-  them in sync.
+  In general, files with 2008 in the name (e.g.
+  &quot;SQLite.Interop.2008.vcproj&quot;) or files ending in
+  &quot;.vsprops&quot; are project and property files for the Visual Studio 2008
+  solution.  Files with 2010 in the name (e.g.
+  &quot;SQLite.Interop.2010.vcxproj&quot;) or files ending in &quot;.props&quot;
+  are project and property files for the Visual Studio 2010 solution.  When
+  making changes, you should make changes to both to keep them in sync.
 </p>
 
 <p>
@@ -49,19 +50,21 @@
   </li>
 
   <li>
-    We want to ship the separate managed-only System.Data.SQLite assembly and
-    the SQLite.Interop.dll native library.  This will make it easier to maintain
-    and deploy the included core SQLite code (in the &quot;SQLite.Interop.dll&quot;
-    native library).  We also want to ship the &quot;monster DLL&quot; (i.e. the
-    &quot;mixed-mode&quot; System.Data.SQLite assembly that includes all the
-    necessary native and managed code).  This will make it easier for developers
-    that wish to register the assembly in the Global Assembly Cache (GAC).
+    We want to ship the separate managed-only &quot;System.Data.SQLite.dll&quot;
+    assembly and the &quot;SQLite.Interop.dll&quot; native library.  This will
+    make it easier to maintain and deploy the included core SQLite code (in the
+    &quot;SQLite.Interop.dll&quot; native library).  We also want to ship the
+    &quot;monster DLL&quot; (i.e. the mixed-mode
+    &quot;System.Data.SQLite.dll&quot; assembly that includes all the necessary
+    native and managed code).  This will make it easier for developers that wish
+    to register the assembly in the Global Assembly Cache (GAC).
   </li>
 
   <li>
     The machine used to prepare the official releases will have the
     [http://www.microsoft.com/downloads/en/details.aspx?FamilyID=ab99342f-5d1a-413d-8319-81da479ab0d7 | .NET Framework 3.5 SP1]
-    and the corresponding [http://www.microsoft.com/downloads/details.aspx?FamilyId=E6E1C3DF-A74F-4207-8586-711EBE331CDC | SDK]
+    and the corresponding
+    [http://www.microsoft.com/downloads/details.aspx?FamilyId=E6E1C3DF-A74F-4207-8586-711EBE331CDC | SDK]
     installed.
   </li>
 
@@ -69,13 +72,13 @@
     The machine used to prepare the official releases will have
     [http://www.jrsoftware.org/isdl.php | Inno Setup 5.4.2] or higher installed
     in &quot;%ProgramFiles%\Inno Setup 5&quot; or &quot;%ProgramFiles(x86)%\Inno
-    Setup 5&quot; for an 64-bit machines.  Alternatively, the InnoSetup
+    Setup 5&quot; for an 64-bit machines.  Alternatively, the Inno Setup
     directory may be included in the PATH environment variable.
   </li>
 
   <li>
     The string &quot;&lt;root&gt;&quot; represents the root of your source tree
-    for System.Data.SQLite.
+    for the System.Data.SQLite project.
   </li>
 
   <li>
@@ -122,9 +125,10 @@
     </ul>
 
     You'll need to update the INTEROP_BUILD_NUMBER, INTEROP_MANIFEST_VERSION,
-    and INTEROP_RC_VERSION properties in the .vsprops and .props files, and the
-    INTEROP_VERSION define in interop.h.  This version number should track the
-    release versions of the System.Data.SQLite packages (i.e. [./news.wiki | 1.0.x]).
+    and INTEROP_RC_VERSION properties in the &quot;.vsprops&quot; and
+    &quot;.props&quot; files, and the INTEROP_VERSION define in
+    &quot;interop.h&quot;.  This version number should track the release
+    versions of the System.Data.SQLite packages (i.e. [./news.wiki | 1.0.x]).
   </li>
 </ol>
 
@@ -137,30 +141,32 @@
     (above).
   </li>
 
-  <li>Open the appropriate solution for your build platform.
+  <li>
+    Open the appropriate solution for your build platform.
+
     <ul>
       <li>
-        SQLite.NET.2008.sln is the top-level solution primarily designed for use
-        with Visual Studio 2008 in the IDE; however, it may also be used from
-        the command line with MSBuild 3.5.
+        The &quot;SQLite.NET.2008.sln&quot; file is the top-level solution
+        primarily designed for use with Visual Studio 2008 in the IDE; however,
+        it may also be used from the command line with MSBuild 3.5.
       </li>
 
       <li>
-        SQLite.NET.2010.sln is the top-level solution primarily designed for use
-        with Visual Studio 2010 in the IDE; however, it may also be used from
-        the command line with MSBuild 4.0.
+        The &quot;SQLite.NET.2010.sln&quot; file is the top-level solution
+        primarily designed for use with Visual Studio 2010 in the IDE; however,
+        it may also be used from the command line with MSBuild 4.0.
       </li>
 
       <li>
-        SQLite.NET.2008.MSBuild.sln is the top-level solution primarily designed
-        for use with MSBuild 3.5 on the command line; however, it may also be
-        used from the Visual Studio 2008 IDE.
+        The &quot;SQLite.NET.2008.MSBuild.sln&quot; file is the top-level
+        solution primarily designed for use with MSBuild 3.5 on the command
+        line; however, it may also be used from the Visual Studio 2008 IDE.
       </li>
 
       <li>
-        SQLite.NET.2010.MSBuild.sln is the top-level solution primarily designed
-        for use with MSBuild 4.0 on the command line; however, it may also be
-        used from the Visual Studio 2010 IDE.
+        The &quot;SQLite.NET.2010.MSBuild.sln&quot; file is the top-level
+        solution primarily designed for use with MSBuild 4.0 on the command
+        line; however, it may also be used from the Visual Studio 2010 IDE.
       </li>
     </ul>
   </li>
@@ -189,6 +195,7 @@
   </li>
 
   <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
@@ -221,13 +228,13 @@
   <li>
     Enter the following command to build the setup binaries for all supported
     build configurations (unfortunately, it is not possible to build the setup
-    using the InnoSetup IDE.  It must be done using the provided command line
-    tools due to its highly dynamic nature): <b>bake_all.bat</b>
+    using the Inno Setup IDE.  It must be done using the provided command line
+    tools due to its highly dynamic nature):<b>bake_all.bat</b>
   </li>
 
   <li>
-    Make sure everything succeeds with no errors.  InnoSetup should produce
-    &quot;success&quot; messages very similar to the following: Successful
-    compile (X.XXX sec). Resulting Setup program filename is: abc
+    Make sure everything succeeds with no errors.  Inno Setup should produce
+    &quot;success&quot; messages very similar to the following: <b>Successful
+    compile (X.XXX sec). Resulting Setup program filename is: abc</b>
   </li>
 </ol>
