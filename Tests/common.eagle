@@ -125,6 +125,22 @@ if {[isEagle]} then {
     return ""
   }
 
+  proc enumerableToString { enumerable } {
+    set result [list]
+
+    if {[string length $enumerable] == 0 || $enumerable eq "null"} then {
+      return $result
+    }
+
+    object foreach -alias item $enumerable {
+      if {[string length $item] > 0} then {
+        lappend result [$item ToString]
+      }
+    }
+
+    return $result
+  }
+
   proc compileCSharpWith { text resultsVarName errorsVarName fileNames args } {
     #
     # NOTE: Create the base command to evaluate and add the property settings

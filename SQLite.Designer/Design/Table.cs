@@ -518,6 +518,15 @@ namespace SQLite.Designer.Design
         separator = ", ";
       }
       builder.Append(")");
+
+      if (!String.IsNullOrEmpty(keys[0].Match))
+          builder.AppendFormat(" MATCH {0}", keys[0].Match);
+
+      if (!String.IsNullOrEmpty(keys[0].OnUpdate))
+          builder.AppendFormat(" ON UPDATE {0}", keys[0].OnUpdate);
+
+      if (!String.IsNullOrEmpty(keys[0].OnDelete))
+          builder.AppendFormat(" ON DELETE {0}", keys[0].OnDelete);
     }
 
     [Browsable(false)]

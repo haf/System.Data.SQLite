@@ -138,7 +138,6 @@ runTest {test basic-1.4 {GetSchema with ReservedWords} -setup {
   setupDb [set fileName basic-1.4.db]
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-
   set dataSource [file join [getTemporaryPath] basic-1.4.db]
 
   unset -nocomplain results errors
@@ -181,6 +180,91 @@ runTest {test basic-1.4 {GetSchema with ReservedWords} -setup {
 } -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
 -match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
 System#Data#DataTable#\d+$}}
+
+###############################################################################
+
+runTest {test basic-1.5 {GetSchema with ForeignKeys} -setup {
+  setupDb [set fileName basic-1.5.db]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(
+      x INTEGER REFERENCES t2 MATCH FULL
+      ON UPDATE SET DEFAULT ON DELETE CASCADE
+      DEFAULT 1
+    );
+  }
+
+  sql execute $db "CREATE TABLE t2(x INTEGER REFERENCES t3);"
+
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getTemporaryPath] basic-1.5.db]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static DataRowCollection GetForeignKeys()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            return connection.GetSchema("ForeignKeys").Rows;
+          }
+        }
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        set rows [list]
+        set foreignKeys [object invoke _Dynamic${id}.Test${id} GetForeignKeys]
+
+        object foreach -alias foreignKey $foreignKeys {
+          lappend rows [list \
+              [$foreignKey Item CONSTRAINT_CATALOG] \
+              [$foreignKey Item CONSTRAINT_NAME] \
+              [$foreignKey Item TABLE_CATALOG] \
+              [$foreignKey Item TABLE_NAME] \
+              [$foreignKey Item CONSTRAINT_TYPE] \
+              [$foreignKey Item IS_DEFERRABLE] \
+              [$foreignKey Item INITIALLY_DEFERRED] \
+              [$foreignKey Item FKEY_FROM_COLUMN] \
+              [$foreignKey Item FKEY_TO_CATALOG] \
+              [$foreignKey Item FKEY_TO_TABLE] \
+              [$foreignKey Item FKEY_TO_COLUMN] \
+              [$foreignKey Item FKEY_FROM_ORDINAL_POSITION] \
+              [$foreignKey Item FKEY_ON_UPDATE] \
+              [$foreignKey Item FKEY_ON_DELETE] \
+              [$foreignKey Item FKEY_MATCH]]
+        }
+
+        set rows
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result rows foreignKey foreignKeys results errors code \
+      dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
+\{\{main FK_t1_0 main t1 \{FOREIGN KEY\} False False x main t2 \{\} 0 \{SET\
+DEFAULT\} CASCADE NONE\} \{main FK_t2_0 main t2 \{FOREIGN KEY\} False False x\
+main t3 \{\} 0 \{NO ACTION\} \{NO ACTION\} NONE\}\}$}}
 
 ###############################################################################
 

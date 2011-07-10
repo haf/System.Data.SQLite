@@ -287,6 +287,9 @@ namespace SQLite.Designer.Design
     internal ForeignKeyFromItem _from;
     internal ForeignKeyToItem _to;
     internal string _name;
+    internal string _onUpdate;
+    internal string _onDelete;
+    internal string _match;
     private bool _dirty;
 
     private ForeignKey(ForeignKey source)
@@ -295,6 +298,9 @@ namespace SQLite.Designer.Design
       _from = new ForeignKeyFromItem(this, source._from.Column);
       _to = new ForeignKeyToItem(this, source._to.Catalog, source._to.Table, source._to.Column);
       _name = source._name;
+      _onUpdate = source._onUpdate;
+      _onDelete = source._onDelete;
+      _match = source._match;
       _dirty = source._dirty;
     }
 
@@ -322,6 +328,9 @@ namespace SQLite.Designer.Design
         _from = new ForeignKeyFromItem(this, row["FKEY_FROM_COLUMN"].ToString());
         _to = new ForeignKeyToItem(this, row["FKEY_TO_CATALOG"].ToString(), row["FKEY_TO_TABLE"].ToString(), row["FKEY_TO_COLUMN"].ToString());
         _name = row["CONSTRAINT_NAME"].ToString();
+        _onUpdate = row["FKEY_ON_UPDATE"].ToString();
+        _onDelete = row["FKEY_ON_DELETE"].ToString();
+        _match = row["FKEY_MATCH"].ToString();
       }
       else
       {
@@ -389,6 +398,30 @@ namespace SQLite.Designer.Design
     public ForeignKeyToItem To
     {
       get { return _to; }
+    }
+
+    [DisplayName("On Update")]
+    [Category("Action")]
+    [Description("The action to take when modifying the parent key values of an existing row.")]
+    public string OnUpdate
+    {
+        get { return _onUpdate; }
+    }
+
+    [DisplayName("On Delete")]
+    [Category("Action")]
+    [Description("The action to take when deleting a row from the parent table.")]
+    public string OnDelete
+    {
+        get { return _onDelete; }
+    }
+
+    [DisplayName("Match")]
+    [Category("Match")]
+    [Description("Used with composite foreign key definitions to modify the way NULL values that occur in child keys are handled.  Not currently supported.")]
+    public string Match
+    {
+        get { return _match; }
     }
 
     #region ICloneable Members

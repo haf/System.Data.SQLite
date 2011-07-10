@@ -2154,6 +2154,9 @@ namespace System.Data.SQLite
       tbl.Columns.Add("FKEY_TO_SCHEMA", typeof(string));
       tbl.Columns.Add("FKEY_TO_TABLE", typeof(string));
       tbl.Columns.Add("FKEY_TO_COLUMN", typeof(string));
+      tbl.Columns.Add("FKEY_ON_UPDATE", typeof(string));
+      tbl.Columns.Add("FKEY_ON_DELETE", typeof(string));
+      tbl.Columns.Add("FKEY_MATCH", typeof(string));
 
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
@@ -2191,6 +2194,9 @@ namespace System.Data.SQLite
                   row["FKEY_TO_TABLE"] = builder.UnquoteIdentifier(rdKey[2].ToString());
                   row["FKEY_TO_COLUMN"] = builder.UnquoteIdentifier(rdKey[4].ToString());
                   row["FKEY_FROM_ORDINAL_POSITION"] = rdKey[1];
+                  row["FKEY_ON_UPDATE"] = (rdKey.FieldCount > 5) ? rdKey[5] : String.Empty;
+                  row["FKEY_ON_DELETE"] = (rdKey.FieldCount > 6) ? rdKey[6] : String.Empty;
+                  row["FKEY_MATCH"] = (rdKey.FieldCount > 7) ? rdKey[7] : String.Empty;
 
                   if (String.IsNullOrEmpty(strKeyName) || String.Compare(strKeyName, row["CONSTRAINT_NAME"].ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                     tbl.Rows.Add(row);
