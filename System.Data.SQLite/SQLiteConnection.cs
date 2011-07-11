@@ -234,7 +234,9 @@ namespace System.Data.SQLite
     /// <param name="connectionString">The connection string to use on the connection</param>
     public SQLiteConnection(string connectionString)
     {
+#if !PLATFORM_COMPACTFRAMEWORK
       SQLiteLog.Initialize();
+#endif
 
       _connectionState = ConnectionState.Closed;
       _connectionString = "";

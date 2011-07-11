@@ -21,7 +21,9 @@ namespace System.Data.SQLite
 
     static SQLiteFactory()
     {
+#if !PLATFORM_COMPACTFRAMEWORK
         SQLiteLog.Initialize();
+#endif
 
         string version =
 #if NET_20
