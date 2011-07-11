@@ -1,0 +1,85 @@
+<title>Test Procedures</title>
+
+<a name="assumptions"></a>
+<h2>Test Assumptions &amp; Prerequisites</h2>
+
+<ol>
+  <li>
+    The string &quot;&lt;root&gt;&quot; represents the root of the source tree
+    for the System.Data.SQLite project.
+  </li>
+
+  <li>
+    The string &quot;&lt;year&gt;&quot; represents the version of Visual Studio
+    used (e.g. 2008) to build the binaries being tested.
+  </li>
+
+  <li>
+    The string &quot;&lt;platform&gt;&quot; represents the native platform for
+    the binaries being tested (e.g. Win32 or x64).
+  </li>
+
+  <li>
+    The string &quot;&lt;pid&gt;&quot; represents the process identifier for the
+    instance of EagleShell being used to run the unit tests.
+  </li>
+</ol>
+
+<a name="procedures"></a>
+<h2>Test Procedures</h2>
+
+<p>
+  Follow these steps to unit test the System.Data.SQLite (SDS) binaries.
+  Unless otherwise noted, all steps need to be done in the order specified.
+</p>
+
+<p>
+  First, you will need a full source enlistment for the System.Data.SQLite
+  project, including the
+  &quot;<a href="http://system.data.sqlite.org/index.html/dir?name=Externals/Eagle">Externals\Eagle</a>&quot;
+  directory.
+
+  The binaries to test must be [./build.wiki | built] or
+  [./downloads.wiki | downloaded].  If the binaries are downloaded, they must be
+  placed in the appropriate build output directory (e.g.
+  &quot;&lt;root&gt;\bin\&lt;year&gt;\Release\bin&quot; for the separate managed
+  and interop assemblies or
+  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;platform&gt;\Release&quot; for the
+  mixed-mode assembly).
+</p>
+
+<p>
+  The new unit tests have been setup using <a href="http://eagle.to/">Eagle</a>
+  and its associated unit testing framework, named &quot;EagleTest&quot;.  Eagle
+  is an implementation of the <a href="http://www.tcl.tk/">Tcl</a> scripting
+  language for the Common Language Runtime (CLR).  EagleTest is the unit testing
+  framework for Eagle, packaged as a collection of Eagle scripts, based loosely
+  on the implementation of
+  <a href="http://www.tcl.tk/man/tcl8.4/TclCmd/tcltest.htm">tcltest</a>.
+</p>
+
+<a name="automated"></a>
+<h2>Automated Unit Tests</h2>
+
+<ol>
+  <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+  <li>Change the current directory to &quot;&lt;root&gt;&quot;.</li>
+
+  <li>
+    Enter the following command to run all the unit tests against the binaries built with a separate managed and interop assembly:
+    <b>Externals\Eagle\bin\EagleShell.exe -file Tests\all.eagle</b>
+  </li>
+
+  <li>
+    Enter the following command to run all the unit tests against the binaries built with a mixed-mode assembly:
+    <b>Externals\Eagle\bin\EagleShell.exe -initialize -runtimeOption native -file Tests\all.eagle</b>
+  </li>
+
+  <li>
+    Make sure all tests pass; the log file &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any errors should occur.  EagleTest should produce &quot;success&quot; messages very similar to the following:<br /><br />
+    PASSED: 30<br />
+    TOTAL: 30<br />
+    PASS PERCENTAGE: 100%<br />
+    OVERALL RESULT: SUCCESS<br />
+  </li>
+</ol>

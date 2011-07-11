@@ -10,6 +10,7 @@
         <li>[./downloads.wiki | Downloads]</li>
         <li>[./contribute.wiki | Contributing]</li>
         <li>[./build.wiki | Build Procedures]</li>
+        <li>[./test.wiki | Test Procedures]</li>
         <li>[./release.wiki | Release Procedures]</li>
       </ul>
     </td>
