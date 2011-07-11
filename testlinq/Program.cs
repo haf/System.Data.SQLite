@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Data.Objects;
 using System.Text;
@@ -9,6 +10,24 @@ namespace testlinq
   {
       private static int Main(string[] args)
       {
+          if (Environment.GetEnvironmentVariable("BREAK") != null)
+          {
+              Console.WriteLine(
+                  "Attach a debugger to process {0} and press any key to continue.",
+                  Process.GetCurrentProcess().Id);
+
+              try
+              {
+                  Console.ReadKey(true); /* throw */
+              }
+              catch (InvalidOperationException) // Console.ReadKey
+              {
+                  // do nothing.
+              }
+
+              Debugger.Break();
+          }
+
           string arg = null;
 
           if ((args != null) && (args.Length > 0))

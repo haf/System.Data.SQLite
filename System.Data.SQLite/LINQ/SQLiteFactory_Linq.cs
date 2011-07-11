@@ -21,6 +21,8 @@ namespace System.Data.SQLite
 
     static SQLiteFactory()
     {
+        SQLiteLog.Initialize();
+
         string version =
 #if NET_20
             "3.5.0.0";

@@ -742,13 +742,17 @@ namespace System.Data.SQLite
     /// </summary>
     Ticks = 0,
     /// <summary>
-    /// The default format for this provider.
+    /// The ISO8601 format
     /// </summary>
     ISO8601 = 1,
     /// <summary>
     /// JulianDay format, which is what SQLite uses internally
     /// </summary>
-    JulianDay = 2
+    JulianDay = 2,
+    /// <summary>
+    /// The default format for this provider.
+    /// </summary>
+    Default = ISO8601
   }
 
   /// <summary>

@@ -393,7 +393,7 @@ namespace System.Data.SQLite
     /// Gets/Sets the datetime format for the connection.
     /// </summary>
     [Browsable(true)]
-    [DefaultValue(SQLiteDateFormats.ISO8601)]
+    [DefaultValue(SQLiteDateFormats.Default)]
     public SQLiteDateFormats DateTimeFormat
     {
       get

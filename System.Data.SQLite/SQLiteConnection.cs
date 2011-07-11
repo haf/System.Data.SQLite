@@ -234,6 +234,8 @@ namespace System.Data.SQLite
     /// <param name="connectionString">The connection string to use on the connection</param>
     public SQLiteConnection(string connectionString)
     {
+      SQLiteLog.Initialize();
+
       _connectionState = ConnectionState.Closed;
       _connectionString = "";
       //_commandList = new List<WeakReference>();
