@@ -38,7 +38,9 @@
   project, including the
   &quot;<a href="http://system.data.sqlite.org/index.html/dir?name=Externals/Eagle">Externals\Eagle</a>&quot;
   directory.
+</p>
 
+<p>
   The binaries to test must be [./build.wiki | built] or
   [./downloads.wiki | downloaded].  If the binaries are downloaded, they must be
   placed in the appropriate build output directory (e.g.
@@ -63,6 +65,7 @@
 
 <ol>
   <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+
   <li>Change the current directory to &quot;&lt;root&gt;&quot;.</li>
 
   <li>
