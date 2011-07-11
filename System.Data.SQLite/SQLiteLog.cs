@@ -237,7 +237,8 @@ namespace System.Data.SQLite
         }
 
         /// <summary>
-        /// Default logger.  Currently, uses the NT Event Log.
+        /// Default logger.  Currently, uses the Trace class (i.e. sends events
+        /// to the current trace listeners, if any).
         /// </summary>
         /// <param name="sender">Should be null.</param>
         /// <param name="e">The data associated with this event.</param>
