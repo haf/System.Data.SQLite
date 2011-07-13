@@ -1095,9 +1095,13 @@ namespace System.Data.SQLite
     /// Queries or modifies the number of retries or the retry interval (in milliseconds) for
     /// certain I/O operations that may fail due to anti-virus software.
     /// </summary>
-    /// <param name="count">The number of times to retry the I/O operation.</param>
-    /// <param name="interval">The number of milliseconds to wait before retrying the I/O operation.</param>
-    /// <returns></returns>
+    /// <param name="count">The number of times to retry the I/O operation.  A negative value
+    /// will cause the current count to be queried and replace that negative value.</param>
+    /// <param name="interval">The number of milliseconds to wait before retrying the I/O
+    /// operation.  This number is multiplied by the number of retry attempts so far to come
+    /// up with the final number of milliseconds to wait.  A negative value will cause the
+    /// current interval to be queried and replace that negative value.</param>
+    /// <returns>Zero for success, non-zero for error.</returns>
     public int SetAvRetry(ref int count, ref int interval)
     {
         if (_connectionState != ConnectionState.Open)
