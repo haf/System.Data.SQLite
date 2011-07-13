@@ -1037,5 +1037,10 @@ namespace System.Data.SQLite
       collationSequence = "BINARY";
 #endif
     }
+
+    internal override int FileControl(string zDbName, int op, IntPtr pArg)
+    {
+      return UnsafeNativeMethods.sqlite3_file_control(_sql, (zDbName != null) ? ToUTF8(zDbName) : null, op, pArg);
+    }
   }
 }

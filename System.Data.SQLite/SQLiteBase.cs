@@ -205,6 +205,8 @@ namespace System.Data.SQLite
       get;
     }
 
+    internal abstract int FileControl(string zDbName, int op, IntPtr pArg);
+
     protected virtual void Dispose(bool bDisposing)
     {
     }

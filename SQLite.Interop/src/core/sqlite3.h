@@ -109,7 +109,7 @@ extern "C" {
 */
 #define SQLITE_VERSION        "3.7.7"
 #define SQLITE_VERSION_NUMBER 3007007
-#define SQLITE_SOURCE_ID      "2011-07-12 14:38:25 0207fd9b0c0f6baa3c2cb8ba588ad585507848b3"
+#define SQLITE_SOURCE_ID      "2011-07-13 16:03:46 7aaf0a6ae1238129e07eb191ca3f043df445e27a"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -741,6 +741,23 @@ struct sqlite3_io_methods {
 ** Applications should not call [sqlite3_file_control()] with this
 ** opcode as doing so may disrupt the operation of the specialized VFSes
 ** that do require it.  
+**
+** ^The [SQLITE_FCNTL_WIN32_AV_RETRY] opcode is used to configure automatic
+** retry counts and intervals for certain disk I/O operations for the
+** windows [VFS] in order to work to provide robustness against
+** anti-virus programs.  By default, the windows VFS will retry file read,
+** file write, and file delete opertions up to 10 times, with a delay
+** of 25 milliseconds before the first retry and with the delay increasing
+** by an additional 25 milliseconds with each subsequent retry.  This
+** opcode allows those to values (10 retries and 25 milliseconds of delay)
+** to be adjusted.  The values are changed for all database connections
+** within the same process.  The argument is a pointer to an array of two
+** integers where the first integer i the new retry count and the second
+** integer is the delay.  If either integer is negative, then the setting
+** is not changed but instead the prior value of that setting is written
+** into the array entry, allowing the current retry settings to be
+** interrogated.  The zDbName parameter is ignored.
+** 
 */
 #define SQLITE_FCNTL_LOCKSTATE        1
 #define SQLITE_GET_LOCKPROXYFILE      2
@@ -750,7 +767,7 @@ struct sqlite3_io_methods {
 #define SQLITE_FCNTL_CHUNK_SIZE       6
 #define SQLITE_FCNTL_FILE_POINTER     7
 #define SQLITE_FCNTL_SYNC_OMITTED     8
-
+#define SQLITE_FCNTL_WIN32_AV_RETRY   9
 
 /*
 ** CAPI3REF: Mutex Handle

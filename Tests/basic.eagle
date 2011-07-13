@@ -268,6 +268,105 @@ main t3 \{\} 0 \{NO ACTION\} \{NO ACTION\} NONE\}\}$}}
 
 ###############################################################################
 
+runTest {test basic-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
+  setupDb [set fileName basic-1.6.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getTemporaryPath] basic-1.6.db]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static bool TestSetAvRetry(
+          ref int count,
+          ref int interval
+          )
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            //
+            // NOTE: Set the requested retry parameter values.
+            //
+            if (connection.SetAvRetry(ref count, ref interval) != 0)
+              return false;
+
+            //
+            // NOTE: Query the retry parameter values.
+            //
+            int newCount = -1; int newInterval = -1;
+
+            if (connection.SetAvRetry(ref newCount, ref newInterval) != 0)
+              return false;
+
+            //
+            // NOTE: Make sure the retry parameter values were set.
+            //
+            return (newCount == count && newInterval == interval);
+          }
+        }
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        set savedCount -1; set savedInterval -1
+
+        object invoke _Dynamic${id}.Test${id} TestSetAvRetry \
+            savedCount savedInterval
+
+        set count 10; set interval 50
+
+        object invoke _Dynamic${id}.Test${id} TestSetAvRetry \
+            count interval
+      } result] : [set result ""]}] $result
+} -cleanup {
+  if {[info exists savedCount]} then {
+    #
+    # NOTE: Restore the saved retry count, if possible.
+    #
+    catch {
+      set interval -1
+      object invoke _Dynamic${id}.Test${id} TestSetAvRetry savedCount interval
+    }
+  }
+
+  if {[info exists savedInterval]} then {
+    #
+    # NOTE: Restore the saved retry interval, if possible.
+    #
+    catch {
+      set count -1
+      object invoke _Dynamic${id}.Test${id} TestSetAvRetry count savedInterval
+    }
+  }
+
+  cleanupDb $fileName
+
+  unset -nocomplain result count interval savedCount savedInterval results \
+      errors code dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
+True$}}
+
+###############################################################################
+
 unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################

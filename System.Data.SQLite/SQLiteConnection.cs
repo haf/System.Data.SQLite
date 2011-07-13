@@ -152,6 +152,8 @@ namespace System.Data.SQLite
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
   {
+    private const int SQLITE_FCNTL_WIN32_AV_RETRY = 9;
+
     private const string _dataDirectory = "|DataDirectory|";
     private const string _masterdb = "sqlite_master";
     private const string _tempmasterdb = "sqlite_temp_master";
@@ -1087,6 +1089,46 @@ namespace System.Data.SQLite
         if (databasePassword.Length == 0) databasePassword = null;
 
       _password = databasePassword;
+    }
+
+    /// <summary>
+    /// Queries or modifies the number of retries or the retry interval (in milliseconds) for
+    /// certain I/O operations that may fail due to anti-virus software.
+    /// </summary>
+    /// <param name="count">The number of times to retry the I/O operation.</param>
+    /// <param name="interval">The number of milliseconds to wait before retrying the I/O operation.</param>
+    /// <returns></returns>
+    public int SetAvRetry(ref int count, ref int interval)
+    {
+        if (_connectionState != ConnectionState.Open)
+            throw new InvalidOperationException(
+                "Database must be opened before changing the AV retry parameters.");
+
+        int rc;
+        IntPtr pArg = IntPtr.Zero;
+
+        try
+        {
+            pArg = Marshal.AllocHGlobal(sizeof(int) * 2);
+
+            Marshal.WriteInt32(pArg, 0, count);
+            Marshal.WriteInt32(pArg, sizeof(int), interval);
+
+            rc = _sql.FileControl(null, SQLITE_FCNTL_WIN32_AV_RETRY, pArg);
+
+            if (rc == 0)
+            {
+                count = Marshal.ReadInt32(pArg, 0);
+                interval = Marshal.ReadInt32(pArg, sizeof(int));
+            }
+        }
+        finally
+        {
+            if (pArg != IntPtr.Zero)
+                Marshal.FreeHGlobal(pArg);
+        }
+
+        return rc;
     }
 
     /// <summary>

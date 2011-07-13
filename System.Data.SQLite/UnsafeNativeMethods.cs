@@ -742,6 +742,13 @@ namespace System.Data.SQLite
 #endif
     internal static extern void sqlite3_log(int iErrCode, byte[] zFormat);
 
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_file_control(IntPtr db, byte[] zDbName, int op, IntPtr pArg);
+
     #endregion
   }
 
