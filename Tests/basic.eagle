@@ -331,7 +331,7 @@ runTest {test basic-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
         object invoke _Dynamic${id}.Test${id} TestSetAvRetry \
             savedCount savedInterval
 
-        set count 10; set interval 50
+        set count 5; set interval 50
 
         object invoke _Dynamic${id}.Test${id} TestSetAvRetry \
             count interval
