@@ -26,8 +26,9 @@ runSQLiteTestPrologue
 #
 set testExeFile [getBuildFileName test.exe]
 set testLinqExeFile [getBuildFileName testlinq.exe]
-set northwindEfDbFile [file join [file dirname $path] testlinq northwindEF.db]
 set testLinqOutFile [file nativename [file join $path testlinq.out]]
+set northwindEfDbFile [file nativename [file join [file dirname $path] \
+    testlinq northwindEF.db]]
 
 #
 # NOTE: Setup the test constraints specific to the tests in this file.

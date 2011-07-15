@@ -18,6 +18,14 @@ if {[isEagle]} then {
     #       EagleShell.exe -initialize -runtimeOption native
     #         -file .\path\to\all.eagle
     #
+    #       To enable this option via the command line prior to the "beta 16"
+    #       release of Eagle, the following command must be used instead (also
+    #       all on one line):
+    #
+    #       EagleShell.exe -initialize -postInitialize
+    #         "object invoke Interpreter.GetActive AddRuntimeOption native"
+    #         -file .\path\to\all.eagle
+    #
     if {[hasRuntimeOption native]} then {
       return [file join [file dirname $::path] bin \
           [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
