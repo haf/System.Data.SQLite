@@ -228,6 +228,27 @@ if {[isEagle]} then {
 
       tryLoadAssembly System.Data.SQLite.dll
       tryLoadAssembly System.Data.SQLite.Linq.dll
+
+      catch {
+        tputs $::test_channel [appendArgs \
+            "---- file version of \"System.Data.SQLite.dll\"... " \
+            [file version [getBinaryFileName System.Data.SQLite.dll]] \n]
+      }
+
+      catch {
+        tputs $::test_channel [appendArgs \
+            "---- file version of \"System.Data.SQLite.Linq.dll\"... " \
+            [file version [getBinaryFileName System.Data.SQLite.Linq.dll]] \n]
+      }
+
+      set assemblies [object invoke AppDomain.CurrentDomain GetAssemblies]
+
+      object foreach assembly $assemblies {
+        if {[string match \{System.Data.SQLite* $assembly]} then {
+          tputs $::test_channel [appendArgs \
+              "---- found assembly: " $assembly \n]
+        }
+      }
     }
   }
 
