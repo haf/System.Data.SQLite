@@ -1210,7 +1210,7 @@ namespace eval ::Eagle {
     #
     # NOTE: Setup the test path relative to the library path.
     #
-    if {![interp issafe] && ![info exists test_path]} then {
+    if {![interp issafe] && ![info exists ::test_path]} then {
       #
       # NOTE: Try the source release directory structure.
       #
@@ -1220,13 +1220,22 @@ namespace eval ::Eagle {
       if {![file exists $::test_path] || \
           ![file isdirectory $::test_path]} then {
         #
-        # NOTE: Must be a binary release, no "Library" directory then.
-        #       Also, binary releases have a lower-case "tests" directory
-        #       name that originates from the "update.bat" tool.  Must
-        #       match casing with "update.bat".
+        # NOTE: Try for the test package directory.
+        #
+        set ::test_path [file join [file normalize [file dirname \
+            [file dirname [info script]]]] Test1.0]
+      }
+
+      if {![file exists $::test_path] || \
+          ![file isdirectory $::test_path]} then {
+        #
+        # NOTE: This must be a binary release, no "Library" directory then.
+        #       Also, binary releases have an upper-case "Tests" directory
+        #       name that originates from the "update.bat" tool.  This must
+        #       match the casing used in "update.bat".
         #
         set ::test_path [file join [file normalize [file dirname [file dirname \
-            [info library]]]] tests]
+            [info library]]]] Tests]
       }
     }
 
@@ -1269,7 +1278,7 @@ namespace eval ::Eagle {
     #
     # NOTE: Setup the test path relative to the path of this file.
     #
-    if {![info exists test_path]} then {
+    if {![info exists ::test_path]} then {
       #
       # NOTE: Try the source release directory structure.
       #
@@ -1279,13 +1288,22 @@ namespace eval ::Eagle {
       if {![file exists $::test_path] || \
           ![file isdirectory $::test_path]} then {
         #
-        # NOTE: Must be a binary release, no "Library" directory then.
-        #       Also, binary releases have a lower-case "tests" directory
-        #       name that originates from the "update.bat" tool.  Must
-        #       match casing with "update.bat".
+        # NOTE: Try for the test package directory.
         #
         set ::test_path [file join [file normalize [file dirname \
-            [file dirname [file dirname [info script]]]]] tests]
+            [file dirname [info script]]]] Test1.0]
+      }
+
+      if {![file exists $::test_path] || \
+          ![file isdirectory $::test_path]} then {
+        #
+        # NOTE: This must be a binary release, no "Library" directory then.
+        #       Also, binary releases have an upper-case "Tests" directory
+        #       name that originates from the "update.bat" tool.  This must
+        #       match the casing used in "update.bat".
+        #
+        set ::test_path [file join [file normalize [file dirname \
+            [file dirname [file dirname [info script]]]]] Tests]
       }
     }
 
