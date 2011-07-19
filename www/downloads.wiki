@@ -293,7 +293,7 @@
       This binary package features the mixed-mode assembly and contains all the
       binaries for the x86 version of the System.Data.SQLite 1.0.74.0 (3.7.7.1)
       package.  The Visual C++ 2010 SP1 runtime for x86 and the .NET Framework
-      3.5 SP1 are required.
+      4.0 are required.
       <br />
       (sha1: 76d0e38e1a687d8ddaaa94744b4da5e2841492e8)
     </td>
@@ -334,7 +334,7 @@
       This binary package features the mixed-mode assembly and contains all the
       binaries for the x64 version of the System.Data.SQLite 1.0.74.0 (3.7.7.1)
       package.  The Visual C++ 2010 SP1 runtime for x64 and the .NET Framework
-      3.5 SP1 are required.
+      4.0 are required.
       <br />
       (sha1: a3648c38cf1522493e3641bfd590c093708c1fc9)
     </td>
@@ -351,7 +351,7 @@
     <td valign="top">
       This binary package contains all the binaries for the x64 version of the
       System.Data.SQLite 1.0.74.0 (3.7.7.1) package.  The Visual C++ 2010 SP1
-      runtime for x64 and the .NET Framework 4.0 SP1 are required.
+      runtime for x64 and the .NET Framework 4.0 are required.
       <br />
       (sha1: 797fa10130f0177118daac2864be28a1ad04e8d4)
     </td>
