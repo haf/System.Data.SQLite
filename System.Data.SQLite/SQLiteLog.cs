@@ -109,10 +109,19 @@ namespace System.Data.SQLite
             lock (syncRoot)
             {
                 //
-                // NOTE: Create a single "global" 
+                // NOTE: Add an event handler for the DomainUnload event so
+                //       that we can unhook our logging managed function
+                //       pointer from the native SQLite code prior to it
+                //       being invalidated.
+                //
+                AppDomain.CurrentDomain.DomainUnload +=
+                    new EventHandler(DomainUnload);
+
+                //
+                // NOTE: Create an instance of the SQLite wrapper class.
                 //
                 if (_sql == null)
-                    _sql = new SQLite3(SQLiteDateFormats.ISO8601);
+                    _sql = new SQLite3(SQLiteDateFormats.Default);
 
                 //
                 // NOTE: Create a single "global" (i.e. per-process) callback
@@ -128,7 +137,7 @@ namespace System.Data.SQLite
 
                     if (rc != 0)
                         throw new SQLiteException(rc,
-                            "Failed to initialize logging interface.");
+                            "Failed to initialize logging.");
                 }
 
                 //
@@ -140,6 +149,32 @@ namespace System.Data.SQLite
                 // NOTE: For now, always setup the default log event handler.
                 //
                 AddDefaultHandler();
+            }
+        }
+
+        /// <summary>
+        /// Handles the AppDomain being unloaded.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void DomainUnload(
+            object sender,
+            EventArgs e
+            )
+        {
+            if (_sql != null)
+            {
+                int rc = _sql.Shutdown();
+
+                if (rc != 0)
+                    throw new SQLiteException(rc,
+                        "Failed to shutdown interface.");
+
+                rc = _sql.SetLogCallback(null);
+
+                if (rc != 0)
+                    throw new SQLiteException(rc,
+                        "Failed to shutdown logging.");
             }
         }
 
