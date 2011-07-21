@@ -34,9 +34,10 @@ runTest {test tkt-b4a7ddc83f-1.1 {initialization/shutdown} -setup [subst {
   setupDb $fileName
 } -cleanup {
   cleanupDb $fileName
+  unset -nocomplain db fileName
 } -constraints {eagle monoBug28 command.sql compile.DATA\
 compile.ISOLATED_INTERPRETERS System.Data.SQLite} -isolationLevel AppDomain \
--result {}}
+-match regexp -result {^SQLiteConnection#\d+$}}
 
 ###############################################################################
 
@@ -44,21 +45,18 @@ runTest {test tkt-b4a7ddc83f-1.2 {initialization/shutdown} -setup [subst {
   set fileName tkt-b4a7ddc83f-1.2.db
   set ::path {$::path}
   set ::test_configuration {$::test_configuration}
-  source [file join $path common.eagle]
+  source [file join $::path common.eagle]
 }] -body {
   package require EagleTest
   tryLoadAssembly System.Data.SQLite.dll
-
-  object invoke Interpreter.GetActive Interactive True
-  debug break
-
   object invoke System.Data.SQLite.SQLiteLog Initialize
   setupDb $fileName
 } -cleanup {
   cleanupDb $fileName
+  unset -nocomplain db fileName
 } -constraints {eagle monoBug28 command.sql compile.DATA\
 compile.ISOLATED_INTERPRETERS System.Data.SQLite} -isolationLevel AppDomain \
--result {}}
+-match regexp -result {^SQLiteConnection#\d+$}}
 
 ###############################################################################
 
