@@ -162,6 +162,11 @@ namespace System.Data.SQLite
             EventArgs e
             )
         {
+            //
+            // BUGBUG: This will cause serious problems if other AppDomains
+            //         have any open SQLite connections; however, there is
+            //         currently no way around this limitation.
+            //
             if (_sql != null)
             {
                 int rc = _sql.Shutdown();
