@@ -51,6 +51,8 @@ SET TOOLS=%TOOLS:\\=\%
 %_VECHO% Tools = '%TOOLS%'
 
 IF EXIST "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat" (
+  CALL :fn_ResetErrorLevel
+
   %_AECHO% Running "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat"...
   %_ECHO% CALL "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat"
 
@@ -79,6 +81,18 @@ IF DEFINED NETFX40ONLY (
   SET YEAR=2010
   SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v4.0.30319
   GOTO skip_netFxCheck
+)
+
+IF DEFINED FRAMEWORKDIR (
+  IF NOT EXIST "%FRAMEWORKDIR%" (
+    CALL :fn_UnsetVariable FRAMEWORKDIR
+  )
+)
+
+IF DEFINED FRAMEWORKDIR (
+  IF NOT EXIST "%FRAMEWORKDIR%\csc.exe" (
+    CALL :fn_UnsetVariable FRAMEWORKDIR
+  )
 )
 
 IF NOT DEFINED FRAMEWORKDIR (

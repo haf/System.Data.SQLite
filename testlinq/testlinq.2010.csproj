@@ -48,7 +48,14 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NorthwindModel2010.Designer.cs">
+    <Compile Condition="'$(TargetFrameworkVersion)' == 'v3.5'"
+             Include="NorthwindModel2008.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NorthwindModel2008.edmx</DependentUpon>
+    </Compile>
+    <Compile Condition="'$(TargetFrameworkVersion)' == 'v4.0'"
+             Include="NorthwindModel2010.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>NorthwindModel2010.edmx</DependentUpon>
@@ -57,11 +64,20 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="2010\App.Config" />
+    <None Condition="'$(TargetFrameworkVersion)' == 'v3.5'"
+          Include="2008\App.Config" />
+    <None Condition="'$(TargetFrameworkVersion)' == 'v4.0'"
+          Include="2010\App.Config" />
     <None Include="northwindEF.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <EntityDeploy Include="NorthwindModel2010.edmx">
+    <EntityDeploy Condition="'$(TargetFrameworkVersion)' == 'v3.5'"
+                  Include="NorthwindModel2008.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>NorthwindModel2008.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <EntityDeploy Condition="'$(TargetFrameworkVersion)' == 'v4.0'"
+                  Include="NorthwindModel2010.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>NorthwindModel2010.Designer.cs</LastGenOutput>
     </EntityDeploy>
@@ -70,7 +86,7 @@
     <Service Include="{C8F2D6AC-F9F4-4E40-A399-22F9A9A5CBD2}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

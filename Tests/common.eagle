@@ -8,6 +8,20 @@
 ###############################################################################
 
 if {[isEagle]} then {
+  proc getBuildYear {} {
+    #
+    # NOTE: See if the "year" setting has been overridden by the user (e.g. on
+    #       the command line).  This controls which binaries we are testing,
+    #       those produced by Visual Studio 2008 or Visual Studio 2010 build
+    #       system.
+    #
+    if {[info exists ::test_year] && [string length $::test_year] > 0} then {
+      return $::test_year
+    } else {
+      return [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}]
+    }
+  }
+
   proc getBuildDirectory {} {
     #
     # NOTE: See if the "native" runtime option has been added.  If so, use the
@@ -27,12 +41,10 @@ if {[isEagle]} then {
     #         -file .\path\to\all.eagle
     #
     if {[hasRuntimeOption native]} then {
-      return [file join [file dirname $::path] bin \
-          [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
+      return [file join [file dirname $::path] bin [getBuildYear] \
           [machineToPlatform $::tcl_platform(machine)] $::test_configuration]
     } else {
-      return [file join [file dirname $::path] bin \
-          [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}] \
+      return [file join [file dirname $::path] bin [getBuildYear] \
           $::test_configuration bin]
     }
   }

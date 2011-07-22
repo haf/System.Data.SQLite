@@ -34,12 +34,12 @@
 	/>
 	<UserMacro
 		Name="SQLITE_WINCE_DEFINES"
-		Value="SQLITE_OMIT_WAL"
+		Value="SQLITE_OMIT_WAL=1"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro
 		Name="SQLITE_DEBUG_DEFINES"
-		Value=""
+		Value="SQLITE_DEBUG=1;SQLITE_MEMDEBUG=1"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro

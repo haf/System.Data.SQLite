@@ -7,4 +7,4 @@
 :: Released to the public domain, use at your own risk!
 ::
 
-REM SET MSBUILD_ARGS=/property:TargetFrameworkVersion=v3.5
+REM SET MSBUILD_ARGS=/p:TargetFrameworkVersion=v3.5 /p:PlatformToolset=v100
