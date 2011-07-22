@@ -13,6 +13,33 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 typedef void (*SQLITEUSERFUNC)(sqlite3_context *, int, sqlite3_value **);
 typedef void (*SQLITEFUNCFINAL)(sqlite3_context *);
 
+__declspec(dllexport) void * WINAPI sqlite3DbMallocZero_interop(sqlite3 *db, int n)
+{
+  void *p;
+  if (db) {
+    sqlite3_mutex_enter(db->mutex);
+  }
+  p = sqlite3DbMallocZero(db,n);
+  if (db) {
+    sqlite3_mutex_leave(db->mutex);
+  }
+  return p;
+}
+
+__declspec(dllexport) void sqlite3DbFree_interop(sqlite3 *db, void *p)
+{
+  if (db) {
+    sqlite3_mutex_enter(db->mutex);
+  }
+  if (p) {
+    sqlite3MemdebugSetType(p, MEMTYPE_DB|MEMTYPE_HEAP);
+  }
+  sqlite3DbFree(db,p);
+  if (db) {
+    sqlite3_mutex_leave(db->mutex);
+  }
+}
+
 /*
     The goal of this version of close is different than that of sqlite3_close(), and is designed to lend itself better to .NET's non-deterministic finalizers and
     the GC thread.  SQLite will not close a database if statements are open on it -- but for our purposes, we'd rather finalize all active statements
@@ -37,7 +64,7 @@ __declspec(dllexport) int WINAPI sqlite3_close_interop(sqlite3 *db)
     while (db->pVdbe)
     {
       // Make a copy of the first prepared statement
-      Vdbe *p = (Vdbe *)sqlite3_malloc(sizeof(Vdbe));
+      Vdbe *p = (Vdbe *)sqlite3DbMallocZero_interop(db, sizeof(Vdbe));
       Vdbe *po = db->pVdbe;
 
       if (!p) 
@@ -205,7 +232,7 @@ __declspec(dllexport) int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
     db = p->db;
     if (db == NULL)
     {
-      sqlite3_free(p);
+      sqlite3DbFree_interop(db, p);
       ret = SQLITE_OK;
     }
   }
@@ -365,7 +392,15 @@ __declspec(dllexport) int WINAPI sqlite3_index_column_info_interop(sqlite3 *db, 
   Index *pIdx;
   Table *pTab;
   int n;
+
+  sqlite3_mutex_enter(db->mutex);
+  sqlite3BtreeEnterAll(db);
+
   pIdx = sqlite3FindIndex(db, zIndexName, zDb);
+
+  sqlite3BtreeLeaveAll(db);
+  sqlite3_mutex_leave(db->mutex);
+
   if (!pIdx) return SQLITE_ERROR;
 
   pTab = pIdx->pTable;
