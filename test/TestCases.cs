@@ -10,6 +10,9 @@ namespace test
 {
   internal class TestCases : TestCaseBase
   {
+    private const int NumThreads = 8;
+    private const int ThreadTimeout = 60000;
+
     private List<string> droptables = new List<string>();
     private List<string> maydroptable = new List<string>();
     private long logevents = 0;
@@ -1286,6 +1289,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       internal Exception e;
       internal System.Threading.Thread t;
       internal int value;
+      internal System.Threading.ManualResetEvent ev;
     }
 
     [Test(Sequence=11)]
@@ -1302,7 +1306,8 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         cmd.ExecuteNonQuery();
       }
 
-      MTTest[] arr = new MTTest[8];
+      System.Threading.ManualResetEvent[] events = new System.Threading.ManualResetEvent[NumThreads];
+      MTTest[] arr = new MTTest[NumThreads];
 
       for (int n = 0; n < arr.Length; n++)
       {
@@ -1310,21 +1315,26 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         arr[n].t = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(MultithreadedTestThread));
         arr[n].t.IsBackground = true;
         arr[n].cnn = ((ICloneable)_cnn).Clone() as DbConnection;
+        arr[n].ev = events[n] = new System.Threading.ManualResetEvent(false);
         arr[n].t.Start(arr[n]);
       }
 
-      System.Threading.Thread.Sleep(8000);
+      System.Threading.WaitHandle.WaitAll(events, ThreadTimeout);
+
       bool failed = false;
       Exception e = null;
+
       for (int n = 0; n < arr.Length; n++)
       {
         if (arr[n].t.Join(0) == false)
         {
           failed = true;
           arr[n].t.Abort();
+          arr[n].t.Join();
         }
         if (arr[n].e != null) e = arr[n].e;
         arr[n].cnn.Dispose();
+        arr[n].ev.Close();
       }
       if (failed) throw new Exception("One or more threads deadlocked");
       if (e != null) 
@@ -1343,7 +1353,8 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       {
         using (DbCommand cmd = test.cnn.CreateCommand())
         {
-          while (Environment.TickCount - start < 2000)
+          bool once = false;
+          while (!once || ((Environment.TickCount - start) < 2000))
           {
             using (DbTransaction trans = test.cnn.BeginTransaction())
             {
@@ -1361,12 +1372,18 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
 
               trans.Commit();
             }
+
+            once = true;
           }
         }
       }
       catch (Exception e)
       {
         test.e = e;
+      }
+      finally
+      {
+        test.ev.Set();
       }
     }
 
