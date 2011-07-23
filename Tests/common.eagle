@@ -12,8 +12,8 @@ if {[isEagle]} then {
     #
     # NOTE: See if the "year" setting has been overridden by the user (e.g. on
     #       the command line).  This controls which binaries we are testing,
-    #       those produced by Visual Studio 2008 or Visual Studio 2010 build
-    #       system.
+    #       those produced by either the Visual Studio 2008 or Visual Studio
+    #       2010 build systems.
     #
     if {[info exists ::test_year] && [string length $::test_year] > 0} then {
       return $::test_year
@@ -240,6 +240,12 @@ if {[isEagle]} then {
 
       tryLoadAssembly System.Data.SQLite.dll
       tryLoadAssembly System.Data.SQLite.Linq.dll
+
+      catch {
+        tputs $::test_channel [appendArgs \
+            "---- file version of \"SQLite.Interop.dll\"... " \
+            [file version [getBinaryFileName SQLite.Interop.dll]] \n]
+      }
 
       catch {
         tputs $::test_channel [appendArgs \
