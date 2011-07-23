@@ -339,6 +339,8 @@ SQLITE_API int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySiz
     pBlock->hWriteKey = hKey;
   }
 
+  sqlite3_mutex_enter(db->mutex);
+
   // Start a transaction
   rc = sqlite3BtreeBeginTrans(pbt, 1);
 
@@ -405,6 +407,8 @@ SQLITE_API int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySiz
   {
     sqlite3PagerSetCodec(p, NULL, NULL, NULL, NULL);
   }
+
+  sqlite3_mutex_leave(db->mutex);
 
   return rc;
 }
