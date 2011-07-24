@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * SQLite.Interop.2010.vcxproj -
+ * SQLite.Interop.Static.2010.vcxproj -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -43,22 +43,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>SQLite.Interop.2010</ProjectName>
-    <ProjectGuid>{53784BC1-A8BC-4AC8-8A3E-158D6807345A}</ProjectGuid>
+    <ProjectName>SQLite.Interop.Static.2010</ProjectName>
+    <ProjectGuid>{A4C171AD-28F0-4D07-877B-511314BF412B}</ProjectGuid>
     <RootNamespace>SQLite.Interop</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="props\sqlite3.props" />
   <Import Project="props\SQLite.Interop.props" />
-  <PropertyGroup Condition="('$(Configuration)' == 'DebugNativeOnly' Or
-                             '$(Configuration)' == 'ReleaseNativeOnly') And
-                            (('$(Platform)' == 'Win32' And
-                              '$(PROCESSOR_ARCHITECTURE)' != 'x86') Or
-                             ('$(Platform)' == 'x64' And
-                              '$(PROCESSOR_ARCHITECTURE)' != 'AMD64' And
-                              '$(PROCESSOR_ARCHITEW6432)' != 'AMD64'))"
-                 Label="PostBuildEvent">
+  <PropertyGroup Condition="('$(Configuration)' == 'DebugNativeOnly' Or&#xD;&#xA;                             '$(Configuration)' == 'ReleaseNativeOnly') And&#xD;&#xA;                            (('$(Platform)' == 'Win32' And&#xD;&#xA;                              '$(PROCESSOR_ARCHITECTURE)' != 'x86') Or&#xD;&#xA;                             ('$(Platform)' == 'x64' And&#xD;&#xA;                              '$(PROCESSOR_ARCHITECTURE)' != 'AMD64' And&#xD;&#xA;                              '$(PROCESSOR_ARCHITEW6432)' != 'AMD64'))" Label="PostBuildEvent">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -109,8 +102,8 @@
   <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>..\obj\$(ConfigurationYear)\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Platform)\$(Configuration)Static\</OutDir>
+    <IntDir>..\obj\$(ConfigurationYear)\$(Platform)\$(Configuration)Static\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <LinkKeyFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(INTEROP_KEY_FILE)</LinkKeyFile>
     <LinkKeyFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(INTEROP_KEY_FILE)</LinkKeyFile>
