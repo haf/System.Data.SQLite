@@ -230,9 +230,8 @@ namespace eval ::Eagle {
       # NOTE: Make sure we handle all the reasonable "cases" of
       #       the environment variable names.
       #
-      lappend names [string toupper $name]
-      lappend names [string tolower $name]
-      lappend names [string totitle $name]
+      lappend names [string toupper $name] [string tolower $name] \
+          [string totitle $name]
     }
 
     #
@@ -352,9 +351,7 @@ namespace eval ::Eagle {
 
     if {[llength $options] > 0} then {eval lappend command $options}
 
-    lappend command --
-    lappend command $commandName
-
+    lappend command -- $commandName
     eval lappend command $args
 
     tputs $::test_channel [appendArgs "---- running command: " $command \n]
