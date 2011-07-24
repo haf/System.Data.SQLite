@@ -44,14 +44,21 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>SQLite.Interop.Static.2010</ProjectName>
-    <ProjectGuid>{A4C171AD-28F0-4D07-877B-511314BF412B}</ProjectGuid>
+    <ProjectGuid>{490CBC51-A3B2-4397-89F9-16E858DCB4F8}</ProjectGuid>
     <RootNamespace>SQLite.Interop</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="props\sqlite3.props" />
   <Import Project="props\SQLite.Interop.props" />
-  <PropertyGroup Condition="('$(Configuration)' == 'DebugNativeOnly' Or&#xD;&#xA;                             '$(Configuration)' == 'ReleaseNativeOnly') And&#xD;&#xA;                            (('$(Platform)' == 'Win32' And&#xD;&#xA;                              '$(PROCESSOR_ARCHITECTURE)' != 'x86') Or&#xD;&#xA;                             ('$(Platform)' == 'x64' And&#xD;&#xA;                              '$(PROCESSOR_ARCHITECTURE)' != 'AMD64' And&#xD;&#xA;                              '$(PROCESSOR_ARCHITEW6432)' != 'AMD64'))" Label="PostBuildEvent">
+  <PropertyGroup Condition="('$(Configuration)' == 'DebugNativeOnly' Or
+                             '$(Configuration)' == 'ReleaseNativeOnly') And
+                            (('$(Platform)' == 'Win32' And
+                              '$(PROCESSOR_ARCHITECTURE)' != 'x86') Or
+                             ('$(Platform)' == 'x64' And
+                              '$(PROCESSOR_ARCHITECTURE)' != 'AMD64' And
+                              '$(PROCESSOR_ARCHITEW6432)' != 'AMD64'))"
+                 Label="PostBuildEvent">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
