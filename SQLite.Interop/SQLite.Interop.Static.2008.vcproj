@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
+<!--
+ *
+ * SQLite.Interop.Static.2008.vcproj -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
