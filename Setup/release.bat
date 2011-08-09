@@ -144,6 +144,13 @@ REM "
 
 CALL :fn_ResetErrorLevel
 
+%_ECHO% IF NOT EXIST Setup\Output MKDIR Setup\Output
+
+IF ERRORLEVEL 1 (
+  ECHO Could not create directory "Setup\Output".
+  GOTO errors
+)
+
 IF DEFINED CONFIGURATIONSUFFIX (
   %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
 ) ELSE (
