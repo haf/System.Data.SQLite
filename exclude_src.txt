@@ -23,6 +23,5 @@ System.Data.SQLite/Properties/*
 test/obj/*
 testce/obj/*
 testlinq/obj/*
-Tests/*
-tools/*
+tools/install/obj/*
 www/*
