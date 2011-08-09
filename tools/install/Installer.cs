@@ -748,6 +748,295 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region RegistryHelper Class
+        private static class RegistryHelper
+        {
+            #region Public Static Properties
+            private static int subKeysCreated;
+            public static int SubKeysCreated
+            {
+                get { return subKeysCreated; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static int subKeysDeleted;
+            public static int SubKeysDeleted
+            {
+                get { return subKeysDeleted; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static int keyValuesSet;
+            public static int KeyValuesSet
+            {
+                get { return keyValuesSet; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static int keyValuesDeleted;
+            public static int KeyValuesDeleted
+            {
+                get { return keyValuesDeleted; }
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Static Methods
+            public static RegistryKey GetRootKeyByName(
+                string keyName
+                )
+            {
+                if (String.IsNullOrEmpty(keyName))
+                    return null;
+
+                switch (keyName.ToUpperInvariant())
+                {
+                    case "HKCR":
+                    case "HKEY_CLASSES_ROOT":
+                        return Registry.ClassesRoot;
+                    case "HKCC":
+                    case "HKEY_CURRENT_CONFIG":
+                        return Registry.CurrentConfig;
+                    case "HKCU":
+                    case "HKEY_CURRENT_USER":
+                        return Registry.CurrentUser;
+                    case "HKDD":
+                    case "HKEY_DYN_DATA":
+                        return Registry.DynData;
+                    case "HKLM":
+                    case "HKEY_LOCAL_MACHINE":
+                        return Registry.LocalMachine;
+                    case "HKPD":
+                    case "HKEY_PERFORMANCE_DATA":
+                        return Registry.PerformanceData;
+                    case "HKU":
+                    case "HKEY_USERS":
+                        return Registry.Users;
+                }
+
+                return null;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static MockRegistryKey OpenSubKey(
+                MockRegistryKey rootKey,
+                string subKeyName,
+                bool writable,
+                bool whatIf,
+                bool verbose
+                )
+            {
+                if (rootKey == null)
+                    return null;
+
+                if (verbose)
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "rootKey = {0}, subKeyName = {1}, writable = {2}",
+                        ForDisplay(rootKey), ForDisplay(subKeyName), writable),
+                        traceCategory);
+
+                //
+                // HACK: Always forbid writable access when operating in
+                //       'what-if' mode.
+                //
+                MockRegistryKey key = rootKey.OpenSubKey(
+                    subKeyName, whatIf ? false : writable);
+
+                return (key != null) ?
+                    new MockRegistryKey(key, whatIf) : null;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static MockRegistryKey CreateSubKey(
+                MockRegistryKey rootKey,
+                string subKeyName,
+                bool whatIf,
+                bool verbose
+                )
+            {
+                if (rootKey == null)
+                    return null;
+
+                if (verbose)
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
+                        ForDisplay(subKeyName)), traceCategory);
+
+                try
+                {
+                    //
+                    // HACK: Always open a key, rather than creating one when
+                    //       operating in 'what-if' mode.
+                    //
+                    if (whatIf)
+                    {
+                        //
+                        // HACK: Attempt to open the specified sub-key.  If
+                        //       this fails, we will simply return the root key
+                        //       itself since no writes are allowed in
+                        //       'what-if' mode anyhow.
+                        //
+                        MockRegistryKey key = rootKey.OpenSubKey(subKeyName);
+
+                        return (key != null) ?
+                            key : new MockRegistryKey(rootKey, subKeyName);
+                    }
+                    else
+                    {
+                        return new MockRegistryKey(
+                            rootKey.CreateSubKey(subKeyName), false);
+                    }
+                }
+                finally
+                {
+                    subKeysCreated++;
+                }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static void DeleteSubKey(
+                MockRegistryKey rootKey,
+                string subKeyName,
+                bool whatIf,
+                bool verbose
+                )
+            {
+                if (rootKey == null)
+                    return;
+
+                if (verbose)
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
+                        ForDisplay(subKeyName)), traceCategory);
+
+                if (!whatIf)
+                    rootKey.DeleteSubKey(subKeyName);
+
+                subKeysDeleted++;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static void DeleteSubKeyTree(
+                MockRegistryKey rootKey,
+                string subKeyName,
+                bool whatIf,
+                bool verbose
+                )
+            {
+                if (rootKey == null)
+                    return;
+
+                if (verbose)
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
+                        ForDisplay(subKeyName)), traceCategory);
+
+                if (!whatIf)
+                    rootKey.DeleteSubKeyTree(subKeyName);
+
+                subKeysDeleted++;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static string[] GetSubKeyNames(
+                MockRegistryKey key,
+                bool whatIf,
+                bool verbose
+                )
+            {
+                if (key == null)
+                    return null;
+
+                if (verbose)
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "key = {0}", ForDisplay(key)), traceCategory);
+
+                return key.GetSubKeyNames();
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static object GetValue(
+                MockRegistryKey key,
+                string name,
+                object defaultValue,
+                bool whatIf,
+                bool verbose
+                )
+            {
+                if (key == null)
+                    return null;
+
+                if (verbose)
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "key = {0}, name = {1}, defaultValue = {2}",
+                        ForDisplay(key), ForDisplay(name),
+                        ForDisplay(defaultValue)), traceCategory);
+
+                return key.GetValue(name, defaultValue);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static void SetValue(
+                MockRegistryKey key,
+                string name,
+                object value,
+                bool whatIf,
+                bool verbose
+                )
+            {
+                if (key == null)
+                    return;
+
+                if (verbose)
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "key = {0}, name = {1}, value = {2}", ForDisplay(key),
+                        ForDisplay(name), ForDisplay(value)), traceCategory);
+
+                if (!whatIf)
+                    key.SetValue(name, value);
+
+                keyValuesSet++;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static void DeleteValue(
+                MockRegistryKey key,
+                string name,
+                bool whatIf,
+                bool verbose
+                )
+            {
+                if (key == null)
+                    return;
+
+                if (verbose)
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "key = {0}, name = {1}", ForDisplay(key),
+                        ForDisplay(name)), traceCategory);
+
+                if (!whatIf)
+                    key.DeleteValue(name);
+
+                keyValuesDeleted++;
+            }
+            #endregion
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region StringList Class
         private sealed class StringList : List<string>
         {
@@ -958,13 +1247,13 @@ namespace System.Data.SQLite
             bool verbose
             )
         {
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, FrameworkKeyName, false, whatIf, verbose))
             {
                 if (key == null)
                     return null;
 
-                object value = GetValue(
+                object value = RegistryHelper.GetValue(
                     key, "InstallRoot", null, whatIf, verbose);
 
                 if (!(value is string))
@@ -1006,7 +1295,7 @@ namespace System.Data.SQLite
 
             for (int index = 0; index < keyNames.Length; index++)
             {
-                using (MockRegistryKey key = OpenSubKey(
+                using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                         rootKey, keyNames[index], false, whatIf, verbose))
                 {
                     if (key == null)
@@ -1014,16 +1303,16 @@ namespace System.Data.SQLite
 
                     if (useSubKeys[index])
                     {
-                        foreach (string subKeyName in GetSubKeyNames(
+                        foreach (string subKeyName in RegistryHelper.GetSubKeyNames(
                                 key, whatIf, verbose))
                         {
-                            using (MockRegistryKey subKey = OpenSubKey(
+                            using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                                     key, subKeyName, false, whatIf, verbose))
                             {
                                 if (subKey == null)
                                     continue;
 
-                                object value = GetValue(
+                                object value = RegistryHelper.GetValue(
                                     subKey, valueNames[index], null, whatIf,
                                     verbose);
 
@@ -1055,7 +1344,7 @@ namespace System.Data.SQLite
                     }
                     else
                     {
-                        object value = GetValue(
+                        object value = RegistryHelper.GetValue(
                             key, valueNames[index], null, whatIf, verbose);
 
                         if (!(value is string))
@@ -1178,7 +1467,7 @@ namespace System.Data.SQLite
             string keyName = String.Format(
                 format, frameworkName, frameworkVersion, platformName);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
@@ -1345,12 +1634,23 @@ namespace System.Data.SQLite
                         continue;
                     }
 
+                    bool localSaved = false;
+
                     if (!callback(
                             fileName, invariant, name, description, typeName,
                             assemblyName, clientData, whatIf, verbose,
-                            ref saved, ref error))
+                            ref localSaved, ref error))
                     {
                         return false;
+                    }
+                    else
+                    {
+                        if (localSaved && !saved)
+                            saved = true;
+
+                        TraceOps.Trace(traceCallback, String.Format(
+                            "localSaved = {0}, saved = {1}", localSaved,
+                            saved), traceCategory);
                     }
                 }
             }
@@ -1524,13 +1824,13 @@ namespace System.Data.SQLite
             string format = "Software\\Microsoft\\VisualStudio\\{0}";
             string keyName = String.Format(format, vsVersion);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
                     return false;
 
-                object value = GetValue(
+                object value = RegistryHelper.GetValue(
                     key, "InstallDir", null, whatIf, verbose);
 
                 if (!(value is string))
@@ -1611,241 +1911,6 @@ namespace System.Data.SQLite
             }
 
             return true;
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region Generic Registry Handling
-        private static RegistryKey GetRootKeyByName(
-            string keyName
-            )
-        {
-            if (String.IsNullOrEmpty(keyName))
-                return null;
-
-            switch (keyName.ToUpperInvariant())
-            {
-                case "HKCR":
-                case "HKEY_CLASSES_ROOT":
-                    return Registry.ClassesRoot;
-                case "HKCC":
-                case "HKEY_CURRENT_CONFIG":
-                    return Registry.CurrentConfig;
-                case "HKCU":
-                case "HKEY_CURRENT_USER":
-                    return Registry.CurrentUser;
-                case "HKDD":
-                case "HKEY_DYN_DATA":
-                    return Registry.DynData;
-                case "HKLM":
-                case "HKEY_LOCAL_MACHINE":
-                    return Registry.LocalMachine;
-                case "HKPD":
-                case "HKEY_PERFORMANCE_DATA":
-                    return Registry.PerformanceData;
-                case "HKU":
-                case "HKEY_USERS":
-                    return Registry.Users;
-            }
-
-            return null;
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static MockRegistryKey OpenSubKey(
-            MockRegistryKey rootKey,
-            string subKeyName,
-            bool writable,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            if (rootKey == null)
-                return null;
-
-            if (verbose)
-                TraceOps.Trace(traceCallback, String.Format(
-                    "rootKey = {0}, subKeyName = {1}, writable = {2}",
-                    ForDisplay(rootKey), ForDisplay(subKeyName), writable),
-                    traceCategory);
-
-            //
-            // HACK: Always forbid writable access when operating in 'what-if'
-            //       mode.
-            //
-            MockRegistryKey key = rootKey.OpenSubKey(
-                subKeyName, whatIf ? false : writable);
-
-            return (key != null) ?
-                new MockRegistryKey(key, whatIf) : null;
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static MockRegistryKey CreateSubKey(
-            MockRegistryKey rootKey,
-            string subKeyName,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            if (rootKey == null)
-                return null;
-
-            if (verbose)
-                TraceOps.Trace(traceCallback, String.Format(
-                    "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
-                    ForDisplay(subKeyName)), traceCategory);
-
-            //
-            // HACK: Always open a key, rather than creating one when operating
-            //       in 'what-if' mode.
-            //
-            if (whatIf)
-            {
-                //
-                // HACK: Attempt to open the specified sub-key.  If this
-                //       fails, we will simply return the root key itself
-                //       since no writes are allowed in 'what-if' mode
-                //       anyhow.
-                //
-                MockRegistryKey key = rootKey.OpenSubKey(subKeyName);
-
-                return (key != null) ?
-                    key : new MockRegistryKey(rootKey, subKeyName);
-            }
-            else
-            {
-                return new MockRegistryKey(
-                    rootKey.CreateSubKey(subKeyName), false);
-            }
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static void DeleteSubKey(
-            MockRegistryKey rootKey,
-            string subKeyName,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            if (rootKey == null)
-                return;
-
-            if (verbose)
-                TraceOps.Trace(traceCallback, String.Format(
-                    "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
-                    ForDisplay(subKeyName)), traceCategory);
-
-            if (!whatIf)
-                rootKey.DeleteSubKey(subKeyName);
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static void DeleteSubKeyTree(
-            MockRegistryKey rootKey,
-            string subKeyName,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            if (rootKey == null)
-                return;
-
-            if (verbose)
-                TraceOps.Trace(traceCallback, String.Format(
-                    "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
-                    ForDisplay(subKeyName)), traceCategory);
-
-            if (!whatIf)
-                rootKey.DeleteSubKeyTree(subKeyName);
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static string[] GetSubKeyNames(
-            MockRegistryKey key,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            if (key == null)
-                return null;
-
-            if (verbose)
-                TraceOps.Trace(traceCallback, String.Format(
-                    "key = {0}", ForDisplay(key)), traceCategory);
-
-            return key.GetSubKeyNames();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static object GetValue(
-            MockRegistryKey key,
-            string name,
-            object defaultValue,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            if (key == null)
-                return null;
-
-            if (verbose)
-                TraceOps.Trace(traceCallback, String.Format(
-                    "key = {0}, name = {1}, defaultValue = {2}",
-                    ForDisplay(key), ForDisplay(name),
-                    ForDisplay(defaultValue)), traceCategory);
-
-            return key.GetValue(name, defaultValue);
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static void SetValue(
-            MockRegistryKey key,
-            string name,
-            object value,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            if (key == null)
-                return;
-
-            if (verbose)
-                TraceOps.Trace(traceCallback, String.Format(
-                    "key = {0}, name = {1}, value = {2}", ForDisplay(key),
-                    ForDisplay(name), ForDisplay(value)), traceCategory);
-
-            if (!whatIf)
-                key.SetValue(name, value);
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static void DeleteValue(
-            MockRegistryKey key,
-            string name,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            if (key == null)
-                return;
-
-            if (verbose)
-                TraceOps.Trace(traceCallback, String.Format(
-                    "key = {0}, name = {1}", ForDisplay(key),
-                    ForDisplay(name)), traceCategory);
-
-            if (!whatIf)
-                key.DeleteValue(name);
         }
         #endregion
 
@@ -2079,7 +2144,7 @@ namespace System.Data.SQLite
             string keyName = GetAssemblyFoldersKeyName(
                 frameworkName, frameworkVersion, platformName);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, true, whatIf, verbose))
             {
                 if (key == null)
@@ -2091,7 +2156,7 @@ namespace System.Data.SQLite
                     return false;
                 }
 
-                using (MockRegistryKey subKey = CreateSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.CreateSubKey(
                         key, subKeyName, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2103,7 +2168,8 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    SetValue(subKey, null, directory, whatIf, verbose);
+                    RegistryHelper.SetValue(
+                        subKey, null, directory, whatIf, verbose);
                 }
             }
 
@@ -2126,7 +2192,7 @@ namespace System.Data.SQLite
             string keyName = GetAssemblyFoldersKeyName(
                 frameworkName, frameworkVersion, platformName);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
@@ -2138,7 +2204,8 @@ namespace System.Data.SQLite
                     return false;
                 }
 
-                DeleteSubKey(key, subKeyName, whatIf, verbose);
+                RegistryHelper.DeleteSubKey(
+                    key, subKeyName, whatIf, verbose);
             }
 
             return true;
@@ -2209,7 +2276,7 @@ namespace System.Data.SQLite
         {
             string keyName = GetVsKeyName(vsVersion);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
@@ -2221,7 +2288,7 @@ namespace System.Data.SQLite
                     return false;
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "DataSources", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2233,7 +2300,7 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    using (MockRegistryKey dataSourceKey = CreateSubKey(
+                    using (MockRegistryKey dataSourceKey = RegistryHelper.CreateSubKey(
                             subKey, dataSourceId.ToString(VsIdFormat), whatIf,
                             verbose))
                     {
@@ -2246,12 +2313,13 @@ namespace System.Data.SQLite
                             return false;
                         }
 
-                        SetValue(dataSourceKey, null, String.Format(
+                        RegistryHelper.SetValue(
+                            dataSourceKey, null, String.Format(
                             "{0} Database File", ProjectName), whatIf,
                             verbose);
 
-                        CreateSubKey(dataSourceKey, String.Format(
-                            "SupportingProviders\\{0}",
+                        RegistryHelper.CreateSubKey(dataSourceKey,
+                            String.Format("SupportingProviders\\{0}",
                             dataProviderId.ToString(VsIdFormat)), whatIf,
                             verbose);
                     }
@@ -2274,7 +2342,7 @@ namespace System.Data.SQLite
         {
             string keyName = GetVsKeyName(vsVersion);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
@@ -2286,7 +2354,7 @@ namespace System.Data.SQLite
                     return false;
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "DataSources", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2298,7 +2366,7 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    DeleteSubKeyTree(
+                    RegistryHelper.DeleteSubKeyTree(
                         subKey, dataSourceId.ToString(VsIdFormat), whatIf,
                         verbose);
                 }
@@ -2367,7 +2435,7 @@ namespace System.Data.SQLite
 
             string keyName = GetVsKeyName(vsVersion);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
@@ -2379,7 +2447,7 @@ namespace System.Data.SQLite
                     return false;
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "DataProviders", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2391,7 +2459,7 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    using (MockRegistryKey dataProviderKey = CreateSubKey(
+                    using (MockRegistryKey dataProviderKey = RegistryHelper.CreateSubKey(
                             subKey, dataProviderId.ToString(VsIdFormat), whatIf,
                             verbose))
                     {
@@ -2404,39 +2472,44 @@ namespace System.Data.SQLite
                             return false;
                         }
 
-                        SetValue(dataProviderKey, null, Description, whatIf,
+                        RegistryHelper.SetValue(
+                            dataProviderKey, null, Description, whatIf,
                             verbose);
 
-                        SetValue(dataProviderKey, "InvariantName",
-                            InvariantName, whatIf, verbose);
+                        RegistryHelper.SetValue(
+                            dataProviderKey, "InvariantName", InvariantName,
+                            whatIf, verbose);
 
-                        SetValue(dataProviderKey, "Technology",
+                        RegistryHelper.SetValue(
+                            dataProviderKey, "Technology",
                             ((Guid)vsAdoNetTechnologyId).ToString(VsIdFormat),
                             whatIf, verbose);
 
-                        SetValue(dataProviderKey, "CodeBase", fileName, whatIf,
+                        RegistryHelper.SetValue(
+                            dataProviderKey, "CodeBase", fileName, whatIf,
                             verbose);
 
-                        SetValue(dataProviderKey, "FactoryService",
+                        RegistryHelper.SetValue(
+                            dataProviderKey, "FactoryService",
                             serviceId.ToString(VsIdFormat), whatIf, verbose);
 
-                        CreateSubKey(dataProviderKey,
+                        RegistryHelper.CreateSubKey(dataProviderKey,
                             "SupportedObjects\\DataConnectionUIControl",
                             whatIf, verbose);
 
-                        CreateSubKey(dataProviderKey,
+                        RegistryHelper.CreateSubKey(dataProviderKey,
                             "SupportedObjects\\DataConnectionProperties",
                             whatIf, verbose);
 
-                        CreateSubKey(dataProviderKey,
+                        RegistryHelper.CreateSubKey(dataProviderKey,
                             "SupportedObjects\\DataConnectionSupport", whatIf,
                             verbose);
 
-                        CreateSubKey(dataProviderKey,
+                        RegistryHelper.CreateSubKey(dataProviderKey,
                             "SupportedObjects\\DataObjectSupport", whatIf,
                             verbose);
 
-                        CreateSubKey(dataProviderKey,
+                        RegistryHelper.CreateSubKey(dataProviderKey,
                             "SupportedObjects\\DataViewSupport", whatIf,
                             verbose);
                     }
@@ -2459,7 +2532,7 @@ namespace System.Data.SQLite
         {
             string keyName = GetVsKeyName(vsVersion);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
@@ -2471,7 +2544,7 @@ namespace System.Data.SQLite
                     return false;
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "DataProviders", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2483,7 +2556,7 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    DeleteSubKeyTree(
+                    RegistryHelper.DeleteSubKeyTree(
                         subKey, dataProviderId.ToString(VsIdFormat), whatIf,
                         verbose);
                 }
@@ -2546,7 +2619,7 @@ namespace System.Data.SQLite
         {
             string keyName = GetVsKeyName(vsVersion);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
@@ -2558,7 +2631,7 @@ namespace System.Data.SQLite
                     return false;
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "Packages", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2570,7 +2643,7 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    using (MockRegistryKey packageKey = CreateSubKey(
+                    using (MockRegistryKey packageKey = RegistryHelper.CreateSubKey(
                             subKey, packageId.ToString(VsIdFormat), whatIf,
                             verbose))
                     {
@@ -2583,36 +2656,37 @@ namespace System.Data.SQLite
                             return false;
                         }
 
-                        SetValue(packageKey, null, String.Format(
+                        RegistryHelper.SetValue(packageKey, null, String.Format(
                             "{0} Designer Package", ProjectName), whatIf,
                             verbose);
 
-                        SetValue(packageKey, "Class",
+                        RegistryHelper.SetValue(packageKey, "Class",
                             "SQLite.Designer.SQLitePackage", whatIf, verbose);
 
-                        SetValue(packageKey, "CodeBase", fileName, whatIf,
+                        RegistryHelper.SetValue(packageKey, "CodeBase",
+                            fileName, whatIf, verbose);
+
+                        RegistryHelper.SetValue(packageKey, "ID", 400, whatIf,
                             verbose);
 
-                        SetValue(packageKey, "ID", 400, whatIf, verbose);
-
-                        SetValue(packageKey, "InprocServer32",
+                        RegistryHelper.SetValue(packageKey, "InprocServer32",
                             Path.Combine(Environment.SystemDirectory,
                                 "mscoree.dll"), whatIf, verbose);
 
-                        SetValue(packageKey, "CompanyName",
+                        RegistryHelper.SetValue(packageKey, "CompanyName",
                             "http://system.data.sqlite.org/", whatIf, verbose);
 
-                        SetValue(packageKey, "MinEdition", "standard", whatIf,
-                            verbose);
+                        RegistryHelper.SetValue(packageKey, "MinEdition",
+                            "standard", whatIf, verbose);
 
-                        SetValue(packageKey, "ProductName", String.Format(
-                            "{0} Designer Package", ProjectName), whatIf,
-                            verbose);
+                        RegistryHelper.SetValue(packageKey, "ProductName",
+                            String.Format("{0} Designer Package", ProjectName),
+                            whatIf, verbose);
 
-                        SetValue(packageKey, "ProductVersion", "1.0", whatIf,
-                            verbose);
+                        RegistryHelper.SetValue(packageKey, "ProductVersion",
+                            "1.0", whatIf, verbose);
 
-                        using (MockRegistryKey toolboxKey = CreateSubKey(
+                        using (MockRegistryKey toolboxKey = RegistryHelper.CreateSubKey(
                                 packageKey, "Toolbox", whatIf, verbose))
                         {
                             if (toolboxKey == null)
@@ -2624,13 +2698,14 @@ namespace System.Data.SQLite
                                 return false;
                             }
 
-                            SetValue(toolboxKey, "Default Items", 3, whatIf,
+                            RegistryHelper.SetValue(
+                                toolboxKey, "Default Items", 3, whatIf,
                                 verbose);
                         }
                     }
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "Menus", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2642,11 +2717,12 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    SetValue(subKey, packageId.ToString(VsIdFormat),
-                        ", 1000, 3", whatIf, verbose);
+                    RegistryHelper.SetValue(
+                        subKey, packageId.ToString(VsIdFormat), ", 1000, 3",
+                        whatIf, verbose);
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "Services", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2658,7 +2734,7 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    using (MockRegistryKey serviceKey = CreateSubKey(
+                    using (MockRegistryKey serviceKey = RegistryHelper.CreateSubKey(
                             subKey, serviceId.ToString(VsIdFormat), whatIf,
                             verbose))
                     {
@@ -2671,12 +2747,12 @@ namespace System.Data.SQLite
                             return false;
                         }
 
-                        SetValue(serviceKey, null,
+                        RegistryHelper.SetValue(serviceKey, null,
                             packageId.ToString(VsIdFormat), whatIf, verbose);
 
-                        SetValue(serviceKey, "Name", String.Format(
-                            "{0} Designer Service", ProjectName), whatIf,
-                            verbose);
+                        RegistryHelper.SetValue(serviceKey, "Name",
+                            String.Format("{0} Designer Service", ProjectName),
+                            whatIf, verbose);
                     }
                 }
             }
@@ -2698,7 +2774,7 @@ namespace System.Data.SQLite
         {
             string keyName = GetVsKeyName(vsVersion);
 
-            using (MockRegistryKey key = OpenSubKey(
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
             {
                 if (key == null)
@@ -2710,7 +2786,7 @@ namespace System.Data.SQLite
                     return false;
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "Packages", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2722,11 +2798,11 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    DeleteSubKeyTree(
+                    RegistryHelper.DeleteSubKeyTree(
                         key, packageId.ToString(VsIdFormat), whatIf, verbose);
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "Menus", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2738,11 +2814,12 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    DeleteValue(subKey, packageId.ToString(VsIdFormat), whatIf,
+                    RegistryHelper.DeleteValue(
+                        subKey, packageId.ToString(VsIdFormat), whatIf,
                         verbose);
                 }
 
-                using (MockRegistryKey subKey = OpenSubKey(
+                using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
                         key, "Services", true, whatIf, verbose))
                 {
                     if (subKey == null)
@@ -2754,7 +2831,7 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    DeleteSubKeyTree(
+                    RegistryHelper.DeleteSubKeyTree(
                         subKey, serviceId.ToString(VsIdFormat), whatIf,
                         verbose);
                 }
@@ -4031,6 +4108,15 @@ namespace System.Data.SQLite
                 }
             }
             #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            TraceOps.Trace(traceCallback, String.Format(
+                "subKeysCreated = {0}, subKeysDeleted = {1}, " +
+                "keyValuesSet = {2}, keyValuesDeleted = {3}",
+                RegistryHelper.SubKeysCreated, RegistryHelper.SubKeysDeleted,
+                RegistryHelper.KeyValuesSet, RegistryHelper.KeyValuesDeleted),
+                traceCategory);
 
             ///////////////////////////////////////////////////////////////////
 
