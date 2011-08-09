@@ -345,7 +345,7 @@ namespace System.Data.SQLite
                 string category
                 )
             {
-                return Trace(traceCallback, null, 1, message, category);
+                return Trace(traceCallback, null, 0, message, category);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2840,7 +2840,8 @@ namespace System.Data.SQLite
                 bool noConsole,
                 bool noLog,
                 bool whatIf,
-                bool verbose
+                bool verbose,
+                bool confirm
                 )
             {
                 this.assembly = assembly;
@@ -2862,6 +2863,7 @@ namespace System.Data.SQLite
                 this.noLog = noLog;
                 this.whatIf = whatIf;
                 this.verbose = verbose;
+                this.confirm = confirm;
             }
             #endregion
 
@@ -3010,7 +3012,7 @@ namespace System.Data.SQLite
                     thisAssembly, null, directory, coreFileName, linqFileName,
                     designerFileName, InstallFlags.Default, true, false, true,
                     false, false, false, false, false, false, false, true,
-                    true);
+                    true, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3231,6 +3233,25 @@ namespace System.Data.SQLite
                                 }
 
                                 configuration.verbose = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "confirm"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.confirm = (bool)value;
                             }
                             else if (MatchOption(newArg, "noDesktop"))
                             {
@@ -3511,6 +3532,22 @@ namespace System.Data.SQLite
                             "debugger attached.", traceCategory);
                     }
 
+                    //
+                    // NOTE: If the command line has not been manually
+                    //       confirmed (i.e. via the explicit command line
+                    //       option), then stop processing now.  We enforce
+                    //       this rule so that simply double-clicking the
+                    //       executable will not result in any changes being
+                    //       made to the system.
+                    //
+                    if (!configuration.confirm)
+                    {
+                        error = "Cannot continue, the \"confirm\" option is " +
+                            "not enabled.";
+
+                        return false;
+                    }
+
                     return true;
                 }
                 catch (Exception e)
@@ -3618,6 +3655,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "Verbose", ForDisplay(verbose)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "Confirm", ForDisplay(confirm)),
                         traceCategory);
                 }
             }
@@ -3793,6 +3834,15 @@ namespace System.Data.SQLite
             {
                 get { return verbose; }
                 set { verbose = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool confirm;
+            public bool Confirm
+            {
+                get { return confirm; }
+                set { confirm = value; }
             }
             #endregion
         }
