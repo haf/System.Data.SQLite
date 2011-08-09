@@ -25,7 +25,6 @@
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
     <OutputPath>$(BinaryOutputPath)</OutputPath>
-    <DocumentationFile>$(BinaryOutputPath)System.Data.SQLite.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
