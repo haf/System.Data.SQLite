@@ -19,14 +19,14 @@ using Microsoft.Win32;
 namespace System.Data.SQLite
 {
     #region Public Delegates
-    public delegate void TraceCallback(
+    internal delegate void TraceCallback(
         string message,
         string category
     );
 
     ///////////////////////////////////////////////////////////////////////////
 
-    public delegate bool FrameworkConfigCallback(
+    internal delegate bool FrameworkConfigCallback(
         string fileName,
         string invariant,
         string name,
@@ -42,7 +42,7 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-    public delegate bool FrameworkRegistryCallback(
+    internal delegate bool FrameworkRegistryCallback(
         RegistryKey rootKey,
         string frameworkName,
         Version frameworkVersion,
@@ -55,7 +55,7 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-    public delegate bool VisualStudioRegistryCallback(
+    internal delegate bool VisualStudioRegistryCallback(
         RegistryKey rootKey,
         Version vsVersion,
         Guid packageId,
@@ -1103,6 +1103,1052 @@ namespace System.Data.SQLite
             {
                 // do nothing.
             }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Configuration Class
+        private sealed class Configuration
+        {
+            #region Private Constants
+            private const char Switch = '-';
+            private const char AltSwitch = '/';
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static readonly char[] SwitchChars = {
+                Switch, AltSwitch
+            };
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Private Constructors
+            private Configuration(
+                Assembly assembly,
+                string logFileName,
+                string directory,
+                string coreFileName,
+                string linqFileName,
+                string designerFileName,
+                InstallFlags installFlags,
+                bool install,
+                bool noDesktop,
+                bool noCompact,
+                bool noNetFx20,
+                bool noNetFx40,
+                bool noVs2008,
+                bool noVs2010,
+                bool noTrace,
+                bool noConsole,
+                bool noLog,
+                bool whatIf,
+                bool verbose,
+                bool confirm
+                )
+            {
+                this.assembly = assembly;
+                this.logFileName = logFileName;
+                this.directory = directory;
+                this.coreFileName = coreFileName;
+                this.linqFileName = linqFileName;
+                this.designerFileName = designerFileName;
+                this.installFlags = installFlags;
+                this.install = install;
+                this.noDesktop = noDesktop;
+                this.noCompact = noCompact;
+                this.noNetFx20 = noNetFx20;
+                this.noNetFx40 = noNetFx40;
+                this.noVs2008 = noVs2008;
+                this.noVs2010 = noVs2010;
+                this.noTrace = noTrace;
+                this.noConsole = noConsole;
+                this.noLog = noLog;
+                this.whatIf = whatIf;
+                this.verbose = verbose;
+                this.confirm = confirm;
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Private Static Methods
+            private static void GetDefaultFileNames(
+                ref string directory,
+                ref string coreFileName,
+                ref string linqFileName,
+                ref string designerFileName
+                )
+            {
+                if (thisAssembly == null)
+                    return;
+
+                directory = Path.GetDirectoryName(thisAssembly.Location);
+
+                if (String.IsNullOrEmpty(directory))
+                    return;
+
+                coreFileName = Path.Combine(directory,
+                    Installer.CoreFileName);
+
+                linqFileName = Path.Combine(directory,
+                    Installer.LinqFileName);
+
+                designerFileName = Path.Combine(directory,
+                    Installer.DesignerFileName);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static bool CheckOption(
+                ref string arg
+                )
+            {
+                string result = arg;
+
+                if (!String.IsNullOrEmpty(result))
+                {
+                    //
+                    // NOTE: Remove all leading switch chars.
+                    //
+                    result = result.TrimStart(SwitchChars);
+
+                    //
+                    // NOTE: How many chars were removed?
+                    //
+                    int count = arg.Length - result.Length;
+
+                    //
+                    // NOTE: Was there at least one?
+                    //
+                    if (count > 0)
+                    {
+                        //
+                        // NOTE: Ok, replace their original
+                        //       argument.
+                        //
+                        arg = result;
+
+                        //
+                        // NOTE: Yes, this is a switch.
+                        //
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static bool MatchOption(
+                string arg,
+                string option
+                )
+            {
+                if ((arg == null) || (option == null))
+                    return false;
+
+                return String.Compare(arg, 0, option, 0,
+                    arg.Length, StringComparison.OrdinalIgnoreCase) == 0;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static bool? ParseBoolean(
+                string text
+                )
+            {
+                if (!String.IsNullOrEmpty(text))
+                {
+                    bool value;
+
+                    if (bool.TryParse(text, out value))
+                        return value;
+                }
+
+                return null;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static object ParseEnum(
+                Type enumType,
+                string text,
+                bool noCase
+                )
+            {
+                if ((enumType == null) || !enumType.IsEnum)
+                    return null;
+
+                if (!String.IsNullOrEmpty(text))
+                {
+                    try
+                    {
+                        return Enum.Parse(enumType, text, noCase);
+                    }
+                    catch
+                    {
+                        // do nothing.
+                    }
+                }
+
+                return null;
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Static Methods
+            public static Configuration CreateDefault()
+            {
+                string directory = null;
+                string coreFileName = null;
+                string linqFileName = null;
+                string designerFileName = null;
+
+                GetDefaultFileNames(
+                    ref directory, ref coreFileName, ref linqFileName,
+                    ref designerFileName);
+
+                return new Configuration(
+                    thisAssembly, null, directory, coreFileName, linqFileName,
+                    designerFileName, InstallFlags.Default, true, false, true,
+                    false, false, false, false, false, false, false, true,
+                    true, false);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static bool FromArgs(
+                string[] args,
+                bool strict,
+                ref Configuration configuration,
+                ref string error
+                )
+            {
+                try
+                {
+                    if (args == null)
+                        return true;
+
+                    if (configuration == null)
+                        configuration = Configuration.CreateDefault();
+
+                    int length = args.Length;
+
+                    for (int index = 0; index < length; index++)
+                    {
+                        string arg = args[index];
+
+                        if (String.IsNullOrEmpty(arg))
+                            continue;
+
+                        string newArg = arg;
+
+                        if (CheckOption(ref newArg))
+                        {
+                            //
+                            // NOTE: All the supported command line options must
+                            //       have a value; therefore, attempt to advance
+                            //       to it now.  If we fail, we are done.
+                            //
+                            index++;
+
+                            if (index >= length)
+                            {
+                                error = TraceOps.Trace(
+                                    traceCallback, String.Format(
+                                        "Missing value for option: {0}",
+                                        ForDisplay(arg)), traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                break;
+                            }
+
+                            //
+                            // NOTE: Grab the textual value of this command line
+                            //       option.
+                            //
+                            string text = args[index];
+
+                            //
+                            // NOTE: Figure out which command line option this is
+                            //       (based on a partial name match) and then try
+                            //       to interpret the textual value as the correct
+                            //       type.
+                            //
+                            if (MatchOption(newArg, "strict"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                //
+                                // NOTE: Allow the command line arguments to override
+                                //       the "strictness" setting provided by our caller.
+                                //
+                                strict = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "logFileName"))
+                            {
+                                configuration.logFileName = text;
+                            }
+                            else if (MatchOption(newArg, "directory"))
+                            {
+                                configuration.directory = text;
+
+                                //
+                                // NOTE: *SPECIAL* Must refresh the file names
+                                //       here because the underlying directory
+                                //       has changed.
+                                //
+                                string coreFileName = configuration.coreFileName;
+
+                                if (!String.IsNullOrEmpty(coreFileName))
+                                    coreFileName = Path.GetFileName(coreFileName);
+
+                                if (String.IsNullOrEmpty(coreFileName))
+                                    coreFileName = Installer.CoreFileName;
+
+                                configuration.coreFileName = Path.Combine(
+                                    configuration.directory, coreFileName);
+
+                                string linqFileName = configuration.linqFileName;
+
+                                if (!String.IsNullOrEmpty(linqFileName))
+                                    linqFileName = Path.GetFileName(linqFileName);
+
+                                if (String.IsNullOrEmpty(linqFileName))
+                                    linqFileName = Installer.LinqFileName;
+
+                                configuration.linqFileName = Path.Combine(
+                                    configuration.directory, linqFileName);
+
+                                string designerFileName = configuration.designerFileName;
+
+                                if (!String.IsNullOrEmpty(designerFileName))
+                                    designerFileName = Path.GetFileName(designerFileName);
+
+                                if (String.IsNullOrEmpty(designerFileName))
+                                    designerFileName = Installer.DesignerFileName;
+
+                                configuration.designerFileName = Path.Combine(
+                                    configuration.directory, designerFileName);
+                            }
+                            else if (MatchOption(newArg, "coreFileName"))
+                            {
+                                configuration.coreFileName = text;
+                            }
+                            else if (MatchOption(newArg, "linqFileName"))
+                            {
+                                configuration.linqFileName = text;
+                            }
+                            else if (MatchOption(newArg, "designerFileName"))
+                            {
+                                configuration.designerFileName = text;
+                            }
+                            else if (MatchOption(newArg, "installFlags"))
+                            {
+                                object value = ParseEnum(
+                                    typeof(InstallFlags), text, true);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid install flags value: {0}",
+                                        ForDisplay(text)), traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.installFlags = (InstallFlags)value;
+                            }
+                            else if (MatchOption(newArg, "install"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.install = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "whatIf"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.whatIf = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "verbose"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.verbose = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "confirm"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.confirm = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noDesktop"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noDesktop = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noCompact"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noCompact = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noNetFx20"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noNetFx20 = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noNetFx40"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noNetFx40 = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noVs2008"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noVs2008 = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noVs2010"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noVs2010 = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noTrace"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noTrace = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noConsole"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noConsole = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "noLog"))
+                            {
+                                bool? value = ParseBoolean(text);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                        "Invalid {0} boolean value: {1}",
+                                        ForDisplay(arg), ForDisplay(text)),
+                                        traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.noLog = (bool)value;
+                            }
+                            else
+                            {
+                                error = TraceOps.Trace(traceCallback, String.Format(
+                                    "Unsupported command line option: {0}",
+                                    ForDisplay(arg)), traceCategory);
+
+                                if (strict)
+                                    return false;
+                            }
+                        }
+                        else
+                        {
+                            error = TraceOps.Trace(traceCallback, String.Format(
+                                "Unsupported command line argument: {0}",
+                                ForDisplay(arg)), traceCategory);
+
+                            if (strict)
+                                return false;
+                        }
+                    }
+
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    TraceOps.Trace(traceCallback, e, traceCategory);
+
+                    error = "Failed to modify configuration.";
+                }
+
+                return false;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static bool Process(
+                string[] args,
+                Configuration configuration,
+                bool strict,
+                ref string error
+                )
+            {
+                try
+                {
+                    if (configuration == null)
+                    {
+                        error = "Invalid configuration.";
+                        return false;
+                    }
+
+                    Assembly assembly = configuration.assembly;
+
+                    if (assembly == null)
+                    {
+                        error = "Invalid assembly.";
+                        return false;
+                    }
+
+                    if (!configuration.noTrace)
+                    {
+                        if (!configuration.noLog &&
+                            String.IsNullOrEmpty(configuration.logFileName))
+                        {
+                            configuration.logFileName = GetLogFileName();
+                        }
+
+                        ///////////////////////////////////////////////////////
+
+                        if (!configuration.noConsole)
+                        {
+                            Trace.Listeners.Add(new ConsoleTraceListener());
+                        }
+
+                        if (!configuration.noLog &&
+                            !String.IsNullOrEmpty(configuration.logFileName))
+                        {
+                            Trace.Listeners.Add(new TextWriterTraceListener(
+                                configuration.logFileName));
+                        }
+                    }
+
+                    //
+                    // NOTE: Dump the configuration now in case we need to
+                    //       troubleshoot any issues.
+                    //
+                    configuration.Dump();
+
+                    //
+                    // NOTE: Show where we are running from and how we were
+                    //       invoked.
+                    //
+                    string location = assembly.Location;
+
+                    TraceOps.Trace(traceCallback, String.Format(
+                        "Original command line is: {0}",
+                        Environment.CommandLine), traceCategory);
+
+                    //
+                    // NOTE: If the debugger is attached and What-If mode is
+                    //       [now] disabled, issue a warning.
+                    //
+                    if (!configuration.whatIf && Debugger.IsAttached)
+                    {
+                        TraceOps.Trace(traceCallback,
+                            "Forced to disable \"what-if\" mode with " +
+                            "debugger attached.", traceCategory);
+                    }
+
+                    //
+                    // NOTE: If the command line has not been manually
+                    //       confirmed (i.e. via the explicit command line
+                    //       option), then stop processing now.  We enforce
+                    //       this rule so that simply double-clicking the
+                    //       executable will not result in any changes being
+                    //       made to the system.
+                    //
+                    if (!configuration.confirm)
+                    {
+                        error = "Cannot continue, the \"confirm\" option is " +
+                            "not enabled.";
+
+                        return false;
+                    }
+
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    TraceOps.Trace(traceCallback, e, traceCategory);
+
+                    error = "Failed to process configuration.";
+                }
+
+                return false;
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Methods
+            public bool HasFlags(
+                InstallFlags hasFlags,
+                bool all
+                )
+            {
+                if (all)
+                    return ((installFlags & hasFlags) == hasFlags);
+                else
+                    return ((installFlags & hasFlags) != InstallFlags.None);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public void Dump()
+            {
+                if (traceCallback != null)
+                {
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "Assembly", ForDisplay(assembly)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "LogFileName", ForDisplay(logFileName)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "Directory", ForDisplay(directory)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "CoreFileName", ForDisplay(coreFileName)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "LinqFileName", ForDisplay(linqFileName)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "DesignerFileName", ForDisplay(designerFileName)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "InstallFlags", ForDisplay(installFlags)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "Install", ForDisplay(install)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoDesktop", ForDisplay(noDesktop)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoCompact", ForDisplay(noCompact)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoNetFx20", ForDisplay(noNetFx20)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoNetFx40", ForDisplay(noNetFx40)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoVs2008", ForDisplay(noVs2008)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoVs2010", ForDisplay(noVs2010)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoTrace", ForDisplay(noTrace)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoConsole", ForDisplay(noConsole)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoLog", ForDisplay(noLog)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "WhatIf", ForDisplay(whatIf)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "Verbose", ForDisplay(verbose)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "Confirm", ForDisplay(confirm)),
+                        traceCategory);
+                }
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Properties
+            private Assembly assembly;
+            public Assembly Assembly
+            {
+                get { return assembly; }
+                set { assembly = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string logFileName;
+            public string LogFileName
+            {
+                get { return logFileName; }
+                set { logFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string directory;
+            public string Directory
+            {
+                get { return directory; }
+                set { directory = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string coreFileName;
+            public string CoreFileName
+            {
+                get { return coreFileName; }
+                set { coreFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string linqFileName;
+            public string LinqFileName
+            {
+                get { return linqFileName; }
+                set { linqFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string designerFileName;
+            public string DesignerFileName
+            {
+                get { return designerFileName; }
+                set { designerFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private InstallFlags installFlags;
+            public InstallFlags InstallFlags
+            {
+                get { return installFlags; }
+                set { installFlags = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool install;
+            public bool Install
+            {
+                get { return install; }
+                set { install = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noDesktop;
+            public bool NoDesktop
+            {
+                get { return noDesktop; }
+                set { noDesktop = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noCompact;
+            public bool NoCompact
+            {
+                get { return noCompact; }
+                set { noCompact = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noNetFx20;
+            public bool NoNetFx20
+            {
+                get { return noNetFx20; }
+                set { noNetFx20 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noNetFx40;
+            public bool NoNetFx40
+            {
+                get { return noNetFx40; }
+                set { noNetFx40 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noVs2008;
+            public bool NoVs2008
+            {
+                get { return noVs2008; }
+                set { noVs2008 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noVs2010;
+            public bool NoVs2010
+            {
+                get { return noVs2010; }
+                set { noVs2010 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noTrace;
+            public bool NoTrace
+            {
+                get { return noTrace; }
+                set { noTrace = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noConsole;
+            public bool NoConsole
+            {
+                get { return noConsole; }
+                set { noConsole = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noLog;
+            public bool NoLog
+            {
+                get { return noLog; }
+                set { noLog = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool whatIf;
+            public bool WhatIf
+            {
+                get { return whatIf; }
+                set { whatIf = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool verbose;
+            public bool Verbose
+            {
+                get { return verbose; }
+                set { verbose = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool confirm;
+            public bool Confirm
+            {
+                get { return confirm; }
+                set { confirm = value; }
+            }
+            #endregion
         }
         #endregion
 
@@ -2883,1052 +3929,6 @@ namespace System.Data.SQLite
             }
         }
         #endregion
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region Configuration Class
-        private sealed class Configuration
-        {
-            #region Private Constants
-            private const char Switch = '-';
-            private const char AltSwitch = '/';
-
-            ///////////////////////////////////////////////////////////////////
-
-            private static readonly char[] SwitchChars = {
-                Switch, AltSwitch
-            };
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region Private Constructors
-            private Configuration(
-                Assembly assembly,
-                string logFileName,
-                string directory,
-                string coreFileName,
-                string linqFileName,
-                string designerFileName,
-                InstallFlags installFlags,
-                bool install,
-                bool noDesktop,
-                bool noCompact,
-                bool noNetFx20,
-                bool noNetFx40,
-                bool noVs2008,
-                bool noVs2010,
-                bool noTrace,
-                bool noConsole,
-                bool noLog,
-                bool whatIf,
-                bool verbose,
-                bool confirm
-                )
-            {
-                this.assembly = assembly;
-                this.logFileName = logFileName;
-                this.directory = directory;
-                this.coreFileName = coreFileName;
-                this.linqFileName = linqFileName;
-                this.designerFileName = designerFileName;
-                this.installFlags = installFlags;
-                this.install = install;
-                this.noDesktop = noDesktop;
-                this.noCompact = noCompact;
-                this.noNetFx20 = noNetFx20;
-                this.noNetFx40 = noNetFx40;
-                this.noVs2008 = noVs2008;
-                this.noVs2010 = noVs2010;
-                this.noTrace = noTrace;
-                this.noConsole = noConsole;
-                this.noLog = noLog;
-                this.whatIf = whatIf;
-                this.verbose = verbose;
-                this.confirm = confirm;
-            }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region Private Static Methods
-            private static void GetDefaultFileNames(
-                ref string directory,
-                ref string coreFileName,
-                ref string linqFileName,
-                ref string designerFileName
-                )
-            {
-                if (thisAssembly == null)
-                    return;
-
-                directory = Path.GetDirectoryName(thisAssembly.Location);
-
-                if (String.IsNullOrEmpty(directory))
-                    return;
-
-                coreFileName = Path.Combine(directory,
-                    Installer.CoreFileName);
-
-                linqFileName = Path.Combine(directory,
-                    Installer.LinqFileName);
-
-                designerFileName = Path.Combine(directory,
-                    Installer.DesignerFileName);
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private static bool CheckOption(
-                ref string arg
-                )
-            {
-                string result = arg;
-
-                if (!String.IsNullOrEmpty(result))
-                {
-                    //
-                    // NOTE: Remove all leading switch chars.
-                    //
-                    result = result.TrimStart(SwitchChars);
-
-                    //
-                    // NOTE: How many chars were removed?
-                    //
-                    int count = arg.Length - result.Length;
-
-                    //
-                    // NOTE: Was there at least one?
-                    //
-                    if (count > 0)
-                    {
-                        //
-                        // NOTE: Ok, replace their original
-                        //       argument.
-                        //
-                        arg = result;
-
-                        //
-                        // NOTE: Yes, this is a switch.
-                        //
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private static bool MatchOption(
-                string arg,
-                string option
-                )
-            {
-                if ((arg == null) || (option == null))
-                    return false;
-
-                return String.Compare(arg, 0, option, 0,
-                    arg.Length, StringComparison.OrdinalIgnoreCase) == 0;
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private static bool? ParseBoolean(
-                string text
-                )
-            {
-                if (!String.IsNullOrEmpty(text))
-                {
-                    bool value;
-
-                    if (bool.TryParse(text, out value))
-                        return value;
-                }
-
-                return null;
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private static object ParseEnum(
-                Type enumType,
-                string text,
-                bool noCase
-                )
-            {
-                if ((enumType == null) || !enumType.IsEnum)
-                    return null;
-
-                if (!String.IsNullOrEmpty(text))
-                {
-                    try
-                    {
-                        return Enum.Parse(enumType, text, noCase);
-                    }
-                    catch
-                    {
-                        // do nothing.
-                    }
-                }
-
-                return null;
-            }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region Public Static Methods
-            public static Configuration CreateDefault()
-            {
-                string directory = null;
-                string coreFileName = null;
-                string linqFileName = null;
-                string designerFileName = null;
-
-                GetDefaultFileNames(
-                    ref directory, ref coreFileName, ref linqFileName,
-                    ref designerFileName);
-
-                return new Configuration(
-                    thisAssembly, null, directory, coreFileName, linqFileName,
-                    designerFileName, InstallFlags.Default, true, false, true,
-                    false, false, false, false, false, false, false, true,
-                    true, false);
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            public static bool FromArgs(
-                string[] args,
-                bool strict,
-                ref Configuration configuration,
-                ref string error
-                )
-            {
-                try
-                {
-                    if (args == null)
-                        return true;
-
-                    if (configuration == null)
-                        configuration = Configuration.CreateDefault();
-
-                    int length = args.Length;
-
-                    for (int index = 0; index < length; index++)
-                    {
-                        string arg = args[index];
-
-                        if (String.IsNullOrEmpty(arg))
-                            continue;
-
-                        string newArg = arg;
-
-                        if (CheckOption(ref newArg))
-                        {
-                            //
-                            // NOTE: All the supported command line options must
-                            //       have a value; therefore, attempt to advance
-                            //       to it now.  If we fail, we are done.
-                            //
-                            index++;
-
-                            if (index >= length)
-                            {
-                                error = TraceOps.Trace(
-                                    traceCallback, String.Format(
-                                        "Missing value for option: {0}",
-                                        ForDisplay(arg)), traceCategory);
-
-                                if (strict)
-                                    return false;
-
-                                break;
-                            }
-
-                            //
-                            // NOTE: Grab the textual value of this command line
-                            //       option.
-                            //
-                            string text = args[index];
-
-                            //
-                            // NOTE: Figure out which command line option this is
-                            //       (based on a partial name match) and then try
-                            //       to interpret the textual value as the correct
-                            //       type.
-                            //
-                            if (MatchOption(newArg, "strict"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                //
-                                // NOTE: Allow the command line arguments to override
-                                //       the "strictness" setting provided by our caller.
-                                //
-                                strict = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "logFileName"))
-                            {
-                                configuration.logFileName = text;
-                            }
-                            else if (MatchOption(newArg, "directory"))
-                            {
-                                configuration.directory = text;
-
-                                //
-                                // NOTE: *SPECIAL* Must refresh the file names
-                                //       here because the underlying directory
-                                //       has changed.
-                                //
-                                string coreFileName = configuration.coreFileName;
-
-                                if (!String.IsNullOrEmpty(coreFileName))
-                                    coreFileName = Path.GetFileName(coreFileName);
-
-                                if (String.IsNullOrEmpty(coreFileName))
-                                    coreFileName = Installer.CoreFileName;
-
-                                configuration.coreFileName = Path.Combine(
-                                    configuration.directory, coreFileName);
-
-                                string linqFileName = configuration.linqFileName;
-
-                                if (!String.IsNullOrEmpty(linqFileName))
-                                    linqFileName = Path.GetFileName(linqFileName);
-
-                                if (String.IsNullOrEmpty(linqFileName))
-                                    linqFileName = Installer.LinqFileName;
-
-                                configuration.linqFileName = Path.Combine(
-                                    configuration.directory, linqFileName);
-
-                                string designerFileName = configuration.designerFileName;
-
-                                if (!String.IsNullOrEmpty(designerFileName))
-                                    designerFileName = Path.GetFileName(designerFileName);
-
-                                if (String.IsNullOrEmpty(designerFileName))
-                                    designerFileName = Installer.DesignerFileName;
-
-                                configuration.designerFileName = Path.Combine(
-                                    configuration.directory, designerFileName);
-                            }
-                            else if (MatchOption(newArg, "coreFileName"))
-                            {
-                                configuration.coreFileName = text;
-                            }
-                            else if (MatchOption(newArg, "linqFileName"))
-                            {
-                                configuration.linqFileName = text;
-                            }
-                            else if (MatchOption(newArg, "designerFileName"))
-                            {
-                                configuration.designerFileName = text;
-                            }
-                            else if (MatchOption(newArg, "installFlags"))
-                            {
-                                object value = ParseEnum(
-                                    typeof(InstallFlags), text, true);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid install flags value: {0}",
-                                        ForDisplay(text)), traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.installFlags = (InstallFlags)value;
-                            }
-                            else if (MatchOption(newArg, "install"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.install = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "whatIf"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.whatIf = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "verbose"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.verbose = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "confirm"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.confirm = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noDesktop"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noDesktop = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noCompact"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noCompact = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noNetFx20"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noNetFx20 = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noNetFx40"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noNetFx40 = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noVs2008"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noVs2008 = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noVs2010"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noVs2010 = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noTrace"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noTrace = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noConsole"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noConsole = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noLog"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noLog = (bool)value;
-                            }
-                            else
-                            {
-                                error = TraceOps.Trace(traceCallback, String.Format(
-                                    "Unsupported command line option: {0}",
-                                    ForDisplay(arg)), traceCategory);
-
-                                if (strict)
-                                    return false;
-                            }
-                        }
-                        else
-                        {
-                            error = TraceOps.Trace(traceCallback, String.Format(
-                                "Unsupported command line argument: {0}",
-                                ForDisplay(arg)), traceCategory);
-
-                            if (strict)
-                                return false;
-                        }
-                    }
-
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    TraceOps.Trace(traceCallback, e, traceCategory);
-
-                    error = "Failed to modify configuration.";
-                }
-
-                return false;
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            public static bool Process(
-                string[] args,
-                Configuration configuration,
-                bool strict,
-                ref string error
-                )
-            {
-                try
-                {
-                    if (configuration == null)
-                    {
-                        error = "Invalid configuration.";
-                        return false;
-                    }
-
-                    Assembly assembly = configuration.assembly;
-
-                    if (assembly == null)
-                    {
-                        error = "Invalid assembly.";
-                        return false;
-                    }
-
-                    if (!configuration.noTrace)
-                    {
-                        if (!configuration.noLog &&
-                            String.IsNullOrEmpty(configuration.logFileName))
-                        {
-                            configuration.logFileName = GetLogFileName();
-                        }
-
-                        ///////////////////////////////////////////////////////
-
-                        if (!configuration.noConsole)
-                        {
-                            Trace.Listeners.Add(new ConsoleTraceListener());
-                        }
-
-                        if (!configuration.noLog &&
-                            !String.IsNullOrEmpty(configuration.logFileName))
-                        {
-                            Trace.Listeners.Add(new TextWriterTraceListener(
-                                configuration.logFileName));
-                        }
-                    }
-
-                    //
-                    // NOTE: Dump the configuration now in case we need to
-                    //       troubleshoot any issues.
-                    //
-                    configuration.Dump();
-
-                    //
-                    // NOTE: Show where we are running from and how we were
-                    //       invoked.
-                    //
-                    string location = assembly.Location;
-
-                    TraceOps.Trace(traceCallback, String.Format(
-                        "Original command line is: {0}",
-                        Environment.CommandLine), traceCategory);
-
-                    //
-                    // NOTE: If the debugger is attached and What-If mode is
-                    //       [now] disabled, issue a warning.
-                    //
-                    if (!configuration.whatIf && Debugger.IsAttached)
-                    {
-                        TraceOps.Trace(traceCallback,
-                            "Forced to disable \"what-if\" mode with " +
-                            "debugger attached.", traceCategory);
-                    }
-
-                    //
-                    // NOTE: If the command line has not been manually
-                    //       confirmed (i.e. via the explicit command line
-                    //       option), then stop processing now.  We enforce
-                    //       this rule so that simply double-clicking the
-                    //       executable will not result in any changes being
-                    //       made to the system.
-                    //
-                    if (!configuration.confirm)
-                    {
-                        error = "Cannot continue, the \"confirm\" option is " +
-                            "not enabled.";
-
-                        return false;
-                    }
-
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    TraceOps.Trace(traceCallback, e, traceCategory);
-
-                    error = "Failed to process configuration.";
-                }
-
-                return false;
-            }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region Public Methods
-            public bool HasFlags(
-                InstallFlags hasFlags,
-                bool all
-                )
-            {
-                if (all)
-                    return ((installFlags & hasFlags) == hasFlags);
-                else
-                    return ((installFlags & hasFlags) != InstallFlags.None);
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            public void Dump()
-            {
-                if (traceCallback != null)
-                {
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "Assembly", ForDisplay(assembly)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "LogFileName", ForDisplay(logFileName)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "Directory", ForDisplay(directory)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "CoreFileName", ForDisplay(coreFileName)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "LinqFileName", ForDisplay(linqFileName)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "DesignerFileName", ForDisplay(designerFileName)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "InstallFlags", ForDisplay(installFlags)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "Install", ForDisplay(install)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoDesktop", ForDisplay(noDesktop)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoCompact", ForDisplay(noCompact)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoNetFx20", ForDisplay(noNetFx20)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoNetFx40", ForDisplay(noNetFx40)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoVs2008", ForDisplay(noVs2008)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoVs2010", ForDisplay(noVs2010)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoTrace", ForDisplay(noTrace)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoConsole", ForDisplay(noConsole)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "NoLog", ForDisplay(noLog)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "WhatIf", ForDisplay(whatIf)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "Verbose", ForDisplay(verbose)),
-                        traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "Confirm", ForDisplay(confirm)),
-                        traceCategory);
-                }
-            }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region Public Properties
-            private Assembly assembly;
-            public Assembly Assembly
-            {
-                get { return assembly; }
-                set { assembly = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private string logFileName;
-            public string LogFileName
-            {
-                get { return logFileName; }
-                set { logFileName = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private string directory;
-            public string Directory
-            {
-                get { return directory; }
-                set { directory = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private string coreFileName;
-            public string CoreFileName
-            {
-                get { return coreFileName; }
-                set { coreFileName = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private string linqFileName;
-            public string LinqFileName
-            {
-                get { return linqFileName; }
-                set { linqFileName = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private string designerFileName;
-            public string DesignerFileName
-            {
-                get { return designerFileName; }
-                set { designerFileName = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private InstallFlags installFlags;
-            public InstallFlags InstallFlags
-            {
-                get { return installFlags; }
-                set { installFlags = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool install;
-            public bool Install
-            {
-                get { return install; }
-                set { install = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noDesktop;
-            public bool NoDesktop
-            {
-                get { return noDesktop; }
-                set { noDesktop = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noCompact;
-            public bool NoCompact
-            {
-                get { return noCompact; }
-                set { noCompact = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noNetFx20;
-            public bool NoNetFx20
-            {
-                get { return noNetFx20; }
-                set { noNetFx20 = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noNetFx40;
-            public bool NoNetFx40
-            {
-                get { return noNetFx40; }
-                set { noNetFx40 = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noVs2008;
-            public bool NoVs2008
-            {
-                get { return noVs2008; }
-                set { noVs2008 = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noVs2010;
-            public bool NoVs2010
-            {
-                get { return noVs2010; }
-                set { noVs2010 = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noTrace;
-            public bool NoTrace
-            {
-                get { return noTrace; }
-                set { noTrace = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noConsole;
-            public bool NoConsole
-            {
-                get { return noConsole; }
-                set { noConsole = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool noLog;
-            public bool NoLog
-            {
-                get { return noLog; }
-                set { noLog = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool whatIf;
-            public bool WhatIf
-            {
-                get { return whatIf; }
-                set { whatIf = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool verbose;
-            public bool Verbose
-            {
-                get { return verbose; }
-                set { verbose = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private bool confirm;
-            public bool Confirm
-            {
-                get { return confirm; }
-                set { confirm = value; }
-            }
-            #endregion
-        }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
