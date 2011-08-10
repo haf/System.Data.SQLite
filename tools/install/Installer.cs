@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.EnterpriseServices.Internal;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
@@ -246,6 +247,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             private static string GetMethodName(
                 StackTrace stackTrace,
                 int level
@@ -323,6 +325,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static string Trace(
                 TraceCallback traceCallback,
                 Exception exception,
@@ -339,17 +342,19 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static string Trace(
                 TraceCallback traceCallback,
                 string message,
                 string category
                 )
             {
-                return Trace(traceCallback, null, 0, message, category);
+                return Trace(traceCallback, null, 1, message, category);
             }
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             private static string Trace(
                 TraceCallback traceCallback,
                 StackTrace stackTrace,
@@ -1648,9 +1653,10 @@ namespace System.Data.SQLite
                         if (localSaved && !saved)
                             saved = true;
 
-                        TraceOps.Trace(traceCallback, String.Format(
-                            "localSaved = {0}, saved = {1}", localSaved,
-                            saved), traceCategory);
+                        if (verbose)
+                            TraceOps.Trace(traceCallback, String.Format(
+                                "localSaved = {0}, saved = {1}", localSaved,
+                                saved), traceCategory);
                     }
                 }
             }
@@ -3652,7 +3658,7 @@ namespace System.Data.SQLite
                     return ((installFlags & hasFlags) != InstallFlags.None);
             }
 
-            ///////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////
 
             public void Dump()
             {
