@@ -94,6 +94,7 @@ namespace System.Data.SQLite
     #region Installer Class
     internal static class Installer
     {
+        #region Private Helper Classes
         #region AnyPair Class
         private sealed class AnyPair<T1, T2>
         {
@@ -2150,6 +2151,7 @@ namespace System.Data.SQLite
             }
             #endregion
         }
+        #endregion
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
