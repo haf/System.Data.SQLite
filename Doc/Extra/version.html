@@ -43,6 +43,26 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.75.0 - September XX, 2011</b></p>
+    <ul>
+      <li>More enhancements to the build system.</li>
+      <li>Make all the assembly versioning attributes consistent.</li>
+      <li>Add unit testing infrastructure using <a href="http://eagle.to/">Eagle</a>.</li>
+      <li>Integrate all legacy unit tests, including the &quot;testlinq&quot; project, into the new test suite.</li>
+      <li>Add projects to build the interop assembly statically linked to the Visual C++ runtime. Fix for <a href="http://system.data.sqlite.org/index.html/info/53f0c5cbf6">[53f0c5cbf6]</a>.</li>
+      <li>Add SQLITE_ENABLE_STAT2 compile-time option to the interop assembly.  Fix for <a href="http://system.data.sqlite.org/index.html/info/74807fbf27">[74807fbf27]</a>.</li>
+      <li>Fix mutex issues exposed when running the test suite with the debug version of SQLite.</li>
+      <li>Support the SQLITE_FCNTL_WIN32_AV_RETRY file control to mitigate the impact of file sharing violations caused by external processes.</li>
+      <li>Refactor the logging interface to be thread-safe and self-initializing.</li>
+      <li>Shutdown the SQLite native interface when the AppDomain is being unloaded. Fix for <a href="http://system.data.sqlite.org/index.html/info/b4a7ddc83f">[b4a7ddc83f]</a>.</li>
+      <li>Support Skip operation for LINQ using OFFSET. Fix for <a href="http://system.data.sqlite.org/index.html/info/8b7d179c3c">[8b7d179c3c]</a>.</li>
+      <li>Support all SQLite journal modes. Fix for <a href="http://system.data.sqlite.org/index.html/info/448d663d11">[448d663d11]</a>.</li>
+      <li>Do not throw exceptions when disposing SQLiteDataReader. Fix for <a href="http://system.data.sqlite.org/index.html/info/e1b2e0f769">[e1b2e0f769]</a>.</li>
+      <li>The REAL type should be mapped to System.Double. Fix for <a href="http://system.data.sqlite.org/index.html/info/2c630bffa7">[2c630bffa7]</a> and <a href="http://system.data.sqlite.org/index.html/info/b0a5990f48">[b0a5990f48]</a>.</li>
+      <li>Minor optimization to GetParamValueBytes(). Fix for <a href="http://system.data.sqlite.org/index.html/info/201128cc88">[201128cc88]</a>.</li>
+      <li>Support the ON UPDATE, ON DELETE, and MATCH clause information when generating schema metadata for foreign keys. Partial fix for <a href="http://system.data.sqlite.org/index.html/info/b226147b37">[b226147b37]</a>. VS designer changes are not yet tested.</li>
+      <li>Fix incorrect resource name for SR.resx in the mixed-mode assembly.</li>
+    </ul>
     <p><b>1.0.74.0 - July 4, 2011</b></p>
     <ul>
       <li>Updated to SQLite 3.7.7.1 <a href="http://www.sqlite.org/src/info/af0d91adf4">[af0d91adf4]</a>.</li>
@@ -63,15 +83,15 @@
     <p><b>1.0.73.0 - June 2, 2011</b></p>
     <ul>
       <li>Updated to SQLite 3.7.6.3 <a href="http://www.sqlite.org/src/info/ed1da510a2">[ed1da510a2]</a>.</li>
-      <li>Minor optimization to GetBytes(). Fix for <a href="http://system.data.sqlite.org/src/info/8c1650482e">[8c1650482e]</a>.</li>
+      <li>Minor optimization to GetBytes(). Fix for <a href="http://system.data.sqlite.org/index.html/info/8c1650482e">[8c1650482e]</a>.</li>
       <li>Update various assembly information settings.</li>
-      <li>Correct System.Data.SQLite.Linq version and resource information. Fix for <a href="http://system.data.sqlite.org/src/info/6489c5a396">[6489c5a396]</a> and <a href="http://system.data.sqlite.org/src/info/133daf50d6">[133daf50d6]</a>.</li>
+      <li>Correct System.Data.SQLite.Linq version and resource information. Fix for <a href="http://system.data.sqlite.org/index.html/info/6489c5a396">[6489c5a396]</a> and <a href="http://system.data.sqlite.org/index.html/info/133daf50d6">[133daf50d6]</a>.</li>
       <li>Moved log handler from SQLiteConnection object to SQLiteFactory object to prevent if from being prematurely GCed.</li>
-      <li>We should block x64 installs on x86 and we should install native only if the setup package itself is native. Fix for <a href="http://system.data.sqlite.org/src/info/e058ce156e">[e058ce156e]</a>.</li>
+      <li>We should block x64 installs on x86 and we should install native only if the setup package itself is native. Fix for <a href="http://system.data.sqlite.org/index.html/info/e058ce156e">[e058ce156e]</a>.</li>
     </ul>
     <p><b>1.0.72.0 - May 1, 2011</b></p>
     <ul>
-      <li>Add the correct directory to the path. Fix for <a href="http://system.data.sqlite.org/src/info/50515a0c8e">[50515a0c8e]</a>.</li>
+      <li>Add the correct directory to the path. Fix for <a href="http://system.data.sqlite.org/index.html/info/50515a0c8e">[50515a0c8e]</a>.</li>
     </ul>
     <p><b>1.0.71.0 - April 27, 2011</b></p>
     <ul>
