@@ -184,6 +184,21 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForTk { channel } {
+    tputs $channel "---- checking for Tk... "
+
+    #
+    # HACK: For now, disable testing Tk 8.4/8.5 when running in Eagle.
+    #
+    if {![isEagle] || [haveConstraint tclLibrary86]} then {
+      addConstraint tk
+
+      tputs $channel yes\n
+    } else {
+      tputs $channel no\n
+    }
+  }
+
   proc checkForVersion { channel } {
     tputs $channel "---- checking for language version... "
 
@@ -636,9 +651,9 @@ namespace eval ::Eagle {
         #
         addConstraint softwareUpdate
 
-        tputs $channel "trusted\n"
+        tputs $channel trusted\n
       } else {
-        tputs $channel "untrusted\n"
+        tputs $channel untrusted\n
       }
     }
 
@@ -901,7 +916,7 @@ namespace eval ::Eagle {
         }
 
         tputs $channel [appendArgs $result ", " $::tcl_platform(osBits) -bit \
-            " " $::tcl_platform(machine)\n]
+            " " $::tcl_platform(machine) \n]
       } else {
         tputs $channel "no, unknown\n"
       }
@@ -912,10 +927,7 @@ namespace eval ::Eagle {
       # NOTE: Check for the Garuda DLL of the same platform (i.e. machine
       #       type) as the native Tcl shell.
       #
-      return [checkForFile $channel [file join $::base_path bin \
-          [machineToPlatform [getMachineForTclShell]] \
-          [appendArgs $::eagle_platform(configuration) Dll] \
-          [appendArgs Garuda [info sharedlibextension]]]]
+      return [checkForFile $channel [getGarudaDll]]
     }
 
     proc checkForCulture { channel } {
@@ -1114,7 +1126,7 @@ namespace eval ::Eagle {
           tputs $channel no\n
         }
       } else {
-        tputs $channel "disabled\n"
+        tputs $channel disabled\n
       }
     }
 
@@ -1137,7 +1149,7 @@ namespace eval ::Eagle {
       }
     }
 
-    proc checkForObjectMember { channel object member } {
+    proc checkForObjectMember { channel object member {constraint ""} } {
       tputs $channel [appendArgs "---- checking for object member \"" \
           $object . $member "\"... "]
 
@@ -1146,7 +1158,11 @@ namespace eval ::Eagle {
         #
         # NOTE: Yes, it appears that it is available.
         #
-        addConstraint $object.[string trim $member *?]
+        if {[string length $constraint] > 0} then {
+          addConstraint member_$constraint
+        } else {
+          addConstraint $object.[string trim $member *?]
+        }
 
         tputs $channel yes\n
       } else {
@@ -1238,7 +1254,8 @@ namespace eval ::Eagle {
         #
         addConstraint tclShell
 
-        tputs $channel "---- checking for Tcl shell... yes\n"
+        tputs $channel [appendArgs "---- checking for Tcl shell... yes (" \
+            $result ")\n"]
       } else {
         tputs $channel "---- checking for Tcl shell... no\n"
       }
@@ -1554,7 +1571,7 @@ namespace eval ::Eagle {
     #       global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list checkForPlatform \
-        checkForEagle checkForGaruda checkForShell checkForDebug \
+        checkForEagle checkForGaruda checkForShell checkForDebug checkForTk \
         checkForVersion checkForCommand checkForFile checkForNativeCode \
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
         checkForPerformance checkForTiming checkForInteractive \

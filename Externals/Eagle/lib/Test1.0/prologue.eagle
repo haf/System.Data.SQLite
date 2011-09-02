@@ -186,6 +186,8 @@ if {![info exists no([file tail [info script]])]} then {
   set test_flags(-threshold) ""; # default to requiring all tests to pass.
   set test_flags(-stopOnFailure) ""; # default to continue on failure.
   set test_flags(-exitOnComplete) ""; # default to not exit after complete.
+  set test_flags(-preTest) ""; # default to not evaluating anything.
+  set test_flags(-postTest) ""; # default to not evaluating anything.
 
   #
   # NOTE: Check for and process any command line arguments.
@@ -260,6 +262,18 @@ if {![info exists no([file tail [info script]])]} then {
       set test_log [file join [getTemporaryPath] [file tail [info \
           nameofexecutable]][getTestLogId].test.[pid].log]
     }
+  }
+
+  #
+  # NOTE: Evaluate the specified pre-test script now, if any.
+  #
+  if {[info exists test_flags(-preTest)] && \
+      [string length $test_flags(-preTest)] > 0} then {
+    #
+    # TODO: Perhaps use [uplevel] here instead of [eval].  For now, it does not
+    #       matter since we enforce this file being evaluated at the top-level.
+    #
+    eval $test_flags(-preTest)
   }
 
   #
@@ -828,6 +842,15 @@ if {![info exists no([file tail [info script]])]} then {
 
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestRemoveFunction*
+
+        #
+        # NOTE: For tests "function-5.*".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestAddNamedFunction*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestRemoveNamedFunction*
       }
 
       #
@@ -842,9 +865,43 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       #
+      # NOTE: Has shell testing support been disabled?
+      #
+      if {![info exists no(testShell)]} then {
+        #
+        # NOTE: For test "debug-1.3".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestShellMainCore*
+      }
+
+      #
+      # NOTE: Has IDisposable testing support been disabled?
+      #
+      if {![info exists no(testDisposable)]} then {
+        #
+        # NOTE: For test "object-2.8".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default+Disposable \
+            *ToString* Eagle._Tests.Default.Disposable.ToString
+      }
+
+      #
       # NOTE: Has core marshaller testing support been disabled?
       #
       if {![info exists no(testMarshaller)]} then {
+        #
+        # NOTE: For test "basic-1.29".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestExecuteStaticDelegates*
+
+        #
+        # NOTE: For tests "basic-1.30" and "basic-1.31".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestExecuteDelegateCommands*
+
         #
         # NOTE: For test "object-2.1".
         #
@@ -918,6 +975,30 @@ if {![info exists no([file tail [info script]])]} then {
             *TestByRefStringListArray*
 
         #
+        # NOTE: For tests "object-7.2" and "object-7.4".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestNullArray*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestOutArray*
+
+        #
+        # NOTE: For test "object-7.5".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestEnum*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestByRefEnum*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestNullableEnum*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestByRefNullableEnum*
+
+        #
         # NOTE: For tests "object-14.4" and "object-14.5".
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
@@ -928,27 +1009,6 @@ if {![info exists no([file tail [info script]])]} then {
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TypeProperty*
-
-        #
-        # NOTE: For test "basic-1.29".
-        #
-        checkForObjectMember $test_channel Eagle._Tests.Default \
-            *TestExecuteStaticDelegates*
-
-        #
-        # NOTE: For tests "basic-1.30" and "basic-1.31".
-        #
-        checkForObjectMember $test_channel Eagle._Tests.Default \
-            *TestExecuteDelegateCommands*
-
-        #
-        # NOTE: For test "object-7.2" and "object-7.4".
-        #
-        checkForObjectMember $test_channel Eagle._Tests.Default \
-            *TestNullArray*
-
-        checkForObjectMember $test_channel Eagle._Tests.Default \
-            *TestOutArray*
       }
     }
 
@@ -1286,6 +1346,13 @@ if {![info exists no([file tail [info script]])]} then {
 
   if {![info exists no(debug)]} then {
     checkForDebug $test_channel
+  }
+
+  #
+  # NOTE: Has Tk testing support been disabled?
+  #
+  if {![info exists no(tk)]} then {
+    checkForTk $test_channel
   }
 
   #

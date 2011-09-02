@@ -44,6 +44,25 @@ if {![info exists no([file tail [info script]])]} then {
       [clock format [clock seconds]] \n]
 
   if {[isEagle]} then {
+    #
+    # NOTE: Check for and display any duplicate test names that we found.  In
+    #       theory, this checking may produce false positives if a test file
+    #       (or the entire test suite) is run multiple times without resetting
+    #       the test statistics and/or restarting Eagle; however, duplicate
+    #       test names must be avoided and this is considered a good trade-off.
+    #
+    foreach {name count} $eagle_tests(counts) {
+      if {$count > 1} then {
+        tputs $test_channel [appendArgs \
+            "==== test name \"" $name "\" DUPLICATED (" $count ")\n"]
+      } elseif {$count <= 0} then {
+        tputs $test_channel [appendArgs \
+            "==== test name \"" $name "\" BAD COUNT (" $count ")\n"]
+      }
+    }
+
+    unset -nocomplain name count
+
     tputs $test_channel \n; # NOTE: Blank line.
 
     if {$eagle_tests(passed) > 0} then {
@@ -64,40 +83,30 @@ if {![info exists no([file tail [info script]])]} then {
     if {$eagle_tests(skipped) > 0} then {
       host result Break [appendArgs "SKIPPED: " $eagle_tests(skipped) \n]
       tlog [appendArgs "SKIPPED: " $eagle_tests(skipped) \n]
+
+      if {[llength $eagle_tests(skippedNames)] > 0} then {
+        host result Break [appendArgs "SKIPPED: " $eagle_tests(skippedNames) \n]
+        tlog [appendArgs "SKIPPED: " $eagle_tests(skippedNames) \n]
+      }
     }
 
     if {$eagle_tests(total) > 0} then {
       host result Return [appendArgs "TOTAL: " $eagle_tests(total) \n]
       tlog [appendArgs "TOTAL: " $eagle_tests(total) \n]
 
-      #
-      # HACK: Temporarily modify the floating point precision so that the
-      #       pass percentage does not end up with excessive detail.  In
-      #       theory, we could use [string format] here; however, that
-      #       would fail under Mono.
-      #
-      if {$tcl_precision != 4} then {
-        set tcl_precision_save $tcl_precision
-        set tcl_precision 4
-      }
-
       if {$eagle_tests(skipped) > 0} then {
         set percent [getSkipPercentage]
-        host result Break [appendArgs "SKIP PERCENTAGE: " $percent %\n]
-        tlog [appendArgs "SKIP PERCENTAGE: " $percent %\n]
+        host result Break [appendArgs "SKIP PERCENTAGE: " \
+            [formatDecimal $percent] %\n]
+
+        tlog [appendArgs "SKIP PERCENTAGE: " [formatDecimal $percent] %\n]
       }
 
       set percent [getPassPercentage]
-      host result Return [appendArgs "PASS PERCENTAGE: " $percent %\n]
-      tlog [appendArgs "PASS PERCENTAGE: " $percent% \n]
+      host result Return [appendArgs "PASS PERCENTAGE: " \
+          [formatDecimal $percent] %\n]
 
-      #
-      # NOTE: Restore the saved floating point precision.
-      #
-      if {[info exists tcl_precision_save]} then {
-        set tcl_precision $tcl_precision_save
-        unset tcl_precision_save
-      }
+      tlog [appendArgs "PASS PERCENTAGE: " [formatDecimal $percent] %\n]
     } else {
       #
       # NOTE: No tests.
@@ -189,12 +198,12 @@ if {![info exists no([file tail [info script]])]} then {
       if {$::tcltest::numTests(Skipped) > 0} then {
         set percent [getSkipPercentage]
         tputs $test_channel [appendArgs "SKIP PERCENTAGE: " \
-            [format "%.4f" $percent] %\n]
+            [formatDecimal $percent] %\n]
       }
 
       set percent [getPassPercentage]
       tputs $test_channel [appendArgs "PASS PERCENTAGE: " \
-          [format "%.4f" $percent] %\n]
+          [formatDecimal $percent] %\n]
     } else {
       #
       # NOTE: No tests.
@@ -255,6 +264,18 @@ if {![info exists no([file tail [info script]])]} then {
   #       be set in the environment.
   #
   sourceIfValid epilogue [getEnvironmentVariable testEpilogue]
+
+  #
+  # NOTE: Evaluate the specified post-test script now, if any.
+  #
+  if {[info exists test_flags(-postTest)] && \
+      [string length $test_flags(-postTest)] > 0} then {
+    #
+    # TODO: Perhaps use [uplevel] here instead of [eval].  For now, it does not
+    #       matter since we enforce this file being evaluated at the top-level.
+    #
+    eval $test_flags(-postTest)
+  }
 
   #
   # NOTE: Do we need to exit now?

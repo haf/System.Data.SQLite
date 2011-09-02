@@ -220,6 +220,32 @@ namespace eval ::Eagle {
     return $result
   }
 
+  proc readSharedFile { fileName } {
+    #
+    # NOTE: This should work properly in both Tcl and Eagle.
+    #
+    set command [list open $fileName RDONLY]
+
+    #
+    # HACK: Tcl appears to do this by default; however Eagle does not and
+    #       will not.  Therefore, manually add the -share option to the
+    #       command if running in Eagle.
+    #
+    if {[isEagle]} then {
+      lappend command 0 file -share readWrite
+    }
+
+    #
+    # NOTE: Open the file using the command constructed above, configure
+    #       the channel for binary data, and output the data to it.
+    #
+    set file_id [eval $command]
+    fconfigure $file_id -encoding binary -translation binary; # BINARY DATA
+    set result [read $file_id]
+    close $file_id
+    return $result
+  }
+
   proc writeFile { fileName data } {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
@@ -533,9 +559,13 @@ namespace eval ::Eagle {
     #
     # HACK: Assume that Mono is somewhere along the PATH.
     #
-    if {[isMono]} then { lappend command mono }
+    if {[isMono]} then {
+      lappend command mono \
+          [appendArgs \" [file nativename [info nameofexecutable]] \"]
+    } else {
+      lappend command [info nameofexecutable]
+    }
 
-    lappend command [info nameofexecutable]
     eval lappend command $args
 
     return [uplevel 1 $command]
@@ -589,71 +619,6 @@ namespace eval ::Eagle {
     }
 
     return $result
-  }
-
-  proc testShim { args } {
-    #
-    # NOTE: Call the original (saved) [test] command, wrapping it in
-    #       our standard test wrapper.
-    #
-    uplevel 1 [list runTest [concat ::savedTest $args]]
-  }
-
-  proc tsource { fileName {prologue true} {epilogue true} } {
-    #
-    # NOTE: At this point, we need to require the test package so that
-    #       we can run the test prologue.  Besides, the contained test(s)
-    #       will almost certainly require access to procedures defined in
-    #       our test package.
-    #
-    package require EagleTest
-
-    #
-    # NOTE: Run the test prologue in the context of the caller (which
-    #       must be global)?
-    #
-    if {$prologue} then {
-      uplevel 1 runTestPrologue
-    }
-
-    #
-    # NOTE: Save the original [test] command and setup our test shim in
-    #       its place.
-    #
-    rename test ::savedTest
-    interp alias {} test {} testShim
-
-    #
-    # NOTE: Source the specified test file in the context of the
-    #       caller (which should be global).
-    #
-    set code [catch {uplevel 1 [list source $fileName]} result]
-    set error [expr {$code == 0 ? false : true}]
-
-    #
-    # NOTE: Remove our test shim and restore the original (saved)
-    #       [test] command.
-    #
-    interp alias {} test {}
-    rename ::savedTest test
-
-    #
-    # NOTE: Run the test epilogue in the context of the caller (which
-    #       must be global)?
-    #
-    if {$epilogue} then {
-      uplevel 1 runTestEpilogue
-    }
-
-    #
-    # NOTE: If the test raised an error, re-raise it now; otherwise,
-    #       just return the result.
-    #
-    if {$error} then {
-      error $result
-    } else {
-      return $result
-    }
   }
 
   if {[isEagle]} then {
@@ -1610,8 +1575,8 @@ namespace eval ::Eagle {
     exportAndImportPackageCommands [namespace current] [list \
         exportAndImportPackageCommands isEagle isMono getEnvironmentVariable \
         getPluginPath getDictionaryValue getColumnValue getRowColumnValue \
-        appendArgs haveGaruda lappendArgs readFile filter map reduce tsource \
-        getPlatformInfo testShim] false false
+        appendArgs haveGaruda lappendArgs readFile filter map reduce \
+        getPlatformInfo] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

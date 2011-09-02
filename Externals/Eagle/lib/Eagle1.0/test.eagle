@@ -201,7 +201,8 @@ namespace eval ::Eagle {
     # TODO: Add more support for standard tcltest options here.
     #
     set options [list -configuration -suffix -file -notFile -match -skip \
-        -constraints -logFile -threshold -stopOnFailure -exitOnComplete]
+        -constraints -logFile -preTest -postTest -threshold -stopOnFailure \
+        -exitOnComplete]
 
     foreach {name value} $args {
       if {[lsearch -exact $options $name] != -1} then {
@@ -311,29 +312,54 @@ namespace eval ::Eagle {
       set expr {random()}
 
       #
-      # HACK: Mono does not currently support calling the String.Format
-      #       overload that takes a variable number of arguments via
-      #       reflection (Mono bug #636939).
+      # NOTE: Include the host name to make the result more unique in both
+      #       time and space.  Also, hash the entire constructed string.
       #
       if {![isMono]} then {
-        return [string format "{0:X16}{1:X16}{2:X16}" \
-            [clock now] [clock clicks] [expr $expr]]
+        #
+        # NOTE: When running on the .NET Framework, we can simply use the
+        #       [string format] command.
+        #
+        return [hash normal sha256 [string format \
+            "{0}{1:X8}{2:X8}{3:X16}{4:X16}{5:X16}" [info host] [pid] \
+            [info tid] [clock now] [clock clicks] [expr $expr]]]
       } else {
         #
-        # NOTE: Strip any leading minus signs for cleanliness.
+        # HACK: Mono does not currently support calling the String.Format
+        #       overload that takes a variable number of arguments via
+        #       reflection (Mono bug #636939).  Also, strip any leading
+        #       minus signs for cleanliness.
         #
-        return [appendArgs \
-            [string trimleft [clock now] -] \
-            [string trimleft [clock clicks] -] \
-            [string trimleft [expr $expr] -]]
+        return [hash normal sha256 [appendArgs [info host] [string trimleft \
+            [pid] -] [string trimleft [info tid] -] [string trimleft \
+            [clock now] -] [string trimleft [clock clicks] -] [string trimleft \
+            [expr $expr] -]]]
       }
     } else {
-      set seconds [clock seconds]; set clicks [clock clicks]
+      #
+      # NOTE: Generate a random number using [expr] and then convert it
+      #       to hexadecimal.
+      #
       binary scan [binary format d* [expr {rand()}]] w* random
 
-      return [format [appendArgs % [getLengthModifier $seconds] X% \
-          [getLengthModifier $clicks] X% [getLengthModifier $random] X] \
-          $seconds $clicks $random]
+      #
+      # NOTE: Convert the host name to a hexadecimal string and include
+      #       it in the result in an attempt to make it more unique in
+      #       both time and space.
+      #
+      binary scan [info host] c* host
+      set host [eval [list format [string repeat %X [llength $host]]] $host]
+
+      #
+      # NOTE: Build the final result with the [format] command, converting
+      #       all the pieces to hexadecimal (except the host, which is
+      #       already hexadecimal).
+      #
+      set pid [pid]; set seconds [clock seconds]; set clicks [clock clicks]
+
+      return [appendArgs $host [format [appendArgs % [getLengthModifier $pid] \
+          X% [getLengthModifier $seconds] X% [getLengthModifier $clicks] X% \
+          [getLengthModifier $random] X] $pid $seconds $clicks $random]]
     }
   }
 
@@ -530,6 +556,63 @@ namespace eval ::Eagle {
     }
   }
 
+  proc testShim { args } {
+    #
+    # NOTE: Call the original (saved) [test] command, wrapping it in
+    #       our standard test wrapper.
+    #
+    uplevel 1 [list runTest [concat ::savedTest $args]]
+  }
+
+  proc tsource { fileName {prologue true} {epilogue true} } {
+    #
+    # NOTE: Run the test prologue in the context of the caller (which
+    #       must be global)?
+    #
+    if {$prologue} then {
+      uplevel 1 runTestPrologue
+    }
+
+    #
+    # NOTE: Save the original [test] command and setup our test shim in
+    #       its place.
+    #
+    rename ::test ::savedTest
+    interp alias {} ::test {} testShim
+
+    #
+    # NOTE: Source the specified test file in the context of the caller
+    #       (which should be global).
+    #
+    set code [catch {uplevel 1 [list source $fileName]} result]
+    set error [expr {$code == 0 ? false : true}]
+
+    #
+    # NOTE: Remove our test shim and restore the original (saved) [test]
+    #       command.
+    #
+    interp alias {} ::test {}
+    rename ::savedTest ::test
+
+    #
+    # NOTE: Run the test epilogue in the context of the caller (which
+    #       must be global)?
+    #
+    if {$epilogue} then {
+      uplevel 1 runTestEpilogue
+    }
+
+    #
+    # NOTE: If the test raised an error, re-raise it now; otherwise,
+    #       just return the result.
+    #
+    if {$error} then {
+      error $result
+    } else {
+      return $result
+    }
+  }
+
   proc recordTestStatistics { varName index } {
     #
     # NOTE: Record counts of all object types that we track.
@@ -705,17 +788,55 @@ namespace eval ::Eagle {
     return $result
   }
 
+  proc formatDecimal { value {places 4} } {
+    if {[isEagle]} then {
+      #
+      # HACK: This works; however, in order to do this kind of thing cleanly,
+      #       we really need the Tcl [format] command.
+      #
+      set result [object invoke String Format [appendArgs "{0:0." \
+          [string repeat # $places] "}"] [set object [object invoke \
+          -create Double Parse $value]]]
+
+      unset object; # dispose
+    } else {
+      #
+      # NOTE: See, nice and clean when done in Tcl?
+      #
+      set result [format [appendArgs %. $places f] $value]
+    }
+
+    return $result
+  }
+
+  proc clearTestPercent { channel } {
+    if {[isEagle]} then {
+      host title ""
+    }
+  }
+
+  proc reportTestPercent { channel percent } {
+    set status [appendArgs "---- test suite running, about " $percent \
+        "% complete..."]
+
+    tputs $channel [appendArgs $status \n]
+
+    if {[isEagle]} then {
+      host title $status
+    }
+  }
+
   proc runAllTests { channel path fileNames skipFileNames } {
     #
     # NOTE: Show the exact arguments we received since they may not
     #       have been displayed by the caller (or anybody else).
     #
-    tputs $::test_channel [appendArgs "---- test run path: \"" $path \"\n]
+    tputs $channel [appendArgs "---- test run path: \"" $path \"\n]
 
-    tputs $::test_channel [appendArgs "---- test run file names: " \
+    tputs $channel [appendArgs "---- test run file names: " \
         [list [removePathFromFileNames $path $fileNames]] \n]
 
-    tputs $::test_channel [appendArgs "---- test run skip file names: " \
+    tputs $channel [appendArgs "---- test run skip file names: " \
         [list $skipFileNames] \n]
 
     #
@@ -737,7 +858,20 @@ namespace eval ::Eagle {
     #
     # NOTE: Process each file name we have been given by the caller...
     #
+    set total [llength $fileNames]; set lastPercent -1
+
     foreach fileName $fileNames {
+      #
+      # NOTE: In terms of files, not tests, what percent done are we now?
+      #
+      set percent [formatDecimal \
+          [expr {100.0 * ($count / double($total))}]]
+
+      if {$percent != $lastPercent} then {
+        reportTestPercent $channel $percent
+        set lastPercent $percent
+      }
+
       #
       # NOTE: Skipping over any file name that matches a pattern in the
       #       list of file names to skip.
@@ -828,8 +962,8 @@ namespace eval ::Eagle {
             #       incorrect code in-between the tests themselves.  We
             #       need to report this.
             #
-            tputs $::test_channel [appendArgs "==== \"" $fileName \
-                "\" ERROR \"" $error \"\n]
+            tputs $channel [appendArgs "==== \"" $fileName "\" ERROR \"" \
+                $error \"\n]
 
             #
             # NOTE: Stop further processing after this loop iteration?
@@ -847,6 +981,17 @@ namespace eval ::Eagle {
           # NOTE: We evaluated another test file.
           #
           incr count
+
+          #
+          # NOTE: In terms of files, not tests, what percent done are we now?
+          #
+          set percent [formatDecimal \
+              [expr {100.0 * ($count / double($total))}]]
+
+          if {$percent != $lastPercent} then {
+            reportTestPercent $channel $percent
+            set lastPercent $percent
+          }
 
           #
           # NOTE: Record failed test count after this file.
@@ -885,6 +1030,23 @@ namespace eval ::Eagle {
             #
             reportTestStatistics $channel $fileName leaks
           }
+        } else {
+          #
+          # NOTE: This file does not actually count towards the total (i.e.
+          #       it contains no actual tests).
+          #
+          incr total -1
+        }
+
+        #
+        # NOTE: In terms of files, not tests, what percent done are we now?
+        #
+        set percent [formatDecimal \
+            [expr {100.0 * ($count / double($total))}]]
+
+        if {$percent != $lastPercent} then {
+          reportTestPercent $channel $percent
+          set lastPercent $percent
         }
 
         #
@@ -895,18 +1057,40 @@ namespace eval ::Eagle {
         if {$stop} then {
           break
         }
+      } else {
+        #
+        # NOTE: This file does not actually count towards the total (i.e.
+        #       it is part of the test suite infrastructure).
+        #
+        incr total -1
+      }
+
+      #
+      # NOTE: In terms of files, not tests, what percent done are we now?
+      #
+      set percent [formatDecimal \
+          [expr {100.0 * ($count / double($total))}]]
+
+      if {$percent != $lastPercent} then {
+        reportTestPercent $channel $percent
+        set lastPercent $percent
       }
     }
 
-    tputs $::test_channel [appendArgs "---- sourced " \
-        $count " test " [expr {$count > 1 ? "files" : "file"}] \n]
+    #
+    # NOTE: Reset the host title because we may have changed it in the for
+    #       loop (above).
+    #
+    clearTestPercent $channel
+
+    tputs $channel [appendArgs "---- sourced " $count " test " \
+        [expr {$count > 1 ? "files" : "file"}] \n]
 
     #
     # NOTE: Show the files that had failing tests.
     #
     if {[llength $failed] > 0} then {
-      tputs $::test_channel [appendArgs "---- files with failing tests: " \
-          $failed \n]
+      tputs $channel [appendArgs "---- files with failing tests: " $failed \n]
     }
   }
 
@@ -991,6 +1175,11 @@ namespace eval ::Eagle {
         } else {
           set eagle_tests(skipNames) [list]; # default to skipping no tests.
         }
+
+        #
+        # NOTE: What tests have been skipped, if any?
+        #
+        set eagle_tests(skippedNames) [list]
 
         #
         # NOTE: What tests have failed, if any?
@@ -1166,6 +1355,31 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getGarudaDll {} {
+      #
+      # NOTE: Get the Garuda DLL of the same platform (i.e. machine type)
+      #       as the native Tcl shell.
+      #
+      if {[info exists ::base_path] && \
+          [info exists ::eagle_platform(configuration)]} then {
+        #
+        # NOTE: Build the full path and file name of the Garuda DLL, using
+        #       the Eagle base path.  Currently, this will only work
+        #       correctly if the test suite is being run from inside the
+        #       source tree.
+        #
+        return [file join $::base_path bin \
+            [machineToPlatform [getMachineForTclShell]] [appendArgs \
+            $::eagle_platform(configuration) Dll] [appendArgs Garuda \
+            [info sharedlibextension]]]
+      } else {
+        #
+        # NOTE: We are missing necessary global variables, return nothing.
+        #
+        return ""
+      }
+    }
+
     proc cleanupExcel {} {
       #
       # TODO: These may need to be changed in later Excel versions.
@@ -1321,7 +1535,8 @@ namespace eval ::Eagle {
         getConstraints getTestFiles getTestRunId execTestShell runTestPrologue \
         runTestEpilogue runTest runAllTests fixConstraints sourceIfValid \
         isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
-        tputs formatList configureTcltest] false false
+        tputs formatDecimal formatList configureTcltest tsource testShim] \
+        false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
