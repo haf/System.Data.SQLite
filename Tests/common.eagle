@@ -13,7 +13,11 @@ if {[isEagle]} then {
     # NOTE: See if the "year" setting has been overridden by the user (e.g. on
     #       the command line).  This controls which binaries we are testing,
     #       those produced by either the Visual Studio 2008 or Visual Studio
-    #       2010 build systems.
+    #       2010 build systems.  To override this value via the command line,
+    #       enter a command similar to the following (all on one line):
+    #
+    #       EagleShell.exe -preInitialize "set test_year 2008"
+    #         -file .\path\to\all.eagle
     #
     if {[info exists ::test_year] && [string length $::test_year] > 0} then {
       return $::test_year
@@ -55,6 +59,13 @@ if {[isEagle]} then {
   }
 
   proc getBinaryDirectory {} {
+    #
+    # NOTE: This procedure returns the directory where the test application
+    #       itself (i.e. the Eagle shell) is located.  This will be used as
+    #       the destination for the copied System.Data.SQLite native and
+    #       managed assemblies (i.e. because this is one of the few places
+    #       where the CLR will actually find and load them properly).
+    #
     return [info binary]
   }
 
@@ -198,31 +209,74 @@ if {[isEagle]} then {
   }
 
   proc setupDb {fileName {mode ""} {delete ""} {extra ""} {varName db}} {
-    set fileName [file join [getTemporaryPath] $fileName]
+    #
+    # NOTE: For now, all test databases used by the test suite are placed into
+    #       the temporary directory.  Each database used by a test should be
+    #       cleaned up by that test using the "cleanupDb" procedure, below.
+    #
+    set fileName [file join [getTemporaryPath] [file tail $fileName]]
 
+    #
+    # NOTE: By default, delete any pre-existing database with the same file
+    #       name.
+    #
     if {[string length $delete] == 0 || $delete} then {
       catch {file delete $fileName}
     }
 
+    #
+    # NOTE: Refer to the specified variable (e.g. "db") in the context of the
+    #       caller.  The handle to the opened database will be stored there.
+    #
     upvar 1 $varName db
 
+    #
+    # NOTE: Start building the connection string.  The only required portion
+    #       of the connection string is the database file name itself.
+    #
     set connection {Data Source=${fileName}}
 
+    #
+    # NOTE: If the caller specified a journal mode, add the necessary portion
+    #       of the connection string now.
+    #
     if {[string length $mode] > 0} then {
       append connection {;Journal Mode=${mode}}
     }
 
+    #
+    # NOTE: If the caller specified an extra payload to the connection string,
+    #       append it now.
+    #
     if {[string length $extra] > 0} then {
       append connection \; $extra
     }
 
+    #
+    # NOTE: Open the database connection now, placing the opaque handle value
+    #       into the variable specified by the caller.
+    #
     set db [sql open -type SQLite [subst $connection]]
   }
 
   proc cleanupDb {fileName {varName db}} {
+    #
+    # NOTE: Refer to the specified variable (e.g. "db") in the context of the
+    #       caller.  The handle to the opened database is stored there.
+    #
     upvar 1 $varName db
+
+    #
+    # NOTE: Close the connection to the database now.  This should allow us to
+    #       delete the underlying database file.
+    #
     catch {sql close $db}
-    catch {file delete [file join [getTemporaryPath] $fileName]}
+
+    #
+    # NOTE: Delete the test database file now.  For now, all test database
+    #       files are stored in the temporary directory.
+    #
+    catch {file delete [file join [getTemporaryPath] [file tail $fileName]]}
   }
 
   proc runSQLiteTestPrologue {} {
