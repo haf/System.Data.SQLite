@@ -115,6 +115,7 @@
       <li>&lt;root&gt;\test\app.config</li>
       <li>&lt;root&gt;\testlinq\2008\App.config</li>
       <li>&lt;root&gt;\testlinq\2010\App.config</li>
+      <li>&lt;root&gt;\SQLite.Designer\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops</li>
       <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props</li>
       <li>&lt;root&gt;\SQLite.Interop\src\win\interop.h</li>
