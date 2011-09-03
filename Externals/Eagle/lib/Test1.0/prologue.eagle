@@ -298,7 +298,8 @@ if {![info exists no([file tail [info script]])]} then {
       $test_channel \n]
 
   tputs $test_channel [appendArgs "---- test configuration: " \
-      $test_configuration \n]
+      [expr {[info exists test_configuration] ? \
+          $test_configuration : "<none>"}] \n]
 
   if {[isEagle]} then {
     tputs $test_channel [appendArgs "---- original command line: " \

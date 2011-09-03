@@ -14,24 +14,76 @@ if {[isEagle]} then {
     #       the command line).  This controls which binaries we are testing,
     #       those produced by either the Visual Studio 2008 or Visual Studio
     #       2010 build systems.  To override this value via the command line,
-    #       enter a command similar to the following (all on one line):
+    #       enter a command similar to one of the following (all on one line):
     #
     #       EagleShell.exe -preInitialize "set test_year 2008"
     #         -file .\path\to\all.eagle
     #
+    #       EagleShell.exe -preInitialize "set test_year 2010"
+    #         -file .\path\to\all.eagle
+    #
+    #       EagleShell.exe -preInitialize "unset -nocomplain test_year"
+    #         -file .\path\to\all.eagle
+    #
     if {[info exists ::test_year] && [string length $::test_year] > 0} then {
+      #
+      # NOTE: Use the specified test year.  If this variable is not set, the
+      #       default value will be based on whether or not Eagle has been
+      #       compiled against the .NET Framework 2.0 or 4.0.
+      #
       return $::test_year
     } else {
+      #
+      # NOTE: If Eagle has been compiled against the .NET Framework 4.0, use
+      #       "2010" as the test year; otherwise, use "2008".  If another major
+      #       [incompatible] version of the .NET Framework is released, this
+      #       check will have to be changed.
+      #
       return [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}]
+    }
+  }
+
+  proc getBuildConfiguration {} {
+    #
+    # NOTE: See if the "configuration" setting has been overridden by the user
+    #       (e.g. on the command line).  This controls which binaries we are
+    #       testing, those produced with the Debug or Release build types.  To
+    #       override this value via the command line, enter a command similar
+    #       to one of the following (all on one line):
+    #
+    #       EagleShell.exe -preInitialize "set test_configuration Debug"
+    #         -file .\path\to\all.eagle
+    #
+    #       EagleShell.exe -preInitialize "set test_configuration Release"
+    #         -file .\path\to\all.eagle
+    #
+    #       EagleShell.exe -file .\path\to\all.eagle -preTest
+    #         "unset -nocomplain test_configuration"
+    #
+    if {[info exists ::test_configuration] && \
+        [string length $::test_configuration] > 0} then {
+      #
+      # NOTE: Use the specified test configuration.  The default value used
+      #       for this variable is "Release", as set by the test suite itself.
+      #
+      return $::test_configuration
+    } else {
+      #
+      # NOTE: Normally, we will never hit this case because the value of the
+      #       test configuration variable is always set by the test suite
+      #       itself; however, it can be overridden using the unset command
+      #       from the -preTest option to the test suite.
+      #
+      return $::eagle_platform(configuration)
     }
   }
 
   proc getBuildDirectory {} {
     #
     # NOTE: See if the "native" runtime option has been added.  If so, use the
-    #       directory for the mixed-mode assembly.  To enable this option via
-    #       the command line, enter a command similar to the following (all on
-    #       one line):
+    #       directory for the mixed-mode assembly (a.k.a. the native interop
+    #       assembly).  To enable this option via the command line, enter a
+    #       command similar to one of the following (all on one line):
     #
     #       EagleShell.exe -initialize -runtimeOption native
     #         -file .\path\to\all.eagle
@@ -46,10 +98,10 @@ if {[isEagle]} then {
     #
     if {[hasRuntimeOption native]} then {
       return [file join [file dirname $::path] bin [getBuildYear] \
-          [machineToPlatform $::tcl_platform(machine)] $::test_configuration]
+          [machineToPlatform $::tcl_platform(machine)] [getBuildConfiguration]]
     } else {
       return [file join [file dirname $::path] bin [getBuildYear] \
-          $::test_configuration bin]
+          [getBuildConfiguration] bin]
     }
   }
 
