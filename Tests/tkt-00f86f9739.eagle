@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# tkt-8b7d179c3c.eagle --
+# tkt-00f86f9739.eagle --
 #
 # Written by Joe Mistachkin.
 # Released to the public domain, use at your own risk!
@@ -41,14 +41,14 @@ if {![haveConstraint file_[file tail $northwindEfDbFile]]} then {
 
 ###############################################################################
 
-runTest {test tkt-8b7d179c3c-1.1 {LINQ with Skip and Take} -body {
+runTest {test tkt-00f86f9739-1.1 {LINQ with StartsWith} -body {
   set result [list]
 
-  for {set pageSize 0} {$pageSize <= 2} {incr pageSize} {
+  foreach value [list "" a b z 1+1 don notthere] {
     set code [catch {
       testExec $testLinqExeFile [list -eventflags Wait -directory \
       [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
-      -success 0] -skip $pageSize
+      -success 0] -startsWith $value
     } error]
 
     tlog "---- BEGIN STDOUT OUTPUT\n"
@@ -66,23 +66,10 @@ runTest {test tkt-8b7d179c3c-1.1 {LINQ with Skip and Take} -body {
 
   set result
 } -cleanup {
-  unset -nocomplain code output error result pageSize
+  unset -nocomplain code output error result value
 } -constraints {eagle file_testlinq.exe file_northwindEF.db} -result \
-{0 {} 0 {DRACD RATTC OLDWO GALED LILAS MAGAA ALFKI CHOPS SAVEA KOENE MAISD\
-FOLKO CACTU OCEAN RANCH THECR GOURL GROSR SUPRD HUNGO ISLAT QUICK HUNGC GREAL\
-LEHMS RICSU ERNSH WILMK LINOD TRAIH SIMOB OTTIK SPLIR MORGK FOLIG FURIB PRINI\
-AROUT BSBEV CONSH EASTC NORTS SEVES BERGS VICTE BOLID FISSA ROMEY BLAUS BONAP\
-MEREP ANATR ANTON CENTC PERIC TORTU FRANK TOMSP DUMON FRANR WARTH PARIS SPECD\
-LONEP THEBI REGGC VINET WELLI HANAR QUEDE RICAR PICCO HILAA LETSS COMMI FAMIA\
-QUEEN TRADH WHITC GODOS SANTG BLONP WANDK FRANS LAMAI BOTTM LAUGB LACOR LAZYK\
-WOLZA VAFFE} 0 {DRACD RATTC OLDWO GALED LILAS MAGAA ALFKI CHOPS SAVEA KOENE\
-MAISD FOLKO CACTU OCEAN RANCH THECR GOURL GROSR SUPRD HUNGO ISLAT QUICK HUNGC\
-GREAL LEHMS RICSU ERNSH WILMK LINOD TRAIH SIMOB OTTIK SPLIR MORGK FOLIG FURIB\
-PRINI AROUT BSBEV CONSH EASTC NORTS SEVES BERGS VICTE BOLID FISSA ROMEY BLAUS\
-BONAP MEREP ANATR ANTON CENTC PERIC TORTU FRANK TOMSP DUMON FRANR WARTH PARIS\
-SPECD LONEP THEBI REGGC VINET WELLI HANAR QUEDE RICAR PICCO HILAA LETSS COMMI\
-FAMIA QUEEN TRADH WHITC GODOS SANTG BLONP WANDK FRANS LAMAI BOTTM LAUGB LACOR\
-LAZYK WOLZA VAFFE}}}
+{0 {} 0 {DRACD OLDWO RATTC} 0 {ALFKI CACTU CHOPS FOLKO GALED KOENE LILAS MAGAA\
+MAISD OCEAN RANCH SAVEA THECR} 0 {} 0 {} 0 {} 0 {}}}
 
 ###############################################################################
 

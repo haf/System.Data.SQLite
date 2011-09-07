@@ -59,6 +59,34 @@ namespace testlinq
 
                       return SkipTest(pageSize);
                   }
+              case "endswith":
+                  {
+                      string value = null;
+
+                      if (args.Length > 1)
+                      {
+                          value = args[1];
+
+                          if (value != null)
+                              value = value.Trim();
+                      }
+
+                      return EndsWithTest(value);
+                  }
+              case "startswith":
+                  {
+                      string value = null;
+
+                      if (args.Length > 1)
+                      {
+                          value = args[1];
+
+                          if (value != null)
+                              value = value.Trim();
+                      }
+
+                      return StartsWithTest(value);
+                  }
               default:
                   {
                       Console.WriteLine("unknown test \"{0}\"", arg);
@@ -67,6 +95,9 @@ namespace testlinq
           }
       }
 
+      //
+      // NOTE: Used to test the fix for ticket [8b7d179c3c].
+      //
       private static int SkipTest(int pageSize)
       {
           using (northwindEFEntities db = new northwindEFEntities())
@@ -91,6 +122,60 @@ namespace testlinq
 
                       once = true;
                   }
+              }
+          }
+
+          return 0;
+      }
+
+      //
+      // NOTE: Used to test the fix for ticket [59edc1018b].
+      //
+      private static int EndsWithTest(string value)
+      {
+          using (northwindEFEntities db = new northwindEFEntities())
+          {
+              bool once = false;
+              var query = from c in db.Customers
+                          where c.City.EndsWith(value)
+                          orderby c.CustomerID
+                          select c;
+
+              foreach (Customers customers in query)
+              {
+                  if (once)
+                      Console.Write(' ');
+
+                  Console.Write(customers.CustomerID);
+
+                  once = true;
+              }
+          }
+
+          return 0;
+      }
+
+      //
+      // NOTE: Used to verify the behavior from ticket [00f86f9739].
+      //
+      private static int StartsWithTest(string value)
+      {
+          using (northwindEFEntities db = new northwindEFEntities())
+          {
+              bool once = false;
+              var query = from c in db.Customers
+                          where c.City.StartsWith(value)
+                          orderby c.CustomerID
+                          select c;
+
+              foreach (Customers customers in query)
+              {
+                  if (once)
+                      Console.Write(' ');
+
+                  Console.Write(customers.CustomerID);
+
+                  once = true;
               }
           }
 
