@@ -727,13 +727,15 @@ namespace System.Data.SQLite
     /// <param name="transaction">The distributed transaction to enlist in</param>
     public override void EnlistTransaction(System.Transactions.Transaction transaction)
     {
-      if (_transactionLevel > 0 && transaction != null)
-        throw new ArgumentException("Unable to enlist in transaction, a local transaction already exists");
-
       if (_enlistment != null && transaction == _enlistment._scope)
         return;
       else if (_enlistment != null)
         throw new ArgumentException("Already enlisted in a transaction");
+
+      if (_transactionLevel > 0 && transaction != null)
+        throw new ArgumentException("Unable to enlist in transaction, a local transaction already exists");
+      else if (transaction == null)
+        throw new ArgumentNullException("Unable to enlist in transaction, it is null");
 
       _enlistment = new SQLiteEnlistment(this, transaction);
     }

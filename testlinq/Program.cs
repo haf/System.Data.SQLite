@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Data.Objects;
 using System.Text;
+using System.Transactions;
 
 namespace testlinq
 {
@@ -86,6 +87,24 @@ namespace testlinq
                       }
 
                       return StartsWithTest(value);
+                  }
+              case "eftransaction":
+                  {
+                      bool value = false;
+
+                      if (args.Length > 1)
+                      {
+                          if (!bool.TryParse(args[1], out value))
+                          {
+                              Console.WriteLine(
+                                  "cannot parse \"{0}\" as boolean",
+                                  args[1]);
+
+                              return 1;
+                          }
+                      }
+
+                      return EFTransactionTest(value);
                   }
               default:
                   {
@@ -174,6 +193,115 @@ namespace testlinq
                       Console.Write(' ');
 
                   Console.Write(customers.CustomerID);
+
+                  once = true;
+              }
+          }
+
+          return 0;
+      }
+
+      //
+      // NOTE: Used to test the fix for ticket [ccfa69fc32].
+      //
+      private static int EFTransactionTest(bool add)
+      {
+          if (add)
+          {
+              using (northwindEFEntities db = new northwindEFEntities())
+              {
+                  using (TransactionScope scope = new TransactionScope())
+                  {
+                      //
+                      // NOTE: *REQUIRED* This is required so that the
+                      //       framework is prevented from using multiple
+                      //       connections to the underlying SQLite database
+                      //       (i.e. which would result in multiple IMMEDIATE
+                      //       transactions, thereby failing [later on] with
+                      //       locking errors).
+                      //
+                      db.Connection.Open();
+
+                      for (int index = 0; index < 5; index++)
+                      {
+                          int id = (index % 10) + 1;
+
+                          Territories territories = new Territories();
+
+                          territories.TerritoryID = id;
+                          territories.TerritoryDescription = String.Format(
+                              "Test #{0}", id);
+                          territories.Regions = db.Regions.First();
+
+                          db.AddObject("Territories", territories);
+                      }
+
+                      //
+                      // NOTE: These territories already exist and should cause
+                      //       an exception to be thrown when we try to INSERT
+                      //       them.
+                      //
+                      int[] territoryIds = new int[] {
+                          1581, 1730, 1833, 2116, 2139
+                      };
+
+                      foreach (int id in territoryIds)
+                      {
+                          Territories territories = new Territories();
+
+                          territories.TerritoryID = id;
+                          territories.TerritoryDescription = String.Format(
+                              "Test Territory #{0}", id);
+                          territories.Regions = db.Regions.First();
+
+                          db.AddObject("Territories", territories);
+                      }
+
+                      for (int index = 5; index < 10; index++)
+                      {
+                          int id = (index % 10) + 1;
+
+                          Territories territories = new Territories();
+
+                          territories.TerritoryID = id;
+                          territories.TerritoryDescription = String.Format(
+                              "Test Territory #{0}", id);
+                          territories.Regions = db.Regions.First();
+
+                          db.AddObject("Territories", territories);
+                      }
+
+                      try
+                      {
+                          db.SaveChanges(SaveOptions.None);
+                      }
+                      catch (Exception e)
+                      {
+                          Console.WriteLine(e);
+                      }
+                      finally
+                      {
+                          scope.Complete();
+                          db.AcceptAllChanges();
+                      }
+                  }
+              }
+          }
+
+          using (northwindEFEntities db = new northwindEFEntities())
+          {
+              bool once = false;
+              var query = from t in db.Territories
+                          where t.TerritoryID.CompareTo(11) < 0
+                          orderby t.TerritoryID
+                          select t;
+
+              foreach (Territories territories in query)
+              {
+                  if (once)
+                      Console.Write(' ');
+
+                  Console.Write(territories.TerritoryID);
 
                   once = true;
               }
