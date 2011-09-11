@@ -214,11 +214,11 @@ namespace testlinq
                   {
                       //
                       // NOTE: *REQUIRED* This is required so that the
-                      //       framework is prevented from using multiple
-                      //       connections to the underlying SQLite database
-                      //       (i.e. which would result in multiple IMMEDIATE
-                      //       transactions, thereby failing [later on] with
-                      //       locking errors).
+                      //       Entity Framework is prevented from opening
+                      //       multiple connections to the underlying SQLite
+                      //       database (i.e. which would result in multiple
+                      //       IMMEDIATE transactions, thereby failing [later
+                      //       on] with locking errors).
                       //
                       db.Connection.Open();
 
@@ -287,23 +287,25 @@ namespace testlinq
                   }
               }
           }
-
-          using (northwindEFEntities db = new northwindEFEntities())
+          else
           {
-              bool once = false;
-              var query = from t in db.Territories
-                          where t.TerritoryID.CompareTo(11) < 0
-                          orderby t.TerritoryID
-                          select t;
-
-              foreach (Territories territories in query)
+              using (northwindEFEntities db = new northwindEFEntities())
               {
-                  if (once)
-                      Console.Write(' ');
+                  bool once = false;
+                  var query = from t in db.Territories
+                              where t.TerritoryID.CompareTo(11) < 0
+                              orderby t.TerritoryID
+                              select t;
 
-                  Console.Write(territories.TerritoryID);
+                  foreach (Territories territories in query)
+                  {
+                      if (once)
+                          Console.Write(' ');
 
-                  once = true;
+                      Console.Write(territories.TerritoryID);
+
+                      once = true;
+                  }
               }
           }
 
