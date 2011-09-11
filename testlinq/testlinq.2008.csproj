@@ -72,6 +72,7 @@
   <ItemGroup>
     <Service Include="{C8F2D6AC-F9F4-4E40-A399-22F9A9A5CBD2}" />
   </ItemGroup>
+  <Import Project="$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.Properties.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

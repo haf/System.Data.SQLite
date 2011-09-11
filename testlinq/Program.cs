@@ -273,7 +273,11 @@ namespace testlinq
 
                       try
                       {
+#if NET_20
+                          db.SaveChanges(false);
+#else
                           db.SaveChanges(SaveOptions.None);
+#endif
                       }
                       catch (Exception e)
                       {
