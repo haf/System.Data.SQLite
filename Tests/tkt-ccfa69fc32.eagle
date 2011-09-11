@@ -66,7 +66,7 @@ runTest {test tkt-ccfa69fc32-1.1 {Entity Framework / Transaction Scope} -body {
 
   set result
 } -cleanup {
-  unset -nocomplain code output error result pageSize
+  unset -nocomplain code output error result add
 } -constraints {eagle file_testlinq.exe file_northwindEF.db} -match glob \
 -result {0 {} 0 {System.Data.UpdateException: * --->\
 System.Data.SQLite.SQLiteException: Abort due to constraint violation
