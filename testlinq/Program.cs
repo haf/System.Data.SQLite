@@ -206,6 +206,18 @@ namespace testlinq
       //
       private static int EFTransactionTest(bool add)
       {
+          //
+          // NOTE: Some of these territories already exist and should cause
+          //       an exception to be thrown when we try to INSERT them.
+          //
+          long[] territoryIds = new long[] {
+                 1,    2,    3,    4,    5, // NOTE: Success
+                 6,    7,    8,    9,   10, // NOTE: Success
+              1576, 1577, 1578, 1579, 1580, // NOTE: Success
+              1581, 1730, 1833, 2116, 2139, // NOTE: Fail (1581)
+              2140, 2141                    // NOTE: Skipped
+          };
+
           if (add)
           {
               using (northwindEFEntities db = new northwindEFEntities())
@@ -222,45 +234,8 @@ namespace testlinq
                       //
                       db.Connection.Open();
 
-                      for (int index = 0; index < 5; index++)
-                      {
-                          int id = (index % 10) + 1;
-
-                          Territories territories = new Territories();
-
-                          territories.TerritoryID = id;
-                          territories.TerritoryDescription = String.Format(
-                              "Test #{0}", id);
-                          territories.Regions = db.Regions.First();
-
-                          db.AddObject("Territories", territories);
-                      }
-
-                      //
-                      // NOTE: These territories already exist and should cause
-                      //       an exception to be thrown when we try to INSERT
-                      //       them.
-                      //
-                      int[] territoryIds = new int[] {
-                          1581, 1730, 1833, 2116, 2139
-                      };
-
                       foreach (int id in territoryIds)
                       {
-                          Territories territories = new Territories();
-
-                          territories.TerritoryID = id;
-                          territories.TerritoryDescription = String.Format(
-                              "Test Territory #{0}", id);
-                          territories.Regions = db.Regions.First();
-
-                          db.AddObject("Territories", territories);
-                      }
-
-                      for (int index = 5; index < 10; index++)
-                      {
-                          int id = (index % 10) + 1;
-
                           Territories territories = new Territories();
 
                           territories.TerritoryID = id;
@@ -297,9 +272,9 @@ namespace testlinq
               {
                   bool once = false;
                   var query = from t in db.Territories
-                              where t.TerritoryID.CompareTo(11) < 0
-                              orderby t.TerritoryID
-                              select t;
+                    where territoryIds.AsQueryable<long>().Contains<long>(t.TerritoryID)
+                    orderby t.TerritoryID
+                    select t;
 
                   foreach (Territories territories in query)
                   {
