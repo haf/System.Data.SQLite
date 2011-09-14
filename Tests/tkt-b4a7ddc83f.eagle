@@ -25,6 +25,10 @@ for {set i 1} {$i < 3} {incr i} {
     set appDomainId(1) [object invoke AppDomain.CurrentDomain Id]
     set fileName tkt-b4a7ddc83f-1.$i.db
 
+    if {[hasRuntimeOption native]} then {
+      object invoke Interpreter.GetActive AddRuntimeOption native
+    }
+
     set ::path {$::path}
     set ::test_year [getBuildYear]
     set ::test_configuration [getBuildConfiguration]
