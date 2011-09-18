@@ -665,7 +665,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns an empty string
+    /// Returns the string "main".
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -965,6 +965,24 @@ namespace System.Data.SQLite
         //  throw new InvalidOperationException();
 
         //return _sql.Version;
+      }
+    }
+
+    /// <summary>
+    /// Returns the number of rows changed by the last INSERT, UPDATE, or DELETE statement executed on
+    /// this connection.
+    /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
+    public int Changes
+    {
+      get
+      {
+        if (_sql == null)
+          throw new InvalidOperationException("Database connection not valid for getting number of changes.");
+
+        return _sql.Changes;
       }
     }
 
