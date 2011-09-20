@@ -25,6 +25,10 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract string Version { get; }
     /// <summary>
+    /// Returns the rowid of the most recent successful INSERT into the database from this connection.
+    /// </summary>
+    internal abstract long LastInsertRowId { get; }
+    /// <summary>
     /// Returns the number of changes the last executing insert/update caused.
     /// </summary>
     internal abstract int Changes { get; }

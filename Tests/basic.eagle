@@ -546,6 +546,98 @@ runTest {test basic-1.9 {properly closed database file (reader #2)} -setup {
 
 ###############################################################################
 
+runTest {test basic-1.10 {Changes property} -setup {
+  setupDb [set fileName basic-1.10.db]
+} -body {
+  set connection [object invoke -flags +NonPublic -objectflags +NoDispose \
+      Interpreter.GetActive.connections Item $db]
+
+  set result [list]
+
+  sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y, z);"
+
+  sql execute $db "INSERT INTO t1 (x, y, z) VALUES(1, 'foo', 1234);"
+  sql execute $db "INSERT INTO t1 (x, y, z) VALUES(2, 'bar', 5678);"
+  lappend result [object invoke $connection Changes]
+
+  sql execute $db "UPDATE t1 SET y = 'foobar';"
+  lappend result [object invoke $connection Changes]
+
+  sql execute -execute reader $db "SELECT x, y, z FROM t1;"
+  lappend result [object invoke $connection Changes]
+
+  foreach name [lsort [array names rows]] {
+    lappend result [list $name $rows($name)]
+  }
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain name rows result connection db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-result {1 2 2 {1 {{x 1} {y foobar} {z 1234}}} {2 {{x 2} {y foobar} {z 5678}}}\
+{count 2} {names {x y z}}}}
+
+###############################################################################
+
+runTest {test basic-1.11 {LastInsertRowId property} -setup {
+  setupDb [set fileName basic-1.11.db]
+} -body {
+  set connection [object invoke -flags +NonPublic -objectflags +NoDispose \
+      Interpreter.GetActive.connections Item $db]
+
+  set result [list]
+
+  sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y, z);"
+
+  sql execute $db "CREATE TABLE t2(x INTEGER PRIMARY KEY AUTOINCREMENT, y, z);"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  sql execute $db "INSERT INTO t1 (x, y, z) VALUES(1, 'foo', 1234);"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  sql execute $db "INSERT INTO t1 (x, y, z) VALUES(2, 'bar', 5678);"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  sql execute $db "UPDATE t1 SET y = 'foobar';"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  sql execute $db "INSERT INTO t2 (y, z) VALUES('foo', 1234);"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  sql execute $db "INSERT INTO t2 (y, z) VALUES('bar', 5678);"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  sql execute $db "UPDATE t2 SET y = 'foobar';"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  sql execute -execute reader $db "SELECT x, y, z FROM t1;"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  foreach name [lsort [array names rows]] {
+    lappend result [list $name $rows($name)]
+  }
+
+  sql execute -execute reader $db "SELECT x, y, z FROM t2;"
+  lappend result [object invoke $connection LastInsertRowId]
+
+  foreach name [lsort [array names rows]] {
+    lappend result [list $name $rows($name)]
+  }
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain name rows result connection db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-result {0 1 2 2 1 2 2 2 {1 {{x 1} {y foobar} {z 1234}}} {2 {{x 2} {y foobar}\
+{z 5678}}} {count 2} {names {x y z}} 2 {1 {{x 1} {y foobar} {z 1234}}} {2 {{x\
+2} {y foobar} {z 5678}}} {count 2} {names {x y z}}}}
+
+###############################################################################
+
 unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################

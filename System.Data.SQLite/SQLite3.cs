@@ -100,6 +100,14 @@ namespace System.Data.SQLite
       }
     }
 
+    internal override long LastInsertRowId
+    {
+      get
+      {
+        return UnsafeNativeMethods.sqlite3_last_insert_rowid(_sql);
+      }
+    }
+
     internal override int Changes
     {
       get

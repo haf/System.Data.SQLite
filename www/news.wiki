@@ -6,8 +6,10 @@
     <b>1.0.75.0 - September XX, 2011</b>
 </p>
 <ul>
+    <li>Updated to SQLite 3.7.8 <a href="http://www.sqlite.org/src/info/3e0da808d2">[3e0da808d2]</a>.</li>
     <li>More enhancements to the build system.</li>
     <li>Add official <a href="http://www.nuget.org/">NuGet</a> package.</li>
+    <li>Add Changes and LastInsertRowId properties to the connection class.</li>
     <li>Make all the assembly versioning attributes consistent.</li>
     <li>Add unit testing infrastructure using <a href="http://eagle.to/">Eagle</a>.</li>
     <li>Integrate all legacy unit tests, including the &quot;testlinq&quot; project, into the new test suite.</li>

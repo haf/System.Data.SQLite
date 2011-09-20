@@ -186,6 +186,20 @@ namespace test
 
     private void closeButton_Click(object sender, EventArgs e)
     {
+      if (_autoRun)
+      {
+        try
+        {
+          Console.Write("canceled...");
+        }
+        catch
+        {
+          // do nothing, ignored.
+        }
+
+        Environment.Exit(2);
+      }
+
       Close();
     }
   }

@@ -969,6 +969,23 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns the rowid of the most recent successful INSERT into the database from this connection.
+    /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
+    public long LastInsertRowId
+    {
+      get
+      {
+        if (_sql == null)
+          throw new InvalidOperationException("Database connection not valid for getting last insert rowid.");
+
+        return _sql.LastInsertRowId;
+      }
+    }
+
+    /// <summary>
     /// Returns the number of rows changed by the last INSERT, UPDATE, or DELETE statement executed on
     /// this connection.
     /// </summary>
