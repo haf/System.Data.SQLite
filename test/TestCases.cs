@@ -1932,6 +1932,52 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       }
     }
 
+    [Test(Sequence = 98)]
+    internal void ScalarPreTest()
+    {
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        droptables.Add("SCALARTEST");
+
+        cmd.CommandText = "CREATE TABLE SCALARTEST(x INTEGER PRIMARY KEY, y)";
+        cmd.ExecuteNonQuery();
+
+        for (int i = 1; i <= 1000; i++)
+        {
+          DbParameter param1 = cmd.CreateParameter();
+
+          param1.ParameterName = "param1";
+          param1.DbType = DbType.Int32;
+          param1.Value = i;
+
+          DbParameter param2 = cmd.CreateParameter();
+
+          param2.ParameterName = "param2";
+          param2.DbType = DbType.Int32;
+          param2.Value = i;
+
+          cmd.CommandText =
+              "INSERT OR REPLACE INTO SCALARTEST(x, y) VALUES(?, ?)";
+
+          cmd.Parameters.Clear();
+          cmd.Parameters.Add(param1);
+          cmd.Parameters.Add(param2);
+
+          cmd.ExecuteNonQuery();
+        }
+      }
+    }
+
+    [Test(Sequence = 99)]
+    internal void ScalarTest()
+    {
+      using (DbCommand cmd = _cnn.CreateCommand())
+      {
+        cmd.CommandText = "SELECT x FROM SCALARTEST ORDER BY x";
+        cmd.ExecuteScalar();
+      }
+    }
+
     [Test(Sequence = 30)]
     internal void VerifyInsert()
     {
