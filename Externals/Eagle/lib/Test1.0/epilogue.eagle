@@ -23,8 +23,12 @@ if {![info exists no([file tail [info script]])]} then {
     #
     # NOTE: Show the current state of the memory.
     #
+    catch {debug memory} memory
+
     tputs $test_channel [appendArgs "---- ending memory: " \
-        [formatListAsDict [debug memory]] \n]
+        [formatListAsDict $memory] \n]
+
+    unset memory
 
     #
     # NOTE: Show the current state of the native stack.

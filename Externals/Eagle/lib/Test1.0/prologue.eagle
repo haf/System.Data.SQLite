@@ -259,8 +259,8 @@ if {![info exists no([file tail [info script]])]} then {
     # NOTE: Set the log to use for test output, if necessary.
     #
     if {![info exists test_log]} then {
-      set test_log [file join [getTemporaryPath] [file tail [info \
-          nameofexecutable]][getTestLogId].test.[pid].log]
+      set test_log [file join [getTemporaryPath] [appendArgs [file tail [info \
+          nameofexecutable]] [getTestLogId] .test. [pid] .log]]
     }
   }
 
@@ -302,6 +302,42 @@ if {![info exists no([file tail [info script]])]} then {
           $test_configuration : "<none>"}] \n]
 
   if {[isEagle]} then {
+    catch {info engine PublicKeyToken} publicKeyToken
+
+    if {[string length $publicKeyToken] == 0} then {
+      #
+      # NOTE: The Eagle core library is not strong name signed.  This is not an
+      #       error, per se; however, it may cause some tests to fail and it
+      #       should be reported to the user and noted in the test suite log
+      #       file.
+      #
+      tputs $test_channel [appendArgs \
+          "==== WARNING: running without any strong name signature...\n"]
+    } else {
+      #
+      # BUGBUG: Tcl 8.4 does not like this expression because it contains the
+      #         "ni" operator (and Tcl tries to compile it even though it will
+      #         only actually ever be evaluated in Eagle).
+      #
+      set expr {$publicKeyToken ni "29c6297630be05eb 1e22ec67879739a2"}
+
+      if {[expr $expr]} then {
+        #
+        # NOTE: The Eagle core library is strong name signed with a key that is
+        #       not official.  This is also not an error, per se; however, it
+        #       may cause some tests to fail and it should be reported to the
+        #       user and noted in the test suite log file.
+        #
+        tputs $test_channel [appendArgs \
+            "==== WARNING: running without official strong name signature: " \
+            $publicKeyToken \n]
+      }
+
+      unset expr
+    }
+
+    unset publicKeyToken
+
     tputs $test_channel [appendArgs "---- original command line: " \
         [info cmdline] \n]
 
@@ -322,10 +358,12 @@ if {![info exists no([file tail [info script]])]} then {
         $encoding \n]
 
     unset encoding
+    catch {debug memory} memory
 
     tputs $test_channel [appendArgs "---- starting memory: " \
-        [formatListAsDict [debug memory]] \n]
+        [formatListAsDict $memory] \n]
 
+    unset memory
     catch {debug stack true} stack
 
     tputs $test_channel [appendArgs "---- starting stack: " \

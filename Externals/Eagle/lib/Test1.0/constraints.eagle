@@ -286,7 +286,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Yes, it appears that it is available.
       #
-      addConstraint command.$name
+      addConstraint [appendArgs command. $name]
 
       tputs $channel yes\n
     } else {
@@ -303,9 +303,9 @@ namespace eval ::Eagle {
       # NOTE: Yes, it appears that it is available.
       #
       if {[string length $constraint] > 0} then {
-        addConstraint file_$constraint
+        addConstraint [appendArgs file_ $constraint]
       } else {
-        addConstraint file_[file tail $name]
+        addConstraint [appendArgs file_ [file tail $name]]
       }
 
       tputs $channel yes\n
@@ -324,9 +324,9 @@ namespace eval ::Eagle {
       #       specified].
       #
       if {[string length $constraint] > 0} then {
-        addConstraint file_$constraint
+        addConstraint [appendArgs file_ $constraint]
       } else {
-        addConstraint file_[file tail $name]
+        addConstraint [appendArgs file_ [file tail $name]]
       }
 
       tputs $channel yes\n
@@ -393,9 +393,9 @@ namespace eval ::Eagle {
             # NOTE: Yes, it appears that it is available in the PATH.
             #
             if {[string length $constraint] > 0} then {
-              addConstraint file_$constraint
+              addConstraint [appendArgs file_ $constraint]
             } else {
-              addConstraint file_[file tail $name]
+              addConstraint [appendArgs file_ [file tail $name]]
             }
 
             tputs $channel yes\n
@@ -616,7 +616,7 @@ namespace eval ::Eagle {
         #
         # NOTE: Yes, it appears that it is available.
         #
-        addConstraint network_$host
+        addConstraint [appendArgs network_ $host]
 
         tputs $channel [appendArgs "yes (" $response ")\n"]
       } else {
@@ -626,7 +626,7 @@ namespace eval ::Eagle {
       #
       # HACK: Running in Tcl, just assume we have network access.
       #
-      addConstraint network_$host
+      addConstraint [appendArgs network_ $host]
 
       tputs $channel yes\n
     }
@@ -752,7 +752,7 @@ namespace eval ::Eagle {
         # NOTE: Keep track of the specific image runtime version for usage in
         #       test constraints.
         #
-        addConstraint imageRuntime$version
+        addConstraint [appendArgs imageRuntime $version]
 
         tputs $channel [appendArgs $::eagle_platform(imageRuntimeVersion) \
             " " ( $dotVersion ) \n]
@@ -784,7 +784,7 @@ namespace eval ::Eagle {
               # NOTE: We are running on Mono.  Keep track of the specific
               #       version for usage in test constraints.
               #
-              addConstraint mono$version
+              addConstraint [appendArgs mono $version]
           }
 
           if {[string length $dotVersion] > 0 && \
@@ -867,7 +867,7 @@ namespace eval ::Eagle {
             # NOTE: We are running on the .NET Framework.  Keep track of the
             #       specific version for usage in test constraints.
             #
-            addConstraint dotNet$version
+            addConstraint [appendArgs dotNet $version]
           }
 
           #
@@ -908,7 +908,7 @@ namespace eval ::Eagle {
           #
           # NOTE: Yes, it matches.
           #
-          addConstraint $machine.${bits}bit
+          addConstraint [appendArgs $machine . $bits bit]
 
           set result yes
         } else {
@@ -942,7 +942,7 @@ namespace eval ::Eagle {
         #
         # NOTE: The culture information is present, use it and show it.
         #
-        addConstraint culture.[string map [list - _] $culture]
+        addConstraint [appendArgs culture. [string map [list - _] $culture]]
 
         tputs $channel [appendArgs $culture \n]
       } else {
@@ -979,7 +979,7 @@ namespace eval ::Eagle {
         #
         # NOTE: Yes, support for the compile option is present.
         #
-        addConstraint compile.$option
+        addConstraint [appendArgs compile. $option]
 
         tputs $channel yes\n
       } else {
@@ -997,7 +997,7 @@ namespace eval ::Eagle {
         #
         # NOTE: Yes, support for the runtime option is present.
         #
-        addConstraint runtime.$option
+        addConstraint [appendArgs runtime. $option]
 
         tputs $channel yes\n
       } else {
@@ -1159,9 +1159,9 @@ namespace eval ::Eagle {
         # NOTE: Yes, it appears that it is available.
         #
         if {[string length $constraint] > 0} then {
-          addConstraint member_$constraint
+          addConstraint [appendArgs member_ $constraint]
         } else {
-          addConstraint $object.[string trim $member *?]
+          addConstraint [appendArgs $object. [string trim $member *?]]
         }
 
         tputs $channel yes\n

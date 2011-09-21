@@ -177,7 +177,12 @@ namespace System.Data.SQLite
         case DbType.Date:
         case DbType.Time:
         case DbType.DateTime:
-          _sql.Bind_DateTime(this, index, Convert.ToDateTime(obj, CultureInfo.CurrentCulture));
+          //
+          // NOTE: The old method (commented below) does not honor the selected date format
+          //       for the connection.
+          // _sql.Bind_DateTime(this, index, Convert.ToDateTime(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_DateTime(this, index, (obj is string) ?
+              _sql.ToDateTime((string)obj) : Convert.ToDateTime(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Int64:
         case DbType.UInt64:

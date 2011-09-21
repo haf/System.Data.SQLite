@@ -19,6 +19,17 @@ namespace System.Data.SQLite
   public abstract class SQLiteConvert
   {
     /// <summary>
+    /// The value for the Unix epoch (e.g. January 1, 1970 at midnight, in UTC).
+    /// </summary>
+    private static readonly DateTime UnixEpoch =
+        new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+    /// <summary>
+    /// The format string for DateTime values when using the InvariantCulture or CurrentCulture formats.
+    /// </summary>
+    private const string FullFormat = "yyyy-MM-ddTHH:mm:ss.fffffffK";
+
+    /// <summary>
     /// An array of ISO8601 datetime formats we support conversion from
     /// </summary>
     private static string[] _datetimeFormats = new string[] {
@@ -143,7 +154,10 @@ namespace System.Data.SQLite
     ///   HH:mm:ss
     ///   THHmmss
     /// </remarks>
-    /// <param name="dateText">The string containing either a Tick value, a JulianDay double, or an ISO8601-format string</param>
+    /// <param name="dateText">The string containing either a long integer number of 100-nanosecond units since
+    /// System.DateTime.MinValue, a Julian day double, an integer number of seconds since the Unix epoch, a
+    /// culture-independent formatted date and time string, a formatted date and time string in the current
+    /// culture, or an ISO8601-format string.</param>
     /// <returns>A DateTime value</returns>
     public DateTime ToDateTime(string dateText)
     {
@@ -153,6 +167,12 @@ namespace System.Data.SQLite
           return new DateTime(Convert.ToInt64(dateText, CultureInfo.InvariantCulture));
         case SQLiteDateFormats.JulianDay:
           return ToDateTime(Convert.ToDouble(dateText, CultureInfo.InvariantCulture));
+        case SQLiteDateFormats.UnixEpoch:
+          return UnixEpoch.AddSeconds(Convert.ToInt32(dateText, CultureInfo.InvariantCulture));
+        case SQLiteDateFormats.InvariantCulture:
+          return DateTime.Parse(dateText, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None);
+        case SQLiteDateFormats.CurrentCulture:
+          return DateTime.Parse(dateText, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None);
         default:
           return DateTime.ParseExact(dateText, _datetimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None);
       }
@@ -182,7 +202,9 @@ namespace System.Data.SQLite
     /// Converts a DateTime to a string value, using the current DateTimeFormat specified for the connection when it was opened.
     /// </summary>
     /// <param name="dateValue">The DateTime value to convert</param>
-    /// <returns>Either a string consisting of the tick count for DateTimeFormat.Ticks, a JulianDay double, or a date/time in ISO8601 format.</returns>
+    /// <returns>Either a string containing the long integer number of 100-nanosecond units since System.DateTime.MinValue, a
+    /// Julian day double, an integer number of seconds since the Unix epoch, a culture-independent formatted date and time
+    /// string, a formatted date and time string in the current culture, or an ISO8601-format date/time string.</returns>
     public string ToString(DateTime dateValue)
     {
       switch (_datetimeFormat)
@@ -191,6 +213,12 @@ namespace System.Data.SQLite
           return dateValue.Ticks.ToString(CultureInfo.InvariantCulture);
         case SQLiteDateFormats.JulianDay:
           return ToJulianDay(dateValue).ToString(CultureInfo.InvariantCulture);
+        case SQLiteDateFormats.UnixEpoch:
+          return ((long)(dateValue.Subtract(UnixEpoch).Ticks / TimeSpan.TicksPerSecond)).ToString();
+        case SQLiteDateFormats.InvariantCulture:
+          return dateValue.ToString(FullFormat, CultureInfo.InvariantCulture);
+        case SQLiteDateFormats.CurrentCulture:
+          return dateValue.ToString(FullFormat, CultureInfo.CurrentCulture);
         default:
           return dateValue.ToString(_datetimeFormats[7], CultureInfo.InvariantCulture);
       }
@@ -666,6 +694,7 @@ namespace System.Data.SQLite
       new SQLiteTypeNames("CURRENCY", DbType.Decimal),
       new SQLiteTypeNames("TIME", DbType.DateTime),
       new SQLiteTypeNames("DATE", DbType.DateTime),
+      new SQLiteTypeNames("DATETIME", DbType.DateTime),
       new SQLiteTypeNames("SMALLDATE", DbType.DateTime),
       new SQLiteTypeNames("BLOB", DbType.Binary),
       new SQLiteTypeNames("BINARY", DbType.Binary),
@@ -749,6 +778,18 @@ namespace System.Data.SQLite
     /// JulianDay format, which is what SQLite uses internally
     /// </summary>
     JulianDay = 2,
+    /// <summary>
+    /// The whole number of seconds since the Unix epoch (January 1, 1970).
+    /// </summary>
+    UnixEpoch = 3,
+    /// <summary>
+    /// Any culture-independent string value that the .NET Framework can interpret as a valid DateTime.
+    /// </summary>
+    InvariantCulture = 4,
+    /// <summary>
+    /// Any string value that the .NET Framework can interpret as a valid DateTime using the current culture.
+    /// </summary>
+    CurrentCulture = 5,
     /// <summary>
     /// The default format for this provider.
     /// </summary>

@@ -118,7 +118,7 @@ runTest {test basic-1.3 {SELECT scalar/reader, CREATE, INSERT} -setup {
   sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y, z);"
   sql execute $db "INSERT INTO t1 (x, y, z) VALUES(1, 'foo', 1234);"
 
-  sql execute -execute reader $db "SELECT * FROM t1;"
+  sql execute -execute reader $db "SELECT x, y, z FROM t1;"
 
   foreach name [lsort [array names rows]] {
     lappend result [list $name $rows($name)]
@@ -566,7 +566,7 @@ runTest {test basic-1.10 {Changes property} -setup {
   sql execute -execute reader $db "SELECT x, y, z FROM t1;"
   lappend result [object invoke $connection Changes]
 
-  foreach name [lsort [array names rows]] {
+  foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
     lappend result [list $name $rows($name)]
   }
 
@@ -576,8 +576,7 @@ runTest {test basic-1.10 {Changes property} -setup {
 
   unset -nocomplain name rows result connection db fileName
 } -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
--result {1 2 2 {1 {{x 1} {y foobar} {z 1234}}} {2 {{x 2} {y foobar} {z 5678}}}\
-{count 2} {names {x y z}}}}
+-result {1 2 2 {1 {{x 1} {y foobar} {z 1234}}} {2 {{x 2} {y foobar} {z 5678}}}}}
 
 ###############################################################################
 
@@ -615,14 +614,14 @@ runTest {test basic-1.11 {LastInsertRowId property} -setup {
   sql execute -execute reader $db "SELECT x, y, z FROM t1;"
   lappend result [object invoke $connection LastInsertRowId]
 
-  foreach name [lsort [array names rows]] {
+  foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
     lappend result [list $name $rows($name)]
   }
 
   sql execute -execute reader $db "SELECT x, y, z FROM t2;"
   lappend result [object invoke $connection LastInsertRowId]
 
-  foreach name [lsort [array names rows]] {
+  foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
     lappend result [list $name $rows($name)]
   }
 
@@ -633,8 +632,185 @@ runTest {test basic-1.11 {LastInsertRowId property} -setup {
   unset -nocomplain name rows result connection db fileName
 } -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
 -result {0 1 2 2 1 2 2 2 {1 {{x 1} {y foobar} {z 1234}}} {2 {{x 2} {y foobar}\
-{z 5678}}} {count 2} {names {x y z}} 2 {1 {{x 1} {y foobar} {z 1234}}} {2 {{x\
-2} {y foobar} {z 5678}}} {count 2} {names {x y z}}}}
+{z 5678}}} 2 {1 {{x 1} {y foobar} {z 1234}}} {2 {{x 2} {y foobar} {z 5678}}}}}
+
+###############################################################################
+
+runTest {test basic-1.12 {DateTime using Unix epoch} -setup {
+  setupDb [set fileName basic-1.12.db] "" "" "DateTimeFormat=UnixEpoch;"
+} -body {
+  set result [list]
+
+  sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y DATETIME);"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(1, 1302825600);"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(2, 1334448000);"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(3, 1365984000);"
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(4, ?);" \
+      [list param1 Int32 1302825600]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(5, ?);" \
+      [list param1 Int32 1334448000]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(6, ?);" \
+      [list param1 Int32 1365984000]
+
+  sql execute -verbatim $db "INSERT INTO t1 (x, y) VALUES(7, ?);" \
+      [list param1 DateTime 1302825600]
+
+  sql execute -verbatim $db "INSERT INTO t1 (x, y) VALUES(8, ?);" \
+      [list param1 DateTime 1334448000]
+
+  sql execute -verbatim $db "INSERT INTO t1 (x, y) VALUES(9, ?);" \
+      [list param1 DateTime 1365984000]
+
+  sql execute -execute reader -datetimeformat "MM/dd/yyyy HH:mm:ss" $db \
+      "SELECT x, y FROM t1 ORDER BY x;"
+
+  foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
+    lappend result [list $name $rows($name)]
+  }
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain name rows result db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-result {{1 {{x 1} {y {04/15/2011 00:00:00}}}} {2 {{x 2} {y {04/15/2012\
+00:00:00}}}} {3 {{x 3} {y {04/15/2013 00:00:00}}}} {4 {{x 4} {y {04/15/2011\
+00:00:00}}}} {5 {{x 5} {y {04/15/2012 00:00:00}}}} {6 {{x 6} {y {04/15/2013\
+00:00:00}}}} {7 {{x 7} {y {04/15/2011 00:00:00}}}} {8 {{x 8} {y {04/15/2012\
+00:00:00}}}} {9 {{x 9} {y {04/15/2013 00:00:00}}}}}}
+
+###############################################################################
+
+set date [clock format [clock seconds] -format yyyy-MM-dd]
+
+###############################################################################
+
+runTest {test basic-1.13 {DateTime using invariant culture} -setup {
+  setupDb [set fileName basic-1.13.db] "" "" "DateTimeFormat=InvariantCulture;"
+} -body {
+  set result [list]
+
+  sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y DATETIME);"
+
+  sql execute $db \
+      "INSERT INTO t1 (x, y) VALUES(1, 'Wednesday, 16 December 2009');"
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(2, '12:00:00');"
+
+  sql execute $db \
+      "INSERT INTO t1 (x, y) VALUES(3, 'Wednesday, 16 December 2009 12:00:00');"
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(4, '12/16/2009');"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(5, '12:00');"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(6, '12/16/2009 12:00');"
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(7, ?);" \
+      [list param1 DateTime "Wednesday, 16 December 2009"]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(8, ?);" \
+      [list param1 DateTime 12:00:00]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(9, ?);" \
+      [list param1 DateTime "Wednesday, 16 December 2009 12:00:00"]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(10, ?);" \
+      [list param1 DateTime 12/16/2009]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(11, ?);" \
+      [list param1 DateTime 12:00]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(12, ?);" \
+      [list param1 DateTime "12/16/2009 12:00"]
+
+  sql execute -execute reader -datetimeformat "MM/dd/yyyy HH:mm:ss" $db \
+      "SELECT x, CAST(y AS TEXT) AS y2 FROM t1 ORDER BY x;"
+
+  foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
+    lappend result [list $name $rows($name)]
+  }
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain name rows result db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-result [subst {{1 {{x 1} {y2 {Wednesday, 16 December 2009}}}} {2 {{x 2} {y2\
+12:00:00}}} {3 {{x 3} {y2 {Wednesday, 16 December 2009 12:00:00}}}} {4 {{x 4}\
+{y2 12/16/2009}}} {5 {{x 5} {y2 12:00}}} {6 {{x 6} {y2 {12/16/2009 12:00}}}} {7\
+{{x 7} {y2 2009-12-16T00:00:00.0000000Z}}} {8 {{x 8} {y2\
+${date}T12:00:00.0000000Z}}} {9 {{x 9} {y2 2009-12-16T12:00:00.0000000Z}}}\
+{10 {{x 10} {y2 2009-12-16T00:00:00.0000000Z}}} {11 {{x 11} {y2\
+${date}T12:00:00.0000000Z}}} {12 {{x 12} {y2 2009-12-16T12:00:00.0000000Z}}}}]}
+
+###############################################################################
+
+runTest {test basic-1.14 {DateTime using current culture} -setup {
+  setupDb [set fileName basic-1.14.db] "" "" "DateTimeFormat=CurrentCulture;"
+} -body {
+  set result [list]
+
+  sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y DATETIME);"
+
+  sql execute $db \
+      "INSERT INTO t1 (x, y) VALUES(1, 'Wednesday, 16 December 2009');"
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(2, '12:00:00');"
+
+  sql execute $db \
+      "INSERT INTO t1 (x, y) VALUES(3, 'Wednesday, 16 December 2009 12:00:00');"
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(4, '12/16/2009');"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(5, '12:00');"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(6, '12/16/2009 12:00');"
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(7, ?);" \
+      [list param1 DateTime "Wednesday, 16 December 2009"]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(8, ?);" \
+      [list param1 DateTime 12:00:00]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(9, ?);" \
+      [list param1 DateTime "Wednesday, 16 December 2009 12:00:00"]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(10, ?);" \
+      [list param1 DateTime 12/16/2009]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(11, ?);" \
+      [list param1 DateTime 12:00]
+
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(12, ?);" \
+      [list param1 DateTime "12/16/2009 12:00"]
+
+  sql execute -execute reader -datetimeformat "MM/dd/yyyy HH:mm:ss" $db \
+      "SELECT x, CAST(y AS TEXT) AS y2 FROM t1 ORDER BY x;"
+
+  foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
+    lappend result [list $name $rows($name)]
+  }
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle culture.en_US monoBug28 command.sql compile.DATA System.Data.SQLite} \
+-result [subst {{1 {{x 1} {y2 {Wednesday, 16 December 2009}}}} {2 {{x 2} {y2\
+12:00:00}}} {3 {{x 3} {y2 {Wednesday, 16 December 2009 12:00:00}}}} {4 {{x 4}\
+{y2 12/16/2009}}} {5 {{x 5} {y2 12:00}}} {6 {{x 6} {y2 {12/16/2009 12:00}}}} {7\
+{{x 7} {y2 2009-12-16T00:00:00.0000000Z}}} {8 {{x 8} {y2\
+${date}T12:00:00.0000000Z}}} {9 {{x 9} {y2 2009-12-16T12:00:00.0000000Z}}}\
+{10 {{x 10} {y2 2009-12-16T00:00:00.0000000Z}}} {11 {{x 11} {y2\
+${date}T12:00:00.0000000Z}}} {12 {{x 12} {y2 2009-12-16T12:00:00.0000000Z}}}}]}
+
+###############################################################################
+
+unset -nocomplain date
 
 ###############################################################################
 

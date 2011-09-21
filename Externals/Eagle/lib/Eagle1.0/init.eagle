@@ -129,29 +129,27 @@ namespace eval ::Eagle {
 
   proc getDictionaryValue { dictionary name {default ""} {wrap ""} } {
     #
-    # NOTE: Start with the default value.
+    # NOTE: Locate the named value we are interested in.  The dictionary must
+    #       be a list with an even number of elements in the following format:
     #
-    set result $default
-
+    #       <name1> <value1> <name2> <value2> ... <nameN> <valueN>
     #
-    # NOTE: Locate the index of the named value we are interested in.
-    #
-    set index [lsearch -exact $dictionary $name]
-
-    #
-    # NOTE: Did we find the name in the row?
-    #
-    if {$index != -1} then {
+    foreach {pairName pairValue} $dictionary {
       #
-      # NOTE: The next element in the list will be the value.
+      # NOTE: Does this name match the one specified by the caller?
       #
-      incr index
-
-      #
-      # NOTE: Grab the value.
-      #
-      set result [appendArgs $wrap [lindex $dictionary $index] $wrap]
+      if {$pairName eq $name} then {
+        #
+        # NOTE: Return the value, optionally wrapped.
+        #
+        return [appendArgs $wrap $pairValue $wrap]
+      }
     }
+
+    #
+    # NOTE: Return the default value.
+    #
+    return $default
   }
 
   proc getColumnValue { row column {default ""} {wrap ""} } {

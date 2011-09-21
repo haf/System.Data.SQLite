@@ -457,7 +457,7 @@ namespace eval ::Eagle {
           #
           # NOTE: Either -nonewline or channelId has been specified.
           #
-          if {[string equal [lindex $args 0] -nonewline]} then {
+          if {[lindex $args 0] eq "-nonewline"} then {
             return [tputs $::test_channel [lindex $args end]]
           } else {
             set channel [lindex $args 0]
@@ -470,7 +470,7 @@ namespace eval ::Eagle {
           #       it's an error.  The -nonewline option is supposed to
           #       be argv[0].
           #
-          if {[string equal [lindex $args 0] -nonewline]} then {
+          if {[lindex $args 0] eq "-nonewline"} then {
             set channel [lindex $args 1]
             set newLine ""
           }
@@ -478,7 +478,7 @@ namespace eval ::Eagle {
       }
 
       if {[info exists channel]} then {
-        if {[string equal $channel stdout]} then {
+        if {$channel eq "stdout"} then {
           #
           # NOTE: Write output for stdout to the test channel.
           #
@@ -1360,8 +1360,31 @@ namespace eval ::Eagle {
       # NOTE: Get the Garuda DLL of the same platform (i.e. machine type)
       #       as the native Tcl shell.
       #
-      if {[info exists ::base_path] && \
-          [info exists ::eagle_platform(configuration)]} then {
+      if {[info exists ::base_path]} then {
+        #
+        # NOTE: If the test configuration is available, use it.  Failing that,
+        #       use the build configuration of Eagle itself.
+        #
+        if {[info exists ::test_configuration]} then {
+          #
+          # NOTE: Use the test configuration.  The default value is "Release",
+          #       as set by the test suite prologue; however, this may have
+          #       been overridden.
+          #
+          set configuration $::test_configuration
+        } elseif {[info exists ::eagle_platform(configuration)]} then {
+          #
+          # NOTE: Use the build configuration of Eagle itself.  This value will
+          #       always be "Debug" or "Release".
+          #
+          set configuration $::eagle_platform(configuration)
+        } else {
+          #
+          # NOTE: We are missing the configuration, return nothing.
+          #
+          return ""
+        }
+
         #
         # NOTE: Build the full path and file name of the Garuda DLL, using
         #       the Eagle base path.  Currently, this will only work
@@ -1370,11 +1393,10 @@ namespace eval ::Eagle {
         #
         return [file join $::base_path bin \
             [machineToPlatform [getMachineForTclShell]] [appendArgs \
-            $::eagle_platform(configuration) Dll] [appendArgs Garuda \
-            [info sharedlibextension]]]
+            $configuration Dll] [appendArgs Garuda [info sharedlibextension]]]
       } else {
         #
-        # NOTE: We are missing necessary global variables, return nothing.
+        # NOTE: We are missing the base path, return nothing.
         #
         return ""
       }
