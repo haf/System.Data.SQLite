@@ -10,6 +10,7 @@
     <li>More enhancements to the build system.</li>
     <li>Add official <a href="http://www.nuget.org/">NuGet</a> package.</li>
     <li>Add Changes and LastInsertRowId properties to the connection class.</li>
+    <li>Support more formats when converting data from/to the DateTime type.</li>
     <li>Make all the assembly versioning attributes consistent.</li>
     <li>Add unit testing infrastructure using <a href="http://eagle.to/">Eagle</a>.</li>
     <li>Integrate all legacy unit tests, including the &quot;testlinq&quot; project, into the new test suite.</li>
