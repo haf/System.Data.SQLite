@@ -12,6 +12,7 @@
     <tags>sqlite database ado.net provider interop</tags>
   </metadata>
   <files>
-    <file src="bin\2010\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib" />
+    <file src="bin\2008\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib\net20" />
+    <file src="bin\2010\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib\net40" />
   </files>
 </package>
