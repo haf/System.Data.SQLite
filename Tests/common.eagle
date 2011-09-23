@@ -210,7 +210,7 @@ if {[isEagle]} then {
     return ""
   }
 
-  proc enumerableToString { enumerable } {
+  proc enumerableToList { enumerable } {
     set result [list]
 
     if {[string length $enumerable] == 0 || $enumerable eq "null"} then {
