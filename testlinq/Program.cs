@@ -271,6 +271,28 @@ namespace testlinq
               using (northwindEFEntities db = new northwindEFEntities())
               {
                   bool once = false;
+#if NET_20
+                  //
+                  // HACK: We cannot use the Contains extension method within a
+                  //       LINQ query with the .NET Framework 3.5.
+                  //
+                  var query = from t in db.Territories
+                    orderby t.TerritoryID
+                    select t;
+
+                  foreach (Territories territories in query)
+                  {
+                      if (Array.IndexOf(territoryIds, territories.TerritoryID) == -1)
+                          continue;
+
+                      if (once)
+                          Console.Write(' ');
+
+                      Console.Write(territories.TerritoryID);
+
+                      once = true;
+                  }
+#else
                   var query = from t in db.Territories
                     where territoryIds.AsQueryable<long>().Contains<long>(t.TerritoryID)
                     orderby t.TerritoryID
@@ -285,6 +307,7 @@ namespace testlinq
 
                       once = true;
                   }
+#endif
               }
           }
 

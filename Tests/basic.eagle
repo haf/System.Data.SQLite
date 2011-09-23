@@ -797,7 +797,7 @@ runTest {test basic-1.14 {DateTime using current culture} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain db fileName
+  unset -nocomplain name rows result db fileName
 } -constraints \
 {eagle culture.en_US monoBug28 command.sql compile.DATA System.Data.SQLite} \
 -result [subst {{1 {{x 1} {y2 {Wednesday, 16 December 2009}}}} {2 {{x 2} {y2\
