@@ -711,7 +711,19 @@ namespace System.Data.SQLite
       SQLiteTypeNames value;
 
       if (_typeNames.TryGetValue(Name, out value))
+      {
         return value.dataType;
+      }
+      else
+      {
+        int index = Name.IndexOf('(');
+
+        if ((index > 0) &&
+            _typeNames.TryGetValue(Name.Substring(0, index), out value))
+        {
+          return value.dataType;
+        }
+      }
 
       return DbType.Object;
     }
