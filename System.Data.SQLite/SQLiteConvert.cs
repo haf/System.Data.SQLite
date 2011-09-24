@@ -653,62 +653,71 @@ namespace System.Data.SQLite
     {
       if (String.IsNullOrEmpty(Name)) return DbType.Object;
 
-      int x = _typeNames.Length;
-      for (int n = 0; n < x; n++)
+      if (_typeNames == null)
       {
-        if (String.Compare(Name, 0, _typeNames[n].typeName, 0, _typeNames[n].typeName.Length, StringComparison.OrdinalIgnoreCase) == 0)
-          return _typeNames[n].dataType; 
+        _typeNames = new Dictionary<string, SQLiteTypeNames>(new TypeNameStringComparer());
+
+        foreach (SQLiteTypeNames typeName in new SQLiteTypeNames[] {
+            new SQLiteTypeNames("COUNTER", DbType.Int64),
+            new SQLiteTypeNames("AUTOINCREMENT", DbType.Int64),
+            new SQLiteTypeNames("IDENTITY", DbType.Int64),
+            new SQLiteTypeNames("LONGTEXT", DbType.String),
+            new SQLiteTypeNames("LONGCHAR", DbType.String),
+            new SQLiteTypeNames("LONGVARCHAR", DbType.String),
+            new SQLiteTypeNames("LONG", DbType.Int64),
+            new SQLiteTypeNames("TINYINT", DbType.Byte),
+            new SQLiteTypeNames("INTEGER", DbType.Int64),
+            new SQLiteTypeNames("INT", DbType.Int32),
+            new SQLiteTypeNames("VARCHAR", DbType.String),
+            new SQLiteTypeNames("NVARCHAR", DbType.String),
+            new SQLiteTypeNames("CHAR", DbType.String),
+            new SQLiteTypeNames("NCHAR", DbType.String),
+            new SQLiteTypeNames("TEXT", DbType.String),
+            new SQLiteTypeNames("NTEXT", DbType.String),
+            new SQLiteTypeNames("STRING", DbType.String),
+            new SQLiteTypeNames("DOUBLE", DbType.Double),
+            new SQLiteTypeNames("FLOAT", DbType.Double),
+            new SQLiteTypeNames("REAL", DbType.Double),
+            new SQLiteTypeNames("BIT", DbType.Boolean),
+            new SQLiteTypeNames("YESNO", DbType.Boolean),
+            new SQLiteTypeNames("LOGICAL", DbType.Boolean),
+            new SQLiteTypeNames("BOOL", DbType.Boolean),
+            new SQLiteTypeNames("NUMERIC", DbType.Decimal),
+            new SQLiteTypeNames("DECIMAL", DbType.Decimal),
+            new SQLiteTypeNames("MONEY", DbType.Decimal),
+            new SQLiteTypeNames("CURRENCY", DbType.Decimal),
+            new SQLiteTypeNames("TIME", DbType.DateTime),
+            new SQLiteTypeNames("DATE", DbType.DateTime),
+            new SQLiteTypeNames("DATETIME", DbType.DateTime),
+            new SQLiteTypeNames("SMALLDATE", DbType.DateTime),
+            new SQLiteTypeNames("BLOB", DbType.Binary),
+            new SQLiteTypeNames("BINARY", DbType.Binary),
+            new SQLiteTypeNames("VARBINARY", DbType.Binary),
+            new SQLiteTypeNames("IMAGE", DbType.Binary),
+            new SQLiteTypeNames("GENERAL", DbType.Binary),
+            new SQLiteTypeNames("OLEOBJECT", DbType.Binary),
+            new SQLiteTypeNames("GUID", DbType.Guid),
+            new SQLiteTypeNames("UNIQUEIDENTIFIER", DbType.Guid),
+            new SQLiteTypeNames("MEMO", DbType.String),
+            new SQLiteTypeNames("NOTE", DbType.String),
+            new SQLiteTypeNames("SMALLINT", DbType.Int16),
+            new SQLiteTypeNames("BIGINT", DbType.Int64)
+          })
+          {
+            _typeNames.Add(typeName.typeName, typeName);
+          }
       }
+
+      SQLiteTypeNames value;
+
+      if (_typeNames.TryGetValue(Name, out value))
+        return value.dataType;
+
       return DbType.Object;
     }
     #endregion
 
-    private static SQLiteTypeNames[] _typeNames = {
-      new SQLiteTypeNames("COUNTER", DbType.Int64),
-      new SQLiteTypeNames("AUTOINCREMENT", DbType.Int64),
-      new SQLiteTypeNames("IDENTITY", DbType.Int64),
-      new SQLiteTypeNames("LONGTEXT", DbType.String),
-      new SQLiteTypeNames("LONGCHAR", DbType.String),
-      new SQLiteTypeNames("LONGVARCHAR", DbType.String),
-      new SQLiteTypeNames("LONG", DbType.Int64),
-      new SQLiteTypeNames("TINYINT", DbType.Byte),
-      new SQLiteTypeNames("INTEGER", DbType.Int64),
-      new SQLiteTypeNames("INT", DbType.Int32),
-      new SQLiteTypeNames("VARCHAR", DbType.String),
-      new SQLiteTypeNames("NVARCHAR", DbType.String),
-      new SQLiteTypeNames("CHAR", DbType.String),
-      new SQLiteTypeNames("NCHAR", DbType.String),
-      new SQLiteTypeNames("TEXT", DbType.String),
-      new SQLiteTypeNames("NTEXT", DbType.String),
-      new SQLiteTypeNames("STRING", DbType.String),
-      new SQLiteTypeNames("DOUBLE", DbType.Double),
-      new SQLiteTypeNames("FLOAT", DbType.Double),
-      new SQLiteTypeNames("REAL", DbType.Double),
-      new SQLiteTypeNames("BIT", DbType.Boolean),
-      new SQLiteTypeNames("YESNO", DbType.Boolean),
-      new SQLiteTypeNames("LOGICAL", DbType.Boolean),
-      new SQLiteTypeNames("BOOL", DbType.Boolean),
-      new SQLiteTypeNames("NUMERIC", DbType.Decimal),
-      new SQLiteTypeNames("DECIMAL", DbType.Decimal),
-      new SQLiteTypeNames("MONEY", DbType.Decimal),
-      new SQLiteTypeNames("CURRENCY", DbType.Decimal),
-      new SQLiteTypeNames("TIME", DbType.DateTime),
-      new SQLiteTypeNames("DATE", DbType.DateTime),
-      new SQLiteTypeNames("DATETIME", DbType.DateTime),
-      new SQLiteTypeNames("SMALLDATE", DbType.DateTime),
-      new SQLiteTypeNames("BLOB", DbType.Binary),
-      new SQLiteTypeNames("BINARY", DbType.Binary),
-      new SQLiteTypeNames("VARBINARY", DbType.Binary),
-      new SQLiteTypeNames("IMAGE", DbType.Binary),
-      new SQLiteTypeNames("GENERAL", DbType.Binary),
-      new SQLiteTypeNames("OLEOBJECT", DbType.Binary),
-      new SQLiteTypeNames("GUID", DbType.Guid),
-      new SQLiteTypeNames("UNIQUEIDENTIFIER", DbType.Guid),
-      new SQLiteTypeNames("MEMO", DbType.String),
-      new SQLiteTypeNames("NOTE", DbType.String),
-      new SQLiteTypeNames("SMALLINT", DbType.Int16),
-      new SQLiteTypeNames("BIGINT", DbType.Int64),
-    };
+    private static Dictionary<string, SQLiteTypeNames> _typeNames = null;
   }
 
   /// <summary>
@@ -870,5 +879,36 @@ namespace System.Data.SQLite
 
     internal string typeName;
     internal DbType dataType;
+  }
+
+  internal class TypeNameStringComparer : IEqualityComparer<string>
+  {
+    #region IEqualityComparer<string> Members
+    public bool Equals(
+      string left,
+      string right
+      )
+    {
+      return String.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    public int GetHashCode(
+      string value
+      )
+    {
+      //
+      // NOTE: The only thing that we must guarantee here, according
+      //       to the MSDN documentation for IEqualityComparer, is 
+      //       that for two given strings, if Equals return true then 
+      //       the two strings must hash to the same value.
+      //
+      if (value != null)
+        return value.ToLowerInvariant().GetHashCode();
+      else
+        throw new ArgumentNullException("value");
+    }
+    #endregion
   }
 }
