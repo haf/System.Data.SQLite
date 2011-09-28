@@ -7,385 +7,408 @@
 #
 ###############################################################################
 
-if {[isEagle]} then {
-  proc getBuildYear {} {
-    #
-    # NOTE: See if the "year" setting has been overridden by the user (e.g. on
-    #       the command line).  This helps control exactly which set of
-    #       binaries we are testing, those produced using either the Visual
-    #       Studio 2008 or Visual Studio 2010 build systems.  To override this
-    #       value via the command line, enter a command similar to one of the
-    #       following (all on one line):
-    #
-    #       EagleShell.exe -preInitialize "set test_year 2008"
-    #         -file .\path\to\all.eagle
-    #
-    #       EagleShell.exe -preInitialize "set test_year 2010"
-    #         -file .\path\to\all.eagle
-    #
-    #       EagleShell.exe -preInitialize "unset -nocomplain test_year"
-    #         -file .\path\to\all.eagle
-    #
-    if {[info exists ::test_year] && [string length $::test_year] > 0} then {
+#
+# NOTE: Use our own namespace here because even though we do not directly
+#       support namespaces ourselves, we do not want to pollute the global
+#       namespace if this script actually ends up being evaluated in Tcl.
+#
+namespace eval ::Eagle {
+  if {[isEagle]} then {
+    ###########################################################################
+    ############################ BEGIN Eagle ONLY #############################
+    ###########################################################################
+
+    proc getBuildYear {} {
       #
-      # NOTE: Use the specified test year.  If this variable is not set, the
-      #       default value will be based on whether or not Eagle has been
-      #       compiled against the .NET Framework 2.0 or 4.0.
+      # NOTE: See if the "year" setting has been overridden by the user (e.g. on
+      #       the command line).  This helps control exactly which set of
+      #       binaries we are testing, those produced using either the Visual
+      #       Studio 2008 or Visual Studio 2010 build systems.  To override this
+      #       value via the command line, enter a command similar to one of the
+      #       following (all on one line):
       #
-      return $::test_year
-    } else {
+      #       EagleShell.exe -preInitialize "set test_year 2008"
+      #         -file .\path\to\all.eagle
       #
-      # NOTE: If Eagle has been compiled against the .NET Framework 4.0, use
-      #       "2010" as the test year; otherwise, use "2008".  If another major
-      #       [incompatible] version of the .NET Framework is released, this
-      #       check will have to be changed.
+      #       EagleShell.exe -preInitialize "set test_year 2010"
+      #         -file .\path\to\all.eagle
       #
-      return [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}]
+      #       EagleShell.exe -preInitialize "unset -nocomplain test_year"
+      #         -file .\path\to\all.eagle
+      #
+      if {[info exists ::test_year] && [string length $::test_year] > 0} then {
+        #
+        # NOTE: Use the specified test year.  If this variable is not set, the
+        #       default value will be based on whether or not Eagle has been
+        #       compiled against the .NET Framework 2.0 or 4.0.
+        #
+        return $::test_year
+      } else {
+        #
+        # NOTE: If Eagle has been compiled against the .NET Framework 4.0, use
+        #       "2010" as the test year; otherwise, use "2008".  If another
+        #       major [incompatible] version of the .NET Framework is released,
+        #       this check will have to be changed.
+        #
+        return [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}]
+      }
     }
-  }
 
-  proc getBuildConfiguration {} {
-    #
-    # NOTE: See if the "configuration" setting has been overridden by the user
-    #       (e.g. on the command line).  This helps control exactly which set
-    #       of binaries we are testing (i.e. those built in the "Debug" or
-    #       "Release" build configurations).  To override this value via the
-    #       command line, enter a command similar to one of the following (all
-    #       on one line):
-    #
-    #       EagleShell.exe -preInitialize "set test_configuration Debug"
-    #         -file .\path\to\all.eagle
-    #
-    #       EagleShell.exe -preInitialize "set test_configuration Release"
-    #         -file .\path\to\all.eagle
-    #
-    #       EagleShell.exe -file .\path\to\all.eagle -preTest
-    #         "unset -nocomplain test_configuration"
-    #
-    if {[info exists ::test_configuration] && \
-        [string length $::test_configuration] > 0} then {
+    proc getBuildConfiguration {} {
       #
-      # NOTE: Use the specified test configuration.  The default value used
-      #       for this variable is "Release", as set by the test suite itself.
+      # NOTE: See if the "configuration" setting has been overridden by the user
+      #       (e.g. on the command line).  This helps control exactly which set
+      #       of binaries we are testing (i.e. those built in the "Debug" or
+      #       "Release" build configurations).  To override this value via the
+      #       command line, enter a command similar to one of the following (all
+      #       on one line):
       #
-      return $::test_configuration
-    } else {
+      #       EagleShell.exe -preInitialize "set test_configuration Debug"
+      #         -file .\path\to\all.eagle
       #
-      # NOTE: Normally, we will never hit this case because the value of the
-      #       test configuration variable is always set by the test suite
-      #       itself; however, it can be overridden using the unset command
-      #       from the -preTest option to the test suite.
+      #       EagleShell.exe -preInitialize "set test_configuration Release"
+      #         -file .\path\to\all.eagle
       #
-      return $::eagle_platform(configuration)
-    }
-  }
-
-  proc getBuildDirectory {} {
-    #
-    # NOTE: See if the "native" runtime option has been added.  If so, use the
-    #       directory for the mixed-mode assembly (a.k.a. the native interop
-    #       assembly).  To enable this option via the command line, enter a
-    #       command similar to one of the following (all on one line):
-    #
-    #       EagleShell.exe -initialize -runtimeOption native
-    #         -file .\path\to\all.eagle
-    #
-    #       To enable this option via the command line prior to the "beta 16"
-    #       release of Eagle, the following command must be used instead (also
-    #       all on one line):
-    #
-    #       EagleShell.exe -initialize -postInitialize
-    #         "object invoke Interpreter.GetActive AddRuntimeOption native"
-    #         -file .\path\to\all.eagle
-    #
-    if {[hasRuntimeOption native]} then {
-      return [file join [file dirname $::path] bin [getBuildYear] \
-          [machineToPlatform $::tcl_platform(machine)] [getBuildConfiguration]]
-    } else {
-      return [file join [file dirname $::path] bin [getBuildYear] \
-          [getBuildConfiguration] bin]
-    }
-  }
-
-  proc getBuildFileName { fileName } {
-    return [file nativename \
-        [file join [getBuildDirectory] [file tail $fileName]]]
-  }
-
-  proc getBinaryDirectory {} {
-    #
-    # NOTE: This procedure returns the directory where the test application
-    #       itself (i.e. the Eagle shell) is located.  This will be used as
-    #       the destination for the copied System.Data.SQLite native and
-    #       managed assemblies (i.e. because this is one of the few places
-    #       where the CLR will actually find and load them properly).
-    #
-    return [info binary]
-  }
-
-  proc getBinaryFileName { fileName } {
-    return [file nativename \
-        [file join [getBinaryDirectory] [file tail $fileName]]]
-  }
-
-  proc tryCopyBuildFile { fileName } {
-    #
-    # NOTE: If we cannot copy the assembly then it is probably already loaded.
-    #
-    set sourceFileName [getBuildFileName $fileName]
-
-    if {![file exists $sourceFileName]} then {
-      tputs $::test_channel [appendArgs \
-          "---- skipped copying build file \"" $sourceFileName \
-          "\", it does not exist\n"]
-
-      return
-    }
-
-    set targetFileName [getBinaryFileName $fileName]
-
-    if {[catch {file copy -force $sourceFileName $targetFileName}] == 0} then {
-      tputs $::test_channel [appendArgs \
-          "---- copied build file from \"" $sourceFileName "\" to \"" \
-          $targetFileName \"\n]
-    } else {
-      tputs $::test_channel [appendArgs \
-          "---- failed to copy build file from \"" $sourceFileName "\" to \"" \
-          $targetFileName \"\n]
-    }
-  }
-
-  proc tryDeleteBinaryFile { fileName } {
-    set fileName [getBinaryFileName $fileName]
-
-    if {![file exists $fileName]} then {
-      tputs $::test_channel [appendArgs \
-          "---- skipped deleting binary file \"" $fileName \
-          "\", it does not exist\n"]
-
-      return
-    }
-
-    if {[catch {file delete $fileName}] == 0} then {
-      tputs $::test_channel [appendArgs \
-          "---- deleted binary file \"" $fileName \"\n]
-    } else {
-      tputs $::test_channel [appendArgs \
-          "---- failed to delete binary file \"" $fileName \"\n]
-    }
-  }
-
-  proc tryCopyAssembly { fileName {pdb true} } {
-    tryCopyBuildFile $fileName
-
-    if {$pdb} then {
-      tryCopyBuildFile [appendArgs [file rootname $fileName] .pdb]
-    }
-  }
-
-  proc tryDeleteAssembly { fileName {pdb true} } {
-    tryDeleteBinaryFile $fileName
-
-    if {$pdb} then {
-      tryDeleteBinaryFile [appendArgs [file rootname $fileName] .pdb]
-    }
-  }
-
-  proc tryLoadAssembly { fileName } {
-    set fileName [getBuildFileName $fileName]
-
-    if {[catch {set assembly \
-        [object load -loadtype File $fileName]}] == 0} then {
+      #       EagleShell.exe -file .\path\to\all.eagle -preTest
+      #         "unset -nocomplain test_configuration"
       #
-      # NOTE: Now, add the necessary test constraint.
-      #
-      addConstraint [file rootname [file tail $fileName]]
-
-      #
-      # NOTE: Return the full path of the loaded file.
-      #
-      return $fileName
+      if {[info exists ::test_configuration] && \
+          [string length $::test_configuration] > 0} then {
+        #
+        # NOTE: Use the specified test configuration.  The default value used
+        #       for this variable is "Release", as set by the test suite itself.
+        #
+        return $::test_configuration
+      } else {
+        #
+        # NOTE: Normally, we will never hit this case because the value of the
+        #       test configuration variable is always set by the test suite
+        #       itself; however, it can be overridden using the unset command
+        #       from the -preTest option to the test suite.
+        #
+        return $::eagle_platform(configuration)
+      }
     }
-
-    return ""
-  }
 
-  proc enumerableToList { enumerable } {
-    set result [list]
+    proc getBuildDirectory {} {
+      #
+      # NOTE: See if the "native" runtime option has been added.  If so, use the
+      #       directory for the mixed-mode assembly (a.k.a. the native interop
+      #       assembly).  To enable this option via the command line, enter a
+      #       command similar to one of the following (all on one line):
+      #
+      #       EagleShell.exe -initialize -runtimeOption native
+      #         -file .\path\to\all.eagle
+      #
+      #       To enable this option via the command line prior to the "beta 16"
+      #       release of Eagle, the following command must be used instead
+      #       (also all on one line):
+      #
+      #       EagleShell.exe -initialize -postInitialize
+      #         "object invoke Interpreter.GetActive AddRuntimeOption native"
+      #         -file .\path\to\all.eagle
+      #
+      if {[hasRuntimeOption native]} then {
+        return [file join [file dirname $::path] bin [getBuildYear] \
+            [machineToPlatform $::tcl_platform(machine)] \
+            [getBuildConfiguration]]
+      } else {
+        return [file join [file dirname $::path] bin [getBuildYear] \
+            [getBuildConfiguration] bin]
+      }
+    }
+
+    proc getBuildFileName { fileName } {
+      return [file nativename \
+          [file join [getBuildDirectory] [file tail $fileName]]]
+    }
+
+    proc getBinaryDirectory {} {
+      #
+      # NOTE: This procedure returns the directory where the test application
+      #       itself (i.e. the Eagle shell) is located.  This will be used as
+      #       the destination for the copied System.Data.SQLite native and
+      #       managed assemblies (i.e. because this is one of the few places
+      #       where the CLR will actually find and load them properly).
+      #
+      return [info binary]
+    }
+
+    proc getBinaryFileName { fileName } {
+      return [file nativename \
+          [file join [getBinaryDirectory] [file tail $fileName]]]
+    }
+
+    proc tryCopyBuildFile { fileName } {
+      #
+      # NOTE: If we cannot copy the assembly then it is probably already loaded.
+      #
+      set sourceFileName [getBuildFileName $fileName]
 
-    if {[string length $enumerable] == 0 || $enumerable eq "null"} then {
+      if {![file exists $sourceFileName]} then {
+        tputs $::test_channel [appendArgs \
+            "---- skipped copying build file \"" $sourceFileName \
+            "\", it does not exist\n"]
+
+        return
+      }
+
+      set targetFileName [getBinaryFileName $fileName]
+
+      if {[catch {
+          file copy -force $sourceFileName $targetFileName}] == 0} then {
+        tputs $::test_channel [appendArgs \
+            "---- copied build file from \"" $sourceFileName "\" to \"" \
+            $targetFileName \"\n]
+      } else {
+        tputs $::test_channel [appendArgs \
+            "---- failed to copy build file from \"" $sourceFileName \
+            "\" to \"" $targetFileName \"\n]
+      }
+    }
+
+    proc tryDeleteBinaryFile { fileName } {
+      set fileName [getBinaryFileName $fileName]
+
+      if {![file exists $fileName]} then {
+        tputs $::test_channel [appendArgs \
+            "---- skipped deleting binary file \"" $fileName \
+            "\", it does not exist\n"]
+
+        return
+      }
+
+      if {[catch {file delete $fileName}] == 0} then {
+        tputs $::test_channel [appendArgs \
+            "---- deleted binary file \"" $fileName \"\n]
+      } else {
+        tputs $::test_channel [appendArgs \
+            "---- failed to delete binary file \"" $fileName \"\n]
+      }
+    }
+
+    proc tryCopyAssembly { fileName {pdb true} } {
+      tryCopyBuildFile $fileName
+
+      if {$pdb} then {
+        tryCopyBuildFile [appendArgs [file rootname $fileName] .pdb]
+      }
+    }
+
+    proc tryDeleteAssembly { fileName {pdb true} } {
+      tryDeleteBinaryFile $fileName
+
+      if {$pdb} then {
+        tryDeleteBinaryFile [appendArgs [file rootname $fileName] .pdb]
+      }
+    }
+
+    proc tryLoadAssembly { fileName } {
+      set fileName [getBuildFileName $fileName]
+
+      if {[catch {set assembly \
+          [object load -loadtype File $fileName]}] == 0} then {
+        #
+        # NOTE: Now, add the necessary test constraint.
+        #
+        addConstraint [file rootname [file tail $fileName]]
+
+        #
+        # NOTE: Return the full path of the loaded file.
+        #
+        return $fileName
+      }
+
+      return ""
+    }
+  
+    proc enumerableToList { enumerable } {
+      set result [list]
+
+      if {[string length $enumerable] == 0 || $enumerable eq "null"} then {
+        return $result
+      }
+
+      object foreach -alias item $enumerable {
+        if {[string length $item] > 0} then {
+          lappend result [$item ToString]
+        }
+      }
+
       return $result
     }
-
-    object foreach -alias item $enumerable {
-      if {[string length $item] > 0} then {
-        lappend result [$item ToString]
-      }
-    }
-
-    return $result
-  }
 
-  proc compileCSharpWith { text resultsVarName errorsVarName fileNames args } {
-    #
-    # NOTE: Create the base command to evaluate and add the property settings
-    #       that are almost always needed by our unit tests (i.e. the System
-    #       and System.Data assembly references).
-    #
-    set command [list compileCSharp $text results errors \
-        ReferencedAssemblies.Add System.dll ReferencedAssemblies.Add \
-        System.Data.dll ReferencedAssemblies.Add System.Xml.dll]
+    proc compileCSharpWith {
+            text resultsVarName errorsVarName fileNames args } {
+      #
+      # NOTE: Create the base command to evaluate and add the property settings
+      #       that are almost always needed by our unit tests (i.e. the System
+      #       and System.Data assembly references).
+      #
+      set command [list compileCSharp $text results errors \
+          ReferencedAssemblies.Add System.dll ReferencedAssemblies.Add \
+          System.Data.dll ReferencedAssemblies.Add System.Xml.dll]
 
-    #
-    # NOTE: Add all the provided file names as assembly references.
-    #
-    foreach fileName $fileNames {
-      lappend command ReferencedAssemblies.Add [getBuildFileName $fileName]
-    }
-
-    #
-    # NOTE: Add the extra arguments, if any, to the command to evaluate.
-    #
-    eval lappend command $args
-
-    #
-    # NOTE: Alias the compiler local results and errors variables to the
-    #       variable names provided by our caller.
-    #
-    upvar 1 $resultsVarName results
-    upvar 1 $errorsVarName errors
-
-    #
-    # NOTE: Evaluate the constructed [compileCSharp] command and return the
-    #       result.
-    #
-    eval $command
-  }
-
-  proc setupDb {fileName {mode ""} {delete ""} {extra ""} {varName db}} {
-    #
-    # NOTE: For now, all test databases used by the test suite are placed into
-    #       the temporary directory.  Each database used by a test should be
-    #       cleaned up by that test using the "cleanupDb" procedure, below.
-    #
-    set fileName [file join [getTemporaryPath] [file tail $fileName]]
-
-    #
-    # NOTE: By default, delete any pre-existing database with the same file
-    #       name.
-    #
-    if {[string length $delete] == 0 || $delete} then {
-      catch {file delete $fileName}
-    }
-
-    #
-    # NOTE: Refer to the specified variable (e.g. "db") in the context of the
-    #       caller.  The handle to the opened database will be stored there.
-    #
-    upvar 1 $varName db
-
-    #
-    # NOTE: Start building the connection string.  The only required portion
-    #       of the connection string is the database file name itself.
-    #
-    set connection {Data Source=${fileName}}
-
-    #
-    # NOTE: If the caller specified a journal mode, add the necessary portion
-    #       of the connection string now.
-    #
-    if {[string length $mode] > 0} then {
-      append connection {;Journal Mode=${mode}}
-    }
-
-    #
-    # NOTE: If the caller specified an extra payload to the connection string,
-    #       append it now.
-    #
-    if {[string length $extra] > 0} then {
-      append connection \; $extra
-    }
-
-    #
-    # NOTE: Open the database connection now, placing the opaque handle value
-    #       into the variable specified by the caller.
-    #
-    set db [sql open -type SQLite [subst $connection]]
-  }
-
-  proc cleanupDb {fileName {varName db}} {
-    #
-    # NOTE: Refer to the specified variable (e.g. "db") in the context of the
-    #       caller.  The handle to the opened database is stored there.
-    #
-    upvar 1 $varName db
-
-    #
-    # NOTE: Close the connection to the database now.  This should allow us to
-    #       delete the underlying database file.
-    #
-    catch {sql close $db}
-
-    #
-    # NOTE: Delete the test database file now.  For now, all test database
-    #       files are stored in the temporary directory.
-    #
-    catch {file delete [file join [getTemporaryPath] [file tail $fileName]]}
-  }
-
-  proc runSQLiteTestPrologue {} {
-    #
-    # NOTE: Skip running our custom prologue if the main one has been skipped.
-    #
-    if {![info exists ::no(prologue.eagle)]} then {
-      tryDeleteAssembly SQLite.Interop.dll
-      tryDeleteAssembly System.Data.SQLite.dll
-      tryDeleteAssembly System.Data.SQLite.Linq.dll
-
-      tryCopyAssembly SQLite.Interop.dll
-      tryCopyAssembly System.Data.SQLite.dll
-      tryCopyAssembly System.Data.SQLite.Linq.dll
-
-      tryLoadAssembly System.Data.SQLite.dll
-      tryLoadAssembly System.Data.SQLite.Linq.dll
-
-      catch {
-        tputs $::test_channel [appendArgs \
-            "---- file version of \"SQLite.Interop.dll\"... " \
-            [file version [getBinaryFileName SQLite.Interop.dll]] \n]
+      #
+      # NOTE: Add all the provided file names as assembly references.
+      #
+      foreach fileName $fileNames {
+        lappend command ReferencedAssemblies.Add [getBuildFileName $fileName]
       }
 
-      catch {
-        tputs $::test_channel [appendArgs \
-            "---- file version of \"System.Data.SQLite.dll\"... " \
-            [file version [getBinaryFileName System.Data.SQLite.dll]] \n]
+      #
+      # NOTE: Add the extra arguments, if any, to the command to evaluate.
+      #
+      eval lappend command $args
+
+      #
+      # NOTE: Alias the compiler local results and errors variables to the
+      #       variable names provided by our caller.
+      #
+      upvar 1 $resultsVarName results
+      upvar 1 $errorsVarName errors
+
+      #
+      # NOTE: Evaluate the constructed [compileCSharp] command and return the
+      #       result.
+      #
+      eval $command
+    }
+
+    proc setupDb {fileName {mode ""} {delete ""} {extra ""} {varName db}} {
+      #
+      # NOTE: For now, all test databases used by the test suite are placed into
+      #       the temporary directory.  Each database used by a test should be
+      #       cleaned up by that test using the "cleanupDb" procedure, below.
+      #
+      set fileName [file join [getTemporaryPath] [file tail $fileName]]
+
+      #
+      # NOTE: By default, delete any pre-existing database with the same file
+      #       name.
+      #
+      if {[string length $delete] == 0 || $delete} then {
+        catch {file delete $fileName}
       }
 
-      catch {
-        tputs $::test_channel [appendArgs \
-            "---- file version of \"System.Data.SQLite.Linq.dll\"... " \
-            [file version [getBinaryFileName System.Data.SQLite.Linq.dll]] \n]
+      #
+      # NOTE: Refer to the specified variable (e.g. "db") in the context of the
+      #       caller.  The handle to the opened database will be stored there.
+      #
+      upvar 1 $varName db
+
+      #
+      # NOTE: Start building the connection string.  The only required portion
+      #       of the connection string is the database file name itself.
+      #
+      set connection {Data Source=${fileName}}
+
+      #
+      # NOTE: If the caller specified a journal mode, add the necessary portion
+      #       of the connection string now.
+      #
+      if {[string length $mode] > 0} then {
+        append connection {;Journal Mode=${mode}}
       }
 
-      set assemblies [object invoke AppDomain.CurrentDomain GetAssemblies]
+      #
+      # NOTE: If the caller specified an extra payload to the connection string,
+      #       append it now.
+      #
+      if {[string length $extra] > 0} then {
+        append connection \; $extra
+      }
 
-      object foreach assembly $assemblies {
-        if {[string match \{System.Data.SQLite* $assembly]} then {
+      #
+      # NOTE: Open the database connection now, placing the opaque handle value
+      #       into the variable specified by the caller.
+      #
+      set db [sql open -type SQLite [subst $connection]]
+    }
+
+    proc cleanupDb {fileName {varName db}} {
+      #
+      # NOTE: Refer to the specified variable (e.g. "db") in the context of the
+      #       caller.  The handle to the opened database is stored there.
+      #
+      upvar 1 $varName db
+
+      #
+      # NOTE: Close the connection to the database now.  This should allow us to
+      #       delete the underlying database file.
+      #
+      catch {sql close $db}
+
+      #
+      # NOTE: Delete the test database file now.  For now, all test database
+      #       files are stored in the temporary directory.
+      #
+      catch {file delete [file join [getTemporaryPath] [file tail $fileName]]}
+    }
+
+    proc runSQLiteTestPrologue {} {
+      #
+      # NOTE: Skip running our custom prologue if the main one has been skipped.
+      #
+      if {![info exists ::no(prologue.eagle)]} then {
+        tryDeleteAssembly SQLite.Interop.dll
+        tryDeleteAssembly System.Data.SQLite.dll
+        tryDeleteAssembly System.Data.SQLite.Linq.dll
+
+        tryCopyAssembly SQLite.Interop.dll
+        tryCopyAssembly System.Data.SQLite.dll
+        tryCopyAssembly System.Data.SQLite.Linq.dll
+
+        tryLoadAssembly System.Data.SQLite.dll
+        tryLoadAssembly System.Data.SQLite.Linq.dll
+
+        catch {
           tputs $::test_channel [appendArgs \
-              "---- found assembly: " $assembly \n]
+              "---- file version of \"SQLite.Interop.dll\"... " \
+              [file version [getBinaryFileName SQLite.Interop.dll]] \n]
+        }
+
+        catch {
+          tputs $::test_channel [appendArgs \
+              "---- file version of \"System.Data.SQLite.dll\"... " \
+              [file version [getBinaryFileName System.Data.SQLite.dll]] \n]
+        }
+
+        catch {
+          tputs $::test_channel [appendArgs \
+              "---- file version of \"System.Data.SQLite.Linq.dll\"... " \
+              [file version [getBinaryFileName System.Data.SQLite.Linq.dll]] \n]
+        }
+
+        set assemblies [object invoke AppDomain.CurrentDomain GetAssemblies]
+
+        object foreach assembly $assemblies {
+          if {[string match \{System.Data.SQLite* $assembly]} then {
+            tputs $::test_channel [appendArgs \
+                "---- found assembly: " $assembly \n]
+          }
         }
       }
     }
-  }
 
-  proc runSQLiteTestEpilogue {} {
-    #
-    # NOTE: Skip running our custom epilogue if the main one has been skipped.
-    #
-    if {![info exists ::no(epilogue.eagle)]} then {
+    proc runSQLiteTestEpilogue {} {
       #
-      # NOTE: For now, nothing is done here.
+      # NOTE: Skip running our custom epilogue if the main one has been skipped.
       #
+      if {![info exists ::no(epilogue.eagle)]} then {
+        #
+        # NOTE: For now, nothing is done here.
+        #
+      }
     }
+
+    ###########################################################################
+    ############################# END Eagle ONLY ##############################
+    ###########################################################################
   }
+
+  #
+  # NOTE: Provide the System.Data.SQLite test package to the interpreter.
+  #
+  package provide System.Data.SQLite.Test 1.0
 }
