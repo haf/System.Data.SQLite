@@ -15,7 +15,7 @@ runTestPrologue
 
 ###############################################################################
 
-source [file join $path common.eagle]
+package require System.Data.SQLite.Test
 runSQLiteTestPrologue
 
 ###############################################################################

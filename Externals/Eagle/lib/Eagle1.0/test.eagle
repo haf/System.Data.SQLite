@@ -708,7 +708,7 @@ namespace eval ::Eagle {
     }
   }
 
-  proc formatList { list {columns 1} } {
+  proc formatList { list {default ""} {columns 1} } {
     set count 1
     set result ""
 
@@ -727,10 +727,10 @@ namespace eval ::Eagle {
       }
     }
 
-    return $result
+    return [expr {[string length $result] > 0 ? $result : $default}]
   }
 
-  proc formatListAsDict { list } {
+  proc formatListAsDict { list {default ""} } {
     set result ""
 
     foreach {name value} $list {
@@ -751,7 +751,7 @@ namespace eval ::Eagle {
       }
     }
 
-    return $result
+    return [expr {[string length $result] > 0 ? $result : $default}]
   }
 
   proc inverseLsearchGlob { noCase patterns element } {

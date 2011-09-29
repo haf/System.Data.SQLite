@@ -950,6 +950,21 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForQuiet { channel } {
+      tputs $channel "---- checking for quiet... "
+
+      if {[object invoke Interpreter.GetActive Quiet]} then {
+        #
+        # NOTE: Yes, quiet mode is enabled.
+        #
+        addConstraint quiet
+
+        tputs $channel yes\n
+      } else {
+        tputs $channel no\n
+      }
+    }
+
     proc checkForReferenceCountTracking { channel } {
       tputs $channel "---- checking for object reference count tracking... "
 

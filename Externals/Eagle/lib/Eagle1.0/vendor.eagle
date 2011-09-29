@@ -1,0 +1,110 @@
+###############################################################################
+#
+# vendor.eagle --
+#
+# Extensible Adaptable Generalized Logic Engine (Eagle)
+# Vendor Initialization File
+#
+# Copyright (c) 2007-2010 by Joe Mistachkin.  All rights reserved.
+#
+# See the file "license.terms" for information on usage and redistribution of
+# this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: $
+#
+###############################################################################
+
+#
+# STUB: This script file is a placeholder.  This file, when present, is always
+#       evaluated when an interpreter is initialized.  Vendors distributing
+#       Eagle can place custom application-specific, interpreter-specific
+#       initialization and/or customizations in here.  Additionally, this file
+#       may contain per-interpreter customizations required when porting to
+#       new platforms, operating systems, etc.
+#
+
+#
+# NOTE: Use our own namespace here because even though we do not directly
+#       support namespaces ourselves, we do not want to pollute the global
+#       namespace if this script actually ends up being evaluated in Tcl.
+#
+namespace eval ::Eagle {
+  if {[isEagle]} then {
+    #
+    # NOTE: This script library helper procedure helps to establish the link
+    #       between the System.Data.SQLite test package and Eagle.
+    #
+    proc addTestSuiteToAutoPath { channel quiet } {
+      #
+      # NOTE: Start with the directory containing this file.
+      #
+      set dir [file normalize [file dirname [info script]]]
+
+      #
+      # NOTE: Keep going until the directory name is empty OR is actually the
+      #       root of the associated volume.
+      #
+      while {[string length $dir] > 0 && \
+          [lsearch -exact -nocase -- [file volumes] $dir] == -1} {
+        #
+        # NOTE: Does this directory have the necessary sub-directory that
+        #       contains a package index file?
+        #
+        if {[file exists [file join $dir Tests]] && \
+            [file isdirectory [file join $dir Tests]] && \
+            [file exists [file join $dir Tests pkgIndex.eagle]] && \
+            [file isfile [file join $dir Tests pkgIndex.eagle]]} then {
+          #
+          # NOTE: Ok, show the directory we found.
+          #
+          set dir [file join $dir Tests]
+
+          #
+          # NOTE: If we have NOT been instructed to be quiet, report now.
+          #
+          if {!$quiet} then {
+            puts -nonewline $channel [appendArgs \
+                "Found vendor-specific test package directory \"" $dir \
+                "\", adding...\n"]
+          }
+
+          #
+          # NOTE: We found the necessary directory to add to the auto-path;
+          #       However, we cannot simply add it to the auto-path directly
+          #       because the auto-path is dynamically constructed after this
+          #       script is evaluated; therefore, set the Eagle library path
+          #       environment variable and force the appropriate internal path
+          #       list to be refreshed.
+          #
+          lappend ::env(EAGLELIBPATH) $dir
+          object invoke Utility RefreshAutoPathList
+
+          #
+          # NOTE: We are done, return success.
+          #
+          return true
+        }
+
+        #
+        # NOTE: Keep going up the directory tree...
+        #
+        set dir [file dirname $dir]
+      }
+
+      #
+      # NOTE: If we have NOT been instructed to be quiet, report now.
+      #
+      if {!$quiet} then {
+        puts -nonewline $channel \
+            "Could not find vendor-specific test package directory.\n"
+      }
+
+      #
+      # NOTE: Directory not found, return failure.
+      #
+      return false
+    }
+
+    addTestSuiteToAutoPath stdout false
+  }
+}
