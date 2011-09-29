@@ -204,7 +204,7 @@ namespace eval ::Eagle {
     }
 
     proc tryLoadAssembly { fileName } {
-      set fileName [getBuildFileName $fileName]
+      set fileName [getBinaryFileName $fileName]
 
       if {[catch {set assembly \
           [object load -loadtype File $fileName]}] == 0} then {
@@ -253,7 +253,7 @@ namespace eval ::Eagle {
       # NOTE: Add all the provided file names as assembly references.
       #
       foreach fileName $fileNames {
-        lappend command ReferencedAssemblies.Add [getBuildFileName $fileName]
+        lappend command ReferencedAssemblies.Add [getBinaryFileName $fileName]
       }
 
       #
