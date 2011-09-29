@@ -26,7 +26,7 @@ runTestPrologue
 #       they do not count as being "leaked" (i.e. the test framework has no way
 #       to know who procedures actually belong to).
 #
-source [file join $path common.eagle]
+package require System.Data.SQLite.Test
 runSQLiteTestPrologue
 
 ###############################################################################
