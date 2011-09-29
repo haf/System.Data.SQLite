@@ -351,16 +351,37 @@ namespace eval ::Eagle {
       # NOTE: Skip running our custom prologue if the main one has been skipped.
       #
       if {![info exists ::no(prologue.eagle)]} then {
-        tryDeleteAssembly SQLite.Interop.dll
-        tryDeleteAssembly System.Data.SQLite.dll
-        tryDeleteAssembly System.Data.SQLite.Linq.dll
+        #
+        # NOTE: Skip all System.Data.SQLite related file handling (deleting,
+        #       copying, and loading) if we are so instructed.
+        #
+        if {![info exists ::no(sqliteFiles)]} then {
+          #
+          # NOTE: Skip trying to delete any files if we are so instructed.
+          #
+          if {![info exists ::no(deleteSqliteFiles)]} then {
+            tryDeleteAssembly SQLite.Interop.dll
+            tryDeleteAssembly System.Data.SQLite.dll
+            tryDeleteAssembly System.Data.SQLite.Linq.dll
+          }
 
-        tryCopyAssembly SQLite.Interop.dll
-        tryCopyAssembly System.Data.SQLite.dll
-        tryCopyAssembly System.Data.SQLite.Linq.dll
+          #
+          # NOTE: Skip trying to copy any files if we are so instructed.
+          #
+          if {![info exists ::no(copySqliteFiles)]} then {
+            tryCopyAssembly SQLite.Interop.dll
+            tryCopyAssembly System.Data.SQLite.dll
+            tryCopyAssembly System.Data.SQLite.Linq.dll
+          }
 
-        tryLoadAssembly System.Data.SQLite.dll
-        tryLoadAssembly System.Data.SQLite.Linq.dll
+          #
+          # NOTE: Skip trying to load any files if we are so instructed.
+          #
+          if {![info exists ::no(loadSqliteFiles)]} then {
+            tryLoadAssembly System.Data.SQLite.dll
+            tryLoadAssembly System.Data.SQLite.Linq.dll
+          }
+        }
 
         catch {
           tputs $::test_channel [appendArgs \
