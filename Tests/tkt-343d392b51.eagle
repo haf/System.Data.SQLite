@@ -1,0 +1,124 @@
+###############################################################################
+#
+# tkt-343d392b51.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
+  setupDb [set fileName tkt-343d392b51-1.1.db]
+  set otherFileName tkt-343d392b51-1.1-otherDb.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getTemporaryPath] $fileName]
+  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set otherDbName otherDb
+  set table [appendArgs $otherDbName .t1]
+
+  set sql(1) [subst { \
+    ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
+    CREATE TABLE ${table}(x INTEGER PRIMARY KEY, y); \
+    [for {set i 1} {$i < 200} {incr i} {
+      append sql(inserts) \
+          "INSERT INTO ${table} (x, y) VALUES($i, '$i'); "
+    }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
+  }]
+
+  set sql(2) [subst { \
+    SELECT x, y FROM ${table} ORDER BY x; \
+  }]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static void Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "${sql(1)}";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(
+                "${sql(2)}", connection))
+            {
+              using (DataSet dataSet = new DataSet())
+              {
+                dataAdapter.Fill(dataSet, "${table}");
+
+                DataTable dataTable = dataSet.Tables\["${table}"\];
+
+                dataTable.Columns\["x"\].Unique = true;
+                dataTable.PrimaryKey = new DataColumn\[\] {
+                  dataTable.Columns\["x"\]
+                };
+
+                SQLiteCommandBuilder commandBuilder =
+                    new SQLiteCommandBuilder(dataAdapter);
+
+                foreach (DataRow dataRow in dataTable.Rows)
+                {
+                  //
+                  // NOTE: Update even rows and delete odd rows.
+                  //
+                  if ((long)dataRow\["x"\] % 2 == 0)
+                    dataRow\["y"\] = "zero";
+                  else
+                    dataRow.Delete();
+                }
+
+                dataAdapter.Update(dataTable); // DBConcurrencyException (?)
+              }
+            }
+          }
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $otherFileName
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors i sql table otherDbName \
+      otherDataSource dataSource id db otherFileName fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -match regexp \
+-result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
