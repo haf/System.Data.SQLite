@@ -632,6 +632,54 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForCompileOption { channel option } {
+    tputs $channel [appendArgs "---- checking for compile option \"" \
+        $option "\"... "]
+
+    if {[isEagle]} then {
+      if {[info exists ::eagle_platform(compileOptions)] && \
+          [lsearch -exact -nocase $::eagle_platform(compileOptions) \
+              $option] != -1} then {
+        #
+        # NOTE: Yes, support for the Eagle compile option is present.
+        #
+        addConstraint [appendArgs compile. $option]
+
+        tputs $channel yes\n
+      } else {
+        tputs $channel no\n
+      }
+    } else {
+      #
+      # NOTE: We are running inside Tcl; however, we need to check for an
+      #       Eagle compile option.  This can now be accomplished via the
+      #       [eagle] command supplied by the Eagle Package for Tcl, if
+      #       it is actually loaded and available.
+      #
+      if {[llength [info commands eagle]] > 0} then {
+        set options [eagle [list expr {[info exists \
+            ::eagle_platform(compileOptions)] ? \
+            $::eagle_platform(compileOptions) : [list]}]]
+
+        if {[lsearch -exact $options $option] != -1} then {
+          #
+          # NOTE: Yes, support for the Eagle compile option is present.
+          #
+          addConstraint [appendArgs compile. $option]
+
+          tputs $channel yes\n
+
+          #
+          # NOTE: We are done here, return now.
+          #
+          return
+        }
+      }
+
+      tputs $channel no\n
+    }
+  }
+
   if {[isEagle]} then {
     ###########################################################################
     ############################ BEGIN Eagle ONLY #############################
@@ -977,24 +1025,6 @@ namespace eval ::Eagle {
         # NOTE: Yes, support for object reference count tracking is present.
         #
         addConstraint refCount
-
-        tputs $channel yes\n
-      } else {
-        tputs $channel no\n
-      }
-    }
-
-    proc checkForCompileOption { channel option } {
-      tputs $channel [appendArgs "---- checking for compile option \"" \
-          $option "\"... "]
-
-      if {[info exists ::eagle_platform(compileOptions)] && \
-          [lsearch -exact -nocase $::eagle_platform(compileOptions) \
-              $option] != -1} then {
-        #
-        # NOTE: Yes, support for the compile option is present.
-        #
-        addConstraint [appendArgs compile. $option]
 
         tputs $channel yes\n
       } else {
@@ -1590,7 +1620,8 @@ namespace eval ::Eagle {
         checkForVersion checkForCommand checkForFile checkForNativeCode \
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
         checkForPerformance checkForTiming checkForInteractive \
-        checkForUserInteraction checkForNetwork] false false
+        checkForNetwork checkForCompileOption checkForUserInteraction] false \
+        false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

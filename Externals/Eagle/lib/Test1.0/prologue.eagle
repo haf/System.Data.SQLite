@@ -1221,6 +1221,21 @@ if {![info exists no([file tail [info script]])]} then {
     # HACK: Reset the list of failed files.
     #
     set ::tcltest::failFiles [list]
+
+    #
+    # NOTE: Has compile/runtime option testing support been disabled?
+    #
+    if {![info exists no(compileOptions)]} then {
+      #
+      # NOTE: Has dedicated test support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileTest)]} then {
+        #
+        # NOTE: For test "tclLoad-1.16.1".
+        #
+        checkForCompileOption $test_channel TEST
+      }
+    }
   }
 
   #
@@ -1559,14 +1574,14 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     tputs $test_channel [appendArgs "---- build: " \
-        [getPlatformInfo engine <none>] " " \
-        [getPlatformInfo patchLevel <none>] " " \
-        [getPlatformInfo tag <none>] " " \
-        [getPlatformInfo release <none>] " " \
-        [getPlatformInfo text <none>] " " \
-        [getPlatformInfo configuration <none>] " " \
-        [getPlatformInfo suffix <none>] " " \
-        $timeStamp \n]
+        [list [getPlatformInfo engine <none>]] " " \
+        [list [getPlatformInfo patchLevel <none>]] " " \
+        [list [getPlatformInfo tag <none>]] " " \
+        [list [getPlatformInfo release <none>]] " " \
+        [list [getPlatformInfo text <none>]] " " \
+        [list [getPlatformInfo configuration <none>]] " " \
+        [list [getPlatformInfo suffix <none>]] " " \
+        [list $timeStamp] \n]
 
     tputs $test_channel [appendArgs "---- os: " \
         [getPlatformInfo os <none>] \n]
