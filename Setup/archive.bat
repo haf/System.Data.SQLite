@@ -73,7 +73,7 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
-%_ECHO% zip.exe -r Setup\Output\sqlite-netFx-source-%VERSION%.zip * -x@exclude_src.txt
+%_ECHO% zip.exe -v -r Setup\Output\sqlite-netFx-source-%VERSION%.zip * -x @exclude_src.txt
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive source files.

@@ -1,9 +1,9 @@
 @ECHO OFF
 
 ::
-:: release_ce.bat --
+:: release_static.bat --
 ::
-:: WinCE Binary Release Tool
+:: Static Binary Release Tool
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!
@@ -23,18 +23,13 @@ SET TOOLS=%TOOLS:~0,-1%
 
 %_VECHO% Tools = '%TOOLS%'
 
-SET RELEASE_CONFIGURATIONS=Release
-SET BASE_CONFIGURATIONSUFFIX=Compact
-SET PLATFORMS="Pocket PC 2003 (ARMV4)"
-SET PROCESSORS=arm
-SET YEARS=2008
-SET BASE_PLATFORM=PocketPC
-SET TYPE=binary
+SET CONFIGURATIONSUFFIX=Static
+SET TYPE_PREFIX=static-
 
 %_ECHO% CALL "%TOOLS%\release_all.bat"
 
 IF ERRORLEVEL 1 (
-  ECHO Failed to build PocketPC release files.
+  ECHO Failed to build static release files.
   GOTO errors
 )
 

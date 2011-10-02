@@ -69,17 +69,40 @@
   <li>Change the current directory to &quot;&lt;root&gt;&quot;.</li>
 
   <li>
-    Enter the following command to run all the unit tests against the binaries built with a separate managed and interop assembly:
+    Enter the following command to run all the unit tests against the binaries
+    built with a separate managed and interop assembly:
     <b>Externals\Eagle\bin\EagleShell.exe -file Tests\all.eagle</b>
   </li>
 
   <li>
-    Enter the following command to run all the unit tests against the binaries built with a mixed-mode assembly:
+    Enter the following command to run all the unit tests against the binaries
+    built with a mixed-mode assembly:
     <b>Externals\Eagle\bin\EagleShell.exe -initialize -runtimeOption native -file Tests\all.eagle</b>
   </li>
 
   <li>
-    Make sure all tests pass; the log file &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any errors should occur.  EagleTest should produce &quot;success&quot; messages very similar to the following:<br /><br />
+    To test binaries built with MSBuild 3.5 or Visual Studio 2008 (i.e. because
+    the default is to test binaries built with MSBuild 4.0 or Visual Studio
+    2010) add the following command line argument right after
+    &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
+    command lines:
+    <b>-preInitialize &quot;set test_year 2008&quot;</b>
+  </li>
+
+  <li>
+    To test binaries built in the &quot;Debug&quot; build configuration (i.e.
+    because the default is to test binaries built in the &quot;Release&quot;
+    build configuration) add the following command line argument right after
+    &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
+    command lines:
+    <b>-preInitialize &quot;set test_configuration Debug&quot;</b>
+  </li>
+
+  <li>
+    Make sure all tests pass; the log file
+    &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any
+    errors should occur.  EagleTest should produce &quot;success&quot; messages
+    very similar to the following:<br /><br />
     PASSED: 30<br />
     TOTAL: 30<br />
     PASS PERCENTAGE: 100%<br />
