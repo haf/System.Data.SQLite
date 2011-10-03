@@ -111,6 +111,8 @@
 
     <ul>
       <li>&lt;root&gt;\SQLite.nuspec</li>
+      <li>&lt;root&gt;\SQLite.x86.nuspec</li>
+      <li>&lt;root&gt;\SQLite.x64.nuspec</li>
       <li>&lt;root&gt;\Doc\Extra\dbfactorysupport.html</li>
       <li>&lt;root&gt;\Doc\Extra\welcome.html</li>
       <li>&lt;root&gt;\test\app.config</li>
