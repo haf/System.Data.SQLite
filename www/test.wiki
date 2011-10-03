@@ -44,7 +44,7 @@
 <p>
   First, you will need a full source check-out for the System.Data.SQLite
   project, including the
-  &quot;<a href="/dir?name=Externals/Eagle">Externals\Eagle</a>&quot;
+  &quot;<a href="/index.html/dir?name=Externals/Eagle">Externals\Eagle</a>&quot;
   directory.
 </p>
 

@@ -54,8 +54,10 @@ if {![haveConstraint file_[file tail $testLinqOutFile]]} then {
 runTest {test basic-1.1 {unit tests from the 'test' project} -setup {
   catch {file delete [file join [file dirname $testExeFile] Test.db3]}
 } -body {
+  set output ""
+
   set code [catch {
-    testExec $testExeFile [list -eventflags Wait -directory \
+    testClrExec $testExeFile [list -eventflags Wait -directory \
     [file dirname $testExeFile] -stdout output -success 0] -autoRun
   } error]
 
@@ -87,8 +89,10 @@ runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
 
   object invoke Console OutputEncoding $encoding
 } -body {
+  set output ""
+
   set code [catch {
-    testExec $testLinqExeFile [list -eventflags Wait -directory \
+    testClrExec $testLinqExeFile [list -eventflags Wait -directory \
     [file dirname $testLinqExeFile] -stdout output -success 0]
   } error]
 
@@ -102,7 +106,8 @@ runTest {test basic-1.2 {unit tests from the 'testlinq' project} -setup {
   catch {object invoke Console OutputEncoding $savedEncoding}
 
   unset -nocomplain code output error savedEncoding encoding
-} -constraints {eagle file_testlinq.exe file_northwindEF.db file_testlinq.out} \
+} -constraints \
+{eagle monoToDo file_testlinq.exe file_northwindEF.db file_testlinq.out} \
 -result {0 True {}}}
 
 ###############################################################################

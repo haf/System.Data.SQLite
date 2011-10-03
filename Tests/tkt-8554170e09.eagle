@@ -50,7 +50,7 @@ runTest {test tkt-8554170e09-1.2 {default DATETIME value, empty} -setup {
 
   unset -nocomplain result db fileName
 } -constraints {eagle monoBug28 command.sql compile.DATA System.Data.SQLite} \
--returnCodes 1 -match glob -result {*.SQLiteConvert.ToDateTime(*}}
+-returnCodes 1 -match glob -result {*.SQLiteConvert.ToDateTime*}}
 
 ###############################################################################
 

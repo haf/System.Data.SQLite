@@ -221,7 +221,7 @@ namespace eval ::Eagle {
 
       return ""
     }
-  
+
     proc enumerableToList { enumerable } {
       set result [list]
 
