@@ -6,7 +6,7 @@
 <ol>
   <li>
     The string &quot;&lt;root&gt;&quot; represents the root of the source tree
-    for the System.Data.SQLite project.
+    (i.e. the working check-out directory) for the System.Data.SQLite project.
   </li>
 
   <li>
@@ -28,7 +28,8 @@
 
   <li>
     The string &quot;&lt;pid&gt;&quot; represents the process identifier for the
-    instance of EagleShell being used to run the unit tests.
+    instance of EagleShell being used to run the unit tests (e.g.
+    &quot;1234&quot;).
   </li>
 </ol>
 
@@ -41,9 +42,9 @@
 </p>
 
 <p>
-  First, you will need a full source enlistment for the System.Data.SQLite
+  First, you will need a full source check-out for the System.Data.SQLite
   project, including the
-  &quot;<a href="http://system.data.sqlite.org/index.html/dir?name=Externals/Eagle">Externals\Eagle</a>&quot;
+  &quot;<a href="/dir?name=Externals/Eagle">Externals\Eagle</a>&quot;
   directory.
 </p>
 
@@ -110,8 +111,8 @@
     &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any
     errors should occur.  EagleTest should produce &quot;success&quot; messages
     very similar to the following:<br /><br />
-    PASSED: 30<br />
-    TOTAL: 30<br />
+    PASSED: 46<br />
+    TOTAL: 46<br />
     PASS PERCENTAGE: 100%<br />
     OVERALL RESULT: SUCCESS<br />
   </li>
