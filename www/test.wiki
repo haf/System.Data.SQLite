@@ -52,9 +52,9 @@
   The binaries to test must be [./build.wiki | built] or
   [./downloads.wiki | downloaded].  If the binaries are downloaded, they must be
   placed in the appropriate build output directory (e.g.
-  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;configuration&gt\bin&quot; for the
+  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;configuration&gt;\bin&quot; for the
   separate managed and interop assemblies or
-  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;platform&gt;\&lt;configuration&gt&quot;
+  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;platform&gt;\&lt;configuration&gt;&quot;
   for the mixed-mode assembly).
 </p>
 
