@@ -10,9 +10,12 @@
     <iconUrl>http://system.data.sqlite.org/images/sqlite32.png</iconUrl>
     <licenseUrl>http://www.sqlite.org/copyright.html</licenseUrl>
     <tags>sqlite database ado.net provider interop</tags>
+    <copyright>Public Domain</copyright>
   </metadata>
   <files>
     <file src="bin\2008\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib\net20" />
     <file src="bin\2010\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib\net40" />
+    <file src="bin\2008\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net20" />
+    <file src="bin\2010\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net40" />
   </files>
 </package>
