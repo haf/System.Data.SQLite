@@ -2,7 +2,8 @@
 #
 # updateFileInfo.tcl -- File Metadata Updating Tool
 #
-# WARNING: This tool requires that the Fossil binary somewhere along the PATH.
+# WARNING: This tool requires the Fossil binary to exist somewhere along the
+#          PATH.
 #
 # Written by Joe Mistachkin.
 # Released to the public domain, use at your own risk!
@@ -49,13 +50,19 @@ proc getFileHash { fileName } {
 set path [file normalize [file dirname [info script]]]
 
 #
+# NOTE: *WARNING* This assumes that the root of the source check-out is one
+#       directory above the directory containing this script.
+#
+set root [file normalize [file dirname $path]]
+
+#
 # NOTE: Grab the name of the file to be updated from the command line, if
 #       available; otherwise, use the default (i.e. "../www/downloads.wiki").
 #
 if {[info exists argv] && [llength $argv] > 0} then {
   set updateFileName [lindex $argv 0]
 } else {
-  set updateFileName [file join [file dirname $path] www downloads.wiki]
+  set updateFileName [file join $root www downloads.wiki]
 }
 
 #
