@@ -11,12 +11,19 @@
 
   <li>
     The string &quot;&lt;year&gt;&quot; represents the version of Visual Studio
-    used (e.g. 2008) to build the binaries being tested.
+    used (e.g. &quot;2008&quot; or &quot;2010&quot;) to build the binaries being
+    tested.
+  </li>
+
+  <li>
+    The string &quot;&lt;configuration&gt;&quot; represents the build
+    configuration for the binaries being tested (e.g. &quot;Debug&quot; or
+    &quot;Release&quot;).
   </li>
 
   <li>
     The string &quot;&lt;platform&gt;&quot; represents the native platform for
-    the binaries being tested (e.g. Win32 or x64).
+    the binaries being tested (e.g. &quot;Win32&quot; or &quot;x64&quot;).
   </li>
 
   <li>
@@ -44,10 +51,10 @@
   The binaries to test must be [./build.wiki | built] or
   [./downloads.wiki | downloaded].  If the binaries are downloaded, they must be
   placed in the appropriate build output directory (e.g.
-  &quot;&lt;root&gt;\bin\&lt;year&gt;\Release\bin&quot; for the separate managed
-  and interop assemblies or
-  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;platform&gt;\Release&quot; for the
-  mixed-mode assembly).
+  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;configuration&gt\bin&quot; for the
+  separate managed and interop assemblies or
+  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;platform&gt;\&lt;configuration&gt&quot;
+  for the mixed-mode assembly).
 </p>
 
 <p>
