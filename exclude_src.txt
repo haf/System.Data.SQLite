@@ -3,6 +3,7 @@
 *.docstates
 *.fossil
 *.ncb
+*.nupkg
 *.suo
 *.user
 *.zip

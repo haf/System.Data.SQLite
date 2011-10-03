@@ -76,6 +76,22 @@ FOR %%D IN (%CLEANDIRS%) DO (
   )
 )
 
+IF EXIST "%SOURCE%\*.nupkg" (
+  %_ECHO% DEL /Q "%SOURCE%\*.nupkg"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\*.nupkg".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\*.nupkg".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\*.nupkg" exist.
+  %_AECHO%.
+)
+
 IF EXIST "%SOURCE%\Doc\SQLite.NET.chw" (
   %_ECHO% DEL /Q "%SOURCE%\Doc\SQLite.NET.chw"
 
