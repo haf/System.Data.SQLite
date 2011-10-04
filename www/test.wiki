@@ -111,8 +111,8 @@
     &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any
     errors should occur.  EagleTest should produce &quot;success&quot; messages
     very similar to the following:<br /><br />
-    PASSED: 46<br />
-    TOTAL: 46<br />
+    PASSED: 48<br />
+    TOTAL: 48<br />
     PASS PERCENTAGE: 100%<br />
     OVERALL RESULT: SUCCESS<br />
   </li>

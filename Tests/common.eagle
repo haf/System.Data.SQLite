@@ -139,6 +139,18 @@ namespace eval ::Eagle {
           [file join [getBinaryDirectory] [file tail $fileName]]]
     }
 
+    proc getAppDomainPreamble { {prefix ""} {suffix ""} } {
+      return [uplevel 1 [list subst [appendArgs $prefix {
+        if {[hasRuntimeOption native]} then {
+          object invoke Interpreter.GetActive AddRuntimeOption native
+        }
+
+        set ::path {$::path}
+        set ::test_year {[getBuildYear]}
+        set ::test_configuration {[getBuildConfiguration]}
+      } $suffix]]]
+    }
+
     proc tryCopyBuildFile { fileName } {
       #
       # NOTE: If we cannot copy the assembly then it is probably already loaded.

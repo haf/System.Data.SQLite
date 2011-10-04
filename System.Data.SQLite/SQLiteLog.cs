@@ -76,6 +76,11 @@ namespace System.Data.SQLite
         private static object syncRoot = new object();
 
         /// <summary>
+        /// Member variable to store the AppDomain.DomainUnload event handler.
+        /// </summary>
+        private static EventHandler _domainUnload;
+
+        /// <summary>
         /// Member variable to store the application log handler to call.
         /// </summary>
         private static event SQLiteLogEventHandler _handlers;
@@ -106,6 +111,22 @@ namespace System.Data.SQLite
         /// </summary>
         public static void Initialize()
         {
+            //
+            // BUGFIX: To avoid nasty situations where multiple AppDomains are
+            //         attempting to initialize and/or shutdown what is really
+            //         a shared native resource (i.e. the SQLite core library
+            //         is loaded per-process and has only one logging callback,
+            //         not one per-AppDomain, which it knows nothing about),
+            //         prevent all non-default AppDomains from registering a
+            //         log handler unless the "Force_SQLiteLog" environment
+            //         variable is used to manually override this safety check.
+            //
+            if (!AppDomain.CurrentDomain.IsDefaultAppDomain() &&
+                Environment.GetEnvironmentVariable("Force_SQLiteLog") == null)
+            {
+                return;
+            }
+
             lock (syncRoot)
             {
                 //
@@ -114,8 +135,14 @@ namespace System.Data.SQLite
                 //       pointer from the native SQLite code prior to it
                 //       being invalidated.
                 //
-                AppDomain.CurrentDomain.DomainUnload +=
-                    new EventHandler(DomainUnload);
+                // BUGFIX: Make sure this event handler is only added one
+                //         time (per-AppDomain).
+                //
+                if (_domainUnload == null)
+                {
+                    _domainUnload = new EventHandler(DomainUnload);
+                    AppDomain.CurrentDomain.DomainUnload += _domainUnload;
+                }
 
                 //
                 // NOTE: Create an instance of the SQLite wrapper class.
@@ -162,24 +189,37 @@ namespace System.Data.SQLite
             EventArgs e
             )
         {
-            //
-            // BUGBUG: This will cause serious problems if other AppDomains
-            //         have any open SQLite connections; however, there is
-            //         currently no way around this limitation.
-            //
-            if (_sql != null)
+            lock (syncRoot)
             {
-                int rc = _sql.Shutdown();
+                //
+                // BUGBUG: This will cause serious problems if other AppDomains
+                //         have any open SQLite connections; however, there is
+                //         currently no way around this limitation.
+                //
+                if (_sql != null)
+                {
+                    int rc = _sql.Shutdown();
 
-                if (rc != 0)
-                    throw new SQLiteException(rc,
-                        "Failed to shutdown interface.");
+                    if (rc != 0)
+                        throw new SQLiteException(rc,
+                            "Failed to shutdown interface.");
 
-                rc = _sql.SetLogCallback(null);
+                    rc = _sql.SetLogCallback(null);
 
-                if (rc != 0)
-                    throw new SQLiteException(rc,
-                        "Failed to shutdown logging.");
+                    if (rc != 0)
+                        throw new SQLiteException(rc,
+                            "Failed to shutdown logging.");
+                }
+
+                //
+                // NOTE: Remove the event handler for the DomainUnload event
+                //       that we added earlier.
+                //
+                if (_domainUnload != null)
+                {
+                    AppDomain.CurrentDomain.DomainUnload -= _domainUnload;
+                    _domainUnload = null;
+                }
             }
         }
 

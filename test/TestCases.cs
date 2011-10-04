@@ -1623,7 +1623,8 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
             cnn.LogMessage(1, "test log event");
 
             if (logevents != 1)
-                throw new Exception("Log event count incorrect.");
+                throw new Exception(String.Format(
+                    "Log event count {0} incorrect.", logevents));
 
             cnn.Close();
 

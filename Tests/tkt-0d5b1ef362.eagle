@@ -1,0 +1,70 @@
+###############################################################################
+#
+# tkt-0d5b1ef362.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+#
+# HACK: This test reads the private "_domainUnload" field of the AppDomain
+#       class.  This is non-portable and will not work on Mono.  Also, this
+#       may not work on versions of the .NET Framework after 4.0.
+#
+runTest {test tkt-0d5b1ef362-1.1 {SQLiteLog.DomainUnload event} -setup \
+    [getAppDomainPreamble] -body {
+  #
+  # NOTE: Grab the number of DomainUnload handlers prior to doing anything
+  #       else.
+  #
+  set x [object invoke -flags +NonPublic \
+      AppDomain.CurrentDomain._domainUnload.GetInvocationList Length]
+
+  package require EagleLibrary
+  package require EagleTest
+  package require System.Data.SQLite.Test
+
+  object load -loadtype File [file join [getBinaryDirectory] \
+      System.Data.SQLite.dll]
+
+  for {set i 1} {$i < 3} {incr i} {
+    set connection($i) [object create System.Data.SQLite.SQLiteConnection ""]
+  }
+
+  #
+  # NOTE: Now, grab the number of DomainUnload handlers after creating the
+  #       connections.
+  #
+  set y [object invoke -flags +NonPublic \
+      AppDomain.CurrentDomain._domainUnload.GetInvocationList Length]
+
+  #
+  # NOTE: Make sure that no DomainUnload handlers were actually added while we
+  #       created the two connections (i.e. because we are not in the default
+  #       application domain).
+  #
+  expr {$x == $y}
+} -cleanup {
+  unset -nocomplain connection i x y
+} -constraints {eagle dotNet monoBug28 command.sql compile.DATA\
+compile.ISOLATED_INTERPRETERS System.Data.SQLite} -isolationLevel AppDomain \
+-result {True}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

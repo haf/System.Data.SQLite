@@ -1,0 +1,80 @@
+###############################################################################
+#
+# tkt-ac47dd230a.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-ac47dd230a-1.1 {multiple AppDomains} -setup {
+  for {set i 1} {$i < 3} {incr i} {
+    set appDomain($i) [object invoke AppDomain CreateDomain \
+        tkt-ac47dd230a-1.1.$i]
+
+    set result null
+    set interpreterHelper($i) [object invoke -alias InterpreterHelper \
+        Create $appDomain($i) null Default null null null result]
+
+    if {[string length $interpreterHelper($i)] == 0} then {
+      error [object invoke $result ToString]
+    }
+
+    set interpreter($i) [$interpreterHelper($i) -alias Interpreter]
+
+    set result null
+    set code [$interpreter($i) EvaluateScript [getAppDomainPreamble] result]
+
+    if {$code ne "Ok"} then {
+      error [object invoke $result ToString]
+    }
+  }
+} -body {
+  set results [list]
+
+  for {set i 1} {$i < 3} {incr i} {
+    set result null
+    set code [$interpreter($i) EvaluateScript {
+      package require EagleLibrary
+      package require EagleTest
+      package require System.Data.SQLite.Test
+
+      object load -loadtype File [file join [getBinaryDirectory] \
+          System.Data.SQLite.dll]
+
+      setupDb tkt-ac47dd230a-1.1; cleanupDb tkt-ac47dd230a-1.1
+    } result]
+
+    lappend results $code [expr {[string length $result] > 0 ? \
+        [object invoke $result ToString] : ""}]
+  }
+
+  set results
+} -cleanup {
+  unset -nocomplain results code result interpreter interpreterHelper
+
+  for {set i 1} {$i < 3} {incr i} {
+    object invoke AppDomain Unload $appDomain($i)
+  }
+
+  unset -nocomplain appDomain i
+} -constraints {eagle monoBug28 command.sql compile.DATA\
+compile.ISOLATED_INTERPRETERS System.Data.SQLite} -result {Ok 0 Ok 0}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
