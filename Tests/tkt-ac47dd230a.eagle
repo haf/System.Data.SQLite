@@ -72,7 +72,7 @@ runTest {test tkt-ac47dd230a-1.1 {multiple AppDomains} -setup {
 
   unset -nocomplain appDomain i
 } -constraints {eagle monoBug28 command.sql compile.DATA\
-compile.ISOLATED_INTERPRETERS System.Data.SQLite} -result {Ok 0 Ok 0}}
+compile.ISOLATED_INTERPRETERS SQLite System.Data.SQLite} -result {Ok 0 Ok 0}}
 
 ###############################################################################
 

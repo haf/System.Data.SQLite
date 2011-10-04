@@ -61,8 +61,8 @@ runTest {test tkt-0d5b1ef362-1.1 {SQLiteLog.DomainUnload event} -setup \
 } -cleanup {
   unset -nocomplain connection i x y
 } -constraints {eagle dotNet monoBug28 command.sql compile.DATA\
-compile.ISOLATED_INTERPRETERS System.Data.SQLite} -isolationLevel AppDomain \
--result {True}}
+compile.ISOLATED_INTERPRETERS SQLite System.Data.SQLite} -isolationLevel \
+AppDomain -result {True}}
 
 ###############################################################################
 

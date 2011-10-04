@@ -27,7 +27,8 @@ runTest {test tkt-448d663d11-1.1 {missing journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -41,7 +42,8 @@ runTest {test tkt-448d663d11-1.2 {missing journal mode, WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {wal}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{wal}}
 
 ###############################################################################
 
@@ -55,7 +57,8 @@ runTest {test tkt-448d663d11-1.3 {missing journal mode, non-WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -66,7 +69,8 @@ runTest {test tkt-448d663d11-1.4 {'Default' journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -80,7 +84,8 @@ runTest {test tkt-448d663d11-1.5 {'Default' journal mode, WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {wal}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{wal}}
 
 ###############################################################################
 
@@ -94,7 +99,8 @@ runTest {test tkt-448d663d11-1.6 {'Default' journal mode, non-WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -105,7 +111,8 @@ runTest {test tkt-448d663d11-1.7 {'Delete' journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -119,7 +126,8 @@ runTest {test tkt-448d663d11-1.8 {'Delete' journal mode, WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -133,7 +141,8 @@ runTest {test tkt-448d663d11-1.9 {'Delete' journal mode, non-WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -144,7 +153,8 @@ runTest {test tkt-448d663d11-1.10 {'Persist' journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {persist}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{persist}}
 
 ###############################################################################
 
@@ -155,7 +165,8 @@ runTest {test tkt-448d663d11-1.11 {'Off' journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {off}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{off}}
 
 ###############################################################################
 
@@ -166,7 +177,8 @@ runTest {test tkt-448d663d11-1.12 {'Truncate' journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {truncate}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{truncate}}
 
 ###############################################################################
 
@@ -177,7 +189,8 @@ runTest {test tkt-448d663d11-1.13 {'Memory' journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {memory}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{memory}}
 
 ###############################################################################
 
@@ -188,7 +201,8 @@ runTest {test tkt-448d663d11-1.14 {'Wal' journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {wal}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{wal}}
 
 ###############################################################################
 
@@ -202,7 +216,8 @@ runTest {test tkt-448d663d11-1.15 {'Wal' journal mode, non-WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {wal}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{wal}}
 
 ###############################################################################
 
@@ -216,7 +231,8 @@ runTest {test tkt-448d663d11-1.16 {'Wal' journal mode, WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {wal}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{wal}}
 
 ###############################################################################
 
@@ -227,7 +243,8 @@ runTest {test tkt-448d663d11-1.17 {'Bad' journal mode, new db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -241,7 +258,8 @@ runTest {test tkt-448d663d11-1.18 {'Bad' journal mode, non-WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {delete}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{delete}}
 
 ###############################################################################
 
@@ -255,7 +273,8 @@ runTest {test tkt-448d663d11-1.19 {'Bad' journal mode, WAL db} -body {
   cleanupDb $fileName
   unset -nocomplain db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -result {wal}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{wal}}
 
 ###############################################################################
 

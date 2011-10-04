@@ -24,8 +24,10 @@ runSQLiteTestPrologue
 # NOTE: Make sure that SQLite core library is completely shutdown prior to
 #       starting any of the tests in this file.
 #
-object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
-    sqlite3_shutdown
+if {[haveConstraint SQLite]} then {
+  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+      sqlite3_shutdown
+}
 
 ###############################################################################
 
@@ -52,8 +54,8 @@ for {set i 1} {$i < 3} {incr i} {
     cleanupDb $fileName
     unset -nocomplain appDomainId db fileName
   } -constraints {eagle monoBug28 command.sql compile.DATA\
-compile.ISOLATED_INTERPRETERS System.Data.SQLite} -isolationLevel AppDomain \
--match regexp -result {^\d+ \d+ True SQLiteConnection#\d+$}}
+compile.ISOLATED_INTERPRETERS SQLite System.Data.SQLite} -isolationLevel \
+AppDomain -match regexp -result {^\d+ \d+ True SQLiteConnection#\d+$}}
 }
 
 ###############################################################################

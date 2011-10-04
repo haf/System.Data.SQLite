@@ -3,6 +3,13 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.76.0 - October 4, 2011</b>
+</p>
+<ul>
+    <li>Prevent the domain unload event handler in SQLiteLog from being registered multiple times. Fix for [0d5b1ef362].</li>
+    <li>Stop allowing non-default application domains to initialize the SQLiteLog class. Fix for [ac47dd230a].</li>
+</ul>
+<p>
     <b>1.0.75.0 - October 3, 2011</b>
 </p>
 <ul>
