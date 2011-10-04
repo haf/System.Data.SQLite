@@ -80,6 +80,8 @@ IF NOT DEFINED TYPE (
 
 %_VECHO% Type = '%TYPE%'
 
+CALL :fn_ResetErrorLevel
+
 %_ECHO% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (

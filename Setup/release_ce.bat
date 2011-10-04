@@ -31,6 +31,8 @@ SET YEARS=2008
 SET BASE_PLATFORM=PocketPC
 SET TYPE=binary
 
+CALL :fn_ResetErrorLevel
+
 %_ECHO% CALL "%TOOLS%\release_all.bat"
 
 IF ERRORLEVEL 1 (

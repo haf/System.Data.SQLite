@@ -23,6 +23,8 @@ SET TOOLS=%TOOLS:~0,-1%
 
 %_VECHO% Tools = '%TOOLS%'
 
+CALL :fn_ResetErrorLevel
+
 %_ECHO% CALL "%TOOLS%\vsSp.bat"
 
 IF ERRORLEVEL 1 (

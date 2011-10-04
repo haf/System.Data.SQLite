@@ -26,6 +26,8 @@ SET TOOLS=%TOOLS:~0,-1%
 SET CONFIGURATIONSUFFIX=Static
 SET TYPE_PREFIX=static-
 
+CALL :fn_ResetErrorLevel
+
 %_ECHO% CALL "%TOOLS%\release_all.bat"
 
 IF ERRORLEVEL 1 (

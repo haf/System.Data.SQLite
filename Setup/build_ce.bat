@@ -30,6 +30,8 @@ SET PROCESSORS=arm
 SET YEARS=2008
 SET BASE_PLATFORM=PocketPC
 
+CALL :fn_ResetErrorLevel
+
 %_ECHO% CALL "%TOOLS%\build_all.bat"
 
 IF ERRORLEVEL 1 (
