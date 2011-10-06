@@ -3,12 +3,19 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.75.0 - September XX, 2011</b>
+    <b>1.0.76.0 - October 4, 2011</b>
+</p>
+<ul>
+    <li>Prevent the domain unload event handler in SQLiteLog from being registered multiple times. Fix for [0d5b1ef362].</li>
+    <li>Stop allowing non-default application domains to initialize the SQLiteLog class. Fix for [ac47dd230a].</li>
+</ul>
+<p>
+    <b>1.0.75.0 - October 3, 2011</b>
 </p>
 <ul>
     <li>Updated to SQLite 3.7.8 <a href="http://www.sqlite.org/src/info/3e0da808d2">[3e0da808d2]</a>.</li>
     <li>More enhancements to the build system.</li>
-    <li>Add official <a href="http://www.nuget.org/">NuGet</a> package.</li>
+    <li>Add official <a href="http://www.nuget.org/">NuGet</a> packages for x86 and x64.</li>
     <li>Add Changes and LastInsertRowId properties to the connection class.</li>
     <li>Support more formats when converting data from/to the DateTime type.</li>
     <li>Make all the assembly versioning attributes consistent.</li>
@@ -29,6 +36,7 @@
     <li>Minor optimization to GetParamValueBytes(). Fix for [201128cc88].</li>
     <li>Support the ON UPDATE, ON DELETE, and MATCH clause information when generating schema metadata for foreign keys. Partial fix for [b226147b37]. VS designer changes are not yet tested.</li>
     <li>Fix incorrect resource name for SR.resx in the mixed-mode assembly.</li>
+    <li>Reduce the number of String.Compare() calls in the hot path for SQLiteCommand.ExecuteReader().</li>
 </ul>
 <p>
     <b>1.0.74.0 - July 4, 2011</b>

@@ -45,8 +45,10 @@ runTest {test tkt-ccfa69fc32-1.1 {Entity Framework / Transaction Scope} -body {
   set result [list]
 
   foreach add [list false true false] {
+    set output ""
+
     set code [catch {
-      testExec $testLinqExeFile [list -eventflags Wait -directory \
+      testClrExec $testLinqExeFile [list -eventflags Wait -directory \
       [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
       -success 0] -efTransaction $add
     } error]
@@ -67,8 +69,8 @@ runTest {test tkt-ccfa69fc32-1.1 {Entity Framework / Transaction Scope} -body {
   set result
 } -cleanup {
   unset -nocomplain code output error result add
-} -constraints {eagle file_testlinq.exe file_northwindEF.db} -match glob \
--result {0 {1581 1730 1833 2116 2139} 0 {System.Data.UpdateException: * --->\
+} -constraints {eagle monoToDo file_testlinq.exe file_northwindEF.db} -match \
+glob -result {0 {1581 1730 1833 2116 2139} 0 {System.Data.UpdateException: * --->\
 System.Data.SQLite.SQLiteException: Abort due to constraint violation
 PRIMARY KEY must be unique
 *} 0 {1 2 3 4 5 6 7 8 9 10 1576 1577 1578 1579 1580 1581 1730 1833 2116 2139}}}

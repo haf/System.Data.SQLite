@@ -139,6 +139,18 @@ namespace eval ::Eagle {
           [file join [getBinaryDirectory] [file tail $fileName]]]
     }
 
+    proc getAppDomainPreamble { {prefix ""} {suffix ""} } {
+      return [uplevel 1 [list subst [appendArgs $prefix {
+        if {[hasRuntimeOption native]} then {
+          object invoke Interpreter.GetActive AddRuntimeOption native
+        }
+
+        set ::path {$::path}
+        set ::test_year {[getBuildYear]}
+        set ::test_configuration {[getBuildConfiguration]}
+      } $suffix]]]
+    }
+
     proc tryCopyBuildFile { fileName } {
       #
       # NOTE: If we cannot copy the assembly then it is probably already loaded.
@@ -204,7 +216,7 @@ namespace eval ::Eagle {
     }
 
     proc tryLoadAssembly { fileName } {
-      set fileName [getBuildFileName $fileName]
+      set fileName [getBinaryFileName $fileName]
 
       if {[catch {set assembly \
           [object load -loadtype File $fileName]}] == 0} then {
@@ -221,7 +233,23 @@ namespace eval ::Eagle {
 
       return ""
     }
-  
+
+    proc checkForSQLite { channel } {
+      tputs $channel "---- checking for core SQLite library... "
+
+      if {[catch {object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
+              SQLiteVersion} version] == 0} then {
+        #
+        # NOTE: Yes, the SQLite core library appears to be available.
+        #
+        addConstraint SQLite
+
+        tputs $channel [appendArgs "yes (" $version ")\n"]
+      } else {
+        tputs $channel no\n
+      }
+    }
+
     proc enumerableToList { enumerable } {
       set result [list]
 
@@ -253,7 +281,7 @@ namespace eval ::Eagle {
       # NOTE: Add all the provided file names as assembly references.
       #
       foreach fileName $fileNames {
-        lappend command ReferencedAssemblies.Add [getBuildFileName $fileName]
+        lappend command ReferencedAssemblies.Add [getBinaryFileName $fileName]
       }
 
       #
@@ -409,6 +437,15 @@ namespace eval ::Eagle {
                 "---- found assembly: " $assembly \n]
           }
         }
+
+        #
+        # NOTE: Now, we need to know if the SQLite core library is available
+        #       (i.e. because the managed-only System.Data.SQLite assembly can
+        #       load without it; however, it cannot do anything useful without
+        #       it).  If we are using the mixed-mode assembly and we already
+        #       found it (above), this should always succeed.
+        #
+        checkForSQLite $::test_channel
       }
     }
 

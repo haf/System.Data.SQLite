@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>System.Data.SQLite</id>
-    <title>System.Data.SQLite (x86)</title>
+    <id>System.Data.SQLite.x86</id>
     <version>1.0.76.0</version>
     <authors>SQLite Development Team</authors>
     <description>The official SQLite database engine combined with a complete ADO.NET provider all rolled into a single mixed-mode assembly for x86.</description>

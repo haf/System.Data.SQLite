@@ -45,8 +45,10 @@ runTest {test tkt-00f86f9739-1.1 {LINQ with StartsWith} -body {
   set result [list]
 
   foreach value [list "" a b z 1+1 don notthere] {
+    set output ""
+
     set code [catch {
-      testExec $testLinqExeFile [list -eventflags Wait -directory \
+      testClrExec $testLinqExeFile [list -eventflags Wait -directory \
       [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
       -success 0] -startsWith $value
     } error]
@@ -67,7 +69,7 @@ runTest {test tkt-00f86f9739-1.1 {LINQ with StartsWith} -body {
   set result
 } -cleanup {
   unset -nocomplain code output error result value
-} -constraints {eagle file_testlinq.exe file_northwindEF.db} -result \
+} -constraints {eagle monoToDo file_testlinq.exe file_northwindEF.db} -result \
 {0 {} 0 {DRACD OLDWO RATTC} 0 {ALFKI CACTU CHOPS FOLKO GALED KOENE LILAS MAGAA\
 MAISD OCEAN RANCH SAVEA THECR} 0 {} 0 {} 0 {} 0 {}}}
 

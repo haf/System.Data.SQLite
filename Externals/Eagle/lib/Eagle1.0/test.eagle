@@ -378,7 +378,32 @@ namespace eval ::Eagle {
     if {[llength $options] > 0} then {eval lappend command $options}
 
     lappend command -- $commandName
-    eval lappend command $args
+
+    if {[llength $args] > 0} then {eval lappend command $args}
+
+    tputs $::test_channel [appendArgs "---- running command: " $command \n]
+
+    return [uplevel 1 $command]
+  }
+
+  proc testClrExec { commandName options args } {
+    set command [list exec]
+
+    if {[llength $options] > 0} then {eval lappend command $options}
+
+    lappend command --
+
+    #
+    # HACK: Assume that Mono is somewhere along the PATH.
+    #
+    if {[isMono]} then {
+      lappend command mono \
+          [appendArgs \" [file nativename $commandName] \"]
+    } else {
+      lappend command $commandName
+    }
+
+    if {[llength $args] > 0} then {eval lappend command $args}
 
     tputs $::test_channel [appendArgs "---- running command: " $command \n]
 

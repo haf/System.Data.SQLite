@@ -60,15 +60,6 @@ namespace eval ::Eagle {
           set dir [file join $dir Tests]
 
           #
-          # NOTE: If we have NOT been instructed to be quiet, report now.
-          #
-          if {!$quiet} then {
-            puts -nonewline $channel [appendArgs \
-                "Found vendor-specific test package directory \"" $dir \
-                "\", adding...\n"]
-          }
-
-          #
           # NOTE: We found the necessary directory to add to the auto-path;
           #       However, we cannot simply add it to the auto-path directly
           #       because the auto-path is dynamically constructed after this
@@ -76,8 +67,20 @@ namespace eval ::Eagle {
           #       environment variable and force the appropriate internal path
           #       list to be refreshed.
           #
-          lappend ::env(EAGLELIBPATH) $dir
-          object invoke Utility RefreshAutoPathList
+          if {![info exists ::env(EAGLELIBPATH)] || \
+              [lsearch -exact $::env(EAGLELIBPATH) $dir] == -1} then {
+            #
+            # NOTE: If we have NOT been instructed to be quiet, report now.
+            #
+            if {!$quiet} then {
+              puts -nonewline $channel [appendArgs \
+                  "Found vendor-specific test package directory \"" $dir \
+                  "\", adding...\n"]
+            }
+
+            lappend ::env(EAGLELIBPATH) $dir
+            object invoke Utility RefreshAutoPathList
+          }
 
           #
           # NOTE: We are done, return success.

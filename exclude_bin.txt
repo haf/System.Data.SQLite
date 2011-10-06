@@ -1,4 +1,6 @@
 *.exp
 *.lib
 *.map
-*Microsoft*
+*Installer.*
+*EnvDTE.*
+*Microsoft.*

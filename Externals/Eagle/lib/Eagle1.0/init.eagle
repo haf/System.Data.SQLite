@@ -564,7 +564,7 @@ namespace eval ::Eagle {
       lappend command [info nameofexecutable]
     }
 
-    eval lappend command $args
+    if {[llength $args] > 0} then {eval lappend command $args}
 
     return [uplevel 1 $command]
   }

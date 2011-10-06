@@ -62,6 +62,7 @@ SET BASE_CONFIGURATION=%BASE_CONFIGURATION:ManagedOnly=%
 SET BASE_CONFIGURATION=%BASE_CONFIGURATION:NativeOnly=%
 
 %_VECHO% BaseConfiguration = '%BASE_CONFIGURATION%'
+%_VECHO% BaseConfigurationSuffix = '%BASE_CONFIGURATIONSUFFIX%'
 
 IF NOT DEFINED BASE_PLATFORM (
   CALL :fn_SetVariable BASE_PLATFORM PLATFORM
@@ -71,13 +72,15 @@ IF NOT DEFINED BASE_PLATFORM (
 
 IF NOT DEFINED TYPE (
   IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
-    SET TYPE=binary-bundle
+    SET TYPE=%TYPE_PREFIX%binary-bundle
   ) ELSE (
-    SET TYPE=binary
+    SET TYPE=%TYPE_PREFIX%binary
   )
 )
 
 %_VECHO% Type = '%TYPE%'
+
+CALL :fn_ResetErrorLevel
 
 %_ECHO% CALL "%TOOLS%\set_common.bat"
 
@@ -151,19 +154,19 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
-IF DEFINED CONFIGURATIONSUFFIX (
-  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
+IF DEFINED BASE_CONFIGURATIONSUFFIX (
+  %_ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%BASE_CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
 ) ELSE (
-  %_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
+  %_ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
 )
 
 IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
-  IF NOT DEFINED CONFIGURATIONSUFFIX (
-    %_ECHO% zip -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
+  IF NOT DEFINED BASE_CONFIGURATIONSUFFIX (
+    %_ECHO% zip -v -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
   )
 )
 
-%_ECHO% zip.exe -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%" -x @exclude_bin.txt
+%_ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%%CONFIGURATIONSUFFIX%" -x @exclude_bin.txt
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive binary files.

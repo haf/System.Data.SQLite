@@ -45,8 +45,10 @@ runTest {test tkt-59edc1018b-1.1 {LINQ with EndsWith} -body {
   set result [list]
 
   foreach value [list "" a b z 1+1 don notthere] {
+    set output ""
+
     set code [catch {
-      testExec $testLinqExeFile [list -eventflags Wait -directory \
+      testClrExec $testLinqExeFile [list -eventflags Wait -directory \
       [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
       -success 0] -endsWith $value
     } error]
@@ -67,7 +69,7 @@ runTest {test tkt-59edc1018b-1.1 {LINQ with EndsWith} -body {
   set result
 } -cleanup {
   unset -nocomplain code output error result value
-} -constraints {eagle file_testlinq.exe file_northwindEF.db} -result \
+} -constraints {eagle monoToDo file_testlinq.exe file_northwindEF.db} -result \
 {0 {} 0 {FURIB GALED GODOS LAZYK LINOD PRINI REGGC WOLZA} 0 {} 0 ERNSH 0 {} 0\
 {AROUT BSBEV CONSH EASTC NORTS SEVES} 0 {}}}
 

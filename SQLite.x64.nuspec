@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>System.Data.SQLite</id>
-    <title>System.Data.SQLite (x86)</title>
+    <id>System.Data.SQLite.x64</id>
     <version>1.0.76.0</version>
     <authors>SQLite Development Team</authors>
-    <description>The official SQLite database engine combined with a complete ADO.NET provider all rolled into a single mixed-mode assembly for x86.</description>
+    <description>The official SQLite database engine combined with a complete ADO.NET provider all rolled into a single mixed-mode assembly for x64.</description>
     <language>en-US</language>
     <projectUrl>http://system.data.sqlite.org/</projectUrl>
     <iconUrl>http://system.data.sqlite.org/images/sqlite32.png</iconUrl>
@@ -14,8 +13,8 @@
     <copyright>Public Domain</copyright>
   </metadata>
   <files>
-    <file src="bin\2008\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib\net20" />
-    <file src="bin\2010\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib\net40" />
+    <file src="bin\2008\x64\ReleaseStatic\System.Data.SQLite.dll" target="lib\net20" />
+    <file src="bin\2010\x64\ReleaseStatic\System.Data.SQLite.dll" target="lib\net40" />
     <file src="bin\2008\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net20" />
     <file src="bin\2010\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net40" />
   </files>

@@ -6,22 +6,30 @@
 <ol>
   <li>
     The string &quot;&lt;root&gt;&quot; represents the root of the source tree
-    for the System.Data.SQLite project.
+    (i.e. the working check-out directory) for the System.Data.SQLite project.
   </li>
 
   <li>
     The string &quot;&lt;year&gt;&quot; represents the version of Visual Studio
-    used (e.g. 2008) to build the binaries being tested.
+    used (e.g. &quot;2008&quot; or &quot;2010&quot;) to build the binaries being
+    tested.
+  </li>
+
+  <li>
+    The string &quot;&lt;configuration&gt;&quot; represents the build
+    configuration for the binaries being tested (e.g. &quot;Debug&quot; or
+    &quot;Release&quot;).
   </li>
 
   <li>
     The string &quot;&lt;platform&gt;&quot; represents the native platform for
-    the binaries being tested (e.g. Win32 or x64).
+    the binaries being tested (e.g. &quot;Win32&quot; or &quot;x64&quot;).
   </li>
 
   <li>
     The string &quot;&lt;pid&gt;&quot; represents the process identifier for the
-    instance of EagleShell being used to run the unit tests.
+    instance of EagleShell being used to run the unit tests (e.g.
+    &quot;1234&quot;).
   </li>
 </ol>
 
@@ -34,9 +42,9 @@
 </p>
 
 <p>
-  First, you will need a full source enlistment for the System.Data.SQLite
+  First, you will need a full source check-out for the System.Data.SQLite
   project, including the
-  &quot;<a href="http://system.data.sqlite.org/index.html/dir?name=Externals/Eagle">Externals\Eagle</a>&quot;
+  &quot;<a href="/index.html/dir?name=Externals/Eagle">Externals\Eagle</a>&quot;
   directory.
 </p>
 
@@ -44,10 +52,10 @@
   The binaries to test must be [./build.wiki | built] or
   [./downloads.wiki | downloaded].  If the binaries are downloaded, they must be
   placed in the appropriate build output directory (e.g.
-  &quot;&lt;root&gt;\bin\&lt;year&gt;\Release\bin&quot; for the separate managed
-  and interop assemblies or
-  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;platform&gt;\Release&quot; for the
-  mixed-mode assembly).
+  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;configuration&gt;\bin&quot; for the
+  separate managed and interop assemblies or
+  &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;platform&gt;\&lt;configuration&gt;&quot;
+  for the mixed-mode assembly).
 </p>
 
 <p>
@@ -69,19 +77,42 @@
   <li>Change the current directory to &quot;&lt;root&gt;&quot;.</li>
 
   <li>
-    Enter the following command to run all the unit tests against the binaries built with a separate managed and interop assembly:
+    Enter the following command to run all the unit tests against the binaries
+    built with a separate managed and interop assembly:
     <b>Externals\Eagle\bin\EagleShell.exe -file Tests\all.eagle</b>
   </li>
 
   <li>
-    Enter the following command to run all the unit tests against the binaries built with a mixed-mode assembly:
+    Enter the following command to run all the unit tests against the binaries
+    built with a mixed-mode assembly:
     <b>Externals\Eagle\bin\EagleShell.exe -initialize -runtimeOption native -file Tests\all.eagle</b>
   </li>
 
   <li>
-    Make sure all tests pass; the log file &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any errors should occur.  EagleTest should produce &quot;success&quot; messages very similar to the following:<br /><br />
-    PASSED: 30<br />
-    TOTAL: 30<br />
+    To test binaries built with MSBuild 3.5 or Visual Studio 2008 (i.e. because
+    the default is to test binaries built with MSBuild 4.0 or Visual Studio
+    2010) add the following command line argument right after
+    &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
+    command lines:
+    <b>-preInitialize &quot;set test_year 2008&quot;</b>
+  </li>
+
+  <li>
+    To test binaries built in the &quot;Debug&quot; build configuration (i.e.
+    because the default is to test binaries built in the &quot;Release&quot;
+    build configuration) add the following command line argument right after
+    &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
+    command lines:
+    <b>-preInitialize &quot;set test_configuration Debug&quot;</b>
+  </li>
+
+  <li>
+    Make sure all tests pass; the log file
+    &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any
+    errors should occur.  EagleTest should produce &quot;success&quot; messages
+    very similar to the following:<br /><br />
+    PASSED: 48<br />
+    TOTAL: 48<br />
     PASS PERCENTAGE: 100%<br />
     OVERALL RESULT: SUCCESS<br />
   </li>

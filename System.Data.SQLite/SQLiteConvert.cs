@@ -917,7 +917,11 @@ namespace System.Data.SQLite
       //       the two strings must hash to the same value.
       //
       if (value != null)
+#if !PLATFORM_COMPACTFRAMEWORK
         return value.ToLowerInvariant().GetHashCode();
+#else
+        return value.ToLower().GetHashCode();
+#endif
       else
         throw new ArgumentNullException("value");
     }

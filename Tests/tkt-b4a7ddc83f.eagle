@@ -20,27 +20,32 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
+#
+# NOTE: Make sure that SQLite core library is completely shutdown prior to
+#       starting any of the tests in this file.
+#
+if {[haveConstraint SQLite]} then {
+  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+      sqlite3_shutdown
+}
+
+###############################################################################
+
 for {set i 1} {$i < 3} {incr i} {
-  runTest {test tkt-b4a7ddc83f-1.$i {logging shutdown} -setup [subst {
+  runTest {test tkt-b4a7ddc83f-1.$i {logging shutdown} -setup \
+      [getAppDomainPreamble {
     set appDomainId(1) {[object invoke AppDomain.CurrentDomain Id]}
     set fileName {tkt-b4a7ddc83f-1.$i.db}
-
-    if {[hasRuntimeOption native]} then {
-      object invoke Interpreter.GetActive AddRuntimeOption native
-    }
-
-    set ::path {$::path}
-    set ::test_year {[getBuildYear]}
-    set ::test_configuration {[getBuildConfiguration]}
   }] -body {
     set appDomainId(2) [object invoke AppDomain.CurrentDomain Id]
 
     package require EagleLibrary
     package require EagleTest
+    package require System.Data.SQLite.Test
 
-    source [file join $path common.eagle]
+    object load -loadtype File [file join [getBinaryDirectory] \
+        System.Data.SQLite.dll]
 
-    object load -loadtype File [getBuildFileName System.Data.SQLite.dll]
     object invoke System.Data.SQLite.SQLiteLog Initialize
 
     list $appDomainId(1) $appDomainId(2) \
@@ -49,8 +54,8 @@ for {set i 1} {$i < 3} {incr i} {
     cleanupDb $fileName
     unset -nocomplain appDomainId db fileName
   } -constraints {eagle monoBug28 command.sql compile.DATA\
-compile.ISOLATED_INTERPRETERS System.Data.SQLite} -isolationLevel AppDomain \
--match regexp -result {^\d+ \d+ True SQLiteConnection#\d+$}}
+compile.ISOLATED_INTERPRETERS SQLite System.Data.SQLite} -isolationLevel \
+AppDomain -match regexp -result {^\d+ \d+ True SQLiteConnection#\d+$}}
 }
 
 ###############################################################################
