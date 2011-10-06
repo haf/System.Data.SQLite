@@ -30,12 +30,14 @@ runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
   set otherDbName otherDb
   set table [appendArgs $otherDbName .t1]
 
+  set sql(inserts) ""
   set sql(1) [subst { \
     ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
-    CREATE TABLE ${table}(x INTEGER PRIMARY KEY, y); \
-    [for {set i 1} {$i < 200} {incr i} {
-      append sql(inserts) \
-          "INSERT INTO ${table} (x, y) VALUES($i, '$i'); "
+    CREATE TABLE ${table}(x INTEGER PRIMARY KEY, y DATETIME); \
+    [for {set i 1} {$i < 2} {incr i} {
+      append sql(inserts) [appendArgs \
+          "INSERT INTO " ${table} " (x, y) VALUES(" $i ", '" \
+          [clock format $i -format {yyyy-MM-ddTHH:mm:ss}] "'); "]
     }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
   }]
 
@@ -46,6 +48,7 @@ runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
+    using System;
     using System.Data;
     using System.Data.SQLite;
 
@@ -89,11 +92,10 @@ runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
                   // NOTE: Update even rows and delete odd rows.
                   //
                   if ((long)dataRow\["x"\] % 2 == 0)
-                    dataRow\["y"\] = "zero";
+                    dataRow\["y"\] =
+                        DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss");
                   else
                     dataRow.Delete();
-
-                  break;
                 }
 
                 dataAdapter.Update(dataTable); // DBConcurrencyException (?)
