@@ -92,6 +92,8 @@ runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
                     dataRow\["y"\] = "zero";
                   else
                     dataRow.Delete();
+
+                  break;
                 }
 
                 dataAdapter.Update(dataTable); // DBConcurrencyException (?)
@@ -115,8 +117,8 @@ runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
   unset -nocomplain result code results errors i sql table otherDbName \
       otherDataSource dataSource id db otherFileName fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA System.Data.SQLite} -match regexp \
--result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
 
 ###############################################################################
 
