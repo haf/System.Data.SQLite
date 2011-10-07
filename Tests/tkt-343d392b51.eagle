@@ -21,7 +21,7 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
-  setupDb [set fileName tkt-343d392b51-1.1.db]
+  setupDb [set fileName tkt-343d392b51-1.1.db] "" "" "DateTimeFormat=JulianDay;"
   set otherFileName tkt-343d392b51-1.1-otherDb.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
@@ -36,8 +36,8 @@ runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
     CREATE TABLE ${table}(x INTEGER PRIMARY KEY, y DATETIME); \
     [for {set i 1} {$i < 2} {incr i} {
       append sql(inserts) [appendArgs \
-          "INSERT INTO " ${table} " (x, y) VALUES(" $i ", '" \
-          [clock format $i -format {yyyy-MM-ddTHH:mm:ss}] "'); "]
+          "INSERT INTO " ${table} " (x, y) VALUES(" $i ", JULIANDAY('" \
+          [clock format $i -format {yyyy-MM-ddTHH:mm:ss}] "')); "]
     }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
   }]
 
@@ -59,7 +59,7 @@ runTest {test tkt-343d392b51-1.1 {SQLiteDataAdapter batch updates} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};DateTimeFormat=JulianDay;"))
           {
             connection.Open();
 

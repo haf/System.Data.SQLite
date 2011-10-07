@@ -21,7 +21,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The value for the Unix epoch (e.g. January 1, 1970 at midnight, in UTC).
     /// </summary>
-    private static readonly DateTime UnixEpoch =
+    protected static readonly DateTime UnixEpoch =
         new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     /// <summary>

@@ -408,9 +408,34 @@ namespace System.Data.SQLite
 
     internal override void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt)
     {
-      byte[] b = ToUTF8(dt);
-      int n = UnsafeNativeMethods.sqlite3_bind_text(stmt._sqlite_stmt, index, b, b.Length - 1, (IntPtr)(-1));
-      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+        switch (_datetimeFormat)
+        {
+            case SQLiteDateFormats.Ticks:
+                {
+                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, dt.Ticks);
+                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+                    break;
+                }
+            case SQLiteDateFormats.JulianDay:
+                {
+                    int n = UnsafeNativeMethods.sqlite3_bind_double(stmt._sqlite_stmt, index, ToJulianDay(dt));
+                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+                    break;
+                }
+            case SQLiteDateFormats.UnixEpoch:
+                {
+                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, Convert.ToInt64(dt.Subtract(UnixEpoch).TotalSeconds));
+                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+                    break;
+                }
+            default:
+                {
+                    byte[] b = ToUTF8(dt);
+                    int n = UnsafeNativeMethods.sqlite3_bind_text(stmt._sqlite_stmt, index, b, b.Length - 1, (IntPtr)(-1));
+                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+                    break;
+                }
+        }
     }
 
     internal override void Bind_Blob(SQLiteStatement stmt, int index, byte[] blobData)
