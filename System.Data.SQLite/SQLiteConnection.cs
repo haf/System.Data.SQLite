@@ -53,6 +53,15 @@ namespace System.Data.SQLite
   /// <description>ISO8601</description>
   /// </item>
   /// <item>
+  /// <description>BaseSchemaName</description>
+  /// <description>Some base data classes in the framework (e.g. those that build SQL queries dynamically)
+  /// assume that an ADO.NET provider cannot support an alternate catalog (i.e. database) without supporting
+  /// alternate schemas as well; however, SQLite does not fit into this model.  Therefore, this value is used
+  /// as a placeholder and removed prior to preparing any SQL statements that may contain it.</description>
+  /// <description>N</description>
+  /// <description>sqlite_schema_stub</description>
+  /// </item>
+  /// <item>
   /// <description>BinaryGUID</description>
   /// <description><b>True</b> - Store GUID columns in binary form<br/><b>False</b> - Store GUID columns as text</description>
   /// <description>N</description>
@@ -152,6 +161,13 @@ namespace System.Data.SQLite
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
   {
+    /// <summary>
+    /// The default "stub" (i.e. placeholder) base schema name to use when
+    /// returning column schema information.  Used as the initial value of
+    /// the BaseSchemaName property.
+    /// </summary>
+    private const string DefaultBaseSchemaName = "sqlite_schema_stub";
+
     private const int SQLITE_FCNTL_WIN32_AV_RETRY = 9;
 
     private const string _dataDirectory = "|DataDirectory|";
@@ -194,6 +210,12 @@ namespace System.Data.SQLite
     /// Temporary password storage, emptied after the database has been opened
     /// </summary>
     private byte[] _password;
+
+    /// <summary>
+    /// The "stub" (i.e. placeholder) base schema name to use when returning
+    /// column schema information.
+    /// </summary>
+    internal string _baseSchemaName;
 
     /// <summary>
     /// Default command timeout
@@ -804,6 +826,8 @@ namespace System.Data.SQLite
         _defaultIsolation = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), FindKey(opts, "Default IsolationLevel", "Serializable"), true);
         if (_defaultIsolation != IsolationLevel.Serializable && _defaultIsolation != IsolationLevel.ReadCommitted)
           throw new NotSupportedException("Invalid Default IsolationLevel specified");
+
+        _baseSchemaName = FindKey(opts, "BaseSchemaName", DefaultBaseSchemaName);
 
         //string temp = FindKey(opts, "DateTimeFormat", "ISO8601");
         //if (String.Compare(temp, "ticks", StringComparison.OrdinalIgnoreCase) == 0) dateFormat = SQLiteDateFormats.Ticks;

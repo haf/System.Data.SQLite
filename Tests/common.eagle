@@ -108,13 +108,21 @@ namespace eval ::Eagle {
       #         "object invoke Interpreter.GetActive AddRuntimeOption native"
       #         -file .\path\to\all.eagle
       #
-      if {[hasRuntimeOption native]} then {
-        return [file join [file dirname $::path] bin [getBuildYear] \
-            [machineToPlatform $::tcl_platform(machine)] \
-            [getBuildConfiguration]]
+      if {[info exists ::build_directory] && \
+          [string length $::build_directory] > 0} then {
+        #
+        # NOTE: The location of the build directory has been overridden.
+        #
+        return $::build_directory
       } else {
-        return [file join [file dirname $::path] bin [getBuildYear] \
-            [getBuildConfiguration] bin]
+        if {[hasRuntimeOption native]} then {
+          return [file join [file dirname $::path] bin [getBuildYear] \
+              [machineToPlatform $::tcl_platform(machine)] \
+              [getBuildConfiguration]]
+        } else {
+          return [file join [file dirname $::path] bin [getBuildYear] \
+              [getBuildConfiguration] bin]
+        }
       }
     }
 
@@ -131,7 +139,15 @@ namespace eval ::Eagle {
       #       managed assemblies (i.e. because this is one of the few places
       #       where the CLR will actually find and load them properly).
       #
-      return [info binary]
+      if {[info exists ::binary_directory] && \
+          [string length $::binary_directory] > 0} then {
+        #
+        # NOTE: The location of the binary directory has been overridden.
+        #
+        return $::binary_directory
+      } else {
+        return [info binary]
+      }
     }
 
     proc getBinaryFileName { fileName } {
@@ -303,7 +319,9 @@ namespace eval ::Eagle {
       eval $command
     }
 
-    proc setupDb {fileName {mode ""} {delete ""} {extra ""} {varName db}} {
+    proc setupDb {
+            fileName {mode ""} {dateTimeFormat ""} {extra ""} {delete true}
+            {varName db}} {
       #
       # NOTE: For now, all test databases used by the test suite are placed into
       #       the temporary directory.  Each database used by a test should be
@@ -315,7 +333,7 @@ namespace eval ::Eagle {
       # NOTE: By default, delete any pre-existing database with the same file
       #       name.
       #
-      if {[string length $delete] == 0 || $delete} then {
+      if {$delete} then {
         catch {file delete $fileName}
       }
 
@@ -337,6 +355,14 @@ namespace eval ::Eagle {
       #
       if {[string length $mode] > 0} then {
         append connection {;Journal Mode=${mode}}
+      }
+
+      #
+      # NOTE: If the caller specified a DateTime format, add the necessary
+      #       portion of the connection string now.
+      #
+      if {[string length $dateTimeFormat] > 0} then {
+        append connection {;DateTimeFormat=${dateTimeFormat}}
       }
 
       #

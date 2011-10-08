@@ -75,7 +75,17 @@ namespace System.Data.SQLite
     /// </summary>
     private SQLiteKeyReader _keyInfo;
 
-    internal long _version; // Matches the version of the connection
+    /// <summary>
+    /// Matches the version of the connection.
+    /// </summary>
+    internal long _version;
+
+    /// <summary>
+    /// The "stub" (i.e. placeholder) base schema name to use when returning
+    /// column schema information.  Matches the base schema name used by the
+    /// associated connection.
+    /// </summary>
+    private string _baseSchemaName;
 
     /// <summary>
     /// Internal constructor, initializes the datareader and sets up to begin executing statements
@@ -87,6 +97,7 @@ namespace System.Data.SQLite
       _throwOnDisposed = true;
       _command = cmd;
       _version = _command.Connection._version;
+      _baseSchemaName = _command.Connection._baseSchemaName;
 
       _commandBehavior = behave;
       _activeStatementIndex = -1;
@@ -640,6 +651,7 @@ namespace System.Data.SQLite
         row[SchemaTableOptionalColumn.IsAutoIncrement] = false;
         row[SchemaTableColumn.DataType] = GetFieldType(n);
         row[SchemaTableOptionalColumn.IsHidden] = false;
+        row[SchemaTableColumn.BaseSchemaName] = _baseSchemaName;
 
         strColumn = _command.Connection._sql.ColumnOriginalName(_activeStatement, n);
         if (String.IsNullOrEmpty(strColumn) == false) row[SchemaTableColumn.BaseColumnName] = strColumn;

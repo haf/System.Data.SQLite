@@ -264,6 +264,26 @@ namespace System.Data.SQLite
 
     internal override SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, uint timeoutMS, out string strRemain)
     {
+      if (!String.IsNullOrEmpty(strSql))
+      {
+        //
+        // NOTE: SQLite does not support the concept of separate schemas
+        //       in one database; therefore, remove the base schema name
+        //       used to smooth integration with the base .NET Framework
+        //       data classes.
+        //
+        string baseSchemaName = (cnn != null) ? cnn._baseSchemaName : null;
+
+        if (!String.IsNullOrEmpty(baseSchemaName))
+        {
+          strSql = strSql.Replace(
+              String.Format("[{0}].", baseSchemaName), String.Empty);
+
+          strSql = strSql.Replace(
+              String.Format("{0}.", baseSchemaName), String.Empty);
+        }
+      }
+
       IntPtr stmt = IntPtr.Zero;
       IntPtr ptr = IntPtr.Zero;
       int len = 0;

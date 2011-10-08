@@ -651,7 +651,7 @@ runTest {test basic-1.11 {LastInsertRowId property} -setup {
 ###############################################################################
 
 runTest {test basic-1.12 {DateTime using Unix epoch} -setup {
-  setupDb [set fileName basic-1.12.db] "" "" "DateTimeFormat=UnixEpoch;"
+  setupDb [set fileName basic-1.12.db] "" UnixEpoch
 } -body {
   set result [list]
 
@@ -705,7 +705,7 @@ set date [clock format [clock seconds] -format yyyy-MM-dd]
 ###############################################################################
 
 runTest {test basic-1.13 {DateTime using invariant culture} -setup {
-  setupDb [set fileName basic-1.13.db] "" "" "DateTimeFormat=InvariantCulture;"
+  setupDb [set fileName basic-1.13.db] "" InvariantCulture
 } -body {
   set result [list]
 
@@ -766,7 +766,7 @@ ${date}T12:00:00.0000000Z}}} {12 {{x 12} {y2 2009-12-16T12:00:00.0000000Z}}}}]}
 ###############################################################################
 
 runTest {test basic-1.14 {DateTime using current culture} -setup {
-  setupDb [set fileName basic-1.14.db] "" "" "DateTimeFormat=CurrentCulture;"
+  setupDb [set fileName basic-1.14.db] "" CurrentCulture
 } -body {
   set result [list]
 
