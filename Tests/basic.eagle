@@ -830,45 +830,6 @@ unset -nocomplain date
 
 ###############################################################################
 
-runTest {test basic-1.15 {attached database, same table name} -setup {
-  setupDb [set fileName basic-1.15.db]
-  set otherFileName basic-1.15-otherDb.db
-} -body {
-  set otherDataSource [file join [getTemporaryPath] $otherFileName]
-  set otherDbName otherDb
-  set otherTable [appendArgs $otherDbName .t1]
-
-  set sql(inserts) ""
-  set sql(1) [subst { \
-    CREATE TABLE t1(x INTEGER PRIMARY KEY); \
-    ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
-    CREATE TABLE ${otherTable}(x INTEGER PRIMARY KEY); \
-    [for {set i 1} {$i < 3} {incr i} {
-      append sql(inserts) [appendArgs \
-          "INSERT INTO t1 (x) VALUES(" $i "); "]
-
-      append sql(inserts) [appendArgs \
-          "INSERT INTO " ${otherTable} " (x) VALUES(" [expr {$i * 2}] "); "]
-    }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
-  }]
-
-  sql execute $db $sql(1)
-
-  list [sql execute -execute reader -format list $db "SELECT x FROM t1;"] \
-      [sql execute -execute reader -format list $db [appendArgs \
-      "SELECT x FROM " ${otherTable} ";"]]
-} -cleanup {
-  cleanupDb $otherFileName
-  cleanupDb $fileName
-
-  unset -nocomplain i sql otherTable otherDbName otherDataSource db \
-      otherFileName fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
-{{1 2} {2 4}}}
-
-###############################################################################
-
 unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################
