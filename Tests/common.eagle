@@ -279,9 +279,10 @@ namespace eval ::Eagle {
         return $::datetime_format
       } else {
         #
-        # NOTE: Return an ISO8601 DateTime format compatible with SQLite
-        #       suitable for round-tripping with the DateTime class of the
-        #       framework.
+        # NOTE: Return an ISO8601 DateTime format compatible with SQLite,
+        #       System.Data.SQLite, and suitable for round-tripping with the
+        #       DateTime class of the framework.  If this value is changed,
+        #       various tests may fail.
         #
         return "yyyy-MM-dd HH:mm:ss.FFFFFFFK"
       }
