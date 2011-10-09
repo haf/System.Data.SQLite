@@ -65,7 +65,7 @@ namespace System.Data.SQLite
   /// alternate schemas as well; however, SQLite does not fit into this model.  Therefore, this value is used
   /// as a placeholder and removed prior to preparing any SQL statements that may contain it.</description>
   /// <description>N</description>
-  /// <description>sqlite_schema_stub</description>
+  /// <description>sqlite_default_schema</description>
   /// </item>
   /// <item>
   /// <description>BinaryGUID</description>
@@ -170,9 +170,11 @@ namespace System.Data.SQLite
     /// <summary>
     /// The default "stub" (i.e. placeholder) base schema name to use when
     /// returning column schema information.  Used as the initial value of
-    /// the BaseSchemaName property.
+    /// the BaseSchemaName property.  This should start with "sqlite_*"
+    /// because those names are reserved for use by SQLite (i.e. they cannot
+    /// be confused with the names of user objects).
     /// </summary>
-    private const string DefaultBaseSchemaName = "sqlite_schema_stub";
+    private const string DefaultBaseSchemaName = "sqlite_default_schema";
 
     private const int SQLITE_FCNTL_WIN32_AV_RETRY = 9;
 
