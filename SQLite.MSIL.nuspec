@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>System.Data.SQLite.MSIL</id>
+    <version>1.0.76.0</version>
+    <authors>SQLite Development Team</authors>
+    <description>An ADO.NET provider for SQLite (managed-only).</description>
+    <language>en-US</language>
+    <projectUrl>http://system.data.sqlite.org/</projectUrl>
+    <iconUrl>http://system.data.sqlite.org/images/sqlite32.png</iconUrl>
+    <licenseUrl>http://www.sqlite.org/copyright.html</licenseUrl>
+    <tags>sqlite database ado.net provider interop</tags>
+    <copyright>Public Domain</copyright>
+  </metadata>
+  <files>
+    <file src="bin\2008\Release\bin\System.Data.SQLite.dll" target="lib\net20" />
+    <file src="bin\2010\Release\bin\System.Data.SQLite.dll" target="lib\net40" />
+    <file src="bin\2008\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net20" />
+    <file src="bin\2010\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net40" />
+  </files>
+</package>
