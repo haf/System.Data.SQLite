@@ -266,6 +266,27 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getDateTimeFormat {} {
+      #
+      # NOTE: This procedure simply returns the "default" DateTime format used
+      #       by the test suite.
+      #
+      if {[info exists ::datetime_format] && \
+          [string length $::datetime_format] > 0} then {
+        #
+        # NOTE: Return the manually overridden value for the DateTime format.
+        #
+        return $::datetime_format
+      } else {
+        #
+        # NOTE: Return an ISO8601 DateTime format compatible with SQLite
+        #       suitable for round-tripping with the DateTime class of the
+        #       framework.
+        #
+        return "yyyy-MM-dd HH:mm:ss.FFFFFFFK"
+      }
+    }
+
     proc enumerableToList { enumerable } {
       set result [list]
 
@@ -320,8 +341,8 @@ namespace eval ::Eagle {
     }
 
     proc setupDb {
-            fileName {mode ""} {dateTimeFormat ""} {extra ""} {delete true}
-            {varName db}} {
+            fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {extra ""}
+            {delete true} {varName db}} {
       #
       # NOTE: For now, all test databases used by the test suite are placed into
       #       the temporary directory.  Each database used by a test should be
@@ -363,6 +384,14 @@ namespace eval ::Eagle {
       #
       if {[string length $dateTimeFormat] > 0} then {
         append connection {;DateTimeFormat=${dateTimeFormat}}
+      }
+
+      #
+      # NOTE: If the caller specified a DateTimeKind, add the necessary portion
+      #       of the connection string now.
+      #
+      if {[string length $dateTimeKind] > 0} then {
+        append connection {;DateTimeKind=${dateTimeKind}}
       }
 
       #

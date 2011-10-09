@@ -15,8 +15,8 @@ namespace System.Data.SQLite
   /// </summary>
   internal class SQLite3_UTF16 : SQLite3
   {
-    internal SQLite3_UTF16(SQLiteDateFormats fmt)
-      : base(fmt)
+    internal SQLite3_UTF16(SQLiteDateFormats fmt, DateTimeKind kind)
+      : base(fmt, kind)
     {
     }
 
@@ -73,7 +73,32 @@ namespace System.Data.SQLite
 
     internal override void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt)
     {
-      Bind_Text(stmt, index, ToString(dt));
+        switch (_datetimeFormat)
+        {
+            case SQLiteDateFormats.Ticks:
+                {
+                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, dt.Ticks);
+                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+                    break;
+                }
+            case SQLiteDateFormats.JulianDay:
+                {
+                    int n = UnsafeNativeMethods.sqlite3_bind_double(stmt._sqlite_stmt, index, ToJulianDay(dt));
+                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+                    break;
+                }
+            case SQLiteDateFormats.UnixEpoch:
+                {
+                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, Convert.ToInt64(dt.Subtract(UnixEpoch).TotalSeconds));
+                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+                    break;
+                }
+            default:
+                {
+                    Bind_Text(stmt, index, ToString(dt));
+                    break;
+                }
+        }
     }
 
     internal override void Bind_Text(SQLiteStatement stmt, int index, string value)

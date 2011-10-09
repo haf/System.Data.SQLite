@@ -28,35 +28,36 @@ for {set i 1} {$i < 5} {incr i} {
   runTest {test [appendArgs tkt-343d392b51-1. $i] [subst {DateTime\
       binding $dateTimeFormat format}] -setup {
     setupDb [set fileName [appendArgs tkt-343d392b51-1. $i .db]] "" \
-        $dateTimeFormat
+        $dateTimeFormat Utc
 
-    set dateTime "4 October, 2011 3:27:50 PM"
+    set dateTime "4 October, 2011 3:27:50 PM GMT"
   } -body {
     sql execute $db "CREATE TABLE t1(x DATETIME);"
 
-    set paramDateTime1 [clock format [clock scan $dateTime -gmt true] -format \
-        "yyyy-MM-dd HH:mm:ss.FFFFFFF" -gmt true]
+    set paramDateTime1 [clock format [clock scan $dateTime] -format \
+        [getDateTimeFormat] -gmt true]
 
     switch -exact -- $dateTimeFormat {
       Ticks {
-        set paramDateTime1 [object invoke -alias DateTime SpecifyKind [set \
-            paramDateTime1 [object invoke DateTime Parse $paramDateTime1]] Utc]
-
-        set paramDateTime1 [$paramDateTime1 Ticks]
+        set paramDateTime1 [object invoke -alias DateTime Parse $paramDateTime1]
+        set paramDateTime1 [$paramDateTime1 ToUniversalTime.Ticks]
         set paramDateTime2 $paramDateTime1
       }
       ISO8601 {
         set paramDateTime2 [appendArgs ' $paramDateTime1 ']
       }
       JulianDay {
-        set paramDateTime1 [object invoke -alias DateTime SpecifyKind [set \
-            paramDateTime1 [object invoke DateTime Parse $paramDateTime1]] Utc]
+        set paramDateTime1 [object invoke -alias DateTime Parse $paramDateTime1]
+        set paramDateTime1 [$paramDateTime1 -alias ToUniversalTime]
 
-        set paramDateTime1 [expr {[$paramDateTime1 ToOADate] + 2415018.5}]
+        set paramDateTime1 [expr {[$paramDateTime1 ToOADate] + \
+            [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+            OleAutomationEpochAsJulianDay]}]
+
         set paramDateTime2 $paramDateTime1
       }
       UnixEpoch {
-        set paramDateTime1 [clock scan $dateTime -gmt true]
+        set paramDateTime1 [clock scan $dateTime]
         set paramDateTime2 $paramDateTime1
       }
     }
@@ -65,17 +66,17 @@ for {set i 1} {$i < 5} {incr i} {
         ");"]
 
     list [sql execute -verbatim -execute reader -format list -datetimeformat \
-        yyyy-MM-ddTHH:mm:ss $db "SELECT x FROM t1 WHERE x = ?;" \
+        [getDateTimeFormat] $db "SELECT x FROM t1 WHERE x = ?;" \
         [list param1 String $paramDateTime1]] \
         [sql execute -verbatim -execute reader -format list -datetimeformat \
-        yyyy-MM-ddTHH:mm:ss $db "SELECT x FROM t1 WHERE x = ?;" \
+        [getDateTimeFormat] $db "SELECT x FROM t1 WHERE x = ?;" \
         [list param1 DateTime $paramDateTime1]]
   } -cleanup {
     cleanupDb $fileName
 
     unset -nocomplain paramDateTime2 paramDateTime1 dateTime db fileName
-  } -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
-System.Data.SQLite} -result {2011-10-04T15:27:50 2011-10-04T15:27:50}}
+  } -constraints {eagle culture.en_US monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite} -result {{{2011-10-04 15:27:50Z}} {{2011-10-04 15:27:50Z}}}}
 }
 
 ###############################################################################
@@ -92,21 +93,21 @@ runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter batch updates} -setup {
   set dataSource [file join [getTemporaryPath] $fileName]
   set otherDataSource [file join [getTemporaryPath] $otherFileName]
   set otherDbName otherDb
-  set table [appendArgs $otherDbName .t1]
+  set otherTable [appendArgs $otherDbName .t1]
 
   set sql(inserts) ""
   set sql(1) [subst { \
     ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
-    CREATE TABLE ${table}(x INTEGER PRIMARY KEY, y DATETIME); \
+    CREATE TABLE ${otherTable}(x INTEGER PRIMARY KEY, y DATETIME); \
     [for {set i 1} {$i < 3} {incr i} {
       append sql(inserts) [appendArgs \
-          "INSERT INTO " ${table} " (x, y) VALUES(" $i ", '" \
-          [clock format $i -format {yyyy-MM-ddTHH:mm:ss}] "'); "]
+          "INSERT INTO " ${otherTable} " (x, y) VALUES(" $i ", '" \
+          [clock format $i -format [getDateTimeFormat]] "'); "]
     }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
   }]
 
   set sql(2) [subst { \
-    SELECT x, y FROM ${table} ORDER BY x; \
+    SELECT x, y FROM ${otherTable} ORDER BY x; \
   }]
 
   unset -nocomplain results errors
@@ -138,9 +139,9 @@ runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter batch updates} -setup {
             {
               using (DataSet dataSet = new DataSet())
               {
-                dataAdapter.Fill(dataSet, "${table}");
+                dataAdapter.Fill(dataSet, "${otherTable}");
 
-                DataTable dataTable = dataSet.Tables\["${table}"\];
+                DataTable dataTable = dataSet.Tables\["${otherTable}"\];
 
                 dataTable.Columns\["x"\].Unique = true;
                 dataTable.PrimaryKey = new DataColumn\[\] {
@@ -159,7 +160,7 @@ runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter batch updates} -setup {
                   //
                   if ((long)dataRow\["x"\] % 2 == 0)
                     dataRow\["y"\] =
-                        DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss");
+                        DateTime.UtcNow.ToString("[getDateTimeFormat]");
                   else
                     dataRow.Delete();
                 }
@@ -182,7 +183,7 @@ runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter batch updates} -setup {
   cleanupDb $otherFileName
   cleanupDb $fileName
 
-  unset -nocomplain result code results errors i sql table otherDbName \
+  unset -nocomplain result code results errors i sql otherTable otherDbName \
       otherDataSource dataSource id db otherFileName fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
@@ -198,21 +199,21 @@ runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter batch updates} -setup {
   set dataSource [file join [getTemporaryPath] $fileName]
   set otherDataSource [file join [getTemporaryPath] $otherFileName]
   set otherDbName otherDb
-  set table [appendArgs $otherDbName .t1]
+  set otherTable [appendArgs $otherDbName .t1]
 
   set sql(inserts) ""
   set sql(1) [subst { \
     ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
-    CREATE TABLE ${table}(x INTEGER PRIMARY KEY, y DATETIME); \
+    CREATE TABLE ${otherTable}(x INTEGER PRIMARY KEY, y DATETIME); \
     [for {set i 1} {$i < 3} {incr i} {
       append sql(inserts) [appendArgs \
-          "INSERT INTO " ${table} " (x, y) VALUES(" $i ", JULIANDAY('" \
-          [clock format $i -format {yyyy-MM-ddTHH:mm:ss}] "')); "]
+          "INSERT INTO " ${otherTable} " (x, y) VALUES(" $i ", JULIANDAY('" \
+          [clock format $i -format [getDateTimeFormat]] "')); "]
     }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
   }]
 
   set sql(2) [subst { \
-    SELECT x, y FROM ${table} ORDER BY x; \
+    SELECT x, y FROM ${otherTable} ORDER BY x; \
   }]
 
   unset -nocomplain results errors
@@ -244,9 +245,9 @@ runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter batch updates} -setup {
             {
               using (DataSet dataSet = new DataSet())
               {
-                dataAdapter.Fill(dataSet, "${table}");
+                dataAdapter.Fill(dataSet, "${otherTable}");
 
-                DataTable dataTable = dataSet.Tables\["${table}"\];
+                DataTable dataTable = dataSet.Tables\["${otherTable}"\];
 
                 dataTable.Columns\["x"\].Unique = true;
                 dataTable.PrimaryKey = new DataColumn\[\] {
@@ -265,7 +266,7 @@ runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter batch updates} -setup {
                   //
                   if ((long)dataRow\["x"\] % 2 == 0)
                     dataRow\["y"\] =
-                        DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss");
+                        DateTime.UtcNow.ToString("[getDateTimeFormat]");
                   else
                     dataRow.Delete();
                 }
@@ -288,7 +289,7 @@ runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter batch updates} -setup {
   cleanupDb $otherFileName
   cleanupDb $fileName
 
-  unset -nocomplain result code results errors i sql table otherDbName \
+  unset -nocomplain result code results errors i sql otherTable otherDbName \
       otherDataSource dataSource id db otherFileName fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \

@@ -40,8 +40,8 @@ namespace System.Data.SQLite
     /// </summary>
     protected SQLiteFunction[] _functionsArray;
 
-    internal SQLite3(SQLiteDateFormats fmt)
-      : base(fmt)
+    internal SQLite3(SQLiteDateFormats fmt, DateTimeKind kind)
+      : base(fmt, kind)
     {
     }
 

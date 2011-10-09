@@ -53,6 +53,12 @@ namespace System.Data.SQLite
   /// <description>ISO8601</description>
   /// </item>
   /// <item>
+  /// <description>DateTimeKind</description>
+  /// <description><b>Unspecified</b> - Not specified as either UTC or local time.<br/><b>Utc</b> - The time represented is UTC.<br/><b>Local</b> - The time represented is local time.</description>
+  /// <description>N</description>
+  /// <description>Unspecified</description>
+  /// </item>
+  /// <item>
   /// <description>BaseSchemaName</description>
   /// <description>Some base data classes in the framework (e.g. those that build SQL queries dynamically)
   /// assume that an ADO.NET provider cannot support an alternate catalog (i.e. database) without supporting
@@ -840,10 +846,13 @@ namespace System.Data.SQLite
                                                                        FindKey(opts, "DateTimeFormat", "ISO8601"),
                                                                        true);
 
+          DateTimeKind kind = (DateTimeKind)Enum.Parse(typeof(DateTimeKind),
+              FindKey(opts, "DateTimeKind", "Unspecified"), true);
+
           if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
-            _sql = new SQLite3_UTF16(dateFormat);
+            _sql = new SQLite3_UTF16(dateFormat, kind);
           else
-            _sql = new SQLite3(dateFormat);
+            _sql = new SQLite3(dateFormat, kind);
         }
 
         SQLiteOpenFlagsEnum flags = SQLiteOpenFlagsEnum.None;
@@ -1062,10 +1071,13 @@ namespace System.Data.SQLite
                                                                          FindKey(opts, "DateTimeFormat", "ISO8601"),
                                                                          true);
 
+            DateTimeKind kind = (DateTimeKind)Enum.Parse(typeof(DateTimeKind),
+                FindKey(opts, "DateTimeKind", "Unspecified"), true);
+
             if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
-                _sql = new SQLite3_UTF16(dateFormat);
+                _sql = new SQLite3_UTF16(dateFormat, kind);
             else
-                _sql = new SQLite3(dateFormat);
+                _sql = new SQLite3(dateFormat, kind);
         }
         if (_sql != null) return _sql.Shutdown();
         throw new InvalidOperationException("Database connection not active.");
