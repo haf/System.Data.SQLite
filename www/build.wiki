@@ -130,6 +130,7 @@
       <li>&lt;root&gt;\testlinq\2010\App.config</li>
       <li>&lt;root&gt;\testlinq\Properties\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\Tests\version.eagle</li>
+      <li>&lt;root&gt;\tools\install\Properties\AssemblyInfo.cs</li>
     </ul>
 
     You'll need to update the INTEROP_BUILD_NUMBER, INTEROP_MANIFEST_VERSION,
@@ -207,7 +208,7 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
-    Enter the following command to build the binaries for Win32 (x86):
+    Enter the following command to build the binaries for Win32 (x86):&nbsp;
     <b>build.bat ReleaseNativeOnly Win32</b><br /><i>You may need to enter the
     command &quot;<b>setenv /x86</b>&quot; first if you are using a
     &quot;Windows SDK Command Prompt&quot; or &quot;Visual Studio Command
@@ -221,7 +222,7 @@
   </li>
 
   <li>
-    Enter the following command to build the binaries for x64: <b>build.bat
+    Enter the following command to build the binaries for x64:&nbsp;<b>build.bat
     ReleaseNativeOnly x64</b><br /><i>You may need to enter the command
     &quot;<b>setenv /x64</b>&quot; first if you are using a &quot;Windows SDK
     Command Prompt&quot; or &quot;Visual Studio Command Prompt&quot; window.</i>
@@ -237,12 +238,13 @@
     Enter the following command to build the setup binaries for all supported
     build configurations (unfortunately, it is not possible to build the setup
     using the Inno Setup IDE.  It must be done using the provided command line
-    tools due to its highly dynamic nature):<b>bake_all.bat</b>
+    tools due to its highly dynamic nature):&nbsp;<b>bake_all.bat</b>
   </li>
 
   <li>
     Make sure everything succeeds with no errors.  Inno Setup should produce
-    &quot;success&quot; messages very similar to the following: <b>Successful
-    compile (X.XXX sec). Resulting Setup program filename is: abc</b>
+    &quot;success&quot; messages very similar to the following:&nbsp;
+    <b>Successful compile (X.XXX sec). Resulting Setup program filename
+    is:&nbsp;abc</b>
   </li>
 </ol>

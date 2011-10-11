@@ -146,6 +146,10 @@ set patterns [list \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)]]
 
 set fileNames [list \
@@ -176,7 +180,9 @@ set fileNames [list \
     [file join testlinq 2008 App.config] \
     [file join testlinq 2010 App.config] \
     [file join testlinq Properties AssemblyInfo.cs] \
-    [file join testlinq Properties AssemblyInfo.cs]]
+    [file join testlinq Properties AssemblyInfo.cs] \
+    [file join tools install Properties AssemblyInfo.cs] \
+    [file join tools install Properties AssemblyInfo.cs]]
 
 for {set i 1} {$i <= [llength $fileNames]} {incr i} {
   set pattern [lindex $patterns [expr {$i - 1}]]
