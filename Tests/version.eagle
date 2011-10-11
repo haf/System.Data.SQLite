@@ -83,19 +83,54 @@ runTest {test version-1.1 {'System.Data.SQLite' binary version} -body {
 
 ###############################################################################
 
-runTest {test version-1.2 {'System.Data.SQLite.Linq' binary version} -body {
+runTest {test version-1.2 {'System.Data.SQLite' assembly version} -body {
+  set assembly [object load System.Data.SQLite]
+
+  foreach assembly [object assemblies] {
+    if {[string match System.Data.SQLite,* $assembly]} then {
+      return [regexp -- [appendArgs Version= [string map [list . \\.] \
+          $version(full)] ,] $assembly]
+    }
+  }
+
+  return false
+} -cleanup {
+  unset -nocomplain assembly
+} -constraints {eagle SQLite System.Data.SQLite} -result {1}}
+
+###############################################################################
+
+runTest {test version-1.3 {'System.Data.SQLite.Linq' binary version} -body {
   file version $systemDataSQLiteLinqDllFile
 } -constraints {eagle file_System.Data.SQLite.Linq.dll} -result $version(full)}
 
 ###############################################################################
 
-runTest {test version-1.3 {'test' binary version} -body {
+runTest {test version-1.4 {'System.Data.SQLite.Linq' assembly version} -body {
+  set assembly [object load System.Data.SQLite.Linq]
+
+  foreach assembly [object assemblies] {
+    if {[string match System.Data.SQLite.Linq,* $assembly]} then {
+      return [regexp -- [appendArgs Version= [string map [list . \\.] \
+          $version(full)] ,] $assembly]
+    }
+  }
+
+  return false
+} -cleanup {
+  unset -nocomplain assembly
+} -constraints {eagle SQLite System.Data.SQLite System.Data.SQLite.Linq} \
+-result {1}}
+
+###############################################################################
+
+runTest {test version-1.5 {'test' binary version} -body {
   file version $testExeFile
 } -constraints {eagle file_test.exe} -result $version(full)}
 
 ###############################################################################
 
-runTest {test version-1.4 {'testlinq' binary version} -body {
+runTest {test version-1.6 {'testlinq' binary version} -body {
   file version $testLinqExeFile
 } -constraints {eagle file_testlinq.exe} -result $version(full)}
 
@@ -206,7 +241,7 @@ for {set i 1} {$i <= [llength $fileNames]} {incr i} {
     checkForFile $test_channel $fileName $constraint
   }
 
-  runTest {test [appendArgs version-1.5. $i] \
+  runTest {test [appendArgs version-1.7. $i] \
       [appendArgs "pattern {" $pattern "} in file \"" $fileName \"] -body {
     regexp -- $pattern [readFile $fileName]
   } -constraints [list eagle [appendArgs file_ $constraint]] -result {1}}
