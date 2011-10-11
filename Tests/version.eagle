@@ -19,22 +19,26 @@ package require System.Data.SQLite.Test
 runSQLiteTestPrologue
 
 ###############################################################################
+# ******************** BEGIN VOLATILE VERSION INFORMATION *********************
+###############################################################################
 
 #
 # NOTE: For these unit tests to be useful and accurate, the following version
 #       numbers must be manually kept synchronized with the version numbers for
-#       the binaries.
+#       the source code files, the built binaries, and the release packages.
 #
-set version(major)     1
-set version(minor)     0
-set version(build)    76
-set version(revision)  0
+set version(major)             1
+set version(minor)             0
+set version(build)            76; # NOTE: Incremented with each release.
+set version(revision)          0
 
+###############################################################################
+# ********************* END VOLATILE VERSION INFORMATION **********************
 ###############################################################################
 
 #
-# NOTE: Build the full version number for the project using the components set
-#       above.  This should not have to be changed.
+# NOTE: Build the full version number using the components setup above.  This
+#       should not have to be changed.
 #
 set version(full) [appendArgs $version(major) . $version(minor) . \
                               $version(build) . $version(revision)]
@@ -178,7 +182,9 @@ for {set i 1} {$i <= [llength $fileNames]} {incr i} {
   } -constraints [list eagle [appendArgs file_ $constraint]] -result {1}}
 }
 
-unset -nocomplain constraint fileName pattern fileNames patterns i
+###############################################################################
+
+unset -nocomplain constraint fileName pattern fileNames patterns i version
 
 ###############################################################################
 
