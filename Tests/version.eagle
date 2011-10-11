@@ -136,9 +136,17 @@ set patterns [list \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
+    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
-    [appendArgs Version= [string map [list . \\.] $version(full)] ,]]
+    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
+    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)]]
 
 set fileNames [list \
     SQLite.nuspec \
@@ -162,9 +170,13 @@ set fileNames [list \
     [file join System.Data.SQLite UnsafeNativeMethods.cs] \
     [file join System.Data.SQLite.Linq AssemblyInfo.cs] \
     [file join System.Data.SQLite.Linq AssemblyInfo.cs] \
+    [file join test AssemblyInfo.cs] \
+    [file join test AssemblyInfo.cs] \
     [file join test app.config] \
     [file join testlinq 2008 App.config] \
-    [file join testlinq 2010 App.config]]
+    [file join testlinq 2010 App.config] \
+    [file join testlinq Properties AssemblyInfo.cs] \
+    [file join testlinq Properties AssemblyInfo.cs]]
 
 for {set i 1} {$i <= [llength $fileNames]} {incr i} {
   set pattern [lindex $patterns [expr {$i - 1}]]

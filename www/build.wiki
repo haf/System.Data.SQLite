@@ -124,9 +124,11 @@
       <li>&lt;root&gt;\System.Data.SQLite\SQLite3.cs</li>
       <li>&lt;root&gt;\System.Data.SQLite\UnsafeNativeMethods.cs</li>
       <li>&lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs</li>
+      <li>&lt;root&gt;\test\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\test\app.config</li>
       <li>&lt;root&gt;\testlinq\2008\App.config</li>
       <li>&lt;root&gt;\testlinq\2010\App.config</li>
+      <li>&lt;root&gt;\testlinq\Properties\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\Tests\version.eagle</li>
     </ul>
 
