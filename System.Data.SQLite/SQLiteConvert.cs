@@ -21,8 +21,13 @@ namespace System.Data.SQLite
     /// <summary>
     /// The value for the Unix epoch (e.g. January 1, 1970 at midnight, in UTC).
     /// </summary>
-    private static readonly DateTime UnixEpoch =
+    protected static readonly DateTime UnixEpoch =
         new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+    /// <summary>
+    /// The value of the OLE Automation epoch represented as a Julian day.
+    /// </summary>
+    private static readonly double OleAutomationEpochAsJulianDay = 2415018.5;
 
     /// <summary>
     /// The format string for DateTime values when using the InvariantCulture or CurrentCulture formats.
@@ -33,23 +38,37 @@ namespace System.Data.SQLite
     /// An array of ISO8601 datetime formats we support conversion from
     /// </summary>
     private static string[] _datetimeFormats = new string[] {
+      "THHmmssK",
+      "THHmmK",
+      "HH:mm:ss.FFFFFFFK",
+      "HH:mm:ssK",
+      "HH:mmK",
+      "yyyy-MM-dd HH:mm:ss.FFFFFFFK", /* NOTE: UTC default (5). */
+      "yyyy-MM-dd HH:mm:ssK",
+      "yyyy-MM-dd HH:mmK",
+      "yyyy-MM-ddTHH:mm:ss.FFFFFFFK",
+      "yyyy-MM-ddTHH:mmK",
+      "yyyy-MM-ddTHH:mm:ssK",
+      "yyyyMMddHHmmssK",
+      "yyyyMMddHHmmK",
+      "yyyyMMddTHHmmssFFFFFFFK",
       "THHmmss",
       "THHmm",
+      "HH:mm:ss.FFFFFFF",
       "HH:mm:ss",
       "HH:mm",
-      "HH:mm:ss.FFFFFFF",
-      "yy-MM-dd",
-      "yyyy-MM-dd",
-      "yyyy-MM-dd HH:mm:ss.FFFFFFF",
+      "yyyy-MM-dd HH:mm:ss.FFFFFFF", /* NOTE: Non-UTC default (19). */
       "yyyy-MM-dd HH:mm:ss",
-      "yyyy-MM-dd HH:mm",                               
+      "yyyy-MM-dd HH:mm",
       "yyyy-MM-ddTHH:mm:ss.FFFFFFF",
       "yyyy-MM-ddTHH:mm",
       "yyyy-MM-ddTHH:mm:ss",
       "yyyyMMddHHmmss",
       "yyyyMMddHHmm",
       "yyyyMMddTHHmmssFFFFFFF",
-      "yyyyMMdd"
+      "yyyy-MM-dd",
+      "yyyyMMdd",
+      "yy-MM-dd"
     };
 
     /// <summary>
@@ -61,12 +80,18 @@ namespace System.Data.SQLite
     /// </summary>
     internal SQLiteDateFormats _datetimeFormat;
     /// <summary>
+    /// The default DateTimeKind for this instance.
+    /// </summary>
+    internal DateTimeKind _datetimeKind;
+    /// <summary>
     /// Initializes the conversion class
     /// </summary>
     /// <param name="fmt">The default date/time format to use for this instance</param>
-    internal SQLiteConvert(SQLiteDateFormats fmt)
+    /// <param name="kind">The DateTimeKind to use.</param>
+    internal SQLiteConvert(SQLiteDateFormats fmt, DateTimeKind kind)
     {
       _datetimeFormat = fmt;
+      _datetimeKind = kind;
     }
 
     #region UTF-8 Conversion Functions
@@ -145,14 +170,40 @@ namespace System.Data.SQLite
     /// </summary>
     /// <remarks>
     /// Acceptable ISO8601 DateTime formats are:
-    ///   yyyy-MM-dd HH:mm:ss
-    ///   yyyyMMddHHmmss
-    ///   yyyyMMddTHHmmssfffffff
-    ///   yyyy-MM-dd
-    ///   yy-MM-dd
-    ///   yyyyMMdd
-    ///   HH:mm:ss
-    ///   THHmmss
+    /// <list type="bullet">
+    /// <item><description>THHmmssK</description></item>
+    /// <item><description>THHmmK</description></item>
+    /// <item><description>HH:mm:ss.FFFFFFFK</description></item>
+    /// <item><description>HH:mm:ssK</description></item>
+    /// <item><description>HH:mmK</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm:ss.FFFFFFFK</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm:ssK</description></item>
+    /// <item><description>yyyy-MM-dd HH:mmK</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm:ss.FFFFFFFK</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mmK</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm:ssK</description></item>
+    /// <item><description>yyyyMMddHHmmssK</description></item>
+    /// <item><description>yyyyMMddHHmmK</description></item>
+    /// <item><description>yyyyMMddTHHmmssFFFFFFFK</description></item>
+    /// <item><description>THHmmss</description></item>
+    /// <item><description>THHmm</description></item>
+    /// <item><description>HH:mm:ss.FFFFFFF</description></item>
+    /// <item><description>HH:mm:ss</description></item>
+    /// <item><description>HH:mm</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm:ss.FFFFFFF</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm:ss</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm:ss.FFFFFFF</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm:ss</description></item>
+    /// <item><description>yyyyMMddHHmmss</description></item>
+    /// <item><description>yyyyMMddHHmm</description></item>
+    /// <item><description>yyyyMMddTHHmmssFFFFFFF</description></item>
+    /// <item><description>yyyy-MM-dd</description></item>
+    /// <item><description>yyyyMMdd</description></item>
+    /// <item><description>yy-MM-dd</description></item>
+    /// </list>
+    /// If the string cannot be matched to one of the above formats, an exception will be thrown.
     /// </remarks>
     /// <param name="dateText">The string containing either a long integer number of 100-nanosecond units since
     /// System.DateTime.MinValue, a Julian day double, an integer number of seconds since the Unix epoch, a
@@ -161,21 +212,105 @@ namespace System.Data.SQLite
     /// <returns>A DateTime value</returns>
     public DateTime ToDateTime(string dateText)
     {
-      switch (_datetimeFormat)
-      {
-        case SQLiteDateFormats.Ticks:
-          return new DateTime(Convert.ToInt64(dateText, CultureInfo.InvariantCulture));
-        case SQLiteDateFormats.JulianDay:
-          return ToDateTime(Convert.ToDouble(dateText, CultureInfo.InvariantCulture));
-        case SQLiteDateFormats.UnixEpoch:
-          return UnixEpoch.AddSeconds(Convert.ToInt32(dateText, CultureInfo.InvariantCulture));
-        case SQLiteDateFormats.InvariantCulture:
-          return DateTime.Parse(dateText, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None);
-        case SQLiteDateFormats.CurrentCulture:
-          return DateTime.Parse(dateText, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None);
-        default:
-          return DateTime.ParseExact(dateText, _datetimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None);
-      }
+      return ToDateTime(dateText, _datetimeFormat, _datetimeKind);
+    }
+
+    /// <summary>
+    /// Converts a string into a DateTime, using the specified DateTimeFormat and DateTimeKind.
+    /// </summary>
+    /// <remarks>
+    /// Acceptable ISO8601 DateTime formats are:
+    /// <list type="bullet">
+    /// <item><description>THHmmssK</description></item>
+    /// <item><description>THHmmK</description></item>
+    /// <item><description>HH:mm:ss.FFFFFFFK</description></item>
+    /// <item><description>HH:mm:ssK</description></item>
+    /// <item><description>HH:mmK</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm:ss.FFFFFFFK</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm:ssK</description></item>
+    /// <item><description>yyyy-MM-dd HH:mmK</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm:ss.FFFFFFFK</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mmK</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm:ssK</description></item>
+    /// <item><description>yyyyMMddHHmmssK</description></item>
+    /// <item><description>yyyyMMddHHmmK</description></item>
+    /// <item><description>yyyyMMddTHHmmssFFFFFFFK</description></item>
+    /// <item><description>THHmmss</description></item>
+    /// <item><description>THHmm</description></item>
+    /// <item><description>HH:mm:ss.FFFFFFF</description></item>
+    /// <item><description>HH:mm:ss</description></item>
+    /// <item><description>HH:mm</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm:ss.FFFFFFF</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm:ss</description></item>
+    /// <item><description>yyyy-MM-dd HH:mm</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm:ss.FFFFFFF</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm</description></item>
+    /// <item><description>yyyy-MM-ddTHH:mm:ss</description></item>
+    /// <item><description>yyyyMMddHHmmss</description></item>
+    /// <item><description>yyyyMMddHHmm</description></item>
+    /// <item><description>yyyyMMddTHHmmssFFFFFFF</description></item>
+    /// <item><description>yyyy-MM-dd</description></item>
+    /// <item><description>yyyyMMdd</description></item>
+    /// <item><description>yy-MM-dd</description></item>
+    /// </list>
+    /// If the string cannot be matched to one of the above formats, an exception will be thrown.
+    /// </remarks>
+    /// <param name="dateText">The string containing either a long integer number of 100-nanosecond units since
+    /// System.DateTime.MinValue, a Julian day double, an integer number of seconds since the Unix epoch, a
+    /// culture-independent formatted date and time string, a formatted date and time string in the current
+    /// culture, or an ISO8601-format string.</param>
+    /// <param name="format">The SQLiteDateFormats to use.</param>
+    /// <param name="kind">The DateTimeKind to use.</param>
+    /// <returns>A DateTime value</returns>
+    public DateTime ToDateTime(string dateText, SQLiteDateFormats format, DateTimeKind kind)
+    {
+        switch (format)
+        {
+            case SQLiteDateFormats.Ticks:
+                {
+                    return new DateTime(Convert.ToInt64(
+                        dateText, CultureInfo.InvariantCulture), kind);
+                }
+            case SQLiteDateFormats.JulianDay:
+                {
+                    return ToDateTime(Convert.ToDouble(
+                        dateText, CultureInfo.InvariantCulture), kind);
+                }
+            case SQLiteDateFormats.UnixEpoch:
+                {
+                    return DateTime.SpecifyKind(
+                        UnixEpoch.AddSeconds(Convert.ToInt32(
+                        dateText, CultureInfo.InvariantCulture)), kind);
+                }
+            case SQLiteDateFormats.InvariantCulture:
+                {
+                    return DateTime.SpecifyKind(DateTime.Parse(
+                        dateText, DateTimeFormatInfo.InvariantInfo,
+                        kind == DateTimeKind.Utc ?
+                            DateTimeStyles.AdjustToUniversal :
+                            DateTimeStyles.None),
+                        kind);
+                }
+            case SQLiteDateFormats.CurrentCulture:
+                {
+                    return DateTime.SpecifyKind(DateTime.Parse(
+                        dateText, DateTimeFormatInfo.CurrentInfo,
+                        kind == DateTimeKind.Utc ?
+                            DateTimeStyles.AdjustToUniversal :
+                            DateTimeStyles.None),
+                        kind);
+                }
+            default:
+                {
+                    return DateTime.SpecifyKind(DateTime.ParseExact(
+                        dateText, _datetimeFormats,
+                        DateTimeFormatInfo.InvariantInfo,
+                        kind == DateTimeKind.Utc ?
+                            DateTimeStyles.AdjustToUniversal :
+                            DateTimeStyles.None),
+                        kind);
+                }
+        }
     }
 
     /// <summary>
@@ -185,7 +320,19 @@ namespace System.Data.SQLite
     /// <returns>A .NET DateTime</returns>
     public DateTime ToDateTime(double julianDay)
     {
-      return DateTime.FromOADate(julianDay - 2415018.5);
+      return ToDateTime(julianDay, _datetimeKind);
+    }
+
+    /// <summary>
+    /// Converts a julianday value into a DateTime
+    /// </summary>
+    /// <param name="julianDay">The value to convert</param>
+    /// <param name="kind">The DateTimeKind to use.</param>
+    /// <returns>A .NET DateTime</returns>
+    public DateTime ToDateTime(double julianDay, DateTimeKind kind)
+    {
+        return DateTime.SpecifyKind(
+            DateTime.FromOADate(julianDay - OleAutomationEpochAsJulianDay), kind);
     }
 
     /// <summary>
@@ -195,7 +342,7 @@ namespace System.Data.SQLite
     /// <returns>The JulianDay value the Datetime represents</returns>
     public double ToJulianDay(DateTime value)
     {
-      return value.ToOADate() + 2415018.5;
+      return value.ToOADate() + OleAutomationEpochAsJulianDay;
     }
 
     /// <summary>
@@ -220,7 +367,9 @@ namespace System.Data.SQLite
         case SQLiteDateFormats.CurrentCulture:
           return dateValue.ToString(FullFormat, CultureInfo.CurrentCulture);
         default:
-          return dateValue.ToString(_datetimeFormats[7], CultureInfo.InvariantCulture);
+          return (dateValue.Kind == DateTimeKind.Utc) ?
+              dateValue.ToString(_datetimeFormats[5], CultureInfo.InvariantCulture) : // include "Z"
+              dateValue.ToString(_datetimeFormats[19], CultureInfo.InvariantCulture);
       }
     }
 

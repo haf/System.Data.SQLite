@@ -53,6 +53,21 @@ namespace System.Data.SQLite
   /// <description>ISO8601</description>
   /// </item>
   /// <item>
+  /// <description>DateTimeKind</description>
+  /// <description><b>Unspecified</b> - Not specified as either UTC or local time.<br/><b>Utc</b> - The time represented is UTC.<br/><b>Local</b> - The time represented is local time.</description>
+  /// <description>N</description>
+  /// <description>Unspecified</description>
+  /// </item>
+  /// <item>
+  /// <description>BaseSchemaName</description>
+  /// <description>Some base data classes in the framework (e.g. those that build SQL queries dynamically)
+  /// assume that an ADO.NET provider cannot support an alternate catalog (i.e. database) without supporting
+  /// alternate schemas as well; however, SQLite does not fit into this model.  Therefore, this value is used
+  /// as a placeholder and removed prior to preparing any SQL statements that may contain it.</description>
+  /// <description>N</description>
+  /// <description>sqlite_default_schema</description>
+  /// </item>
+  /// <item>
   /// <description>BinaryGUID</description>
   /// <description><b>True</b> - Store GUID columns in binary form<br/><b>False</b> - Store GUID columns as text</description>
   /// <description>N</description>
@@ -152,6 +167,15 @@ namespace System.Data.SQLite
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
   {
+    /// <summary>
+    /// The default "stub" (i.e. placeholder) base schema name to use when
+    /// returning column schema information.  Used as the initial value of
+    /// the BaseSchemaName property.  This should start with "sqlite_*"
+    /// because those names are reserved for use by SQLite (i.e. they cannot
+    /// be confused with the names of user objects).
+    /// </summary>
+    private const string DefaultBaseSchemaName = "sqlite_default_schema";
+
     private const int SQLITE_FCNTL_WIN32_AV_RETRY = 9;
 
     private const string _dataDirectory = "|DataDirectory|";
@@ -194,6 +218,12 @@ namespace System.Data.SQLite
     /// Temporary password storage, emptied after the database has been opened
     /// </summary>
     private byte[] _password;
+
+    /// <summary>
+    /// The "stub" (i.e. placeholder) base schema name to use when returning
+    /// column schema information.
+    /// </summary>
+    internal string _baseSchemaName;
 
     /// <summary>
     /// Default command timeout
@@ -805,6 +835,8 @@ namespace System.Data.SQLite
         if (_defaultIsolation != IsolationLevel.Serializable && _defaultIsolation != IsolationLevel.ReadCommitted)
           throw new NotSupportedException("Invalid Default IsolationLevel specified");
 
+        _baseSchemaName = FindKey(opts, "BaseSchemaName", DefaultBaseSchemaName);
+
         //string temp = FindKey(opts, "DateTimeFormat", "ISO8601");
         //if (String.Compare(temp, "ticks", StringComparison.OrdinalIgnoreCase) == 0) dateFormat = SQLiteDateFormats.Ticks;
         //else if (String.Compare(temp, "julianday", StringComparison.OrdinalIgnoreCase) == 0) dateFormat = SQLiteDateFormats.JulianDay;
@@ -816,10 +848,13 @@ namespace System.Data.SQLite
                                                                        FindKey(opts, "DateTimeFormat", "ISO8601"),
                                                                        true);
 
+          DateTimeKind kind = (DateTimeKind)Enum.Parse(typeof(DateTimeKind),
+              FindKey(opts, "DateTimeKind", "Unspecified"), true);
+
           if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
-            _sql = new SQLite3_UTF16(dateFormat);
+            _sql = new SQLite3_UTF16(dateFormat, kind);
           else
-            _sql = new SQLite3(dateFormat);
+            _sql = new SQLite3(dateFormat, kind);
         }
 
         SQLiteOpenFlagsEnum flags = SQLiteOpenFlagsEnum.None;
@@ -1038,10 +1073,13 @@ namespace System.Data.SQLite
                                                                          FindKey(opts, "DateTimeFormat", "ISO8601"),
                                                                          true);
 
+            DateTimeKind kind = (DateTimeKind)Enum.Parse(typeof(DateTimeKind),
+                FindKey(opts, "DateTimeKind", "Unspecified"), true);
+
             if (bUTF16) // SQLite automatically sets the encoding of the database to UTF16 if called from sqlite3_open16()
-                _sql = new SQLite3_UTF16(dateFormat);
+                _sql = new SQLite3_UTF16(dateFormat, kind);
             else
-                _sql = new SQLite3(dateFormat);
+                _sql = new SQLite3(dateFormat, kind);
         }
         if (_sql != null) return _sql.Shutdown();
         throw new InvalidOperationException("Database connection not active.");

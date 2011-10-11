@@ -32,10 +32,10 @@ if {[haveConstraint SQLite]} then {
 ###############################################################################
 
 for {set i 1} {$i < 3} {incr i} {
-  runTest {test tkt-b4a7ddc83f-1.$i {logging shutdown} -setup \
+  runTest {test [appendArgs tkt-b4a7ddc83f-1. $i] {logging shutdown} -setup \
       [getAppDomainPreamble {
     set appDomainId(1) {[object invoke AppDomain.CurrentDomain Id]}
-    set fileName {tkt-b4a7ddc83f-1.$i.db}
+    set fileName {[appendArgs tkt-b4a7ddc83f-1. $i .db]}
   }] -body {
     set appDomainId(2) [object invoke AppDomain.CurrentDomain Id]
 

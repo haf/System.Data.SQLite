@@ -15,8 +15,8 @@ namespace System.Data.SQLite
   /// </summary>
   internal abstract class SQLiteBase : SQLiteConvert, IDisposable
   {
-    internal SQLiteBase(SQLiteDateFormats fmt)
-      : base(fmt) { }
+    internal SQLiteBase(SQLiteDateFormats fmt, DateTimeKind kind)
+      : base(fmt, kind) { }
 
     static internal object _lock = new object();
 

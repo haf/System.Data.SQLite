@@ -1,0 +1,439 @@
+###############################################################################
+#
+# tkt-343d392b51.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+set dateTimeFormats [list "" Ticks ISO8601 JulianDay UnixEpoch]
+
+for {set i 1} {$i < 5} {incr i} {
+  set dateTimeFormat [lindex $dateTimeFormats $i]
+
+  runTest {test [appendArgs tkt-343d392b51-1. $i] [subst {DateTime\
+      binding $dateTimeFormat format}] -setup {
+    setupDb [set fileName [appendArgs tkt-343d392b51-1. $i .db]] "" \
+        $dateTimeFormat Utc
+
+    set dateTime "4 October, 2011 3:27:50 PM GMT"
+  } -body {
+    sql execute $db "CREATE TABLE t1(x DATETIME);"
+
+    set paramDateTime1 [clock format [clock scan $dateTime] -format \
+        [getDateTimeFormat] -gmt true]
+
+    switch -exact -- $dateTimeFormat {
+      Ticks {
+        set paramDateTime1 [object invoke -alias DateTime Parse $paramDateTime1]
+        set paramDateTime1 [$paramDateTime1 ToUniversalTime.Ticks]
+        set paramDateTime2 $paramDateTime1
+      }
+      ISO8601 {
+        set paramDateTime2 [appendArgs ' $paramDateTime1 ']
+      }
+      JulianDay {
+        set paramDateTime1 [object invoke -alias DateTime Parse $paramDateTime1]
+        set paramDateTime1 [$paramDateTime1 -alias ToUniversalTime]
+
+        set paramDateTime1 [expr {[$paramDateTime1 ToOADate] + \
+            [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+            OleAutomationEpochAsJulianDay]}]
+
+        set paramDateTime2 $paramDateTime1
+      }
+      UnixEpoch {
+        set paramDateTime1 [clock scan $dateTime]
+        set paramDateTime2 $paramDateTime1
+      }
+    }
+
+    sql execute $db [appendArgs "INSERT INTO t1 (x) VALUES(" $paramDateTime2 \
+        ");"]
+
+    list [sql execute -verbatim -execute reader -format list -datetimeformat \
+        [getDateTimeFormat] $db "SELECT x FROM t1 WHERE x = ?;" \
+        [list param1 String $paramDateTime1]] \
+        [sql execute -verbatim -execute reader -format list -datetimeformat \
+        [getDateTimeFormat] $db "SELECT x FROM t1 WHERE x = ?;" \
+        [list param1 DateTime $paramDateTime1]]
+  } -cleanup {
+    cleanupDb $fileName
+
+    unset -nocomplain paramDateTime2 paramDateTime1 dateTime db fileName
+  } -constraints {eagle culture.en_US monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite} -result {{{2011-10-04 15:27:50Z}} {{2011-10-04 15:27:50Z}}}}
+}
+
+###############################################################################
+
+unset -nocomplain dateTimeFormat i dateTimeFormats
+
+###############################################################################
+
+runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter update fail} -setup {
+  setupDb [set fileName tkt-343d392b51-2.1.db]
+  set otherFileName tkt-343d392b51-2.1-otherDb.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getTemporaryPath] $fileName]
+  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set otherDbName otherDb
+  set otherTable [appendArgs $otherDbName .t1]
+
+  set sql(inserts) ""
+  set sql(1) [subst { \
+    ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
+    CREATE TABLE ${otherTable}(x INTEGER PRIMARY KEY, y DATETIME); \
+    [for {set i 1} {$i < 3} {incr i} {
+      append sql(inserts) [appendArgs \
+          "INSERT INTO " ${otherTable} " (x, y) VALUES(" $i ", '" \
+          [clock format $i -format [getDateTimeFormat]] "'); "]
+    }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
+  }]
+
+  set sql(2) [subst { \
+    SELECT x, y FROM ${otherTable} ORDER BY x; \
+  }]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static void Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "${sql(1)}";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(
+                "${sql(2)}", connection))
+            {
+              using (DataSet dataSet = new DataSet())
+              {
+                dataAdapter.Fill(dataSet, "${otherTable}");
+
+                DataTable dataTable = dataSet.Tables\["${otherTable}"\];
+
+                dataTable.Columns\["x"\].Unique = true;
+                dataTable.PrimaryKey = new DataColumn\[\] {
+                  dataTable.Columns\["x"\]
+                };
+
+                [expr {[isMono] ? "#pragma warning disable 219" : ""}]
+                SQLiteCommandBuilder commandBuilder =
+                    new SQLiteCommandBuilder(dataAdapter);
+                [expr {[isMono] ? "#pragma warning restore 219" : ""}]
+
+                foreach (DataRow dataRow in dataTable.Rows)
+                {
+                  //
+                  // NOTE: Update even rows and delete odd rows.
+                  //
+                  if ((long)dataRow\["x"\] % 2 == 0)
+                    dataRow\["y"\] =
+                        DateTime.UtcNow.ToString("[getDateTimeFormat]");
+                  else
+                    dataRow.Delete();
+                }
+
+                dataAdapter.Update(dataTable); // DBConcurrencyException (?)
+              }
+            }
+          }
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $otherFileName
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors i sql otherTable otherDbName \
+      otherDataSource dataSource id db otherFileName fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+glob -result {* System.Data.DBConcurrencyException: *}}
+
+###############################################################################
+
+runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter update success} -setup {
+  setupDb [set fileName tkt-343d392b51-2.2.db] "" JulianDay
+  set otherFileName tkt-343d392b51-2.2-otherDb.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getTemporaryPath] $fileName]
+  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set otherDbName otherDb
+  set otherTable [appendArgs $otherDbName .t1]
+
+  set sql(inserts) ""
+  set sql(1) [subst { \
+    ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
+    CREATE TABLE ${otherTable}(x INTEGER PRIMARY KEY, y DATETIME); \
+    [for {set i 1} {$i < 3} {incr i} {
+      append sql(inserts) [appendArgs \
+          "INSERT INTO " ${otherTable} " (x, y) VALUES(" $i ", JULIANDAY('" \
+          [clock format $i -format [getDateTimeFormat]] "')); "]
+    }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
+  }]
+
+  set sql(2) [subst { \
+    SELECT x, y FROM ${otherTable} ORDER BY x; \
+  }]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static void Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};DateTimeFormat=JulianDay;"))
+          {
+            connection.Open();
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "${sql(1)}";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(
+                "${sql(2)}", connection))
+            {
+              using (DataSet dataSet = new DataSet())
+              {
+                dataAdapter.Fill(dataSet, "${otherTable}");
+
+                DataTable dataTable = dataSet.Tables\["${otherTable}"\];
+
+                dataTable.Columns\["x"\].Unique = true;
+                dataTable.PrimaryKey = new DataColumn\[\] {
+                  dataTable.Columns\["x"\]
+                };
+
+                [expr {[isMono] ? "#pragma warning disable 219" : ""}]
+                SQLiteCommandBuilder commandBuilder =
+                    new SQLiteCommandBuilder(dataAdapter);
+                [expr {[isMono] ? "#pragma warning restore 219" : ""}]
+
+                foreach (DataRow dataRow in dataTable.Rows)
+                {
+                  //
+                  // NOTE: Update even rows and delete odd rows.
+                  //
+                  if ((long)dataRow\["x"\] % 2 == 0)
+                    dataRow\["y"\] =
+                        DateTime.UtcNow.ToString("[getDateTimeFormat]");
+                  else
+                    dataRow.Delete();
+                }
+
+                dataAdapter.Update(dataTable); // DBConcurrencyException (?)
+              }
+            }
+          }
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $otherFileName
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors i sql otherTable otherDbName \
+      otherDataSource dataSource id db otherFileName fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+
+###############################################################################
+
+runTest {test tkt-343d392b51-3.1 {attached database, same table name} -setup {
+  setupDb [set fileName tkt-343d392b51-3.1.db]
+  set otherFileName tkt-343d392b51-3.1-otherDb.db
+} -body {
+  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set otherDbName otherDb
+  set otherTable [appendArgs $otherDbName .t1]
+
+  set sql(inserts) ""
+  set sql(1) [subst { \
+    CREATE TABLE t1(x INTEGER PRIMARY KEY); \
+    ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
+    CREATE TABLE ${otherTable}(x INTEGER PRIMARY KEY); \
+    [for {set i 1} {$i < 3} {incr i} {
+      append sql(inserts) [appendArgs \
+          "INSERT INTO t1 (x) VALUES(" $i "); "]
+
+      append sql(inserts) [appendArgs \
+          "INSERT INTO " ${otherTable} " (x) VALUES(" [expr {$i * 2}] "); "]
+    }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
+  }]
+
+  sql execute $db $sql(1)
+
+  list [sql execute -execute reader -format list $db "SELECT x FROM t1;"] \
+      [sql execute -execute reader -format list $db [appendArgs \
+      "SELECT x FROM " ${otherTable} ";"]]
+} -cleanup {
+  cleanupDb $otherFileName
+  cleanupDb $fileName
+
+  unset -nocomplain i sql otherTable otherDbName otherDataSource db \
+      otherFileName fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{{1 2} {2 4}}}
+
+###############################################################################
+
+runTest {test tkt-343d392b51-3.2 {adapter, attached db, table names} -setup {
+  setupDb [set fileName tkt-343d392b51-3.2.db]
+  set otherFileName tkt-343d392b51-3.2-otherDb.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getTemporaryPath] $fileName]
+  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set otherDbName otherDb
+  set otherTable [appendArgs $otherDbName .t1]
+
+  set sql(inserts) ""
+  set sql(1) [subst { \
+    CREATE TABLE t1(x INTEGER PRIMARY KEY); \
+    ATTACH DATABASE '${otherDataSource}' AS ${otherDbName}; \
+    CREATE TABLE ${otherTable}(x INTEGER PRIMARY KEY); \
+    [for {set i 1} {$i < 3} {incr i} {
+      append sql(inserts) [appendArgs \
+          "INSERT INTO t1 (x) VALUES(" $i ");"]
+      append sql(inserts) [appendArgs \
+          "INSERT INTO " ${otherTable} " (x) VALUES(" [expr {$i * 2}] "); "]
+    }; return [expr {[info exists sql(inserts)] ? $sql(inserts) : ""}]] \
+  }]
+
+  set sql(2) [subst { \
+    SELECT x FROM ${otherTable} ORDER BY x; \
+  }]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static void Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "${sql(1)}";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(
+                "${sql(2)}", connection))
+            {
+              using (DataSet dataSet = new DataSet())
+              {
+                dataAdapter.Fill(dataSet, "${otherTable}");
+
+                DataTable dataTable = dataSet.Tables\["${otherTable}"\];
+
+                dataTable.Columns\["x"\].Unique = true;
+                dataTable.PrimaryKey = new DataColumn\[\] {
+                  dataTable.Columns\["x"\]
+                };
+
+                [expr {[isMono] ? "#pragma warning disable 219" : ""}]
+                SQLiteCommandBuilder commandBuilder =
+                    new SQLiteCommandBuilder(dataAdapter);
+                [expr {[isMono] ? "#pragma warning restore 219" : ""}]
+
+                foreach (DataRow dataRow in dataTable.Rows)
+                  dataRow.Delete();
+
+                dataAdapter.Update(dataTable); // DBConcurrencyException (?)
+              }
+            }
+          }
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $otherFileName
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors i sql otherTable otherDbName \
+      otherDataSource dataSource id db otherFileName fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

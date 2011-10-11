@@ -651,7 +651,7 @@ runTest {test basic-1.11 {LastInsertRowId property} -setup {
 ###############################################################################
 
 runTest {test basic-1.12 {DateTime using Unix epoch} -setup {
-  setupDb [set fileName basic-1.12.db] "" "" "DateTimeFormat=UnixEpoch;"
+  setupDb [set fileName basic-1.12.db] "" UnixEpoch Utc
 } -body {
   set result [list]
 
@@ -678,7 +678,7 @@ runTest {test basic-1.12 {DateTime using Unix epoch} -setup {
   sql execute -verbatim $db "INSERT INTO t1 (x, y) VALUES(9, ?);" \
       [list param1 DateTime 1365984000]
 
-  sql execute -execute reader -datetimeformat "MM/dd/yyyy HH:mm:ss" $db \
+  sql execute -execute reader -datetimeformat [getDateTimeFormat] $db \
       "SELECT x, y FROM t1 ORDER BY x;"
 
   foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
@@ -692,11 +692,11 @@ runTest {test basic-1.12 {DateTime using Unix epoch} -setup {
   unset -nocomplain name rows result db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
--result {{1 {{x 1} {y {04/15/2011 00:00:00}}}} {2 {{x 2} {y {04/15/2012\
-00:00:00}}}} {3 {{x 3} {y {04/15/2013 00:00:00}}}} {4 {{x 4} {y {04/15/2011\
-00:00:00}}}} {5 {{x 5} {y {04/15/2012 00:00:00}}}} {6 {{x 6} {y {04/15/2013\
-00:00:00}}}} {7 {{x 7} {y {04/15/2011 00:00:00}}}} {8 {{x 8} {y {04/15/2012\
-00:00:00}}}} {9 {{x 9} {y {04/15/2013 00:00:00}}}}}}
+-result {{1 {{x 1} {y {2011-04-15 00:00:00Z}}}} {2 {{x 2} {y {2012-04-15\
+00:00:00Z}}}} {3 {{x 3} {y {2013-04-15 00:00:00Z}}}} {4 {{x 4} {y {2011-04-15\
+00:00:00Z}}}} {5 {{x 5} {y {2012-04-15 00:00:00Z}}}} {6 {{x 6} {y {2013-04-15\
+00:00:00Z}}}} {7 {{x 7} {y {2011-04-15 00:00:00Z}}}} {8 {{x 8} {y {2012-04-15\
+00:00:00Z}}}} {9 {{x 9} {y {2013-04-15 00:00:00Z}}}}}}
 
 ###############################################################################
 
@@ -705,7 +705,7 @@ set date [clock format [clock seconds] -format yyyy-MM-dd]
 ###############################################################################
 
 runTest {test basic-1.13 {DateTime using invariant culture} -setup {
-  setupDb [set fileName basic-1.13.db] "" "" "DateTimeFormat=InvariantCulture;"
+  setupDb [set fileName basic-1.13.db] "" InvariantCulture Utc
 } -body {
   set result [list]
 
@@ -741,7 +741,7 @@ runTest {test basic-1.13 {DateTime using invariant culture} -setup {
   sql execute $db "INSERT INTO t1 (x, y) VALUES(12, ?);" \
       [list param1 DateTime "12/16/2009 12:00"]
 
-  sql execute -execute reader -datetimeformat "MM/dd/yyyy HH:mm:ss" $db \
+  sql execute -execute reader -datetimeformat [getDateTimeFormat] $db \
       "SELECT x, CAST(y AS TEXT) AS y2 FROM t1 ORDER BY x;"
 
   foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
@@ -766,7 +766,7 @@ ${date}T12:00:00.0000000Z}}} {12 {{x 12} {y2 2009-12-16T12:00:00.0000000Z}}}}]}
 ###############################################################################
 
 runTest {test basic-1.14 {DateTime using current culture} -setup {
-  setupDb [set fileName basic-1.14.db] "" "" "DateTimeFormat=CurrentCulture;"
+  setupDb [set fileName basic-1.14.db] "" CurrentCulture Utc
 } -body {
   set result [list]
 
@@ -802,7 +802,7 @@ runTest {test basic-1.14 {DateTime using current culture} -setup {
   sql execute $db "INSERT INTO t1 (x, y) VALUES(12, ?);" \
       [list param1 DateTime "12/16/2009 12:00"]
 
-  sql execute -execute reader -datetimeformat "MM/dd/yyyy HH:mm:ss" $db \
+  sql execute -execute reader -datetimeformat [getDateTimeFormat] $db \
       "SELECT x, CAST(y AS TEXT) AS y2 FROM t1 ORDER BY x;"
 
   foreach name [lsort -integer [array names rows -regexp {^\d+$}]] {
