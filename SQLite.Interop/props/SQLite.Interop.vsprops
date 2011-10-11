@@ -19,7 +19,7 @@
 	/>
 	<UserMacro
 		Name="INTEROP_BUILD_NUMBER"
-		Value="075"
+		Value="076"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro

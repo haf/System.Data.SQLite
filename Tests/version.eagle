@@ -1,0 +1,197 @@
+###############################################################################
+#
+# version.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+# ******************** BEGIN VOLATILE VERSION INFORMATION *********************
+###############################################################################
+
+#
+# NOTE: For these unit tests to be useful and accurate, the following version
+#       numbers must be manually kept synchronized with the version numbers for
+#       the source code files, the built binaries, and the release packages.
+#
+set version(major)             1
+set version(minor)             0
+set version(build)            76; # NOTE: Incremented with each release.
+set version(revision)          0
+
+###############################################################################
+# ********************* END VOLATILE VERSION INFORMATION **********************
+###############################################################################
+
+#
+# NOTE: Build the full version number using the components setup above.  This
+#       should not have to be changed.
+#
+set version(full) [appendArgs $version(major) . $version(minor) . \
+                              $version(build) . $version(revision)]
+
+###############################################################################
+
+#
+# NOTE: Setup the variables that refer to the various files required by the
+#       tests in this file.
+#
+set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
+set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
+set testExeFile [getBuildFileName test.exe]
+set testLinqExeFile [getBuildFileName testlinq.exe]
+
+#
+# NOTE: Setup the test constraints specific to the tests in this file.
+#
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteDllFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteLinqDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteLinqDllFile
+}
+
+if {![haveConstraint [appendArgs file_ [file tail $testExeFile]]]} then {
+  checkForFile $test_channel $testExeFile
+}
+
+if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
+  checkForFile $test_channel $testLinqExeFile
+}
+
+###############################################################################
+
+runTest {test version-1.1 {'System.Data.SQLite' binary version} -body {
+  file version $systemDataSQLiteDllFile
+} -constraints {eagle file_System.Data.SQLite.dll} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.2 {'System.Data.SQLite.Linq' binary version} -body {
+  file version $systemDataSQLiteLinqDllFile
+} -constraints {eagle file_System.Data.SQLite.Linq.dll} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.3 {'test' binary version} -body {
+  file version $testExeFile
+} -constraints {eagle file_test.exe} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.4 {'testlinq' binary version} -body {
+  file version $testLinqExeFile
+} -constraints {eagle file_testlinq.exe} -result $version(full)}
+
+###############################################################################
+
+set patterns [list \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
+    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
+    [appendArgs &quot\; [format %03d $version(build)] &quot\;] \
+    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs Value=\" [format %03d $version(build)] \"] \
+    [appendArgs Value=\" [string map [list . \\.] $version(full)] \"] \
+    [appendArgs Value=\" [string map [list . ,] $version(full)] \"] \
+    [appendArgs <INTEROP_BUILD_NUMBER> [format %03d $version(build)] \
+        </INTEROP_BUILD_NUMBER>] \
+    [appendArgs <INTEROP_MANIFEST_VERSION> [string map [list . \\.] \
+        $version(full)] </INTEROP_MANIFEST_VERSION>] \
+    [appendArgs <INTEROP_RC_VERSION> [string map [list . ,] \
+        $version(full)] </INTEROP_RC_VERSION>] \
+    [appendArgs \" [string map [list . \\.] $version(full)] \"] \
+    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs \" [string map [list . \\.] $version(full)] \"] \
+    [appendArgs \"SQLite.Interop. [format %03d $version(build)] .dll\"] \
+    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
+    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
+    [appendArgs Version= [string map [list . \\.] $version(full)] ,]]
+
+set fileNames [list \
+    SQLite.nuspec \
+    SQLite.MSIL.nuspec \
+    SQLite.x64.nuspec \
+    SQLite.x86.nuspec \
+    [file join Doc Extra dbfactorysupport.html] \
+    [file join Doc Extra welcome.html] \
+    [file join SQLite.Designer AssemblyInfo.cs] \
+    [file join SQLite.Designer AssemblyInfo.cs] \
+    [file join SQLite.Interop props SQLite.Interop.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.props] \
+    [file join SQLite.Interop props SQLite.Interop.props] \
+    [file join SQLite.Interop props SQLite.Interop.props] \
+    [file join SQLite.Interop src win interop.h] \
+    [file join System.Data.SQLite AssemblyInfo.cs] \
+    [file join System.Data.SQLite AssemblyInfo.cs] \
+    [file join System.Data.SQLite SQLite3.cs] \
+    [file join System.Data.SQLite UnsafeNativeMethods.cs] \
+    [file join System.Data.SQLite.Linq AssemblyInfo.cs] \
+    [file join System.Data.SQLite.Linq AssemblyInfo.cs] \
+    [file join test app.config] \
+    [file join testlinq 2008 App.config] \
+    [file join testlinq 2010 App.config]]
+
+for {set i 1} {$i <= [llength $fileNames]} {incr i} {
+  set pattern [lindex $patterns [expr {$i - 1}]]
+  set fileName [lindex $fileNames [expr {$i - 1}]]
+  set constraint [string map [list / _ \\ _] $fileName]
+  set fileName [file join $root_path $fileName]
+
+  if {![haveConstraint [appendArgs file_ $constraint]]} then {
+    checkForFile $test_channel $fileName $constraint
+  }
+
+  runTest {test [appendArgs version-1.5. $i] \
+      [appendArgs "pattern {" $pattern "} in file \"" $fileName \"] -body {
+    regexp -- $pattern [readFile $fileName]
+  } -constraints [list eagle [appendArgs file_ $constraint]] -result {1}}
+}
+
+###############################################################################
+
+unset -nocomplain constraint fileName pattern fileNames patterns i version
+
+###############################################################################
+
+unset -nocomplain testLinqExeFile testExeFile systemDataSQLiteLinqDllFile \
+    systemDataSQLiteDllFile
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
