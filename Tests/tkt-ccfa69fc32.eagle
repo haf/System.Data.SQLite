@@ -31,11 +31,11 @@ set northwindEfDbFile [file nativename [file join [file dirname $path] \
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
 #
-if {![haveConstraint file_[file tail $testLinqExeFile]]} then {
+if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
   checkForFile $test_channel $testLinqExeFile
 }
 
-if {![haveConstraint file_[file tail $northwindEfDbFile]]} then {
+if {![haveConstraint [appendArgs file_ [file tail $northwindEfDbFile]]]} then {
   checkForFile $test_channel $northwindEfDbFile
 }
 

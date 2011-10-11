@@ -115,6 +115,30 @@ namespace eval ::Eagle {
       addConstraint eagleBug
       addConstraint eagleCrash
 
+      #
+      # HACK: Needed by tests "socket-*.*".
+      #
+      if {![info exists ::no(compileNetwork)]} then {
+        addConstraint compile.NETWORK
+      }
+
+      tputs $channel no\n
+    }
+  }
+
+  proc checkForLogFile { channel } {
+    tputs $channel "---- checking for log file... "
+
+    if {[info exists ::test_log] && \
+        [string length $::test_log] > 0 && \
+        [file exists $::test_log]} then {
+      #
+      # NOTE: The log file appears to be available.
+      #
+      addConstraint logFile
+
+      tputs $channel yes\n
+    } else {
       tputs $channel no\n
     }
   }
@@ -439,7 +463,9 @@ namespace eval ::Eagle {
       #
       # HACK: Needed by test "benchmark-1.22".
       #
-      addConstraint compile.NATIVE
+      if {![info exists ::no(compileNative)]} then {
+        addConstraint compile.NATIVE
+      }
 
       tputs $channel yes\n
     }
@@ -1619,7 +1645,7 @@ namespace eval ::Eagle {
         checkForEagle checkForGaruda checkForShell checkForDebug checkForTk \
         checkForVersion checkForCommand checkForFile checkForNativeCode \
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
-        checkForPerformance checkForTiming checkForInteractive \
+        checkForPerformance checkForTiming checkForInteractive checkForLogFile \
         checkForNetwork checkForCompileOption checkForUserInteraction] false \
         false
 

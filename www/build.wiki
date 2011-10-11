@@ -111,13 +111,11 @@
 
     <ul>
       <li>&lt;root&gt;\SQLite.nuspec</li>
+      <li>&lt;root&gt;\SQLite.MSIL.nuspec</li>
       <li>&lt;root&gt;\SQLite.x86.nuspec</li>
       <li>&lt;root&gt;\SQLite.x64.nuspec</li>
       <li>&lt;root&gt;\Doc\Extra\dbfactorysupport.html</li>
       <li>&lt;root&gt;\Doc\Extra\welcome.html</li>
-      <li>&lt;root&gt;\test\app.config</li>
-      <li>&lt;root&gt;\testlinq\2008\App.config</li>
-      <li>&lt;root&gt;\testlinq\2010\App.config</li>
       <li>&lt;root&gt;\SQLite.Designer\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops</li>
       <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props</li>
@@ -126,6 +124,10 @@
       <li>&lt;root&gt;\System.Data.SQLite\SQLite3.cs</li>
       <li>&lt;root&gt;\System.Data.SQLite\UnsafeNativeMethods.cs</li>
       <li>&lt;root&gt;\System.Data.SQLite.Linq\AssemblyInfo.cs</li>
+      <li>&lt;root&gt;\test\app.config</li>
+      <li>&lt;root&gt;\testlinq\2008\App.config</li>
+      <li>&lt;root&gt;\testlinq\2010\App.config</li>
+      <li>&lt;root&gt;\Tests\version.eagle</li>
     </ul>
 
     You'll need to update the INTEROP_BUILD_NUMBER, INTEROP_MANIFEST_VERSION,

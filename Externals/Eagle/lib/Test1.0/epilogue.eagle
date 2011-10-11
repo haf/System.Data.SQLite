@@ -261,6 +261,12 @@ if {![info exists no([file tail [info script]])]} then {
     unset percent
 
     tputs $test_channel \n; # NOTE: Blank line.
+
+    #
+    # NOTE: Call the Tcl test cleanup procedure now to give it a chance to do
+    #       any custom cleanup that has been registered.
+    #
+    ::tcltest::cleanupTests
   }
 
   #
@@ -270,15 +276,21 @@ if {![info exists no([file tail [info script]])]} then {
   sourceIfValid epilogue [getEnvironmentVariable testEpilogue]
 
   #
-  # NOTE: Evaluate the specified post-test script now, if any.
+  # NOTE: Are we being prevented from evaluating the "post-test" script?
   #
-  if {[info exists test_flags(-postTest)] && \
-      [string length $test_flags(-postTest)] > 0} then {
+  if {![info exists no(postTest)]} then {
     #
-    # TODO: Perhaps use [uplevel] here instead of [eval].  For now, it does not
-    #       matter since we enforce this file being evaluated at the top-level.
+    # NOTE: Evaluate the specified post-test script now, if any.
     #
-    eval $test_flags(-postTest)
+    if {[info exists test_flags(-postTest)] && \
+        [string length $test_flags(-postTest)] > 0} then {
+      #
+      # TODO: Perhaps use [uplevel] here instead of [eval].  For now, it does
+      #       not matter since we enforce this file being evaluated at the
+      #       top-level.
+      #
+      eval $test_flags(-postTest)
+    }
   }
 
   #

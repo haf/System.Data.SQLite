@@ -1574,7 +1574,7 @@ namespace eval ::Eagle {
         exportAndImportPackageCommands isEagle isMono getEnvironmentVariable \
         getPluginPath getDictionaryValue getColumnValue getRowColumnValue \
         appendArgs haveGaruda lappendArgs readFile filter map reduce \
-        getPlatformInfo] false false
+        getPlatformInfo execShell] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

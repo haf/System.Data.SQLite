@@ -67,6 +67,36 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: Set the local root directory of the source checkout (i.e. of
+  #       Eagle or whatever project the Eagle binaries are being used by).
+  #
+  if {![info exists root_path]} then {
+    set pattern {^local-root:\s+(.*)\s+$}
+
+    if {[catch {set exec [exec -- fossil info]}] || \
+        [regexp -line -- $pattern $exec dummy directory] == 0} then {
+      #
+      # NOTE: We could not query local root directory of the source checkout
+      #       from Fossil; therefore, attempt to make an educated guess.  This
+      #       value will probably be wrong for any project(s) other than Eagle.
+      #       In that case, this value should be overridden by that project to
+      #       relfect the actual local root directory of the source checkout
+      #       for that project.
+      #
+      set root_path $base_path
+    } else {
+      #
+      # NOTE: We extracted the local root directory of the source checkout
+      #       from Fossil.  Now, make sure it is fully normalized and has no
+      #       trailing slashes.
+      #
+      set root_path [file normalize $directory]
+    }
+
+    unset -nocomplain directory exec pattern
+  }
+
+  #
   # NOTE: Set the executable file name for the process, if
   #       necessary.
   #
@@ -195,6 +225,20 @@ if {![info exists no([file tail [info script]])]} then {
   if {[info exists argv]} then {
     eval processTestArguments test_flags $argv
 
+    if {[info exists test_flags(-no)] && \
+        [string length $test_flags(-no)] > 0} then {
+      #
+      # NOTE: Set the test run restrictions based on the provided command line
+      #       argument value (which is assumed to be a "dictionary-style" list
+      #       containing name/value pairs to add to the global "no" array).
+      #
+      foreach {name value} $test_flags(-no) {
+        set no($name) $value
+      }
+
+      unset name value
+    }
+
     if {[info exists test_flags(-logFile)] && \
         [string length $test_flags(-logFile)] > 0} then {
       #
@@ -252,9 +296,9 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Has logging been disabled?
+  # NOTE: Has automatic log file naming been disabled?
   #
-  if {![info exists no(log)]} then {
+  if {![info exists no(logFileName)]} then {
     #
     # NOTE: Set the log to use for test output, if necessary.
     #
@@ -265,15 +309,21 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Evaluate the specified pre-test script now, if any.
+  # NOTE: Are we being prevented from evaluating the "pre-test" script?
   #
-  if {[info exists test_flags(-preTest)] && \
-      [string length $test_flags(-preTest)] > 0} then {
+  if {![info exists no(preTest)]} then {
     #
-    # TODO: Perhaps use [uplevel] here instead of [eval].  For now, it does not
-    #       matter since we enforce this file being evaluated at the top-level.
+    # NOTE: Evaluate the specified pre-test script now, if any.
     #
-    eval $test_flags(-preTest)
+    if {[info exists test_flags(-preTest)] && \
+        [string length $test_flags(-preTest)] > 0} then {
+      #
+      # TODO: Perhaps use [uplevel] here instead of [eval].  For now, it does
+      #       not matter since we enforce this file being evaluated at the
+      #       top-level.
+      #
+      eval $test_flags(-preTest)
+    }
   }
 
   #
@@ -428,12 +478,15 @@ if {![info exists no([file tail [info script]])]} then {
         $test_flags(-skip) \n]
   }
 
-  tputs $test_channel [appendArgs "---- path: \"" \
+  tputs $test_channel [appendArgs "---- path: " \
       [expr {[info exists path] && [string length $path] > 0 ? \
-          $path : "<none>"}] \"\n]
+          [appendArgs \" $path \"] : "<none>"}] \n]
 
   tputs $test_channel [appendArgs "---- base path: \"" \
       $base_path \"\n]
+
+  tputs $test_channel [appendArgs "---- root path: \"" \
+      $root_path \"\n]
 
   tputs $test_channel [appendArgs "---- binary path: \"" \
       $bin_path \"\n]
@@ -1345,6 +1398,13 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: For test "interp-1.10".
+  #
+  if {![info exists no(settings.xml)]} then {
+    checkForFile $test_channel [file join $test_path settings.xml]
+  }
+
+  #
   # NOTE: For test "load-1.1.*".
   #
   if {![info exists no(Plugin.dll)]} then {
@@ -1408,6 +1468,10 @@ if {![info exists no([file tail [info script]])]} then {
 
   if {![info exists no(eagle)]} then {
     checkForEagle $test_channel
+  }
+
+  if {![info exists no(noLogFile)]} then {
+    checkForLogFile $test_channel
   }
 
   if {![info exists no(garuda)]} then {
@@ -1550,6 +1614,16 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       tputs $test_channel [appendArgs $test_cops \n]
+
+      set percent [expr {[calculateRelativePerformance iterations 1] * 100}]
+
+      tputs $test_channel [appendArgs \
+          "---- current BogoCops (commands-per-second) is " [formatDecimal \
+          [expr {$percent > 100 ? $percent - 100 : $percent}] 2] "% " \
+          [expr {$percent > 100 ? "faster than" : "as fast as"}] \
+          " the baseline\n"]
+
+      unset percent
     }
 
     ###########################################################################

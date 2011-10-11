@@ -200,9 +200,9 @@ namespace eval ::Eagle {
     #
     # TODO: Add more support for standard tcltest options here.
     #
-    set options [list -configuration -suffix -file -notFile -match -skip \
-        -constraints -logFile -preTest -postTest -threshold -stopOnFailure \
-        -exitOnComplete]
+    set options [list -configuration -constraints -exitOnComplete -file \
+        -logFile -match -no -notFile -postTest -preTest -skip -stopOnFailure \
+        -suffix -threshold]
 
     foreach {name value} $args {
       if {[lsearch -exact $options $name] != -1} then {
@@ -679,6 +679,7 @@ namespace eval ::Eagle {
       set array(delegates,$index) 0
       set array(tcl,$index) 0
       set array(tclinterps,$index) 0
+      set array(tclthreads,$index) 0
       set array(tclcommands,$index) 0
 
       catch {set array(connections,$index) [llength [info connections]]}
@@ -691,6 +692,7 @@ namespace eval ::Eagle {
       }
 
       catch {set array(tclinterps,$index) [llength [tcl interps]]}
+      catch {set array(tclthreads,$index) [llength [tcl threads]]}
       catch {set array(tclcommands,$index) [llength [tcl command list]]}
     }
   }
@@ -707,7 +709,7 @@ namespace eval ::Eagle {
       #
       lappend statistics scopes objects callbacks types interfaces \
           namespaces processes connections transactions modules \
-          delegates tcl tclinterps tclcommands; # assemblies
+          delegates tcl tclinterps tclthreads tclcommands; # assemblies
     }
 
     #
@@ -1136,7 +1138,7 @@ namespace eval ::Eagle {
       #
       # NOTE: This is needed by most tests in the Tcl test suite.
       #
-      proc ::tcltest::cleanupTests {} {}
+      proc ::tcltest::cleanupTests { args } {}
     } else {
       #
       # NOTE: Load the tcltest package.
@@ -1304,7 +1306,10 @@ namespace eval ::Eagle {
             return [expr {($after - $before) / ($milliseconds / 1000.0)}]
           }
         } finally {
-          catch {after cancel $event}
+          if {[info exists event]} then {
+            catch {after cancel $event}
+          }
+
           after flags =$flags
         }
       } finally {
