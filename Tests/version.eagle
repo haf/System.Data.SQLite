@@ -116,6 +116,10 @@ set patterns [list \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
+    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
     [appendArgs Value=\" [format %03d $version(build)] \"] \
     [appendArgs Value=\" [string map [list . \\.] $version(full)] \"] \
     [appendArgs Value=\" [string map [list . ,] $version(full)] \"] \
@@ -141,6 +145,10 @@ set patterns [list \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
+    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
+    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
+        $version(full)] \"\\)] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
@@ -159,6 +167,8 @@ set fileNames [list \
     SQLite.x86.nuspec \
     [file join Doc Extra dbfactorysupport.html] \
     [file join Doc Extra welcome.html] \
+    [file join Membership Properties AssemblyInfo.cs] \
+    [file join Membership Properties AssemblyInfo.cs] \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Interop props SQLite.Interop.vsprops] \
@@ -177,6 +187,8 @@ set fileNames [list \
     [file join test AssemblyInfo.cs] \
     [file join test AssemblyInfo.cs] \
     [file join test app.config] \
+    [file join testce AssemblyInfo.cs] \
+    [file join testce AssemblyInfo.cs] \
     [file join testlinq 2008 App.config] \
     [file join testlinq 2010 App.config] \
     [file join testlinq Properties AssemblyInfo.cs] \
