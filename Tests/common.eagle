@@ -156,6 +156,25 @@ namespace eval ::Eagle {
     }
 
     proc getAppDomainPreamble { {prefix ""} {suffix ""} } {
+      #
+      # NOTE: This procedure returns a test setup script suitable for evaluation
+      #       by a test interpreter created in an isolated application domain.
+      #       The script being returned will be surrounded by the prefix and
+      #       suffix "script fragments" specified by the caller, if any.  The
+      #       entire script being returned will be substituted via [subst], in
+      #       the context of the caller.  This step is necessary so that some
+      #       limited context information, primarily related to the test build
+      #       directory, can be transferred to the interpreter in the isolated
+      #       application domain, making it able to successfully run tests that
+      #       require one or more of the files in the build directory.  Callers
+      #       to this procedure should keep in mind that the test script being
+      #       returned cannot only rely on any script library procedures not
+      #       included in the EagleLibrary package (i.e. "init.eagle").  Also,
+      #       all variable references and all "nested" commands (i.e. those in
+      #       square brackets), unless they are specially quoted, will end up
+      #       being evaluated in the context of the calling interpreter and not
+      #       the test interpreter created in the isolated application domain.
+      #
       return [uplevel 1 [list subst [appendArgs $prefix {
         if {[hasRuntimeOption native]} then {
           object invoke Interpreter.GetActive AddRuntimeOption native
@@ -410,7 +429,7 @@ namespace eval ::Eagle {
       set db [sql open -type SQLite [subst $connection]]
     }
 
-    proc cleanupDb {fileName {varName db}} {
+    proc cleanupDb { fileName {varName db} } {
       #
       # NOTE: Refer to the specified variable (e.g. "db") in the context of the
       #       caller.  The handle to the opened database is stored there.
