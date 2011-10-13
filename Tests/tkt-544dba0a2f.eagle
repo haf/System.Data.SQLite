@@ -1,0 +1,45 @@
+###############################################################################
+#
+# tkt-544dba0a2f.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-544dba0a2f-1.1 {BOOL versus BOOLEAN} -setup {
+  setupDb [set fileName tkt-544dba0a2f-1.1.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x BOOL, y BOOLEAN);"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(0, 0);"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(0, 1);"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(1, 0);"
+  sql execute $db "INSERT INTO t1 (x, y) VALUES(1, 1);"
+
+  sql execute -execute reader -format list $db \
+      "SELECT x, y FROM t1 ORDER BY rowid;"
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{False False False True True False True True}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

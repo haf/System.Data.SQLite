@@ -831,6 +831,7 @@ namespace System.Data.SQLite
             new SQLiteTypeNames("YESNO", DbType.Boolean),
             new SQLiteTypeNames("LOGICAL", DbType.Boolean),
             new SQLiteTypeNames("BOOL", DbType.Boolean),
+            new SQLiteTypeNames("BOOLEAN", DbType.Boolean),
             new SQLiteTypeNames("NUMERIC", DbType.Decimal),
             new SQLiteTypeNames("DECIMAL", DbType.Decimal),
             new SQLiteTypeNames("MONEY", DbType.Decimal),
