@@ -59,6 +59,12 @@ runTest {test tkt-84718e79fa-1.1 {SQLiteConvert thread safety} -setup {
 
   object unimport -importpattern System.Threading
 
+  for {set i 0} {$i < $c} {incr i} {
+    if {[info exists t($i)] && [cleanupThread $t($i)]} then {
+      unset t($i)
+    }
+  }
+
   catch {object removecallback threadStart}
 
   unset -nocomplain results t i c db fileName
