@@ -1,0 +1,78 @@
+###############################################################################
+#
+# tkt-84718e79fa.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+set c 10
+
+###############################################################################
+
+runTest {test tkt-84718e79fa-1.1 {SQLiteConvert thread safety} -setup {
+  proc threadStart { args } {
+    lappend ::results [sql execute -execute reader -format list $::db \
+        "SELECT x FROM t1;"]
+  }
+
+  object import System.Threading
+
+  setupDb [set fileName tkt-84718e79fa-1.1.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY ASC);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  for {set i 0} {$i < $c} {incr i} {
+    set t($i) [object create -alias Thread threadStart]
+  }
+
+  set ::results [list]
+
+  for {set i 0} {$i < $c} {incr i} {
+    $t($i) Start
+  }
+
+  after 4000; # wait for other threads to do something...
+
+  for {set i 0} {$i < $c} {incr i} {
+    $t($i) Join
+  }
+
+  set ::results
+} -cleanup {
+  cleanupDb $fileName
+
+  object unimport -importpattern System.Threading
+
+  catch {object removecallback threadStart}
+
+  unset -nocomplain results t i c db fileName
+
+  rename threadStart ""
+} -constraints \
+{eagle shell monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-result [lrepeat $c 1]}
+
+###############################################################################
+
+unset -nocomplain c
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
