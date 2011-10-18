@@ -193,6 +193,17 @@ namespace System.Data.SQLite
             lock (syncRoot)
             {
                 //
+                // NOTE: Remove the default log event handler.
+                //
+                RemoveDefaultHandler();
+
+                //
+                // NOTE: Disable logging.  If necessary, it can be re-enabled
+                //       later by the Initialize method.
+                //
+                _enabled = false;
+
+                //
                 // BUGBUG: This will cause serious problems if other AppDomains
                 //         have any open SQLite connections; however, there is
                 //         currently no way around this limitation.
@@ -210,6 +221,18 @@ namespace System.Data.SQLite
                     if (rc != 0)
                         throw new SQLiteException(rc,
                             "Failed to shutdown logging.");
+                }
+
+                //
+                // BUGFIX: Make sure to reset the callback for next time.  This
+                //         must be done after it has been succesfully removed
+                //         as logging callback by the SQLite core library as we
+                //         cannot allow native code to refer to a delegate that
+                //         has been garbage collected.
+                //
+                if (_callback != null)
+                {
+                    _callback = null;
                 }
 
                 //
