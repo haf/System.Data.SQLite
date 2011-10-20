@@ -19,6 +19,7 @@
     <RootNamespace>testlinq</RootNamespace>
     <AssemblyName>testlinq</AssemblyName>
     <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <ConfigurationYear>2010</ConfigurationYear>
   </PropertyGroup>

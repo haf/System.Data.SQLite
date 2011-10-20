@@ -432,19 +432,37 @@ namespace System.Data.SQLite
         {
             case SQLiteDateFormats.Ticks:
                 {
-                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, dt.Ticks);
+                    long value = dt.Ticks;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, value);
+#else
+                    int n = UnsafeNativeMethods.sqlite3_bind_int64_interop(stmt._sqlite_stmt, index, ref value);
+#endif
                     if (n > 0) throw new SQLiteException(n, SQLiteLastError());
                     break;
                 }
             case SQLiteDateFormats.JulianDay:
                 {
-                    int n = UnsafeNativeMethods.sqlite3_bind_double(stmt._sqlite_stmt, index, ToJulianDay(dt));
+                    double value = ToJulianDay(dt);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+                    int n = UnsafeNativeMethods.sqlite3_bind_double(stmt._sqlite_stmt, index, value);
+#else
+                    int n = UnsafeNativeMethods.sqlite3_bind_double_interop(stmt._sqlite_stmt, index, ref value);
+#endif
                     if (n > 0) throw new SQLiteException(n, SQLiteLastError());
                     break;
                 }
             case SQLiteDateFormats.UnixEpoch:
                 {
-                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, Convert.ToInt64(dt.Subtract(UnixEpoch).TotalSeconds));
+                    long value = Convert.ToInt64(dt.Subtract(UnixEpoch).TotalSeconds);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, value);
+#else
+                    int n = UnsafeNativeMethods.sqlite3_bind_int64_interop(stmt._sqlite_stmt, index, ref value);
+#endif
                     if (n > 0) throw new SQLiteException(n, SQLiteLastError());
                     break;
                 }
