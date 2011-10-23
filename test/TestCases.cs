@@ -112,6 +112,28 @@ namespace test
 
             cnn.Close();
 
+            ///////////////////////////////////////////////////////////////////
+
+            cnn.Open();
+
+            // Re-Encrypts the database. The connection remains valid and usable afterwards.
+            cnn.ChangePassword("mypassword");
+            cnn.ChangePassword("mynewerpassword");
+
+            maydroptable.Add("ChangePasswordTest2");
+            if (cnn.State != ConnectionState.Open) cnn.Open();
+            using (DbCommand cmd = cnn.CreateCommand())
+            {
+                cmd.CommandText = "CREATE TABLE ChangePasswordTest2(ID int primary key)";
+                cmd.ExecuteNonQuery();
+            }
+
+            // Decrpyt database
+            cnn.ChangePassword("");
+            cnn.Close();
+
+            ///////////////////////////////////////////////////////////////////
+
             // Try opening now without password
             cnn.Open();
             cnn.Close();
