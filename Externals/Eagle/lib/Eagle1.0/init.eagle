@@ -1537,38 +1537,45 @@ namespace eval ::Eagle {
       #       namespace into the global namespace?
       #
       if {$forget} then {
-        namespace forget ${namespace}::*
+        namespace eval :: [list namespace forget [appendArgs $namespace ::*]]
       }
 
       #
-      # NOTE: Process each of the commands to be exported from this
+      # NOTE: Process each command to be exported from the specified
       #       namespace and import it into the global namespace, if
       #       necessary.
       #
       foreach export $exports {
         #
-        # NOTE: Force importing of our exported commands into the
-        #       global namespace?  Otherwise, see if the command is
-        #       already present in the global namespace before trying
-        #       to import it.
+        # NOTE: Force importing of our exported commands into the global
+        #       namespace?  Otherwise, see if the command is already
+        #       present in the global namespace before trying to import
+        #       it.
         #
-        if {$force || [llength [info commands ::$export]] == 0} then {
-          namespace export $export
+        if {$force || \
+            [llength [info commands [appendArgs :: $export]]] == 0} then {
+          #
+          # NOTE: Export the specified command from the specified namespace.
+          #
+          namespace eval $namespace [list namespace export $export]
+
+          #
+          # NOTE: Import the specified command into the global namespace.
+          #
+          set namespaceExport [appendArgs $namespace :: $export]
 
           if {$force} then {
-            namespace eval :: [list namespace import -force \
-                ${namespace}::$export]
+            namespace eval :: [list namespace import -force $namespaceExport]
           } else {
-            namespace eval :: [list namespace import \
-                ${namespace}::$export]
+            namespace eval :: [list namespace import $namespaceExport]
           }
         }
       }
     }
 
     #
-    # NOTE: Exports the necessary commands from this package and import
-    #       them into the global namespace.
+    # NOTE: Exports the necessary commands from this package and import them
+    #       into the global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
         exportAndImportPackageCommands isEagle isMono getEnvironmentVariable \

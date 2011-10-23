@@ -126,6 +126,28 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForSymbols { channel name {constraint ""} } {
+    set fileName [file normalize [appendArgs [file rootname $name] .pdb]]
+
+    tputs $channel [appendArgs "---- checking for symbols \"" $fileName \
+        "\"... "]
+
+    if {[file exists $fileName]} then {
+      #
+      # NOTE: The file appears to have associated symbols available.
+      #
+      if {[string length $constraint] > 0} then {
+        addConstraint [appendArgs symbols_ $constraint]
+      } else {
+        addConstraint [appendArgs symbols_ [file tail $name]]
+      }
+
+      tputs $channel yes\n
+    } else {
+      tputs $channel no\n
+    }
+  }
+
   proc checkForLogFile { channel } {
     tputs $channel "---- checking for log file... "
 
@@ -535,13 +557,15 @@ namespace eval ::Eagle {
     }
   }
 
-  proc checkForTiming { channel threshold } {
+  proc checkForTiming { channel threshold {tries 2} } {
     tputs $channel "---- checking for precision timing... "
 
     #
-    # NOTE: Are we allowed to do precision timing tests?
+    # HACK: Sometimes the first try takes quite a bit longer than subsequent
+    #       tries.  We attempt to bypass this problem by retrying a set number
+    #       of times (which can be overridden by the caller) before giving up.
     #
-    if {![info exists ::no(timing)]} then {
+    for {set try 0} {$try < $tries} {incr try} {
       #
       # NOTE: Attempt to block for exactly one second.
       #
@@ -559,17 +583,24 @@ namespace eval ::Eagle {
       # NOTE: Are we within the threshold specified by the caller?
       #
       if {$difference >= 0 && $difference <= $threshold} then {
+        #
+        # NOTE: We appear to be capable of fairly precise timing.
+        #
         addConstraint timing
 
         tputs $channel [appendArgs "yes (0 <= " $difference " <= " \
-            $threshold " milliseconds)\n"]
-      } else {
-        tputs $channel [appendArgs "no (0 <= " $difference " > " \
-            $threshold " milliseconds)\n"]
+            $threshold " milliseconds, tried " [expr {$try + 1}] \
+            " " [expr {$try > 0 ? "times" : "time"}] ")\n"]
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
       }
-    } else {
-      tputs $channel no\n
     }
+
+    tputs $channel [appendArgs "no (0 <= " $difference " > " \
+        $threshold " milliseconds)\n"]
   }
 
   proc checkForPerformance { channel } {
@@ -1645,9 +1676,9 @@ namespace eval ::Eagle {
         checkForEagle checkForGaruda checkForShell checkForDebug checkForTk \
         checkForVersion checkForCommand checkForFile checkForNativeCode \
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
-        checkForPerformance checkForTiming checkForInteractive checkForLogFile \
-        checkForNetwork checkForCompileOption checkForUserInteraction] false \
-        false
+        checkForPerformance checkForTiming checkForInteractive checkForSymbols \
+        checkForLogFile checkForNetwork checkForCompileOption \
+        checkForUserInteraction] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

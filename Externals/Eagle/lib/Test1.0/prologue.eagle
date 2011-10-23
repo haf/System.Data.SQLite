@@ -50,20 +50,24 @@ if {![info exists no([file tail [info script]])]} then {
     #
     # WARNING: The Eagle package name and version are hard-coded here.
     #
+    set pkg_dir Eagle1.0; # TODO: Change me.
+
     if {![file exists [file join $base_path lib]] || \
         ![file isdirectory [file join $base_path lib]] || \
-        ![file exists [file join $base_path lib Eagle1.0]] || \
-        ![file isdirectory [file join $base_path lib Eagle1.0]] || \
-        ![file exists [file join $base_path lib Eagle1.0 init.eagle]] || \
-        ![file isfile [file join $base_path lib Eagle1.0 init.eagle]]} then {
+        ![file exists [file join $base_path lib $pkg_dir]] || \
+        ![file isdirectory [file join $base_path lib $pkg_dir]] || \
+        ![file exists [file join $base_path lib $pkg_dir init.eagle]] || \
+        ![file isfile [file join $base_path lib $pkg_dir init.eagle]]} then {
       #
-      # NOTE: We do not bother to check if the "lib" sub-directory
-      #       actually exists as a child of this one.  This is the
-      #       previous (legacy) behavior (i.e. where we always went
-      #       up two levels to the base directory).
+      # NOTE: We do not bother to check if the "lib" sub-directory actually
+      #       exists as a child of this one.  This is the previous (legacy)
+      #       behavior (i.e. where we always went up two levels to the base
+      #       directory).
       #
       set base_path [file dirname $base_path]
     }
+
+    unset pkg_dir
   }
 
   #
@@ -93,7 +97,7 @@ if {![info exists no([file tail [info script]])]} then {
       set root_path [file normalize $directory]
     }
 
-    unset -nocomplain directory exec pattern
+    unset -nocomplain directory dummy exec pattern
   }
 
   #
@@ -659,6 +663,13 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has symbol testing support been disabled?
+    #
+    if {![info exists no(assemblySymbols)]} then {
+      checkForSymbols $test_channel [lindex [info assembly] end]
+    }
+
+    #
     # NOTE: Has quiet testing support been disabled?
     #
     if {![info exists no(quiet)]} then {
@@ -830,6 +841,16 @@ if {![info exists no([file tail [info script]])]} then {
         # NOTE: For tests "commands-1.4", "object-7.3" and "xml-1.1.*".
         #
         checkForCompileOption $test_channel XML
+      }
+
+      #
+      # NOTE: Has serialization support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileSerialization)]} then {
+        #
+        # NOTE: For test "interp-1.10".
+        #
+        checkForCompileOption $test_channel SERIALIZATION
       }
 
       #
@@ -1474,6 +1495,10 @@ if {![info exists no([file tail [info script]])]} then {
     checkForLogFile $test_channel
   }
 
+  if {![info exists no(symbols)]} then {
+    checkForSymbols $test_channel [info nameofexecutable]
+  }
+
   if {![info exists no(garuda)]} then {
     checkForGaruda $test_channel
   }
@@ -1641,7 +1666,7 @@ if {![info exists no([file tail [info script]])]} then {
         #
         set timeStamp [lindex $timeStamp 0]
       } else {
-        set timeStamp [clock format [clock scan $timeStamp] -iso]
+        set timeStamp [clock format [clock scan $timeStamp] -iso -isotimezone]
       }
     } else {
       set timeStamp <none>
