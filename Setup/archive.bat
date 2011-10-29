@@ -66,11 +66,13 @@ REM "
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% IF NOT EXIST Setup\Output MKDIR Setup\Output
+%_ECHO% IF NOT EXIST Setup\Output (
+  MKDIR Setup\Output
 
-IF ERRORLEVEL 1 (
-  ECHO Could not create directory "Setup\Output".
-  GOTO errors
+  IF ERRORLEVEL 1 (
+    ECHO Could not create directory "Setup\Output".
+    GOTO errors
+  )
 )
 
 %_ECHO% zip.exe -v -r Setup\Output\sqlite-netFx-source-%VERSION%.zip * -x @exclude_src.txt
