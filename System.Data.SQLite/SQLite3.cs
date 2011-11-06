@@ -21,7 +21,7 @@ namespace System.Data.SQLite
   internal class SQLite3 : SQLiteBase
   {
 #if !PLATFORM_COMPACTFRAMEWORK
-    internal const string DesignerVersion = "1.0.76.0";
+    internal const string DesignerVersion = "1.0.77.0";
 #endif
 
     /// <summary>
