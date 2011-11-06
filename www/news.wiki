@@ -3,6 +3,20 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.77.0 - November XX, 2011</b>
+</p>
+<ul>
+    <li>Updated to SQLite 3.7.9 <a href="http://www.sqlite.org/src/info/c7c6050ef0">[c7c6050ef0]</a>.</li>
+    <li>More enhancements to the build and test automation.</li>
+    <li>Support building the core System.Data.SQLite assemblies using the .NET Framework 4.0 Client Profile. Fix for [566f1ad1e4].</li>
+    <li>When returning schema information that may be used by the .NET Framework to construct dynamic SQL, use a fake schema name (instead of null) so that the table names will be properly qualified with the catalog name (i.e. the attached database name). Partial fix for [343d392b51].</li>
+    <li>Add DateTimeKind connection string property to control the DateTimeKind of parsed DateTime values. Partial fix for [343d392b51].</li>
+    <li>Improve the robustness of the SQLiteLog class when it will be initialized and unloaded multiple times.</li>
+    <li>Fix the name of the interop assembly for Windows CE. Add unit tests to prevent this type of issue from happening again. Fix for [737ca4ff74].</li>
+    <li>Formally support the SQL type name BOOLEAN in addition to BOOL. Fix for [544dba0a2f].</li>
+    <li>Make sure the SQLiteConvert.TypeNameToDbType method is thread-safe. Fix for [84718e79fa].</li>
+</ul>
+<p>
     <b>1.0.76.0 - October 4, 2011</b>
 </p>
 <ul>
