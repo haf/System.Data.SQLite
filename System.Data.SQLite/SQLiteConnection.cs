@@ -819,7 +819,7 @@ namespace System.Data.SQLite
       else
       {
 #if PLATFORM_COMPACTFRAMEWORK
-       if (fileName.StartsWith(".\\"))
+       if (fileName.StartsWith("./") || fileName.StartsWith(".\\"))
          fileName = Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
 #endif
        fileName = ExpandFileName(fileName);
