@@ -111,16 +111,45 @@ namespace eval ::Eagle {
       if {[info exists ::build_directory] && \
           [string length $::build_directory] > 0} then {
         #
-        # NOTE: The location of the build directory has been overridden.
+        # NOTE: The location of the build directory has been overridden;
+        #       therefore, use it verbatim.
         #
         return $::build_directory
       } else {
+        #
+        # NOTE: Figure out the build base directory.  This will be the directory
+        #       that contains the actual build output directory (e.g. "bin").
+        #
+        if {[info exists ::build_base_directory] && \
+            [string length $::build_base_directory] > 0} then {
+          #
+          # NOTE: The location of the build base directory has been overridden;
+          #       therefore, use it verbatim.
+          #
+          set path $::build_base_directory
+        } elseif {[info exists ::common_directory] && \
+            [string length $::common_directory] > 0} then {
+          #
+          # NOTE: Next, fallback to the parent directory of the one containing
+          #       this file (i.e. "common.eagle"), if available.
+          #
+          set path [file dirname $::common_directory]
+        } else {
+          #
+          # NOTE: Finally, fallback to the parent directory of the EagleTest
+          #       path.  The EagleTest package guarantees that this variable
+          #       will be set to the directory containing the first file to
+          #       execute the [runTestPrologue] script library procedure.
+          #
+          set path [file dirname $::path]
+        }
+
         if {[hasRuntimeOption native]} then {
-          return [file join [file dirname $::path] bin [getBuildYear] \
+          return [file join $path bin [getBuildYear] \
               [machineToPlatform $::tcl_platform(machine)] \
               [getBuildConfiguration]]
         } else {
-          return [file join [file dirname $::path] bin [getBuildYear] \
+          return [file join $path bin [getBuildYear] \
               [getBuildConfiguration] bin]
         }
       }
@@ -142,7 +171,8 @@ namespace eval ::Eagle {
       if {[info exists ::binary_directory] && \
           [string length $::binary_directory] > 0} then {
         #
-        # NOTE: The location of the binary directory has been overridden.
+        # NOTE: The location of the binary directory has been overridden;
+        #       therefore, use it verbatim.
         #
         return $::binary_directory
       } else {
@@ -539,6 +569,11 @@ namespace eval ::Eagle {
     ############################# END Eagle ONLY ##############################
     ###########################################################################
   }
+
+  #
+  # NOTE: Save the name of the directory containing this file.
+  #
+  set ::common_directory [file dirname [info script]]
 
   #
   # NOTE: Provide the System.Data.SQLite test package to the interpreter.
