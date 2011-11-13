@@ -1,0 +1,139 @@
+###############################################################################
+#
+# tkt-7e3fa93744.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-7e3fa93744-1.1 {composite primary key, baseline} -setup {
+  setupDb [set fileName tkt-7e3fa93744-1.1.db]
+} -body {
+  set sql {
+    CREATE TABLE t1 (
+      id1 INTEGER PRIMARY KEY
+    );
+
+    CREATE TABLE t2 (
+      id1 INTEGER NOT NULL,
+      id2 INTEGER NOT NULL,
+      PRIMARY KEY (id1, id2)
+    );
+
+    INSERT INTO t1 (id1) VALUES (1);
+    INSERT INTO t1 (id1) VALUES (2);
+
+    INSERT INTO t2 (id1, id2) VALUES (1, 1);
+    INSERT INTO t2 (id1, id2) VALUES (1, 2);
+    INSERT INTO t2 (id1, id2) VALUES (2, 1);
+    INSERT INTO t2 (id1, id2) VALUES (2, 2);
+
+    SELECT t1.id1, t2.id1, t2.id2
+    FROM t1, t2
+    ORDER BY t1.id1, t2.id1, t2.id2;
+  }
+
+  sql execute -execute reader -format list $db $sql
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain sql db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{1 1 1 1 1 2 1 2 1 1 2 2 2 1 1 2 1 2 2 2 1 2 2 2}}
+
+###############################################################################
+
+runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
+  setupDb [set fileName tkt-7e3fa93744-1.2.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getTemporaryPath] $fileName]
+
+  set sql { \
+    CREATE TABLE t1 ( \
+      id1 INTEGER PRIMARY KEY NOT NULL \
+    ); \
+    CREATE TABLE t2 ( \
+      id1 INTEGER NOT NULL, \
+      id2 INTEGER NOT NULL, \
+      PRIMARY KEY (id1, id2) \
+    ); \
+    INSERT INTO t1 (id1) VALUES (1); \
+    INSERT INTO t1 (id1) VALUES (2); \
+    INSERT INTO t2 (id1, id2) VALUES (1, 1); \
+    INSERT INTO t2 (id1, id2) VALUES (1, 2); \
+    INSERT INTO t2 (id1, id2) VALUES (2, 1); \
+    INSERT INTO t2 (id1, id2) VALUES (2, 2); \
+    SELECT t1.id1, t2.id1, t2.id2 \
+    FROM t1, t2 \
+    ORDER BY t1.id1, t2.id1, t2.id2; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static int Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "${sql}";
+
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                DataTable dataTable = new DataTable();
+                dataTable.Load(dataReader);
+
+                return dataTable.Rows.Count;
+              }
+            }
+          }
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 8$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
