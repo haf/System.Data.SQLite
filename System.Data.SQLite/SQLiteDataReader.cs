@@ -8,6 +8,7 @@
 namespace System.Data.SQLite
 {
   using System;
+  using System.Collections.Generic;
   using System.Data;
   using System.Data.Common;
   using System.Globalization;
@@ -587,9 +588,137 @@ namespace System.Data.SQLite
       return GetSchemaTable(true, false);
     }
 
+    private class ColumnParent : IEqualityComparer<ColumnParent>
+    {
+        public string DatabaseName;
+        public string TableName;
+        public string ColumnName;
+
+        public ColumnParent()
+        {
+            // do nothing.
+        }
+
+        public ColumnParent(
+            string databaseName,
+            string tableName,
+            string columnName
+            )
+            : this()
+        {
+            this.DatabaseName = databaseName;
+            this.TableName = tableName;
+            this.ColumnName = columnName;
+        }
+
+        #region IEqualityComparer<ColumnParent> Members
+        public bool Equals(ColumnParent x, ColumnParent y)
+        {
+            if ((x == null) && (y == null))
+            {
+                return true;
+            }
+            else if ((x == null) || (y == null))
+            {
+                return false;
+            }
+            else
+            {
+                if (!String.Equals(x.DatabaseName, y.DatabaseName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                if (!String.Equals(x.TableName, y.TableName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                if (!String.Equals(x.ColumnName, y.ColumnName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        public int GetHashCode(ColumnParent obj)
+        {
+            int result = 0;
+
+            if ((obj != null) && (obj.DatabaseName != null))
+                result ^= obj.DatabaseName.GetHashCode();
+
+            if ((obj != null) && (obj.TableName != null))
+                result ^= obj.TableName.GetHashCode();
+
+            if ((obj != null) && (obj.ColumnName != null))
+                result ^= obj.ColumnName.GetHashCode();
+
+            return result;
+        }
+        #endregion
+    }
+
+    private static void GetStatementColumnParents(
+        SQLiteBase sql,
+        SQLiteStatement stmt,
+        int fieldCount,
+        ref Dictionary<ColumnParent, List<int>> parentToColumns,
+        ref Dictionary<int, ColumnParent> columnToParent
+        )
+    {
+        if (parentToColumns == null)
+            parentToColumns = new Dictionary<ColumnParent, List<int>>(
+                new ColumnParent());
+
+        if (columnToParent == null)
+            columnToParent = new Dictionary<int, ColumnParent>();
+
+        for (int n = 0; n < fieldCount; n++)
+        {
+            string databaseName = sql.ColumnDatabaseName(stmt, n);
+            string tableName = sql.ColumnTableName(stmt, n);
+            string columnName = sql.ColumnOriginalName(stmt, n);
+
+            ColumnParent key = new ColumnParent(databaseName, tableName, null);
+            ColumnParent value = new ColumnParent(databaseName, tableName, columnName);
+
+            if (!parentToColumns.ContainsKey(key))
+                parentToColumns.Add(key, new List<int>(new int[] { n }));
+            else
+                parentToColumns[key].Add(n);
+
+            columnToParent.Add(n, value);
+        }
+    }
+
     internal DataTable GetSchemaTable(bool wantUniqueInfo, bool wantDefaultValue)
     {
       CheckClosed();
+
+     //
+     // BUGFIX: We need to quickly scan all the fields in the current
+     //         "result set" to see how many distinct tables are actually
+     //         involved.  This information is necessary so that some
+     //         intelligent decisions can be made when constructing the
+     //         metadata below.  For example, we need to be very careful
+     //         about flagging a particular column as "unique" just
+     //         because it was in its original underlying database table
+     //         if there are now multiple tables involved in the
+     //         "result set".  See ticket [7e3fa93744] for more detailed
+     //         information.
+     //
+      Dictionary<ColumnParent, List<int>> parentToColumns = null;
+      Dictionary<int, ColumnParent> columnToParent = null;
+
+      GetStatementColumnParents(
+          _command.Connection._sql, _activeStatement, _fieldCount,
+          ref parentToColumns, ref columnToParent);
 
       DataTable tbl = new DataTable("SchemaTable");
       DataTable tblIndexes = null;
@@ -653,16 +782,16 @@ namespace System.Data.SQLite
         row[SchemaTableOptionalColumn.IsHidden] = false;
         row[SchemaTableColumn.BaseSchemaName] = _baseSchemaName;
 
-        strColumn = _command.Connection._sql.ColumnOriginalName(_activeStatement, n);
+        strColumn = columnToParent[n].ColumnName;
         if (String.IsNullOrEmpty(strColumn) == false) row[SchemaTableColumn.BaseColumnName] = strColumn;
 
         row[SchemaTableColumn.IsExpression] = String.IsNullOrEmpty(strColumn);
         row[SchemaTableColumn.IsAliased] = (String.Compare(GetName(n), strColumn, StringComparison.OrdinalIgnoreCase) != 0);
 
-        temp = _command.Connection._sql.ColumnTableName(_activeStatement, n);
+        temp = columnToParent[n].TableName;
         if (String.IsNullOrEmpty(temp) == false) row[SchemaTableColumn.BaseTableName] = temp;
 
-        temp = _command.Connection._sql.ColumnDatabaseName(_activeStatement, n);
+        temp = columnToParent[n].DatabaseName;
         if (String.IsNullOrEmpty(temp) == false) row[SchemaTableOptionalColumn.BaseCatalogName] = temp;
 
         string dataType = null;
@@ -762,7 +891,13 @@ namespace System.Data.SQLite
               {
                 if (String.Compare((string)rowColumnIndex["COLUMN_NAME"], strColumn, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                  if (tblIndexColumns.Rows.Count == 1 && (bool)row[SchemaTableColumn.AllowDBNull] == false)
+                  //
+                  // BUGFIX: Make sure that we only flag this column as "unique"
+                  //         if we are not processing of some kind of multi-table
+                  //         construct (i.e. a join) because in that case we must
+                  //         allow duplicate values (refer to ticket [7e3fa93744]).
+                  //
+                  if (parentToColumns.Count == 1 && tblIndexColumns.Rows.Count == 1 && (bool)row[SchemaTableColumn.AllowDBNull] == false)
                     row[SchemaTableColumn.IsUnique] = rowIndexes["UNIQUE"];
 
                   // If its an integer primary key and the only primary key in the table, then its a rowid alias and is autoincrement

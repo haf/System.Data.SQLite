@@ -120,6 +120,28 @@ namespace eval ::Eagle {
       #
       return false
     }
+
+    proc checkForTestOverrides { channel varNames quiet } {
+      set result 0
+
+      foreach varName $varNames {
+        if {[uplevel 1 [list info exists $varName]]} then {
+          incr result
+
+          if {!$quiet} then {
+            puts -nonewline $channel [appendArgs \
+                "Found vendor-specific test override \"" $varName "\".\n"]
+          }
+        }
+      }
+
+      return $result
+    }
+
+    checkForTestOverrides stdout \
+        [list binary_directory build_base_directory build_directory \
+              common_directory datetime_format test_configuration \
+              test_year] false
 
     addTestSuiteToAutoPath stdout false
   }

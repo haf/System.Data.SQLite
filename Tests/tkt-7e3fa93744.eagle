@@ -20,7 +20,7 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test tkt-7e3fa93744-1.1 {composite primary key} -setup {
+runTest {test tkt-7e3fa93744-1.1 {composite primary key, baseline} -setup {
   setupDb [set fileName tkt-7e3fa93744-1.1.db]
 } -body {
   set sql {
@@ -64,33 +64,25 @@ runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getTemporaryPath] $fileName]
 
-  set sql(1) {
-    CREATE TABLE t1 (
-      id1 INTEGER PRIMARY KEY NOT NULL
-    );
-
-    CREATE TABLE t2 (
-      id1 INTEGER NOT NULL,
-      id2 INTEGER NOT NULL,
-      PRIMARY KEY (id1, id2)
-    );
-
-    INSERT INTO t1 (id1) VALUES (1);
-    INSERT INTO t1 (id1) VALUES (2);
-
-    INSERT INTO t2 (id1, id2) VALUES (1, 1);
-    INSERT INTO t2 (id1, id2) VALUES (1, 2);
-    INSERT INTO t2 (id1, id2) VALUES (2, 1);
-    INSERT INTO t2 (id1, id2) VALUES (2, 2);
-  }
-
-  set sql(2) { \
+  set sql { \
+    CREATE TABLE t1 ( \
+      id1 INTEGER PRIMARY KEY NOT NULL \
+    ); \
+    CREATE TABLE t2 ( \
+      id1 INTEGER NOT NULL, \
+      id2 INTEGER NOT NULL, \
+      PRIMARY KEY (id1, id2) \
+    ); \
+    INSERT INTO t1 (id1) VALUES (1); \
+    INSERT INTO t1 (id1) VALUES (2); \
+    INSERT INTO t2 (id1, id2) VALUES (1, 1); \
+    INSERT INTO t2 (id1, id2) VALUES (1, 2); \
+    INSERT INTO t2 (id1, id2) VALUES (2, 1); \
+    INSERT INTO t2 (id1, id2) VALUES (2, 2); \
     SELECT t1.id1, t2.id1, t2.id2 \
     FROM t1, t2 \
     ORDER BY t1.id1, t2.id1, t2.id2; \
   }
-
-  sql execute $db $sql(1)
 
   unset -nocomplain results errors
 
@@ -112,7 +104,7 @@ runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
 
             using (SQLiteCommand command = connection.CreateCommand())
             {
-              command.CommandText = "${sql(2)}";
+              command.CommandText = "${sql}";
 
               using (SQLiteDataReader dataReader = command.ExecuteReader())
               {
