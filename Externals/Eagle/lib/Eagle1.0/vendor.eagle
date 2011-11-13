@@ -23,6 +23,9 @@
 #       new platforms, operating systems, etc.
 #
 
+###############################################################################
+############################## BEGIN VENDOR CODE ##############################
+###############################################################################
 #
 # NOTE: Use our own namespace here because even though we do not directly
 #       support namespaces ourselves, we do not want to pollute the global
@@ -78,7 +81,17 @@ namespace eval ::Eagle {
                   "\", adding...\n"]
             }
 
+            #
+            # NOTE: Append the directory to the necessary environment variable
+            #       so that it will get picked up when Eagle actually rebuilds
+            #       the auto-path list (below).
+            #
             lappend ::env(EAGLELIBPATH) $dir
+
+            #
+            # NOTE: Force Eagle to rebuild the auto-path list for the current
+            #       interpreter right now.
+            #
             object invoke Utility RefreshAutoPathList
           }
 
@@ -111,3 +124,7 @@ namespace eval ::Eagle {
     addTestSuiteToAutoPath stdout false
   }
 }
+
+###############################################################################
+############################### END VENDOR CODE ###############################
+###############################################################################
