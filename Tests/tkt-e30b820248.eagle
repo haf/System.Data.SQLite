@@ -25,6 +25,7 @@ runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getTemporaryPath] $fileName]
+  set name [file rootname [file tail $fileName]]
 
   set sql { \
     CREATE TABLE t1 (id1 INTEGER); \
@@ -39,6 +40,7 @@ runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
 
   set code [compileCSharpWith [subst {
     using System.Data.SQLite;
+    using System.Diagnostics;
 
     namespace _Dynamic${id}
     {
@@ -46,26 +48,43 @@ runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
       {
         public static void Main()
         {
-          using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+          using (TraceListener listener = new TextWriterTraceListener(
+              "${test_log}", "${name}"))
           {
-            connection.Open();
+            Trace.Listeners.Add(listener);
+            Trace.WriteLine("---- START TRACE \\"${name}\\"");
 
-            using (SQLiteTransaction transaction =
-                connection.BeginTransaction())
+            using (SQLiteConnection connection = new SQLiteConnection(
+                "Data Source=${dataSource};"))
             {
-              using (SQLiteCommand command = connection.CreateCommand())
-              {
-                command.Transaction = transaction;
-                command.CommandText = "${sql}";
-                command.Parameters.AddWithValue("x", 3);
-                command.Parameters.AddWithValue("y", 4);
-                command.Parameters.AddWithValue("z", 5);
-                command.ExecuteNonQuery();
-              }
+              connection.Open();
+              connection.LogMessage(0, "Connection opened.");
 
-              transaction.Commit();
+              using (SQLiteTransaction transaction =
+                  connection.BeginTransaction())
+              {
+                connection.LogMessage(0, "Transaction started.");
+
+                using (SQLiteCommand command = connection.CreateCommand())
+                {
+                  command.Transaction = transaction;
+                  command.CommandText = "${sql}";
+
+                  command.Parameters.AddWithValue("x", 3);
+                  command.Parameters.AddWithValue("y", 4);
+                  command.Parameters.AddWithValue("z", 5);
+
+                  command.ExecuteNonQuery();
+                  connection.LogMessage(0, "Command executed.");
+                }
+
+                transaction.Commit();
+                connection.LogMessage(0, "Transaction committed.");
+              }
             }
+
+            Trace.WriteLine("---- END TRACE \\"${name}\\"");
+            Trace.Listeners.Remove(listener);
           }
         }
       }
@@ -82,8 +101,9 @@ runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
 
   unset -nocomplain result code results errors sql dataSource id db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+{eagle logFile monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
+\{\}$}}
 
 ###############################################################################
 

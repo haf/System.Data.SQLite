@@ -874,11 +874,18 @@ namespace System.Data.SQLite
       try
       {
         SQLiteBase.CloseConnection(this);
+#if DEBUG
+        return true;
+#endif
       }
       catch (SQLiteException)
       {
       }
+#if DEBUG
+      return false;
+#else
       return true;
+#endif
     }
 
     public override bool IsInvalid
@@ -916,11 +923,18 @@ namespace System.Data.SQLite
       try
       {
         SQLiteBase.FinalizeStatement(this);
+#if DEBUG
+        return true;
+#endif
       }
       catch (SQLiteException)
       {
       }
+#if DEBUG
+      return false;
+#else
       return true;
+#endif
     }
 
     public override bool IsInvalid
