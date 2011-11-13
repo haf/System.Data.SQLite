@@ -48,7 +48,9 @@
       <li>Updated to SQLite 3.7.9 <a href="http://www.sqlite.org/src/info/c7c6050ef0">[c7c6050ef0]</a>.</li>
       <li>More enhancements to the build and test automation.</li>
       <li>Support building the core System.Data.SQLite assemblies using the .NET Framework 4.0 Client Profile. Fix for <a href="http://system.data.sqlite.org/index.html/info/566f1ad1e4">[566f1ad1e4]</a>.</li>
+      <li>When generating the schema based on the contents of a SQLiteDataReader, skip flagging columns as unique if the data reader is holding the result of some kind of multi-table construct (e.g. a cross join) because we must allow duplicate values in that case. Fix for <a href="http://system.data.sqlite.org/index.html/info/7e3fa93744">[7e3fa93744]</a>.</li>
       <li>When returning schema information that may be used by the .NET Framework to construct dynamic SQL, use a fake schema name (instead of null) so that the table names will be properly qualified with the catalog name (i.e. the attached database name). Partial fix for <a href="http://system.data.sqlite.org/index.html/info/343d392b51">[343d392b51]</a>.</li>
+      <li>Add MemoryUsed and MemoryHighwater properties to the SQLiteConnection class to help determine the memory usage of SQLite.</li>
       <li>Add DateTimeKind connection string property to control the DateTimeKind of parsed DateTime values. Partial fix for <a href="http://system.data.sqlite.org/index.html/info/343d392b51">[343d392b51]</a>.</li>
       <li>Improve the robustness of the SQLiteLog class when it will be initialized and unloaded multiple times.</li>
       <li>Fix the name of the interop assembly for Windows CE. Add unit tests to prevent this type of issue from happening again. Fix for <a href="http://system.data.sqlite.org/index.html/info/737ca4ff74">[737ca4ff74]</a>.</li>

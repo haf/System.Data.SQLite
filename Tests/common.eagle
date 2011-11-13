@@ -480,11 +480,24 @@ namespace eval ::Eagle {
     }
 
     proc reportSQLiteResources { channel } {
-      tputs $channel "---- memory now in use by SQLite... "
+      tputs $channel "---- current memory in use by SQLite... "
 
       if {[catch {object invoke -flags +NonPublic \
-              System.Data.SQLite.UnsafeNativeMethods sqlite3_memory_used} \
-              memory] == 0} then {
+              System.Data.SQLite.UnsafeNativeMethods \
+              sqlite3_memory_used} memory] == 0} then {
+        tputs $channel [appendArgs $memory " bytes\n"]
+      } else {
+        #
+        # NOTE: Maybe the SQLite native library is unavailable?
+        #
+        tputs $channel unknown\n
+      }
+
+      tputs $channel "---- maximum memory in use by SQLite... "
+
+      if {[catch {object invoke -flags +NonPublic \
+              System.Data.SQLite.UnsafeNativeMethods \
+              sqlite3_memory_highwater 0} memory] == 0} then {
         tputs $channel [appendArgs $memory " bytes\n"]
       } else {
         #

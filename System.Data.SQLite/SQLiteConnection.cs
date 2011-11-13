@@ -1039,7 +1039,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns the amount of memory, in bytes, currently in use by SQLite core library.
+    /// Returns the amount of memory (in bytes) currently in use by the SQLite core library.
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -1052,6 +1052,23 @@ namespace System.Data.SQLite
           throw new InvalidOperationException("Database connection not valid for getting memory used.");
 
         return _sql.MemoryUsed;
+      }
+    }
+
+    /// <summary>
+    /// Returns the maximum amount of memory (in bytes) used by the SQLite core library since the high-water mark was last reset.
+    /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
+    public long MemoryHighwater
+    {
+      get
+      {
+        if (_sql == null)
+          throw new InvalidOperationException("Database connection not valid for getting maximum memory used.");
+
+          return _sql.MemoryHighwater;
       }
     }
 

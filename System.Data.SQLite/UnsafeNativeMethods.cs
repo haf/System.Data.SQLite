@@ -384,6 +384,13 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
+    internal static extern long sqlite3_memory_highwater(int resetFlag);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
     internal static extern int sqlite3_shutdown();
 
 #if !PLATFORM_COMPACTFRAMEWORK

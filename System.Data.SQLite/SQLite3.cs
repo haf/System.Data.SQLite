@@ -124,6 +124,14 @@ namespace System.Data.SQLite
       }
     }
 
+    internal override long MemoryHighwater
+    {
+      get
+      {
+        return UnsafeNativeMethods.sqlite3_memory_highwater(0);
+      }
+    }
+
     /// <summary>
     /// Shutdown the SQLite engine so that it can be restarted with different config options.
     /// We depend on auto initialization to recover.
