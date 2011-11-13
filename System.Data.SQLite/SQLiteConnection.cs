@@ -1039,6 +1039,23 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns the amount of memory, in bytes, currently in use by SQLite core library.
+    /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
+    public long MemoryUsed
+    {
+      get
+      {
+        if (_sql == null)
+          throw new InvalidOperationException("Database connection not valid for getting memory used.");
+
+        return _sql.MemoryUsed;
+      }
+    }
+
+    /// <summary>
     /// Returns the version of the underlying SQLite database engine
     /// </summary>
     public static string SQLiteVersion

@@ -116,6 +116,14 @@ namespace System.Data.SQLite
       }
     }
 
+    internal override long MemoryUsed
+    {
+      get
+      {
+        return UnsafeNativeMethods.sqlite3_memory_used();
+      }
+    }
+
     /// <summary>
     /// Shutdown the SQLite engine so that it can be restarted with different config options.
     /// We depend on auto initialization to recover.

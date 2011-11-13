@@ -479,6 +479,21 @@ namespace eval ::Eagle {
       catch {file delete [file join [getTemporaryPath] [file tail $fileName]]}
     }
 
+    proc reportSQLiteResources { channel } {
+      tputs $channel "---- memory now in use by SQLite... "
+
+      if {[catch {object invoke -flags +NonPublic \
+              System.Data.SQLite.UnsafeNativeMethods sqlite3_memory_used} \
+              memory] == 0} then {
+        tputs $channel [appendArgs $memory " bytes\n"]
+      } else {
+        #
+        # NOTE: Maybe the SQLite native library is unavailable?
+        #
+        tputs $channel unknown\n
+      }
+    }
+
     proc runSQLiteTestPrologue {} {
       #
       # NOTE: Skip running our custom prologue if the main one has been skipped.
@@ -551,6 +566,11 @@ namespace eval ::Eagle {
         #       found it (above), this should always succeed.
         #
         checkForSQLite $::test_channel
+
+        #
+        # NOTE: Report the resource usage prior to running any tests.
+        #
+        reportSQLiteResources $::test_channel
       }
     }
 
@@ -560,8 +580,9 @@ namespace eval ::Eagle {
       #
       if {![info exists ::no(epilogue.eagle)]} then {
         #
-        # NOTE: For now, nothing is done here.
+        # NOTE: Also report the resource usage after running the tests.
         #
+        reportSQLiteResources $::test_channel
       }
     }
 
