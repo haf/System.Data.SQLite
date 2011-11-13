@@ -87,7 +87,6 @@ runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
-    using System;
     using System.Data;
     using System.Data.SQLite;
 
