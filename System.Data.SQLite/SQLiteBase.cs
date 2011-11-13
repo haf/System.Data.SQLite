@@ -33,9 +33,13 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract int Changes { get; }
     /// <summary>
-    /// Returns the amount of memory, in bytes, currently in use by SQLite core library.
+    /// Returns the amount of memory (in bytes) currently in use by the SQLite core library.
     /// </summary>
     internal abstract long MemoryUsed { get; }
+    /// <summary>
+    /// Returns the maximum amount of memory (in bytes) used by the SQLite core library since the high-water mark was last reset.
+    /// </summary>
+    internal abstract long MemoryHighwater { get; }
     /// <summary>
     /// Shutdown the SQLite engine so that it can be restarted with different config options.
     /// We depend on auto initialization to recover.
