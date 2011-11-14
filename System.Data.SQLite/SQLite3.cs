@@ -8,6 +8,9 @@
 namespace System.Data.SQLite
 {
   using System;
+#if DEBUG
+  using System.Diagnostics;
+#endif
   using System.Runtime.InteropServices;
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -168,6 +171,11 @@ namespace System.Data.SQLite
 #else
         int n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, (int)flags, IntPtr.Zero);
 #endif
+
+#if DEBUG
+        Trace.WriteLine(String.Format("Open: {0}", db));
+#endif
+
         if (n > 0) throw new SQLiteException(n, null);
 
         _sql = db;
@@ -322,6 +330,10 @@ namespace System.Data.SQLite
 #else
           n = UnsafeNativeMethods.sqlite3_prepare(_sql, psql, b.Length - 1, out stmt, out ptr);
           len = -1;
+#endif
+
+#if DEBUG
+          Trace.WriteLine(String.Format("Prepare: {0}", stmt));
 #endif
 
           if (n == 17)

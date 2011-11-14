@@ -357,9 +357,16 @@ namespace System.Data.SQLite
             string message = e.Message;
 
             if (message == null)
+            {
                 message = "<null>";
-            else if (message.Length == 0)
-                message = "<empty>";
+            }
+            else
+            {
+                message = message.Trim();
+
+                if (message.Length == 0)
+                    message = "<empty>";
+            }
 
             Trace.WriteLine(String.Format("SQLite error ({0}): {1}",
                 e.ErrorCode, message));

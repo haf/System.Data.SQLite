@@ -8,6 +8,9 @@
 namespace System.Data.SQLite
 {
   using System;
+#if DEBUG
+  using System.Diagnostics;
+#endif
 
 #if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
   using System.Security;
@@ -873,6 +876,10 @@ namespace System.Data.SQLite
     {
       try
       {
+#if DEBUG
+        Trace.WriteLine(String.Format("CloseConnection: {0}", handle));
+#endif
+
         SQLiteBase.CloseConnection(this);
 #if DEBUG
         return true;
@@ -922,6 +929,10 @@ namespace System.Data.SQLite
     {
       try
       {
+#if DEBUG
+        Trace.WriteLine(String.Format("FinalizeStatement: {0}", handle));
+#endif
+
         SQLiteBase.FinalizeStatement(this);
 #if DEBUG
         return true;
