@@ -368,8 +368,11 @@ namespace System.Data.SQLite
                     message = "<empty>";
             }
 
-            Trace.WriteLine(String.Format("SQLite error ({0}): {1}",
-                e.ErrorCode, message));
+            int errorCode = e.ErrorCode;
+
+            Trace.WriteLine(String.Format(
+                "SQLite {0} ({1}): {2}", errorCode == 0 ?
+                "message" : "error", errorCode, message));
         }
     }
 #endif
