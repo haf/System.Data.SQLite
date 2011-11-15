@@ -115,7 +115,7 @@ System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{\\} " $memory_used \$]}
 
 ###############################################################################
 
-for {set i 2} {$i < 4} {incr i} {
+for {set i 2} {$i < 5} {incr i} {
   set memory_used [reportSQLiteResources $test_channel true]
 
   #############################################################################
@@ -140,7 +140,7 @@ for {set i 2} {$i < 4} {incr i} {
     unset -nocomplain results errors
 
     set code [compileCSharpWith [subst {
-      [expr {$i == 3 ? "using System;" : ""}]
+      using System;
       using System.Data.SQLite;
       using System.Diagnostics;
       using System.IO;
@@ -215,7 +215,7 @@ for {set i 2} {$i < 4} {incr i} {
               OpenConnection();
               SQLiteDataReader dataReader = ExecuteReader("${sql}");
 
-              [expr {$i == 3 ? {
+              [expr {$i <= 2 ? {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
@@ -223,13 +223,19 @@ for {set i 2} {$i < 4} {incr i} {
 
               dataReader.Close();
 
-              [expr {$i == 3 ? {
+              [expr {$i <= 3 ? {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
               } : ""}]
 
               CloseConnection();
+
+              [expr {$i <= 4 ? {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+              } : ""}]
 
               Trace.WriteLine("---- END TRACE \\"${name}\\"");
               Trace.Listeners.Remove(listener);
