@@ -181,7 +181,7 @@ are not supporting the mixed CF assembly I was building prior to this version.</
 <h2><b>Development Notes Regarding the SQLite 3 Source Code</b></h2>
 
 <p>
-The core sqlite engine is compiled directly from the unmodified source code available
+The core SQLite engine is compiled directly from the unmodified source code available
 at the sqlite.org website.&nbsp; Several additional pieces are compiled on top of
 it to extend its functionality, but the core engine's source is not changed.</p>
 <p>
@@ -195,9 +195,15 @@ it to extend its functionality, but the core engine's source is not changed.</p>
 <ul>
     <li>Updated to SQLite 3.7.9 <a href="http://www.sqlite.org/src/info/c7c6050ef0">[c7c6050ef0]</a>.</li>
     <li>More enhancements to the build and test automation.</li>
+    <li>Plug native memory leak when closing a database connection containing a statement that cannot be finalized for some reason.</li>
+    <li>The SQLite3 class should always attempt to dispose the contained SQLiteConnectionHandle, even when called via the finalizer.</li>
+    <li>When compiled with DEBUG defined, emit diagnostic information related to resource cleanup to any TraceListener objects that may be registered.</li>
+    <li>Stop characterizing all log messages as errors. From now on, if the errorCode is zero, the message will not be considered an error.</li>
+    <li>Allow the SQLiteLog class to be used for logging messages without having an open connection.</li>
     <li>Support building the core System.Data.SQLite assemblies using the .NET Framework 4.0 Client Profile. Fix for [566f1ad1e4].</li>
     <li>When generating the schema based on the contents of a SQLiteDataReader, skip flagging columns as unique if the data reader is holding the result of some kind of multi-table construct (e.g. a cross join) because we must allow duplicate values in that case. Fix for [7e3fa93744].</li>
     <li>When returning schema information that may be used by the .NET Framework to construct dynamic SQL, use a fake schema name (instead of null) so that the table names will be properly qualified with the catalog name (i.e. the attached database name). Partial fix for [343d392b51].</li>
+    <li>Add SQLiteSourceId property to the SQLiteConnection class to return the SQLite source identifier.</li>
     <li>Add MemoryUsed and MemoryHighwater properties to the SQLiteConnection class to help determine the memory usage of SQLite.</li>
     <li>Add DateTimeKind connection string property to control the DateTimeKind of parsed DateTime values. Partial fix for [343d392b51].</li>
     <li>Improve the robustness of the SQLiteLog class when it will be initialized and unloaded multiple times.</li>
@@ -289,7 +295,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
   <b>1.0.70.0 - April 22, 2011</b>
 </p>
 <ul>
-  <li>Added support for sqlite3_extended_result_codes(), sqlite3_errcode(), and sqlite3_extended_errcode() 
+  <li>Added support for sqlite3_extended_result_codes(), sqlite3_errcode(), and sqlite3_extended_errcode()
         via SetExtendedResultCodes(), ResultCode(), and ExtendedResultCode().</li>
   <li>Added support for SQLITE_CONFIG_LOG via SQLiteLogEventHandler().</li>
 </ul>
@@ -828,7 +834,7 @@ and/or connections are not properly disposed by the user. </li>
 <li>Switched the encryption's internal deallocation code to use sqlite's built-in
 aux functions instead of modifying the pager.c source to free the crypt block.&nbsp;
 This eliminates the last of the code changes the provider makes to the original
-sqlite engine sources.&nbsp; Props to Ralf Junker for pointing that out.</li>
+SQLite engine sources.&nbsp; Props to Ralf Junker for pointing that out.</li>
 </ul>
 <p>
 <b>1.0.38.0 - November 22, 2006</b></p>
@@ -1125,7 +1131,7 @@ more robust and incorporates into the SQLite codebase more efficiently than the
 previous CE adaptation.</li>
 <li>Moved some of the embedded schema XML data into a resource file to ease code
 readability.</li>
-<li>Automated the fixup of the original sqlite codebase's source prior to compiling,
+<li>Automated the fixup of the original SQLite codebase's source prior to compiling,
 to ease merging with sqlite.org's source.</li>
 <li>Fixed a memory leak in SQLiteCommand due to it not removing an internal reference
 to itself in SQLiteConnection.&nbsp; </li>
