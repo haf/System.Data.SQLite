@@ -221,28 +221,33 @@ namespace System.Data.SQLite
 
       try
       {
-        if (_statementList == null)
-          _remainingText = _commandText;
-
-        stmt = _cnn._sql.Prepare(_cnn, _remainingText, (_statementList == null) ? null : _statementList[_statementList.Count - 1], (uint)(_commandTimeout * 1000), out _remainingText);
-        if (stmt != null)
+        if ((_cnn != null) && (_cnn._sql != null))
         {
-          stmt._command = this;
           if (_statementList == null)
-            _statementList = new List<SQLiteStatement>();
+            _remainingText = _commandText;
 
-          _statementList.Add(stmt);
+          stmt = _cnn._sql.Prepare(_cnn, _remainingText, (_statementList == null) ? null : _statementList[_statementList.Count - 1], (uint)(_commandTimeout * 1000), out _remainingText);
 
-          _parameterCollection.MapParameters(stmt);
-          stmt.BindParameters();
-        }        
+          if (stmt != null)
+          {
+            stmt._command = this;
+
+            if (_statementList == null)
+              _statementList = new List<SQLiteStatement>();
+
+            _statementList.Add(stmt);
+
+            _parameterCollection.MapParameters(stmt);
+            stmt.BindParameters();
+          }
+        }
         return stmt;
       }
       catch (Exception)
       {
         if (stmt != null)
         {
-          if (_statementList.Contains(stmt))
+          if ((_statementList != null) && _statementList.Contains(stmt))
             _statementList.Remove(stmt);
 
           stmt.Dispose();

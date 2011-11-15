@@ -8,6 +8,9 @@
 namespace System.Data.SQLite
 {
   using System;
+#if DEBUG
+  using System.Diagnostics;
+#endif
   using System.Runtime.InteropServices;
 
   /// <summary>
@@ -64,6 +67,11 @@ namespace System.Data.SQLite
 
         int n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
 #endif
+
+#if DEBUG
+        Trace.WriteLine(String.Format("Open: {0}", db));
+#endif
+
         if (n > 0) throw new SQLiteException(n, null);
 
         _sql = db;

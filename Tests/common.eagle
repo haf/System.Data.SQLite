@@ -305,11 +305,23 @@ namespace eval ::Eagle {
       if {[catch {object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
               SQLiteVersion} version] == 0} then {
         #
+        # NOTE: Attempt to query the Fossil source identifier for the SQLite
+        #       core library.
+        #
+        if {[catch {object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
+                SQLiteSourceId} sourceId]} then {
+          #
+          # NOTE: We failed to query the Fossil source identifier.
+          #
+          set sourceId unknown
+        }
+
+        #
         # NOTE: Yes, the SQLite core library appears to be available.
         #
         addConstraint SQLite
 
-        tputs $channel [appendArgs "yes (" $version ")\n"]
+        tputs $channel [appendArgs "yes (" $version " " $sourceId ")\n"]
       } else {
         tputs $channel no\n
       }
@@ -402,10 +414,17 @@ namespace eval ::Eagle {
 
       #
       # NOTE: By default, delete any pre-existing database with the same file
-      #       name.
+      #       name if it currently exists.
       #
-      if {$delete} then {
-        catch {file delete $fileName}
+      if {$delete && [file exists $fileName]} then {
+        if {[catch {file delete $fileName} error]} then {
+          #
+          # NOTE: We somehow failed to delete the file, report why.
+          #
+          tputs $::test_channel [appendArgs \
+              "==== WARNING: failed to delete database file \"" $fileName \
+              "\" during setup, error: " \n\t $error \n]
+        }
       }
 
       #
@@ -470,41 +489,82 @@ namespace eval ::Eagle {
       # NOTE: Close the connection to the database now.  This should allow us to
       #       delete the underlying database file.
       #
-      catch {sql close $db}
+      if {[info exists db] && [catch {sql close $db} error]} then {
+        #
+        # NOTE: We somehow failed to close the database, report why.
+        #
+        tputs $::test_channel [appendArgs \
+            "==== WARNING: failed to close database \"" $db "\", error: " \
+            \n\t $error \n]
+      }
 
       #
-      # NOTE: Delete the test database file now.  For now, all test database
-      #       files are stored in the temporary directory.
+      # NOTE: Attempt to delete the test database file now.  For now, all test
+      #       database files are stored in the temporary directory.
       #
-      catch {file delete [file join [getTemporaryPath] [file tail $fileName]]}
+      set fileName [file join [getTemporaryPath] [file tail $fileName]]
+
+      if {[set code [catch {file delete $fileName} error]]} then {
+        #
+        # NOTE: We somehow failed to delete the file, report why.
+        #
+        tputs $::test_channel [appendArgs \
+            "==== WARNING: failed to delete database file \"" $fileName \
+            "\" during cleanup, error: " \n\t $error \n]
+      }
+
+      return $code
     }
 
-    proc reportSQLiteResources { channel } {
-      tputs $channel "---- current memory in use by SQLite... "
+    proc reportSQLiteResources { channel {quiet false} } {
+      #
+      # NOTE: Skip all output if we are running in "quiet" mode.
+      #
+      if {!$quiet} then {
+        tputs $channel "---- current memory in use by SQLite... "
+      }
 
       if {[catch {object invoke -flags +NonPublic \
               System.Data.SQLite.UnsafeNativeMethods \
               sqlite3_memory_used} memory] == 0} then {
-        tputs $channel [appendArgs $memory " bytes\n"]
+        if {!$quiet} then {
+          tputs $channel [appendArgs $memory " bytes\n"]
+        }
       } else {
         #
         # NOTE: Maybe the SQLite native library is unavailable?
         #
-        tputs $channel unknown\n
+        set memory unknown
+
+        if {!$quiet} then {
+          tputs $channel [appendArgs $memory \n]
+        }
       }
 
-      tputs $channel "---- maximum memory in use by SQLite... "
+      set result $memory; # NOTE: Return memory in-use to caller.
+
+      if {!$quiet} then {
+        tputs $channel "---- maximum memory in use by SQLite... "
+      }
 
       if {[catch {object invoke -flags +NonPublic \
               System.Data.SQLite.UnsafeNativeMethods \
               sqlite3_memory_highwater 0} memory] == 0} then {
-        tputs $channel [appendArgs $memory " bytes\n"]
+        if {!$quiet} then {
+          tputs $channel [appendArgs $memory " bytes\n"]
+        }
       } else {
         #
         # NOTE: Maybe the SQLite native library is unavailable?
         #
-        tputs $channel unknown\n
+        set memory unknown
+
+        if {!$quiet} then {
+          tputs $channel [appendArgs $memory \n]
+        }
       }
+
+      return $result
     }
 
     proc runSQLiteTestPrologue {} {
@@ -521,6 +581,7 @@ namespace eval ::Eagle {
           # NOTE: Skip trying to delete any files if we are so instructed.
           #
           if {![info exists ::no(deleteSqliteFiles)]} then {
+            tryDeleteAssembly sqlite3.dll
             tryDeleteAssembly SQLite.Interop.dll
             tryDeleteAssembly System.Data.SQLite.dll
             tryDeleteAssembly System.Data.SQLite.Linq.dll
@@ -530,6 +591,7 @@ namespace eval ::Eagle {
           # NOTE: Skip trying to copy any files if we are so instructed.
           #
           if {![info exists ::no(copySqliteFiles)]} then {
+            tryCopyAssembly sqlite3.dll
             tryCopyAssembly SQLite.Interop.dll
             tryCopyAssembly System.Data.SQLite.dll
             tryCopyAssembly System.Data.SQLite.Linq.dll

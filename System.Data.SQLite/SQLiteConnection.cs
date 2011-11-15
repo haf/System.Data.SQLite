@@ -487,8 +487,8 @@ namespace System.Data.SQLite
         if (_sql != null)
         {
           _sql.Close();
+          _sql = null;
         }
-        _sql = null;
         _transactionLevel = 0;
       }
       OnStateChange(ConnectionState.Closed);
@@ -1078,6 +1078,16 @@ namespace System.Data.SQLite
     public static string SQLiteVersion
     {
       get { return SQLite3.SQLiteVersion; }
+    }
+
+    /// <summary>
+    /// This method returns the string whose value is the same as the
+    /// SQLITE_SOURCE_ID C preprocessor macro used when compiling the
+    /// SQLite core library.
+    /// </summary>
+    public static string SQLiteSourceId
+    {
+      get { return SQLite3.SQLiteSourceId; }
     }
 
     /// <summary>

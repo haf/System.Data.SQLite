@@ -8,6 +8,9 @@
 namespace System.Data.SQLite
 {
   using System;
+#if DEBUG
+  using System.Diagnostics;
+#endif
 
 #if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
   using System.Security;
@@ -350,6 +353,13 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern IntPtr sqlite3_libversion();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_sourceid();
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -874,11 +884,45 @@ namespace System.Data.SQLite
       try
       {
         SQLiteBase.CloseConnection(this);
+
+#if DEBUG
+        try
+        {
+          Trace.WriteLine(String.Format(
+              "CloseConnection: {0}", handle));
+        }
+        catch
+        {
+        }
+#endif
+
+#if DEBUG
+        return true;
+#endif
       }
+#if DEBUG
+      catch (SQLiteException e)
+#else
       catch (SQLiteException)
+#endif
       {
+#if DEBUG
+        try
+        {
+          Trace.WriteLine(String.Format(
+              "CloseConnection: {0}, exception: {1}",
+              handle, e));
+        }
+        catch
+        {
+        }
+#endif
       }
+#if DEBUG
+      return false;
+#else
       return true;
+#endif
     }
 
     public override bool IsInvalid
@@ -916,11 +960,45 @@ namespace System.Data.SQLite
       try
       {
         SQLiteBase.FinalizeStatement(this);
+
+#if DEBUG
+        try
+        {
+          Trace.WriteLine(String.Format(
+              "FinalizeStatement: {0}", handle));
+        }
+        catch
+        {
+        }
+#endif
+
+#if DEBUG
+        return true;
+#endif
       }
+#if DEBUG
+      catch (SQLiteException e)
+#else
       catch (SQLiteException)
+#endif
       {
+#if DEBUG
+        try
+        {
+          Trace.WriteLine(String.Format(
+              "FinalizeStatement: {0}, exception: {1}",
+              handle, e));
+        }
+        catch
+        {
+        }
+#endif
       }
+#if DEBUG
+      return false;
+#else
       return true;
+#endif
     }
 
     public override bool IsInvalid

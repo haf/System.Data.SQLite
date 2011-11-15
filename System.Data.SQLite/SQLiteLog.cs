@@ -287,6 +287,31 @@ namespace System.Data.SQLite
         }
 
         /// <summary>
+        /// Log a message to all the registered log event handlers without going
+        /// through the SQLite library.
+        /// </summary>
+        /// <param name="errorCode">The error code or zero for success.</param>
+        /// <param name="message">The message to be logged.</param>
+        public static void LogMessage(
+            int errorCode,
+            string message
+            )
+        {
+            bool enabled;
+            SQLiteLogEventHandler handlers;
+
+            lock (syncRoot)
+            {
+                enabled = _enabled;
+                handlers = _handlers;
+            }
+
+            if (enabled && (handlers != null))
+                handlers(null, new LogEventArgs(
+                    IntPtr.Zero, errorCode, message, null));
+        }
+
+        /// <summary>
         /// Creates and initializes the default log event handler.
         /// </summary>
         private static void InitializeDefaultHandler()
@@ -357,12 +382,22 @@ namespace System.Data.SQLite
             string message = e.Message;
 
             if (message == null)
+            {
                 message = "<null>";
-            else if (message.Length == 0)
-                message = "<empty>";
+            }
+            else
+            {
+                message = message.Trim();
 
-            Trace.WriteLine(String.Format("SQLite error ({0}): {1}",
-                e.ErrorCode, message));
+                if (message.Length == 0)
+                    message = "<empty>";
+            }
+
+            int errorCode = e.ErrorCode;
+
+            Trace.WriteLine(String.Format(
+                "SQLite {0} ({1}): {2}", errorCode == 0 ?
+                "message" : "error", errorCode, message));
         }
     }
 #endif

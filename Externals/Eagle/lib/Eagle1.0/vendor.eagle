@@ -33,11 +33,24 @@
 #
 namespace eval ::Eagle {
   if {[isEagle]} then {
-    #
-    # NOTE: This script library helper procedure helps to establish the link
-    #       between the System.Data.SQLite test package and Eagle.
-    #
-    proc addTestSuiteToAutoPath { channel quiet } {
+    proc checkForTestOverrides { channel varNames quiet } {
+      set result 0
+
+      foreach varName $varNames {
+        if {[uplevel 1 [list info exists $varName]]} then {
+          incr result
+
+          if {!$quiet} then {
+            puts -nonewline $channel [appendArgs \
+                "Found vendor-specific test override \"" $varName "\".\n"]
+          }
+        }
+      }
+
+      return $result
+    }
+
+    proc addTestSuiteToAutoPath { channel varName quiet } {
       #
       # NOTE: Start with the directory containing this file.
       #
@@ -58,9 +71,17 @@ namespace eval ::Eagle {
             [file exists [file join $dir Tests pkgIndex.eagle]] && \
             [file isfile [file join $dir Tests pkgIndex.eagle]]} then {
           #
+          # NOTE: If requested, give the caller access to the name of the
+          #       directory we just found.
+          #
+          if {[string length $varName] > 0} then {
+            upvar 1 $varName dir2
+          }
+
+          #
           # NOTE: Ok, show the directory we found.
           #
-          set dir [file join $dir Tests]
+          set dir2 [file join $dir Tests]
 
           #
           # NOTE: We found the necessary directory to add to the auto-path;
@@ -71,13 +92,13 @@ namespace eval ::Eagle {
           #       list to be refreshed.
           #
           if {![info exists ::env(EAGLELIBPATH)] || \
-              [lsearch -exact $::env(EAGLELIBPATH) $dir] == -1} then {
+              [lsearch -exact $::env(EAGLELIBPATH) $dir2] == -1} then {
             #
             # NOTE: If we have NOT been instructed to be quiet, report now.
             #
             if {!$quiet} then {
               puts -nonewline $channel [appendArgs \
-                  "Found vendor-specific test package directory \"" $dir \
+                  "Found vendor-specific test package directory \"" $dir2 \
                   "\", adding...\n"]
             }
 
@@ -86,7 +107,7 @@ namespace eval ::Eagle {
             #       so that it will get picked up when Eagle actually rebuilds
             #       the auto-path list (below).
             #
-            lappend ::env(EAGLELIBPATH) $dir
+            lappend ::env(EAGLELIBPATH) $dir2
 
             #
             # NOTE: Force Eagle to rebuild the auto-path list for the current
@@ -121,21 +142,13 @@ namespace eval ::Eagle {
       return false
     }
 
-    proc checkForTestOverrides { channel varNames quiet } {
-      set result 0
+    proc setupInterpreterTestPath { channel dir quiet } {
+      object invoke -flags +NonPublic Interpreter.GetActive TestPath $dir
 
-      foreach varName $varNames {
-        if {[uplevel 1 [list info exists $varName]]} then {
-          incr result
-
-          if {!$quiet} then {
-            puts -nonewline $channel [appendArgs \
-                "Found vendor-specific test override \"" $varName "\".\n"]
-          }
-        }
+      if {!$quiet} then {
+        puts -nonewline $channel [appendArgs \
+            "Set interpreter test path to \"" $dir \".\n]
       }
-
-      return $result
     }
 
     checkForTestOverrides stdout \
@@ -143,7 +156,27 @@ namespace eval ::Eagle {
               common_directory datetime_format test_configuration \
               test_year] false
 
-    addTestSuiteToAutoPath stdout false
+    #
+    # NOTE: This variable will contain the name of the directory containing the
+    #       vendor-specific testing infrastructure.
+    #
+    set ::vendor_directory ""
+
+    #
+    # NOTE: This procedure will attempt to find the vendor-specific testing
+    #       infrastructure directory and add it to the auto-path for the
+    #       current interpreter.
+    #
+    addTestSuiteToAutoPath stdout ::vendor_directory false
+
+    #
+    # NOTE: If we actually found a vendor-specific testing infrastructure
+    #       directory then modify the TestPath property of the current
+    #       interpreter to point directly to it.
+    #
+    if {[string length $::vendor_directory] > 0} then {
+      setupInterpreterTestPath stdout $::vendor_directory false
+    }
   }
 }
 

@@ -83,6 +83,12 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
         // finalize failed -- so we must put back anything we munged
         CopyMemory(po, p, sizeof(Vdbe));
         db->pVdbe = po;
+
+        //
+        // NOTE: Ok, we must free this block that *we* allocated (above) since
+        //       finalize did not do so.
+        //
+        sqlite3DbFree_interop(db, p);
         break;
       }
       else

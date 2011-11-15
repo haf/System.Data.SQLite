@@ -770,6 +770,36 @@ namespace eval ::Eagle {
       $parameters GenerateInMemory true
 
       #
+      # NOTE: Make sure that the "standard" preprocessor defines match those
+      #       for the platform (i.e. the ones used to compile the Eagle core
+      #       library assembly).
+      #
+      set platformOptions [expr { \
+          [info exists ::eagle_platform(compileOptions)] ? \
+          $::eagle_platform(compileOptions) : [list]}]
+
+      if {[llength $platformOptions] > 0} then {
+        #
+        # NOTE: Grab the existing compiler options, if any.
+        #
+        set compilerOptions [$parameters CompilerOptions]
+
+        if {"DEBUG" in $platformOptions} then {
+          append compilerOptions " /define:DEBUG"
+        }
+
+        if {"TRACE" in $platformOptions} then {
+          append compilerOptions " /define:TRACE"
+        }
+
+        #
+        # NOTE: Reset the compiler options to the pre-existing ones plus the
+        #       extra defines we may have added (above).
+        #
+        $parameters CompilerOptions $compilerOptions
+      }
+
+      #
       # NOTE: Process any extra compiler settings the caller may have
       #       provided.
       #
