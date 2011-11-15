@@ -143,11 +143,16 @@ namespace eval ::Eagle {
     }
 
     proc setupInterpreterTestPath { channel dir quiet } {
-      object invoke -flags +NonPublic Interpreter.GetActive TestPath $dir
+      set testPath [object invoke -flags +NonPublic Interpreter.GetActive \
+          TestPath]
 
-      if {!$quiet} then {
-        puts -nonewline $channel [appendArgs \
-            "Set interpreter test path to \"" $dir \".\n]
+      if {$dir ne $testPath} then {
+        object invoke -flags +NonPublic Interpreter.GetActive TestPath $dir
+
+        if {!$quiet} then {
+          puts -nonewline $channel [appendArgs \
+              "Set interpreter test path to \"" $dir \".\n]
+        }
       }
     }
 
