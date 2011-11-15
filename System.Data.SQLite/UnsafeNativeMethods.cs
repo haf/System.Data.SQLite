@@ -359,6 +359,13 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
+    internal static extern IntPtr sqlite3_sourceid();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
     internal static extern void sqlite3_interrupt(IntPtr db);
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -876,17 +883,40 @@ namespace System.Data.SQLite
     {
       try
       {
+        SQLiteBase.CloseConnection(this);
+
 #if DEBUG
-        Trace.WriteLine(String.Format("CloseConnection: {0}", handle));
+        try
+        {
+          Trace.WriteLine(String.Format(
+              "CloseConnection: {0}", handle));
+        }
+        catch
+        {
+        }
 #endif
 
-        SQLiteBase.CloseConnection(this);
 #if DEBUG
         return true;
 #endif
       }
+#if DEBUG
+      catch (SQLiteException e)
+#else
       catch (SQLiteException)
+#endif
       {
+#if DEBUG
+        try
+        {
+          Trace.WriteLine(String.Format(
+              "CloseConnection: {0}, exception: {1}",
+              handle, e));
+        }
+        catch
+        {
+        }
+#endif
       }
 #if DEBUG
       return false;
@@ -929,17 +959,40 @@ namespace System.Data.SQLite
     {
       try
       {
+        SQLiteBase.FinalizeStatement(this);
+
 #if DEBUG
-        Trace.WriteLine(String.Format("FinalizeStatement: {0}", handle));
+        try
+        {
+          Trace.WriteLine(String.Format(
+              "FinalizeStatement: {0}", handle));
+        }
+        catch
+        {
+        }
 #endif
 
-        SQLiteBase.FinalizeStatement(this);
 #if DEBUG
         return true;
 #endif
       }
+#if DEBUG
+      catch (SQLiteException e)
+#else
       catch (SQLiteException)
+#endif
       {
+#if DEBUG
+        try
+        {
+          Trace.WriteLine(String.Format(
+              "FinalizeStatement: {0}, exception: {1}",
+              handle, e));
+        }
+        catch
+        {
+        }
+#endif
       }
 #if DEBUG
       return false;

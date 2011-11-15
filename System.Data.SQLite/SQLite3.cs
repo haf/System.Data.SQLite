@@ -50,8 +50,7 @@ namespace System.Data.SQLite
 
     protected override void Dispose(bool bDisposing)
     {
-      if (bDisposing)
-        Close();
+      Close();
     }
 
     // It isn't necessary to cleanup any functions we've registered.  If the connection
@@ -92,6 +91,14 @@ namespace System.Data.SQLite
       get
       {
         return UTF8ToString(UnsafeNativeMethods.sqlite3_libversion(), -1);
+      }
+    }
+
+    internal static string SQLiteSourceId
+    {
+      get
+      {
+        return UTF8ToString(UnsafeNativeMethods.sqlite3_sourceid(), -1);
       }
     }
 

@@ -20,8 +20,12 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
-  setupDb [set fileName tkt-e30b820248-1.1.db]
+set memory_used [reportSQLiteResources $test_channel true]
+
+###############################################################################
+
+runTest {test tkt-e30b820248-1.1 {disposal ordering} -setup {
+  set fileName tkt-e30b820248-1.1.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getTemporaryPath] $fileName]
@@ -34,6 +38,7 @@ runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
     INSERT INTO t1 (id1) VALUES (?); \
     INSERT INTO t1 (id1) VALUES (?); \
     INSERT INTO t1 (id1) VALUES (?); \
+    SELECT * FROM t1 ORDER BY id1; \
   }
 
   unset -nocomplain results errors
@@ -41,6 +46,7 @@ runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
   set code [compileCSharpWith [subst {
     using System.Data.SQLite;
     using System.Diagnostics;
+    using System.IO;
 
     namespace _Dynamic${id}
     {
@@ -49,7 +55,8 @@ runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
         public static void Main()
         {
           using (TraceListener listener = new TextWriterTraceListener(
-              "${test_log}", "${name}"))
+              new FileStream("${test_log}", FileMode.Append,
+                  FileAccess.Write, FileShare.ReadWrite), "${name}"))
           {
             Trace.Listeners.Add(listener);
             Trace.WriteLine("---- START TRACE \\"${name}\\"");
@@ -95,15 +102,165 @@ runTest {test tkt-e30b820248-1.1 {statement disposal ordering} -setup {
       [expr {[info exists errors] ? $errors : ""}] \
       [expr {$code eq "Ok" ? [catch {
         object invoke _Dynamic${id}.Test${id} Main
-      } result] : [set result ""]}] $result
+      } result] : [set result ""]}] $result \
+      [reportSQLiteResources $test_channel true]
 } -cleanup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors sql dataSource id db fileName
 } -constraints \
 {eagle logFile monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
--match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
-\{\}$}}
+-match regexp -result [appendArgs "^Ok\
+System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{\\} " $memory_used \$]}
+
+###############################################################################
+
+for {set i 2} {$i < 4} {incr i} {
+  set memory_used [reportSQLiteResources $test_channel true]
+
+  #############################################################################
+
+  runTest {test [appendArgs tkt-e30b820248-1. $i] {disposal ordering} -setup {
+    set fileName [appendArgs tkt-e30b820248-1. $i .db]
+  } -body {
+    set id [object invoke Interpreter.GetActive NextId]
+    set dataSource [file join [getTemporaryPath] $fileName]
+    set name [file rootname [file tail $fileName]]
+
+    set sql { \
+      CREATE TABLE t1 (id1 INTEGER); \
+      INSERT INTO t1 (id1) VALUES (1); \
+      INSERT INTO t1 (id1) VALUES (2); \
+      INSERT INTO t1 (id1) VALUES (3); \
+      INSERT INTO t1 (id1) VALUES (4); \
+      INSERT INTO t1 (id1) VALUES (5); \
+      SELECT * FROM t1 ORDER BY id1; \
+    }
+
+    unset -nocomplain results errors
+
+    set code [compileCSharpWith [subst {
+      [expr {$i == 3 ? "using System;" : ""}]
+      using System.Data.SQLite;
+      using System.Diagnostics;
+      using System.IO;
+
+      namespace _Dynamic${id}
+      {
+        public class Test${id}
+        {
+          #region Private Static Data
+          private static SQLiteConnection connection;
+          #endregion
+
+          /////////////////////////////////////////////////////////////////////
+
+          #region Public Static Methods
+          public static void OpenConnection()
+          {
+            connection = new SQLiteConnection("Data Source=${dataSource};");
+            connection.Open();
+            connection.LogMessage(0, "Connection opened.");
+          }
+
+          /////////////////////////////////////////////////////////////////////
+
+          public static SQLiteCommand CreateCommand(string sql)
+          {
+            SQLiteCommand command = connection.CreateCommand();
+            command.CommandText = sql;
+            connection.LogMessage(0, "Command created.");
+            return command;
+          }
+
+          /////////////////////////////////////////////////////////////////////
+
+          public static SQLiteDataReader ExecuteReader(SQLiteCommand command)
+          {
+            SQLiteDataReader dataReader = command.ExecuteReader();
+            connection.LogMessage(0, "Command executed.");
+            return dataReader;
+          }
+
+          /////////////////////////////////////////////////////////////////////
+
+          public static SQLiteDataReader ExecuteReader(string sql)
+          {
+            SQLiteCommand command = CreateCommand(sql);
+            SQLiteDataReader dataReader = command.ExecuteReader();
+            connection.LogMessage(0, "Command executed.");
+            return dataReader;
+          }
+
+          /////////////////////////////////////////////////////////////////////
+
+          public static void CloseConnection()
+          {
+            connection.LogMessage(0, "Closing connection...");
+            connection.Close();
+          }
+          #endregion
+
+          /////////////////////////////////////////////////////////////////////
+
+          public static void Main()
+          {
+            using (TraceListener listener = new TextWriterTraceListener(
+                new FileStream("${test_log}", FileMode.Append,
+                    FileAccess.Write, FileShare.ReadWrite), "${name}"))
+            {
+              Trace.Listeners.Add(listener);
+              Trace.WriteLine("---- START TRACE \\"${name}\\"");
+
+              OpenConnection();
+              SQLiteDataReader dataReader = ExecuteReader("${sql}");
+
+              [expr {$i == 3 ? {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+              } : ""}]
+
+              dataReader.Close();
+
+              [expr {$i == 3 ? {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+              } : ""}]
+
+              CloseConnection();
+
+              Trace.WriteLine("---- END TRACE \\"${name}\\"");
+              Trace.Listeners.Remove(listener);
+            }
+          }
+        }
+      }
+    }] results errors System.Data.SQLite.dll]
+
+    list $code $results \
+        [expr {[info exists errors] ? $errors : ""}] \
+        [expr {$code eq "Ok" ? [catch {
+          object invoke _Dynamic${id}.Test${id} Main
+        } result] : [set result ""]}] $result \
+        [reportSQLiteResources $test_channel true]
+  } -cleanup {
+    cleanupDb $fileName
+
+    unset -nocomplain result code results errors sql dataSource id db fileName
+  } -constraints {eagle logFile monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite} -match regexp -result [appendArgs "^Ok\
+System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{\\} " $memory_used \$]}
+}
+
+###############################################################################
+
+unset -nocomplain i
+
+###############################################################################
+
+unset -nocomplain memory_used
 
 ###############################################################################
 
