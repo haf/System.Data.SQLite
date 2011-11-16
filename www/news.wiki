@@ -12,6 +12,7 @@
     <li>The SQLite3 class should always attempt to dispose the contained SQLiteConnectionHandle, even when called via the finalizer.</li>
     <li>When compiled with DEBUG defined, emit diagnostic information related to resource cleanup to any TraceListener objects that may be registered.</li>
     <li>Stop characterizing all log messages as errors. From now on, if the errorCode is zero, the message will not be considered an error.</li>
+    <li>Never attempt to configure the native logging interface if the SQLite core library has already been initialized for the process. Fix for [2ce0870fad].</li>
     <li>Allow the SQLiteLog class to be used for logging messages without having an open connection.</li>
     <li>Support building the core System.Data.SQLite assemblies using the .NET Framework 4.0 Client Profile. Fix for [566f1ad1e4].</li>
     <li>When generating the schema based on the contents of a SQLiteDataReader, skip flagging columns as unique if the data reader is holding the result of some kind of multi-table construct (e.g. a cross join) because we must allow duplicate values in that case. Fix for [7e3fa93744].</li>
