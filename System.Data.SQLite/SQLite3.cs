@@ -1052,8 +1052,45 @@ namespace System.Data.SQLite
     /// <returns>Returns a result code</returns>
     internal override int SetLogCallback(SQLiteLogCallback func)
     {
-        int rc = UnsafeNativeMethods.sqlite3_config((int)SQLiteConfigOpsEnum.SQLITE_CONFIG_LOG, func, (IntPtr)0);
+        int rc = UnsafeNativeMethods.sqlite3_config(
+            (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_LOG, func, (IntPtr)0);
+
         return rc;
+    }
+
+    /// <summary>
+    /// Determines if the SQLite core library has been initialized for the
+    /// current process.
+    /// </summary>
+    /// <returns>
+    /// A boolean indicating whether or not the SQLite core library has been
+    /// initialized for the current process.
+    /// </returns>
+    internal override bool IsInitialized()
+    {
+        return StaticIsInitialized();
+    }
+
+    /// <summary>
+    /// Determines if the SQLite core library has been initialized for the
+    /// current process.
+    /// </summary>
+    /// <returns>
+    /// A boolean indicating whether or not the SQLite core library has been
+    /// initialized for the current process.
+    /// </returns>
+    internal static bool StaticIsInitialized()
+    {
+        //
+        // NOTE: This method [ab]uses the fact that SQLite will always
+        //       return SQLITE_ERROR for any unknown configuration option
+        //       *unless* the SQLite library has already been initialized.
+        //       In that case it will always return SQLITE_MISUSE.
+        //
+        int rc = UnsafeNativeMethods.sqlite3_config(
+            (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE, null, (IntPtr)0);
+
+        return (rc == /* SQLITE_MISUSE */ 21);
     }
 
     /// <summary>

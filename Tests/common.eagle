@@ -499,18 +499,28 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: Attempt to delete the test database file now.  For now, all test
+      # NOTE: Build the full path to the database file name.  For now, all test
       #       database files are stored in the temporary directory.
       #
       set fileName [file join [getTemporaryPath] [file tail $fileName]]
 
-      if {[set code [catch {file delete $fileName} error]]} then {
+      if {[file exists $fileName]} then {
         #
-        # NOTE: We somehow failed to delete the file, report why.
+        # NOTE: Attempt to delete the test database file now.
         #
-        tputs $::test_channel [appendArgs \
-            "==== WARNING: failed to delete database file \"" $fileName \
-            "\" during cleanup, error: " \n\t $error \n]
+        if {[set code [catch {file delete $fileName} error]]} then {
+          #
+          # NOTE: We somehow failed to delete the file, report why.
+          #
+          tputs $::test_channel [appendArgs \
+              "==== WARNING: failed to delete database file \"" $fileName \
+              "\" during cleanup, error: " \n\t $error \n]
+        }
+      } else {
+        #
+        # NOTE: The file does not exist, success!
+        #
+        set code 0
       }
 
       return $code

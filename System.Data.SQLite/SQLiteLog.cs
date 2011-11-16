@@ -112,6 +112,14 @@ namespace System.Data.SQLite
         public static void Initialize()
         {
             //
+            // BUFXIX: We cannot initialize the logging interface if the SQLite
+            //         core library has already been initialized anywhere in
+            //         the process (see ticket [2ce0870fad]).
+            //
+            if (SQLite3.StaticIsInitialized())
+                return;
+
+            //
             // BUGFIX: To avoid nasty situations where multiple AppDomains are
             //         attempting to initialize and/or shutdown what is really
             //         a shared native resource (i.e. the SQLite core library

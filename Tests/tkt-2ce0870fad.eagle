@@ -1,0 +1,81 @@
+###############################################################################
+#
+# tkt-2ce0870fad.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+#
+# NOTE: Make sure that SQLite core library is completely shutdown prior to
+#       starting any of the tests in this file.
+#
+if {[haveConstraint SQLite]} then {
+  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+      sqlite3_shutdown
+}
+
+###############################################################################
+
+for {set i 1} {$i < 3} {incr i} {
+  runTest {test [appendArgs tkt-2ce0870fad-1. $i] {logging setup} -setup \
+      [getAppDomainPreamble {
+    set i {$i}
+    set appDomainId($i) {[object invoke AppDomain.CurrentDomain Id]}
+    set fileName {[appendArgs tkt-2ce0870fad-1. $i .db]}
+  }] -body {
+    set appDomainId(3) [object invoke AppDomain.CurrentDomain Id]
+
+    package require EagleLibrary
+    package require EagleTest
+    package require System.Data.SQLite.Test
+
+    object load -loadtype File [file join [getBinaryDirectory] \
+        System.Data.SQLite.dll]
+
+    object invoke System.Data.SQLite.SQLiteLog Initialize
+
+    list $appDomainId($i) $appDomainId(3) [expr {$i == 1 ? \
+        $appDomainId($i) != $appDomainId(3) : \
+        $appDomainId($i) == $appDomainId(3)}] [setupDb $fileName]
+  } -cleanup {
+    cleanupDb $fileName
+
+    #
+    # NOTE: If this is the primary application domain, skip unsetting the
+    #       loop variable because the surrounding [for] command still needs
+    #       it.
+    #
+    if {$i <= 1} then {
+      unset -nocomplain i
+    }
+
+    unset -nocomplain appDomainId db fileName
+  } -constraints {eagle monoBug28 command.sql compile.DATA\
+compile.ISOLATED_INTERPRETERS SQLite System.Data.SQLite} -isolationLevel \
+[expr {$i == 1 ? "AppDomain" : "Default"}] -match regexp -result \
+{^\d+ \d+ True SQLiteConnection#\d+$}}
+}
+
+###############################################################################
+
+unset -nocomplain i
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

@@ -206,6 +206,7 @@ namespace System.Data.SQLite
     internal abstract void SetTraceCallback(SQLiteTraceCallback func);
     internal abstract void SetRollbackHook(SQLiteRollbackCallback func);
     internal abstract int SetLogCallback(SQLiteLogCallback func);
+    internal abstract bool IsInitialized();
 
     internal abstract int GetCursorForTable(SQLiteStatement stmt, int database, int rootPage);
     internal abstract long GetRowIdForCursor(SQLiteStatement stmt, int cursor);
@@ -324,6 +325,7 @@ namespace System.Data.SQLite
   // These are the options to the internal sqlite3_config call.
   internal enum SQLiteConfigOpsEnum
   {
+    SQLITE_CONFIG_NONE = 0, // nil 
     SQLITE_CONFIG_SINGLETHREAD = 1, // nil 
     SQLITE_CONFIG_MULTITHREAD = 2, // nil 
     SQLITE_CONFIG_SERIALIZED = 3, // nil 
