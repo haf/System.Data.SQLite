@@ -147,8 +147,8 @@ REM "
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% IF NOT EXIST Setup\Output (
-  MKDIR Setup\Output
+IF NOT EXIST Setup\Output (
+  %_ECHO% MKDIR Setup\Output
 
   IF ERRORLEVEL 1 (
     ECHO Could not create directory "Setup\Output".
