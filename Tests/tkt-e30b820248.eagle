@@ -254,7 +254,8 @@ for {set i 2} {$i < 5} {incr i} {
   } -cleanup {
     cleanupDb $fileName
 
-    unset -nocomplain result code results errors sql dataSource id db fileName
+    unset -nocomplain result code results errors sql name dataSource id db \
+        fileName
   } -constraints {eagle logFile monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -match regexp -result [appendArgs "^Ok\
 System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{\\} " $memory_used \$]}
