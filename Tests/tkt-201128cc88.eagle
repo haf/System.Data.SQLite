@@ -93,7 +93,7 @@ runTest {test tkt-201128cc88-1.1 {custom function with byte[] arg} -setup {
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}\
-SQLiteConnection#\d+ \{\} \{\} Zm9v$}}
+System#Data#SQLite#SQLiteConnection#\d+ \{\} \{\} Zm9v$}}
 
 ###############################################################################
 

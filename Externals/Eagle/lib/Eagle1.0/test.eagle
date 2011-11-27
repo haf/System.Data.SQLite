@@ -431,6 +431,10 @@ namespace eval ::Eagle {
                   $::test_exit_on_complete}]
   }
 
+  proc returnInfoScript {} {
+    return [info script]
+  }
+
   proc runTestPrologue {} {
     #
     # HACK: We do not want to force every third-party test suite
@@ -906,7 +910,7 @@ namespace eval ::Eagle {
       # NOTE: In terms of files, not tests, what percent done are we now?
       #
       set percent [formatDecimal \
-          [expr {100.0 * ($count / double($total))}]]
+          [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
 
       if {$percent != $lastPercent} then {
         reportTestPercent $channel $percent
@@ -1027,7 +1031,7 @@ namespace eval ::Eagle {
           # NOTE: In terms of files, not tests, what percent done are we now?
           #
           set percent [formatDecimal \
-              [expr {100.0 * ($count / double($total))}]]
+              [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
 
           if {$percent != $lastPercent} then {
             reportTestPercent $channel $percent
@@ -1083,7 +1087,7 @@ namespace eval ::Eagle {
         # NOTE: In terms of files, not tests, what percent done are we now?
         #
         set percent [formatDecimal \
-            [expr {100.0 * ($count / double($total))}]]
+            [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
 
         if {$percent != $lastPercent} then {
           reportTestPercent $channel $percent
@@ -1110,7 +1114,7 @@ namespace eval ::Eagle {
       # NOTE: In terms of files, not tests, what percent done are we now?
       #
       set percent [formatDecimal \
-          [expr {100.0 * ($count / double($total))}]]
+          [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
 
       if {$percent != $lastPercent} then {
         reportTestPercent $channel $percent
@@ -1142,9 +1146,15 @@ namespace eval ::Eagle {
   proc configureTcltest { imports force } {
     if {[isEagle]} then {
       #
-      # NOTE: Fake having the tcltest package.
+      # HACK: Flag the "test" and "runTest" script library procedures so
+      #       that they use the script location of their caller and not
+      #       their own.
       #
-      package provide tcltest 2.2.10; # Tcl 8.4
+      # BUGBUG: This does not yet fix the script location issues in the
+      #         test suite.
+      #
+      # debug procedureflags test +ScriptLocation
+      # debug procedureflags runTest +ScriptLocation
 
       #
       # HACK: Compatibility shim(s) for use with various tests in the Tcl
@@ -1157,6 +1167,11 @@ namespace eval ::Eagle {
       # NOTE: This is needed by most tests in the Tcl test suite.
       #
       proc ::tcltest::cleanupTests { args } {}
+
+      #
+      # NOTE: Fake having the tcltest package.
+      #
+      package provide tcltest 2.2.10; # Tcl 8.4
     } else {
       #
       # NOTE: Load the tcltest package.
@@ -1436,7 +1451,7 @@ namespace eval ::Eagle {
       }
     }
 
-    proc getMachineForTclShell {} {
+    proc testExecTclScript { script } {
       try {
         #
         # NOTE: Get a temporary file name for the script we are going to
@@ -1449,7 +1464,7 @@ namespace eval ::Eagle {
         #       supplied via the command line, write the script to be
         #       evaluated to the temporary file.
         #
-        writeFile $fileName {puts -nonewline stdout $tcl_platform(machine)}
+        writeFile $fileName $script
 
         #
         # NOTE: Evaluate the script using the native Tcl shell, trim the
@@ -1457,7 +1472,7 @@ namespace eval ::Eagle {
         #       caller.
         #
         if {[catch {string trim \
-            [testExec $::test_tclsh [list] \
+            [testExec $::test_tclsh [list -success Success] \
             [appendArgs \" $fileName \"]]} result] == 0} then {
           #
           # NOTE: Success, return the result to the caller.
@@ -1484,6 +1499,18 @@ namespace eval ::Eagle {
           catch {file delete $fileName}
         }
       }
+    }
+
+    proc getMachineForTclShell {} {
+      return [testExecTclScript {
+        puts -nonewline stdout $tcl_platform(machine)
+      }]
+    }
+
+    proc getTkVersion {} {
+      return [testExecTclScript {
+        puts -nonewline stdout [package require Tk]; exit
+      }]
     }
 
     proc machineToPlatform { machine } {
@@ -1706,8 +1733,8 @@ namespace eval ::Eagle {
         getConstraints getTestFiles getTestRunId execTestShell runTestPrologue \
         runTestEpilogue runTest runAllTests fixConstraints sourceIfValid \
         isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
-        tputs formatDecimal formatList configureTcltest tsource testShim] \
-        false false
+        returnInfoScript tputs formatDecimal formatList configureTcltest \
+        tsource testShim] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
@@ -1718,6 +1745,6 @@ namespace eval ::Eagle {
   # NOTE: Provide the Eagle test package to the interpreter.
   #
   package provide EagleTest \
-    [expr {[isEagle] ? [info engine PatchLevel] : 1.0}]
+    [expr {[isEagle] ? [info engine PatchLevel] : "1.0"}]
 }
 

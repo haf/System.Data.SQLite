@@ -783,7 +783,7 @@ if {![info exists no([file tail [info script]])]} then {
       #
       if {![info exists no(compileWindows)]} then {
         #
-        # NOTE: For test "garuda-1.0".
+        # NOTE: For test "garuda-1.1".
         #
         checkForCompileOption $test_channel WINDOWS
       }
@@ -803,7 +803,7 @@ if {![info exists no([file tail [info script]])]} then {
       #
       if {![info exists no(compileNativePackage)]} then {
         #
-        # NOTE: For test "garuda-1.0".
+        # NOTE: For test "garuda-1.1".
         #
         checkForCompileOption $test_channel NATIVE_PACKAGE
       }
@@ -925,9 +925,16 @@ if {![info exists no([file tail [info script]])]} then {
 
       if {![info exists no(tclShell)]} then {
         #
-        # NOTE: For test "garuda-1.0".
+        # NOTE: For test "garuda-1.1".
         #
         checkForTclShell $test_channel
+      }
+
+      if {![info exists no(tkPackage)]} then {
+        #
+        # NOTE: For test "tclLoad-1.1".
+        #
+        checkForTkPackage $test_channel
       }
     }
 
@@ -1066,13 +1073,43 @@ if {![info exists no([file tail [info script]])]} then {
             *set_Item*
 
         #
-        # NOTE: For test "object-3.6.*".
+        # NOTE: For tests "object-3.6" and "object-3.7".
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestStringIListReturnValue*
 
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestStringIListIListIListReturnValue*
+
+        #
+        # NOTE: For test "object-3.8".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestByteList*
+
+        #
+        # NOTE: For test "object-3.9".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestIntList*
+
+        #
+        # NOTE: For test "object-3.10".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestLongList*
+
+        #
+        # NOTE: For test "object-3.11".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestDerivedList*
+
+        #
+        # NOTE: For tests "object-3.12" and "object-3.13".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestStringIDictionaryReturnValue*
 
         #
         # NOTE: For test "object-4.1".
@@ -1188,7 +1225,7 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(staThread)]} then {
       #
-      # NOTE: For test "xaml-1.*".
+      # NOTE: For tests "xaml-1.*".
       #
       checkForStaThread $test_channel
     }
@@ -1198,7 +1235,7 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(wpf)]} then {
       #
-      # NOTE: For test "xaml-1.*".
+      # NOTE: For tests "xaml-1.*".
       #
       checkForWindowsPresentationFoundation $test_channel
     }
@@ -1278,7 +1315,7 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(garudaDll)]} then {
       #
-      # NOTE: For test "garuda-1.0".
+      # NOTE: For test "garuda-1.1".
       #
       checkForGarudaDll $test_channel
     }
@@ -1321,14 +1358,14 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: For test "subst-1.*".
+  # NOTE: For tests "subst-1.*".
   #
   if {![info exists no(bad_subst.txt)]} then {
     checkForFile $test_channel [file join $test_path bad_subst.txt]
   }
 
   #
-  # NOTE: For test "fileIO-1.*".
+  # NOTE: For tests "fileIO-1.*".
   #
   if {![info exists no(file.dat)]} then {
     checkForFile $test_channel [file join $test_path file.dat]
@@ -1342,7 +1379,7 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: For test "xaml-1.*".
+  # NOTE: For tests "xaml-1.*".
   #
   if {![info exists no(test.png)]} then {
     checkForFile $test_channel [file join $test_path test.png]
@@ -1363,56 +1400,63 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: For test "read.eagle".
+  # NOTE: For test "basic-1.4".
   #
   if {![info exists no(read.eagle)]} then {
     checkForFile $test_channel [file join $test_path read.eagle]
   }
 
   #
-  # NOTE: For test "read2.eagle".
+  # NOTE: For test "basic-1.5".
   #
   if {![info exists no(read2.eagle)]} then {
     checkForFile $test_channel [file join $test_path read2.eagle]
   }
 
   #
-  # NOTE: For test "read3.eagle".
+  # NOTE: For test "basic-1.6".
   #
   if {![info exists no(read3.eagle)]} then {
     checkForFile $test_channel [file join $test_path read3.eagle]
   }
 
   #
-  # NOTE: For test "read4.eagle".
+  # NOTE: For test "basic-1.7".
   #
   if {![info exists no(read4.eagle)]} then {
     checkForFile $test_channel [file join $test_path read4.eagle]
   }
 
   #
-  # NOTE: For test "source.eagle".
+  # NOTE: For test "infoScript-1.1".
+  #
+  if {![info exists no(script.eagle)]} then {
+    checkForFile $test_channel [file join $test_path script.eagle]
+  }
+
+  #
+  # NOTE: For test "basic-1.1".
   #
   if {![info exists no(source.eagle)]} then {
     checkForFile $test_channel [file join $test_path source.eagle]
   }
 
   #
-  # NOTE: For test "unbalanced_brace.eagle".
+  # NOTE: For test "basic-1.2".
   #
   if {![info exists no(unbalanced_brace.eagle)]} then {
     checkForFile $test_channel [file join $test_path unbalanced_brace.eagle]
   }
 
   #
-  # NOTE: For test "unbalanced_brace2.eagle".
+  # NOTE: For test "basic-1.3".
   #
   if {![info exists no(unbalanced_brace2.eagle)]} then {
     checkForFile $test_channel [file join $test_path unbalanced_brace2.eagle]
   }
 
   #
-  # NOTE: For test "excel-2.*".
+  # NOTE: For tests "excel-2.*".
   #
   if {![info exists no(test.xls)]} then {
     checkForFile $test_channel [file join $test_path test.xls]
@@ -1426,7 +1470,7 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: For test "load-1.1.*".
+  # NOTE: For tests "load-1.1.*".
   #
   if {![info exists no(Plugin.dll)]} then {
     checkForFile $test_channel [file join $lib_path Plugin1.0 Plugin.dll]

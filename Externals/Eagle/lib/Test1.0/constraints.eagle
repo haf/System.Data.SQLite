@@ -565,6 +565,8 @@ namespace eval ::Eagle {
     #       tries.  We attempt to bypass this problem by retrying a set number
     #       of times (which can be overridden by the caller) before giving up.
     #
+    set difference unknown
+
     for {set try 0} {$try < $tries} {incr try} {
       #
       # NOTE: Attempt to block for exactly one second.
@@ -1363,6 +1365,27 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForTkPackage { channel } {
+      #
+      # HACK: We do not care about the Tk version returned from this
+      #       procedure, we only care if it returns "error" because that
+      #       would indicate an error was caught during [exec] (i.e. the
+      #       native Tcl shell could not be executed).
+      #
+      if {[catch {getTkVersion} result] == 0 && \
+          $result ne "error"} then {
+        #
+        # NOTE: Yes, a native Tk package appears to be available.
+        #
+        addConstraint tkPackage
+
+        tputs $channel [appendArgs "---- checking for Tk package... yes (" \
+            $result ")\n"]
+      } else {
+        tputs $channel "---- checking for Tk package... no\n"
+      }
+    }
+
     proc checkForPowerShell { channel } {
       tputs $channel "---- checking for PowerShell... "
 
@@ -1689,6 +1712,6 @@ namespace eval ::Eagle {
   # NOTE: Provide the Eagle test constraints package to the interpreter.
   #
   package provide EagleTestConstraints \
-    [expr {[isEagle] ? [info engine PatchLevel] : 1.0}]
+    [expr {[isEagle] ? [info engine PatchLevel] : "1.0"}]
 }
 

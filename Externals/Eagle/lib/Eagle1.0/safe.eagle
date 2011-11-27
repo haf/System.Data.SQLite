@@ -80,6 +80,6 @@ namespace eval ::Eagle {
   # NOTE: Provide the Eagle "safe" package to the interpreter.
   #
   package provide EagleSafe \
-    [expr {[isEagle] ? [info engine PatchLevel] : 1.0}]
+    [expr {[isEagle] ? [info engine PatchLevel] : "1.0"}]
 }
 

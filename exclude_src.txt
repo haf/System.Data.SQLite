@@ -27,7 +27,9 @@ Externals/Eagle/lib/Test1.0/epilogue.eagle
 Externals/Eagle/lib/Test1.0/pkgIndex.eagle
 Externals/Eagle/lib/Test1.0/pkgIndex.tcl
 Externals/Eagle/lib/Test1.0/prologue.eagle
+Externals/HtmlHelp/*
 Externals/MSVCPP/*
+Externals/NDoc3/*
 Membership/*
 Membership/obj/*
 Membership/Profile/*

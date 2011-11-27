@@ -1248,6 +1248,56 @@ namespace eval ::Eagle {
       return [list "cannot determine if your build is the latest"]
     }
 
+    proc getReturnType { object member } {
+      if {[string length $object] == 0 || [string length $member] == 0} then {
+        return ""
+      }
+
+      set code [catch {
+        object foreach -alias memberInfo \
+            [object invoke -noinvoke $object $member] {
+          #
+          # NOTE: Use the member type to determine which property contains
+          #       the type information we want to return.
+          #
+          switch -exact -- [$memberInfo MemberType] {
+            Field {
+              return [$memberInfo FieldType.AssemblyQualifiedName]
+            }
+            Method {
+              return [$memberInfo ReturnType.AssemblyQualifiedName]
+            }
+            Property {
+              return [$memberInfo PropertyType.AssemblyQualifiedName]
+            }
+            default {
+              return ""
+            }
+          }
+        }
+      } result]
+
+      #
+      # NOTE: If no error was raised above, return the result; otherwise,
+      #       return an empty string to indicate a general failure.
+      #
+      return [expr {$code == 2 ? $result : ""}]
+    }
+
+    proc getDefaultValue { typeName } {
+      if {[string length $typeName] == 0} then {
+        return ""
+      }
+
+      set type [object invoke -alias Type GetType $typeName]
+
+      if {[string length $type] == 0} then {
+        return ""
+      }
+
+      return [expr {[$type IsValueType] ? 0 : "null"}]
+    }
+
     proc parray { a {pattern *} } {
       upvar 1 $a array
 
@@ -1622,6 +1672,6 @@ namespace eval ::Eagle {
   # NOTE: Provide the Eagle library package to the interpreter.
   #
   package provide EagleLibrary \
-    [expr {[isEagle] ? [info engine PatchLevel] : 1.0}]
+    [expr {[isEagle] ? [info engine PatchLevel] : "1.0"}]
 }
 
