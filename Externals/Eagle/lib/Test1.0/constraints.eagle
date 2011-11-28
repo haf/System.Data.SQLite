@@ -1057,6 +1057,29 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForThreadCulture { channel } {
+      tputs $channel "---- checking for thread culture... "
+
+      #
+      # NOTE: Grab the current thread culture.
+      #
+      set culture [object invoke Eagle._Components.Private.FormatOps \
+          CultureName [object invoke System.Threading.Thread.CurrentThread \
+          CurrentCulture] false]
+
+      if {[string length $culture] > 0} then {
+        #
+        # NOTE: The culture information is present, use it and show it.
+        #
+        addConstraint [appendArgs threadCulture. [string map [list - _] \
+            $culture]]
+
+        tputs $channel [appendArgs $culture \n]
+      } else {
+        tputs $channel [appendArgs unknown \n]
+      }
+    }
+
     proc checkForQuiet { channel } {
       tputs $channel "---- checking for quiet... "
 

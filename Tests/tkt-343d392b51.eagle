@@ -75,7 +75,8 @@ for {set i 1} {$i < 5} {incr i} {
     cleanupDb $fileName
 
     unset -nocomplain paramDateTime2 paramDateTime1 dateTime db fileName
-  } -constraints {eagle culture.en_US monoBug28 command.sql compile.DATA SQLite\
+  } -constraints \
+{eagle threadCulture.en_US monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -result {{{2011-10-04 15:27:50Z}} {{2011-10-04 15:27:50Z}}}}
 }
 

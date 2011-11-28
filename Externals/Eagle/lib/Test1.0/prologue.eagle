@@ -594,6 +594,13 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has thread culture detection support been disabled?
+    #
+    if {![info exists no(threadCulture)]} then {
+      checkForThreadCulture $test_channel
+    }
+
+    #
     # NOTE: Has software update trust detection support been disabled?
     #
     if {![info exists no(softwareUpdate)]} then {
