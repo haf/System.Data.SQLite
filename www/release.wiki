@@ -45,7 +45,8 @@ ndoc2 location where all my intermediate files are for the CHM<br />
 1. Update the news.wiki page and the downloads.wiki page.<br />
 2. Tag the release in Fossil.<br />
 3. Upload the distributables.<br />
-4. Announce the release on the mailing list.<br />
+4. Push the NuGet packages.<br />
+5. Announce the release on the mailing list.<br />
 </ul>
 </li>
 </ol>
