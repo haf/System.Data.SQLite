@@ -151,6 +151,61 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Attempts to convert an arbitrary object to the Boolean data type.
+    /// Null object values are converted to false.  Throws a SQLiteException
+    /// upon failure.
+    /// </summary>
+    /// <param name="obj">The object value to convert.</param>
+    /// <param name="provider">The format provider to use.</param>
+    /// <returns>The converted boolean value.</returns>
+    private static bool ToBoolean(object obj, IFormatProvider provider)
+    {
+        if (obj == null)
+            return false;
+
+        TypeCode typeCode = Type.GetTypeCode(obj.GetType());
+
+        switch (typeCode)
+        {
+            case TypeCode.Empty:
+            case TypeCode.DBNull:
+                return false;
+            case TypeCode.Boolean:
+                return (bool)obj;
+            case TypeCode.Char:
+                return ((char)obj) != (char)0 ? true : false;
+            case TypeCode.SByte:
+                return ((sbyte)obj) != (sbyte)0 ? true : false;
+            case TypeCode.Byte:
+                return ((byte)obj) != (byte)0 ? true : false;
+            case TypeCode.Int16:
+                return ((short)obj) != (short)0 ? true : false;
+            case TypeCode.UInt16:
+                return ((ushort)obj) != (ushort)0 ? true : false;
+            case TypeCode.Int32:
+                return ((int)obj) != (int)0 ? true : false;
+            case TypeCode.UInt32:
+                return ((uint)obj) != (uint)0 ? true : false;
+            case TypeCode.Int64:
+                return ((long)obj) != (long)0 ? true : false;
+            case TypeCode.UInt64:
+                return ((ulong)obj) != (ulong)0 ? true : false;
+            case TypeCode.Single:
+                return ((float)obj) != (float)0.0 ? true : false;
+            case TypeCode.Double:
+                return ((double)obj) != (double)0.0 ? true : false;
+            case TypeCode.Decimal:
+                return ((decimal)obj) != Decimal.Zero ? true : false;
+            case TypeCode.String:
+                return Convert.ToBoolean(obj, provider);
+            default:
+                throw new SQLiteException((int)SQLiteErrorCode.Error,
+                    String.Format("Cannot convert type {0} to boolean",
+                    typeCode));
+        }
+    }
+
+    /// <summary>
     /// Perform the bind operation for an individual parameter
     /// </summary>
     /// <param name="index">The index of the parameter to bind</param>
@@ -184,18 +239,32 @@ namespace System.Data.SQLite
           _sql.Bind_DateTime(this, index, (obj is string) ?
               _sql.ToDateTime((string)obj) : Convert.ToDateTime(obj, CultureInfo.CurrentCulture));
           break;
+        case DbType.Boolean:
+          _sql.Bind_Int32(this, index, ToBoolean(obj, CultureInfo.CurrentCulture) ? 1 : 0);
+          break;
+        case DbType.SByte:
+          _sql.Bind_Int32(this, index, Convert.ToSByte(obj, CultureInfo.CurrentCulture));
+          break;
+        case DbType.Int16:
+          _sql.Bind_Int32(this, index, Convert.ToInt16(obj, CultureInfo.CurrentCulture));
+          break;
+        case DbType.Int32:
+          _sql.Bind_Int32(this, index, Convert.ToInt32(obj, CultureInfo.CurrentCulture));
+          break;
         case DbType.Int64:
-        case DbType.UInt64:
           _sql.Bind_Int64(this, index, Convert.ToInt64(obj, CultureInfo.CurrentCulture));
           break;
-        case DbType.Boolean:
-        case DbType.Int16:
-        case DbType.Int32:
-        case DbType.UInt16:
-        case DbType.UInt32:
-        case DbType.SByte:
         case DbType.Byte:
-          _sql.Bind_Int32(this, index, Convert.ToInt32(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_UInt32(this, index, Convert.ToByte(obj, CultureInfo.CurrentCulture));
+          break;
+        case DbType.UInt16:
+          _sql.Bind_UInt32(this, index, Convert.ToUInt16(obj, CultureInfo.CurrentCulture));
+          break;
+        case DbType.UInt32:
+          _sql.Bind_UInt32(this, index, Convert.ToUInt32(obj, CultureInfo.CurrentCulture));
+          break;
+        case DbType.UInt64:
+          _sql.Bind_UInt64(this, index, Convert.ToUInt64(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Single:
         case DbType.Double:

@@ -444,12 +444,28 @@ namespace System.Data.SQLite
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
 
+    internal override void Bind_UInt32(SQLiteStatement stmt, int index, uint value)
+    {
+      int n = UnsafeNativeMethods.sqlite3_bind_uint(stmt._sqlite_stmt, index, value);
+      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+    }
+
     internal override void Bind_Int64(SQLiteStatement stmt, int index, long value)
     {
 #if !PLATFORM_COMPACTFRAMEWORK
       int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, value);
 #else
       int n = UnsafeNativeMethods.sqlite3_bind_int64_interop(stmt._sqlite_stmt, index, ref value);
+#endif
+      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+    }
+
+    internal override void Bind_UInt64(SQLiteStatement stmt, int index, ulong value)
+    {
+#if !PLATFORM_COMPACTFRAMEWORK
+      int n = UnsafeNativeMethods.sqlite3_bind_uint64(stmt._sqlite_stmt, index, value);
+#else
+      int n = UnsafeNativeMethods.sqlite3_bind_uint64_interop(stmt._sqlite_stmt, index, ref value);
 #endif
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }

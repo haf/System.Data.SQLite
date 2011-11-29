@@ -115,7 +115,9 @@ namespace System.Data.SQLite
 
     internal abstract void Bind_Double(SQLiteStatement stmt, int index, double value);
     internal abstract void Bind_Int32(SQLiteStatement stmt, int index, Int32 value);
+    internal abstract void Bind_UInt32(SQLiteStatement stmt, int index, UInt32 value);
     internal abstract void Bind_Int64(SQLiteStatement stmt, int index, Int64 value);
+    internal abstract void Bind_UInt64(SQLiteStatement stmt, int index, UInt64 value);
     internal abstract void Bind_Text(SQLiteStatement stmt, int index, string value);
     internal abstract void Bind_Blob(SQLiteStatement stmt, int index, byte[] blobData);
     internal abstract void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt);

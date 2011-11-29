@@ -432,12 +432,35 @@ namespace System.Data.SQLite
 #endif
     internal static extern int sqlite3_bind_int(IntPtr stmt, int index, int value);
 
+    //
+    // NOTE: This really just calls "sqlite3_bind_int"; however, it has the
+    //       correct type signature for an unsigned (32-bit) integer.
+    //
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int", CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int")]
+#endif
+    internal static extern int sqlite3_bind_uint(IntPtr stmt, int index, uint value);
+
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern int sqlite3_bind_int64(IntPtr stmt, int index, long value);
 #else
     [DllImport(SQLITE_DLL)]
     internal static extern int sqlite3_bind_int64_interop(IntPtr stmt, int index, ref long value);
+#endif
+
+    //
+    // NOTE: This really just calls "sqlite3_bind_int64"; however, it has the
+    //       correct type signature for an unsigned long (64-bit) integer.
+    //
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int64", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int sqlite3_bind_uint64(IntPtr stmt, int index, ulong value);
+#else
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int64_interop")]
+    internal static extern int sqlite3_bind_uint64_interop(IntPtr stmt, int index, ref ulong value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
