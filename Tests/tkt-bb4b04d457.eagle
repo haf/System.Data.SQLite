@@ -1,0 +1,47 @@
+###############################################################################
+#
+# tkt-bb4b04d457.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-bb4b04d457-1.1 {} -setup {
+  setupDb [set fileName tkt-bb4b04d457-1.1.db] "" Ticks Utc
+} -body {
+  set dateTime [object invoke -alias DateTime Parse 2011-11-29T12:34:56Z]
+  set dateTime [$dateTime -alias ToUniversalTime]
+
+  sql execute $db "CREATE TABLE t1(x TIMESTAMP NOT NULL);"
+
+  sql execute $db "INSERT INTO t1 (x) VALUES(?);" \
+      [list param1 Int64 [$dateTime Ticks]]
+
+  sql execute -execute reader -format list -datetimeformat \
+      [getDateTimeFormat] $db "SELECT x FROM t1 ORDER BY rowid;"
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain dateTime db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{{2011-11-29 12:34:56Z}}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

@@ -843,6 +843,7 @@ namespace System.Data.SQLite
               new SQLiteTypeNames("DATE", DbType.DateTime),
               new SQLiteTypeNames("DATETIME", DbType.DateTime),
               new SQLiteTypeNames("SMALLDATE", DbType.DateTime),
+              new SQLiteTypeNames("TIMESTAMP", DbType.DateTime),
               new SQLiteTypeNames("BLOB", DbType.Binary),
               new SQLiteTypeNames("BINARY", DbType.Binary),
               new SQLiteTypeNames("VARBINARY", DbType.Binary),
