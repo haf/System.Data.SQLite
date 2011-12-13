@@ -530,13 +530,15 @@ namespace System.Data.SQLite
                     RegistryKey subKey = key.OpenSubKey(subKeyName);
 
                     return (subKey != null) ?
-                        new MockRegistryKey(subKey) :
-                        new MockRegistryKey(key, subKeyName);
+                        new MockRegistryKey(
+                                subKey, whatIf, readOnly, safe) :
+                        new MockRegistryKey(
+                                key, subKeyName, whatIf, readOnly, safe);
                 }
                 else
                 {
                     return new MockRegistryKey(
-                        key.CreateSubKey(subKeyName), false);
+                        key.CreateSubKey(subKeyName), whatIf, readOnly, safe);
                 }
             }
 
@@ -645,7 +647,7 @@ namespace System.Data.SQLite
                     subKeyName, whatIf ? false : writable);
 
                 return (subKey != null) ?
-                    new MockRegistryKey(subKey, whatIf) : null;
+                    new MockRegistryKey(subKey, whatIf, readOnly, safe) : null;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -776,7 +778,7 @@ namespace System.Data.SQLite
                 RegistryKey key
                 )
             {
-                return new MockRegistryKey(key, null, true);
+                return new MockRegistryKey(key, null, true, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -961,7 +963,7 @@ namespace System.Data.SQLite
                     subKeyName, whatIf ? false : writable);
 
                 return (key != null) ?
-                    new MockRegistryKey(key, whatIf) : null;
+                    new MockRegistryKey(key, whatIf, false, false) : null;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -998,12 +1000,14 @@ namespace System.Data.SQLite
                         MockRegistryKey key = rootKey.OpenSubKey(subKeyName);
 
                         return (key != null) ?
-                            key : new MockRegistryKey(rootKey, subKeyName);
+                            key : new MockRegistryKey(
+                                rootKey, subKeyName, true, false, false);
                     }
                     else
                     {
                         return new MockRegistryKey(
-                            rootKey.CreateSubKey(subKeyName), false);
+                            rootKey.CreateSubKey(subKeyName), false, false,
+                            false);
                     }
                 }
                 finally
