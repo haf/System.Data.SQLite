@@ -392,6 +392,8 @@ namespace System.Data.SQLite
             private MockRegistryKey()
             {
                 whatIf = true;
+                readOnly = true;
+                safe = true;
             }
             #endregion
 
@@ -433,9 +435,61 @@ namespace System.Data.SQLite
 
             public MockRegistryKey(
                 RegistryKey key,
+                string subKeyName,
+                bool whatIf,
+                bool readOnly
+                )
+                : this(key, subKeyName, whatIf)
+            {
+                this.readOnly = readOnly;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public MockRegistryKey(
+                RegistryKey key,
+                string subKeyName,
+                bool whatIf,
+                bool readOnly,
+                bool safe
+                )
+                : this(key, subKeyName, whatIf, readOnly)
+            {
+                this.safe = safe;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public MockRegistryKey(
+                RegistryKey key,
                 bool whatIf
                 )
                 : this(key, null, whatIf)
+            {
+                // do nothing.
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public MockRegistryKey(
+                RegistryKey key,
+                bool whatIf,
+                bool readOnly
+                )
+                : this(key, null, whatIf, readOnly)
+            {
+                // do nothing.
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public MockRegistryKey(
+                RegistryKey key,
+                bool whatIf,
+                bool readOnly,
+                bool safe
+                )
+                : this(key, null, whatIf, readOnly, safe)
             {
                 // do nothing.
             }
@@ -460,6 +514,7 @@ namespace System.Data.SQLite
                 )
             {
                 CheckDisposed();
+                CheckReadOnly();
 
                 if (key == null)
                     return null;
@@ -492,6 +547,7 @@ namespace System.Data.SQLite
                 )
             {
                 CheckDisposed();
+                CheckReadOnly();
 
                 if (key == null)
                     return;
@@ -507,6 +563,7 @@ namespace System.Data.SQLite
                 )
             {
                 CheckDisposed();
+                CheckReadOnly();
 
                 if (key == null)
                     return;
@@ -522,6 +579,7 @@ namespace System.Data.SQLite
                 )
             {
                 CheckDisposed();
+                CheckReadOnly();
 
                 if (key == null)
                     return;
@@ -577,6 +635,9 @@ namespace System.Data.SQLite
             {
                 CheckDisposed();
 
+                if (writable)
+                    CheckReadOnly();
+
                 if (key == null)
                     return null;
 
@@ -595,6 +656,7 @@ namespace System.Data.SQLite
                 )
             {
                 CheckDisposed();
+                CheckReadOnly();
 
                 if (key == null)
                     return;
@@ -627,7 +689,7 @@ namespace System.Data.SQLite
             private RegistryKey key;
             public RegistryKey Key
             {
-                get { CheckDisposed(); return key; }
+                get { CheckDisposed(); CheckSafe(); return key; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -644,6 +706,51 @@ namespace System.Data.SQLite
             public bool WhatIf
             {
                 get { CheckDisposed(); return whatIf; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool readOnly;
+            public bool ReadOnly
+            {
+                get { CheckDisposed(); return readOnly; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public bool safe;
+            public bool Safe
+            {
+                get { CheckDisposed(); return safe; }
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Private Methods
+            private void CheckReadOnly()
+            {
+                //
+                // NOTE: In "read-only" mode, we disallow all write access.
+                //
+                if (!readOnly)
+                    return;
+
+                throw new InvalidOperationException();
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private void CheckSafe()
+            {
+                //
+                // NOTE: In "safe" mode, we disallow all direct access to the
+                //       contained registry key.
+                //
+                if (!safe)
+                    return;
+
+                throw new InvalidOperationException();
             }
             #endregion
 
