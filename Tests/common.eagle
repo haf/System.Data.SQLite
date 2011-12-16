@@ -593,12 +593,9 @@ namespace eval ::Eagle {
       }
 
       if {$collect} then {
-        if {[catch {
-                object invoke GC Collect
-                object invoke GC WaitForPendingFinalizers
-                object invoke GC Collect} error]} then {
+        if {[catch {object invoke GC GetTotalMemory true} error]} then {
           tputs $channel [appendArgs \
-              "==== WARNING: failed to garbage collect, error: " \
+              "==== WARNING: failed full garbage collection, error: " \
               \n\t $error \n]
         }
       }
