@@ -604,7 +604,7 @@ namespace eval ::Eagle {
         tputs $channel "---- current memory in use by the CLR... "
       }
 
-      if {[catch {getDictionaryValue [debug memory] gc} memory] == 0} then {
+      if {[catch {object invoke GC GetTotalMemory false} memory] == 0} then {
         if {[string is integer -strict $memory]} then {
           if {!$quiet} then {
             tputs $channel [appendArgs $memory " bytes\n"]
