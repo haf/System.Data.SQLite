@@ -23,6 +23,16 @@ namespace System.Data.SQLite
   /// </summary>
   internal class SQLite3 : SQLiteBase
   {
+    //
+    // NOTE: This is the public key for the System.Data.SQLite assembly.  If you change the
+    //       SNK file, you will need to change this as well.
+    //
+    internal const string PublicKey =
+        "002400000480000094000000060200000024000052534131000400000100010005a288de5687c4e1" +
+        "b621ddff5d844727418956997f475eb829429e411aff3e93f97b70de698b972640925bdd44280df0" +
+        "a25a843266973704137cbb0e7441c1fe7cae4e2440ae91ab8cde3933febcb1ac48dd33b40e13c421" +
+        "d8215c18a4349a436dd499e3c385cc683015f886f6c10bd90115eb2bd61b67750839e3a19941dc9c";
+
 #if !PLATFORM_COMPACTFRAMEWORK
     internal const string DesignerVersion = "1.0.77.0";
 #endif
@@ -48,10 +58,50 @@ namespace System.Data.SQLite
     {
     }
 
-    protected override void Dispose(bool bDisposing)
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
     {
-      Close();
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLite3).Name);
+#endif
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                Close();
+
+                disposed = true;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     // It isn't necessary to cleanup any functions we've registered.  If the connection
     // goes to the pool and is resurrected later, re-registered functions will overwrite the
@@ -61,17 +111,20 @@ namespace System.Data.SQLite
     {
       if (_sql != null)
       {
-        if (_usePool)
-        {
-          SQLiteBase.ResetConnection(_sql);
-          SQLiteConnectionPool.Add(_fileName, _sql, _poolVersion);
-        }
-        else
-          _sql.Dispose();
+          if (_usePool)
+          {
+              SQLiteBase.ResetConnection(_sql);
+              SQLiteConnectionPool.Add(_fileName, _sql, _poolVersion);
+          }
+          else
+          {
+              _sql.Dispose();
+          }
+          _sql = null;
       }
-
-      _sql = null;
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     internal override void Cancel()
     {

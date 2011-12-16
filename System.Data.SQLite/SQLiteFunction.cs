@@ -83,6 +83,86 @@ namespace System.Data.SQLite
       _contextDataList = new Dictionary<long, AggregateData>();
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable Members
+    /// <summary>
+    /// Disposes of any active contextData variables that were not automatically cleaned up.  Sometimes this can happen if
+    /// someone closes the connection while a DataReader is open.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteFunction).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Placeholder for a user-defined disposal routine
+    /// </summary>
+    /// <param name="disposing">True if the object is being disposed explicitly</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                ////////////////////////////////////
+                // dispose managed resources here...
+                ////////////////////////////////////
+
+                IDisposable disp;
+
+                foreach (KeyValuePair<long, AggregateData> kv in _contextDataList)
+                {
+                    disp = kv.Value._data as IDisposable;
+                    if (disp != null)
+                        disp.Dispose();
+                }
+                _contextDataList.Clear();
+
+                _InvokeFunc = null;
+                _StepFunc = null;
+                _FinalFunc = null;
+                _CompareFunc = null;
+                _base = null;
+                _contextDataList = null;
+            }
+
+            //////////////////////////////////////
+            // release unmanaged resources here...
+            //////////////////////////////////////
+
+            disposed = true;
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Destructor
+    ~SQLiteFunction()
+    {
+        Dispose(false);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Returns a reference to the underlying connection's SQLiteConvert class, which can be used to convert
     /// strings and DateTime's into the current connection's encoding schema.
@@ -91,6 +171,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return _base;
       }
     }
@@ -109,6 +190,7 @@ namespace System.Data.SQLite
     /// just return it!</returns>
     public virtual object Invoke(object[] args)
     {
+      CheckDisposed();
       return null;
     }
 
@@ -123,6 +205,7 @@ namespace System.Data.SQLite
     /// <param name="contextData">A placeholder for implementers to store contextual data pertaining to the current context.</param>
     public virtual void Step(object[] args, int stepNumber, ref object contextData)
     {
+      CheckDisposed();
     }
 
     /// <summary>
@@ -143,6 +226,7 @@ namespace System.Data.SQLite
     /// </returns>
     public virtual object Final(object contextData)
     {
+      CheckDisposed();
       return null;
     }
 
@@ -154,6 +238,7 @@ namespace System.Data.SQLite
     /// <returns>1 if param1 is greater than param2, 0 if they are equal, or -1 if param1 is less than param2</returns>
     public virtual int Compare(string param1, string param2)
     {
+      CheckDisposed();
       return 0;
     }
 
@@ -218,7 +303,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="context">The context the return value applies to</param>
     /// <param name="returnValue">The parameter to return to SQLite</param>
-    void SetReturnValue(IntPtr context, object returnValue)
+    private void SetReturnValue(IntPtr context, object returnValue)
     {
       if (returnValue == null || returnValue == DBNull.Value)
       {
@@ -349,43 +434,6 @@ namespace System.Data.SQLite
 
       IDisposable disp = obj as IDisposable;
       if (disp != null) disp.Dispose();
-    }
-
-    /// <summary>
-    /// Placeholder for a user-defined disposal routine
-    /// </summary>
-    /// <param name="disposing">True if the object is being disposed explicitly</param>
-    protected virtual void Dispose(bool disposing)
-    {
-      if (disposing)
-      {
-        IDisposable disp;
-
-        foreach (KeyValuePair<long, AggregateData> kv in _contextDataList)
-        {
-          disp = kv.Value._data as IDisposable;
-          if (disp != null)
-            disp.Dispose();
-        }
-        _contextDataList.Clear();
-
-        _InvokeFunc = null;
-        _StepFunc = null;
-        _FinalFunc = null;
-        _CompareFunc = null;
-        _base = null;
-        _contextDataList = null;
-      }
-    }
-
-    /// <summary>
-    /// Disposes of any active contextData variables that were not automatically cleaned up.  Sometimes this can happen if
-    /// someone closes the connection while a DataReader is open.
-    /// </summary>
-    public void Dispose()
-    {
-      Dispose(true);
-      GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -540,6 +588,47 @@ namespace System.Data.SQLite
     {
       return _base.GetCollationSequence(this, _context);
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteFunctionEx).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+    #endregion
   }
 
   /// <summary>

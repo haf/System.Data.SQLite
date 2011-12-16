@@ -10,7 +10,7 @@ namespace System.Data.SQLite
 {
   using System.Transactions;
 
-  internal class SQLiteEnlistment : IEnlistmentNotification
+  internal class SQLiteEnlistment : IEnlistmentNotification, IDisposable
   {
     internal SQLiteTransaction _transaction;
     internal Transaction _scope;
@@ -23,6 +23,73 @@ namespace System.Data.SQLite
 
       _scope.EnlistVolatile(this, System.Transactions.EnlistmentOptions.None);
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable Members
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteEnlistment).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                ////////////////////////////////////
+                // dispose managed resources here...
+                ////////////////////////////////////
+
+                if (_transaction != null)
+                {
+                    _transaction.Dispose();
+                    _transaction = null;
+                }
+
+                if (_scope != null)
+                {
+                    // _scope.Dispose(); // NOTE: Not "owned" by us.
+                    _scope = null;
+                }
+            }
+
+            //////////////////////////////////////
+            // release unmanaged resources here...
+            //////////////////////////////////////
+
+            disposed = true;
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Destructor
+    ~SQLiteEnlistment()
+    {
+        Dispose(false);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     private void Cleanup(SQLiteConnection cnn)
     {
@@ -37,6 +104,8 @@ namespace System.Data.SQLite
 
     public void Commit(Enlistment enlistment)
     {
+      CheckDisposed();
+
       SQLiteConnection cnn = _transaction.Connection;
       cnn._enlistment = null;
 
@@ -56,11 +125,14 @@ namespace System.Data.SQLite
 
     public void InDoubt(Enlistment enlistment)
     {
+      CheckDisposed();
       enlistment.Done();
     }
 
     public void Prepare(PreparingEnlistment preparingEnlistment)
     {
+      CheckDisposed();
+
       if (_transaction.IsValid(false) == false)
         preparingEnlistment.ForceRollback();
       else
@@ -69,6 +141,8 @@ namespace System.Data.SQLite
 
     public void Rollback(Enlistment enlistment)
     {
+      CheckDisposed();
+
       SQLiteConnection cnn = _transaction.Connection;
       cnn._enlistment = null;
 

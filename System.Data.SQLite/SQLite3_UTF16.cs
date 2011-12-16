@@ -23,6 +23,49 @@ namespace System.Data.SQLite
     {
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLite3_UTF16).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Overrides SQLiteConvert.ToString() to marshal UTF-16 strings instead of UTF-8
     /// </summary>
@@ -31,6 +74,7 @@ namespace System.Data.SQLite
     /// <returns>A .NET string</returns>
     public override string ToString(IntPtr b, int nbytelen)
     {
+      CheckDisposed();
       return UTF16ToString(b, nbytelen);
     }
 

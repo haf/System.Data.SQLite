@@ -50,4 +50,11 @@
   <PropertyGroup Condition="'$(IsRetargetable)' != 'false'">
     <DefineConstants>$(DefineConstants);RETARGETABLE</DefineConstants>
   </PropertyGroup>
+
+  <!--
+      NOTE: Throw an exception when somebody tries to access a disposed object?
+  -->
+  <PropertyGroup Condition="'$(ThrowOnDisposed)' != 'false'">
+    <DefineConstants>$(DefineConstants);THROW_ON_DISPOSED</DefineConstants>
+  </PropertyGroup>
 </Project>

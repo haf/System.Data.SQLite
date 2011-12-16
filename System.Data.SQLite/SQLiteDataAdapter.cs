@@ -64,6 +64,49 @@ namespace System.Data.SQLite
       SelectCommand = new SQLiteCommand(commandText, cnn);
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteDataAdapter).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Row updating event handler
     /// </summary>
@@ -71,6 +114,8 @@ namespace System.Data.SQLite
     {
       add
       {
+        CheckDisposed();
+
 #if !PLATFORM_COMPACTFRAMEWORK
         EventHandler<RowUpdatingEventArgs> previous = (EventHandler<RowUpdatingEventArgs>)base.Events[_updatingEventPH];
         if ((previous != null) && (value.Target is DbCommandBuilder))
@@ -84,7 +129,7 @@ namespace System.Data.SQLite
 #endif
         base.Events.AddHandler(_updatingEventPH, value); 
       }
-      remove { base.Events.RemoveHandler(_updatingEventPH, value); }
+      remove { CheckDisposed(); base.Events.RemoveHandler(_updatingEventPH, value); }
     }
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -110,8 +155,8 @@ namespace System.Data.SQLite
     /// </summary>
     public event EventHandler<RowUpdatedEventArgs> RowUpdated
     {
-      add { base.Events.AddHandler(_updatedEventPH, value); }
-      remove { base.Events.RemoveHandler(_updatedEventPH, value); }
+      add { CheckDisposed(); base.Events.AddHandler(_updatedEventPH, value); }
+      remove { CheckDisposed(); base.Events.RemoveHandler(_updatedEventPH, value); }
     }
 
     /// <summary>
@@ -146,8 +191,8 @@ namespace System.Data.SQLite
 #endif
     public new SQLiteCommand SelectCommand
     {
-      get { return (SQLiteCommand)base.SelectCommand; }
-      set { base.SelectCommand = value; }
+      get { CheckDisposed(); return (SQLiteCommand)base.SelectCommand; }
+      set { CheckDisposed(); base.SelectCommand = value; }
     }
 
     /// <summary>
@@ -158,8 +203,8 @@ namespace System.Data.SQLite
 #endif
     public new SQLiteCommand InsertCommand
     {
-      get { return (SQLiteCommand)base.InsertCommand; }
-      set { base.InsertCommand = value; }
+      get { CheckDisposed(); return (SQLiteCommand)base.InsertCommand; }
+      set { CheckDisposed(); base.InsertCommand = value; }
     }
 
     /// <summary>
@@ -170,8 +215,8 @@ namespace System.Data.SQLite
 #endif
     public new SQLiteCommand UpdateCommand
     {
-      get { return (SQLiteCommand)base.UpdateCommand; }
-      set { base.UpdateCommand = value; }
+      get { CheckDisposed(); return (SQLiteCommand)base.UpdateCommand; }
+      set { CheckDisposed(); base.UpdateCommand = value; }
     }
 
     /// <summary>
@@ -182,8 +227,8 @@ namespace System.Data.SQLite
 #endif
     public new SQLiteCommand DeleteCommand
     {
-      get { return (SQLiteCommand)base.DeleteCommand; }
-      set { base.DeleteCommand = value; }
+      get { CheckDisposed(); return (SQLiteCommand)base.DeleteCommand; }
+      set { CheckDisposed(); base.DeleteCommand = value; }
     }
   }
 }

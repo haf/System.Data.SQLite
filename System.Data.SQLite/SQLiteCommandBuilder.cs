@@ -36,6 +36,49 @@ namespace System.Data.SQLite
       DataAdapter = adp;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteCommandBuilder).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Minimal amount of parameter processing.  Primarily sets the DbType for the parameter equal to the provider type in the schema
     /// </summary>
@@ -106,8 +149,8 @@ namespace System.Data.SQLite
     /// </summary>
     public new SQLiteDataAdapter DataAdapter
     {
-      get { return (SQLiteDataAdapter)base.DataAdapter; }
-      set { base.DataAdapter = value; }
+      get { CheckDisposed(); return (SQLiteDataAdapter)base.DataAdapter; }
+      set { CheckDisposed(); base.DataAdapter = value; }
     }
 
     /// <summary>
@@ -116,6 +159,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public new SQLiteCommand GetDeleteCommand()
     {
+      CheckDisposed();
       return (SQLiteCommand)base.GetDeleteCommand();
     }
 
@@ -126,6 +170,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public new SQLiteCommand GetDeleteCommand(bool useColumnsForParameterNames)
     {
+      CheckDisposed();
       return (SQLiteCommand)base.GetDeleteCommand(useColumnsForParameterNames);
     }
 
@@ -135,6 +180,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public new SQLiteCommand GetUpdateCommand()
     {
+      CheckDisposed();
       return (SQLiteCommand)base.GetUpdateCommand();
     }
 
@@ -145,6 +191,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public new SQLiteCommand GetUpdateCommand(bool useColumnsForParameterNames)
     {
+      CheckDisposed();
       return (SQLiteCommand)base.GetUpdateCommand(useColumnsForParameterNames);
     }
 
@@ -154,6 +201,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public new SQLiteCommand GetInsertCommand()
     {
+      CheckDisposed();
       return (SQLiteCommand)base.GetInsertCommand();
     }
 
@@ -164,6 +212,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public new SQLiteCommand GetInsertCommand(bool useColumnsForParameterNames)
     {
+      CheckDisposed();
       return (SQLiteCommand)base.GetInsertCommand(useColumnsForParameterNames);
     }
 
@@ -177,10 +226,12 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return base.CatalogLocation;
       }
       set
       {
+        CheckDisposed();
         base.CatalogLocation = value;
       }
     }
@@ -195,10 +246,12 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return base.CatalogSeparator;
       }
       set
       {
+        CheckDisposed();
         base.CatalogSeparator = value;
       }
     }
@@ -214,10 +267,12 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return base.QuotePrefix;
       }
       set
       {
+        CheckDisposed();
         base.QuotePrefix = value;
       }
     }
@@ -232,10 +287,12 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return base.QuoteSuffix;
       }
       set
       {
+        CheckDisposed();
         base.QuoteSuffix = value;
       }
     }
@@ -247,6 +304,8 @@ namespace System.Data.SQLite
     /// <returns>The bracketed identifier</returns>
     public override string QuoteIdentifier(string unquotedIdentifier)
     {
+      CheckDisposed();
+
       if (String.IsNullOrEmpty(QuotePrefix)
         || String.IsNullOrEmpty(QuoteSuffix)
         || String.IsNullOrEmpty(unquotedIdentifier))
@@ -262,6 +321,8 @@ namespace System.Data.SQLite
     /// <returns>The undecorated identifier</returns>
     public override string UnquoteIdentifier(string quotedIdentifier)
     {
+      CheckDisposed();
+
       if (String.IsNullOrEmpty(QuotePrefix)
         || String.IsNullOrEmpty(QuoteSuffix)
         || String.IsNullOrEmpty(quotedIdentifier))
@@ -284,10 +345,12 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return base.SchemaSeparator;
       }
       set
       {
+        CheckDisposed();
         base.SchemaSeparator = value;
       }
     }
