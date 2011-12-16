@@ -14,20 +14,8 @@ namespace System.Data.SQLite
   /// <summary>
   /// SQLite implementation of DbProviderFactory.
   /// </summary>
-  public sealed partial class SQLiteFactory : DbProviderFactory
+  public sealed partial class SQLiteFactory : DbProviderFactory, IDisposable
   {
-    /// <summary>
-    /// This event is raised whenever SQLite raises a logging event.
-    /// Note that this should be set as one of the first things in the
-    /// application.  This event is provided for backward compatibility only.
-    /// New code should use the SQLiteLog class instead.
-    /// </summary>
-    public event SQLiteLogEventHandler Log
-    {
-      add { SQLiteLog.Log += value; }
-      remove { SQLiteLog.Log -= value; }
-    }
-
     /// <overloads>
     /// Constructs a new SQLiteFactory object
     /// </overloads>
@@ -42,6 +30,73 @@ namespace System.Data.SQLite
         //
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable Members
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteFactory).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            //if (disposing)
+            //{
+            //    ////////////////////////////////////
+            //    // dispose managed resources here...
+            //    ////////////////////////////////////
+            //}
+
+            //////////////////////////////////////
+            // release unmanaged resources here...
+            //////////////////////////////////////
+
+            disposed = true;
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Destructor
+    ~SQLiteFactory()
+    {
+        Dispose(false);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// This event is raised whenever SQLite raises a logging event.
+    /// Note that this should be set as one of the first things in the
+    /// application.  This event is provided for backward compatibility only.
+    /// New code should use the SQLiteLog class instead.
+    /// </summary>
+    public event SQLiteLogEventHandler Log
+    {
+      add { CheckDisposed(); SQLiteLog.Log += value; }
+      remove { CheckDisposed(); SQLiteLog.Log -= value; }
+    }
+
     /// <summary>
     /// Static instance member which returns an instanced SQLiteFactory class.
     /// </summary>
@@ -53,6 +108,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteCommand object.</returns>
     public override DbCommand CreateCommand()
     {
+      CheckDisposed();
       return new SQLiteCommand();
     }
 
@@ -62,6 +118,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteCommandBuilder object.</returns>
     public override DbCommandBuilder CreateCommandBuilder()
     {
+      CheckDisposed();
       return new SQLiteCommandBuilder();
     }
 
@@ -71,6 +128,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteConnection object.</returns>
     public override DbConnection CreateConnection()
     {
+      CheckDisposed();
       return new SQLiteConnection();
     }
 
@@ -80,6 +138,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteConnectionStringBuilder object.</returns>
     public override DbConnectionStringBuilder CreateConnectionStringBuilder()
     {
+      CheckDisposed();
       return new SQLiteConnectionStringBuilder();
     }
 
@@ -89,6 +148,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteDataAdapter object.</returns>
     public override DbDataAdapter CreateDataAdapter()
     {
+      CheckDisposed();
       return new SQLiteDataAdapter();
     }
 
@@ -98,6 +158,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteParameter object.</returns>
     public override DbParameter CreateParameter()
     {
+      CheckDisposed();
       return new SQLiteParameter();
     }
   }

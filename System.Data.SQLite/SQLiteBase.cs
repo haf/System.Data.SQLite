@@ -222,15 +222,60 @@ namespace System.Data.SQLite
 
     internal abstract int FileControl(string zDbName, int op, IntPtr pArg);
 
-    protected virtual void Dispose(bool bDisposing)
-    {
-    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    #region IDisposable Members
     public void Dispose()
     {
-      Dispose(true);
-      GC.SuppressFinalize(this);
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteBase).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            //if (disposing)
+            //{
+            //    ////////////////////////////////////
+            //    // dispose managed resources here...
+            //    ////////////////////////////////////
+            //}
+
+            //////////////////////////////////////
+            // release unmanaged resources here...
+            //////////////////////////////////////
+
+            disposed = true;
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Destructor
+    ~SQLiteBase()
+    {
+        Dispose(false);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     // These statics are here for lack of a better place to put them.
     // They exist here because they are called during the finalization of

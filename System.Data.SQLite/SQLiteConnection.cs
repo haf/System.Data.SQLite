@@ -313,6 +313,51 @@ namespace System.Data.SQLite
       }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteConnection).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                Close();
+
+                disposed = true;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
 #if PLATFORM_COMPACTFRAMEWORK
     /// <summary>
     /// Obsolete
@@ -334,18 +379,6 @@ namespace System.Data.SQLite
     public object Clone()
     {
       return new SQLiteConnection(this);
-    }
-
-    /// <summary>
-    /// Disposes of the SQLiteConnection, closing it if it is active.
-    /// </summary>
-    /// <param name="disposing">True if the connection is being explicitly closed.</param>
-    protected override void Dispose(bool disposing)
-    {
-      base.Dispose(disposing);
-
-      if (disposing)
-        Close();
     }
 
     /// <summary>

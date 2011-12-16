@@ -67,11 +67,6 @@ namespace System.Data.SQLite
     internal bool _throwOnDisposed;
 
     /// <summary>
-    /// If set, then the object is currently being disposed.
-    /// </summary>
-    internal bool _disposing;
-
-    /// <summary>
     /// An array of rowid's for the active statement if CommandBehavior.KeyInfo is specified
     /// </summary>
     private SQLiteKeyReader _keyInfo;
@@ -108,10 +103,19 @@ namespace System.Data.SQLite
         NextResult();
     }
 
-    internal void Cancel()
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
     {
-      _version = 0;
+#if THROW_ON_DISPOSED
+        if (disposed && _throwOnDisposed)
+            throw new ObjectDisposedException(typeof(SQLiteDataReader).Name);
+#endif
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// Dispose of all resources used by this datareader.
@@ -119,14 +123,41 @@ namespace System.Data.SQLite
     /// <param name="disposing"></param>
     protected override void Dispose(bool disposing)
     {
-        //
-        // NOTE: Fix for ticket [e1b2e0f769], do NOT throw exceptions while we
-        //       are being disposed.
-        //
-        _disposing = true;
-        _throwOnDisposed = false;
+        try
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
 
-        base.Dispose(disposing);
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                //
+                // NOTE: Fix for ticket [e1b2e0f769], do NOT throw exceptions
+                //       while we are being disposed.
+                //
+                _throwOnDisposed = false;
+                disposed = true;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    internal void Cancel()
+    {
+      _version = 0;
     }
 
     /// <summary>
@@ -134,6 +165,8 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Close()
     {
+      CheckDisposed();
+
       try
       {
         if (_command != null)
@@ -218,6 +251,7 @@ namespace System.Data.SQLite
     /// <returns>Returns a DbEnumerator object.</returns>
     public override Collections.IEnumerator GetEnumerator()
     {
+      CheckDisposed();
       return new DbEnumerator(this, ((_commandBehavior & CommandBehavior.CloseConnection) == CommandBehavior.CloseConnection));
     }
 
@@ -228,6 +262,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         CheckClosed();
         return 0;
       }
@@ -240,7 +275,9 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         CheckClosed();
+
         if (_keyInfo == null)
           return _fieldCount;
 
@@ -255,6 +292,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         CheckClosed();
         return _fieldCount;
       }
@@ -277,6 +315,7 @@ namespace System.Data.SQLite
     {
       CheckClosed();
       CheckValidRow();
+
       TypeAffinity affinity = GetSQLiteType(i).Affinity;
 
       switch (affinity)
@@ -323,6 +362,8 @@ namespace System.Data.SQLite
     /// <returns>bool</returns>
     public override bool GetBoolean(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetBoolean(i - VisibleFieldCount);
 
@@ -337,6 +378,8 @@ namespace System.Data.SQLite
     /// <returns>byte</returns>
     public override byte GetByte(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetByte(i - VisibleFieldCount);
 
@@ -358,6 +401,8 @@ namespace System.Data.SQLite
     /// </remarks>
     public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetBytes(i - VisibleFieldCount, fieldOffset, buffer, bufferoffset, length);
 
@@ -372,6 +417,8 @@ namespace System.Data.SQLite
     /// <returns>char</returns>
     public override char GetChar(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetChar(i - VisibleFieldCount);
 
@@ -393,6 +440,8 @@ namespace System.Data.SQLite
     /// </remarks>
     public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetChars(i - VisibleFieldCount, fieldoffset, buffer, bufferoffset, length);
 
@@ -407,6 +456,8 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetDataTypeName(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetDataTypeName(i - VisibleFieldCount);
 
@@ -422,6 +473,8 @@ namespace System.Data.SQLite
     /// <returns>DateTime</returns>
     public override DateTime GetDateTime(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetDateTime(i - VisibleFieldCount);
 
@@ -436,6 +489,8 @@ namespace System.Data.SQLite
     /// <returns>decimal</returns>
     public override decimal GetDecimal(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetDecimal(i - VisibleFieldCount);
 
@@ -450,6 +505,8 @@ namespace System.Data.SQLite
     /// <returns>double</returns>
     public override double GetDouble(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetDouble(i - VisibleFieldCount);
 
@@ -464,6 +521,8 @@ namespace System.Data.SQLite
     /// <returns>Type</returns>
     public override Type GetFieldType(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetFieldType(i - VisibleFieldCount);
 
@@ -477,6 +536,8 @@ namespace System.Data.SQLite
     /// <returns>float</returns>
     public override float GetFloat(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetFloat(i - VisibleFieldCount);
 
@@ -491,6 +552,8 @@ namespace System.Data.SQLite
     /// <returns>Guid</returns>
     public override Guid GetGuid(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetGuid(i - VisibleFieldCount);
 
@@ -512,6 +575,8 @@ namespace System.Data.SQLite
     /// <returns>Int16</returns>
     public override Int16 GetInt16(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetInt16(i - VisibleFieldCount);
 
@@ -526,6 +591,8 @@ namespace System.Data.SQLite
     /// <returns>Int32</returns>
     public override Int32 GetInt32(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetInt32(i - VisibleFieldCount);
 
@@ -540,6 +607,8 @@ namespace System.Data.SQLite
     /// <returns>Int64</returns>
     public override Int64 GetInt64(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetInt64(i - VisibleFieldCount);
 
@@ -554,6 +623,8 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetName(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetName(i - VisibleFieldCount);
 
@@ -567,7 +638,9 @@ namespace System.Data.SQLite
     /// <returns>The int i of the column</returns>
     public override int GetOrdinal(string name)
     {
+      CheckDisposed();
       CheckClosed();
+
       int r = _activeStatement._sql.ColumnIndex(_activeStatement, name);
       if (r == -1 && _keyInfo != null)
       {
@@ -585,6 +658,7 @@ namespace System.Data.SQLite
     /// <returns>Returns a DataTable containing the schema information for the active SELECT statement being processed.</returns>
     public override DataTable GetSchemaTable()
     {
+      CheckDisposed();
       return GetSchemaTable(true, false);
     }
 
@@ -945,6 +1019,8 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetString(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetString(i - VisibleFieldCount);
 
@@ -959,6 +1035,8 @@ namespace System.Data.SQLite
     /// <returns>object</returns>
     public override object GetValue(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetValue(i - VisibleFieldCount);
 
@@ -974,6 +1052,8 @@ namespace System.Data.SQLite
     /// <returns>The number of columns retrieved</returns>
     public override int GetValues(object[] values)
     {
+      CheckDisposed();
+
       int nMax = FieldCount;
       if (values.Length < nMax) nMax = values.Length;
 
@@ -992,6 +1072,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         CheckClosed();
         return (_readingState != 1);
       }
@@ -1002,7 +1083,7 @@ namespace System.Data.SQLite
     /// </summary>
     public override bool IsClosed
     {
-      get { return (_command == null); }
+      get { CheckDisposed(); return (_command == null); }
     }
 
     /// <summary>
@@ -1012,6 +1093,8 @@ namespace System.Data.SQLite
     /// <returns>True or False</returns>
     public override bool IsDBNull(int i)
     {
+      CheckDisposed();
+
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.IsDBNull(i - VisibleFieldCount);
 
@@ -1024,6 +1107,7 @@ namespace System.Data.SQLite
     /// <returns>True if the command was successful and a new resultset is available, False otherwise.</returns>
     public override bool NextResult()
     {
+      CheckDisposed();
       CheckClosed();
 
       SQLiteStatement stmt = null;
@@ -1139,6 +1223,7 @@ namespace System.Data.SQLite
     /// <returns>True if a new row was successfully loaded and is ready for processing</returns>
     public override bool Read()
     {
+      CheckDisposed();
       CheckClosed();
 
       if (_readingState == -1) // First step was already done at the NextResult() level, so don't step again, just return true.
@@ -1171,7 +1256,7 @@ namespace System.Data.SQLite
     /// </summary>
     public override int RecordsAffected
     {
-      get { return (_rowsAffected < 0) ? 0 : _rowsAffected; }
+      get { CheckDisposed(); return (_rowsAffected < 0) ? 0 : _rowsAffected; }
     }
 
     /// <summary>
@@ -1181,7 +1266,7 @@ namespace System.Data.SQLite
     /// <returns>The value contained in the column</returns>
     public override object this[string name]
     {
-      get { return GetValue(GetOrdinal(name)); }
+      get { CheckDisposed(); return GetValue(GetOrdinal(name)); }
     }
 
     /// <summary>
@@ -1191,7 +1276,7 @@ namespace System.Data.SQLite
     /// <returns>The value contained in the column</returns>
     public override object this[int i]
     {
-      get { return GetValue(i); }
+      get { CheckDisposed(); return GetValue(i); }
     }
 
     private void LoadKeyInfo()

@@ -59,11 +59,63 @@ namespace System.Data.SQLite
       }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteTransaction).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Disposes the transaction.  If it is currently active, any changes are rolled back.
+    /// </summary>
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    ////////////////////////////////////
+                    // dispose managed resources here...
+                    ////////////////////////////////////
+
+                    if (IsValid(false))
+                    {
+                        IssueRollback();
+                    }
+                }
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Commits the current transaction.
     /// </summary>
     public override void Commit()
     {
+      CheckDisposed();
       IsValid(true);
 
       if (_cnn._transactionLevel - 1 == 0)
@@ -83,7 +135,7 @@ namespace System.Data.SQLite
     /// </summary>
     public new SQLiteConnection Connection
     {
-      get { return _cnn; }
+      get { CheckDisposed(); return _cnn; }
     }
 
     /// <summary>
@@ -95,26 +147,11 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Disposes the transaction.  If it is currently active, any changes are rolled back.
-    /// </summary>
-    protected override void Dispose(bool disposing)
-    {
-      if (disposing)
-      {
-        if (IsValid(false))
-        {
-          IssueRollback();
-        }
-      }
-      base.Dispose(disposing);
-    }
-
-    /// <summary>
     /// Gets the isolation level of the transaction.  SQLite only supports Serializable transactions.
     /// </summary>
     public override IsolationLevel IsolationLevel
     {
-      get { return _level; }
+      get { CheckDisposed(); return _level; }
     }
 
     /// <summary>
@@ -122,6 +159,7 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Rollback()
     {
+      CheckDisposed();
       IsValid(true);
       IssueRollback();
     }

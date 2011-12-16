@@ -143,41 +143,76 @@ namespace System.Data.SQLite
         Transaction = transaction;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteCommand).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Disposes of the command and clears all member variables
     /// </summary>
     /// <param name="disposing">Whether or not the class is being explicitly or implicitly disposed</param>
     protected override void Dispose(bool disposing)
     {
-      base.Dispose(disposing);
-
-      if (disposing)
-      {
-        // If a reader is active on this command, don't destroy the command, instead let the reader do it
-        SQLiteDataReader reader = null;
-        if (_activeReader != null)
+        try
         {
-          try
-          {
-            reader = _activeReader.Target as SQLiteDataReader;
-          }
-          catch(InvalidOperationException)
-          {
-          }
-        }
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    ////////////////////////////////////
+                    // dispose managed resources here...
+                    ////////////////////////////////////
 
-        if (reader != null)
+                    // If a reader is active on this command, don't destroy the command, instead let the reader do it
+                    SQLiteDataReader reader = null;
+                    if (_activeReader != null)
+                    {
+                        try
+                        {
+                            reader = _activeReader.Target as SQLiteDataReader;
+                        }
+                        catch (InvalidOperationException)
+                        {
+                        }
+                    }
+
+                    if (reader != null)
+                    {
+                        reader._disposeCommand = true;
+                        _activeReader = null;
+                        return;
+                    }
+
+                    Connection = null;
+                    _parameterCollection.Clear();
+                    _commandText = null;
+                }
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        finally
         {
-          reader._disposeCommand = true;
-          _activeReader = null;
-          return;
+            base.Dispose(disposing);
         }
-
-        Connection = null;
-        _parameterCollection.Clear();
-        _commandText = null;
-      }
     }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// Clears and destroys all statements currently prepared
@@ -283,6 +318,8 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Cancel()
     {
+      CheckDisposed();
+
       if (_activeReader != null)
       {
         SQLiteDataReader reader = _activeReader.Target as SQLiteDataReader;
@@ -301,10 +338,13 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return _commandText;
       }
       set
       {
+        CheckDisposed();
+
         if (_commandText == value) return;
 
         if (_activeReader != null && _activeReader.IsAlive)
@@ -329,10 +369,12 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return _commandTimeout;
       }
       set
       {
+        CheckDisposed();
         _commandTimeout = value;
       }
     }
@@ -347,10 +389,13 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return CommandType.Text;
       }
       set
       {
+        CheckDisposed();
+
         if (value != CommandType.Text)
         {
           throw new NotSupportedException();
@@ -373,6 +418,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public new SQLiteParameter CreateParameter()
     {
+      CheckDisposed();
       return new SQLiteParameter();
     }
 
@@ -384,9 +430,11 @@ namespace System.Data.SQLite
 #endif
     public new SQLiteConnection Connection
     {
-      get { return _cnn; }
+      get { CheckDisposed(); return _cnn; }
       set
       {
+        CheckDisposed();
+
         if (_activeReader != null && _activeReader.IsAlive)
           throw new InvalidOperationException("Cannot set Connection while a DataReader is active");
 
@@ -428,7 +476,7 @@ namespace System.Data.SQLite
 #endif
     public new SQLiteParameterCollection Parameters
     {
-      get { return _parameterCollection; }
+      get { CheckDisposed(); return _parameterCollection; }
     }
 
     /// <summary>
@@ -451,9 +499,11 @@ namespace System.Data.SQLite
 #endif
     public new SQLiteTransaction Transaction
     {
-      get { return _transaction; }
+      get { CheckDisposed(); return _transaction; }
       set
       {
+        CheckDisposed();
+
         if (_cnn != null)
         {
           if (_activeReader != null && _activeReader.IsAlive)
@@ -536,6 +586,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteDataReader</returns>
     public new SQLiteDataReader ExecuteReader(CommandBehavior behavior)
     {
+      CheckDisposed();
       InitializeForReader();
 
       SQLiteDataReader rd = new SQLiteDataReader(this, behavior);
@@ -550,6 +601,7 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteDataReader</returns>
     public new SQLiteDataReader ExecuteReader()
     {
+      CheckDisposed();
       return ExecuteReader(CommandBehavior.Default);
     }
 
@@ -567,6 +619,8 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public override int ExecuteNonQuery()
     {
+      CheckDisposed();
+
       using (SQLiteDataReader reader = ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
       {
         while (reader.NextResult()) ;
@@ -581,6 +635,8 @@ namespace System.Data.SQLite
     /// <returns>The first column of the first row of the first resultset from the query</returns>
     public override object ExecuteScalar()
     {
+      CheckDisposed();
+
       using (SQLiteDataReader reader = ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
       {
         if (reader.Read())
@@ -594,6 +650,7 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Prepare()
     {
+      CheckDisposed();
     }
 
     /// <summary>
@@ -604,10 +661,12 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return _updateRowSource;
       }
       set
       {
+        CheckDisposed();
         _updateRowSource = value;
       }
     }
@@ -622,10 +681,13 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return _designTimeVisible;
       }
       set
       {
+        CheckDisposed();
+
         _designTimeVisible = value;
 #if !PLATFORM_COMPACTFRAMEWORK
         TypeDescriptor.Refresh(this);
@@ -639,6 +701,7 @@ namespace System.Data.SQLite
     /// <returns>A new SQLiteCommand with the same commandtext, connection and parameters</returns>
     public object Clone()
     {
+      CheckDisposed();
       return new SQLiteCommand(this);
     }
   }

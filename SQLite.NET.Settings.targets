@@ -106,6 +106,14 @@
               flag from the AssemblyNameFlags enumeration?
     -->
     <IsRetargetable Condition="'$(IsRetargetable)' == ''">false</IsRetargetable>
+
+    <!--
+        NOTE: Throw an exception if an object has already been disposed?  By
+              default, this is enabled.  If this is disabled, an exception will
+              not be thrown when a SQLite object which has already been disposed
+              is accessed.
+    -->
+    <ThrowOnDisposed Condition="'$(ThrowOnDisposed)' == ''">true</ThrowOnDisposed>
   </PropertyGroup>
 
   <!--
@@ -172,7 +180,8 @@
 
   <PropertyGroup Condition="'$(SQLiteNetDir)' != '' And
                             !HasTrailingSlash('$(SQLiteNetDir)') And
-                            Exists('$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.snk')">
+                            (('$(IsCompactFramework)' == 'false' And Exists('$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.snk')) Or
+                             ('$(IsCompactFramework)' != 'false' And Exists('$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.CF.snk')))">
     <!--
         NOTE: Sign the assembly?  By default, this is enabled.
     -->

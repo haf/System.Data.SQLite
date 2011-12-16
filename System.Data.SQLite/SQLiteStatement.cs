@@ -88,6 +88,75 @@ namespace System.Data.SQLite
       }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable Members
+    /// <summary>
+    /// Disposes and finalizes the statement
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteStatement).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                ////////////////////////////////////
+                // dispose managed resources here...
+                ////////////////////////////////////
+
+                if (_sqlite_stmt != null)
+                {
+                    _sqlite_stmt.Dispose();
+                    _sqlite_stmt = null;
+                }
+
+                _paramNames = null;
+                _paramValues = null;
+                _sql = null;
+                _sqlStatement = null;
+            }
+
+            //////////////////////////////////////
+            // release unmanaged resources here...
+            //////////////////////////////////////
+
+            disposed = true;
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Destructor
+    ~SQLiteStatement()
+    {
+        Dispose(false);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Called by SQLiteParameterCollection, this function determines if the specified parameter name belongs to
     /// this statement, and if so, keeps a reference to the parameter so it can be bound later.
@@ -117,25 +186,6 @@ namespace System.Data.SQLite
       return false;
     }
 
-    #region IDisposable Members
-    /// <summary>
-    /// Disposes and finalizes the statement
-    /// </summary>
-    public void Dispose()
-    {
-      if (_sqlite_stmt != null)
-      {
-        _sqlite_stmt.Dispose();
-      }
-      _sqlite_stmt = null;
-      
-      _paramNames = null;
-      _paramValues = null;
-      _sql = null;
-      _sqlStatement = null;
-    }
-    #endregion
-    
     /// <summary>
     ///  Bind all parameters, making sure the caller didn't miss any
     /// </summary>
