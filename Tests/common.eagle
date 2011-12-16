@@ -526,7 +526,7 @@ namespace eval ::Eagle {
       return $code
     }
 
-    proc reportSQLiteResources { channel {quiet false} } {
+    proc reportSQLiteResources { channel {quiet false} {collect true} } {
       #
       # NOTE: Skip all output if we are running in "quiet" mode.
       #
@@ -567,6 +567,41 @@ namespace eval ::Eagle {
         #
         # NOTE: Maybe the SQLite native library is unavailable?
         #
+        set memory unknown
+
+        if {!$quiet} then {
+          tputs $channel [appendArgs $memory \n]
+        }
+      }
+
+      if {$collect} then {
+        if {[catch {
+                object invoke GC Collect
+                object invoke GC WaitForPendingFinalizers
+                object invoke GC Collect} error]} then {
+          tputs $channel [appendArgs \
+              "==== WARNING: failed to garbage collect, error: " \
+              \n\t $error \n]
+        }
+      }
+
+      if {!$quiet} then {
+        tputs $channel "---- current memory in use by the CLR... "
+      }
+
+      if {[catch {getDictionaryValue [debug memory] gc} memory] == 0} then {
+        if {[string is integer -strict $memory]} then {
+          if {!$quiet} then {
+            tputs $channel [appendArgs $memory " bytes\n"]
+          }
+        } else {
+          set memory invalid
+
+          if {!$quiet} then {
+            tputs $channel [appendArgs $memory \n]
+          }
+        }
+      } else {
         set memory unknown
 
         if {!$quiet} then {
