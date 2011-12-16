@@ -31,7 +31,7 @@ runTest {test tkt-e1b2e0f769-1.1 {data reader cleanup} -setup {
   }
 
   set result1 [list]
-  set dataSource [file join [getTemporaryPath] tkt-e1b2e0f769-1.1.db]
+  set dataSource [file join [getDatabaseDirectory] tkt-e1b2e0f769-1.1.db]
 
   foreach table [list t1 t2] {
     set id [object invoke Interpreter.GetActive NextId]

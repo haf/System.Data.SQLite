@@ -62,7 +62,7 @@ runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
   setupDb [set fileName tkt-7e3fa93744-1.2.db]
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] $fileName]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
 
   set sql { \
     CREATE TABLE t1 ( \

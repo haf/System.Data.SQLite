@@ -91,8 +91,8 @@ runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter update fail} -setup {
   set otherFileName tkt-343d392b51-2.1-otherDb.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] $fileName]
-  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+  set otherDataSource [file join [getDatabaseDirectory] $otherFileName]
   set otherDbName otherDb
   set otherTable [appendArgs $otherDbName .t1]
 
@@ -197,8 +197,8 @@ runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter update success} -setup {
   set otherFileName tkt-343d392b51-2.2-otherDb.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] $fileName]
-  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+  set otherDataSource [file join [getDatabaseDirectory] $otherFileName]
   set otherDbName otherDb
   set otherTable [appendArgs $otherDbName .t1]
 
@@ -302,7 +302,7 @@ runTest {test tkt-343d392b51-3.1 {attached database, same table name} -setup {
   setupDb [set fileName tkt-343d392b51-3.1.db]
   set otherFileName tkt-343d392b51-3.1-otherDb.db
 } -body {
-  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set otherDataSource [file join [getDatabaseDirectory] $otherFileName]
   set otherDbName otherDb
   set otherTable [appendArgs $otherDbName .t1]
 
@@ -342,8 +342,8 @@ runTest {test tkt-343d392b51-3.2 {adapter, attached db, table names} -setup {
   set otherFileName tkt-343d392b51-3.2-otherDb.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] $fileName]
-  set otherDataSource [file join [getTemporaryPath] $otherFileName]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+  set otherDataSource [file join [getDatabaseDirectory] $otherFileName]
   set otherDbName otherDb
   set otherTable [appendArgs $otherDbName .t1]
 

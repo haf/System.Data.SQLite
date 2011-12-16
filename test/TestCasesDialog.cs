@@ -32,7 +32,7 @@ namespace test
     private TestCases _test;
     private TestCases _testitems;
 
-    public TestCasesDialog(bool autoRun)
+    public TestCasesDialog(string fileName, bool autoRun)
     {
       InitializeComponent();
 
@@ -49,7 +49,7 @@ namespace test
           if (prov == "System.Data.SQLite") _provider.SelectedItem = prov;
         }
       }
-      _connectionString.Items.Add("Data Source=Test.db3;Pooling=true;FailIfMissing=false");
+      _connectionString.Items.Add(String.Format("Data Source={0};Pooling=true;FailIfMissing=false", fileName));
       _connectionString.Items.Add("Data Source=(local);Initial Catalog=sqlite;Integrated Security=True;Max Pool Size=10");
       _connectionString.SelectedIndex = 0;
 

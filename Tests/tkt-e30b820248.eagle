@@ -28,7 +28,7 @@ runTest {test tkt-e30b820248-1.1 {disposal ordering} -setup {
   set fileName tkt-e30b820248-1.1.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] $fileName]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
   set name [file rootname [file tail $fileName]]
 
   set sql { \
@@ -124,7 +124,7 @@ for {set i 2} {$i < 5} {incr i} {
     set fileName [appendArgs tkt-e30b820248-1. $i .db]
   } -body {
     set id [object invoke Interpreter.GetActive NextId]
-    set dataSource [file join [getTemporaryPath] $fileName]
+    set dataSource [file join [getDatabaseDirectory] $fileName]
     set name [file rootname [file tail $fileName]]
 
     set sql { \

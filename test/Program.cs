@@ -34,25 +34,39 @@ namespace test
                 Debugger.Break();
             }
 
+            string fileName = "test.db"; // NOTE: New default, was "Test.db3".
             bool autoRun = false;
 
-            if ((args != null) && (args.Length > 0))
+            if (args != null)
             {
-                string arg = args[0];
+                int length = args.Length;
 
-                if (arg != null)
+                for (int index = 0; index < length; index++)
                 {
-                    arg = arg.TrimStart(new char[] { '-', '/' });
+                    string arg = args[index];
 
-                    if (String.Equals(arg, "autoRun",
-                            StringComparison.OrdinalIgnoreCase))
+                    if (arg != null)
                     {
-                        autoRun = true;
+                        arg = arg.TrimStart(new char[] { '-', '/' });
+
+                        if (String.Equals(arg, "fileName",
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            index++;
+
+                            if (index < length)
+                                fileName = args[index];
+                        }
+                        else if (String.Equals(arg, "autoRun",
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            autoRun = true;
+                        }
                     }
                 }
             }
 
-            Application.Run(new TestCasesDialog(autoRun));
+            Application.Run(new TestCasesDialog(fileName, autoRun));
         }
     }
 }

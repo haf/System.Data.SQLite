@@ -185,6 +185,24 @@ namespace eval ::Eagle {
           [file join [getBinaryDirectory] [file tail $fileName]]]
     }
 
+    proc getDatabaseDirectory {} {
+      #
+      # NOTE: This procedure returns the directory where the test databases
+      #       should be located.  By default, this just uses the temporary
+      #       directory configured for this system.
+      #
+      if {[info exists ::database_directory] && \
+          [string length $::database_directory] > 0} then {
+        #
+        # NOTE: The location of the database directory has been overridden;
+        #       therefore, use it.
+        #
+        return [file normalize $::database_directory]
+      } else {
+        return [getTemporaryPath]
+      }
+    }
+
     proc getAppDomainPreamble { {prefix ""} {suffix ""} } {
       #
       # NOTE: This procedure returns a test setup script suitable for evaluation
@@ -410,7 +428,7 @@ namespace eval ::Eagle {
       #       the temporary directory.  Each database used by a test should be
       #       cleaned up by that test using the "cleanupDb" procedure, below.
       #
-      set fileName [file join [getTemporaryPath] [file tail $fileName]]
+      set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
 
       #
       # NOTE: By default, delete any pre-existing database with the same file
@@ -502,7 +520,7 @@ namespace eval ::Eagle {
       # NOTE: Build the full path to the database file name.  For now, all test
       #       database files are stored in the temporary directory.
       #
-      set fileName [file join [getTemporaryPath] [file tail $fileName]]
+      set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
 
       if {[file exists $fileName]} then {
         #

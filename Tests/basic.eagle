@@ -53,12 +53,19 @@ if {![haveConstraint [appendArgs file_ [file tail $testLinqOutFile]]]} then {
 
 runTest {test data-1.1 {unit tests from the 'test' project} -setup {
   catch {file delete [file join [file dirname $testExeFile] Test.db3]}
+  set fileName [file join [getDatabaseDirectory] data-1.1.db]
+  catch {file delete $fileName}
 } -body {
   set output ""
 
   set code [catch {
+    #
+    # NOTE: For the sake of backward compatibility, the "-autoRun" argument
+    #       must be first.
+    #
     testClrExec $testExeFile [list -eventflags Wait -directory \
-    [file dirname $testExeFile] -stdout output -success 0] -autoRun
+    [file dirname $testExeFile] -stdout output -success 0] -autoRun \
+    -fileName [appendArgs \" [file nativename $fileName] \"]
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
@@ -67,7 +74,7 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
 
   list $code [expr {$code == 0 ? "" : $error}]
 } -cleanup {
-  unset -nocomplain code output error
+  unset -nocomplain code output error fileName
 } -constraints {eagle file_test.exe} -result {0 {}}}
 
 ###############################################################################
@@ -145,7 +152,7 @@ runTest {test data-1.4 {GetSchema with ReservedWords} -setup {
   setupDb [set fileName data-1.4.db]
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] data-1.4.db]
+  set dataSource [file join [getDatabaseDirectory] data-1.4.db]
 
   unset -nocomplain results errors
 
@@ -205,7 +212,7 @@ runTest {test data-1.5 {GetSchema with ForeignKeys} -setup {
   sql execute $db "CREATE TABLE t2(x INTEGER REFERENCES t3);"
 
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] data-1.5.db]
+  set dataSource [file join [getDatabaseDirectory] data-1.5.db]
 
   unset -nocomplain results errors
 
@@ -281,7 +288,7 @@ runTest {test data-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
   setupDb [set fileName data-1.6.db]
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] data-1.6.db]
+  set dataSource [file join [getDatabaseDirectory] data-1.6.db]
 
   unset -nocomplain results errors
 
@@ -381,7 +388,7 @@ runTest {test data-1.7 {properly closed database file (non-query)} -setup {
   set fileName data-1.7.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] $fileName]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
 
   set sql { \
     BEGIN EXCLUSIVE TRANSACTION; \
@@ -439,7 +446,7 @@ runTest {test data-1.8 {properly closed database file (reader #1)} -setup {
   set fileName data-1.8.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] $fileName]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
 
   set sql { \
     BEGIN EXCLUSIVE TRANSACTION; \
@@ -500,7 +507,7 @@ runTest {test data-1.9 {properly closed database file (reader #2)} -setup {
   set fileName data-1.9.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getTemporaryPath] $fileName]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
 
   set sql { \
     BEGIN EXCLUSIVE TRANSACTION; \
