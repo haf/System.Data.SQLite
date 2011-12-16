@@ -45,51 +45,101 @@ namespace System.Data.SQLite
     /// </summary>
     private sealed class KeyQuery : IDisposable
     {
-      private SQLiteCommand _command;
-      internal SQLiteDataReader _reader;
+        private SQLiteCommand _command;
+        internal SQLiteDataReader _reader;
 
-      internal KeyQuery(SQLiteConnection cnn, string database, string table, params string[] columns)
-      {
-        using (SQLiteCommandBuilder builder = new SQLiteCommandBuilder())
+        internal KeyQuery(SQLiteConnection cnn, string database, string table, params string[] columns)
         {
-          _command = cnn.CreateCommand();
-          for (int n = 0; n < columns.Length; n++)
-          {
-            columns[n] = builder.QuoteIdentifier(columns[n]);
-          }
+            using (SQLiteCommandBuilder builder = new SQLiteCommandBuilder())
+            {
+                _command = cnn.CreateCommand();
+                for (int n = 0; n < columns.Length; n++)
+                {
+                    columns[n] = builder.QuoteIdentifier(columns[n]);
+                }
+            }
+            _command.CommandText = String.Format(CultureInfo.InvariantCulture, "SELECT {0} FROM [{1}].[{2}] WHERE ROWID = ?", String.Join(",", columns), database, table);
+            _command.Parameters.AddWithValue(null, (long)0);
         }
-        _command.CommandText = String.Format(CultureInfo.InvariantCulture, "SELECT {0} FROM [{1}].[{2}] WHERE ROWID = ?", String.Join(",", columns), database, table);
-        _command.Parameters.AddWithValue(null, (long)0);
-      }
 
-      internal bool IsValid
-      {
-        set
+        internal bool IsValid
         {
-          if (value != false) throw new ArgumentException();
-          if (_reader != null)
-          {
-            _reader.Dispose();
-            _reader = null;
-          }
+            set
+            {
+                if (value != false) throw new ArgumentException();
+                if (_reader != null)
+                {
+                    _reader.Dispose();
+                    _reader = null;
+                }
+            }
         }
-      }
 
-      internal void Sync(long rowid)
-      {
-        IsValid = false;
-        _command.Parameters[0].Value = rowid;
-        _reader = _command.ExecuteReader();
-        _reader.Read();
-      }
+        internal void Sync(long rowid)
+        {
+            IsValid = false;
+            _command.Parameters[0].Value = rowid;
+            _reader = _command.ExecuteReader();
+            _reader.Read();
+        }
 
-      public void Dispose()
-      {
-        IsValid = false;
+        ///////////////////////////////////////////////////////////////////////////////////////////////
 
-        if (_command != null) _command.Dispose();
-        _command = null;
-      }
+        #region IDisposable Members
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+
+        #region IDisposable "Pattern" Members
+        private bool disposed;
+        private void CheckDisposed() /* throw */
+        {
+#if THROW_ON_DISPOSED
+            if (disposed)
+                throw new ObjectDisposedException(typeof(KeyQuery).Name);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    ////////////////////////////////////
+                    // dispose managed resources here...
+                    ////////////////////////////////////
+
+                    IsValid = false;
+
+                    if (_command != null) _command.Dispose();
+                    _command = null;
+                }
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+
+        #region Destructor
+        ~KeyQuery()
+        {
+            Dispose(false);
+        }
+        #endregion
     }
 
     /// <summary>
@@ -259,6 +309,73 @@ namespace System.Data.SQLite
       keys.CopyTo(_keyInfo);
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable Members
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region IDisposable "Pattern" Members
+    private bool disposed;
+    private void CheckDisposed() /* throw */
+    {
+#if THROW_ON_DISPOSED
+        if (disposed)
+            throw new ObjectDisposedException(typeof(SQLiteKeyReader).Name);
+#endif
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                ////////////////////////////////////
+                // dispose managed resources here...
+                ////////////////////////////////////
+
+                _stmt = null;
+
+                if (_keyInfo == null) return;
+
+                for (int n = 0; n < _keyInfo.Length; n++)
+                {
+                    if (_keyInfo[n].query != null)
+                        _keyInfo[n].query.Dispose();
+                }
+
+                _keyInfo = null;
+            }
+
+            //////////////////////////////////////
+            // release unmanaged resources here...
+            //////////////////////////////////////
+
+            disposed = true;
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Destructor
+    ~SQLiteKeyReader()
+    {
+        Dispose(false);
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// How many additional columns of keyinfo we're holding
     /// </summary>
@@ -312,20 +429,6 @@ namespace System.Data.SQLite
         if (_keyInfo[n].query != null)
           _keyInfo[n].query.IsValid = false;
       }
-    }
-
-    public void Dispose()
-    {
-      _stmt = null;
-
-      if (_keyInfo == null) return;
-
-      for (int n = 0; n < _keyInfo.Length; n++)
-      {
-        if (_keyInfo[n].query != null)
-          _keyInfo[n].query.Dispose();
-      }
-      _keyInfo = null;
     }
 
     internal string GetDataTypeName(int i)
