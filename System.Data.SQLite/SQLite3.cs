@@ -1151,15 +1151,29 @@ namespace System.Data.SQLite
     internal static bool StaticIsInitialized()
     {
         //
-        // NOTE: This method [ab]uses the fact that SQLite will always
-        //       return SQLITE_ERROR for any unknown configuration option
-        //       *unless* the SQLite library has already been initialized.
-        //       In that case it will always return SQLITE_MISUSE.
+        // NOTE: Save the state of the logging class and then restore it
+        //       after we are done to avoid logging too many false errors.
         //
-        int rc = UnsafeNativeMethods.sqlite3_config(
-            (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE, null, (IntPtr)0);
+        bool savedEnabled = SQLiteLog.Enabled;
+        SQLiteLog.Enabled = false;
 
-        return (rc == /* SQLITE_MISUSE */ 21);
+        try
+        {
+            //
+            // NOTE: This method [ab]uses the fact that SQLite will always
+            //       return SQLITE_ERROR for any unknown configuration option
+            //       *unless* the SQLite library has already been initialized.
+            //       In that case it will always return SQLITE_MISUSE.
+            //
+            int rc = UnsafeNativeMethods.sqlite3_config(
+                (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE, null, (IntPtr)0);
+
+            return (rc == /* SQLITE_MISUSE */ 21);
+        }
+        finally
+        {
+            SQLiteLog.Enabled = savedEnabled;
+        }
     }
 
     /// <summary>
