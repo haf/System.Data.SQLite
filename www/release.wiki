@@ -37,8 +37,8 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
-    Enter the following command to build the binaries for Windows CE:&nbsp;
-    <b>build_ce.bat</b><br />
+    Enter the following command to build all the binaries available for Windows
+    CE:&nbsp;<b>build_ce.bat</b><br />
   </li>
 </ol>
 
@@ -47,13 +47,14 @@
 
 <ol>
   <li>
-    Update the &quot;&lt;root&gt;\readme.htm&quot; file with the latest version
-    changes.
+    Update the &quot;&lt;root&gt;\readme.htm&quot; file with information about
+    all the major changes since the last released version.
   </li>
 
   <li>
-    Copy the changes to the &quot;&lt;root&gt;\Doc\Extra\version.html&quot; and
-    &quot;&lt;root&gt;\www\news.wiki&quot; files.
+    Copy those changes to the &quot;&lt;root&gt;\Doc\Extra\version.html&quot;
+    and &quot;&lt;root&gt;\www\news.wiki&quot; files, reformatting as necessary
+    to fit with the existing document conventions.
   </li>
 </ol>
 
@@ -71,8 +72,8 @@
     format:&nbsp;<b>tclsh.exe buildChm.tcl</b><br /><i>This assumes that
     [http://www.activestate.com/activetcl | ActiveTcl] version 8.4 or later, the
     [http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=21138 | HTML Help Workshop],
-    and [http://ndoc3.sourceforge.net/ | NDoc3] have been installed using the
-    default settings.</i>
+    and [http://ndoc3.sourceforge.net/ | NDoc3] have all been installed using
+    the default settings.</i>
   </li>
 </ol>
 
@@ -217,12 +218,13 @@
   </li>
 
   <li>Tag the release in the Fossil repository.</li>
+
   <li>Upload all the release packages to the web site.</li>
 
   <li>
-    Push the [http://www.nuget.org/ | NuGet] packages.
-    <i>Please refer to [http://docs.nuget.org/ | NuGet Documentation] for further
-    details.</i>
+    Push the [http://www.nuget.org/ | NuGet] packages.<br />
+    <i>Please refer to [http://docs.nuget.org/ | NuGet Documentation] for
+    further details.</i>
   </li>
 
   <li>Announce the release on the System.Data.SQLite mailing list.</li>
