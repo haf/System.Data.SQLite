@@ -179,32 +179,32 @@
     Enter the following command to build the &quot;default&quot; NuGet package:
     &nbsp;<b>nuget.exe pack SQLite.nuspec</b><br /><i>This assumes that the
     NuGet binary is available somewhere along the
-    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].  Please refer to
-    [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
-  </li>
-
-  <li>
-    Enter the following command to build the NuGet package for x86:
-    &nbsp;<b>nuget.exe pack SQLite.x86.nuspec</b><br /><i>This assumes that the
-    NuGet binary is available somewhere along the
-    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].  Please refer to
-    [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
-  </li>
-
-  <li>
-    Enter the following command to build the NuGet package for x64:
-    &nbsp;<b>nuget.exe pack SQLite.x64.nuspec</b><br /><i>This assumes that the
-    NuGet binary is available somewhere along the
-    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].  Please refer to
-    [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
+    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
   </li>
 
   <li>
     Enter the following command to build the &quot;managed-only&quot; NuGet
     package:&nbsp;<b>nuget.exe pack SQLite.MSIL.nuspec</b><br /><i>This assumes
     that the NuGet binary is available somewhere along the
-    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].  Please refer to
-    [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
+    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+  </li>
+
+  <li>
+    Enter the following command to build the NuGet package for x86:
+    &nbsp;<b>nuget.exe pack SQLite.x86.nuspec</b><br /><i>This assumes that the
+    NuGet binary is available somewhere along the
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
+    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+  </li>
+
+  <li>
+    Enter the following command to build the NuGet package for x64:
+    &nbsp;<b>nuget.exe pack SQLite.x64.nuspec</b><br /><i>This assumes that the
+    NuGet binary is available somewhere along the
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
+    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
   </li>
 </ol>
 
