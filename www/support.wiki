@@ -2,51 +2,89 @@
 
 <h3>Mailing Lists</h3>
 
-<p>SQLite has an active mailing list and support community, and users of this version of
-System.Data.SQLite are encouraged to use these for support questions.</p>
-
-<p>Three separate mailing lists have been established to help support
-SQLite:</p>
-
-<ul>
-<li><a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-announce">
-sqlite-announce</a> - announcements of new releases or significant developments.</li>
-<li><a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-users">
-sqlite-users</a> - general user discussion; most postings belong here.</li>
-<li><a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-dev">
-sqlite-dev</a> - developer conversations; for people who have or aspire to
-have write permission on the SQLite source code repository.</li>
-</ul>
+<p>
+  SQLite has an active mailing list and support community and users of
+  the System.Data.SQLite project available on this web site are encouraged to
+  use these for support questions.
+</p>
 
 <p>
-Most users of SQLite will want to join the
-<a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-announce">
-sqlite-announce</a> list and many will want to join the
-<a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-users">
-sqlite-users</a> list.  The
-<a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-dev">
-sqlite-dev</a> list is more specialized and appeals to a narrower audience.
-Off-site archives of the
-<a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-users">
-sqlite-users</a> list are available at:
+  Three separate mailing lists have been established to help support SQLite and
+  System.Data.SQLite:
 </p>
 
 <ul>
-<li><a href="http://www.mail-archive.com/sqlite-users%40sqlite.org/">http://www.mail-archive.com/sqlite-users%40sqlite.org/</a><br>
-<li><a href="http://marc.info/?l">http://marc.info/?l=sqlite-users&r=1&w=2</a><br>
-<li><a href="http://news.gmane.org/gmane.comp.db.sqlite.general">http://news.gmane.org/gmane.comp.db.sqlite.general</a>
+  <li>
+    <a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-announce">
+    sqlite-announce</a> - announcements of new releases or significant
+    developments.
+  </li>
+
+  <li>
+    <a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-users">
+    sqlite-users</a> - general user discussion; most postings belong here.
+  </li>
+
+  <li>
+    <a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-dev">
+    sqlite-dev</a> - developer conversations; for people who have or aspire to
+    have write permission on the SQLite and/or System.Data.SQLite source code
+    repositories.
+  </li>
+</ul>
+
+<p>
+  Most users of SQLite and/or System.Data.SQLite will want to join the
+  <a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-announce">
+  sqlite-announce</a> list and many will want to join the
+  <a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-users">
+  sqlite-users</a> list.  The
+  <a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-dev">
+  sqlite-dev</a> list is more specialized and appeals to a narrower audience.
+  Off-site archives of the
+  <a href="http://sqlite.org:8080/cgi-bin/mailman/listinfo/sqlite-users">
+  sqlite-users</a> list are available at:
+</p>
+
+<ul>
+  <li>
+    <a href="http://www.mail-archive.com/sqlite-users%40sqlite.org/">
+    http://www.mail-archive.com/sqlite-users%40sqlite.org/</a>
+  </li>
+
+  <li>
+    <a href="http://marc.info/?l=sqlite-users&r=1&w=2">
+    http://marc.info/?l=sqlite-users&r=1&w=2</a>
+  </li>
+
+  <li>
+    <a href="http://news.gmane.org/gmane.comp.db.sqlite.general">
+    http://news.gmane.org/gmane.comp.db.sqlite.general</a>
+  </li>
 </ul>
 
 <h3>Direct E-Mail</h3>
 
-<p>Use the mailing list. Please do <b>not</b> send email directly to the authors of SQLite or System.Data.SQLite
-unless:</p>
+<p>
+  Use the mailing list. Please do <b>not</b> send email directly
+  to the authors of SQLite or System.Data.SQLite unless:
+</p>
 
 <ul>
-<li>You have or intend to acquire a <a href="http://www.sqlite.org/draft/support.html">professional support contract</a>
-<li>You are working on an open source project.
+  <li>
+    You have or intend to acquire a
+    <a href="http://www.sqlite.org/draft/support.html">
+    professional support contract</a>.
+  </li>
+
+  <li>
+    You are working on an open source project.
+  </li>
 </ul>
 
-<p>You are welcomed to use SQLite in closed source, proprietary, and/or commercial projects and to 
-ask questions about such use on the public mailing list. But please do not ask to receive free direct 
-technical support. The software is free; direct technical support is not.</p>
+<p>
+  You are welcomed to use SQLite and System.Data.SQLite in closed source,
+  proprietary, and/or commercial projects and to ask questions about such use
+  on the public mailing list.  But please do not ask to receive free direct
+  technical support. The software is free; direct technical support is not.
+</p>
