@@ -907,7 +907,9 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
+    using System;
     using System.Data.SQLite;
+    using System.Reflection;
 
     namespace _Dynamic${id}
     {
@@ -915,7 +917,8 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
       {
         public static string GetConnectionString(
           string key,
-          string value
+          string value,
+          string propertyName
           )
         {
           SQLiteConnectionStringBuilder builder =
@@ -924,7 +927,16 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
           if (key != null)
             builder.Add(key, value);
 
-          return builder.ToString();
+          object propertyValue = null;
+
+          if (propertyName != null)
+          {
+            propertyValue = typeof(SQLiteConnectionStringBuilder).InvokeMember(
+                propertyName, BindingFlags.Instance | BindingFlags.Public |
+                BindingFlags.GetProperty, null, builder, null);
+          }
+
+          return String.Format("{0}, {1}", propertyValue, builder);
         }
 
         public static void Main()
@@ -952,9 +964,17 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                      UnixEpoch Utc sqlite_schema \
                      Memory Serializable False]
 
-    foreach key $keys value $values {
+    set propertyNames [list null Version SyncMode UseUTF16Encoding Pooling \
+                            BinaryGUID DataSource Uri DefaultTimeout \
+                            Enlist FailIfMissing LegacyFormat ReadOnly \
+                            Password PageSize MaxPageCount CacheSize \
+                            DateTimeFormat DateTimeKind BaseSchemaName \
+                            JournalMode DefaultIsolationLevel ForeignKeys]
+
+    foreach key $keys value $values propertyName $propertyNames {
       set code [catch {
-        object invoke _Dynamic${id}.Test${id} GetConnectionString $key $value
+        object invoke _Dynamic${id}.Test${id} GetConnectionString \
+            $key $value $propertyName
       } result]
 
       lappend results $code $result
@@ -963,17 +983,21 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
 
   set results
 } -cleanup {
-  unset -nocomplain value key values keys result results errors code id
+  unset -nocomplain propertyName propertyNames value key values keys result \
+      results errors code id
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^System#CodeDom#Compiler#CompilerResults#\d+ Ok \{\} 0 \{\} 0\
-Version=3 0 Synchronous=Full 0 UseUTF16Encoding=True 0 Pooling=False 0\
-BinaryGUID=True 0 \{Data Source=test\.db\} 0 Uri=test\.db 0 \{Default\
-Timeout=60\} 0 Enlist=False 0 FailIfMissing=True 0 \{Legacy Format=False\} 0\
-\{Read Only=True\} 0 Password=secret 0 \{Page Size=4096\} 0 \{Max Page\
-Count=1024\} 0 \{Cache Size=8192\} 0 DateTimeFormat=UnixEpoch 0\
-DateTimeKind=Utc 0 BaseSchemaName=sqlite_schema 0 \{Journal Mode=Memory\} 0\
-\{Default IsolationLevel=Serializable\} 0 \{Foreign Keys=False\}$}}
+regexp -result {^System#CodeDom#Compiler#CompilerResults#\d+ Ok \{\} 0 \{, \} 0\
+\{3, Version=3\} 0 \{Full, Synchronous=Full\} 0 \{True, UseUTF16Encoding=True\}\
+0 \{False, Pooling=False\} 0 \{True, BinaryGUID=True\} 0 \{test\.db, Data\
+Source=test\.db\} 0 \{test\.db, Uri=test\.db\} 0 \{60, Default Timeout=60\} 0\
+\{False, Enlist=False\} 0 \{True, FailIfMissing=True\} 0 \{False, Legacy\
+Format=False\} 0 \{True, Read Only=True\} 0 \{secret, Password=secret\} 0\
+\{4096, Page Size=4096\} 0 \{1024, Max Page Count=1024\} 0 \{8192, Cache\
+Size=8192\} 0 \{UnixEpoch, DateTimeFormat=UnixEpoch\} 0 \{Utc,\
+DateTimeKind=Utc\} 0 \{sqlite_schema, BaseSchemaName=sqlite_schema\} 0\
+\{Memory, Journal Mode=Memory\} 0 \{Serializable, Default\
+IsolationLevel=Serializable\} 0 \{False, Foreign Keys=False\}$}}
 
 ###############################################################################
 
