@@ -849,7 +849,10 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
     {
       public class Test${id}
       {
-        public static string GetConnectionString(string format, string kind)
+        public static string GetConnectionString(
+          string format,
+          string kind
+          )
         {
           SQLiteConnectionStringBuilder builder =
               new SQLiteConnectionStringBuilder();
@@ -895,6 +898,82 @@ regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{Date\
 Source=test\.db\} 0 \{Date Source=test\.db;DateTimeFormat=ISO8601\} 0 \{Date\
 Source=test\.db;DateTimeKind=Unspecified\} 0 \{Date\
 Source=test\.db;DateTimeFormat=ISO8601;DateTimeKind=Utc\}$}}
+
+###############################################################################
+
+runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static string GetConnectionString(
+          string key,
+          string value
+          )
+        {
+          SQLiteConnectionStringBuilder builder =
+              new SQLiteConnectionStringBuilder();
+
+          if (key != null)
+            builder.Add(key, value);
+
+          return builder.ToString();
+        }
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  lappend results $code [expr {[info exists errors] ? $errors : ""}]
+
+  if {$code eq "Ok"} then {
+    set keys [list null Version Synchronous UseUTF16Encoding Pooling \
+                   BinaryGUID "Data Source" Uri "Default Timeout" \
+                   Enlist FailIfMissing "Legacy Format" "Read Only" \
+                   Password "Page Size" "Max Page Count" "Cache Size" \
+                   DateTimeFormat DateTimeKind BaseSchemaName \
+                   "Journal Mode" "Default IsolationLevel" "Foreign Keys"]
+
+    set values [list null 3 Full True False \
+                     True test.db test.db 60 \
+                     False True False True \
+                     secret 4096 1024 8192 \
+                     UnixEpoch Utc sqlite_schema \
+                     Memory Serializable False]
+
+    foreach key $keys value $values {
+      set code [catch {
+        object invoke _Dynamic${id}.Test${id} GetConnectionString $key $value
+      } result]
+
+      lappend results $code $result
+    }
+  }
+
+  set results
+} -cleanup {
+  unset -nocomplain value key values keys result results errors code id
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^System#CodeDom#Compiler#CompilerResults#\d+ Ok \{\} 0 \{\} 0\
+Version=3 0 Synchronous=Full 0 UseUTF16Encoding=True 0 Pooling=False 0\
+BinaryGUID=True 0 \{Data Source=test\.db\} 0 Uri=test\.db 0 \{Default\
+Timeout=60\} 0 Enlist=False 0 FailIfMissing=True 0 \{Legacy Format=False\} 0\
+\{Read Only=True\} 0 Password=secret 0 \{Page Size=4096\} 0 \{Max Page\
+Count=1024\} 0 \{Cache Size=8192\} 0 DateTimeFormat=UnixEpoch 0\
+DateTimeKind=Utc 0 BaseSchemaName=sqlite_schema 0 \{Journal Mode=Memory\} 0\
+\{Default IsolationLevel=Serializable\} 0 \{Foreign Keys=False\}$}}
 
 ###############################################################################
 
