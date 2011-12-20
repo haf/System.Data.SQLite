@@ -404,11 +404,9 @@ namespace System.Data.SQLite
             {
                 if (value is SQLiteDateFormats)
                     return (SQLiteDateFormats)value;
-                else if (value is string)
+                else if (value != null)
                     return (SQLiteDateFormats)TypeDescriptor.GetConverter(
                         typeof(SQLiteDateFormats)).ConvertFrom(value);
-                else
-                    throw new NotSupportedException();
             }
 
             return SQLiteDateFormats.Default;
@@ -434,11 +432,9 @@ namespace System.Data.SQLite
             {
                 if (value is DateTimeKind)
                     return (DateTimeKind)value;
-                else if (value is string)
+                else if (value != null)
                     return (DateTimeKind)TypeDescriptor.GetConverter(
                         typeof(DateTimeKind)).ConvertFrom(value);
-                else
-                    throw new NotSupportedException();
             }
 
             return DateTimeKind.Unspecified;
