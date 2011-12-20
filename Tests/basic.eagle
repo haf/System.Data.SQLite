@@ -53,8 +53,9 @@ if {![haveConstraint [appendArgs file_ [file tail $testLinqOutFile]]]} then {
 
 runTest {test data-1.1 {unit tests from the 'test' project} -setup {
   catch {file delete [file join [file dirname $testExeFile] Test.db3]}
+
   set fileName [file join [getDatabaseDirectory] data-1.1.db]
-  catch {file delete $fileName}
+  cleanupDb $fileName
 } -body {
   set output ""
 
@@ -74,6 +75,8 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
 
   list $code [expr {$code == 0 ? "" : $error}]
 } -cleanup {
+  cleanupDb $fileName
+
   unset -nocomplain code output error fileName
 } -constraints {eagle file_test.exe} -result {0 {}}}
 
