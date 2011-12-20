@@ -158,8 +158,8 @@ namespace eval ::Eagle {
 
     checkForTestOverrides stdout \
         [list binary_directory build_base_directory build_directory \
-              common_directory datetime_format test_configuration \
-              test_year] false
+              common_directory database_directory datetime_format \
+              test_configuration test_year] false
 
     #
     # NOTE: This variable will contain the name of the directory containing the
