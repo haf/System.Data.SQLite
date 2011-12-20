@@ -407,6 +407,8 @@ namespace System.Data.SQLite
                 else if (value is string)
                     return (SQLiteDateFormats)TypeDescriptor.GetConverter(
                         typeof(SQLiteDateFormats)).ConvertFrom(value);
+                else
+                    throw new NotSupportedException();
             }
 
             return SQLiteDateFormats.Default;
