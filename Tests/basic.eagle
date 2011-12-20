@@ -837,6 +837,67 @@ unset -nocomplain date
 
 ###############################################################################
 
+runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static string GetConnectionString(string format, string kind)
+        {
+          SQLiteConnectionStringBuilder builder =
+              new SQLiteConnectionStringBuilder();
+
+          builder.Add("Date Source", "test.db");
+          builder.Add("DateTimeFormat", format);
+          builder.Add("DateTimeKind", kind);
+
+          return builder.ToString();
+        }
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetConnectionString \
+            null null
+      } result] : [set result ""]}] $result \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetConnectionString \
+            Default null
+      } result] : [set result ""]}] $result \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetConnectionString \
+            null Unspecified
+      } result] : [set result ""]}] $result \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetConnectionString \
+            ISO8601 Utc
+      } result] : [set result ""]}] $result
+} -cleanup {
+  unset -nocomplain result results errors code id
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{Date\
+Source=test\.db\} 0 \{Date Source=test\.db;DateTimeFormat=ISO8601\} 0 \{Date\
+Source=test\.db;DateTimeKind=Unspecified\} 0 \{Date\
+Source=test\.db;DateTimeFormat=ISO8601;DateTimeKind=Utc\}$}}
+
+###############################################################################
+
 unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################

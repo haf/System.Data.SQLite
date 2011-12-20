@@ -390,24 +390,89 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Gets/Sets the datetime format for the connection.
+    /// Gets/Sets the DateTime format for the connection.
     /// </summary>
     [Browsable(true)]
     [DefaultValue(SQLiteDateFormats.Default)]
     public SQLiteDateFormats DateTimeFormat
     {
-      get
-      {
-        object value;
-        TryGetValue("datetimeformat", out value);
-        if (value is string)
-          return (SQLiteDateFormats)TypeDescriptor.GetConverter(typeof(SQLiteDateFormats)).ConvertFrom(value);
-        else return (SQLiteDateFormats)value;
-      }
-      set
-      {
-        this["datetimeformat"] = value;
-      }
+        get
+        {
+            object value;
+
+            if (TryGetValue("datetimeformat", out value))
+            {
+                if (value is SQLiteDateFormats)
+                    return (SQLiteDateFormats)value;
+                else if (value is string)
+                    return (SQLiteDateFormats)TypeDescriptor.GetConverter(
+                        typeof(SQLiteDateFormats)).ConvertFrom(value);
+            }
+
+            return SQLiteDateFormats.Default;
+        }
+        set
+        {
+            this["datetimeformat"] = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets/Sets the DateTime kind for the connection.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(DateTimeKind.Unspecified)]
+    public DateTimeKind DateTimeKind
+    {
+        get
+        {
+            object value;
+
+            if (TryGetValue("datetimekind", out value))
+            {
+                if (value is DateTimeKind)
+                    return (DateTimeKind)value;
+                else if (value is string)
+                    return (DateTimeKind)TypeDescriptor.GetConverter(
+                        typeof(DateTimeKind)).ConvertFrom(value);
+                else
+                    throw new NotSupportedException();
+            }
+
+            return DateTimeKind.Unspecified;
+        }
+        set
+        {
+            this["datetimekind"] = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets/Sets the placeholder base schema name used for
+    /// .NET Framework compatibility purposes.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(SQLiteConnection.DefaultBaseSchemaName)]
+    public string BaseSchemaName
+    {
+        get
+        {
+            object value;
+
+            if (TryGetValue("baseschemaname", out value))
+            {
+                if (value is string)
+                    return (string)value;
+                else if (value != null)
+                    return value.ToString();
+            }
+
+            return null;
+        }
+        set
+        {
+            this["baseschemaname"] = value;
+        }
     }
 
     /// <summary>

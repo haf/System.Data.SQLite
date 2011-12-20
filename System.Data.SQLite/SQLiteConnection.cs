@@ -174,7 +174,7 @@ namespace System.Data.SQLite
     /// because those names are reserved for use by SQLite (i.e. they cannot
     /// be confused with the names of user objects).
     /// </summary>
-    private const string DefaultBaseSchemaName = "sqlite_default_schema";
+    internal const string DefaultBaseSchemaName = "sqlite_default_schema";
 
     private const int SQLITE_FCNTL_WIN32_AV_RETRY = 9;
 
