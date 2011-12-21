@@ -49,8 +49,8 @@ runTest {test tkt-59edc1018b-1.1 {LINQ with EndsWith} -body {
 
     set code [catch {
       testClrExec $testLinqExeFile [list -eventflags Wait -directory \
-      [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
-      -success 0] -endsWith $value
+          [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
+          -success 0] -endsWith $value
     } error]
 
     tlog "---- BEGIN STDOUT OUTPUT\n"

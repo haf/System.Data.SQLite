@@ -27,7 +27,7 @@ runTest {test tkt-8554170e09-1.1 {default DATETIME value, NULL} -setup {
   sql execute $db "INSERT INTO t1 (x, y) VALUES(1, NULL);"
 
   set result [sql execute -execute reader -format list $db \
-    "SELECT x, y FROM t1 ORDER BY x;"]
+      "SELECT x, y FROM t1 ORDER BY x;"]
 } -cleanup {
   cleanupDb $fileName
 
@@ -45,7 +45,7 @@ runTest {test tkt-8554170e09-1.2 {default DATETIME value, empty} -setup {
   sql execute $db "INSERT INTO t1 (x, y) VALUES(1, '');"
 
   set result [sql execute -execute reader -format list $db \
-    "SELECT x, y FROM t1 ORDER BY x;"]
+      "SELECT x, y FROM t1 ORDER BY x;"]
 } -cleanup {
   cleanupDb $fileName
 

@@ -49,8 +49,8 @@ runTest {test tkt-8b7d179c3c-1.1 {LINQ with Skip and Take} -body {
 
     set code [catch {
       testClrExec $testLinqExeFile [list -eventflags Wait -directory \
-      [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
-      -success 0] -skip $pageSize
+          [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
+          -success 0] -skip $pageSize
     } error]
 
     tlog "---- BEGIN STDOUT OUTPUT\n"

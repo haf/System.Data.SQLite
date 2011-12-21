@@ -49,8 +49,8 @@ runTest {test tkt-00f86f9739-1.1 {LINQ with StartsWith} -body {
 
     set code [catch {
       testClrExec $testLinqExeFile [list -eventflags Wait -directory \
-      [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
-      -success 0] -startsWith $value
+          [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
+          -success 0] -startsWith $value
     } error]
 
     tlog "---- BEGIN STDOUT OUTPUT\n"

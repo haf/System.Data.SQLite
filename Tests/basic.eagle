@@ -65,8 +65,8 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
     #       must be first.
     #
     testClrExec $testExeFile [list -eventflags Wait -directory \
-    [file dirname $testExeFile] -stdout output -success 0] -autoRun \
-    -fileName [appendArgs \" [file nativename $fileName] \"]
+        [file dirname $testExeFile] -stdout output -success 0] -autoRun \
+        -fileName [appendArgs \" [file nativename $fileName] \"]
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
@@ -103,7 +103,7 @@ runTest {test data-1.2 {unit tests from the 'testlinq' project} -setup {
 
   set code [catch {
     testClrExec $testLinqExeFile [list -eventflags Wait -directory \
-    [file dirname $testLinqExeFile] -stdout output -success 0]
+        [file dirname $testLinqExeFile] -stdout output -success 0]
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
