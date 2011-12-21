@@ -184,7 +184,7 @@ runTest {test data-1.4 {GetSchema with ReservedWords} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \
@@ -244,7 +244,7 @@ runTest {test data-1.5 {GetSchema with ForeignKeys} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \
@@ -340,7 +340,7 @@ runTest {test data-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \
@@ -426,7 +426,7 @@ runTest {test data-1.7 {properly closed database file (non-query)} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \
@@ -487,7 +487,7 @@ runTest {test data-1.8 {properly closed database file (reader #1)} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \
@@ -549,7 +549,7 @@ runTest {test data-1.9 {properly closed database file (reader #2)} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \
@@ -873,7 +873,7 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \
@@ -948,7 +948,7 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   lappend results $code [expr {[info exists errors] ? $errors : ""}]
 

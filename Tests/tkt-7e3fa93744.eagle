@@ -117,7 +117,7 @@ runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \

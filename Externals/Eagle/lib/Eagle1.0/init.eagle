@@ -750,7 +750,8 @@ namespace eval ::Eagle {
     #
     # NOTE: This proc can be used to dynamically compile C# code in a script.
     #
-    proc compileCSharp { string resultsVarName errorsVarName args } {
+    proc compileCSharp {
+            string memory symbols strict resultsVarName errorsVarName args } {
       #
       # NOTE: Create the C# code provider object (i.e. the compiler).
       #
@@ -764,10 +765,18 @@ namespace eval ::Eagle {
           System.CodeDom.Compiler.CompilerParameters]
 
       #
-      # NOTE: By default, we do not want to persist the generated assembly
-      #       to disk.
+      # NOTE: Do we not want to persist the generated assembly to disk?
       #
-      $parameters GenerateInMemory true
+      if {$memory} then {
+        $parameters GenerateInMemory true
+      }
+
+      #
+      # NOTE: Do we want symbols to be generated for the generated assembly?
+      #
+      if {$symbols} then {
+        $parameters IncludeDebugInformation true
+      }
 
       #
       # NOTE: Make sure that the "standard" preprocessor defines match those
@@ -833,15 +842,11 @@ namespace eval ::Eagle {
       set errors [$results -alias Errors]
 
       #
-      # NOTE: How many compile errors?
-      #
-      set count [$errors Count]
-
-      #
       # NOTE: It is assumed that no assembly was generated if there were
-      #       any compile errors.
+      #       any compiler errors.  Ignore all compiler warnings unless
+      #       we are in strict mode.
       #
-      if {$count > 0} then {
+      if {[$errors HasErrors] || ($strict && [$errors HasWarnings])} then {
         #
         # NOTE: Compilation of the assembly failed.
         #
@@ -852,6 +857,15 @@ namespace eval ::Eagle {
         #
         upvar 1 $errorsVarName local_errors
 
+        #
+        # NOTE: How many compile errors?
+        #
+        set count [$errors Count]
+
+        #
+        # NOTE: Grab each error object and append the string itself to
+        #       the overall list of errors.
+        #
         for {set index 0} {$index < $count} {incr index} {
           #
           # NOTE: Get the compiler error object at this index.

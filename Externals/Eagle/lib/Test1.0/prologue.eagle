@@ -555,6 +555,16 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has default application domain detection support been
+    #       disabled?  We do this check [nearly] first as it may
+    #       [eventually] be used to help determine if other
+    #       constraints should be skipped.
+    #
+    if {![info exists no(defaultAppDomain)]} then {
+      checkForDefaultAppDomain $test_channel
+    }
+
+    #
     # NOTE: Has runtime detection support been disabled?  We do this
     #       checking [nearly] first as it may skip other constraints.
     #
@@ -1034,6 +1044,60 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       #
+      # NOTE: Has linked variable testing support been disabled?
+      #
+      if {![info exists no(testLinkedVariables)]} then {
+        #
+        # NOTE: For tests "basic-1.39", "basic-1.40", "basic-1.41",
+        #       "basic-1.42", and "basic-1.43".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestSetVariableLinks*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestUnsetVariableLinks*
+      }
+
+      #
+      # NOTE: Has field testing support been disabled?
+      #
+      if {![info exists no(testFields)]} then {
+        #
+        # NOTE: For tests "basic-1.39", "basic-1.40", "basic-1.41",
+        #       "basic-1.42", and "basic-1.43".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *privateField*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *objectField*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *intField*
+      }
+
+      #
+      # NOTE: Has property testing support been disabled?
+      #
+      if {![info exists no(testProperties)]} then {
+        #
+        # NOTE: For tests "basic-1.39", "basic-1.40", "basic-1.41",
+        #       "basic-1.42", and "basic-1.43".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *get_SimpleProperty*
+
+        #
+        # NOTE: For test "object-3.1".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *get_Item*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *set_Item*
+      }
+
+      #
       # NOTE: Has core marshaller testing support been disabled?
       #
       if {![info exists no(testMarshaller)]} then {
@@ -1069,15 +1133,6 @@ if {![info exists no([file tail [info script]])]} then {
 
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestNestedArray*
-
-        #
-        # NOTE: For test "object-3.1".
-        #
-        checkForObjectMember $test_channel Eagle._Tests.Default \
-            *get_Item*
-
-        checkForObjectMember $test_channel Eagle._Tests.Default \
-            *set_Item*
 
         #
         # NOTE: For tests "object-3.6" and "object-3.7".
@@ -1357,173 +1412,179 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: For test "package-1.0".
+  # NOTE: Has checking for the extra files needed by various tests been
+  #       disabled?
   #
-  if {![info exists no(pkgAll.tcl)]} then {
-    checkForFile $test_channel [file join $base_path Package Tests all.tcl] \
-        pkgAll.tcl
-  }
+  if {![info exists no(checkForFile)]} then {
+    #
+    # NOTE: For test "package-1.0".
+    #
+    if {![info exists no(pkgAll.tcl)]} then {
+      checkForFile $test_channel [file join $base_path Package Tests all.tcl] \
+          pkgAll.tcl
+    }
 
-  #
-  # NOTE: For tests "subst-1.*".
-  #
-  if {![info exists no(bad_subst.txt)]} then {
-    checkForFile $test_channel [file join $test_path bad_subst.txt]
-  }
+    #
+    # NOTE: For tests "subst-1.*".
+    #
+    if {![info exists no(bad_subst.txt)]} then {
+      checkForFile $test_channel [file join $test_path bad_subst.txt]
+    }
 
-  #
-  # NOTE: For tests "fileIO-1.*".
-  #
-  if {![info exists no(file.dat)]} then {
-    checkForFile $test_channel [file join $test_path file.dat]
-  }
+    #
+    # NOTE: For tests "fileIO-1.*".
+    #
+    if {![info exists no(file.dat)]} then {
+      checkForFile $test_channel [file join $test_path file.dat]
+    }
 
-  #
-  # NOTE: For test "garbage-1.1".
-  #
-  if {![info exists no(garbage.txt)]} then {
-    checkForFile $test_channel [file join $test_path garbage.txt]
-  }
+    #
+    # NOTE: For test "garbage-1.1".
+    #
+    if {![info exists no(garbage.txt)]} then {
+      checkForFile $test_channel [file join $test_path garbage.txt]
+    }
 
-  #
-  # NOTE: For tests "xaml-1.*".
-  #
-  if {![info exists no(test.png)]} then {
-    checkForFile $test_channel [file join $test_path test.png]
-  }
+    #
+    # NOTE: For tests "xaml-1.*".
+    #
+    if {![info exists no(test.png)]} then {
+      checkForFile $test_channel [file join $test_path test.png]
+    }
 
-  #
-  # NOTE: For test "socket-1.2".
-  #
-  if {![info exists no(client.tcl)]} then {
-    checkForFile $test_channel [file join $test_path client.tcl]
-  }
+    #
+    # NOTE: For test "socket-1.2".
+    #
+    if {![info exists no(client.tcl)]} then {
+      checkForFile $test_channel [file join $test_path client.tcl]
+    }
 
-  #
-  # NOTE: For test "tclLoad-1.2".
-  #
-  if {![info exists no(tcl_unload.tcl)]} then {
-    checkForFile $test_channel [file join $test_path tcl_unload.tcl]
-  }
+    #
+    # NOTE: For test "tclLoad-1.2".
+    #
+    if {![info exists no(tcl_unload.tcl)]} then {
+      checkForFile $test_channel [file join $test_path tcl_unload.tcl]
+    }
 
-  #
-  # NOTE: For test "basic-1.4".
-  #
-  if {![info exists no(read.eagle)]} then {
-    checkForFile $test_channel [file join $test_path read.eagle]
-  }
+    #
+    # NOTE: For test "basic-1.4".
+    #
+    if {![info exists no(read.eagle)]} then {
+      checkForFile $test_channel [file join $test_path read.eagle]
+    }
 
-  #
-  # NOTE: For test "basic-1.5".
-  #
-  if {![info exists no(read2.eagle)]} then {
-    checkForFile $test_channel [file join $test_path read2.eagle]
-  }
+    #
+    # NOTE: For test "basic-1.5".
+    #
+    if {![info exists no(read2.eagle)]} then {
+      checkForFile $test_channel [file join $test_path read2.eagle]
+    }
 
-  #
-  # NOTE: For test "basic-1.6".
-  #
-  if {![info exists no(read3.eagle)]} then {
-    checkForFile $test_channel [file join $test_path read3.eagle]
-  }
+    #
+    # NOTE: For test "basic-1.6".
+    #
+    if {![info exists no(read3.eagle)]} then {
+      checkForFile $test_channel [file join $test_path read3.eagle]
+    }
 
-  #
-  # NOTE: For test "basic-1.7".
-  #
-  if {![info exists no(read4.eagle)]} then {
-    checkForFile $test_channel [file join $test_path read4.eagle]
-  }
+    #
+    # NOTE: For test "basic-1.7".
+    #
+    if {![info exists no(read4.eagle)]} then {
+      checkForFile $test_channel [file join $test_path read4.eagle]
+    }
 
-  #
-  # NOTE: For test "infoScript-1.1".
-  #
-  if {![info exists no(script.eagle)]} then {
-    checkForFile $test_channel [file join $test_path script.eagle]
-  }
+    #
+    # NOTE: For test "infoScript-1.1".
+    #
+    if {![info exists no(script.eagle)]} then {
+      checkForFile $test_channel [file join $test_path script.eagle]
+    }
 
-  #
-  # NOTE: For test "basic-1.1".
-  #
-  if {![info exists no(source.eagle)]} then {
-    checkForFile $test_channel [file join $test_path source.eagle]
-  }
+    #
+    # NOTE: For test "basic-1.1".
+    #
+    if {![info exists no(source.eagle)]} then {
+      checkForFile $test_channel [file join $test_path source.eagle]
+    }
 
-  #
-  # NOTE: For test "basic-1.2".
-  #
-  if {![info exists no(unbalanced_brace.eagle)]} then {
-    checkForFile $test_channel [file join $test_path unbalanced_brace.eagle]
-  }
+    #
+    # NOTE: For test "basic-1.2".
+    #
+    if {![info exists no(unbalanced_brace.eagle)]} then {
+      checkForFile $test_channel [file join $test_path unbalanced_brace.eagle]
+    }
 
-  #
-  # NOTE: For test "basic-1.3".
-  #
-  if {![info exists no(unbalanced_brace2.eagle)]} then {
-    checkForFile $test_channel [file join $test_path unbalanced_brace2.eagle]
-  }
+    #
+    # NOTE: For test "basic-1.3".
+    #
+    if {![info exists no(unbalanced_brace2.eagle)]} then {
+      checkForFile $test_channel [file join $test_path unbalanced_brace2.eagle]
+    }
 
-  #
-  # NOTE: For tests "excel-2.*".
-  #
-  if {![info exists no(test.xls)]} then {
-    checkForFile $test_channel [file join $test_path test.xls]
-  }
+    #
+    # NOTE: For tests "excel-2.*".
+    #
+    if {![info exists no(test.xls)]} then {
+      checkForFile $test_channel [file join $test_path test.xls]
+    }
 
-  #
-  # NOTE: For test "interp-1.10".
-  #
-  if {![info exists no(settings.xml)]} then {
-    checkForFile $test_channel [file join $test_path settings.xml]
-  }
+    #
+    # NOTE: For test "interp-1.10".
+    #
+    if {![info exists no(settings.xml)]} then {
+      checkForFile $test_channel [file join $test_path settings.xml]
+    }
 
-  #
-  # NOTE: For tests "load-1.1.*".
-  #
-  if {![info exists no(Plugin.dll)]} then {
-    checkForFile $test_channel [file join $lib_path Plugin1.0 Plugin.dll]
-  }
+    #
+    # NOTE: For tests "load-1.1.*".
+    #
+    if {![info exists no(Plugin.dll)]} then {
+      checkForFile $test_channel [file join $lib_path Plugin1.0 Plugin.dll]
+    }
 
-  #
-  # NOTE: For test "object-6.1".
-  #
-  if {![info exists no(Sample.exe)]} then {
-    checkForFile $test_channel [file join $bin_path Sample.exe]
-  }
+    #
+    # NOTE: For test "object-6.1".
+    #
+    if {![info exists no(Sample.exe)]} then {
+      checkForFile $test_channel [file join $bin_path Sample.exe]
+    }
 
-  #
-  # NOTE: For test "object-4.8".
-  #
-  if {![info exists no(EagleCmdlets.dll)]} then {
-    checkForFile $test_channel [file join $bin_path EagleCmdlets.dll]
-  }
+    #
+    # NOTE: For test "object-4.8".
+    #
+    if {![info exists no(EagleCmdlets.dll)]} then {
+      checkForFile $test_channel [file join $bin_path EagleCmdlets.dll]
+    }
 
-  #
-  # NOTE: For test "object-4.10".
-  #
-  if {![info exists no(EagleExtensions.dll)]} then {
-    checkForFile $test_channel [file join $bin_path EagleExtensions.dll]
-  }
+    #
+    # NOTE: For test "object-4.10".
+    #
+    if {![info exists no(EagleExtensions.dll)]} then {
+      checkForFile $test_channel [file join $bin_path EagleExtensions.dll]
+    }
 
-  #
-  # NOTE: For test "object-4.10".
-  #
-  if {![info exists no(test.wxs)]} then {
-    checkForFile $test_channel [file join $base_path Installer Tests test.wxs]
-  }
+    #
+    # NOTE: For test "object-4.10".
+    #
+    if {![info exists no(test.wxs)]} then {
+      checkForFile $test_channel [file join $base_path Installer Tests test.wxs]
+    }
 
-  #
-  # NOTE: For test "sql-1.2".
-  #
-  if {![info exists no(sqlite3.dll)]} then {
-    checkForFile $test_channel [file join $bin_path sqlite3.dll]
-  }
+    #
+    # NOTE: For test "sql-1.2".
+    #
+    if {![info exists no(sqlite3.dll)]} then {
+      checkForFile $test_channel [file join $bin_path sqlite3.dll]
+    }
 
-  if {![info exists no(System.Data.SQLite.dll)]} then {
-    checkForFile $test_channel [file join $bin_path System.Data.SQLite.dll]
-  }
+    if {![info exists no(System.Data.SQLite.dll)]} then {
+      checkForFile $test_channel [file join $bin_path System.Data.SQLite.dll]
+    }
 
-  if {![info exists no(test.sqlite3)]} then {
-    checkForFile $test_channel [file join $test_path test.sqlite3]
+    if {![info exists no(test.sqlite3)]} then {
+      checkForFile $test_channel [file join $test_path test.sqlite3]
+    }
   }
 
   #

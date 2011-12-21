@@ -804,6 +804,26 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForDefaultAppDomain { channel } {
+      tputs $channel "---- checking for default application domain... "
+
+      set appDomain [object invoke AppDomain CurrentDomain]
+
+      if {[string length $appDomain] > 0} then {
+        if {[object invoke $appDomain IsDefaultAppDomain]} then {
+          addConstraint defaultAppDomain
+
+          tputs $channel [appendArgs "yes (" [object invoke $appDomain Id] \
+              ")\n"]
+        } else {
+          tputs $channel [appendArgs "no (" [object invoke $appDomain Id] \
+              ")\n"]
+        }
+      } else {
+        tputs $channel [appendArgs "no (null)\n"]
+      }
+    }
+
     proc checkForRuntime { channel } {
       tputs $channel "---- checking for runtime... "
 
@@ -1063,9 +1083,11 @@ namespace eval ::Eagle {
       #
       # NOTE: Grab the current thread culture.
       #
+      set culture [object invoke System.Threading.Thread.CurrentThread \
+          CurrentCulture]
+
       set culture [object invoke Eagle._Components.Private.FormatOps \
-          CultureName [object invoke System.Threading.Thread.CurrentThread \
-          CurrentCulture] false]
+          CultureName $culture false]
 
       if {[string length $culture] > 0} then {
         #

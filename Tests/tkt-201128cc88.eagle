@@ -68,7 +68,7 @@ runTest {test tkt-201128cc88-1.1 {custom function with byte[] arg} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   #
   # NOTE: Compile the C# code (above) to register the custom SQLite function

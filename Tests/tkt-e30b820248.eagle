@@ -96,7 +96,7 @@ runTest {test tkt-e30b820248-1.1 {disposal ordering} -setup {
         }
       }
     }
-  }] results errors System.Data.SQLite.dll]
+  }] true true true results errors System.Data.SQLite.dll]
 
   list $code $results \
       [expr {[info exists errors] ? $errors : ""}] \
@@ -243,7 +243,7 @@ for {set i 2} {$i < 5} {incr i} {
           }
         }
       }
-    }] results errors System.Data.SQLite.dll]
+    }] true true true results errors System.Data.SQLite.dll]
 
     list $code $results \
         [expr {[info exists errors] ? $errors : ""}] \

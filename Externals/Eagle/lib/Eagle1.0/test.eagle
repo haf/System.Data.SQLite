@@ -859,9 +859,9 @@ namespace eval ::Eagle {
     }
   }
 
-  proc reportTestPercent { channel percent } {
+  proc reportTestPercent { channel percent failed leaked } {
     set status [appendArgs "---- test suite running, about " $percent \
-        "% complete..."]
+        "% complete (" $failed " failed, " $leaked " leaked)..."]
 
     tputs $channel [appendArgs $status \n]
 
@@ -913,7 +913,9 @@ namespace eval ::Eagle {
           [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
 
       if {$percent != $lastPercent} then {
-        reportTestPercent $channel $percent
+        reportTestPercent $channel $percent \
+            [llength $failed] [llength $leaked]
+
         set lastPercent $percent
       }
 
@@ -1034,7 +1036,9 @@ namespace eval ::Eagle {
               [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
 
           if {$percent != $lastPercent} then {
-            reportTestPercent $channel $percent
+            reportTestPercent $channel $percent \
+                [llength $failed] [llength $leaked]
+
             set lastPercent $percent
           }
 
@@ -1090,7 +1094,9 @@ namespace eval ::Eagle {
             [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
 
         if {$percent != $lastPercent} then {
-          reportTestPercent $channel $percent
+          reportTestPercent $channel $percent \
+              [llength $failed] [llength $leaked]
+
           set lastPercent $percent
         }
 
@@ -1117,7 +1123,9 @@ namespace eval ::Eagle {
           [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
 
       if {$percent != $lastPercent} then {
-        reportTestPercent $channel $percent
+        reportTestPercent $channel $percent \
+            [llength $failed] [llength $leaked]
+
         set lastPercent $percent
       }
     }

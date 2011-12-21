@@ -384,14 +384,15 @@ namespace eval ::Eagle {
     }
 
     proc compileCSharpWith {
-            text resultsVarName errorsVarName fileNames args } {
+            text memory symbols strict resultsVarName errorsVarName fileNames
+            args } {
       #
       # NOTE: Create the base command to evaluate and add the property settings
       #       that are almost always needed by our unit tests (i.e. the System
       #       and System.Data assembly references).
       #
-      set command [list compileCSharp $text results errors \
-          ReferencedAssemblies.Add System.dll ReferencedAssemblies.Add \
+      set command [list compileCSharp $text $memory $symbols $strict results \
+          errors ReferencedAssemblies.Add System.dll ReferencedAssemblies.Add \
           System.Data.dll ReferencedAssemblies.Add System.Xml.dll]
 
       #
