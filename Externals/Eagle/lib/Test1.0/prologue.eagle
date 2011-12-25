@@ -1692,7 +1692,14 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Have precision timing tests been disabled?
+  # NOTE: Have very precise timing tests been disabled?
+  #
+  if {![info exists no(preciseTiming)]} then {
+    checkForTiming $test_channel 25 preciseTiming; # 1/40th second.
+  }
+
+  #
+  # NOTE: Have precise timing tests been disabled?
   #
   if {![info exists no(timing)]} then {
     checkForTiming $test_channel 50; # 1/20th second.
