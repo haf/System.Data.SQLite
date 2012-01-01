@@ -85,6 +85,7 @@ namespace System.Data.SQLite
         Framework = GAC | AssemblyFolders | DbProviderFactory,
         Vs = VsPackage | VsDataSource | VsDataProvider,
         All = Framework | Vs,
+        AllNoGAC = All & ~GAC,
         Default = All
     }
 
@@ -168,6 +169,8 @@ namespace System.Data.SQLite
         private static class TraceOps
         {
             #region Private Constants
+            private const string DefaultTraceFormat = "#{0} @ {1}: {2}";
+
             private const string Iso8601DateTimeOutputFormat =
                 "yyyy.MM.ddTHH:mm:ss.fffffff";
             #endregion
@@ -178,6 +181,7 @@ namespace System.Data.SQLite
             private static object syncRoot = new object();
             private static long nextId;
             private static TracePriority tracePriority = TracePriority.Default;
+            private static string traceFormat = DefaultTraceFormat;
             #endregion
 
             ///////////////////////////////////////////////////////////////////
@@ -187,6 +191,14 @@ namespace System.Data.SQLite
             {
                 get { lock (syncRoot) { return tracePriority; } }
                 set { lock (syncRoot) { tracePriority = value; } }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static string TraceFormat
+            {
+                get { lock (syncRoot) { return traceFormat; } }
+                set { lock (syncRoot) { traceFormat = value; } }
             }
             #endregion
 
@@ -1291,6 +1303,7 @@ namespace System.Data.SQLite
                 string coreFileName,
                 string linqFileName,
                 string designerFileName,
+                string traceFormat,
                 InstallFlags installFlags,
                 TracePriority tracePriority,
                 bool install,
@@ -1314,6 +1327,7 @@ namespace System.Data.SQLite
                 this.coreFileName = coreFileName;
                 this.linqFileName = linqFileName;
                 this.designerFileName = designerFileName;
+                this.traceFormat = traceFormat;
                 this.installFlags = installFlags;
                 this.tracePriority = tracePriority;
                 this.install = install;
@@ -1475,9 +1489,9 @@ namespace System.Data.SQLite
 
                 return new Configuration(thisAssembly, null, directory,
                     coreFileName, linqFileName, designerFileName,
-                    InstallFlags.Default, TracePriority.Default, true, false,
-                    true, false, false, false, false, false, false, false,
-                    true, true, false);
+                    TraceOps.TraceFormat, InstallFlags.Default,
+                    TracePriority.Default, true, false, true, false, false,
+                    false, false, false, false, false, true, true, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1626,27 +1640,10 @@ namespace System.Data.SQLite
                             {
                                 configuration.designerFileName = text;
                             }
-                            else if (MatchOption(newArg, "tracePriority"))
+                            else if (MatchOption(newArg, "traceFormat"))
                             {
-                                object value = ParseEnum(
-                                    typeof(TracePriority), text, true);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(
-                                        TracePriority.Lowest,
-                                        traceCallback, String.Format(
-                                        "Invalid trace priority value: {0}",
-                                        ForDisplay(text)), traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.tracePriority = (TracePriority)value;
-                                TraceOps.TracePriority = configuration.tracePriority;
+                                configuration.traceFormat = text;
+                                TraceOps.TraceFormat = configuration.traceFormat;
                             }
                             else if (MatchOption(newArg, "installFlags"))
                             {
@@ -1668,6 +1665,28 @@ namespace System.Data.SQLite
                                 }
 
                                 configuration.installFlags = (InstallFlags)value;
+                            }
+                            else if (MatchOption(newArg, "tracePriority"))
+                            {
+                                object value = ParseEnum(
+                                    typeof(TracePriority), text, true);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
+                                        "Invalid trace priority value: {0}",
+                                        ForDisplay(text)), traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.tracePriority = (TracePriority)value;
+                                TraceOps.TracePriority = configuration.tracePriority;
                             }
                             else if (MatchOption(newArg, "install"))
                             {
@@ -2047,16 +2066,25 @@ namespace System.Data.SQLite
                         "Original command line is: {0}",
                         Environment.CommandLine), traceCategory);
 
-                    //
-                    // NOTE: If the debugger is attached and What-If mode is
-                    //       [now] disabled, issue a warning.
-                    //
-                    if (!configuration.whatIf && Debugger.IsAttached)
+                    if (!configuration.whatIf)
+                    {
+                        //
+                        // NOTE: If the debugger is attached and What-If mode
+                        //       is [now] disabled, issue a warning.
+                        //
+                        if (Debugger.IsAttached)
+                            TraceOps.Trace(
+                                TracePriority.Medium, traceCallback,
+                                "Forced to disable \"what-if\" mode with " +
+                                "debugger attached.", traceCategory);
+                    }
+                    else
                     {
                         TraceOps.Trace(
-                            TracePriority.Medium, traceCallback,
-                            "Forced to disable \"what-if\" mode with " +
-                            "debugger attached.", traceCategory);
+                            TracePriority.Higher, traceCallback,
+                            "No actual changes will be made to this " +
+                            "system because \"what-if\" mode is enabled.",
+                            traceCategory);
                     }
 
                     //
@@ -2132,6 +2160,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "DesignerFileName", ForDisplay(designerFileName)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "TraceFormat", ForDisplay(traceFormat)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -2250,6 +2282,15 @@ namespace System.Data.SQLite
             {
                 get { return designerFileName; }
                 set { designerFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string traceFormat;
+            public string TraceFormat
+            {
+                get { return traceFormat; }
+                set { traceFormat = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2407,7 +2448,6 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private const string NameAndValueFormat = "{0}: {1}";
-        private const string TraceFormat = "#{0} @ {1}: {2}";
         private const string LogFileSuffix = ".log";
 
         ///////////////////////////////////////////////////////////////////////
@@ -2487,7 +2527,7 @@ namespace System.Data.SQLite
             )
         {
             TraceOps.TraceCore(String.Format(
-                TraceFormat, TraceOps.NextId(),
+                TraceOps.TraceFormat, TraceOps.NextId(),
                 TraceOps.TimeStamp(DateTime.UtcNow), message), category);
         }
         #endregion

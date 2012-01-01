@@ -5,7 +5,7 @@
 # Extensible Adaptable Generalized Logic Engine (Eagle)
 # Test Prologue File
 #
-# Copyright (c) 2007-2010 by Joe Mistachkin.  All rights reserved.
+# Copyright (c) 2007-2012 by Joe Mistachkin.  All rights reserved.
 #
 # See the file "license.terms" for information on usage and redistribution of
 # this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -1310,6 +1310,13 @@ if {![info exists no([file tail [info script]])]} then {
       # NOTE: For tests "object-4.7", "object-4.8", and "object-4.9".
       #
       checkForPowerShell $test_channel
+    }
+
+    #
+    # NOTE: Has Visual Studio testing support been disabled?
+    #
+    if {![info exists no(visualStudio)]} then {
+      checkForVisualStudio $test_channel
     }
 
     #

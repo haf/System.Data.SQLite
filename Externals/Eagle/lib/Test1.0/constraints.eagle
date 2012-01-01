@@ -5,7 +5,7 @@
 # Extensible Adaptable Generalized Logic Engine (Eagle)
 # Test Constraints File
 #
-# Copyright (c) 2007-2010 by Joe Mistachkin.  All rights reserved.
+# Copyright (c) 2007-2012 by Joe Mistachkin.  All rights reserved.
 #
 # See the file "license.terms" for information on usage and redistribution of
 # this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -1538,7 +1538,7 @@ namespace eval ::Eagle {
           # NOTE: Registry hive where WiX install information
           #       is stored.
           #
-          set key {HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Installer XML}
+          set key {HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Installer XML}
 
           #
           # NOTE: The versions of WiX that we support.
@@ -1563,45 +1563,36 @@ namespace eval ::Eagle {
             # NOTE: Does the directory name look valid and
             #       does it actually exist?
             #
-            if {[string length $directory] > 0} then {
+            if {[string length $directory] > 0 && \
+                [file isdirectory $directory]} then {
               #
-              # NOTE: Does the directory actually exist?
+              # NOTE: The file name of the primary WiX assembly.
               #
-              if {[file isdirectory $directory]} then {
+              set fileName [file join $directory wix.dll]
+
+              #
+              # NOTE: We do not know the file version yet.
+              #
+              set version ""
+
+              #
+              # NOTE: Attempt to query the version of the file.
+              #
+              if {[catch {file version $fileName} version] == 0 && \
+                  [string length $version] > 0} then {
                 #
-                # NOTE: The file name of the primary WiX assembly.
+                # NOTE: Indicate where we found the file.
                 #
-                set fileName [file join $directory wix.dll]
+                set where registry
 
                 #
-                # NOTE: We do not know the file version yet.
+                # NOTE: We found it, bail out now.
                 #
-                set version ""
-
-                #
-                # NOTE: Attempt to query the version of the file.
-                #
-                if {[catch {file version $fileName} version] == 0 && \
-                    [string length $version] > 0} then {
-                  #
-                  # NOTE: Indicate where we found the file.
-                  #
-                  set where registry
-
-                  #
-                  # NOTE: We found it, bail out now.
-                  #
-                  break
-                } else {
-                  #
-                  # NOTE: The file does not exist or is not properly
-                  #       versioned.
-                  #
-                  set directory ""
-                }
+                break
               } else {
                 #
-                # NOTE: The directory does not exist.
+                # NOTE: The file does not exist or is not properly
+                #       versioned.
                 #
                 set directory ""
               }
@@ -1639,6 +1630,75 @@ namespace eval ::Eagle {
       }
 
       tputs $channel no\n
+    }
+
+    proc checkForVisualStudio { channel } {
+      tputs $channel "---- checking for Visual Studio... "
+
+      #
+      # NOTE: Platform must be Windows for this constraint to even be
+      #       checked (i.e. we require the registry).
+      #
+      set visualStudioVersions [list]
+
+      if {$::tcl_platform(platform) eq "windows"} then {
+        #
+        # NOTE: Registry hive where Visual Studio install information
+        #       is stored.
+        #
+        set key {HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio}
+
+        #
+        # NOTE: The versions of Visual Studio that we support.
+        #
+        set versions [list [list 8.0 2005] [list 9.0 2008] [list 10.0 2010]]
+
+        #
+        # NOTE: Check each version and keep track of the ones we find.
+        #
+        foreach version $versions {
+          #
+          # NOTE: Attempt to fetch the Visual Studio install directory
+          #       value from the registry, removing the trailing backslash,
+          #       if any.
+          #
+          set fileName [file normalize [file join [string trimright [object \
+              invoke Microsoft.Win32.Registry GetValue [appendArgs $key \\ \
+              [lindex $version 0]] InstallDir null] \\] msenv.dll]]
+
+          #
+          # NOTE: Does the directory name look valid and does it actually
+          #       exist?
+          #
+          if {[string length $fileName] > 0 && [file isfile $fileName]} then {
+            #
+            # NOTE: Yes, it appears that it is available.
+            #
+            addConstraint [appendArgs visualStudio [lindex $version 1]]
+
+            #
+            # NOTE: Keep track of all the versions that we find.
+            #
+            lappend visualStudioVersions [lindex $version 1]
+
+            #
+            # NOTE: Save the directory for later usage by
+            #       the test itself.
+            #
+            set ::test_visual_studio [file dirname $fileName]
+          }
+        }
+      }
+
+      if {[llength $visualStudioVersions] > 0} then {
+        #
+        # NOTE: Show where we found the latest version.
+        #
+        tputs $channel [appendArgs "yes (" $visualStudioVersions ", \"" \
+            $::test_visual_studio "\")\n"]
+      } else {
+        tputs $channel no\n
+      }
     }
 
     proc checkForManagedDebugger { channel } {

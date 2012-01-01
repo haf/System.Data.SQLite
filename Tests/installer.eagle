@@ -1,0 +1,117 @@
+###############################################################################
+#
+# installer.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+#
+# NOTE: Setup the variables that refer to the various files required by the
+#       tests in this file.
+#
+set installerExeFile [getBuildFileName Installer.exe]
+set testVs2008LogFile [file nativename [file join $path \
+    Installer_Test_Vs2008.log]]
+set testVs2010LogFile [file nativename [file join $path \
+    Installer_Test_Vs2010.log]]
+
+#
+# NOTE: Setup the test constraints specific to the tests in this file.
+#
+if {![haveConstraint [appendArgs file_ [file tail $installerExeFile]]]} then {
+  checkForFile $test_channel $installerExeFile
+}
+
+if {![haveConstraint [appendArgs file_ [file tail $testVs2008LogFile]]]} then {
+  checkForFile $test_channel $testVs2008LogFile
+}
+
+if {![haveConstraint [appendArgs file_ [file tail $testVs2010LogFile]]]} then {
+  checkForFile $test_channel $testVs2010LogFile
+}
+
+###############################################################################
+
+runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
+  set fileName [file join [getTemporaryPath] Installer_Test_Vs2008.log]
+
+  catch {file delete $fileName}
+} -body {
+  set output ""
+
+  set code [catch {
+    testClrExec $installerExeFile [list -eventflags Wait -stdout output \
+        -success 0] -tracePriority High -installFlags AllNoGAC \
+        -noNetFx40 true -noVs2010 true \
+        -logFileName [appendArgs \" [file nativename $fileName] \"] \
+        -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+      [readFile $testVs2008LogFile]] : $error}]
+} -cleanup {
+  catch {file delete $fileName}
+
+  unset -nocomplain code output error fileName
+} -constraints \
+{eagle visualStudio2008 file_Installer.exe file_Installer_Test_Vs2008.log} \
+-result {0 True}}
+
+###############################################################################
+
+runTest {test installer-1.2 {installer tool / Visual Studio 2010} -setup {
+  set fileName [file join [getTemporaryPath] Installer_Test_Vs2010.log]
+
+  catch {file delete $fileName}
+} -body {
+  set output ""
+
+  set code [catch {
+    testClrExec $installerExeFile [list -eventflags Wait -stdout output \
+        -success 0] -tracePriority High -installFlags AllNoGAC \
+        -noNetFx20 true -noVs2008 true \
+        -logFileName [appendArgs \" [file nativename $fileName] \"] \
+        -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+      [readFile $testVs2010LogFile]] : $error}]
+} -cleanup {
+  catch {file delete $fileName}
+
+  unset -nocomplain code output error fileName
+} -constraints \
+{eagle visualStudio2010 file_Installer.exe file_Installer_Test_Vs2010.log} \
+-result {0 True}}
+
+###############################################################################
+
+unset -nocomplain testVs2010LogFile testVs2008LogFile installerExeFile
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

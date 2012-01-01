@@ -1,0 +1,59 @@
+Installer.exe: #1: Configuration.Process: No actual changes will be made to this system because "what-if" mode is enabled.
+Installer.exe: #2: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v4.0.30319", writable = False
+Installer.exe: #3: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework", writable = False
+Installer.exe: #4: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
+Installer.exe: #5: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v4.0.30319\AssemblyFoldersEx", writable = False
+Installer.exe: #6: RegistryHelper.DeleteSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework\v4.0.30319\AssemblyFoldersEx", subKeyName = "SQLite"
+Installer.exe: #7: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v4.0.30319\AssemblyFoldersEx", writable = True
+Installer.exe: #8: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework\v4.0.30319\AssemblyFoldersEx", subKeyName = "System.Data.SQLite"
+Installer.exe: #9: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework\v4.0.30319\AssemblyFoldersEx\System.Data.SQLite", name = <null>, value = "C:\dev\sqlite\dotnet\bin\2010\Release\bin"
+Installer.exe: #10: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v4.0.30319", writable = False
+Installer.exe: #11: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework", writable = False
+Installer.exe: #12: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
+Installer.exe: #13: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework", writable = False
+Installer.exe: #14: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
+Installer.exe: #15: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\10.0", writable = False
+Installer.exe: #16: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #17: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\10.0", writable = False
+Installer.exe: #18: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "Packages", writable = True
+Installer.exe: #19: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
+Installer.exe: #20: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = <null>, value = "System.Data.SQLite Designer Package"
+Installer.exe: #21: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = "Class", value = "SQLite.Designer.SQLitePackage"
+Installer.exe: #22: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = "CodeBase", value = "C:\dev\sqlite\dotnet\bin\2010\Release\bin\SQLite.Designer.dll"
+Installer.exe: #23: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = "ID", value = 400
+Installer.exe: #24: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = "InprocServer32", value = "C:\Windows\system32\mscoree.dll"
+Installer.exe: #25: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = "CompanyName", value = "http://system.data.sqlite.org/"
+Installer.exe: #26: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = "MinEdition", value = "standard"
+Installer.exe: #27: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = "ProductName", value = "System.Data.SQLite Designer Package"
+Installer.exe: #28: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", name = "ProductVersion", value = "1.0"
+Installer.exe: #29: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", subKeyName = "Toolbox"
+Installer.exe: #30: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages\Toolbox", name = "Default Items", value = 3
+Installer.exe: #31: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "Menus", writable = True
+Installer.exe: #32: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Menus", name = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}", value = ", 1000, 3"
+Installer.exe: #33: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "Services", writable = True
+Installer.exe: #34: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Services", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9d}"
+Installer.exe: #35: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Services\{dcbe6c8d-0e57-4099-a183-98ff74c64d9d}", name = <null>, value = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
+Installer.exe: #36: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Services\{dcbe6c8d-0e57-4099-a183-98ff74c64d9d}", name = "Name", value = "System.Data.SQLite Designer Service"
+Installer.exe: #37: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\10.0", writable = False
+Installer.exe: #38: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #39: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\10.0", writable = False
+Installer.exe: #40: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "DataSources", writable = True
+Installer.exe: #41: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataSources", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c71}"
+Installer.exe: #42: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataSources\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c71}", name = <null>, value = "System.Data.SQLite Database File"
+Installer.exe: #43: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataSources\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c71}", subKeyName = "SupportingProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}"
+Installer.exe: #44: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\10.0", writable = False
+Installer.exe: #45: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #46: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\10.0", writable = False
+Installer.exe: #47: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "DataProviders", writable = True
+Installer.exe: #48: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}"
+Installer.exe: #49: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = <null>, value = ".NET Framework Data Provider for SQLite"
+Installer.exe: #50: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "InvariantName", value = "System.Data.SQLite"
+Installer.exe: #51: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "Technology", value = "{77ab9a9d-78b9-4ba7-91ac-873f5338f1d2}"
+Installer.exe: #52: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "CodeBase", value = "C:\dev\sqlite\dotnet\bin\2010\Release\bin\SQLite.Designer.dll"
+Installer.exe: #53: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "FactoryService", value = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9d}"
+Installer.exe: #54: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataConnectionUIControl"
+Installer.exe: #55: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataConnectionProperties"
+Installer.exe: #56: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataConnectionSupport"
+Installer.exe: #57: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataObjectSupport"
+Installer.exe: #58: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataViewSupport"
+Installer.exe: #59: Installer.Main: subKeysCreated = 12, subKeysDeleted = 1, keyValuesSet = 20, keyValuesDeleted = 0
