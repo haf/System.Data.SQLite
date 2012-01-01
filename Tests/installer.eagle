@@ -86,7 +86,7 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2008LogFile]]] : $error}]
 } -cleanup {
-  # catch {file delete $fileName}
+  catch {file delete $fileName}
 
   unset -nocomplain code output error fileName
 } -constraints \
@@ -118,7 +118,7 @@ runTest {test installer-1.2 {uninstaller tool / Visual Studio 2008} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2008LogFile]]] : $error}]
 } -cleanup {
-  # catch {file delete $fileName}
+  catch {file delete $fileName}
 
   unset -nocomplain code output error fileName
 } -constraints \
@@ -150,7 +150,7 @@ runTest {test installer-1.3 {installer tool / Visual Studio 2010} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2010LogFile]]] : $error}]
 } -cleanup {
-  # catch {file delete $fileName}
+  catch {file delete $fileName}
 
   unset -nocomplain code output error fileName
 } -constraints \
@@ -182,7 +182,7 @@ runTest {test installer-1.4 {uninstaller tool / Visual Studio 2010} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2010LogFile]]] : $error}]
 } -cleanup {
-  # catch {file delete $fileName}
+  catch {file delete $fileName}
 
   unset -nocomplain code output error fileName
 } -constraints \

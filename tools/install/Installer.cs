@@ -259,13 +259,15 @@ namespace System.Data.SQLite
                     result = MessageBox.Show(message, title, buttons, icon);
 
                     Trace(tracePriority, traceCallback, String.Format(
-                        "User choice of \"{0}\".", result), category);
+                        "User choice of {0}.", ForDisplay(result)),
+                        category);
 
                     return result;
                 }
 
                 Trace(tracePriority, traceCallback, String.Format(
-                    "Default choice of \"{0}\".", result), category);
+                    "Default choice of {0}.", ForDisplay(result)),
+                    category);
 
                 return result;
             }
@@ -1005,7 +1007,8 @@ namespace System.Data.SQLite
                         writable ? TracePriority.Highest : TracePriority.Higher,
                         traceCallback, String.Format("rootKey = {0}, " +
                         "subKeyName = {1}, writable = {2}", ForDisplay(rootKey),
-                        ForDisplay(subKeyName), writable), traceCategory);
+                        ForDisplay(subKeyName), ForDisplay(writable)),
+                        traceCategory);
 
                 //
                 // HACK: Always forbid writable access when operating in
@@ -2551,6 +2554,12 @@ namespace System.Data.SQLite
 
                 result = element.OuterXml;
             }
+            else if (type == typeof(Version))
+            {
+                Version version = (Version)value;
+
+                result = String.Format("v{0}", version);
+            }
             else
             {
                 result = value.ToString();
@@ -2937,8 +2946,9 @@ namespace System.Data.SQLite
                     {
                         TraceOps.Trace(
                             TracePriority.Low, traceCallback, String.Format(
-                            ".NET Framework v{0} directory is invalid, " +
-                            "skipping...", frameworkVersion), traceCategory);
+                            ".NET Framework {0} directory is invalid, " +
+                            "skipping...", ForDisplay(frameworkVersion)),
+                            traceCategory);
 
                         continue;
                     }
@@ -2949,9 +2959,9 @@ namespace System.Data.SQLite
                     {
                         TraceOps.Trace(
                             TracePriority.Low, traceCallback, String.Format(
-                            ".NET Framework v{0} directory \"{1}\" does not " +
-                            "exist, skipping...", frameworkVersion, directory),
-                            traceCategory);
+                            ".NET Framework {0} directory {1} does not exist, " +
+                            "skipping...", ForDisplay(frameworkVersion),
+                            ForDisplay(directory)), traceCategory);
 
                         continue;
                     }
@@ -2962,9 +2972,9 @@ namespace System.Data.SQLite
                     {
                         TraceOps.Trace(
                             TracePriority.Low, traceCallback, String.Format(
-                            ".NET Framework v{0} file \"{1}\" does not exist, " +
-                            "skipping...", frameworkVersion, fileName),
-                            traceCategory);
+                            ".NET Framework {0} file {1} does not exist, " +
+                            "skipping...", ForDisplay(frameworkVersion),
+                            ForDisplay(fileName)), traceCategory);
 
                         continue;
                     }
@@ -2985,9 +2995,11 @@ namespace System.Data.SQLite
 
                         if (verbose)
                             TraceOps.Trace(
-                                TracePriority.Lowest, traceCallback, String.Format(
-                                "localSaved = {0}, saved = {1}", localSaved,
-                                saved), traceCategory);
+                                TracePriority.Lowest,
+                                traceCallback, String.Format(
+                                "localSaved = {0}, saved = {1}",
+                                ForDisplay(localSaved), ForDisplay(saved)),
+                                traceCategory);
                     }
                 }
             }
@@ -4281,7 +4293,7 @@ namespace System.Data.SQLite
                     TraceOps.Trace(
                         TracePriority.Highest, traceCallback, String.Format(
                         "GacInstall: assemblyPath = {0}",
-                        configuration.CoreFileName), traceCategory);
+                        ForDisplay(configuration.CoreFileName)), traceCategory);
 
                     if (!configuration.WhatIf)
                         publish.GacInstall(configuration.LinqFileName); /* throw */
@@ -4289,7 +4301,7 @@ namespace System.Data.SQLite
                     TraceOps.Trace(
                         TracePriority.Highest, traceCallback, String.Format(
                         "GacInstall: assemblyPath = {0}",
-                        configuration.LinqFileName), traceCategory);
+                        ForDisplay(configuration.LinqFileName)), traceCategory);
                 }
                 else
                 {
@@ -4299,7 +4311,7 @@ namespace System.Data.SQLite
                     TraceOps.Trace(
                         TracePriority.Highest, traceCallback, String.Format(
                         "GacRemove: assemblyPath = {0}",
-                        configuration.LinqFileName), traceCategory);
+                        ForDisplay(configuration.LinqFileName)), traceCategory);
 
                     if (!configuration.WhatIf)
                         publish.GacRemove(configuration.CoreFileName); /* throw */
@@ -4307,7 +4319,7 @@ namespace System.Data.SQLite
                     TraceOps.Trace(
                         TracePriority.Highest, traceCallback, String.Format(
                         "GacRemove: assemblyPath = {0}",
-                        configuration.CoreFileName), traceCategory);
+                        ForDisplay(configuration.CoreFileName)), traceCategory);
                 }
             }
             #endregion
@@ -4423,8 +4435,10 @@ namespace System.Data.SQLite
                 TracePriority.Higher, traceCallback, String.Format(
                 "subKeysCreated = {0}, subKeysDeleted = {1}, " +
                 "keyValuesSet = {2}, keyValuesDeleted = {3}",
-                RegistryHelper.SubKeysCreated, RegistryHelper.SubKeysDeleted,
-                RegistryHelper.KeyValuesSet, RegistryHelper.KeyValuesDeleted),
+                ForDisplay(RegistryHelper.SubKeysCreated),
+                ForDisplay(RegistryHelper.SubKeysDeleted),
+                ForDisplay(RegistryHelper.KeyValuesSet),
+                ForDisplay(RegistryHelper.KeyValuesDeleted)),
                 traceCategory);
 
             ///////////////////////////////////////////////////////////////////
