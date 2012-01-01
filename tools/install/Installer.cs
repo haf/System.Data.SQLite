@@ -1645,27 +1645,6 @@ namespace System.Data.SQLite
                                 configuration.traceFormat = text;
                                 TraceOps.TraceFormat = configuration.traceFormat;
                             }
-                            else if (MatchOption(newArg, "installFlags"))
-                            {
-                                object value = ParseEnum(
-                                    typeof(InstallFlags), text, true);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.Trace(
-                                        TracePriority.Lowest,
-                                        traceCallback, String.Format(
-                                        "Invalid install flags value: {0}",
-                                        ForDisplay(text)), traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.installFlags = (InstallFlags)value;
-                            }
                             else if (MatchOption(newArg, "tracePriority"))
                             {
                                 object value = ParseEnum(
@@ -1708,6 +1687,27 @@ namespace System.Data.SQLite
                                 }
 
                                 configuration.install = (bool)value;
+                            }
+                            else if (MatchOption(newArg, "installFlags"))
+                            {
+                                object value = ParseEnum(
+                                    typeof(InstallFlags), text, true);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
+                                        "Invalid install flags value: {0}",
+                                        ForDisplay(text)), traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.installFlags = (InstallFlags)value;
                             }
                             else if (MatchOption(newArg, "whatIf"))
                             {
@@ -4268,7 +4268,10 @@ namespace System.Data.SQLite
             #region .NET GAC Install/Remove
             if (configuration.HasFlags(InstallFlags.GAC, true))
             {
-                Publish publish = new Publish();
+                Publish publish = null;
+
+                if (!configuration.WhatIf)
+                    publish = new Publish();
 
                 if (configuration.Install)
                 {

@@ -25,10 +25,14 @@ runSQLiteTestPrologue
 #       tests in this file.
 #
 set installerExeFile [getBuildFileName Installer.exe]
-set testVs2008LogFile [file nativename [file join $path \
+set testInstallVs2008LogFile [file nativename [file join $path \
     Installer_Test_Vs2008.log]]
-set testVs2010LogFile [file nativename [file join $path \
+set testInstallVs2010LogFile [file nativename [file join $path \
     Installer_Test_Vs2010.log]]
+set testUninstallVs2008LogFile [file nativename [file join $path \
+    Uninstaller_Test_Vs2008.log]]
+set testUninstallVs2010LogFile [file nativename [file join $path \
+    Uninstaller_Test_Vs2010.log]]
 
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
@@ -37,18 +41,31 @@ if {![haveConstraint [appendArgs file_ [file tail $installerExeFile]]]} then {
   checkForFile $test_channel $installerExeFile
 }
 
-if {![haveConstraint [appendArgs file_ [file tail $testVs2008LogFile]]]} then {
-  checkForFile $test_channel $testVs2008LogFile
+if {![haveConstraint [appendArgs file_ \
+    [file tail $testInstallVs2008LogFile]]]} then {
+  checkForFile $test_channel $testInstallVs2008LogFile
 }
 
-if {![haveConstraint [appendArgs file_ [file tail $testVs2010LogFile]]]} then {
-  checkForFile $test_channel $testVs2010LogFile
+if {![haveConstraint [appendArgs file_ \
+    [file tail $testInstallVs2010LogFile]]]} then {
+  checkForFile $test_channel $testInstallVs2010LogFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $testUninstallVs2008LogFile]]]} then {
+  checkForFile $test_channel $testUninstallVs2008LogFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $testUninstallVs2010LogFile]]]} then {
+  checkForFile $test_channel $testUninstallVs2010LogFile
 }
 
 ###############################################################################
 
 runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
-  set fileName [file join [getTemporaryPath] Installer_Test_Vs2008.log]
+  set fileName [file join [getTemporaryPath] \
+      [file tail $testInstallVs2008LogFile]]
 
   catch {file delete $fileName}
 } -body {
@@ -56,8 +73,8 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
 
   set code [catch {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
-        -success 0] -tracePriority High -installFlags AllNoGAC \
-        -noNetFx40 true -noVs2010 true \
+        -success 0] -install true -tracePriority High -noNetFx40 true \
+        -noVs2010 true \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
         -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
   } error]
@@ -67,9 +84,9 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
   tlog "\n---- END STDOUT OUTPUT\n"
 
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
-      [readFile $testVs2008LogFile]] : $error}]
+      [subst -nobackslashes [readFile $testInstallVs2008LogFile]]] : $error}]
 } -cleanup {
-  catch {file delete $fileName}
+  # catch {file delete $fileName}
 
   unset -nocomplain code output error fileName
 } -constraints \
@@ -78,8 +95,9 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
 
 ###############################################################################
 
-runTest {test installer-1.2 {installer tool / Visual Studio 2010} -setup {
-  set fileName [file join [getTemporaryPath] Installer_Test_Vs2010.log]
+runTest {test installer-1.2 {uninstaller tool / Visual Studio 2008} -setup {
+  set fileName [file join [getTemporaryPath] \
+      [file tail $testUninstallVs2008LogFile]]
 
   catch {file delete $fileName}
 } -body {
@@ -87,8 +105,8 @@ runTest {test installer-1.2 {installer tool / Visual Studio 2010} -setup {
 
   set code [catch {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
-        -success 0] -tracePriority High -installFlags AllNoGAC \
-        -noNetFx20 true -noVs2008 true \
+        -success 0] -install false -tracePriority High -noNetFx40 true \
+        -noVs2010 true \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
         -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
   } error]
@@ -98,13 +116,77 @@ runTest {test installer-1.2 {installer tool / Visual Studio 2010} -setup {
   tlog "\n---- END STDOUT OUTPUT\n"
 
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
-      [readFile $testVs2010LogFile]] : $error}]
+      [subst -nobackslashes [readFile $testUninstallVs2008LogFile]]] : $error}]
 } -cleanup {
+  # catch {file delete $fileName}
+
+  unset -nocomplain code output error fileName
+} -constraints \
+{eagle visualStudio2008 file_Installer.exe file_Uninstaller_Test_Vs2008.log} \
+-result {0 True}}
+
+###############################################################################
+
+runTest {test installer-1.3 {installer tool / Visual Studio 2010} -setup {
+  set fileName [file join [getTemporaryPath] \
+      [file tail $testInstallVs2010LogFile]]
+
   catch {file delete $fileName}
+} -body {
+  set output ""
+
+  set code [catch {
+    testClrExec $installerExeFile [list -eventflags Wait -stdout output \
+        -success 0] -install true -tracePriority High -noNetFx20 true \
+        -noVs2008 true \
+        -logFileName [appendArgs \" [file nativename $fileName] \"] \
+        -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+      [subst -nobackslashes [readFile $testInstallVs2010LogFile]]] : $error}]
+} -cleanup {
+  # catch {file delete $fileName}
 
   unset -nocomplain code output error fileName
 } -constraints \
 {eagle visualStudio2010 file_Installer.exe file_Installer_Test_Vs2010.log} \
+-result {0 True}}
+
+###############################################################################
+
+runTest {test installer-1.4 {uninstaller tool / Visual Studio 2010} -setup {
+  set fileName [file join [getTemporaryPath] \
+      [file tail $testUninstallVs2010LogFile]]
+
+  catch {file delete $fileName}
+} -body {
+  set output ""
+
+  set code [catch {
+    testClrExec $installerExeFile [list -eventflags Wait -stdout output \
+        -success 0] -install false -tracePriority High -noNetFx20 true \
+        -noVs2008 true \
+        -logFileName [appendArgs \" [file nativename $fileName] \"] \
+        -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+      [subst -nobackslashes [readFile $testUninstallVs2010LogFile]]] : $error}]
+} -cleanup {
+  # catch {file delete $fileName}
+
+  unset -nocomplain code output error fileName
+} -constraints \
+{eagle visualStudio2010 file_Installer.exe file_Uninstaller_Test_Vs2010.log} \
 -result {0 True}}
 
 ###############################################################################
