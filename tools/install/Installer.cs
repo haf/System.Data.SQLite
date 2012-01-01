@@ -87,6 +87,22 @@ namespace System.Data.SQLite
         All = Framework | Vs,
         Default = All
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [Flags()]
+    public enum TracePriority
+    {
+        None = 0x0,
+        Lowest = 0x1,
+        Lower = 0x2,
+        Low = 0x4,
+        Medium = 0x8,
+        High = 0x10,
+        Higher = 0x20,
+        Highest = 0x40,
+        Default = Medium
+    }
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////
@@ -158,9 +174,20 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            #region Private Data
+            #region Private Static Data
             private static object syncRoot = new object();
             private static long nextId;
+            private static TracePriority tracePriority = TracePriority.Default;
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Static Properties
+            public static TracePriority TracePriority
+            {
+                get { lock (syncRoot) { return tracePriority; } }
+                set { lock (syncRoot) { tracePriority = value; } }
+            }
             #endregion
 
             ///////////////////////////////////////////////////////////////////
@@ -197,6 +224,7 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             public static DialogResult ShowMessage(
+                TracePriority tracePriority,
                 TraceCallback traceCallback,
                 Assembly assembly,
                 string message,
@@ -207,7 +235,7 @@ namespace System.Data.SQLite
             {
                 DialogResult result = DialogResult.OK;
 
-                Trace(traceCallback, message, category);
+                Trace(tracePriority, traceCallback, message, category);
 
                 if (SystemInformation.UserInteractive)
                 {
@@ -218,13 +246,13 @@ namespace System.Data.SQLite
 
                     result = MessageBox.Show(message, title, buttons, icon);
 
-                    Trace(traceCallback, String.Format(
+                    Trace(tracePriority, traceCallback, String.Format(
                         "User choice of \"{0}\".", result), category);
 
                     return result;
                 }
 
-                Trace(traceCallback, String.Format(
+                Trace(tracePriority, traceCallback, String.Format(
                     "Default choice of \"{0}\".", result), category);
 
                 return result;
@@ -328,13 +356,14 @@ namespace System.Data.SQLite
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static string Trace(
+                TracePriority tracePriority,
                 TraceCallback traceCallback,
                 Exception exception,
                 string category
                 )
             {
                 if (exception != null)
-                    return Trace(traceCallback,
+                    return Trace(tracePriority, traceCallback,
                         new StackTrace(exception, true), 0,
                         exception.ToString(), category);
 
@@ -345,18 +374,21 @@ namespace System.Data.SQLite
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static string Trace(
+                TracePriority tracePriority,
                 TraceCallback traceCallback,
                 string message,
                 string category
                 )
             {
-                return Trace(traceCallback, null, 1, message, category);
+                return Trace(
+                    tracePriority, traceCallback, null, 1, message, category);
             }
 
             ///////////////////////////////////////////////////////////////////
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             private static string Trace(
+                TracePriority tracePriority,
                 TraceCallback traceCallback,
                 StackTrace stackTrace,
                 int level,
@@ -364,6 +396,13 @@ namespace System.Data.SQLite
                 string category
                 )
             {
+                //
+                // NOTE: If the priority of this message is less than what
+                //       we currently care about, just return now.
+                //
+                if (tracePriority < TracePriority)
+                    return message;
+
                 //
                 // NOTE: Always skip this call frame if the stack trace is
                 //       going to be captured by GetMethodName.
@@ -950,10 +989,11 @@ namespace System.Data.SQLite
                     return null;
 
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
-                        "rootKey = {0}, subKeyName = {1}, writable = {2}",
-                        ForDisplay(rootKey), ForDisplay(subKeyName), writable),
-                        traceCategory);
+                    TraceOps.Trace(
+                        writable ? TracePriority.Highest : TracePriority.Higher,
+                        traceCallback, String.Format("rootKey = {0}, " +
+                        "subKeyName = {1}, writable = {2}", ForDisplay(rootKey),
+                        ForDisplay(subKeyName), writable), traceCategory);
 
                 //
                 // HACK: Always forbid writable access when operating in
@@ -979,7 +1019,8 @@ namespace System.Data.SQLite
                     return null;
 
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
                         "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
                         ForDisplay(subKeyName)), traceCategory);
 
@@ -1029,7 +1070,8 @@ namespace System.Data.SQLite
                     return;
 
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
                         "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
                         ForDisplay(subKeyName)), traceCategory);
 
@@ -1052,7 +1094,8 @@ namespace System.Data.SQLite
                     return;
 
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
                         "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
                         ForDisplay(subKeyName)), traceCategory);
 
@@ -1074,7 +1117,8 @@ namespace System.Data.SQLite
                     return null;
 
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.High, traceCallback, String.Format(
                         "key = {0}", ForDisplay(key)), traceCategory);
 
                 return key.GetSubKeyNames();
@@ -1094,7 +1138,8 @@ namespace System.Data.SQLite
                     return null;
 
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.High, traceCallback, String.Format(
                         "key = {0}, name = {1}, defaultValue = {2}",
                         ForDisplay(key), ForDisplay(name),
                         ForDisplay(defaultValue)), traceCategory);
@@ -1116,7 +1161,8 @@ namespace System.Data.SQLite
                     return;
 
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
                         "key = {0}, name = {1}, value = {2}", ForDisplay(key),
                         ForDisplay(name), ForDisplay(value)), traceCategory);
 
@@ -1139,7 +1185,8 @@ namespace System.Data.SQLite
                     return;
 
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
                         "key = {0}, name = {1}", ForDisplay(key),
                         ForDisplay(name)), traceCategory);
 
@@ -1245,6 +1292,7 @@ namespace System.Data.SQLite
                 string linqFileName,
                 string designerFileName,
                 InstallFlags installFlags,
+                TracePriority tracePriority,
                 bool install,
                 bool noDesktop,
                 bool noCompact,
@@ -1267,6 +1315,7 @@ namespace System.Data.SQLite
                 this.linqFileName = linqFileName;
                 this.designerFileName = designerFileName;
                 this.installFlags = installFlags;
+                this.tracePriority = tracePriority;
                 this.install = install;
                 this.noDesktop = noDesktop;
                 this.noCompact = noCompact;
@@ -1424,11 +1473,11 @@ namespace System.Data.SQLite
                     ref directory, ref coreFileName, ref linqFileName,
                     ref designerFileName);
 
-                return new Configuration(
-                    thisAssembly, null, directory, coreFileName, linqFileName,
-                    designerFileName, InstallFlags.Default, true, false, true,
-                    false, false, false, false, false, false, false, true,
-                    true, false);
+                return new Configuration(thisAssembly, null, directory,
+                    coreFileName, linqFileName, designerFileName,
+                    InstallFlags.Default, TracePriority.Default, true, false,
+                    true, false, false, false, false, false, false, false,
+                    true, true, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1471,9 +1520,10 @@ namespace System.Data.SQLite
                             if (index >= length)
                             {
                                 error = TraceOps.Trace(
+                                    TracePriority.Lowest,
                                     traceCallback, String.Format(
-                                        "Missing value for option: {0}",
-                                        ForDisplay(arg)), traceCategory);
+                                    "Missing value for option: {0}",
+                                    ForDisplay(arg)), traceCategory);
 
                                 if (strict)
                                     return false;
@@ -1499,7 +1549,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1574,6 +1626,28 @@ namespace System.Data.SQLite
                             {
                                 configuration.designerFileName = text;
                             }
+                            else if (MatchOption(newArg, "tracePriority"))
+                            {
+                                object value = ParseEnum(
+                                    typeof(TracePriority), text, true);
+
+                                if (value == null)
+                                {
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
+                                        "Invalid trace priority value: {0}",
+                                        ForDisplay(text)), traceCategory);
+
+                                    if (strict)
+                                        return false;
+
+                                    continue;
+                                }
+
+                                configuration.tracePriority = (TracePriority)value;
+                                TraceOps.TracePriority = configuration.tracePriority;
+                            }
                             else if (MatchOption(newArg, "installFlags"))
                             {
                                 object value = ParseEnum(
@@ -1581,7 +1655,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid install flags value: {0}",
                                         ForDisplay(text)), traceCategory);
 
@@ -1599,7 +1675,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1618,7 +1696,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1637,7 +1717,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1656,7 +1738,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1675,7 +1759,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1694,7 +1780,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1713,7 +1801,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1732,7 +1822,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1751,7 +1843,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1770,7 +1864,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1789,7 +1885,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1808,7 +1906,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1827,7 +1927,9 @@ namespace System.Data.SQLite
 
                                 if (value == null)
                                 {
-                                    error = TraceOps.Trace(traceCallback, String.Format(
+                                    error = TraceOps.Trace(
+                                        TracePriority.Lowest,
+                                        traceCallback, String.Format(
                                         "Invalid {0} boolean value: {1}",
                                         ForDisplay(arg), ForDisplay(text)),
                                         traceCategory);
@@ -1842,7 +1944,9 @@ namespace System.Data.SQLite
                             }
                             else
                             {
-                                error = TraceOps.Trace(traceCallback, String.Format(
+                                error = TraceOps.Trace(
+                                    TracePriority.Lowest,
+                                    traceCallback, String.Format(
                                     "Unsupported command line option: {0}",
                                     ForDisplay(arg)), traceCategory);
 
@@ -1852,7 +1956,9 @@ namespace System.Data.SQLite
                         }
                         else
                         {
-                            error = TraceOps.Trace(traceCallback, String.Format(
+                            error = TraceOps.Trace(
+                                TracePriority.Lowest,
+                                traceCallback, String.Format(
                                 "Unsupported command line argument: {0}",
                                 ForDisplay(arg)), traceCategory);
 
@@ -1865,7 +1971,9 @@ namespace System.Data.SQLite
                 }
                 catch (Exception e)
                 {
-                    TraceOps.Trace(traceCallback, e, traceCategory);
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, e,
+                        traceCategory);
 
                     error = "Failed to modify configuration.";
                 }
@@ -1925,7 +2033,8 @@ namespace System.Data.SQLite
                     // NOTE: Dump the configuration now in case we need to
                     //       troubleshoot any issues.
                     //
-                    configuration.Dump();
+                    if (configuration.tracePriority <= TracePriority.Medium)
+                        configuration.Dump();
 
                     //
                     // NOTE: Show where we are running from and how we were
@@ -1933,7 +2042,8 @@ namespace System.Data.SQLite
                     //
                     string location = assembly.Location;
 
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Medium, traceCallback, String.Format(
                         "Original command line is: {0}",
                         Environment.CommandLine), traceCategory);
 
@@ -1943,7 +2053,8 @@ namespace System.Data.SQLite
                     //
                     if (!configuration.whatIf && Debugger.IsAttached)
                     {
-                        TraceOps.Trace(traceCallback,
+                        TraceOps.Trace(
+                            TracePriority.Medium, traceCallback,
                             "Forced to disable \"what-if\" mode with " +
                             "debugger attached.", traceCategory);
                     }
@@ -1968,7 +2079,9 @@ namespace System.Data.SQLite
                 }
                 catch (Exception e)
                 {
-                    TraceOps.Trace(traceCallback, e, traceCategory);
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, e,
+                        traceCategory);
 
                     error = "Failed to process configuration.";
                 }
@@ -2023,6 +2136,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "InstallFlags", ForDisplay(installFlags)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "TracePriority", ForDisplay(tracePriority)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -2142,6 +2259,15 @@ namespace System.Data.SQLite
             {
                 get { return installFlags; }
                 set { installFlags = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private TracePriority tracePriority;
+            public TracePriority TracePriority
+            {
+                get { return tracePriority; }
+                set { tracePriority = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2742,7 +2868,8 @@ namespace System.Data.SQLite
 
                 foreach (Version frameworkVersion in frameworkVersionList)
                 {
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Lower, traceCallback, String.Format(
                         "frameworkName = {0}, frameworkVersion = {1}, " +
                         "platformName = {2}", ForDisplay(frameworkName),
                         ForDisplay(frameworkVersion),
@@ -2752,7 +2879,8 @@ namespace System.Data.SQLite
                             rootKey, frameworkName, frameworkVersion,
                             platformName, whatIf, verbose))
                     {
-                        TraceOps.Trace(traceCallback,
+                        TraceOps.Trace(
+                            TracePriority.Low, traceCallback,
                             ".NET Framework not found, skipping...",
                             traceCategory);
 
@@ -2767,7 +2895,8 @@ namespace System.Data.SQLite
 
                     if (String.IsNullOrEmpty(directory))
                     {
-                        TraceOps.Trace(traceCallback, String.Format(
+                        TraceOps.Trace(
+                            TracePriority.Low, traceCallback, String.Format(
                             ".NET Framework v{0} directory is invalid, " +
                             "skipping...", frameworkVersion), traceCategory);
 
@@ -2778,7 +2907,8 @@ namespace System.Data.SQLite
 
                     if (!Directory.Exists(directory))
                     {
-                        TraceOps.Trace(traceCallback, String.Format(
+                        TraceOps.Trace(
+                            TracePriority.Low, traceCallback, String.Format(
                             ".NET Framework v{0} directory \"{1}\" does not " +
                             "exist, skipping...", frameworkVersion, directory),
                             traceCategory);
@@ -2790,7 +2920,8 @@ namespace System.Data.SQLite
 
                     if (!File.Exists(fileName))
                     {
-                        TraceOps.Trace(traceCallback, String.Format(
+                        TraceOps.Trace(
+                            TracePriority.Low, traceCallback, String.Format(
                             ".NET Framework v{0} file \"{1}\" does not exist, " +
                             "skipping...", frameworkVersion, fileName),
                             traceCategory);
@@ -2813,7 +2944,8 @@ namespace System.Data.SQLite
                             saved = true;
 
                         if (verbose)
-                            TraceOps.Trace(traceCallback, String.Format(
+                            TraceOps.Trace(
+                                TracePriority.Lowest, traceCallback, String.Format(
                                 "localSaved = {0}, saved = {1}", localSaved,
                                 saved), traceCategory);
                     }
@@ -2899,7 +3031,8 @@ namespace System.Data.SQLite
 
                 foreach (Version frameworkVersion in frameworkVersionList)
                 {
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Lower, traceCallback, String.Format(
                         "frameworkName = {0}, frameworkVersion = {1}, " +
                         "platformName = {2}", ForDisplay(frameworkName),
                         ForDisplay(frameworkVersion),
@@ -2909,7 +3042,7 @@ namespace System.Data.SQLite
                             rootKey, frameworkName, frameworkVersion,
                             platformName, whatIf, verbose))
                     {
-                        TraceOps.Trace(traceCallback,
+                        TraceOps.Trace(TracePriority.Low, traceCallback,
                             ".NET Framework not found, skipping...",
                             traceCategory);
 
@@ -3050,13 +3183,14 @@ namespace System.Data.SQLite
 
             foreach (Version vsVersion in vsVersionList)
             {
-                TraceOps.Trace(traceCallback, String.Format(
+                TraceOps.Trace(
+                    TracePriority.Lower, traceCallback, String.Format(
                     "vsVersion = {0}", ForDisplay(vsVersion)),
                     traceCategory);
 
                 if (!HaveVsVersion(rootKey, vsVersion, whatIf, verbose))
                 {
-                    TraceOps.Trace(traceCallback,
+                    TraceOps.Trace(TracePriority.Low, traceCallback,
                         "Visual Studio version not found, skipping...",
                         traceCategory);
 
@@ -3171,7 +3305,8 @@ namespace System.Data.SQLite
             if (dirty)
             {
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Lowest, traceCallback, String.Format(
                         "element = {0}", ForDisplay(element)), traceCategory);
 
                 if (!whatIf)
@@ -3221,7 +3356,8 @@ namespace System.Data.SQLite
             if (dirty)
             {
                 if (verbose)
-                    TraceOps.Trace(traceCallback, String.Format(
+                    TraceOps.Trace(
+                        TracePriority.Lowest, traceCallback, String.Format(
                         "element = {0}", ForDisplay(element)), traceCategory);
 
                 if (!whatIf)
@@ -4061,8 +4197,9 @@ namespace System.Data.SQLite
                     args, configuration, true, ref error))
             {
                 TraceOps.ShowMessage(
-                    traceCallback, thisAssembly, error, traceCategory,
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    TracePriority.Highest, traceCallback, thisAssembly,
+                    error, traceCategory, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
 
                 return 1;
             }
@@ -4072,6 +4209,11 @@ namespace System.Data.SQLite
             InitializeAllFrameworks(configuration);
             InitializeAllVsVersions(configuration);
             #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            AssemblyName assemblyName = AssemblyName.GetAssemblyName(
+                configuration.CoreFileName); /* throw */
 
             ///////////////////////////////////////////////////////////////////
 
@@ -4091,38 +4233,38 @@ namespace System.Data.SQLite
                 if (configuration.Install)
                 {
                     if (!configuration.WhatIf)
-                    {
                         publish.GacInstall(configuration.CoreFileName); /* throw */
-                        publish.GacInstall(configuration.LinqFileName); /* throw */
-                    }
-                    else
-                    {
-                        TraceOps.Trace(traceCallback, String.Format(
-                            "GacInstall: assemblyPath = {0}",
-                            configuration.CoreFileName), traceCategory);
 
-                        TraceOps.Trace(traceCallback, String.Format(
-                            "GacInstall: assemblyPath = {0}",
-                            configuration.LinqFileName), traceCategory);
-                    }
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
+                        "GacInstall: assemblyPath = {0}",
+                        configuration.CoreFileName), traceCategory);
+
+                    if (!configuration.WhatIf)
+                        publish.GacInstall(configuration.LinqFileName); /* throw */
+
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
+                        "GacInstall: assemblyPath = {0}",
+                        configuration.LinqFileName), traceCategory);
                 }
                 else
                 {
                     if (!configuration.WhatIf)
-                    {
                         publish.GacRemove(configuration.LinqFileName); /* throw */
-                        publish.GacRemove(configuration.CoreFileName); /* throw */
-                    }
-                    else
-                    {
-                        TraceOps.Trace(traceCallback, String.Format(
-                            "GacRemove: assemblyPath = {0}",
-                            configuration.LinqFileName), traceCategory);
 
-                        TraceOps.Trace(traceCallback, String.Format(
-                            "GacRemove: assemblyPath = {0}",
-                            configuration.CoreFileName), traceCategory);
-                    }
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
+                        "GacRemove: assemblyPath = {0}",
+                        configuration.LinqFileName), traceCategory);
+
+                    if (!configuration.WhatIf)
+                        publish.GacRemove(configuration.CoreFileName); /* throw */
+
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, String.Format(
+                        "GacRemove: assemblyPath = {0}",
+                        configuration.CoreFileName), traceCategory);
                 }
             }
             #endregion
@@ -4137,8 +4279,9 @@ namespace System.Data.SQLite
                         configuration.Verbose, ref error))
                 {
                     TraceOps.ShowMessage(
-                        traceCallback, null, error, traceCategory,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        TracePriority.Highest, traceCallback, null,
+                        error, traceCategory, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
 
                     return 1;
                 }
@@ -4154,14 +4297,14 @@ namespace System.Data.SQLite
 
                 if (!ForEachFrameworkConfig(ProcessDbProviderFactory,
                         InvariantName, ProviderName, Description,
-                        FactoryTypeName, AssemblyName.GetAssemblyName(
-                            configuration.CoreFileName), directoryPair,
+                        FactoryTypeName, assemblyName, directoryPair,
                         configuration.WhatIf, configuration.Verbose,
                         ref saved, ref error))
                 {
                     TraceOps.ShowMessage(
-                        traceCallback, null, error, traceCategory,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        TracePriority.Highest, traceCallback, null,
+                        error, traceCategory, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
 
                     return 1;
                 }
@@ -4180,8 +4323,9 @@ namespace System.Data.SQLite
                         configuration.Verbose, ref error))
                 {
                     TraceOps.ShowMessage(
-                        traceCallback, null, error, traceCategory,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        TracePriority.Highest, traceCallback, null,
+                        error, traceCategory, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
 
                     return 1;
                 }
@@ -4200,8 +4344,9 @@ namespace System.Data.SQLite
                         configuration.Verbose, ref error))
                 {
                     TraceOps.ShowMessage(
-                        traceCallback, null, error, traceCategory,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        TracePriority.Highest, traceCallback, null,
+                        error, traceCategory, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
 
                     return 1;
                 }
@@ -4220,8 +4365,9 @@ namespace System.Data.SQLite
                         configuration.Verbose, ref error))
                 {
                     TraceOps.ShowMessage(
-                        traceCallback, null, error, traceCategory,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        TracePriority.Highest, traceCallback, null,
+                        error, traceCategory, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
 
                     return 1;
                 }
@@ -4230,7 +4376,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            TraceOps.Trace(traceCallback, String.Format(
+            TraceOps.Trace(
+                TracePriority.Higher, traceCallback, String.Format(
                 "subKeysCreated = {0}, subKeysDeleted = {1}, " +
                 "keyValuesSet = {2}, keyValuesDeleted = {3}",
                 RegistryHelper.SubKeysCreated, RegistryHelper.SubKeysDeleted,
