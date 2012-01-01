@@ -191,7 +191,8 @@ runTest {test installer-1.4 {uninstaller tool / Visual Studio 2010} -setup {
 
 ###############################################################################
 
-unset -nocomplain testVs2010LogFile testVs2008LogFile installerExeFile
+unset -nocomplain testUninstallVs2010LogFile testUninstallVs2008LogFile \
+    testInstallVs2010LogFile testInstallVs2008LogFile installerExeFile
 
 ###############################################################################
 
