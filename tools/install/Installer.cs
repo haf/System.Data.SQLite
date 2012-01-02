@@ -1282,6 +1282,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region VersionListMap Class
+        private sealed class VersionListMap : Dictionary<Version, VersionList>
+        {
+            public VersionListMap()
+            {
+                // do nothing.
+            }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Configuration Class
         private sealed class Configuration
         {
@@ -2066,6 +2078,11 @@ namespace System.Data.SQLite
 
                     TraceOps.Trace(
                         TracePriority.Medium, traceCallback, String.Format(
+                        "Running from: {0}", ForDisplay(location)),
+                        traceCategory);
+
+                    TraceOps.Trace(
+                        TracePriority.Medium, traceCallback, String.Format(
                         "Original command line is: {0}",
                         Environment.CommandLine), traceCategory);
 
@@ -2115,6 +2132,60 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     error = "Failed to process configuration.";
+                }
+
+                return false;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static bool CheckImageRuntimeVersion(
+                Configuration configuration,
+                VersionListMap fromtoyou,
+                VersionList versionList,
+                bool strict,
+                ref string error
+                )
+            {
+                try
+                {
+                    if (configuration == null)
+                    {
+                        error = "Invalid configuration.";
+                        return false;
+                    }
+
+                    Assembly assembly = configuration.assembly;
+
+                    if (assembly == null)
+                    {
+                        error = "Invalid assembly.";
+                        return false;
+                    }
+
+                    //
+                    // NOTE: What version of the runtime was the core (primary)
+                    //       assembly compiled against (e.g. "v2.0.50727" or
+                    //       "v4.0.30319").
+                    //
+                    string coreImageRuntimeVersion = GetImageRuntimeVersion(
+                        configuration.coreFileName);
+
+                    //
+                    // TODO: Restrict the configuration based on which image
+                    //       runtime versions (which more-or-less correspond
+                    //       to .NET Framework versions) are supported by the
+                    //       versions of Visual Studio that are installed.
+                    //
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, e,
+                        traceCategory);
+
+                    error = "Failed to check image runtime version.";
                 }
 
                 return false;
@@ -2502,6 +2573,7 @@ namespace System.Data.SQLite
 
         private static RegistryKey vsRootKey;
         private static VersionList vsVersionList;
+        private static VersionListMap vsFrameworkVersionMap;
         private static Guid? vsPackageId;
         private static Guid? vsServiceId;
         private static Guid? vsDataSourcesId;
@@ -2726,6 +2798,25 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Per-Framework/Platform Handling
+        private static void ResetAllFrameworks()
+        {
+            frameworkRootKey = null;
+
+            if (frameworkNameList != null)
+            {
+                frameworkNameList.Clear();
+                frameworkNameList = null;
+            }
+
+            if (frameworkVersionMap != null)
+            {
+                frameworkVersionMap.Clear();
+                frameworkVersionMap = null;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static void InitializeAllFrameworks(
             Configuration configuration
             )
@@ -2766,8 +2857,8 @@ namespace System.Data.SQLite
 
             if ((configuration == null) || !configuration.NoCompact)
             {
-                frameworkVersionMap.Add(".NETCompactFramework", new VersionList(
-                    new Version[] {
+                frameworkVersionMap.Add(".NETCompactFramework",
+                    new VersionList(new Version[] {
                     new Version(2, 0, 0, 0), new Version(3, 5, 0, 0)
                 }));
             }
@@ -2812,7 +2903,7 @@ namespace System.Data.SQLite
                 if (key == null)
                     return false;
 
-                if (platformName != null) // NOTE: Skip non-desktop frameworks.
+                if (platformName != null) // NOTE: Skip non-desktop.
                     return true;
 
                 string directory = GetFrameworkDirectory(
@@ -3121,9 +3212,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Per-Visual Studio Version Handling
-        private static void InitializeAllVsVersions(
-            Configuration configuration
-            )
+        private static void InitializeVsRootKeyAndIds()
         {
             if (vsRootKey == null)
                 vsRootKey = Registry.LocalMachine;
@@ -3147,7 +3236,63 @@ namespace System.Data.SQLite
             if (vsDataProviderId == null)
                 vsDataProviderId = new Guid(
                     "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C70");
+        }
 
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void ResetVsFrameworkVersionMap()
+        {
+            if (vsFrameworkVersionMap != null)
+            {
+                vsFrameworkVersionMap.Clear();
+                vsFrameworkVersionMap = null;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void InitializeVsFrameworkVersionMap(
+            Configuration configuration
+            )
+        {
+            if (vsFrameworkVersionMap == null)
+            {
+                vsFrameworkVersionMap = new VersionListMap();
+
+                // vsFrameworkVersionMap.Add(new Version(8, 0),
+                //     new VersionList(new Version[] {
+                //         new Version(2, 0, 50727) }));
+
+                if ((configuration == null) || !configuration.NoVs2008)
+                    vsFrameworkVersionMap.Add(new Version(9, 0),
+                        new VersionList(new Version[] {
+                            new Version(2, 0, 50727) }));
+
+                if ((configuration == null) || !configuration.NoVs2010)
+                    vsFrameworkVersionMap.Add(new Version(10, 0),
+                        new VersionList(new Version[] {
+                            new Version(2, 0, 50727),
+                                new Version(4, 0, 30319) }));
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void ResetAllVsVersions()
+        {
+            if (vsVersionList != null)
+            {
+                vsVersionList.Clear();
+                vsVersionList = null;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void InitializeAllVsVersions(
+            Configuration configuration
+            )
+        {
             if (vsVersionList == null)
             {
                 vsVersionList = new VersionList();
@@ -3613,6 +3758,31 @@ namespace System.Data.SQLite
             return String.Format("Software\\Microsoft\\VisualStudio\\{0}",
                 vsVersion);
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Visual Studio Version Handling
+        private static bool AddVsVersion(
+            RegistryKey rootKey,
+            Version vsVersion,
+            Guid packageId,
+            Guid serviceId,
+            Guid dataSourceId,
+            Guid dataProviderId,
+            object clientData,
+            bool whatIf,
+            bool verbose,
+            ref string error
+            )
+        {
+            VersionList versionList = clientData as VersionList;
+
+            if (versionList != null)
+                versionList.Add(vsVersion);
+
+            return true;
+        }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -4235,7 +4405,31 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Application Entry Point
-        private static int Main(string[] args)
+        public static string GetImageRuntimeVersion(
+            string fileName
+            )
+        {
+            try
+            {
+                Assembly assembly =
+                    Assembly.ReflectionOnlyLoadFrom(fileName); /* throw */
+
+                if (assembly != null)
+                    return assembly.ImageRuntimeVersion;
+            }
+            catch
+            {
+                // do nothing.
+            }
+
+            return null;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static int Main(
+            string[] args
+            )
         {
             Configuration configuration = null;
             string error = null;
@@ -4253,7 +4447,49 @@ namespace System.Data.SQLite
                     error, traceCategory, MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
-                return 1;
+                return 1; /* FAILURE */
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Check Installed VS Versions
+            InitializeVsRootKeyAndIds();
+            InitializeAllFrameworks(null);
+            InitializeAllVsVersions(null);
+
+            VersionList installedVsVersions = new VersionList();
+
+            if (configuration.HasFlags(InstallFlags.All, /* any */ false))
+            {
+                if (!ForEachVsVersionRegistry(AddVsVersion,
+                        Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty,
+                        installedVsVersions, configuration.WhatIf,
+                        configuration.Verbose, ref error))
+                {
+                    TraceOps.ShowMessage(
+                        TracePriority.Highest, traceCallback, null,
+                        error, traceCategory, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+
+                    return 1; /* FAILURE */
+                }
+            }
+
+            InitializeVsFrameworkVersionMap(configuration);
+
+            ///////////////////////////////////////////////////////////////////
+
+            if (!Configuration.CheckImageRuntimeVersion(
+                    configuration, vsFrameworkVersionMap,
+                    installedVsVersions, true, ref error))
+            {
+                TraceOps.ShowMessage(
+                    TracePriority.Highest, traceCallback, thisAssembly,
+                    error, traceCategory, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return 1; /* FAILURE */
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -4338,7 +4574,7 @@ namespace System.Data.SQLite
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
@@ -4361,7 +4597,7 @@ namespace System.Data.SQLite
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
@@ -4382,7 +4618,7 @@ namespace System.Data.SQLite
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
@@ -4403,7 +4639,7 @@ namespace System.Data.SQLite
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
@@ -4424,13 +4660,14 @@ namespace System.Data.SQLite
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
 
             ///////////////////////////////////////////////////////////////////
 
+            #region Log Summary
             TraceOps.Trace(
                 TracePriority.Higher, traceCallback, String.Format(
                 "subKeysCreated = {0}, subKeysDeleted = {1}, " +
@@ -4440,10 +4677,11 @@ namespace System.Data.SQLite
                 ForDisplay(RegistryHelper.KeyValuesSet),
                 ForDisplay(RegistryHelper.KeyValuesDeleted)),
                 traceCategory);
+            #endregion
 
             ///////////////////////////////////////////////////////////////////
 
-            return 0;
+            return 0; /* SUCCESS */
         }
         #endregion
     }
