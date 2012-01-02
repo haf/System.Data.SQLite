@@ -3354,11 +3354,11 @@ namespace System.Data.SQLite
                 dirty = true;
             }
 
-            if (dirty)
+            if (dirty || whatIf)
             {
                 if (verbose)
                     TraceOps.Trace(
-                        TracePriority.Lowest, traceCallback, String.Format(
+                        TracePriority.Highest, traceCallback, String.Format(
                         "element = {0}", ForDisplay(element)), traceCategory);
 
                 if (!whatIf)
@@ -3405,11 +3405,11 @@ namespace System.Data.SQLite
                 dirty = true;
             }
 
-            if (dirty)
+            if (dirty || whatIf)
             {
                 if (verbose)
                     TraceOps.Trace(
-                        TracePriority.Lowest, traceCallback, String.Format(
+                        TracePriority.Highest, traceCallback, String.Format(
                         "element = {0}", ForDisplay(element)), traceCategory);
 
                 if (!whatIf)
