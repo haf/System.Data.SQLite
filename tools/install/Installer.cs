@@ -3432,33 +3432,6 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static void InitializeVsPackage(
-            ref Package package
-            )
-        {
-            if (package == null)
-            {
-                package = new Package();
-
-                package.AdoNetTechnologyId = new Guid(
-                    "77AB9A9D-78B9-4BA7-91AC-873F5338F1D2");
-
-                package.PackageId = new Guid(
-                    "DCBE6C8D-0E57-4099-A183-98FF74C64D9C");
-
-                package.ServiceId = new Guid(
-                    "DCBE6C8D-0E57-4099-A183-98FF74C64D9D");
-
-                package.DataSourceId = new Guid(
-                    "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C71");
-
-                package.DataProviderId = new Guid(
-                    "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C70");
-            }
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
         private static bool HaveVsVersion(
             RegistryKey rootKey,
             Version vsVersion,
@@ -4329,6 +4302,33 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Visual Studio Package Handling
+        private static void InitializeVsPackage(
+            ref Package package
+            )
+        {
+            if (package == null)
+            {
+                package = new Package();
+
+                package.AdoNetTechnologyId = new Guid(
+                    "77AB9A9D-78B9-4BA7-91AC-873F5338F1D2");
+
+                package.PackageId = new Guid(
+                    "DCBE6C8D-0E57-4099-A183-98FF74C64D9C");
+
+                package.ServiceId = new Guid(
+                    "DCBE6C8D-0E57-4099-A183-98FF74C64D9D");
+
+                package.DataSourceId = new Guid(
+                    "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C71");
+
+                package.DataProviderId = new Guid(
+                    "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C70");
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static bool AddVsPackage(
             RegistryKey rootKey,
             Version vsVersion,
