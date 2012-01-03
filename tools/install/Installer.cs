@@ -2211,14 +2211,6 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    Assembly assembly = configuration.assembly;
-
-                    if (assembly == null)
-                    {
-                        error = "Invalid assembly.";
-                        return false;
-                    }
-
                     //
                     // NOTE: What version of the runtime was the core (primary)
                     //       assembly compiled against (e.g. "v2.0.50727" or
