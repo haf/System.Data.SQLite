@@ -302,11 +302,18 @@ namespace eval ::Eagle {
       set fileName [getBinaryFileName $fileName]
 
       if {[catch {set assembly \
-          [object load -loadtype File $fileName]}] == 0} then {
+          [object load -loadtype File -alias $fileName]}] == 0} then {
         #
         # NOTE: Now, add the necessary test constraint.
         #
         addConstraint [file rootname [file tail $fileName]]
+
+        #
+        # NOTE: Grab the image runtime version from the assembly because
+        #       several tests rely on it having a certain value.
+        #
+        addConstraint [appendArgs [file tail $fileName] _ \
+            [$assembly ImageRuntimeVersion]]
 
         #
         # NOTE: Return the full path of the loaded file.
@@ -707,6 +714,12 @@ namespace eval ::Eagle {
         # NOTE: Report the resource usage prior to running any tests.
         #
         reportSQLiteResources $::test_channel
+
+        #
+        # NOTE: Show the active test constraints.
+        #
+        tputs $::test_channel [appendArgs "---- constraints: " \
+            [formatList [lsort [getConstraints]]] \n]
       }
     }
 

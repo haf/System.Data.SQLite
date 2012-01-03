@@ -2136,7 +2136,7 @@ namespace System.Data.SQLite
 
                     TraceOps.Trace(
                         TracePriority.Medium, traceCallback, String.Format(
-                        "Running from: {0}", ForDisplay(location)),
+                        "Running executable is: {0}", ForDisplay(location)),
                         traceCategory);
 
                     TraceOps.Trace(
@@ -2197,9 +2197,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public static bool CheckImageRuntimeVersion(
+            public static bool CheckRuntimeVersion(
                 Configuration configuration,
-                VsList vsList,
                 bool strict,
                 ref string error
                 )
@@ -2234,6 +2233,67 @@ namespace System.Data.SQLite
                     //       to .NET Framework versions) are supported by the
                     //       versions of Visual Studio that are installed.
                     //
+                    if (String.IsNullOrEmpty(coreImageRuntimeVersion))
+                    {
+                        error = "invalid core file image runtime version";
+                        return false;
+                    }
+                    else if (String.Equals(
+                            coreImageRuntimeVersion, CLR2ImageRuntimeVersion,
+                            StringComparison.InvariantCulture))
+                    {
+                        //
+                        // NOTE: For the CLR v2.0 runtime, make sure we disable
+                        //       any attempt to use it for things that require
+                        //       an assembly compiled for the CLR v4.0.  It is
+                        //       uncertain if this is actually a problem in
+                        //       practice as the CLR v4.0 can load and use an
+                        //       assembly compiled with the CLR v2.0; however,
+                        //       since this project offers both configurations,
+                        //       we currently disallow this mismatch.
+                        //
+                        configuration.noNetFx40 = true;
+                        configuration.noVs2010 = true;
+
+                        TraceOps.Trace(
+                            TracePriority.Medium, traceCallback, String.Format(
+                            "Assembly is compiled for the .NET Framework {0}, " +
+                            "support for .NET Framework {1} is now disabled.",
+                            CLR2ImageRuntimeVersion, CLR4ImageRuntimeVersion),
+                            traceCategory);
+                    }
+                    else if (String.Equals(
+                            coreImageRuntimeVersion, CLR4ImageRuntimeVersion,
+                            StringComparison.InvariantCulture))
+                    {
+                        //
+                        // NOTE: For the CLR v4.0 runtime, make sure we disable
+                        //       any attempt to use it for things that require
+                        //       an assembly compiled for the CLR v2.0.
+                        //
+                        configuration.noNetFx20 = true;
+                        configuration.noVs2008 = true;
+
+                        TraceOps.Trace(
+                            TracePriority.Medium, traceCallback, String.Format(
+                            "Assembly is compiled for the .NET Framework {0}, " +
+                            "support for .NET Framework {1} is now disabled.",
+                            ForDisplay(CLR4ImageRuntimeVersion),
+                            ForDisplay(CLR2ImageRuntimeVersion)),
+                            traceCategory);
+                    }
+                    else
+                    {
+                        error = String.Format(
+                            "unsupported core file image runtime version " +
+                            "{0}, must be {1} or {2}",
+                            ForDisplay(coreImageRuntimeVersion),
+                            ForDisplay(CLR2ImageRuntimeVersion),
+                            ForDisplay(CLR4ImageRuntimeVersion));
+
+                        return false;
+                    }
+
                     return true;
                 }
                 catch (Exception e)
@@ -2679,6 +2739,11 @@ namespace System.Data.SQLite
         private const string InvariantName = "System.Data.SQLite";
         private const string FactoryTypeName = "System.Data.SQLite.SQLiteFactory";
         private const string Description = ".NET Framework Data Provider for SQLite";
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private const string CLR2ImageRuntimeVersion = "v2.0.50727";
+        private const string CLR4ImageRuntimeVersion = "v4.0.30319";
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -4630,9 +4695,6 @@ namespace System.Data.SQLite
             string[] args
             )
         {
-            Package package = null;
-            FrameworkList frameworkList = null;
-            VsList vsList = null;
             Configuration configuration = null;
             string error = null;
 
@@ -4642,7 +4704,9 @@ namespace System.Data.SQLite
             if (!Configuration.FromArgs(
                     args, true, ref configuration, ref error) ||
                 !Configuration.Process(
-                    args, configuration, true, ref error))
+                    args, configuration, true, ref error) ||
+                !Configuration.CheckRuntimeVersion(
+                    configuration, true, ref error))
             {
                 TraceOps.ShowMessage(
                     TracePriority.Highest, traceCallback, thisAssembly,
@@ -4651,6 +4715,14 @@ namespace System.Data.SQLite
 
                 return 1; /* FAILURE */
             }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region .NET Framework / Visual Studio Data
+            Package package = null;
+            FrameworkList frameworkList = null;
+            VsList vsList = null;
 
             ///////////////////////////////////////////////////////////////////
 
@@ -4658,39 +4730,6 @@ namespace System.Data.SQLite
             InitializeFrameworkList(configuration, ref frameworkList);
             InitializeVsList(configuration, ref vsList);
             #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-#if false
-            #region Check Installed VS Versions
-            if (configuration.HasFlags(InstallFlags.All, /* any */ false))
-            {
-                if (!ForEachVsVersionRegistry(
-                        vsList, AddVsVersion, null, vsList,
-                        configuration.WhatIf, configuration.Verbose,
-                        ref error))
-                {
-                    TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
-                        error, traceCategory, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
-                    return 1; /* FAILURE */
-                }
-
-                if (!Configuration.CheckImageRuntimeVersion(
-                        configuration, vsList, true, ref error))
-                {
-                    TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
-                        error, traceCategory, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
-                    return 1; /* FAILURE */
-                }
-            }
-            #endregion
-#endif
 
             ///////////////////////////////////////////////////////////////////
 
