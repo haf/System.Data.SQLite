@@ -1386,18 +1386,6 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region VersionListMap Class
-        private sealed class VersionListMap : Dictionary<Version, VersionList>
-        {
-            public VersionListMap()
-            {
-                // do nothing.
-            }
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
         #region Package Class
         internal sealed class Package
         {
@@ -2961,24 +2949,6 @@ namespace System.Data.SQLite
                 get { return versions; }
                 set { versions = value; }
             }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private VersionListMap frameworkVersions;
-            public VersionListMap FrameworkVersions
-            {
-                get { return frameworkVersions; }
-                set { frameworkVersions = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            private VersionList installedVersions;
-            public VersionList InstalledVersions
-            {
-                get { return installedVersions; }
-                set { installedVersions = value; }
-            }
             #endregion
         }
         #endregion
@@ -3018,16 +2988,6 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static readonly string FrameworkSdkKeyName =
-            "Software\\Microsoft\\Microsoft SDKs\\.NETFramework";
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static readonly string WindowsSdkKeyName =
-            "Software\\Microsoft\\Microsoft SDKs\\Windows";
-
-        ///////////////////////////////////////////////////////////////////////
-
         private static readonly string XPathForAddElement =
             "configuration/system.data/DbProviderFactories/add[@invariant=\"{0}\"]";
 
@@ -3050,14 +3010,18 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Trace Handling
-        private static string GetLogFileName()
+        private static string GetLogFileName() /* throw */
         {
-            string result = Path.GetTempFileName(); /* throw */
+            string fileName = Path.GetTempFileName();
+            string directory = Path.GetDirectoryName(fileName);
+            string fileNameOnly = Path.GetFileNameWithoutExtension(fileName);
 
-            File.Move(result, result + LogFileSuffix); /* throw */
-            result += LogFileSuffix;
+            string newFileName = Path.Combine(directory,
+                traceCategory + "." + fileNameOnly + LogFileSuffix);
 
-            return result;
+            File.Move(fileName, newFileName);
+
+            return newFileName;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -3173,125 +3137,6 @@ namespace System.Data.SQLite
                 return Path.Combine(
                     (string)value, String.Format("v{0}", frameworkVersion));
             }
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static string GetSdkBinaryFileName(
-            RegistryKey rootKey,
-            string fileName,
-            bool whatIf,
-            bool verbose
-            )
-        {
-            StringDictionary results = new StringDictionary();
-
-            string[] keyNames = {
-                FrameworkKeyName,
-                FrameworkSdkKeyName,
-                WindowsSdkKeyName
-            };
-
-            string[] valueNames = {
-                "sdkInstallRootv2.0",
-                "InstallationFolder",
-                "InstallationFolder"
-            };
-
-            bool[] useSubKeys = {
-                false,
-                true,
-                true
-            };
-
-            for (int index = 0; index < keyNames.Length; index++)
-            {
-                using (MockRegistryKey key = RegistryHelper.OpenSubKey(
-                        rootKey, keyNames[index], false, whatIf, verbose))
-                {
-                    if (key == null)
-                        continue;
-
-                    if (useSubKeys[index])
-                    {
-                        foreach (string subKeyName in RegistryHelper.GetSubKeyNames(
-                                key, whatIf, verbose))
-                        {
-                            using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
-                                    key, subKeyName, false, whatIf, verbose))
-                            {
-                                if (subKey == null)
-                                    continue;
-
-                                object value = RegistryHelper.GetValue(
-                                    subKey, valueNames[index], null, whatIf,
-                                    verbose);
-
-                                if (!(value is string))
-                                    continue;
-
-                                string path = (string)value;
-
-                                if (!Directory.Exists(path))
-                                    continue;
-
-                                path = Path.Combine(path, "bin");
-
-                                if (!Directory.Exists(path))
-                                    continue;
-
-                                if (String.IsNullOrEmpty(fileName))
-                                {
-                                    results.Add(subKey.Name, path);
-                                    continue;
-                                }
-
-                                path = Path.Combine(path, fileName);
-
-                                if (File.Exists(path))
-                                    results.Add(subKey.Name, path);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        object value = RegistryHelper.GetValue(
-                            key, valueNames[index], null, whatIf, verbose);
-
-                        if (!(value is string))
-                            continue;
-
-                        string path = (string)value;
-
-                        if (!Directory.Exists(path))
-                            continue;
-
-                        path = Path.Combine(path, "bin");
-
-                        if (!Directory.Exists(path))
-                            continue;
-
-                        if (String.IsNullOrEmpty(fileName))
-                        {
-                            results.Add(key.Name, path);
-                            continue;
-                        }
-
-                        path = Path.Combine(path, fileName);
-
-                        if (File.Exists(path))
-                            results.Add(key.Name, path);
-                    }
-                }
-            }
-
-            //
-            // NOTE: If we found some results, return the last (latest) one.
-            //
-            if (results.Count > 0)
-                return results[new StringList(results.Keys)[results.Count - 1]];
-
-            return null;
         }
         #endregion
 
@@ -3742,26 +3587,6 @@ namespace System.Data.SQLite
 
                 if ((configuration == null) || !configuration.NoVs2010)
                     vsList.Versions.Add(new Version(10, 0));// Visual Studio 2010
-            }
-
-            if (vsList.FrameworkVersions == null)
-            {
-                vsList.FrameworkVersions = new VersionListMap();
-
-                // vsList.FrameworkVersions.Add(new Version(8, 0),
-                //     new VersionList(new Version[] {
-                //         new Version(2, 0, 50727) }));
-
-                if ((configuration == null) || !configuration.NoVs2008)
-                    vsList.FrameworkVersions.Add(new Version(9, 0),
-                        new VersionList(new Version[] {
-                            new Version(2, 0, 50727) }));
-
-                if ((configuration == null) || !configuration.NoVs2010)
-                    vsList.FrameworkVersions.Add(new Version(10, 0),
-                        new VersionList(new Version[] {
-                            new Version(2, 0, 50727),
-                                new Version(4, 0, 30319) }));
             }
         }
 
@@ -4228,37 +4053,6 @@ namespace System.Data.SQLite
             return String.Format("Software\\Microsoft\\VisualStudio\\{0}",
                 vsVersion);
         }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region Visual Studio Version Handling
-        private static bool AddVsVersion(
-            RegistryKey rootKey,
-            Version vsVersion,
-            Package package,
-            object clientData,
-            bool whatIf,
-            bool verbose,
-            ref string error
-            )
-        {
-            if (vsVersion != null)
-            {
-                VsList vsList = clientData as VsList;
-
-                if (vsList != null)
-                {
-                    if (vsList.InstalledVersions == null)
-                        vsList.InstalledVersions = new VersionList();
-
-                    if (!vsList.InstalledVersions.Contains(vsVersion))
-                        vsList.InstalledVersions.Add(vsVersion);
-                }
-            }
-
-            return true;
-        }
-        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
