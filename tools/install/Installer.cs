@@ -58,10 +58,7 @@ namespace System.Data.SQLite
     internal delegate bool VisualStudioRegistryCallback(
         RegistryKey rootKey,
         Version vsVersion,
-        Guid packageId,
-        Guid serviceId,
-        Guid dataSourceId,
-        Guid dataProviderId,
+        Installer.Package package,
         object clientData,
         bool whatIf,
         bool verbose,
@@ -1282,6 +1279,79 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region VersionListMap Class
+        private sealed class VersionListMap : Dictionary<Version, VersionList>
+        {
+            public VersionListMap()
+            {
+                // do nothing.
+            }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Package Class
+        internal sealed class Package
+        {
+            #region Public Constructors
+            public Package()
+            {
+                // do nothing.
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Properties
+            private Guid packageId;
+            public Guid PackageId
+            {
+                get { return packageId; }
+                set { packageId = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private Guid serviceId;
+            public Guid ServiceId
+            {
+                get { return serviceId; }
+                set { serviceId = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private Guid dataSourceId;
+            public Guid DataSourceId
+            {
+                get { return dataSourceId; }
+                set { dataSourceId = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private Guid dataProviderId;
+            public Guid DataProviderId
+            {
+                get { return dataProviderId; }
+                set { dataProviderId = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private Guid adoNetTechnologyId;
+            public Guid AdoNetTechnologyId
+            {
+                get { return adoNetTechnologyId; }
+                set { adoNetTechnologyId = value; }
+            }
+            #endregion
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Configuration Class
         private sealed class Configuration
         {
@@ -2066,6 +2136,11 @@ namespace System.Data.SQLite
 
                     TraceOps.Trace(
                         TracePriority.Medium, traceCallback, String.Format(
+                        "Running executable is: {0}", ForDisplay(location)),
+                        traceCategory);
+
+                    TraceOps.Trace(
+                        TracePriority.Medium, traceCallback, String.Format(
                         "Original command line is: {0}",
                         Environment.CommandLine), traceCategory);
 
@@ -2115,6 +2190,111 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     error = "Failed to process configuration.";
+                }
+
+                return false;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public static bool CheckRuntimeVersion(
+                Configuration configuration,
+                bool strict,
+                ref string error
+                )
+            {
+                try
+                {
+                    if (configuration == null)
+                    {
+                        error = "Invalid configuration.";
+                        return false;
+                    }
+
+                    //
+                    // NOTE: What version of the runtime was the core (primary)
+                    //       assembly compiled against (e.g. "v2.0.50727" or
+                    //       "v4.0.30319").
+                    //
+                    string coreImageRuntimeVersion = GetImageRuntimeVersion(
+                        configuration.coreFileName);
+
+                    //
+                    // TODO: Restrict the configuration based on which image
+                    //       runtime versions (which more-or-less correspond
+                    //       to .NET Framework versions) are supported by the
+                    //       versions of Visual Studio that are installed.
+                    //
+                    if (String.IsNullOrEmpty(coreImageRuntimeVersion))
+                    {
+                        error = "invalid core file image runtime version";
+                        return false;
+                    }
+                    else if (String.Equals(
+                            coreImageRuntimeVersion, CLR2ImageRuntimeVersion,
+                            StringComparison.InvariantCulture))
+                    {
+                        //
+                        // NOTE: For the CLR v2.0 runtime, make sure we disable
+                        //       any attempt to use it for things that require
+                        //       an assembly compiled for the CLR v4.0.  It is
+                        //       uncertain if this is actually a problem in
+                        //       practice as the CLR v4.0 can load and use an
+                        //       assembly compiled with the CLR v2.0; however,
+                        //       since this project offers both configurations,
+                        //       we currently disallow this mismatch.
+                        //
+                        configuration.noNetFx40 = true;
+                        configuration.noVs2010 = true;
+
+                        TraceOps.Trace(
+                            TracePriority.Medium, traceCallback, String.Format(
+                            "Assembly is compiled for the .NET Framework {0}, " +
+                            "support for .NET Framework {1} is now disabled.",
+                            CLR2ImageRuntimeVersion, CLR4ImageRuntimeVersion),
+                            traceCategory);
+                    }
+                    else if (String.Equals(
+                            coreImageRuntimeVersion, CLR4ImageRuntimeVersion,
+                            StringComparison.InvariantCulture))
+                    {
+                        //
+                        // NOTE: For the CLR v4.0 runtime, make sure we disable
+                        //       any attempt to use it for things that require
+                        //       an assembly compiled for the CLR v2.0.
+                        //
+                        configuration.noNetFx20 = true;
+                        configuration.noVs2008 = true;
+
+                        TraceOps.Trace(
+                            TracePriority.Medium, traceCallback, String.Format(
+                            "Assembly is compiled for the .NET Framework {0}, " +
+                            "support for .NET Framework {1} is now disabled.",
+                            ForDisplay(CLR4ImageRuntimeVersion),
+                            ForDisplay(CLR2ImageRuntimeVersion)),
+                            traceCategory);
+                    }
+                    else
+                    {
+                        error = String.Format(
+                            "unsupported core file image runtime version " +
+                            "{0}, must be {1} or {2}",
+                            ForDisplay(coreImageRuntimeVersion),
+                            ForDisplay(CLR2ImageRuntimeVersion),
+                            ForDisplay(CLR4ImageRuntimeVersion));
+
+                        return false;
+                    }
+
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    TraceOps.Trace(
+                        TracePriority.Highest, traceCallback, e,
+                        traceCategory);
+
+                    error = "Failed to check image runtime version.";
                 }
 
                 return false;
@@ -2433,6 +2613,110 @@ namespace System.Data.SQLite
             #endregion
         }
         #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region FrameworkList Class
+        private sealed class FrameworkList
+        {
+            #region Public Constructors
+            public FrameworkList()
+            {
+                // do nothing.
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Methods
+            private RegistryKey rootKey;
+            public RegistryKey RootKey
+            {
+                get { return rootKey; }
+                set { rootKey = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private StringList names;
+            public StringList Names
+            {
+                get { return names; }
+                set { names = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private VersionMap versions;
+            public VersionMap Versions
+            {
+                get { return versions; }
+                set { versions = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private StringList platformNames;
+            public StringList PlatformNames
+            {
+                get { return platformNames; }
+                set { platformNames = value; }
+            }
+            #endregion
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region VsList Class
+        private sealed class VsList
+        {
+            #region Public Constructors
+            public VsList()
+            {
+                // do nothing.
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Properties
+            private RegistryKey rootKey;
+            public RegistryKey RootKey
+            {
+                get { return rootKey; }
+                set { rootKey = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private VersionList versions;
+            public VersionList Versions
+            {
+                get { return versions; }
+                set { versions = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private VersionListMap frameworkVersions;
+            public VersionListMap FrameworkVersions
+            {
+                get { return frameworkVersions; }
+                set { frameworkVersions = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private VersionList installedVersions;
+            public VersionList InstalledVersions
+            {
+                get { return installedVersions; }
+                set { installedVersions = value; }
+            }
+            #endregion
+        }
+        #endregion
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -2447,6 +2731,11 @@ namespace System.Data.SQLite
         private const string InvariantName = "System.Data.SQLite";
         private const string FactoryTypeName = "System.Data.SQLite.SQLiteFactory";
         private const string Description = ".NET Framework Data Provider for SQLite";
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private const string CLR2ImageRuntimeVersion = "v2.0.50727";
+        private const string CLR4ImageRuntimeVersion = "v4.0.30319";
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -2483,30 +2772,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Private Data
+        #region Private Static Data
         private static Assembly thisAssembly = Assembly.GetExecutingAssembly();
 
         private static string traceCategory = Path.GetFileName(
             thisAssembly.Location);
 
         private static TraceCallback traceCallback = AppTrace;
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static RegistryKey frameworkRootKey;
-        private static StringList frameworkNameList;
-        private static VersionMap frameworkVersionMap;
-        private static StringList platformNameList;
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static RegistryKey vsRootKey;
-        private static VersionList vsVersionList;
-        private static Guid? vsPackageId;
-        private static Guid? vsServiceId;
-        private static Guid? vsDataSourcesId;
-        private static Guid? vsDataProviderId;
-        private static Guid? vsAdoNetTechnologyId;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -2579,6 +2851,28 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region .NET Framework Handling
+        private static string GetImageRuntimeVersion(
+            string fileName
+            )
+        {
+            try
+            {
+                Assembly assembly =
+                    Assembly.ReflectionOnlyLoadFrom(fileName); /* throw */
+
+                if (assembly != null)
+                    return assembly.ImageRuntimeVersion;
+            }
+            catch
+            {
+                // do nothing.
+            }
+
+            return null;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static string GetFrameworkDirectory(
             RegistryKey rootKey,
             Version frameworkVersion,
@@ -2726,64 +3020,77 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Per-Framework/Platform Handling
-        private static void InitializeAllFrameworks(
-            Configuration configuration
+        private static void InitializeFrameworkList(
+            Configuration configuration,
+            ref FrameworkList frameworkList
             )
         {
-            if (frameworkRootKey == null)
-                frameworkRootKey = Registry.LocalMachine;
+            if (frameworkList == null)
+                frameworkList = new FrameworkList();
 
-            if (frameworkNameList == null)
+            if (frameworkList.RootKey == null)
+                frameworkList.RootKey = Registry.LocalMachine;
+
+            ///////////////////////////////////////////////////////////////////
+
+            if (frameworkList.Names == null)
             {
-                frameworkNameList = new StringList();
+                frameworkList.Names = new StringList();
 
                 if ((configuration == null) || !configuration.NoDesktop)
-                    frameworkNameList.Add(".NETFramework");
+                    frameworkList.Names.Add(".NETFramework");
 
                 if ((configuration == null) || !configuration.NoCompact)
                 {
-                    frameworkNameList.Add(".NETCompactFramework");
-                    frameworkNameList.Add(".NETCompactFramework");
-                    frameworkNameList.Add(".NETCompactFramework");
+                    frameworkList.Names.Add(".NETCompactFramework");
+                    frameworkList.Names.Add(".NETCompactFramework");
+                    frameworkList.Names.Add(".NETCompactFramework");
                 }
             }
 
-            if (frameworkVersionMap == null)
-                frameworkVersionMap = new VersionMap();
+            ///////////////////////////////////////////////////////////////////
 
-            if ((configuration == null) || !configuration.NoDesktop)
+            if (frameworkList.Versions == null)
             {
-                VersionList desktopVersionList = new VersionList();
-
-                if ((configuration == null) || !configuration.NoNetFx20)
-                    desktopVersionList.Add(new Version(2, 0, 50727));
-
-                if ((configuration == null) || !configuration.NoNetFx40)
-                    desktopVersionList.Add(new Version(4, 0, 30319));
-
-                frameworkVersionMap.Add(".NETFramework", desktopVersionList);
-            }
-
-            if ((configuration == null) || !configuration.NoCompact)
-            {
-                frameworkVersionMap.Add(".NETCompactFramework", new VersionList(
-                    new Version[] {
-                    new Version(2, 0, 0, 0), new Version(3, 5, 0, 0)
-                }));
-            }
-
-            if (platformNameList == null)
-            {
-                platformNameList = new StringList();
+                frameworkList.Versions = new VersionMap();
 
                 if ((configuration == null) || !configuration.NoDesktop)
-                    platformNameList.Add(null);
+                {
+                    VersionList desktopVersionList = new VersionList();
+
+                    if ((configuration == null) || !configuration.NoNetFx20)
+                        desktopVersionList.Add(new Version(2, 0, 50727));
+
+                    if ((configuration == null) || !configuration.NoNetFx40)
+                        desktopVersionList.Add(new Version(4, 0, 30319));
+
+                    frameworkList.Versions.Add(".NETFramework",
+                        desktopVersionList);
+                }
 
                 if ((configuration == null) || !configuration.NoCompact)
                 {
-                    platformNameList.Add("PocketPC");
-                    platformNameList.Add("Smartphone");
-                    platformNameList.Add("WindowsCE");
+                    frameworkList.Versions.Add(".NETCompactFramework",
+                        new VersionList(new Version[] {
+                        new Version(2, 0, 0, 0), new Version(3, 5, 0, 0)
+                    }));
+                }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            if (frameworkList.PlatformNames == null)
+            {
+                frameworkList.PlatformNames = new StringList();
+
+                if ((configuration == null) || !configuration.NoDesktop)
+                    frameworkList.PlatformNames.Add(null);
+
+                if ((configuration == null) || !configuration.NoCompact)
+                {
+                    frameworkList.PlatformNames.Add("PocketPC");
+                    frameworkList.PlatformNames.Add("Smartphone");
+                    frameworkList.PlatformNames.Add("WindowsCE");
                 }
             }
         }
@@ -2812,7 +3119,7 @@ namespace System.Data.SQLite
                 if (key == null)
                     return false;
 
-                if (platformName != null) // NOTE: Skip non-desktop frameworks.
+                if (platformName != null) // NOTE: Skip non-desktop.
                     return true;
 
                 string directory = GetFrameworkDirectory(
@@ -2831,6 +3138,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ForEachFrameworkConfig(
+            FrameworkList frameworkList,
             FrameworkConfigCallback callback,
             string invariant,
             string name,
@@ -2844,7 +3152,13 @@ namespace System.Data.SQLite
             ref string error
             )
         {
-            RegistryKey rootKey = frameworkRootKey;
+            if (frameworkList == null)
+            {
+                error = "invalid framework list";
+                return false;
+            }
+
+            RegistryKey rootKey = frameworkList.RootKey;
 
             if (rootKey == null)
             {
@@ -2859,41 +3173,41 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (frameworkNameList == null)
+            if (frameworkList.Names == null)
             {
                 error = "no framework names found";
                 return false;
             }
 
-            if (frameworkVersionMap == null)
+            if (frameworkList.Versions == null)
             {
                 error = "no framework versions found";
                 return false;
             }
 
-            if (platformNameList == null)
+            if (frameworkList.PlatformNames == null)
             {
                 error = "no platform names found";
                 return false;
             }
 
-            if (frameworkNameList.Count != platformNameList.Count)
+            if (frameworkList.Names.Count != frameworkList.PlatformNames.Count)
             {
                 error = String.Format("framework name count {0} does not " +
-                    "match platform name count {1}", frameworkNameList.Count,
-                    platformNameList.Count);
+                    "match platform name count {1}", frameworkList.Names.Count,
+                    frameworkList.PlatformNames.Count);
 
                 return false;
             }
 
-            for (int index = 0; index < frameworkNameList.Count; index++)
+            for (int index = 0; index < frameworkList.Names.Count; index++)
             {
                 //
                 // NOTE: Grab the name of the framework (e.g. ".NETFramework")
                 //       and the name of the platform (e.g. "WindowsCE").
                 //
-                string frameworkName = frameworkNameList[index];
-                string platformName = platformNameList[index];
+                string frameworkName = frameworkList.Names[index];
+                string platformName = frameworkList.PlatformNames[index];
 
                 //
                 // NOTE: Skip all non-desktop frameworks (i.e. if the platform
@@ -2908,7 +3222,7 @@ namespace System.Data.SQLite
                 //
                 VersionList frameworkVersionList;
 
-                if (!frameworkVersionMap.TryGetValue(
+                if (!frameworkList.Versions.TryGetValue(
                         frameworkName, out frameworkVersionList) ||
                     (frameworkVersionList == null))
                 {
@@ -3010,6 +3324,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ForEachFrameworkRegistry(
+            FrameworkList frameworkList,
             FrameworkRegistryCallback callback,
             object clientData,
             bool whatIf,
@@ -3017,7 +3332,13 @@ namespace System.Data.SQLite
             ref string error
             )
         {
-            RegistryKey rootKey = frameworkRootKey;
+            if (frameworkList == null)
+            {
+                error = "invalid framework list";
+                return false;
+            }
+
+            RegistryKey rootKey = frameworkList.RootKey;
 
             if (rootKey == null)
             {
@@ -3032,41 +3353,41 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (frameworkNameList == null)
+            if (frameworkList.Names == null)
             {
                 error = "no framework names found";
                 return false;
             }
 
-            if (frameworkVersionMap == null)
+            if (frameworkList.Versions == null)
             {
                 error = "no framework versions found";
                 return false;
             }
 
-            if (platformNameList == null)
+            if (frameworkList.PlatformNames == null)
             {
                 error = "no platform names found";
                 return false;
             }
 
-            if (frameworkNameList.Count != platformNameList.Count)
+            if (frameworkList.Names.Count != frameworkList.PlatformNames.Count)
             {
                 error = String.Format("framework name count {0} does not " +
-                    "match platform name count {1}", frameworkNameList.Count,
-                    platformNameList.Count);
+                    "match platform name count {1}", frameworkList.Names.Count,
+                    frameworkList.PlatformNames.Count);
 
                 return false;
             }
 
-            for (int index = 0; index < frameworkNameList.Count; index++)
+            for (int index = 0; index < frameworkList.Names.Count; index++)
             {
                 //
                 // NOTE: Grab the name of the framework (e.g. ".NETFramework")
                 //       and the name of the platform (e.g. "WindowsCE").
                 //
-                string frameworkName = frameworkNameList[index];
-                string platformName = platformNameList[index];
+                string frameworkName = frameworkList.Names[index];
+                string platformName = frameworkList.PlatformNames[index];
 
                 //
                 // NOTE: Grab the supported versions of this particular
@@ -3074,7 +3395,7 @@ namespace System.Data.SQLite
                 //
                 VersionList frameworkVersionList;
 
-                if (!frameworkVersionMap.TryGetValue(
+                if (!frameworkList.Versions.TryGetValue(
                         frameworkName, out frameworkVersionList) ||
                     (frameworkVersionList == null))
                 {
@@ -3121,44 +3442,48 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Per-Visual Studio Version Handling
-        private static void InitializeAllVsVersions(
-            Configuration configuration
+        private static void InitializeVsList(
+            Configuration configuration,
+            ref VsList vsList
             )
         {
-            if (vsRootKey == null)
-                vsRootKey = Registry.LocalMachine;
+            if (vsList == null)
+                vsList = new VsList();
 
-            if (vsAdoNetTechnologyId == null)
-                vsAdoNetTechnologyId = new Guid(
-                    "77AB9A9D-78B9-4BA7-91AC-873F5338F1D2");
+            if (vsList.RootKey == null)
+                vsList.RootKey = Registry.LocalMachine;
 
-            if (vsPackageId == null)
-                vsPackageId = new Guid(
-                    "DCBE6C8D-0E57-4099-A183-98FF74C64D9C");
-
-            if (vsServiceId == null)
-                vsServiceId = new Guid(
-                    "DCBE6C8D-0E57-4099-A183-98FF74C64D9D");
-
-            if (vsDataSourcesId == null)
-                vsDataSourcesId = new Guid(
-                    "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C71");
-
-            if (vsDataProviderId == null)
-                vsDataProviderId = new Guid(
-                    "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C70");
-
-            if (vsVersionList == null)
+            if (vsList.Versions == null)
             {
-                vsVersionList = new VersionList();
+                vsList.Versions = new VersionList();
 
-                // vsVersionList.Add(new Version(8, 0)); // Visual Studio 2005
+                // vsList.Versions.Add(new Version(8, 0)); // Visual Studio 2005
 
                 if ((configuration == null) || !configuration.NoVs2008)
-                    vsVersionList.Add(new Version(9, 0)); // Visual Studio 2008
+                    vsList.Versions.Add(new Version(9, 0)); // Visual Studio 2008
 
                 if ((configuration == null) || !configuration.NoVs2010)
-                    vsVersionList.Add(new Version(10, 0));// Visual Studio 2010
+                    vsList.Versions.Add(new Version(10, 0));// Visual Studio 2010
+            }
+
+            if (vsList.FrameworkVersions == null)
+            {
+                vsList.FrameworkVersions = new VersionListMap();
+
+                // vsList.FrameworkVersions.Add(new Version(8, 0),
+                //     new VersionList(new Version[] {
+                //         new Version(2, 0, 50727) }));
+
+                if ((configuration == null) || !configuration.NoVs2008)
+                    vsList.FrameworkVersions.Add(new Version(9, 0),
+                        new VersionList(new Version[] {
+                            new Version(2, 0, 50727) }));
+
+                if ((configuration == null) || !configuration.NoVs2010)
+                    vsList.FrameworkVersions.Add(new Version(10, 0),
+                        new VersionList(new Version[] {
+                            new Version(2, 0, 50727),
+                                new Version(4, 0, 30319) }));
             }
         }
 
@@ -3171,6 +3496,9 @@ namespace System.Data.SQLite
             bool verbose
             )
         {
+            if (vsVersion == null)
+                return false;
+
             string format = "Software\\Microsoft\\VisualStudio\\{0}";
             string keyName = String.Format(format, vsVersion);
 
@@ -3201,18 +3529,22 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ForEachVsVersionRegistry(
+            VsList vsList,
             VisualStudioRegistryCallback callback,
-            Guid packageId,
-            Guid serviceId,
-            Guid dataSourceId,
-            Guid dataProviderId,
+            Package package,
             object clientData,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
-            RegistryKey rootKey = vsRootKey;
+            if (vsList == null)
+            {
+                error = "invalid VS list";
+                return false;
+            }
+
+            RegistryKey rootKey = vsList.RootKey;
 
             if (rootKey == null)
             {
@@ -3227,13 +3559,13 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (vsVersionList == null)
+            if (vsList.Versions == null)
             {
                 error = "no VS versions found";
                 return false;
             }
 
-            foreach (Version vsVersion in vsVersionList)
+            foreach (Version vsVersion in vsList.Versions)
             {
                 TraceOps.Trace(
                     TracePriority.Lower, traceCallback, String.Format(
@@ -3253,8 +3585,7 @@ namespace System.Data.SQLite
                     continue;
 
                 if (!callback(
-                        rootKey, vsVersion, packageId, serviceId,
-                        dataSourceId, dataProviderId, clientData, whatIf,
+                        rootKey, vsVersion, package, clientData, whatIf,
                         verbose, ref error))
                 {
                     return false;
@@ -3610,9 +3941,43 @@ namespace System.Data.SQLite
             Version vsVersion
             )
         {
+            if (vsVersion == null)
+                return null;
+
             return String.Format("Software\\Microsoft\\VisualStudio\\{0}",
                 vsVersion);
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Visual Studio Version Handling
+        private static bool AddVsVersion(
+            RegistryKey rootKey,
+            Version vsVersion,
+            Package package,
+            object clientData,
+            bool whatIf,
+            bool verbose,
+            ref string error
+            )
+        {
+            if (vsVersion != null)
+            {
+                VsList vsList = clientData as VsList;
+
+                if (vsList != null)
+                {
+                    if (vsList.InstalledVersions == null)
+                        vsList.InstalledVersions = new VersionList();
+
+                    if (!vsList.InstalledVersions.Contains(vsVersion))
+                        vsList.InstalledVersions.Add(vsVersion);
+                }
+            }
+
+            return true;
+        }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -3620,13 +3985,24 @@ namespace System.Data.SQLite
         private static bool AddVsDataSource(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid dataSourceId,
-            Guid dataProviderId,
+            Package package,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
+            if (vsVersion == null)
+            {
+                error = "invalid VS version";
+                return false;
+            }
+
+            if (package == null)
+            {
+                error = "invalid VS package";
+                return false;
+            }
+
             string keyName = GetVsKeyName(vsVersion);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
@@ -3653,15 +4029,16 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    using (MockRegistryKey dataSourceKey = RegistryHelper.CreateSubKey(
-                            subKey, dataSourceId.ToString(VsIdFormat), whatIf,
-                            verbose))
+                    using (MockRegistryKey dataSourceKey =
+                            RegistryHelper.CreateSubKey(subKey,
+                            package.DataSourceId.ToString(VsIdFormat),
+                            whatIf, verbose))
                     {
                         if (dataSourceKey == null)
                         {
                             error = String.Format(
-                                "could not create registry key: {0}\\{1}",
-                                key, dataSourceId.ToString(VsIdFormat));
+                                "could not create registry key: {0}\\{1}", key,
+                                package.DataSourceId.ToString(VsIdFormat));
 
                             return false;
                         }
@@ -3673,8 +4050,8 @@ namespace System.Data.SQLite
 
                         RegistryHelper.CreateSubKey(dataSourceKey,
                             String.Format("SupportingProviders\\{0}",
-                            dataProviderId.ToString(VsIdFormat)), whatIf,
-                            verbose);
+                            package.DataProviderId.ToString(VsIdFormat)),
+                            whatIf, verbose);
                     }
                 }
             }
@@ -3687,12 +4064,24 @@ namespace System.Data.SQLite
         private static bool RemoveVsDataSource(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid dataSourceId,
+            Package package,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
+            if (vsVersion == null)
+            {
+                error = "invalid VS version";
+                return false;
+            }
+
+            if (package == null)
+            {
+                error = "invalid VS package";
+                return false;
+            }
+
             string keyName = GetVsKeyName(vsVersion);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
@@ -3720,8 +4109,8 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteSubKeyTree(
-                        subKey, dataSourceId.ToString(VsIdFormat), whatIf,
-                        verbose);
+                        subKey, package.DataSourceId.ToString(VsIdFormat),
+                        whatIf, verbose);
                 }
             }
 
@@ -3733,16 +4122,19 @@ namespace System.Data.SQLite
         private static bool ProcessVsDataSource(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid packageId, /* NOT USED */
-            Guid serviceId, /* NOT USED */
-            Guid dataSourceId,
-            Guid dataProviderId,
+            Package package,
             object clientData,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
+            if (package == null)
+            {
+                error = "invalid VS package";
+                return false;
+            }
+
             AnyPair<string, bool> pair = clientData as AnyPair<string, bool>;
 
             if (pair == null)
@@ -3754,14 +4146,12 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsDataSource(
-                    rootKey, vsVersion, dataSourceId, dataProviderId,
-                    whatIf, verbose, ref error);
+                    rootKey, vsVersion, package, whatIf, verbose, ref error);
             }
             else
             {
                 return RemoveVsDataSource(
-                    rootKey, vsVersion, dataSourceId, whatIf, verbose,
-                    ref error);
+                    rootKey, vsVersion, package, whatIf, verbose, ref error);
             }
         }
         #endregion
@@ -3772,17 +4162,22 @@ namespace System.Data.SQLite
         private static bool AddVsDataProvider(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid serviceId,
-            Guid dataProviderId,
+            Package package,
             string fileName,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
-            if (vsAdoNetTechnologyId == null)
+            if (vsVersion == null)
             {
-                error = "invalid ADO.NET technology Id";
+                error = "invalid VS version";
+                return false;
+            }
+
+            if (package == null)
+            {
+                error = "invalid VS package";
                 return false;
             }
 
@@ -3812,15 +4207,16 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    using (MockRegistryKey dataProviderKey = RegistryHelper.CreateSubKey(
-                            subKey, dataProviderId.ToString(VsIdFormat), whatIf,
-                            verbose))
+                    using (MockRegistryKey dataProviderKey =
+                            RegistryHelper.CreateSubKey(subKey,
+                            package.DataProviderId.ToString(VsIdFormat),
+                            whatIf, verbose))
                     {
                         if (dataProviderKey == null)
                         {
                             error = String.Format(
-                                "could not create registry key: {0}\\{1}",
-                                key, dataProviderId.ToString(VsIdFormat));
+                                "could not create registry key: {0}\\{1}", key,
+                                package.DataProviderId.ToString(VsIdFormat));
 
                             return false;
                         }
@@ -3835,7 +4231,7 @@ namespace System.Data.SQLite
 
                         RegistryHelper.SetValue(
                             dataProviderKey, "Technology",
-                            ((Guid)vsAdoNetTechnologyId).ToString(VsIdFormat),
+                            package.AdoNetTechnologyId.ToString(VsIdFormat),
                             whatIf, verbose);
 
                         RegistryHelper.SetValue(
@@ -3844,7 +4240,8 @@ namespace System.Data.SQLite
 
                         RegistryHelper.SetValue(
                             dataProviderKey, "FactoryService",
-                            serviceId.ToString(VsIdFormat), whatIf, verbose);
+                            package.ServiceId.ToString(VsIdFormat), whatIf,
+                            verbose);
 
                         RegistryHelper.CreateSubKey(dataProviderKey,
                             "SupportedObjects\\DataConnectionUIControl",
@@ -3877,12 +4274,18 @@ namespace System.Data.SQLite
         private static bool RemoveVsDataProvider(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid dataProviderId,
+            Package package,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
+            if (vsVersion == null)
+            {
+                error = "invalid VS version";
+                return false;
+            }
+
             string keyName = GetVsKeyName(vsVersion);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
@@ -3910,8 +4313,8 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteSubKeyTree(
-                        subKey, dataProviderId.ToString(VsIdFormat), whatIf,
-                        verbose);
+                        subKey, package.DataProviderId.ToString(VsIdFormat),
+                        whatIf, verbose);
                 }
             }
 
@@ -3923,10 +4326,7 @@ namespace System.Data.SQLite
         private static bool ProcessVsDataProvider(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid packageId, /* NOT USED */
-            Guid serviceId,
-            Guid dataSourceId, /* NOT USED */
-            Guid dataProviderId,
+            Package package,
             object clientData,
             bool whatIf,
             bool verbose,
@@ -3944,14 +4344,14 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsDataProvider(
-                    rootKey, vsVersion, serviceId, dataProviderId, pair.X,
+                    rootKey, vsVersion, package, pair.X,
                     whatIf, verbose, ref error);
             }
             else
             {
                 return RemoveVsDataProvider(
-                    rootKey, vsVersion, dataProviderId, whatIf, verbose,
-                    ref error);
+                    rootKey, vsVersion, package, whatIf,
+                    verbose, ref error);
             }
         }
         #endregion
@@ -3959,17 +4359,55 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Visual Studio Package Handling
+        private static void InitializeVsPackage(
+            ref Package package
+            )
+        {
+            if (package == null)
+            {
+                package = new Package();
+
+                package.AdoNetTechnologyId = new Guid(
+                    "77AB9A9D-78B9-4BA7-91AC-873F5338F1D2");
+
+                package.PackageId = new Guid(
+                    "DCBE6C8D-0E57-4099-A183-98FF74C64D9C");
+
+                package.ServiceId = new Guid(
+                    "DCBE6C8D-0E57-4099-A183-98FF74C64D9D");
+
+                package.DataSourceId = new Guid(
+                    "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C71");
+
+                package.DataProviderId = new Guid(
+                    "0EBAAB6E-CA80-4B4A-8DDF-CBE6BF058C70");
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static bool AddVsPackage(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid packageId,
-            Guid serviceId,
+            Package package,
             string fileName,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
+            if (vsVersion == null)
+            {
+                error = "invalid VS version";
+                return false;
+            }
+
+            if (package == null)
+            {
+                error = "invalid VS package";
+                return false;
+            }
+
             string keyName = GetVsKeyName(vsVersion);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
@@ -3997,14 +4435,14 @@ namespace System.Data.SQLite
                     }
 
                     using (MockRegistryKey packageKey = RegistryHelper.CreateSubKey(
-                            subKey, packageId.ToString(VsIdFormat), whatIf,
+                            subKey, package.PackageId.ToString(VsIdFormat), whatIf,
                             verbose))
                     {
                         if (packageKey == null)
                         {
                             error = String.Format(
                                 "could not create registry key: {0}\\{1}",
-                                key, packageId.ToString(VsIdFormat));
+                                key, package.PackageId.ToString(VsIdFormat));
 
                             return false;
                         }
@@ -4071,8 +4509,8 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.SetValue(
-                        subKey, packageId.ToString(VsIdFormat), ", 1000, 3",
-                        whatIf, verbose);
+                        subKey, package.PackageId.ToString(VsIdFormat),
+                        ", 1000, 3", whatIf, verbose);
                 }
 
                 using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
@@ -4088,20 +4526,21 @@ namespace System.Data.SQLite
                     }
 
                     using (MockRegistryKey serviceKey = RegistryHelper.CreateSubKey(
-                            subKey, serviceId.ToString(VsIdFormat), whatIf,
+                            subKey, package.ServiceId.ToString(VsIdFormat), whatIf,
                             verbose))
                     {
                         if (serviceKey == null)
                         {
                             error = String.Format(
                                 "could not create registry key: {0}\\{1}",
-                                key, serviceId.ToString(VsIdFormat));
+                                key, package.ServiceId.ToString(VsIdFormat));
 
                             return false;
                         }
 
                         RegistryHelper.SetValue(serviceKey, null,
-                            packageId.ToString(VsIdFormat), whatIf, verbose);
+                            package.PackageId.ToString(VsIdFormat), whatIf,
+                            verbose);
 
                         RegistryHelper.SetValue(serviceKey, "Name",
                             String.Format("{0} Designer Service", ProjectName),
@@ -4118,13 +4557,24 @@ namespace System.Data.SQLite
         private static bool RemoveVsPackage(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid packageId,
-            Guid serviceId,
+            Package package,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
+            if (vsVersion == null)
+            {
+                error = "invalid VS version";
+                return false;
+            }
+
+            if (package == null)
+            {
+                error = "invalid VS package";
+                return false;
+            }
+
             string keyName = GetVsKeyName(vsVersion);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
@@ -4152,7 +4602,8 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteSubKeyTree(
-                        key, packageId.ToString(VsIdFormat), whatIf, verbose);
+                        key, package.PackageId.ToString(VsIdFormat), whatIf,
+                        verbose);
                 }
 
                 using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
@@ -4168,7 +4619,7 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteValue(
-                        subKey, packageId.ToString(VsIdFormat), whatIf,
+                        subKey, package.PackageId.ToString(VsIdFormat), whatIf,
                         verbose);
                 }
 
@@ -4185,7 +4636,7 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteSubKeyTree(
-                        subKey, serviceId.ToString(VsIdFormat), whatIf,
+                        subKey, package.ServiceId.ToString(VsIdFormat), whatIf,
                         verbose);
                 }
             }
@@ -4198,10 +4649,7 @@ namespace System.Data.SQLite
         private static bool ProcessVsPackage(
             RegistryKey rootKey,
             Version vsVersion,
-            Guid packageId,
-            Guid serviceId,
-            Guid dataSourceId,
-            Guid dataProviderId,
+            Package package,
             object clientData,
             bool whatIf,
             bool verbose,
@@ -4219,13 +4667,13 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsPackage(
-                    rootKey, vsVersion, packageId, serviceId, pair.X, whatIf,
+                    rootKey, vsVersion, package, pair.X, whatIf,
                     verbose, ref error);
             }
             else
             {
                 return RemoveVsPackage(
-                    rootKey, vsVersion, packageId, serviceId, whatIf, verbose,
+                    rootKey, vsVersion, package, whatIf, verbose,
                     ref error);
             }
         }
@@ -4235,7 +4683,9 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Application Entry Point
-        private static int Main(string[] args)
+        private static int Main(
+            string[] args
+            )
         {
             Configuration configuration = null;
             string error = null;
@@ -4246,20 +4696,31 @@ namespace System.Data.SQLite
             if (!Configuration.FromArgs(
                     args, true, ref configuration, ref error) ||
                 !Configuration.Process(
-                    args, configuration, true, ref error))
+                    args, configuration, true, ref error) ||
+                !Configuration.CheckRuntimeVersion(
+                    configuration, true, ref error))
             {
                 TraceOps.ShowMessage(
                     TracePriority.Highest, traceCallback, thisAssembly,
                     error, traceCategory, MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
-                return 1;
+                return 1; /* FAILURE */
             }
+            #endregion
 
             ///////////////////////////////////////////////////////////////////
 
-            InitializeAllFrameworks(configuration);
-            InitializeAllVsVersions(configuration);
+            #region .NET Framework / Visual Studio Data
+            Package package = null;
+            FrameworkList frameworkList = null;
+            VsList vsList = null;
+
+            ///////////////////////////////////////////////////////////////////
+
+            InitializeVsPackage(ref package);
+            InitializeFrameworkList(configuration, ref frameworkList);
+            InitializeVsList(configuration, ref vsList);
             #endregion
 
             ///////////////////////////////////////////////////////////////////
@@ -4329,16 +4790,17 @@ namespace System.Data.SQLite
             #region .NET AssemblyFolders
             if (configuration.HasFlags(InstallFlags.AssemblyFolders, true))
             {
-                if (!ForEachFrameworkRegistry(ProcessAssemblyFolders,
+                if (!ForEachFrameworkRegistry(
+                        frameworkList, ProcessAssemblyFolders,
                         directoryPair, configuration.WhatIf,
                         configuration.Verbose, ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
@@ -4350,18 +4812,19 @@ namespace System.Data.SQLite
             {
                 bool saved = false;
 
-                if (!ForEachFrameworkConfig(ProcessDbProviderFactory,
+                if (!ForEachFrameworkConfig(
+                        frameworkList, ProcessDbProviderFactory,
                         InvariantName, ProviderName, Description,
                         FactoryTypeName, assemblyName, directoryPair,
                         configuration.WhatIf, configuration.Verbose,
                         ref saved, ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
@@ -4371,18 +4834,17 @@ namespace System.Data.SQLite
             #region VS Package
             if (configuration.HasFlags(InstallFlags.VsPackage, true))
             {
-                if (!ForEachVsVersionRegistry(ProcessVsPackage,
-                        (Guid)vsPackageId, (Guid)vsServiceId,
-                        (Guid)vsDataSourcesId, (Guid)vsDataProviderId,
-                        fileNamePair, configuration.WhatIf,
-                        configuration.Verbose, ref error))
+                if (!ForEachVsVersionRegistry(
+                        vsList, ProcessVsPackage, package, fileNamePair,
+                        configuration.WhatIf, configuration.Verbose,
+                        ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
@@ -4392,18 +4854,17 @@ namespace System.Data.SQLite
             #region VS DataSource
             if (configuration.HasFlags(InstallFlags.VsDataSource, true))
             {
-                if (!ForEachVsVersionRegistry(ProcessVsDataSource,
-                        (Guid)vsPackageId, (Guid)vsServiceId,
-                        (Guid)vsDataSourcesId, (Guid)vsDataProviderId,
-                        fileNamePair, configuration.WhatIf,
-                        configuration.Verbose, ref error))
+                if (!ForEachVsVersionRegistry(
+                        vsList, ProcessVsDataSource, package, fileNamePair,
+                        configuration.WhatIf, configuration.Verbose,
+                        ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
@@ -4413,24 +4874,24 @@ namespace System.Data.SQLite
             #region VS DataProvider
             if (configuration.HasFlags(InstallFlags.VsDataProvider, true))
             {
-                if (!ForEachVsVersionRegistry(ProcessVsDataProvider,
-                        (Guid)vsPackageId, (Guid)vsServiceId,
-                        (Guid)vsDataSourcesId, (Guid)vsDataProviderId,
-                        fileNamePair, configuration.WhatIf,
-                        configuration.Verbose, ref error))
+                if (!ForEachVsVersionRegistry(
+                        vsList, ProcessVsDataProvider, package, fileNamePair,
+                        configuration.WhatIf, configuration.Verbose,
+                        ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
-                    return 1;
+                    return 1; /* FAILURE */
                 }
             }
             #endregion
 
             ///////////////////////////////////////////////////////////////////
 
+            #region Log Summary
             TraceOps.Trace(
                 TracePriority.Higher, traceCallback, String.Format(
                 "subKeysCreated = {0}, subKeysDeleted = {1}, " +
@@ -4440,10 +4901,11 @@ namespace System.Data.SQLite
                 ForDisplay(RegistryHelper.KeyValuesSet),
                 ForDisplay(RegistryHelper.KeyValuesDeleted)),
                 traceCategory);
+            #endregion
 
             ///////////////////////////////////////////////////////////////////
 
-            return 0;
+            return 0; /* SUCCESS */
         }
         #endregion
     }
