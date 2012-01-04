@@ -2772,7 +2772,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Private Data
+        #region Private Static Data
         private static Assembly thisAssembly = Assembly.GetExecutingAssembly();
 
         private static string traceCategory = Path.GetFileName(
@@ -4796,7 +4796,7 @@ namespace System.Data.SQLite
                         configuration.Verbose, ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
@@ -4820,7 +4820,7 @@ namespace System.Data.SQLite
                         ref saved, ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
@@ -4840,7 +4840,7 @@ namespace System.Data.SQLite
                         ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
@@ -4860,7 +4860,7 @@ namespace System.Data.SQLite
                         ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
@@ -4880,7 +4880,7 @@ namespace System.Data.SQLite
                         ref error))
                 {
                     TraceOps.ShowMessage(
-                        TracePriority.Highest, traceCallback, null,
+                        TracePriority.Highest, traceCallback, thisAssembly,
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
