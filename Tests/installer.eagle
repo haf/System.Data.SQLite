@@ -74,10 +74,11 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
 
   set code [catch {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
-        -success 0] -install true -tracePriority High -noNetFx40 true \
-        -noVs2010 true -verbose true \
+        -success 0] -debugPriority Lowest -tracePriority High -install true \
+        -noRuntimeVersion true -noCompact true -noNetFx40 true -noVs2010 true \
+        -whatIf true -verbose true -confirm true \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
-        -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
+        -traceFormat [appendArgs \" "#{0}: {2}" \"]
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
@@ -105,10 +106,11 @@ runTest {test installer-1.2 {uninstaller tool / Visual Studio 2008} -setup {
 
   set code [catch {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
-        -success 0] -install false -tracePriority High -noNetFx40 true \
-        -noVs2010 true -verbose true \
+        -success 0] -debugPriority Lowest -tracePriority High -install false \
+        -noRuntimeVersion true -noCompact true -noNetFx40 true -noVs2010 true \
+        -whatIf true -verbose true -confirm true \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
-        -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
+        -traceFormat [appendArgs \" "#{0}: {2}" \"]
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
@@ -136,10 +138,11 @@ runTest {test installer-1.3 {installer tool / Visual Studio 2010} -setup {
 
   set code [catch {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
-        -success 0] -install true -tracePriority High -noNetFx20 true \
-        -noVs2008 true -verbose true \
+        -success 0] -debugPriority Lowest -tracePriority High -install true \
+        -noRuntimeVersion true -noCompact true -noNetFx20 true -noVs2008 true \
+        -whatIf true -verbose true -confirm true \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
-        -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
+        -traceFormat [appendArgs \" "#{0}: {2}" \"]
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
@@ -167,10 +170,11 @@ runTest {test installer-1.4 {uninstaller tool / Visual Studio 2010} -setup {
 
   set code [catch {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
-        -success 0] -install false -tracePriority High -noNetFx20 true \
-        -noVs2008 true -verbose true \
+        -success 0] -debugPriority Lowest -tracePriority High -install false \
+        -noRuntimeVersion true -noCompact true -noNetFx20 true -noVs2008 true \
+        -whatIf true -verbose true -confirm true \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
-        -traceFormat [appendArgs \" "#{0}: {2}" \"] -whatIf true -confirm true
+        -traceFormat [appendArgs \" "#{0}: {2}" \"]
   } error]
 
   tlog "---- BEGIN STDOUT OUTPUT\n"
