@@ -2260,11 +2260,11 @@ namespace System.Data.SQLite
                         if (!configuration.noConsole)
                         {
                             //
-                            // NOTE: In verbose mode, ALL output will be
-                            //       displayed to the console; otherwise, only
-                            //       outputs that are actually logged (i.e.
-                            //       those that meet the priority requirements)
-                            //       will be displayed to the console.
+                            // NOTE: In verbose mode, debug output (that meets
+                            //       the configured priority criteria) will be
+                            //       displayed to the console; otherwise, trace
+                            //       output (that meets the configured priority
+                            //       criteria) will be displayed to the console.
                             //
                             if (!configuration.verbose)
                             {
