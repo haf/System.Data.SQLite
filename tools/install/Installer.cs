@@ -99,8 +99,8 @@ namespace System.Data.SQLite
         High = 0x10,
         Higher = 0x20,
         Highest = 0x40,
-        Debug = Medium,
-        Trace = Medium
+        Debug = Medium, /* NOTE: Default for debug messages. */
+        Trace = Medium  /* NOTE: Default for trace messages. */
     }
     #endregion
 
@@ -390,16 +390,20 @@ namespace System.Data.SQLite
             {
                 lock (syncRoot)
                 {
+#if DEBUG
+                    //
+                    // NOTE: Write the message to all the active debug
+                    //       listeners.
+                    //
+                    Debug.WriteLine(message, category);
+                    Debug.Flush();
+#else
                     //
                     // NOTE: For a build without "DEBUG" defined, we cannot
                     //       simply use the Debug class (i.e. it will do
                     //       nothing); therefore, use the console directly
                     //       instead.
                     //
-#if DEBUG
-                    Debug.WriteLine(message, category);
-                    Debug.Flush();
-#else
                     Console.WriteLine(String.Format("{1}: {0}", message,
                         category));
 #endif
@@ -415,6 +419,10 @@ namespace System.Data.SQLite
             {
                 lock (syncRoot)
                 {
+                    //
+                    // NOTE: Write the message to all the active trace
+                    //       listeners.
+                    //
                     Trace.WriteLine(message, category);
                     Trace.Flush();
                 }
@@ -494,8 +502,9 @@ namespace System.Data.SQLite
                         debugCallback = DebugCore;
 
                     //
-                    // NOTE: Write the formatted message to all the active
-                    //       debug listeners.
+                    // NOTE: Invoke the debug callback with the formatted
+                    //       message and the category specified by the
+                    //       caller.
                     //
                     debugCallback(formatted, category);
                 }
@@ -513,8 +522,9 @@ namespace System.Data.SQLite
                         traceCallback = TraceCore;
 
                     //
-                    // NOTE: Write the formatted message to all the active
-                    //       trace listeners.
+                    // NOTE: Invoke the trace callback with the formatted
+                    //       message and the category specified by the
+                    //       caller.
                     //
                     traceCallback(formatted, category);
                 }
@@ -946,7 +956,8 @@ namespace System.Data.SQLite
                 if (!disposed)
                     return;
 
-                throw new ObjectDisposedException(typeof(MockRegistryKey).Name);
+                throw new ObjectDisposedException(
+                    typeof(MockRegistryKey).Name);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1092,8 +1103,8 @@ namespace System.Data.SQLite
                     return null;
 
                 if (verbose)
-                    TraceOps.DebugAndTrace(
-                        writable ? TracePriority.Highest : TracePriority.Higher,
+                    TraceOps.DebugAndTrace(writable ?
+                        TracePriority.Highest : TracePriority.Higher,
                         debugCallback, traceCallback, String.Format(
                         "rootKey = {0}, subKeyName = {1}, writable = {2}",
                         ForDisplay(rootKey), ForDisplay(subKeyName),
@@ -1125,8 +1136,9 @@ namespace System.Data.SQLite
                 if (verbose)
                     TraceOps.DebugAndTrace(TracePriority.Highest,
                         debugCallback, traceCallback, String.Format(
-                        "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
-                        ForDisplay(subKeyName)), traceCategory);
+                        "rootKey = {0}, subKeyName = {1}",
+                        ForDisplay(rootKey), ForDisplay(subKeyName)),
+                        traceCategory);
 
                 try
                 {
@@ -1138,8 +1150,8 @@ namespace System.Data.SQLite
                     {
                         //
                         // HACK: Attempt to open the specified sub-key.  If
-                        //       this fails, we will simply return the root key
-                        //       itself since no writes are allowed in
+                        //       this fails, we will simply return the root
+                        //       key itself since no writes are allowed in
                         //       'what-if' mode anyhow.
                         //
                         MockRegistryKey key = rootKey.OpenSubKey(subKeyName);
@@ -1176,8 +1188,9 @@ namespace System.Data.SQLite
                 if (verbose)
                     TraceOps.DebugAndTrace(TracePriority.Highest,
                         debugCallback, traceCallback, String.Format(
-                        "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
-                        ForDisplay(subKeyName)), traceCategory);
+                        "rootKey = {0}, subKeyName = {1}",
+                        ForDisplay(rootKey), ForDisplay(subKeyName)),
+                        traceCategory);
 
                 if (!whatIf)
                     rootKey.DeleteSubKey(subKeyName);
@@ -1200,8 +1213,9 @@ namespace System.Data.SQLite
                 if (verbose)
                     TraceOps.DebugAndTrace(TracePriority.Highest,
                         debugCallback, traceCallback, String.Format(
-                        "rootKey = {0}, subKeyName = {1}", ForDisplay(rootKey),
-                        ForDisplay(subKeyName)), traceCategory);
+                        "rootKey = {0}, subKeyName = {1}",
+                        ForDisplay(rootKey), ForDisplay(subKeyName)),
+                        traceCategory);
 
                 if (!whatIf)
                     rootKey.DeleteSubKeyTree(subKeyName);
@@ -1267,8 +1281,9 @@ namespace System.Data.SQLite
                 if (verbose)
                     TraceOps.DebugAndTrace(TracePriority.Highest,
                         debugCallback, traceCallback, String.Format(
-                        "key = {0}, name = {1}, value = {2}", ForDisplay(key),
-                        ForDisplay(name), ForDisplay(value)), traceCategory);
+                        "key = {0}, name = {1}, value = {2}",
+                        ForDisplay(key), ForDisplay(name), ForDisplay(value)),
+                        traceCategory);
 
                 if (!whatIf)
                     key.SetValue(name, value);
@@ -1690,518 +1705,537 @@ namespace System.Data.SQLite
                     {
                         string arg = args[index];
 
+                        //
+                        // NOTE: Skip any argument that is null (?) or an empty
+                        //       string.
+                        //
                         if (String.IsNullOrEmpty(arg))
                             continue;
 
+                        //
+                        // NOTE: We are going to modify the original argument
+                        //       by removing any leading option characters;
+                        //       therefore, we use a new string to hold the
+                        //       modified argument.
+                        //
                         string newArg = arg;
 
-                        if (CheckOption(ref newArg))
+                        //
+                        // NOTE: All the supported command line options must
+                        //       begin with an option character (e.g. a minus
+                        //       or forward slash); attempt to validate that
+                        //       now.  If we fail in strict mode, we are done;
+                        //       otherwise, just skip this argument and advance
+                        //       to the next one.
+                        //
+                        if (!CheckOption(ref newArg))
                         {
-                            //
-                            // NOTE: All the supported command line options must
-                            //       have a value; therefore, attempt to advance
-                            //       to it now.  If we fail, we are done.
-                            //
-                            index++;
+                            error = TraceOps.DebugAndTrace(
+                                TracePriority.Lowest, debugCallback,
+                                traceCallback, String.Format(
+                                "Unsupported command line argument: {0}",
+                                ForDisplay(arg)), traceCategory);
 
-                            if (index >= length)
+                            if (strict)
+                                return false;
+
+                            continue;
+                        }
+
+                        //
+                        // NOTE: All the supported command line options must
+                        //       have a value; therefore, attempt to advance
+                        //       to it now.  If we fail, we are done.
+                        //
+                        index++;
+
+                        if (index >= length)
+                        {
+                            error = TraceOps.DebugAndTrace(
+                                TracePriority.Lowest, debugCallback,
+                                traceCallback, String.Format(
+                                "Missing value for option: {0}",
+                                ForDisplay(arg)), traceCategory);
+
+                            if (strict)
+                                return false;
+
+                            break;
+                        }
+
+                        //
+                        // NOTE: Grab the textual value of this command line
+                        //       option.
+                        //
+                        string text = args[index];
+
+                        //
+                        // NOTE: Figure out which command line option this is
+                        //       (based on a partial name match) and then try
+                        //       to interpret the textual value as the correct
+                        //       type.
+                        //
+                        if (MatchOption(newArg, "strict"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
                             {
                                 error = TraceOps.DebugAndTrace(
                                     TracePriority.Lowest, debugCallback,
                                     traceCallback, String.Format(
-                                    "Missing value for option: {0}",
-                                    ForDisplay(arg)), traceCategory);
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
 
                                 if (strict)
                                     return false;
 
-                                break;
+                                continue;
                             }
 
                             //
-                            // NOTE: Grab the textual value of this command line
-                            //       option.
+                            // NOTE: Allow the command line arguments to
+                            //       override the "strictness" setting
+                            //       provided by our caller.
                             //
-                            string text = args[index];
+                            strict = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "logFileName"))
+                        {
+                            configuration.logFileName = text;
+                        }
+                        else if (MatchOption(newArg, "directory"))
+                        {
+                            configuration.directory = text;
 
                             //
-                            // NOTE: Figure out which command line option this is
-                            //       (based on a partial name match) and then try
-                            //       to interpret the textual value as the correct
-                            //       type.
+                            // NOTE: *SPECIAL* Must refresh the file names
+                            //       here because the underlying directory
+                            //       has changed.
                             //
-                            if (MatchOption(newArg, "strict"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                //
-                                // NOTE: Allow the command line arguments to override
-                                //       the "strictness" setting provided by our caller.
-                                //
-                                strict = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "logFileName"))
-                            {
-                                configuration.logFileName = text;
-                            }
-                            else if (MatchOption(newArg, "directory"))
-                            {
-                                configuration.directory = text;
-
-                                //
-                                // NOTE: *SPECIAL* Must refresh the file names
-                                //       here because the underlying directory
-                                //       has changed.
-                                //
-                                string coreFileName = configuration.coreFileName;
-
-                                if (!String.IsNullOrEmpty(coreFileName))
-                                    coreFileName = Path.GetFileName(coreFileName);
-
-                                if (String.IsNullOrEmpty(coreFileName))
-                                    coreFileName = Installer.CoreFileName;
-
-                                configuration.coreFileName = Path.Combine(
-                                    configuration.directory, coreFileName);
-
-                                string linqFileName = configuration.linqFileName;
-
-                                if (!String.IsNullOrEmpty(linqFileName))
-                                    linqFileName = Path.GetFileName(linqFileName);
-
-                                if (String.IsNullOrEmpty(linqFileName))
-                                    linqFileName = Installer.LinqFileName;
-
-                                configuration.linqFileName = Path.Combine(
-                                    configuration.directory, linqFileName);
-
-                                string designerFileName = configuration.designerFileName;
-
-                                if (!String.IsNullOrEmpty(designerFileName))
-                                    designerFileName = Path.GetFileName(designerFileName);
-
-                                if (String.IsNullOrEmpty(designerFileName))
-                                    designerFileName = Installer.DesignerFileName;
-
-                                configuration.designerFileName = Path.Combine(
-                                    configuration.directory, designerFileName);
-                            }
-                            else if (MatchOption(newArg, "coreFileName"))
-                            {
-                                configuration.coreFileName = text;
-                            }
-                            else if (MatchOption(newArg, "linqFileName"))
-                            {
-                                configuration.linqFileName = text;
-                            }
-                            else if (MatchOption(newArg, "designerFileName"))
-                            {
-                                configuration.designerFileName = text;
-                            }
-                            else if (MatchOption(newArg, "debugFormat"))
-                            {
-                                configuration.debugFormat = text;
-                                TraceOps.DebugFormat = configuration.debugFormat;
-                            }
-                            else if (MatchOption(newArg, "traceFormat"))
-                            {
-                                configuration.traceFormat = text;
-                                TraceOps.TraceFormat = configuration.traceFormat;
-                            }
-                            else if (MatchOption(newArg, "debugPriority"))
-                            {
-                                object value = ParseEnum(
-                                    typeof(TracePriority), text, true);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.debugPriority = (TracePriority)value;
-                                TraceOps.DebugPriority = configuration.debugPriority;
-                            }
-                            else if (MatchOption(newArg, "tracePriority"))
-                            {
-                                object value = ParseEnum(
-                                    typeof(TracePriority), text, true);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.tracePriority = (TracePriority)value;
-                                TraceOps.TracePriority = configuration.tracePriority;
-                            }
-                            else if (MatchOption(newArg, "install"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.install = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "installFlags"))
-                            {
-                                object value = ParseEnum(
-                                    typeof(InstallFlags), text, true);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid install flags value: {0}",
-                                        ForDisplay(text)), traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.installFlags = (InstallFlags)value;
-                            }
-                            else if (MatchOption(newArg, "noRuntimeVersion"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noRuntimeVersion = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "whatIf"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.whatIf = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "verbose"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.verbose = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "confirm"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.confirm = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noDesktop"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noDesktop = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noCompact"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noCompact = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noNetFx20"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noNetFx20 = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noNetFx40"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noNetFx40 = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noVs2008"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noVs2008 = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noVs2010"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noVs2010 = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noTrace"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noTrace = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noConsole"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noConsole = (bool)value;
-                            }
-                            else if (MatchOption(newArg, "noLog"))
-                            {
-                                bool? value = ParseBoolean(text);
-
-                                if (value == null)
-                                {
-                                    error = TraceOps.DebugAndTrace(
-                                        TracePriority.Lowest, debugCallback,
-                                        traceCallback, String.Format(
-                                        "Invalid {0} boolean value: {1}",
-                                        ForDisplay(arg), ForDisplay(text)),
-                                        traceCategory);
-
-                                    if (strict)
-                                        return false;
-
-                                    continue;
-                                }
-
-                                configuration.noLog = (bool)value;
-                            }
-                            else
+                            string coreFileName = configuration.coreFileName;
+
+                            if (!String.IsNullOrEmpty(coreFileName))
+                                coreFileName = Path.GetFileName(coreFileName);
+
+                            if (String.IsNullOrEmpty(coreFileName))
+                                coreFileName = Installer.CoreFileName;
+
+                            configuration.coreFileName = Path.Combine(
+                                configuration.directory, coreFileName);
+
+                            string linqFileName = configuration.linqFileName;
+
+                            if (!String.IsNullOrEmpty(linqFileName))
+                                linqFileName = Path.GetFileName(linqFileName);
+
+                            if (String.IsNullOrEmpty(linqFileName))
+                                linqFileName = Installer.LinqFileName;
+
+                            configuration.linqFileName = Path.Combine(
+                                configuration.directory, linqFileName);
+
+                            string designerFileName = configuration.designerFileName;
+
+                            if (!String.IsNullOrEmpty(designerFileName))
+                                designerFileName = Path.GetFileName(designerFileName);
+
+                            if (String.IsNullOrEmpty(designerFileName))
+                                designerFileName = Installer.DesignerFileName;
+
+                            configuration.designerFileName = Path.Combine(
+                                configuration.directory, designerFileName);
+                        }
+                        else if (MatchOption(newArg, "coreFileName"))
+                        {
+                            configuration.coreFileName = text;
+                        }
+                        else if (MatchOption(newArg, "linqFileName"))
+                        {
+                            configuration.linqFileName = text;
+                        }
+                        else if (MatchOption(newArg, "designerFileName"))
+                        {
+                            configuration.designerFileName = text;
+                        }
+                        else if (MatchOption(newArg, "debugFormat"))
+                        {
+                            configuration.debugFormat = text;
+                            TraceOps.DebugFormat = configuration.debugFormat;
+                        }
+                        else if (MatchOption(newArg, "traceFormat"))
+                        {
+                            configuration.traceFormat = text;
+                            TraceOps.TraceFormat = configuration.traceFormat;
+                        }
+                        else if (MatchOption(newArg, "debugPriority"))
+                        {
+                            object value = ParseEnum(
+                                typeof(TracePriority), text, true);
+
+                            if (value == null)
                             {
                                 error = TraceOps.DebugAndTrace(
                                     TracePriority.Lowest, debugCallback,
                                     traceCallback, String.Format(
-                                    "Unsupported command line option: {0}",
-                                    ForDisplay(arg)), traceCategory);
+                                    "Invalid {0} value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
 
                                 if (strict)
                                     return false;
+
+                                continue;
                             }
+
+                            configuration.debugPriority = (TracePriority)value;
+                            TraceOps.DebugPriority = configuration.debugPriority;
+                        }
+                        else if (MatchOption(newArg, "tracePriority"))
+                        {
+                            object value = ParseEnum(
+                                typeof(TracePriority), text, true);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.tracePriority = (TracePriority)value;
+                            TraceOps.TracePriority = configuration.tracePriority;
+                        }
+                        else if (MatchOption(newArg, "install"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.install = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "installFlags"))
+                        {
+                            object value = ParseEnum(
+                                typeof(InstallFlags), text, true);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid install flags value: {0}",
+                                    ForDisplay(text)), traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.installFlags = (InstallFlags)value;
+                        }
+                        else if (MatchOption(newArg, "noRuntimeVersion"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noRuntimeVersion = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "whatIf"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.whatIf = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "verbose"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.verbose = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "confirm"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.confirm = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noDesktop"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noDesktop = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noCompact"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noCompact = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noNetFx20"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noNetFx20 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noNetFx40"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noNetFx40 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noVs2008"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noVs2008 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noVs2010"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noVs2010 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noTrace"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noTrace = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noConsole"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noConsole = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noLog"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noLog = (bool)value;
                         }
                         else
                         {
                             error = TraceOps.DebugAndTrace(
                                 TracePriority.Lowest, debugCallback,
                                 traceCallback, String.Format(
-                                "Unsupported command line argument: {0}",
+                                "Unsupported command line option: {0}",
                                 ForDisplay(arg)), traceCategory);
 
                             if (strict)
@@ -4947,10 +4981,10 @@ namespace System.Data.SQLite
                 !Configuration.CheckRuntimeVersion(
                     configuration, true, ref error))
             {
-                TraceOps.ShowMessage(
-                    TracePriority.Highest, debugCallback, traceCallback,
-                    thisAssembly, error, traceCategory,
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                TraceOps.ShowMessage(TracePriority.Highest,
+                    debugCallback, traceCallback, thisAssembly,
+                    error, traceCategory, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
 
                 return 1; /* FAILURE */
             }
