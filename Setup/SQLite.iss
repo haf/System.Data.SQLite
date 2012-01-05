@@ -9,9 +9,11 @@
 #define GacProcessor StringChange(AppProcessor, "x64", "amd64")
 
 #if Pos("NativeOnly", AppConfiguration) == 0
+#define InstallerCondition "Application\Core\MSIL and Application\Designer and Application\Designer\Installer"
 #define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + AppPlatform + "\" + AppConfiguration + "\System.Data.SQLite.dll", PRODUCT_VERSION)
 #define OutputConfiguration StringChange(StringChange(AppConfiguration, "Debug", "setup"), "Release", "setup") + "-bundle"
 #else
+#define InstallerCondition "Application\Core\MSIL and Application\Core\" + AppProcessor + " and Application\Designer and Application\Designer\Installer"
 #define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + BaseConfiguration + "\bin\System.Data.SQLite.dll", PRODUCT_VERSION)
 #define OutputConfiguration StringChange(StringChange(BaseConfiguration, "Debug", "setup"), "Release", "setup")
 #endif
@@ -56,12 +58,16 @@ Name: Application\Core; Description: Core components.; Types: custom compact ful
 Name: Application\Core\MSIL; Description: Core managed components.; Types: custom compact full
 Name: Application\Core\{#AppProcessor}; Description: Core native components.; Types: custom compact full
 Name: Application\LINQ; Description: LINQ support components.; Types: custom compact full
+Name: Application\Designer; Description: Visual Studio designer components.; Types: custom full
+Name: Application\Designer\Installer; Description: Visual Studio designer installer components.; Types: custom full
 Name: Application\Symbols; Description: Debugging symbol components.; Types: custom compact full
 Name: Application\Documentation; Description: Documentation components.; Types: custom compact full
 Name: Application\Test; Description: Test components.; Types: custom compact full
 
 [Tasks]
 Components: Application\Core\MSIL Or Application\LINQ; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
+Components: {#InstallerCondition}; Name: vs2008; Description: Install the designer components for Visual Studio 2008.; Check: CheckIsNetFx2Setup()
+Components: {#InstallerCondition}; Name: vs2010; Description: Install the designer components for Visual Studio 2010.; Check: CheckIsNetFx4Setup()
 
 #if Pos("NativeOnly", AppConfiguration) == 0
 Components: Application\Core\MSIL Or Application\LINQ; Name: gac; Description: Install the assemblies into the global assembly cache.; Flags: unchecked; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
@@ -72,8 +78,12 @@ Components: Application\Core\MSIL; Tasks: ngen; Filename: {code:GetNetFx2Install
 Components: Application\Core\MSIL; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup() and CheckForNetFx35(1)
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
+Components: {#InstallerCondition}; Tasks: vs2008; Filename: {app}\bin\Installer.exe; Parameters: "-install true -installFlags AllExceptGAC -noCompact true -noNetFx40 true -noVs2010 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
+Components: {#InstallerCondition}; Tasks: vs2010; Filename: {app}\bin\Installer.exe; Parameters: "-install true -installFlags AllExceptGAC -noCompact true -noNetFx20 true -noVs2008 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 
 [UninstallRun]
+Components: {#InstallerCondition}; Tasks: vs2010; Filename: {app}\bin\Installer.exe; Parameters: "-install false -installFlags AllExceptGAC -noCompact true -noNetFx20 true -noVs2008 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
+Components: {#InstallerCondition}; Tasks: vs2008; Filename: {app}\bin\Installer.exe; Parameters: "-install false -installFlags AllExceptGAC -noCompact true -noNetFx40 true -noVs2010 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup() and CheckForNetFx35(1)
 Components: Application\Core\MSIL; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
@@ -113,6 +123,10 @@ Components: Application\Core\{#AppProcessor} and Application\Symbols; Source: ..
 #endif
 
 Components: Application\Documentation; Source: ..\doc\SQLite.NET.chm; DestDir: {app}\doc; Flags: restartreplace uninsrestartdelete
+Components: Application\Designer; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\SQLite.Designer.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Designer and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\SQLite.Designer.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Designer\Installer; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\Installer.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Designer\Installer and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\Installer.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
