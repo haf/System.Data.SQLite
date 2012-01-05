@@ -32,3 +32,4 @@ Installer.exe: #31: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", s
 Installer.exe: #32: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "DataProviders", writable = True
 Installer.exe: #33: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\DataProviders", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}"
 Installer.exe: #34: Installer.Main: subKeysCreated = 0, subKeysDeleted = 5, keyValuesSet = 0, keyValuesDeleted = 1
+Installer.exe: #35: Installer.Main: Success.

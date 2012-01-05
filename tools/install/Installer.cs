@@ -2692,7 +2692,7 @@ namespace System.Data.SQLite
                     }
                     else
                     {
-                        TraceOps.DebugAndTrace(TracePriority.Higher,
+                        TraceOps.DebugAndTrace(TracePriority.High,
                             debugCallback, traceCallback,
                             "No actual changes will be made to this " +
                             "system because \"what-if\" mode is enabled.",
@@ -5169,6 +5169,10 @@ namespace System.Data.SQLite
                         error, traceCategory, MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
+                    TraceOps.DebugAndTrace(TracePriority.High,
+                        debugCallback, traceCallback, "Failure.",
+                        traceCategory);
+
                     return 1; /* FAILURE */
                 }
                 #endregion
@@ -5293,6 +5297,10 @@ namespace System.Data.SQLite
                                 error, traceCategory, MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
 
+                            TraceOps.DebugAndTrace(TracePriority.High,
+                                debugCallback, traceCallback, "Failure.",
+                                traceCategory);
+
                             return 1; /* FAILURE */
                         }
                     }
@@ -5319,6 +5327,10 @@ namespace System.Data.SQLite
                                 error, traceCategory, MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
 
+                            TraceOps.DebugAndTrace(TracePriority.High,
+                                debugCallback, traceCallback, "Failure.",
+                                traceCategory);
+
                             return 1; /* FAILURE */
                         }
                     }
@@ -5340,6 +5352,10 @@ namespace System.Data.SQLite
                                 debugCallback, traceCallback, thisAssembly,
                                 error, traceCategory, MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
+
+                            TraceOps.DebugAndTrace(TracePriority.High,
+                                debugCallback, traceCallback, "Failure.",
+                                traceCategory);
 
                             return 1; /* FAILURE */
                         }
@@ -5363,6 +5379,10 @@ namespace System.Data.SQLite
                                 error, traceCategory, MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
 
+                            TraceOps.DebugAndTrace(TracePriority.High,
+                                debugCallback, traceCallback, "Failure.",
+                                traceCategory);
+
                             return 1; /* FAILURE */
                         }
                     }
@@ -5385,6 +5405,10 @@ namespace System.Data.SQLite
                                 error, traceCategory, MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
 
+                            TraceOps.DebugAndTrace(TracePriority.High,
+                                debugCallback, traceCallback, "Failure.",
+                                traceCategory);
+
                             return 1; /* FAILURE */
                         }
                     }
@@ -5393,7 +5417,7 @@ namespace System.Data.SQLite
                     ///////////////////////////////////////////////////////////
 
                     #region Log Summary
-                    TraceOps.DebugAndTrace(TracePriority.Higher,
+                    TraceOps.DebugAndTrace(TracePriority.High,
                         debugCallback, traceCallback, String.Format(
                         "subKeysCreated = {0}, subKeysDeleted = {1}, " +
                         "keyValuesSet = {2}, keyValuesDeleted = {3}",
@@ -5405,6 +5429,10 @@ namespace System.Data.SQLite
                     #endregion
 
                     ///////////////////////////////////////////////////////////
+
+                    TraceOps.DebugAndTrace(TracePriority.High,
+                        debugCallback, traceCallback, "Success.",
+                        traceCategory);
 
                     return 0; /* SUCCESS */
                 }

@@ -61,3 +61,4 @@ Installer.exe: #60: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\S
 Installer.exe: #61: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\9.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataObjectSupport"
 Installer.exe: #62: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\9.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataViewSupport"
 Installer.exe: #63: Installer.Main: subKeysCreated = 12, subKeysDeleted = 1, keyValuesSet = 20, keyValuesDeleted = 0
+Installer.exe: #64: Installer.Main: Success.

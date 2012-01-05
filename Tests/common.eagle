@@ -443,6 +443,10 @@ namespace eval ::Eagle {
       #       name if it currently exists.
       #
       if {$delete && [file exists $fileName]} then {
+        #
+        # NOTE: Attempt to delete any pre-existing database with the same file
+        #       name.
+        #
         if {[catch {file delete $fileName} error]} then {
           #
           # NOTE: We somehow failed to delete the file, report why.
@@ -530,17 +534,76 @@ namespace eval ::Eagle {
       #
       set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
 
+      #
+      # NOTE: Check if the file still exists.
+      #
       if {[file exists $fileName]} then {
         #
-        # NOTE: Attempt to delete the test database file now.
+        # NOTE: Skip deleting database files if somebody sets the global
+        #       variable to prevent it.
         #
-        if {[set code [catch {file delete $fileName} error]]} then {
+        if {![info exists ::no(cleanupDb)]} then {
           #
-          # NOTE: We somehow failed to delete the file, report why.
+          # NOTE: Attempt to delete the test database file now.
           #
+          if {[set code [catch {file delete $fileName} error]]} then {
+            #
+            # NOTE: We somehow failed to delete the file, report why.
+            #
+            tputs $::test_channel [appendArgs \
+                "==== WARNING: failed to delete database file \"" $fileName \
+                "\" during cleanup, error: " \n\t $error \n]
+          }
+        } else {
+          #
+          # NOTE: Show that we skipped deleting the file.
+          #
+          set code 0
+
           tputs $::test_channel [appendArgs \
-              "==== WARNING: failed to delete database file \"" $fileName \
-              "\" during cleanup, error: " \n\t $error \n]
+              "==== WARNING: skipped deleting database file \"" $fileName \
+              "\" during cleanup\n"]
+        }
+      } else {
+        #
+        # NOTE: The file does not exist, success!
+        #
+        set code 0
+      }
+
+      return $code
+    }
+
+    proc cleanupFile { fileName {force false} } {
+      #
+      # NOTE: Check if the file still exists.
+      #
+      if {[file exists $fileName]} then {
+        #
+        # NOTE: Skip deleting test files if somebody sets the global variable
+        #       to prevent it.
+        #
+        if {$force || ![info exists ::no(cleanupFile)]} then {
+          #
+          # NOTE: Attempt to delete the test file now.
+          #
+          if {[set code [catch {file delete $fileName} error]]} then {
+            #
+            # NOTE: We somehow failed to delete the file, report why.
+            #
+            tputs $::test_channel [appendArgs \
+                "==== WARNING: failed to delete test file \"" $fileName \
+                "\" during cleanup, error: " \n\t $error \n]
+          }
+        } else {
+          #
+          # NOTE: Show that we skipped deleting the file.
+          #
+          set code 0
+
+          tputs $::test_channel [appendArgs \
+              "==== WARNING: skipped deleting test file \"" $fileName \
+              "\" during cleanup\n"]
         }
       } else {
         #
