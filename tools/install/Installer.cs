@@ -44,7 +44,7 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     internal delegate bool FrameworkRegistryCallback(
-        RegistryKey rootKey,
+        Installer.MockRegistryKey rootKey,
         string frameworkName,
         Version frameworkVersion,
         string platformName,
@@ -58,7 +58,7 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     internal delegate bool VisualStudioRegistryCallback(
-        RegistryKey rootKey,
+        Installer.MockRegistryKey rootKey,
         Version vsVersion,
         Installer.Package package,
         object clientData,
@@ -85,7 +85,7 @@ namespace System.Data.SQLite
         Framework = GAC | AssemblyFolders | DbProviderFactory,
         Vs = VsPackage | VsDataSource | VsDataProvider,
         All = Framework | Vs,
-        AllNoGAC = All & ~GAC,
+        AllExceptGAC = All & ~GAC,
         Default = All
     }
 
@@ -102,8 +102,7 @@ namespace System.Data.SQLite
         High = 0x10,
         Higher = 0x20,
         Highest = 0x40,
-        Debug = Medium, /* NOTE: Default for debug messages. */
-        Trace = Medium  /* NOTE: Default for trace messages. */
+        Default = Medium
     }
     #endregion
 
@@ -183,8 +182,8 @@ namespace System.Data.SQLite
             private static object syncRoot = new object();
             private static long nextDebugId;
             private static long nextTraceId;
-            private static TracePriority debugPriority = TracePriority.Debug;
-            private static TracePriority tracePriority = TracePriority.Trace;
+            private static TracePriority debugPriority = TracePriority.Default;
+            private static TracePriority tracePriority = TracePriority.Default;
             private static string debugFormat = DefaultDebugFormat;
             private static string traceFormat = DefaultTraceFormat;
             #endregion
@@ -540,8 +539,367 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region MockRegistry Class
+        private sealed class MockRegistry : IDisposable
+        {
+            #region Public Constructors
+            public MockRegistry()
+            {
+                whatIf = true;
+                readOnly = true;
+                safe = true;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public MockRegistry(
+                bool whatIf
+                )
+                : this()
+            {
+                this.whatIf = whatIf;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public MockRegistry(
+                bool whatIf,
+                bool readOnly
+                )
+                : this(whatIf)
+            {
+                this.readOnly = readOnly;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public MockRegistry(
+                bool whatIf,
+                bool readOnly,
+                bool safe
+                )
+                : this(whatIf, readOnly)
+            {
+                this.safe = safe;
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Properties
+            private bool whatIf;
+            public bool WhatIf
+            {
+                get { CheckDisposed(); return whatIf; }
+                set { CheckDisposed(); whatIf = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool readOnly;
+            public bool ReadOnly
+            {
+                get { CheckDisposed(); return readOnly; }
+                set { CheckDisposed(); readOnly = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool safe;
+            public bool Safe
+            {
+                get { CheckDisposed(); return safe; }
+                set { CheckDisposed(); safe = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private MockRegistryKey classesRoot;
+            public MockRegistryKey ClassesRoot
+            {
+                get
+                {
+                    CheckDisposed();
+
+                    if (classesRoot == null)
+                        classesRoot = new MockRegistryKey(
+                            Registry.ClassesRoot, whatIf, readOnly, safe);
+
+                    return classesRoot;
+                }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private MockRegistryKey currentConfig;
+            public MockRegistryKey CurrentConfig
+            {
+                get
+                {
+                    CheckDisposed();
+
+                    if (currentConfig == null)
+                        currentConfig = new MockRegistryKey(
+                            Registry.CurrentConfig, whatIf, readOnly, safe);
+
+                    return currentConfig;
+                }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private MockRegistryKey currentUser;
+            public MockRegistryKey CurrentUser
+            {
+                get
+                {
+                    CheckDisposed();
+
+                    if (currentUser == null)
+                        currentUser = new MockRegistryKey(
+                            Registry.CurrentUser, whatIf, readOnly, safe);
+
+                    return currentUser;
+                }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private MockRegistryKey dynData;
+            public MockRegistryKey DynData
+            {
+                get
+                {
+                    CheckDisposed();
+
+                    if (dynData == null)
+                        dynData = new MockRegistryKey(
+                            Registry.DynData, whatIf, readOnly, safe);
+
+                    return dynData;
+                }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private MockRegistryKey localMachine;
+            public MockRegistryKey LocalMachine
+            {
+                get
+                {
+                    CheckDisposed();
+
+                    if (localMachine == null)
+                        localMachine = new MockRegistryKey(
+                            Registry.LocalMachine, whatIf, readOnly, safe);
+
+                    return localMachine;
+                }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private MockRegistryKey performanceData;
+            public MockRegistryKey PerformanceData
+            {
+                get
+                {
+                    CheckDisposed();
+
+                    if (performanceData == null)
+                        performanceData = new MockRegistryKey(
+                            Registry.PerformanceData, whatIf, readOnly, safe);
+
+                    return performanceData;
+                }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private MockRegistryKey users;
+            public MockRegistryKey Users
+            {
+                get
+                {
+                    CheckDisposed();
+
+                    if (users == null)
+                        users = new MockRegistryKey(
+                            Registry.Users, whatIf, readOnly, safe);
+
+                    return users;
+                }
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public "Registry" Methods
+            public object GetValue(
+                string keyName,
+                string valueName,
+                object defaultValue
+                )
+            {
+                CheckDisposed();
+
+                return Registry.GetValue(keyName, valueName, defaultValue);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public void SetValue(
+                string keyName,
+                string valueName,
+                object value
+                )
+            {
+                CheckDisposed();
+                CheckReadOnly();
+
+                if (!whatIf)
+                    Registry.SetValue(keyName, valueName, value);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public void SetValue(
+                string keyName,
+                string valueName,
+                object value,
+                RegistryValueKind valueKind
+                )
+            {
+                CheckDisposed();
+                CheckReadOnly();
+
+                if (!whatIf)
+                    Registry.SetValue(keyName, valueName, value, valueKind);
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Private Methods
+            private void CheckReadOnly()
+            {
+                //
+                // NOTE: In "read-only" mode, we disallow all write access.
+                //
+                if (!readOnly)
+                    return;
+
+                throw new InvalidOperationException();
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region IDisposable "Pattern" Members
+            private bool disposed;
+            private void CheckDisposed() /* throw */
+            {
+                if (!disposed)
+                    return;
+
+                throw new ObjectDisposedException(
+                    typeof(MockRegistry).Name);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private /* protected virtual */ void Dispose(
+                bool disposing
+                )
+            {
+                if (!disposed)
+                {
+                    if (disposing)
+                    {
+                        ////////////////////////////////////
+                        // dispose managed resources here...
+                        ////////////////////////////////////
+
+                        if (classesRoot != null)
+                        {
+                            classesRoot.Close();
+                            classesRoot = null;
+                        }
+
+                        if (currentConfig != null)
+                        {
+                            currentConfig.Close();
+                            currentConfig = null;
+                        }
+
+                        if (currentUser != null)
+                        {
+                            currentUser.Close();
+                            currentUser = null;
+                        }
+
+                        if (dynData != null)
+                        {
+                            dynData.Close();
+                            dynData = null;
+                        }
+
+                        if (localMachine != null)
+                        {
+                            localMachine.Close();
+                            localMachine = null;
+                        }
+
+                        if (performanceData != null)
+                        {
+                            performanceData.Close();
+                            performanceData = null;
+                        }
+
+                        if (users != null)
+                        {
+                            users.Close();
+                            users = null;
+                        }
+                    }
+
+                    //////////////////////////////////////
+                    // release unmanaged resources here...
+                    //////////////////////////////////////
+
+                    //
+                    // NOTE: This object is now disposed.
+                    //
+                    disposed = true;
+                }
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region IDisposable Members
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Destructor
+            ~MockRegistry()
+            {
+                Dispose(false);
+            }
+            #endregion
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region MockRegistryKey Class
-        private sealed class MockRegistryKey : IDisposable
+        internal sealed class MockRegistryKey : IDisposable
         {
             #region Private Constructors
             private MockRegistryKey()
@@ -928,19 +1286,6 @@ namespace System.Data.SQLite
 
             #region Implicit Conversion Operators
             //
-            // BUGBUG: The 'what-if' mode setting here should probably be based
-            //         on some static property, not hard-coded to true?
-            //
-            public static implicit operator MockRegistryKey(
-                RegistryKey key
-                )
-            {
-                return new MockRegistryKey(key, null, true, false, false);
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            //
             // BUGBUG: Remove me?  This should be safe because in 'what-if'
             //         mode all keys are opened read-only.
             //
@@ -1059,43 +1404,6 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Static Methods
-            public static RegistryKey GetRootKeyByName(
-                string keyName
-                )
-            {
-                if (String.IsNullOrEmpty(keyName))
-                    return null;
-
-                switch (keyName.ToUpperInvariant())
-                {
-                    case "HKCR":
-                    case "HKEY_CLASSES_ROOT":
-                        return Registry.ClassesRoot;
-                    case "HKCC":
-                    case "HKEY_CURRENT_CONFIG":
-                        return Registry.CurrentConfig;
-                    case "HKCU":
-                    case "HKEY_CURRENT_USER":
-                        return Registry.CurrentUser;
-                    case "HKDD":
-                    case "HKEY_DYN_DATA":
-                        return Registry.DynData;
-                    case "HKLM":
-                    case "HKEY_LOCAL_MACHINE":
-                        return Registry.LocalMachine;
-                    case "HKPD":
-                    case "HKEY_PERFORMANCE_DATA":
-                        return Registry.PerformanceData;
-                    case "HKU":
-                    case "HKEY_USERS":
-                        return Registry.Users;
-                }
-
-                return null;
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
             public static MockRegistryKey OpenSubKey(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1163,12 +1471,12 @@ namespace System.Data.SQLite
 
                         return (key != null) ?
                             key : new MockRegistryKey(
-                                rootKey, subKeyName, true, false, false);
+                                rootKey, subKeyName, whatIf, false, false);
                     }
                     else
                     {
                         return new MockRegistryKey(
-                            rootKey.CreateSubKey(subKeyName), false, false,
+                            rootKey.CreateSubKey(subKeyName), whatIf, false,
                             false);
                     }
                 }
@@ -1673,8 +1981,8 @@ namespace System.Data.SQLite
                 return new Configuration(thisAssembly, null, directory,
                     coreFileName, linqFileName, designerFileName,
                     TraceOps.DebugFormat, TraceOps.TraceFormat,
-                    InstallFlags.Default, TracePriority.Debug,
-                    TracePriority.Trace, true, false, false, false, false,
+                    InstallFlags.Default, TracePriority.Default,
+                    TracePriority.Default, true, false, false, false, false,
                     false, false, false, false, false, false, true, true,
                     true, false);
             }
@@ -2925,8 +3233,8 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Methods
-            private RegistryKey rootKey;
-            public RegistryKey RootKey
+            private MockRegistryKey rootKey;
+            public MockRegistryKey RootKey
             {
                 get { return rootKey; }
                 set { rootKey = value; }
@@ -2977,8 +3285,8 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Properties
-            private RegistryKey rootKey;
-            public RegistryKey RootKey
+            private MockRegistryKey rootKey;
+            public MockRegistryKey RootKey
             {
                 get { return rootKey; }
                 set { rootKey = value; }
@@ -3159,7 +3467,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static string GetFrameworkDirectory(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version frameworkVersion,
             bool whatIf,
             bool verbose
@@ -3187,6 +3495,7 @@ namespace System.Data.SQLite
 
         #region Per-Framework/Platform Handling
         private static void InitializeFrameworkList(
+            MockRegistryKey rootKey,
             Configuration configuration,
             ref FrameworkList frameworkList
             )
@@ -3195,7 +3504,7 @@ namespace System.Data.SQLite
                 frameworkList = new FrameworkList();
 
             if (frameworkList.RootKey == null)
-                frameworkList.RootKey = Registry.LocalMachine;
+                frameworkList.RootKey = rootKey;
 
             ///////////////////////////////////////////////////////////////////
 
@@ -3264,7 +3573,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool HaveFramework(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             string frameworkName,
             Version frameworkVersion,
             string platformName,
@@ -3304,6 +3613,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ForEachFrameworkConfig(
+            MockRegistry registry,
             FrameworkList frameworkList,
             FrameworkConfigCallback callback,
             string invariant,
@@ -3319,13 +3629,19 @@ namespace System.Data.SQLite
             ref string error
             )
         {
+            if (registry == null)
+            {
+                error = "invalid registry";
+                return false;
+            }
+
             if (frameworkList == null)
             {
                 error = "invalid framework list";
                 return false;
             }
 
-            RegistryKey rootKey = frameworkList.RootKey;
+            MockRegistryKey rootKey = frameworkList.RootKey;
 
             if (rootKey == null)
             {
@@ -3333,8 +3649,8 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (!Object.ReferenceEquals(rootKey, Registry.CurrentUser) &&
-                !Object.ReferenceEquals(rootKey, Registry.LocalMachine))
+            if (!Object.ReferenceEquals(rootKey, registry.CurrentUser) &&
+                !Object.ReferenceEquals(rootKey, registry.LocalMachine))
             {
                 error = "root key must be per-user or per-machine";
                 return false;
@@ -3490,6 +3806,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ForEachFrameworkRegistry(
+            MockRegistry registry,
             FrameworkList frameworkList,
             FrameworkRegistryCallback callback,
             object clientData,
@@ -3499,13 +3816,19 @@ namespace System.Data.SQLite
             ref string error
             )
         {
+            if (registry == null)
+            {
+                error = "invalid registry";
+                return false;
+            }
+
             if (frameworkList == null)
             {
                 error = "invalid framework list";
                 return false;
             }
 
-            RegistryKey rootKey = frameworkList.RootKey;
+            MockRegistryKey rootKey = frameworkList.RootKey;
 
             if (rootKey == null)
             {
@@ -3513,8 +3836,8 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (!Object.ReferenceEquals(rootKey, Registry.CurrentUser) &&
-                !Object.ReferenceEquals(rootKey, Registry.LocalMachine))
+            if (!Object.ReferenceEquals(rootKey, registry.CurrentUser) &&
+                !Object.ReferenceEquals(rootKey, registry.LocalMachine))
             {
                 error = "root key must be per-user or per-machine";
                 return false;
@@ -3611,6 +3934,7 @@ namespace System.Data.SQLite
 
         #region Per-Visual Studio Version Handling
         private static void InitializeVsList(
+            MockRegistryKey rootKey,
             Configuration configuration,
             ref VsList vsList
             )
@@ -3619,7 +3943,7 @@ namespace System.Data.SQLite
                 vsList = new VsList();
 
             if (vsList.RootKey == null)
-                vsList.RootKey = Registry.LocalMachine;
+                vsList.RootKey = rootKey;
 
             if (vsList.Versions == null)
             {
@@ -3638,7 +3962,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool HaveVsVersion(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             bool whatIf,
             bool verbose
@@ -3677,6 +4001,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ForEachVsVersionRegistry(
+            MockRegistry registry,
             VsList vsList,
             VisualStudioRegistryCallback callback,
             Package package,
@@ -3687,13 +4012,19 @@ namespace System.Data.SQLite
             ref string error
             )
         {
+            if (registry == null)
+            {
+                error = "invalid registry";
+                return false;
+            }
+
             if (vsList == null)
             {
                 error = "invalid VS list";
                 return false;
             }
 
-            RegistryKey rootKey = vsList.RootKey;
+            MockRegistryKey rootKey = vsList.RootKey;
 
             if (rootKey == null)
             {
@@ -3701,8 +4032,8 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (!Object.ReferenceEquals(rootKey, Registry.CurrentUser) &&
-                !Object.ReferenceEquals(rootKey, Registry.LocalMachine))
+            if (!Object.ReferenceEquals(rootKey, registry.CurrentUser) &&
+                !Object.ReferenceEquals(rootKey, registry.LocalMachine))
             {
                 error = "root key must be per-user or per-machine";
                 return false;
@@ -3967,7 +4298,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool AddToAssemblyFolders(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             string frameworkName,
             Version frameworkVersion,
             string platformName,
@@ -4016,7 +4347,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool RemoveFromAssemblyFolders(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             string frameworkName,
             Version frameworkVersion,
             string platformName,
@@ -4052,7 +4383,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ProcessAssemblyFolders(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             string frameworkName,
             Version frameworkVersion,
             string platformName,
@@ -4107,7 +4438,7 @@ namespace System.Data.SQLite
 
         #region Visual Studio Data Source Handling
         private static bool AddVsDataSource(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             bool whatIf,
@@ -4186,7 +4517,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool RemoveVsDataSource(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             bool whatIf,
@@ -4244,7 +4575,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ProcessVsDataSource(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             object clientData,
@@ -4285,7 +4616,7 @@ namespace System.Data.SQLite
 
         #region Visual Studio Data Provider Handling
         private static bool AddVsDataProvider(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             string fileName,
@@ -4397,7 +4728,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool RemoveVsDataProvider(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             bool whatIf,
@@ -4449,7 +4780,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ProcessVsDataProvider(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             object clientData,
@@ -4513,7 +4844,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool AddVsPackage(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             string fileName,
@@ -4684,7 +5015,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool RemoveVsPackage(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             bool throwOnMissing,
@@ -4777,7 +5108,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private static bool ProcessVsPackage(
-            RegistryKey rootKey,
+            MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
             object clientData,
@@ -4844,213 +5175,239 @@ namespace System.Data.SQLite
 
                 ///////////////////////////////////////////////////////////////
 
-                #region .NET Framework / Visual Studio Data
-                Package package = null;
-                FrameworkList frameworkList = null;
-                VsList vsList = null;
-
-                ///////////////////////////////////////////////////////////////
-
-                InitializeVsPackage(ref package);
-                InitializeFrameworkList(configuration, ref frameworkList);
-                InitializeVsList(configuration, ref vsList);
-                #endregion
-
-                ///////////////////////////////////////////////////////////////
-
-                AssemblyName assemblyName = AssemblyName.GetAssemblyName(
-                    configuration.CoreFileName); /* throw */
-
-                ///////////////////////////////////////////////////////////////
-
-                AnyPair<string, bool> directoryPair = new AnyPair<string, bool>(
-                    configuration.Directory, configuration.Install);
-
-                AnyPair<string, bool> fileNamePair = new AnyPair<string, bool>(
-                    configuration.DesignerFileName, configuration.Install);
-
-                ///////////////////////////////////////////////////////////////
-
-                #region .NET GAC Install/Remove
-                if (configuration.HasFlags(InstallFlags.GAC, true))
+                using (MockRegistry registry = new MockRegistry(
+                        configuration.WhatIf, false, false))
                 {
-                    Publish publish = null;
+                    #region .NET Framework / Visual Studio Data
+                    Package package = null;
+                    FrameworkList frameworkList = null;
+                    VsList vsList = null;
 
-                    if (!configuration.WhatIf)
-                        publish = new Publish();
+                    ///////////////////////////////////////////////////////////
 
-                    if (configuration.Install)
+                    InitializeVsPackage(ref package);
+
+                    ///////////////////////////////////////////////////////////
+
+                    InitializeFrameworkList(registry.LocalMachine,
+                        configuration, ref frameworkList);
+
+                    InitializeVsList(registry.LocalMachine, configuration,
+                        ref vsList);
+                    #endregion
+
+                    ///////////////////////////////////////////////////////////
+
+                    #region Core Assembly Name Check
+                    //
+                    // NOTE: Do this first, before making any changes to the
+                    //       system, because it will throw an exception if the
+                    //       file name does not represent a valid managed
+                    //       assembly.
+                    //
+                    AssemblyName assemblyName = AssemblyName.GetAssemblyName(
+                        configuration.CoreFileName); /* throw */
+                    #endregion
+
+                    ///////////////////////////////////////////////////////////
+
+                    #region Shared Client Data Creation
+                    object directoryData = new AnyPair<string, bool>(
+                        configuration.Directory, configuration.Install);
+
+                    object fileNameData = new AnyPair<string, bool>(
+                        configuration.DesignerFileName, configuration.Install);
+                    #endregion
+
+                    ///////////////////////////////////////////////////////////
+
+                    #region .NET GAC Install/Remove
+                    if (configuration.HasFlags(InstallFlags.GAC, true))
                     {
-                        if (!configuration.WhatIf)
-                            /* throw */
-                            publish.GacInstall(configuration.CoreFileName);
-
-                        TraceOps.DebugAndTrace(TracePriority.Highest,
-                            debugCallback, traceCallback, String.Format(
-                            "GacInstall: assemblyPath = {0}",
-                            ForDisplay(configuration.CoreFileName)),
-                            traceCategory);
-
-                        if (!configuration.WhatIf)
-                            /* throw */
-                            publish.GacInstall(configuration.LinqFileName);
-
-                        TraceOps.DebugAndTrace(TracePriority.Highest,
-                            debugCallback, traceCallback, String.Format(
-                            "GacInstall: assemblyPath = {0}",
-                            ForDisplay(configuration.LinqFileName)),
-                            traceCategory);
-                    }
-                    else
-                    {
-                        if (!configuration.WhatIf)
-                            /* throw */
-                            publish.GacRemove(configuration.LinqFileName);
-
-                        TraceOps.DebugAndTrace(TracePriority.Highest,
-                            debugCallback, traceCallback, String.Format(
-                            "GacRemove: assemblyPath = {0}",
-                            ForDisplay(configuration.LinqFileName)),
-                            traceCategory);
+                        Publish publish = null;
 
                         if (!configuration.WhatIf)
-                            /* throw */
-                            publish.GacRemove(configuration.CoreFileName);
+                            publish = new Publish();
 
-                        TraceOps.DebugAndTrace(TracePriority.Highest,
-                            debugCallback, traceCallback, String.Format(
-                            "GacRemove: assemblyPath = {0}",
-                            ForDisplay(configuration.CoreFileName)),
-                            traceCategory);
+                        if (configuration.Install)
+                        {
+                            if (!configuration.WhatIf)
+                                /* throw */
+                                publish.GacInstall(configuration.CoreFileName);
+
+                            TraceOps.DebugAndTrace(TracePriority.Highest,
+                                debugCallback, traceCallback, String.Format(
+                                "GacInstall: assemblyPath = {0}",
+                                ForDisplay(configuration.CoreFileName)),
+                                traceCategory);
+
+                            if (!configuration.WhatIf)
+                                /* throw */
+                                publish.GacInstall(configuration.LinqFileName);
+
+                            TraceOps.DebugAndTrace(TracePriority.Highest,
+                                debugCallback, traceCallback, String.Format(
+                                "GacInstall: assemblyPath = {0}",
+                                ForDisplay(configuration.LinqFileName)),
+                                traceCategory);
+                        }
+                        else
+                        {
+                            if (!configuration.WhatIf)
+                                /* throw */
+                                publish.GacRemove(configuration.LinqFileName);
+
+                            TraceOps.DebugAndTrace(TracePriority.Highest,
+                                debugCallback, traceCallback, String.Format(
+                                "GacRemove: assemblyPath = {0}",
+                                ForDisplay(configuration.LinqFileName)),
+                                traceCategory);
+
+                            if (!configuration.WhatIf)
+                                /* throw */
+                                publish.GacRemove(configuration.CoreFileName);
+
+                            TraceOps.DebugAndTrace(TracePriority.Highest,
+                                debugCallback, traceCallback, String.Format(
+                                "GacRemove: assemblyPath = {0}",
+                                ForDisplay(configuration.CoreFileName)),
+                                traceCategory);
+                        }
                     }
-                }
-                #endregion
+                    #endregion
 
-                ///////////////////////////////////////////////////////////////
+                    ///////////////////////////////////////////////////////////
 
-                #region .NET AssemblyFolders
-                if (configuration.HasFlags(InstallFlags.AssemblyFolders, true))
-                {
-                    if (!ForEachFrameworkRegistry(
-                            frameworkList, ProcessAssemblyFolders,
-                            directoryPair, configuration.ThrowOnMissing,
-                            configuration.WhatIf, configuration.Verbose,
-                            ref error))
+                    #region .NET AssemblyFolders
+                    if (configuration.HasFlags(
+                            InstallFlags.AssemblyFolders, true))
                     {
-                        TraceOps.ShowMessage(TracePriority.Highest,
-                            debugCallback, traceCallback, thisAssembly,
-                            error, traceCategory, MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                        if (!ForEachFrameworkRegistry(registry,
+                                frameworkList, ProcessAssemblyFolders,
+                                directoryData, configuration.ThrowOnMissing,
+                                configuration.WhatIf, configuration.Verbose,
+                                ref error))
+                        {
+                            TraceOps.ShowMessage(TracePriority.Highest,
+                                debugCallback, traceCallback, thisAssembly,
+                                error, traceCategory, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
 
-                        return 1; /* FAILURE */
+                            return 1; /* FAILURE */
+                        }
                     }
-                }
-                #endregion
+                    #endregion
 
-                ///////////////////////////////////////////////////////////////
+                    ///////////////////////////////////////////////////////////
 
-                #region .NET DbProviderFactory
-                if (configuration.HasFlags(InstallFlags.DbProviderFactory, true))
-                {
-                    bool saved = false;
-
-                    if (!ForEachFrameworkConfig(
-                            frameworkList, ProcessDbProviderFactory,
-                            InvariantName, ProviderName, Description,
-                            FactoryTypeName, assemblyName, directoryPair,
-                            configuration.ThrowOnMissing, configuration.WhatIf,
-                            configuration.Verbose, ref saved, ref error))
+                    #region .NET DbProviderFactory
+                    if (configuration.HasFlags(
+                            InstallFlags.DbProviderFactory, true))
                     {
-                        TraceOps.ShowMessage(TracePriority.Highest,
-                            debugCallback, traceCallback, thisAssembly,
-                            error, traceCategory, MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                        bool saved = false;
 
-                        return 1; /* FAILURE */
+                        if (!ForEachFrameworkConfig(registry,
+                                frameworkList, ProcessDbProviderFactory,
+                                InvariantName, ProviderName, Description,
+                                FactoryTypeName, assemblyName,
+                                directoryData, configuration.ThrowOnMissing,
+                                configuration.WhatIf, configuration.Verbose,
+                                ref saved, ref error))
+                        {
+                            TraceOps.ShowMessage(TracePriority.Highest,
+                                debugCallback, traceCallback, thisAssembly,
+                                error, traceCategory, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+
+                            return 1; /* FAILURE */
+                        }
                     }
-                }
-                #endregion
+                    #endregion
 
-                ///////////////////////////////////////////////////////////////
+                    ///////////////////////////////////////////////////////////
 
-                #region VS Package
-                if (configuration.HasFlags(InstallFlags.VsPackage, true))
-                {
-                    if (!ForEachVsVersionRegistry(
-                            vsList, ProcessVsPackage, package,
-                            fileNamePair, configuration.ThrowOnMissing,
-                            configuration.WhatIf, configuration.Verbose,
-                            ref error))
+                    #region VS Package
+                    if (configuration.HasFlags(
+                            InstallFlags.VsPackage, true))
                     {
-                        TraceOps.ShowMessage(TracePriority.Highest,
-                            debugCallback, traceCallback, thisAssembly,
-                            error, traceCategory, MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                        if (!ForEachVsVersionRegistry(registry,
+                                vsList, ProcessVsPackage, package,
+                                fileNameData, configuration.ThrowOnMissing,
+                                configuration.WhatIf, configuration.Verbose,
+                                ref error))
+                        {
+                            TraceOps.ShowMessage(TracePriority.Highest,
+                                debugCallback, traceCallback, thisAssembly,
+                                error, traceCategory, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
 
-                        return 1; /* FAILURE */
+                            return 1; /* FAILURE */
+                        }
                     }
-                }
-                #endregion
+                    #endregion
 
-                ///////////////////////////////////////////////////////////////
+                    ///////////////////////////////////////////////////////////
 
-                #region VS DataSource
-                if (configuration.HasFlags(InstallFlags.VsDataSource, true))
-                {
-                    if (!ForEachVsVersionRegistry(
-                            vsList, ProcessVsDataSource, package,
-                            fileNamePair, configuration.ThrowOnMissing,
-                            configuration.WhatIf, configuration.Verbose,
-                            ref error))
+                    #region VS DataSource
+                    if (configuration.HasFlags(
+                            InstallFlags.VsDataSource, true))
                     {
-                        TraceOps.ShowMessage(TracePriority.Highest,
-                            debugCallback, traceCallback, thisAssembly,
-                            error, traceCategory, MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                        if (!ForEachVsVersionRegistry(registry,
+                                vsList, ProcessVsDataSource, package,
+                                fileNameData, configuration.ThrowOnMissing,
+                                configuration.WhatIf, configuration.Verbose,
+                                ref error))
+                        {
+                            TraceOps.ShowMessage(TracePriority.Highest,
+                                debugCallback, traceCallback, thisAssembly,
+                                error, traceCategory, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
 
-                        return 1; /* FAILURE */
+                            return 1; /* FAILURE */
+                        }
                     }
-                }
-                #endregion
+                    #endregion
 
-                ///////////////////////////////////////////////////////////////
+                    ///////////////////////////////////////////////////////////
 
-                #region VS DataProvider
-                if (configuration.HasFlags(InstallFlags.VsDataProvider, true))
-                {
-                    if (!ForEachVsVersionRegistry(
-                            vsList, ProcessVsDataProvider, package,
-                            fileNamePair, configuration.ThrowOnMissing,
-                            configuration.WhatIf, configuration.Verbose,
-                            ref error))
+                    #region VS DataProvider
+                    if (configuration.HasFlags(
+                            InstallFlags.VsDataProvider, true))
                     {
-                        TraceOps.ShowMessage(TracePriority.Highest,
-                            debugCallback, traceCallback, thisAssembly,
-                            error, traceCategory, MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                        if (!ForEachVsVersionRegistry(registry,
+                                vsList, ProcessVsDataProvider, package,
+                                fileNameData, configuration.ThrowOnMissing,
+                                configuration.WhatIf, configuration.Verbose,
+                                ref error))
+                        {
+                            TraceOps.ShowMessage(TracePriority.Highest,
+                                debugCallback, traceCallback, thisAssembly,
+                                error, traceCategory, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
 
-                        return 1; /* FAILURE */
+                            return 1; /* FAILURE */
+                        }
                     }
+                    #endregion
+
+                    ///////////////////////////////////////////////////////////
+
+                    #region Log Summary
+                    TraceOps.DebugAndTrace(TracePriority.Higher,
+                        debugCallback, traceCallback, String.Format(
+                        "subKeysCreated = {0}, subKeysDeleted = {1}, " +
+                        "keyValuesSet = {2}, keyValuesDeleted = {3}",
+                        ForDisplay(RegistryHelper.SubKeysCreated),
+                        ForDisplay(RegistryHelper.SubKeysDeleted),
+                        ForDisplay(RegistryHelper.KeyValuesSet),
+                        ForDisplay(RegistryHelper.KeyValuesDeleted)),
+                        traceCategory);
+                    #endregion
+
+                    ///////////////////////////////////////////////////////////
+
+                    return 0; /* SUCCESS */
                 }
-                #endregion
-
-                ///////////////////////////////////////////////////////////////
-
-                #region Log Summary
-                TraceOps.DebugAndTrace(TracePriority.Higher,
-                    debugCallback, traceCallback, String.Format(
-                    "subKeysCreated = {0}, subKeysDeleted = {1}, " +
-                    "keyValuesSet = {2}, keyValuesDeleted = {3}",
-                    ForDisplay(RegistryHelper.SubKeysCreated),
-                    ForDisplay(RegistryHelper.SubKeysDeleted),
-                    ForDisplay(RegistryHelper.KeyValuesSet),
-                    ForDisplay(RegistryHelper.KeyValuesDeleted)),
-                    traceCategory);
-                #endregion
-
-                ///////////////////////////////////////////////////////////////
-
-                return 0; /* SUCCESS */
             }
             catch (Exception e)
             {

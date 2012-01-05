@@ -4,7 +4,7 @@ Installer.exe: #3: Installer.Main: GacRemove: assemblyPath = "[file nativename [
 Installer.exe: #4: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v4.0.30319", writable = False
 Installer.exe: #5: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework", writable = False
 Installer.exe: #6: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
-Installer.exe: #7: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v4.0.30319\AssemblyFoldersEx", writable = False
+Installer.exe: #7: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v4.0.30319\AssemblyFoldersEx", writable = True
 Installer.exe: #8: RegistryHelper.DeleteSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework\v4.0.30319\AssemblyFoldersEx", subKeyName = "System.Data.SQLite"
 Installer.exe: #9: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v4.0.30319", writable = False
 Installer.exe: #10: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework", writable = False

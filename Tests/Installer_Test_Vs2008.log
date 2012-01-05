@@ -4,7 +4,7 @@ Installer.exe: #3: Installer.Main: GacInstall: assemblyPath = "[file nativename 
 Installer.exe: #4: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v2.0.50727", writable = False
 Installer.exe: #5: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework", writable = False
 Installer.exe: #6: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
-Installer.exe: #7: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v2.0.50727\AssemblyFoldersEx", writable = False
+Installer.exe: #7: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v2.0.50727\AssemblyFoldersEx", writable = True
 Installer.exe: #8: RegistryHelper.DeleteSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework\v2.0.50727\AssemblyFoldersEx", subKeyName = "SQLite"
 Installer.exe: #9: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\.NETFramework\v2.0.50727\AssemblyFoldersEx", writable = True
 Installer.exe: #10: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework\v2.0.50727\AssemblyFoldersEx", subKeyName = "System.Data.SQLite"
