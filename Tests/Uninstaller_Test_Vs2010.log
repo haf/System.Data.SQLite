@@ -16,7 +16,7 @@ Installer.exe: #15: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", s
 Installer.exe: #16: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #17: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\10.0", writable = False
 Installer.exe: #18: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "Packages", writable = True
-Installer.exe: #19: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
+Installer.exe: #19: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Packages", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
 Installer.exe: #20: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "Menus", writable = True
 Installer.exe: #21: RegistryHelper.DeleteValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0\Menus", name = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
 Installer.exe: #22: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0", subKeyName = "Services", writable = True
