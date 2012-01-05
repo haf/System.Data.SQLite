@@ -5063,7 +5063,7 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteSubKeyTree(
-                        key, package.PackageId.ToString(VsIdFormat),
+                        subKey, package.PackageId.ToString(VsIdFormat),
                         whatIf, verbose);
                 }
 
