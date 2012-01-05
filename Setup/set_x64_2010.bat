@@ -7,7 +7,7 @@
 :: Released to the public domain, use at your own risk!
 ::
 
-SET ISNETFX2=True
+SET ISNETFX2=False
 SET VCRUNTIME=2010_SP1
 SET PLATFORM=x64
 SET PROCESSOR=x64

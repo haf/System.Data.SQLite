@@ -34,6 +34,7 @@ namespace System.Data.SQLite
         string typeName,
         AssemblyName assemblyName,
         object clientData,
+        bool throwOnMissing,
         bool whatIf,
         bool verbose,
         ref bool saved,
@@ -48,6 +49,7 @@ namespace System.Data.SQLite
         Version frameworkVersion,
         string platformName,
         object clientData,
+        bool throwOnMissing,
         bool whatIf,
         bool verbose,
         ref string error
@@ -60,6 +62,7 @@ namespace System.Data.SQLite
         Version vsVersion,
         Installer.Package package,
         object clientData,
+        bool throwOnMissing,
         bool whatIf,
         bool verbose,
         ref string error
@@ -697,7 +700,8 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             public void DeleteSubKey(
-                string subKeyName
+                string subKeyName,
+                bool throwOnMissing
                 )
             {
                 CheckDisposed();
@@ -707,7 +711,7 @@ namespace System.Data.SQLite
                     return;
 
                 if (!whatIf)
-                    key.DeleteSubKey(subKeyName);
+                    key.DeleteSubKey(subKeyName, throwOnMissing);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -729,7 +733,8 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             public void DeleteValue(
-                string name
+                string name,
+                bool throwOnMissing
                 )
             {
                 CheckDisposed();
@@ -739,7 +744,7 @@ namespace System.Data.SQLite
                     return;
 
                 if (!whatIf)
-                    key.DeleteValue(name);
+                    key.DeleteValue(name, throwOnMissing);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1178,6 +1183,7 @@ namespace System.Data.SQLite
             public static void DeleteSubKey(
                 MockRegistryKey rootKey,
                 string subKeyName,
+                bool throwOnMissing,
                 bool whatIf,
                 bool verbose
                 )
@@ -1193,7 +1199,7 @@ namespace System.Data.SQLite
                         traceCategory);
 
                 if (!whatIf)
-                    rootKey.DeleteSubKey(subKeyName);
+                    rootKey.DeleteSubKey(subKeyName, throwOnMissing);
 
                 subKeysDeleted++;
             }
@@ -1296,6 +1302,7 @@ namespace System.Data.SQLite
             public static void DeleteValue(
                 MockRegistryKey key,
                 string name,
+                bool throwOnMissing,
                 bool whatIf,
                 bool verbose
                 )
@@ -1310,7 +1317,7 @@ namespace System.Data.SQLite
                         ForDisplay(name)), traceCategory);
 
                 if (!whatIf)
-                    key.DeleteValue(name);
+                    key.DeleteValue(name, throwOnMissing);
 
                 keyValuesDeleted++;
             }
@@ -1487,6 +1494,7 @@ namespace System.Data.SQLite
                 bool noTrace,
                 bool noConsole,
                 bool noLog,
+                bool throwOnMissing,
                 bool whatIf,
                 bool verbose,
                 bool confirm
@@ -1514,6 +1522,7 @@ namespace System.Data.SQLite
                 this.noTrace = noTrace;
                 this.noConsole = noConsole;
                 this.noLog = noLog;
+                this.throwOnMissing = throwOnMissing;
                 this.whatIf = whatIf;
                 this.verbose = verbose;
                 this.confirm = confirm;
@@ -1667,7 +1676,7 @@ namespace System.Data.SQLite
                     InstallFlags.Default, TracePriority.Debug,
                     TracePriority.Trace, true, false, false, false, false,
                     false, false, false, false, false, false, true, true,
-                    false);
+                    true, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1965,6 +1974,27 @@ namespace System.Data.SQLite
                             }
 
                             configuration.noRuntimeVersion = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "throwOnMissing"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.throwOnMissing = (bool)value;
                         }
                         else if (MatchOption(newArg, "whatIf"))
                         {
@@ -2624,6 +2654,10 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "ThrowOnMissing", ForDisplay(throwOnMissing)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "WhatIf", ForDisplay(whatIf)),
                         traceCategory);
 
@@ -2835,6 +2869,15 @@ namespace System.Data.SQLite
             {
                 get { return noLog; }
                 set { noLog = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool throwOnMissing;
+            public bool ThrowOnMissing
+            {
+                get { return throwOnMissing; }
+                set { throwOnMissing = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3269,6 +3312,7 @@ namespace System.Data.SQLite
             string typeName,
             AssemblyName assemblyName,
             object clientData,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref bool saved,
@@ -3420,8 +3464,8 @@ namespace System.Data.SQLite
 
                     if (!callback(
                             fileName, invariant, name, description, typeName,
-                            assemblyName, clientData, whatIf, verbose,
-                            ref localSaved, ref error))
+                            assemblyName, clientData, throwOnMissing, whatIf,
+                            verbose, ref localSaved, ref error))
                     {
                         return false;
                     }
@@ -3449,6 +3493,7 @@ namespace System.Data.SQLite
             FrameworkList frameworkList,
             FrameworkRegistryCallback callback,
             object clientData,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref string error
@@ -3550,8 +3595,8 @@ namespace System.Data.SQLite
 
                     if (!callback(
                             rootKey, frameworkName, frameworkVersion,
-                            platformName, clientData, whatIf, verbose,
-                            ref error))
+                            platformName, clientData, throwOnMissing,
+                            whatIf, verbose, ref error))
                     {
                         return false;
                     }
@@ -3636,6 +3681,7 @@ namespace System.Data.SQLite
             VisualStudioRegistryCallback callback,
             Package package,
             object clientData,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref string error
@@ -3689,8 +3735,8 @@ namespace System.Data.SQLite
                     continue;
 
                 if (!callback(
-                        rootKey, vsVersion, package, clientData, whatIf,
-                        verbose, ref error))
+                        rootKey, vsVersion, package, clientData,
+                        throwOnMissing, whatIf, verbose, ref error))
                 {
                     return false;
                 }
@@ -3868,6 +3914,7 @@ namespace System.Data.SQLite
             string typeName,
             AssemblyName assemblyName,
             object clientData,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref bool saved,
@@ -3974,6 +4021,7 @@ namespace System.Data.SQLite
             Version frameworkVersion,
             string platformName,
             string subKeyName,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref string error
@@ -3983,7 +4031,7 @@ namespace System.Data.SQLite
                 frameworkName, frameworkVersion, platformName);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
-                    rootKey, keyName, false, whatIf, verbose))
+                    rootKey, keyName, true, whatIf, verbose))
             {
                 if (key == null)
                 {
@@ -3995,7 +4043,7 @@ namespace System.Data.SQLite
                 }
 
                 RegistryHelper.DeleteSubKey(
-                    key, subKeyName, whatIf, verbose);
+                    key, subKeyName, throwOnMissing, whatIf, verbose);
             }
 
             return true;
@@ -4009,6 +4057,7 @@ namespace System.Data.SQLite
             Version frameworkVersion,
             string platformName,
             object clientData,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4026,7 +4075,7 @@ namespace System.Data.SQLite
             {
                 return RemoveFromAssemblyFolders(
                     rootKey, frameworkName, frameworkVersion, platformName,
-                    LegacyProjectName, whatIf, verbose, ref error) &&
+                    LegacyProjectName, false, whatIf, verbose, ref error) &&
                 AddToAssemblyFolders(
                     rootKey, frameworkName, frameworkVersion, platformName,
                     ProjectName, pair.X, whatIf, verbose, ref error);
@@ -4035,7 +4084,7 @@ namespace System.Data.SQLite
             {
                 return RemoveFromAssemblyFolders(
                     rootKey, frameworkName, frameworkVersion, platformName,
-                    ProjectName, whatIf, verbose, ref error);
+                    ProjectName, throwOnMissing, whatIf, verbose, ref error);
             }
         }
         #endregion
@@ -4199,6 +4248,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             Package package,
             object clientData,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4403,6 +4453,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             Package package,
             object clientData,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4509,8 +4560,9 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    using (MockRegistryKey packageKey = RegistryHelper.CreateSubKey(
-                            subKey, package.PackageId.ToString(VsIdFormat), whatIf,
+                    using (MockRegistryKey packageKey =
+                            RegistryHelper.CreateSubKey(subKey,
+                            package.PackageId.ToString(VsIdFormat), whatIf,
                             verbose))
                     {
                         if (packageKey == null)
@@ -4522,9 +4574,9 @@ namespace System.Data.SQLite
                             return false;
                         }
 
-                        RegistryHelper.SetValue(packageKey, null, String.Format(
-                            "{0} Designer Package", ProjectName), whatIf,
-                            verbose);
+                        RegistryHelper.SetValue(packageKey, null,
+                            String.Format("{0} Designer Package", ProjectName),
+                            whatIf, verbose);
 
                         RegistryHelper.SetValue(packageKey, "Class",
                             "SQLite.Designer.SQLitePackage", whatIf, verbose);
@@ -4552,14 +4604,15 @@ namespace System.Data.SQLite
                         RegistryHelper.SetValue(packageKey, "ProductVersion",
                             "1.0", whatIf, verbose);
 
-                        using (MockRegistryKey toolboxKey = RegistryHelper.CreateSubKey(
-                                packageKey, "Toolbox", whatIf, verbose))
+                        using (MockRegistryKey toolboxKey =
+                                RegistryHelper.CreateSubKey(packageKey,
+                                "Toolbox", whatIf, verbose))
                         {
                             if (toolboxKey == null)
                             {
                                 error = String.Format(
-                                    "could not create registry key: {0}\\Toolbox",
-                                    packageKey);
+                                    "could not create registry key: " +
+                                    "{0}\\Toolbox", packageKey);
 
                                 return false;
                             }
@@ -4600,8 +4653,9 @@ namespace System.Data.SQLite
                         return false;
                     }
 
-                    using (MockRegistryKey serviceKey = RegistryHelper.CreateSubKey(
-                            subKey, package.ServiceId.ToString(VsIdFormat), whatIf,
+                    using (MockRegistryKey serviceKey =
+                            RegistryHelper.CreateSubKey(subKey,
+                            package.ServiceId.ToString(VsIdFormat), whatIf,
                             verbose))
                     {
                         if (serviceKey == null)
@@ -4633,6 +4687,7 @@ namespace System.Data.SQLite
             RegistryKey rootKey,
             Version vsVersion,
             Package package,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4677,8 +4732,8 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteSubKeyTree(
-                        key, package.PackageId.ToString(VsIdFormat), whatIf,
-                        verbose);
+                        key, package.PackageId.ToString(VsIdFormat),
+                        whatIf, verbose);
                 }
 
                 using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
@@ -4694,8 +4749,8 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteValue(
-                        subKey, package.PackageId.ToString(VsIdFormat), whatIf,
-                        verbose);
+                        subKey, package.PackageId.ToString(VsIdFormat),
+                        throwOnMissing, whatIf, verbose);
                 }
 
                 using (MockRegistryKey subKey = RegistryHelper.OpenSubKey(
@@ -4711,8 +4766,8 @@ namespace System.Data.SQLite
                     }
 
                     RegistryHelper.DeleteSubKeyTree(
-                        subKey, package.ServiceId.ToString(VsIdFormat), whatIf,
-                        verbose);
+                        subKey, package.ServiceId.ToString(VsIdFormat),
+                        whatIf, verbose);
                 }
             }
 
@@ -4726,6 +4781,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             Package package,
             object clientData,
+            bool throwOnMissing,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4742,14 +4798,14 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsPackage(
-                    rootKey, vsVersion, package, pair.X, whatIf,
-                    verbose, ref error);
+                    rootKey, vsVersion, package, pair.X, whatIf, verbose,
+                    ref error);
             }
             else
             {
                 return RemoveVsPackage(
-                    rootKey, vsVersion, package, whatIf, verbose,
-                    ref error);
+                    rootKey, vsVersion, package, throwOnMissing, whatIf,
+                    verbose, ref error);
             }
         }
         #endregion
@@ -4762,229 +4818,247 @@ namespace System.Data.SQLite
             string[] args
             )
         {
-            Configuration configuration = null;
-            string error = null;
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region Command Line Processing
-            if (!Configuration.FromArgs(
-                    args, true, ref configuration, ref error) ||
-                !Configuration.Process(
-                    args, configuration, true, ref error) ||
-                !Configuration.CheckRuntimeVersion(
-                    configuration, true, ref error))
+            try
             {
-                TraceOps.ShowMessage(TracePriority.Highest,
-                    debugCallback, traceCallback, thisAssembly,
-                    error, traceCategory, MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Configuration configuration = null;
+                string error = null;
 
-                return 1; /* FAILURE */
-            }
-            #endregion
+                ///////////////////////////////////////////////////////////////
 
-            ///////////////////////////////////////////////////////////////////
-
-            #region .NET Framework / Visual Studio Data
-            Package package = null;
-            FrameworkList frameworkList = null;
-            VsList vsList = null;
-
-            ///////////////////////////////////////////////////////////////////
-
-            InitializeVsPackage(ref package);
-            InitializeFrameworkList(configuration, ref frameworkList);
-            InitializeVsList(configuration, ref vsList);
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            AssemblyName assemblyName = AssemblyName.GetAssemblyName(
-                configuration.CoreFileName); /* throw */
-
-            ///////////////////////////////////////////////////////////////////
-
-            AnyPair<string, bool> directoryPair = new AnyPair<string, bool>(
-                configuration.Directory, configuration.Install);
-
-            AnyPair<string, bool> fileNamePair = new AnyPair<string, bool>(
-                configuration.DesignerFileName, configuration.Install);
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region .NET GAC Install/Remove
-            if (configuration.HasFlags(InstallFlags.GAC, true))
-            {
-                Publish publish = null;
-
-                if (!configuration.WhatIf)
-                    publish = new Publish();
-
-                if (configuration.Install)
+                #region Command Line Processing
+                if (!Configuration.FromArgs(
+                        args, true, ref configuration, ref error) ||
+                    !Configuration.Process(
+                        args, configuration, true, ref error) ||
+                    !Configuration.CheckRuntimeVersion(
+                        configuration, true, ref error))
                 {
-                    if (!configuration.WhatIf)
-                        publish.GacInstall(configuration.CoreFileName); /* throw */
+                    TraceOps.ShowMessage(TracePriority.Highest,
+                        debugCallback, traceCallback, thisAssembly,
+                        error, traceCategory, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
 
-                    TraceOps.DebugAndTrace(TracePriority.Highest,
-                        debugCallback, traceCallback, String.Format(
-                        "GacInstall: assemblyPath = {0}",
-                        ForDisplay(configuration.CoreFileName)),
-                        traceCategory);
+                    return 1; /* FAILURE */
+                }
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                #region .NET Framework / Visual Studio Data
+                Package package = null;
+                FrameworkList frameworkList = null;
+                VsList vsList = null;
+
+                ///////////////////////////////////////////////////////////////
+
+                InitializeVsPackage(ref package);
+                InitializeFrameworkList(configuration, ref frameworkList);
+                InitializeVsList(configuration, ref vsList);
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                AssemblyName assemblyName = AssemblyName.GetAssemblyName(
+                    configuration.CoreFileName); /* throw */
+
+                ///////////////////////////////////////////////////////////////
+
+                AnyPair<string, bool> directoryPair = new AnyPair<string, bool>(
+                    configuration.Directory, configuration.Install);
+
+                AnyPair<string, bool> fileNamePair = new AnyPair<string, bool>(
+                    configuration.DesignerFileName, configuration.Install);
+
+                ///////////////////////////////////////////////////////////////
+
+                #region .NET GAC Install/Remove
+                if (configuration.HasFlags(InstallFlags.GAC, true))
+                {
+                    Publish publish = null;
 
                     if (!configuration.WhatIf)
-                        publish.GacInstall(configuration.LinqFileName); /* throw */
+                        publish = new Publish();
 
-                    TraceOps.DebugAndTrace(TracePriority.Highest,
-                        debugCallback, traceCallback, String.Format(
-                        "GacInstall: assemblyPath = {0}",
-                        ForDisplay(configuration.LinqFileName)),
-                        traceCategory);
+                    if (configuration.Install)
+                    {
+                        if (!configuration.WhatIf)
+                            /* throw */
+                            publish.GacInstall(configuration.CoreFileName);
+
+                        TraceOps.DebugAndTrace(TracePriority.Highest,
+                            debugCallback, traceCallback, String.Format(
+                            "GacInstall: assemblyPath = {0}",
+                            ForDisplay(configuration.CoreFileName)),
+                            traceCategory);
+
+                        if (!configuration.WhatIf)
+                            /* throw */
+                            publish.GacInstall(configuration.LinqFileName);
+
+                        TraceOps.DebugAndTrace(TracePriority.Highest,
+                            debugCallback, traceCallback, String.Format(
+                            "GacInstall: assemblyPath = {0}",
+                            ForDisplay(configuration.LinqFileName)),
+                            traceCategory);
+                    }
+                    else
+                    {
+                        if (!configuration.WhatIf)
+                            /* throw */
+                            publish.GacRemove(configuration.LinqFileName);
+
+                        TraceOps.DebugAndTrace(TracePriority.Highest,
+                            debugCallback, traceCallback, String.Format(
+                            "GacRemove: assemblyPath = {0}",
+                            ForDisplay(configuration.LinqFileName)),
+                            traceCategory);
+
+                        if (!configuration.WhatIf)
+                            /* throw */
+                            publish.GacRemove(configuration.CoreFileName);
+
+                        TraceOps.DebugAndTrace(TracePriority.Highest,
+                            debugCallback, traceCallback, String.Format(
+                            "GacRemove: assemblyPath = {0}",
+                            ForDisplay(configuration.CoreFileName)),
+                            traceCategory);
+                    }
                 }
-                else
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                #region .NET AssemblyFolders
+                if (configuration.HasFlags(InstallFlags.AssemblyFolders, true))
                 {
-                    if (!configuration.WhatIf)
-                        publish.GacRemove(configuration.LinqFileName); /* throw */
+                    if (!ForEachFrameworkRegistry(
+                            frameworkList, ProcessAssemblyFolders,
+                            directoryPair, configuration.ThrowOnMissing,
+                            configuration.WhatIf, configuration.Verbose,
+                            ref error))
+                    {
+                        TraceOps.ShowMessage(TracePriority.Highest,
+                            debugCallback, traceCallback, thisAssembly,
+                            error, traceCategory, MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
 
-                    TraceOps.DebugAndTrace(TracePriority.Highest,
-                        debugCallback, traceCallback, String.Format(
-                        "GacRemove: assemblyPath = {0}",
-                        ForDisplay(configuration.LinqFileName)),
-                        traceCategory);
-
-                    if (!configuration.WhatIf)
-                        publish.GacRemove(configuration.CoreFileName); /* throw */
-
-                    TraceOps.DebugAndTrace(TracePriority.Highest,
-                        debugCallback, traceCallback, String.Format(
-                        "GacRemove: assemblyPath = {0}",
-                        ForDisplay(configuration.CoreFileName)),
-                        traceCategory);
+                        return 1; /* FAILURE */
+                    }
                 }
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                #region .NET DbProviderFactory
+                if (configuration.HasFlags(InstallFlags.DbProviderFactory, true))
+                {
+                    bool saved = false;
+
+                    if (!ForEachFrameworkConfig(
+                            frameworkList, ProcessDbProviderFactory,
+                            InvariantName, ProviderName, Description,
+                            FactoryTypeName, assemblyName, directoryPair,
+                            configuration.ThrowOnMissing, configuration.WhatIf,
+                            configuration.Verbose, ref saved, ref error))
+                    {
+                        TraceOps.ShowMessage(TracePriority.Highest,
+                            debugCallback, traceCallback, thisAssembly,
+                            error, traceCategory, MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+
+                        return 1; /* FAILURE */
+                    }
+                }
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                #region VS Package
+                if (configuration.HasFlags(InstallFlags.VsPackage, true))
+                {
+                    if (!ForEachVsVersionRegistry(
+                            vsList, ProcessVsPackage, package,
+                            fileNamePair, configuration.ThrowOnMissing,
+                            configuration.WhatIf, configuration.Verbose,
+                            ref error))
+                    {
+                        TraceOps.ShowMessage(TracePriority.Highest,
+                            debugCallback, traceCallback, thisAssembly,
+                            error, traceCategory, MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+
+                        return 1; /* FAILURE */
+                    }
+                }
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                #region VS DataSource
+                if (configuration.HasFlags(InstallFlags.VsDataSource, true))
+                {
+                    if (!ForEachVsVersionRegistry(
+                            vsList, ProcessVsDataSource, package,
+                            fileNamePair, configuration.ThrowOnMissing,
+                            configuration.WhatIf, configuration.Verbose,
+                            ref error))
+                    {
+                        TraceOps.ShowMessage(TracePriority.Highest,
+                            debugCallback, traceCallback, thisAssembly,
+                            error, traceCategory, MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+
+                        return 1; /* FAILURE */
+                    }
+                }
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                #region VS DataProvider
+                if (configuration.HasFlags(InstallFlags.VsDataProvider, true))
+                {
+                    if (!ForEachVsVersionRegistry(
+                            vsList, ProcessVsDataProvider, package,
+                            fileNamePair, configuration.ThrowOnMissing,
+                            configuration.WhatIf, configuration.Verbose,
+                            ref error))
+                    {
+                        TraceOps.ShowMessage(TracePriority.Highest,
+                            debugCallback, traceCallback, thisAssembly,
+                            error, traceCategory, MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+
+                        return 1; /* FAILURE */
+                    }
+                }
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                #region Log Summary
+                TraceOps.DebugAndTrace(TracePriority.Higher,
+                    debugCallback, traceCallback, String.Format(
+                    "subKeysCreated = {0}, subKeysDeleted = {1}, " +
+                    "keyValuesSet = {2}, keyValuesDeleted = {3}",
+                    ForDisplay(RegistryHelper.SubKeysCreated),
+                    ForDisplay(RegistryHelper.SubKeysDeleted),
+                    ForDisplay(RegistryHelper.KeyValuesSet),
+                    ForDisplay(RegistryHelper.KeyValuesDeleted)),
+                    traceCategory);
+                #endregion
+
+                ///////////////////////////////////////////////////////////////
+
+                return 0; /* SUCCESS */
             }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region .NET AssemblyFolders
-            if (configuration.HasFlags(InstallFlags.AssemblyFolders, true))
+            catch (Exception e)
             {
-                if (!ForEachFrameworkRegistry(
-                        frameworkList, ProcessAssemblyFolders,
-                        directoryPair, configuration.WhatIf,
-                        configuration.Verbose, ref error))
-                {
-                    TraceOps.ShowMessage(TracePriority.Highest,
-                        debugCallback, traceCallback, thisAssembly,
-                        error, traceCategory, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                TraceOps.DebugAndTrace(TracePriority.Highest,
+                    debugCallback, traceCallback, e, traceCategory);
 
-                    return 1; /* FAILURE */
-                }
+                throw;
             }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region .NET DbProviderFactory
-            if (configuration.HasFlags(InstallFlags.DbProviderFactory, true))
-            {
-                bool saved = false;
-
-                if (!ForEachFrameworkConfig(
-                        frameworkList, ProcessDbProviderFactory,
-                        InvariantName, ProviderName, Description,
-                        FactoryTypeName, assemblyName, directoryPair,
-                        configuration.WhatIf, configuration.Verbose,
-                        ref saved, ref error))
-                {
-                    TraceOps.ShowMessage(TracePriority.Highest,
-                        debugCallback, traceCallback, thisAssembly,
-                        error, traceCategory, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
-                    return 1; /* FAILURE */
-                }
-            }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region VS Package
-            if (configuration.HasFlags(InstallFlags.VsPackage, true))
-            {
-                if (!ForEachVsVersionRegistry(
-                        vsList, ProcessVsPackage, package, fileNamePair,
-                        configuration.WhatIf, configuration.Verbose,
-                        ref error))
-                {
-                    TraceOps.ShowMessage(TracePriority.Highest,
-                        debugCallback, traceCallback, thisAssembly,
-                        error, traceCategory, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
-                    return 1; /* FAILURE */
-                }
-            }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region VS DataSource
-            if (configuration.HasFlags(InstallFlags.VsDataSource, true))
-            {
-                if (!ForEachVsVersionRegistry(
-                        vsList, ProcessVsDataSource, package, fileNamePair,
-                        configuration.WhatIf, configuration.Verbose,
-                        ref error))
-                {
-                    TraceOps.ShowMessage(TracePriority.Highest,
-                        debugCallback, traceCallback, thisAssembly,
-                        error, traceCategory, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
-                    return 1; /* FAILURE */
-                }
-            }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region VS DataProvider
-            if (configuration.HasFlags(InstallFlags.VsDataProvider, true))
-            {
-                if (!ForEachVsVersionRegistry(
-                        vsList, ProcessVsDataProvider, package, fileNamePair,
-                        configuration.WhatIf, configuration.Verbose,
-                        ref error))
-                {
-                    TraceOps.ShowMessage(TracePriority.Highest,
-                        debugCallback, traceCallback, thisAssembly,
-                        error, traceCategory, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
-                    return 1; /* FAILURE */
-                }
-            }
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            #region Log Summary
-            TraceOps.DebugAndTrace(TracePriority.Higher,
-                debugCallback, traceCallback, String.Format(
-                "subKeysCreated = {0}, subKeysDeleted = {1}, " +
-                "keyValuesSet = {2}, keyValuesDeleted = {3}",
-                ForDisplay(RegistryHelper.SubKeysCreated),
-                ForDisplay(RegistryHelper.SubKeysDeleted),
-                ForDisplay(RegistryHelper.KeyValuesSet),
-                ForDisplay(RegistryHelper.KeyValuesDeleted)),
-                traceCategory);
-            #endregion
-
-            ///////////////////////////////////////////////////////////////////
-
-            return 0; /* SUCCESS */
         }
         #endregion
     }
