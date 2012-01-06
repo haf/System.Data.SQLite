@@ -5,6 +5,7 @@
  * Released to the public domain, use at your own risk!
  */
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.EnterpriseServices.Internal;
@@ -184,6 +185,7 @@ namespace System.Data.SQLite
             private static object syncRoot = new object();
             private static long nextDebugId;
             private static long nextTraceId;
+            private static IList<TraceListener> debugListeners;
             private static TracePriority debugPriority = TracePriority.Default;
             private static TracePriority tracePriority = TracePriority.Default;
             private static string debugFormat = DefaultDebugFormat;
@@ -227,36 +229,6 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Interactive Support Methods
-            public static string GetAssemblyTitle(
-                Assembly assembly
-                )
-            {
-                if (assembly != null)
-                {
-                    try
-                    {
-                        if (assembly.IsDefined(
-                                typeof(AssemblyTitleAttribute), false))
-                        {
-                            AssemblyTitleAttribute title =
-                                (AssemblyTitleAttribute)
-                                assembly.GetCustomAttributes(
-                                    typeof(AssemblyTitleAttribute), false)[0];
-
-                            return title.Title;
-                        }
-                    }
-                    catch
-                    {
-                        // do nothing.
-                    }
-                }
-
-                return null;
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
             public static DialogResult ShowMessage(
                 TracePriority tracePriority,
                 TraceCallback debugCallback,
@@ -302,6 +274,16 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Tracing Support Methods
+            public static void SetupDebugListeners()
+            {
+                if (debugListeners == null)
+                    debugListeners = new List<TraceListener>();
+
+                debugListeners.Add(new ConsoleTraceListener());
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             public static long NextDebugId()
             {
                 return Interlocked.Increment(ref nextDebugId);
@@ -394,23 +376,14 @@ namespace System.Data.SQLite
             {
                 lock (syncRoot)
                 {
-#if DEBUG
-                    //
-                    // NOTE: Write the message to all the active debug
-                    //       listeners.
-                    //
-                    Debug.WriteLine(message, category);
-                    Debug.Flush();
-#else
-                    //
-                    // NOTE: For a build without "DEBUG" defined, we cannot
-                    //       simply use the Debug class (i.e. it will do
-                    //       nothing); therefore, use the console directly
-                    //       instead.
-                    //
-                    Console.WriteLine(String.Format("{1}: {0}", message,
-                        category));
-#endif
+                    if (debugListeners != null)
+                    {
+                        foreach (TraceListener listener in debugListeners)
+                        {
+                            listener.WriteLine(message, category);
+                            listener.Flush();
+                        }
+                    }
                 }
             }
 
@@ -494,17 +467,13 @@ namespace System.Data.SQLite
                     GetMethodName(stackTrace, level), message);
 
                 //
-                // NOTE: If the trace priority of this message is less than
-                //       what we currently want to debug, skip it.
+                // NOTE: If the debug callback is invalid or the trace priority
+                //       of this message is less than what we currently want to
+                //       debug, skip it.
                 //
-                if (tracePriority >= DebugPriority)
+                if ((debugCallback != null) &&
+                    (tracePriority >= DebugPriority))
                 {
-                    //
-                    // NOTE: If not specified, use the default debug callback.
-                    //
-                    if (debugCallback == null)
-                        debugCallback = DebugCore;
-
                     //
                     // NOTE: Invoke the debug callback with the formatted
                     //       message and the category specified by the
@@ -514,17 +483,13 @@ namespace System.Data.SQLite
                 }
 
                 //
-                // NOTE: If the trace priority of this message is less than
-                //       what we currently want to trace, skip it.
+                // NOTE: If the trace callback is invalid or the trace priority
+                //       of this message is less than what we currently want to
+                //       trace, skip it.
                 //
-                if (tracePriority >= TracePriority)
+                if ((traceCallback != null) &&
+                    (tracePriority >= TracePriority))
                 {
-                    //
-                    // NOTE: If not specified, use the default trace callback.
-                    //
-                    if (traceCallback == null)
-                        traceCallback = TraceCore;
-
                     //
                     // NOTE: Invoke the trace callback with the formatted
                     //       message and the category specified by the
@@ -1806,6 +1771,7 @@ namespace System.Data.SQLite
                 bool noLog,
                 bool throwOnMissing,
                 bool whatIf,
+                bool debug,
                 bool verbose,
                 bool confirm
                 )
@@ -1834,6 +1800,7 @@ namespace System.Data.SQLite
                 this.noLog = noLog;
                 this.throwOnMissing = throwOnMissing;
                 this.whatIf = whatIf;
+                this.debug = debug;
                 this.verbose = verbose;
                 this.confirm = confirm;
             }
@@ -1986,7 +1953,7 @@ namespace System.Data.SQLite
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, true, false, false, false, false,
                     false, false, false, false, false, false, true, true,
-                    true, false);
+                    false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2082,7 +2049,7 @@ namespace System.Data.SQLite
                         //       to interpret the textual value as the correct
                         //       type.
                         //
-                        if (MatchOption(newArg, "strict"))
+                        if (MatchOption(newArg, "confirm"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2101,16 +2068,64 @@ namespace System.Data.SQLite
                                 continue;
                             }
 
-                            //
-                            // NOTE: Allow the command line arguments to
-                            //       override the "strictness" setting
-                            //       provided by our caller.
-                            //
-                            strict = (bool)value;
+                            configuration.confirm = (bool)value;
                         }
-                        else if (MatchOption(newArg, "logFileName"))
+                        else if (MatchOption(newArg, "coreFileName"))
                         {
-                            configuration.logFileName = text;
+                            configuration.coreFileName = text;
+                        }
+                        else if (MatchOption(newArg, "debug"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.debug = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "debugFormat"))
+                        {
+                            configuration.debugFormat = text;
+                            TraceOps.DebugFormat = configuration.debugFormat;
+                        }
+                        else if (MatchOption(newArg, "debugPriority"))
+                        {
+                            object value = ParseEnum(
+                                typeof(TracePriority), text, true);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.debugPriority = (TracePriority)value;
+                            TraceOps.DebugPriority = configuration.debugPriority;
+                        }
+                        else if (MatchOption(newArg, "designerFileName"))
+                        {
+                            configuration.designerFileName = text;
                         }
                         else if (MatchOption(newArg, "directory"))
                         {
@@ -2154,74 +2169,6 @@ namespace System.Data.SQLite
                             configuration.designerFileName = Path.Combine(
                                 configuration.directory, designerFileName);
                         }
-                        else if (MatchOption(newArg, "coreFileName"))
-                        {
-                            configuration.coreFileName = text;
-                        }
-                        else if (MatchOption(newArg, "linqFileName"))
-                        {
-                            configuration.linqFileName = text;
-                        }
-                        else if (MatchOption(newArg, "designerFileName"))
-                        {
-                            configuration.designerFileName = text;
-                        }
-                        else if (MatchOption(newArg, "debugFormat"))
-                        {
-                            configuration.debugFormat = text;
-                            TraceOps.DebugFormat = configuration.debugFormat;
-                        }
-                        else if (MatchOption(newArg, "traceFormat"))
-                        {
-                            configuration.traceFormat = text;
-                            TraceOps.TraceFormat = configuration.traceFormat;
-                        }
-                        else if (MatchOption(newArg, "debugPriority"))
-                        {
-                            object value = ParseEnum(
-                                typeof(TracePriority), text, true);
-
-                            if (value == null)
-                            {
-                                error = TraceOps.DebugAndTrace(
-                                    TracePriority.Lowest, debugCallback,
-                                    traceCallback, String.Format(
-                                    "Invalid {0} value: {1}",
-                                    ForDisplay(arg), ForDisplay(text)),
-                                    traceCategory);
-
-                                if (strict)
-                                    return false;
-
-                                continue;
-                            }
-
-                            configuration.debugPriority = (TracePriority)value;
-                            TraceOps.DebugPriority = configuration.debugPriority;
-                        }
-                        else if (MatchOption(newArg, "tracePriority"))
-                        {
-                            object value = ParseEnum(
-                                typeof(TracePriority), text, true);
-
-                            if (value == null)
-                            {
-                                error = TraceOps.DebugAndTrace(
-                                    TracePriority.Lowest, debugCallback,
-                                    traceCallback, String.Format(
-                                    "Invalid {0} value: {1}",
-                                    ForDisplay(arg), ForDisplay(text)),
-                                    traceCategory);
-
-                                if (strict)
-                                    return false;
-
-                                continue;
-                            }
-
-                            configuration.tracePriority = (TracePriority)value;
-                            TraceOps.TracePriority = configuration.tracePriority;
-                        }
                         else if (MatchOption(newArg, "install"))
                         {
                             bool? value = ParseBoolean(text);
@@ -2264,49 +2211,15 @@ namespace System.Data.SQLite
 
                             configuration.installFlags = (InstallFlags)value;
                         }
-                        else if (MatchOption(newArg, "noRuntimeVersion"))
+                        else if (MatchOption(newArg, "linqFileName"))
                         {
-                            bool? value = ParseBoolean(text);
-
-                            if (value == null)
-                            {
-                                error = TraceOps.DebugAndTrace(
-                                    TracePriority.Lowest, debugCallback,
-                                    traceCallback, String.Format(
-                                    "Invalid {0} boolean value: {1}",
-                                    ForDisplay(arg), ForDisplay(text)),
-                                    traceCategory);
-
-                                if (strict)
-                                    return false;
-
-                                continue;
-                            }
-
-                            configuration.noRuntimeVersion = (bool)value;
+                            configuration.linqFileName = text;
                         }
-                        else if (MatchOption(newArg, "throwOnMissing"))
+                        else if (MatchOption(newArg, "logFileName"))
                         {
-                            bool? value = ParseBoolean(text);
-
-                            if (value == null)
-                            {
-                                error = TraceOps.DebugAndTrace(
-                                    TracePriority.Lowest, debugCallback,
-                                    traceCallback, String.Format(
-                                    "Invalid {0} boolean value: {1}",
-                                    ForDisplay(arg), ForDisplay(text)),
-                                    traceCategory);
-
-                                if (strict)
-                                    return false;
-
-                                continue;
-                            }
-
-                            configuration.throwOnMissing = (bool)value;
+                            configuration.logFileName = text;
                         }
-                        else if (MatchOption(newArg, "whatIf"))
+                        else if (MatchOption(newArg, "noCompact"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2325,9 +2238,9 @@ namespace System.Data.SQLite
                                 continue;
                             }
 
-                            configuration.whatIf = (bool)value;
+                            configuration.noCompact = (bool)value;
                         }
-                        else if (MatchOption(newArg, "verbose"))
+                        else if (MatchOption(newArg, "noConsole"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2346,28 +2259,7 @@ namespace System.Data.SQLite
                                 continue;
                             }
 
-                            configuration.verbose = (bool)value;
-                        }
-                        else if (MatchOption(newArg, "confirm"))
-                        {
-                            bool? value = ParseBoolean(text);
-
-                            if (value == null)
-                            {
-                                error = TraceOps.DebugAndTrace(
-                                    TracePriority.Lowest, debugCallback,
-                                    traceCallback, String.Format(
-                                    "Invalid {0} boolean value: {1}",
-                                    ForDisplay(arg), ForDisplay(text)),
-                                    traceCategory);
-
-                                if (strict)
-                                    return false;
-
-                                continue;
-                            }
-
-                            configuration.confirm = (bool)value;
+                            configuration.noConsole = (bool)value;
                         }
                         else if (MatchOption(newArg, "noDesktop"))
                         {
@@ -2390,7 +2282,7 @@ namespace System.Data.SQLite
 
                             configuration.noDesktop = (bool)value;
                         }
-                        else if (MatchOption(newArg, "noCompact"))
+                        else if (MatchOption(newArg, "noLog"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2409,7 +2301,7 @@ namespace System.Data.SQLite
                                 continue;
                             }
 
-                            configuration.noCompact = (bool)value;
+                            configuration.noLog = (bool)value;
                         }
                         else if (MatchOption(newArg, "noNetFx20"))
                         {
@@ -2453,6 +2345,48 @@ namespace System.Data.SQLite
 
                             configuration.noNetFx40 = (bool)value;
                         }
+                        else if (MatchOption(newArg, "noRuntimeVersion"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noRuntimeVersion = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noTrace"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noTrace = (bool)value;
+                        }
                         else if (MatchOption(newArg, "noVs2008"))
                         {
                             bool? value = ParseBoolean(text);
@@ -2495,7 +2429,7 @@ namespace System.Data.SQLite
 
                             configuration.noVs2010 = (bool)value;
                         }
-                        else if (MatchOption(newArg, "noTrace"))
+                        else if (MatchOption(newArg, "strict"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2514,9 +2448,14 @@ namespace System.Data.SQLite
                                 continue;
                             }
 
-                            configuration.noTrace = (bool)value;
+                            //
+                            // NOTE: Allow the command line arguments to
+                            //       override the "strictness" setting
+                            //       provided by our caller.
+                            //
+                            strict = (bool)value;
                         }
-                        else if (MatchOption(newArg, "noConsole"))
+                        else if (MatchOption(newArg, "throwOnMissing"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2535,9 +2474,37 @@ namespace System.Data.SQLite
                                 continue;
                             }
 
-                            configuration.noConsole = (bool)value;
+                            configuration.throwOnMissing = (bool)value;
                         }
-                        else if (MatchOption(newArg, "noLog"))
+                        else if (MatchOption(newArg, "traceFormat"))
+                        {
+                            configuration.traceFormat = text;
+                            TraceOps.TraceFormat = configuration.traceFormat;
+                        }
+                        else if (MatchOption(newArg, "tracePriority"))
+                        {
+                            object value = ParseEnum(
+                                typeof(TracePriority), text, true);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.tracePriority = (TracePriority)value;
+                            TraceOps.TracePriority = configuration.tracePriority;
+                        }
+                        else if (MatchOption(newArg, "verbose"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2556,7 +2523,28 @@ namespace System.Data.SQLite
                                 continue;
                             }
 
-                            configuration.noLog = (bool)value;
+                            configuration.verbose = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "whatIf"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.whatIf = (bool)value;
                         }
                         else
                         {
@@ -2614,7 +2602,11 @@ namespace System.Data.SQLite
                         if (!configuration.noLog &&
                             String.IsNullOrEmpty(configuration.logFileName))
                         {
-                            configuration.logFileName = GetLogFileName();
+                            //
+                            // NOTE: Use the default log file name.
+                            //
+                            configuration.logFileName = GetLogFileName(
+                                "trace");
                         }
 
                         ///////////////////////////////////////////////////////
@@ -2628,23 +2620,30 @@ namespace System.Data.SQLite
                             //       output (that meets the configured priority
                             //       criteria) will be displayed to the console.
                             //
-                            if (!configuration.verbose)
+                            if (configuration.debug)
                             {
-                                Trace.Listeners.Add(new ConsoleTraceListener());
+                                //
+                                // NOTE: Add the console trace listener to the
+                                //       list of trace listeners maintained by
+                                //       the TraceOps class (i.e. only messages
+                                //       that meet the debug priority will be
+                                //       seen on the console).
+                                //
+                                TraceOps.SetupDebugListeners();
                             }
-#if DEBUG
                             else
                             {
                                 //
-                                // NOTE: For a build with "DEBUG" defined, we
-                                //       can simply use the Debug class;
-                                //       otherwise, the console will be used
-                                //       directly (by DebugCore).
+                                // NOTE: Add the console trace listener to the
+                                //       list of built-in trace listeners (i.e.
+                                //       only messages that meet the trace
+                                //       priority will be seen on the console).
                                 //
-                                Debug.Listeners.Add(new ConsoleTraceListener());
+                                Trace.Listeners.Add(new ConsoleTraceListener());
                             }
-#endif
                         }
+
+                        ///////////////////////////////////////////////////////
 
                         if (!configuration.noLog &&
                             !String.IsNullOrEmpty(configuration.logFileName))
@@ -2972,12 +2971,31 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "Debug", ForDisplay(debug)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "Verbose", ForDisplay(verbose)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "Confirm", ForDisplay(confirm)),
                         traceCategory);
+
+                    ///////////////////////////////////////////////////////////
+
+                    if (assembly != null)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "AssemblyTitle",
+                            ForDisplay(GetAssemblyTitle(assembly))),
+                            traceCategory);
+
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "AssemblyConfiguration",
+                            ForDisplay(GetAssemblyConfiguration(assembly))),
+                            traceCategory);
+                    }
                 }
             }
             #endregion
@@ -3201,6 +3219,15 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            private bool debug;
+            public bool Debug
+            {
+                get { return debug; }
+                set { debug = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             private bool verbose;
             public bool Verbose
             {
@@ -3363,14 +3390,18 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Trace Handling
-        private static string GetLogFileName() /* throw */
+        private static string GetLogFileName(
+            string typeName
+            ) /* throw */
         {
             string fileName = Path.GetTempFileName();
             string directory = Path.GetDirectoryName(fileName);
             string fileNameOnly = Path.GetFileNameWithoutExtension(fileName);
 
-            string newFileName = Path.Combine(directory,
-                traceCategory + "." + fileNameOnly + LogFileSuffix);
+            string newFileName = Path.Combine(directory, String.Format(
+                "{0}{1}{2}", traceCategory, !String.IsNullOrEmpty(typeName) ?
+                    "." + typeName : String.Empty, "." + fileNameOnly +
+                    LogFileSuffix));
 
             File.Move(fileName, newFileName);
 
@@ -3440,6 +3471,69 @@ namespace System.Data.SQLite
             }
 
             return result;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Assembly Attribute Handling
+        public static string GetAssemblyConfiguration(
+            Assembly assembly
+            )
+        {
+            if (assembly != null)
+            {
+                try
+                {
+                    if (assembly.IsDefined(
+                            typeof(AssemblyConfigurationAttribute), false))
+                    {
+                        AssemblyConfigurationAttribute configuration =
+                            (AssemblyConfigurationAttribute)
+                            assembly.GetCustomAttributes(
+                                typeof(AssemblyConfigurationAttribute),
+                                false)[0];
+
+                        return configuration.Configuration;
+                    }
+                }
+                catch
+                {
+                    // do nothing.
+                }
+            }
+
+            return null;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static string GetAssemblyTitle(
+            Assembly assembly
+            )
+        {
+            if (assembly != null)
+            {
+                try
+                {
+                    if (assembly.IsDefined(
+                            typeof(AssemblyTitleAttribute), false))
+                    {
+                        AssemblyTitleAttribute title =
+                            (AssemblyTitleAttribute)
+                            assembly.GetCustomAttributes(
+                                typeof(AssemblyTitleAttribute), false)[0];
+
+                        return title.Title;
+                    }
+                }
+                catch
+                {
+                    // do nothing.
+                }
+            }
+
+            return null;
         }
         #endregion
 

@@ -38,7 +38,8 @@ set testUninstallVs2010LogFile [file nativename [file join $path \
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
 #
-if {![haveConstraint [appendArgs file_ [file tail $installerExeFile]]]} then {
+if {![haveConstraint [appendArgs file_ \
+    [file tail $installerExeFile]]]} then {
   checkForFile $test_channel $installerExeFile
 }
 
@@ -65,8 +66,8 @@ if {![haveConstraint [appendArgs file_ \
 ###############################################################################
 
 runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
-  set fileName [file join [getTemporaryPath] \
-      [file tail $testInstallVs2008LogFile]]
+  set fileName [file join [getTemporaryPath] [file tail [string map [list \
+      .log [appendArgs _ [pid] .log]] $testInstallVs2008LogFile]]]
 
   cleanupFile $fileName
 } -body {
@@ -97,8 +98,8 @@ file_Installer.exe file_Installer_Test_Vs2008.log} -result {0 True}}
 ###############################################################################
 
 runTest {test installer-1.2 {uninstaller tool / Visual Studio 2008} -setup {
-  set fileName [file join [getTemporaryPath] \
-      [file tail $testUninstallVs2008LogFile]]
+  set fileName [file join [getTemporaryPath] [file tail [string map [list \
+      .log [appendArgs _ [pid] .log]] $testUninstallVs2008LogFile]]]
 
   cleanupFile $fileName
 } -body {
@@ -129,8 +130,8 @@ file_Installer.exe file_Uninstaller_Test_Vs2008.log} -result {0 True}}
 ###############################################################################
 
 runTest {test installer-1.3 {installer tool / Visual Studio 2010} -setup {
-  set fileName [file join [getTemporaryPath] \
-      [file tail $testInstallVs2010LogFile]]
+  set fileName [file join [getTemporaryPath] [file tail [string map [list \
+      .log [appendArgs _ [pid] .log]] $testInstallVs2010LogFile]]]
 
   cleanupFile $fileName
 } -body {
@@ -161,8 +162,8 @@ file_Installer.exe file_Installer_Test_Vs2010.log} -result {0 True}}
 ###############################################################################
 
 runTest {test installer-1.4 {uninstaller tool / Visual Studio 2010} -setup {
-  set fileName [file join [getTemporaryPath] \
-      [file tail $testUninstallVs2010LogFile]]
+  set fileName [file join [getTemporaryPath] [file tail [string map [list \
+      .log [appendArgs _ [pid] .log]] $testUninstallVs2010LogFile]]]
 
   cleanupFile $fileName
 } -body {
