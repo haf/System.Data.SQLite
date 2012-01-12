@@ -156,6 +156,11 @@ namespace eval ::Eagle {
     }
 
     proc getBuildFileName { fileName } {
+      #
+      # NOTE: Returns the specified file name as if it were located in the
+      #       build directory, discarding any directory information present
+      #       in the file name as provided by the caller.
+      #
       return [file nativename \
           [file join [getBuildDirectory] [file tail $fileName]]]
     }
@@ -181,6 +186,11 @@ namespace eval ::Eagle {
     }
 
     proc getBinaryFileName { fileName } {
+      #
+      # NOTE: Returns the specified file name as if it were located in the
+      #       binary directory, discarding any directory information present
+      #       in the file name as provided by the caller.
+      #
       return [file nativename \
           [file join [getBinaryDirectory] [file tail $fileName]]]
     }
@@ -430,7 +440,7 @@ namespace eval ::Eagle {
 
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {extra ""}
-            {delete true} {varName db}} {
+            {delete true} {varName db} } {
       #
       # NOTE: For now, all test databases used by the test suite are placed into
       #       the temporary directory.  Each database used by a test should be
