@@ -332,7 +332,9 @@ SQLITE_API const char * WINAPI sqlite3_context_collseq(sqlite3_context *ctx, int
   if (pColl)
   {
     *enc = pColl->enc;
+#if SQLITE_VERSION_NUMBER < 3007010
     *ptype = pColl->type;
+#endif
     *plen = (pColl->zName != 0) ? strlen(pColl->zName) : 0;
 
     return pColl->zName;

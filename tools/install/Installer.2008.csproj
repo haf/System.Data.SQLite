@@ -18,6 +18,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Installer</RootNamespace>
     <AssemblyName>Installer</AssemblyName>
+    <DelaySign>true</DelaySign>
     <OldToolsVersion>2.0</OldToolsVersion>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..\..</SQLiteNetDir>
     <NetFx20>true</NetFx20>

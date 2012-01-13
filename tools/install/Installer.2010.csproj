@@ -18,6 +18,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Installer</RootNamespace>
     <AssemblyName>Installer</AssemblyName>
+    <DelaySign>true</DelaySign>
     <OldToolsVersion>3.5</OldToolsVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..\..</SQLiteNetDir>
