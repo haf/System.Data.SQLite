@@ -109,7 +109,7 @@ extern "C" {
 */
 #define SQLITE_VERSION        "3.7.10"
 #define SQLITE_VERSION_NUMBER 3007010
-#define SQLITE_SOURCE_ID      "2012-01-12 16:41:30 a298465c3919c331b9d8b60351c42b96d2efacdc"
+#define SQLITE_SOURCE_ID      "2012-01-14 03:34:24 88ad2f23c5036cbb4a69b73ce5792bd5c33a9177"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -2632,8 +2632,10 @@ SQLITE_API int sqlite3_open_v2(
 ** to see if a database file was a URI that contained a specific query 
 ** parameter, and if so obtains the value of that query parameter.
 **
-** If F is the filename pointer passed into the xOpen() method of a VFS
-** implementation and P is the name of the query parameter, then
+** If F is the database filename pointer passed into the xOpen() method of 
+** a VFS implementation when the flags parameter to xOpen() has one or 
+** more of the [SQLITE_OPEN_URI] or [SQLITE_OPEN_MAIN_DB] bits set and
+** P is the name of the query parameter, then
 ** sqlite3_uri_parameter(F,P) returns the value of the P
 ** parameter if it exists or a NULL pointer if P does not appear as a 
 ** query parameter on F.  If P is a query parameter of F
@@ -2653,8 +2655,9 @@ SQLITE_API int sqlite3_open_v2(
 ** 
 ** If F is a NULL pointer, then sqlite3_uri_parameter(F,P) returns NULL and
 ** sqlite3_uri_boolean(F,P,B) returns B.  If F is not a NULL pointer and
-** is not a pathname pointer that SQLite passed into the xOpen VFS method,
-** then the behavior of this routine is undefined and probably undesirable.
+** is not a database file pathname pointer that SQLite passed into the xOpen
+** VFS method, then the behavior of this routine is undefined and probably
+** undesirable.
 */
 SQLITE_API const char *sqlite3_uri_parameter(const char *zFilename, const char *zParam);
 SQLITE_API int sqlite3_uri_boolean(const char *zFile, const char *zParam, int bDefault);
@@ -6210,7 +6213,7 @@ struct sqlite3_pcache_page {
 ** [[the xShrink() page cache method]]
 ** ^SQLite invokes the xShrink() method when it wants the page cache to
 ** free up as much of heap memory as possible.  The page cache implementation
-** is not obligated to free any memory, but well-behaved implementions should
+** is not obligated to free any memory, but well-behaved implementations should
 ** do their best.
 */
 typedef struct sqlite3_pcache_methods2 sqlite3_pcache_methods2;
