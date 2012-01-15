@@ -262,7 +262,7 @@ namespace System.Data.SQLite
     /// <param name="format">The SQLiteDateFormats to use.</param>
     /// <param name="kind">The DateTimeKind to use.</param>
     /// <returns>A DateTime value</returns>
-    public DateTime ToDateTime(string dateText, SQLiteDateFormats format, DateTimeKind kind)
+    public static DateTime ToDateTime(string dateText, SQLiteDateFormats format, DateTimeKind kind)
     {
         switch (format)
         {
@@ -329,7 +329,7 @@ namespace System.Data.SQLite
     /// <param name="julianDay">The value to convert</param>
     /// <param name="kind">The DateTimeKind to use.</param>
     /// <returns>A .NET DateTime</returns>
-    public DateTime ToDateTime(double julianDay, DateTimeKind kind)
+    public static DateTime ToDateTime(double julianDay, DateTimeKind kind)
     {
         return DateTime.SpecifyKind(
             DateTime.FromOADate(julianDay - OleAutomationEpochAsJulianDay), kind);
@@ -340,7 +340,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="value">The DateTime to convert</param>
     /// <returns>The JulianDay value the Datetime represents</returns>
-    public double ToJulianDay(DateTime value)
+    public static double ToJulianDay(DateTime value)
     {
       return value.ToOADate() + OleAutomationEpochAsJulianDay;
     }

@@ -1004,6 +1004,24 @@ IsolationLevel=Serializable\} 0 \{False, Foreign Keys=False\}$}}
 
 ###############################################################################
 
+runTest {test data-1.17 {SQLiteConvert ToDateTime (Julian Day)} -body {
+  set dateTime [object invoke System.Data.SQLite.SQLiteConvert ToDateTime \
+      2455928.0 Utc]
+
+  object invoke $dateTime ToString [getDateTimeFormat]
+} -cleanup {
+  unset -nocomplain dateTime
+} -constraints {eagle System.Data.SQLite} -result {2012-01-01 12:00:00Z}}
+
+###############################################################################
+
+runTest {test data-1.18 {SQLiteConvert ToJulianDay} -body {
+  expr {round([object invoke System.Data.SQLite.SQLiteConvert ToJulianDay \
+      "2012-01-01 12:00:00Z"])}
+} -constraints {eagle System.Data.SQLite} -result {2455928}}
+
+###############################################################################
+
 unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################
