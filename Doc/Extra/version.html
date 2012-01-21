@@ -43,6 +43,18 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.78.0 - January XX, 2012</b></p>
+    <ul>
+      <li>Updated to SQLite 3.7.10 <a href="http://www.sqlite.org/src/info/ebd01a8def">[ebd01a8def]</a>.</li>
+      <li>Redesign the VS designer support installer and integrate it into the setup packages.</li>
+      <li>Refactor all IDisposable implementations to conform to best practices, potentially eliminating leaks in certain circumstances.</li>
+      <li>Even more enhancements to the build and test automation.</li>
+      <li>Support parameter binding to more primitive types, including unsigned integer types.</li>
+      <li>Recognize the TIMESTAMP column data type as the DateTime type. Fix for <a href="http://system.data.sqlite.org/index.html/info/bb4b04d457">[bb4b04d457]</a>.</li>
+      <li>Prevent logging superfluous messages having to do with library initialization checking. Fix for <a href="http://system.data.sqlite.org/index.html/info/3fc172d1be">[3fc172d1be]</a>.</li>
+      <li>Support the DateTimeKind and BaseSchemaName connection string properties in the SQLiteConnectionStringBuilder class. Fix for <a href="http://system.data.sqlite.org/index.html/info/f3ec1e0066">[f3ec1e0066]</a>.</li>
+      <li>Overloads of the SQLiteConvert.ToDateTime and SQLiteConvert.ToJulianDay methods that do not require an instance should be static. Partial fix for <a href="http://system.data.sqlite.org/index.html/info/4bbf851fa5">[4bbf851fa5]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    </ul>
     <p><b>1.0.77.0 - November 28, 2011</b></p>
     <ul>
       <li>Updated to SQLite 3.7.9 <a href="http://www.sqlite.org/src/info/a499ae3835">[a499ae3835]</a>.</li>
@@ -58,7 +70,7 @@
       <li>When returning schema information that may be used by the .NET Framework to construct dynamic SQL, use a fake schema name (instead of null) so that the table names will be properly qualified with the catalog name (i.e. the attached database name). Partial fix for <a href="http://system.data.sqlite.org/index.html/info/343d392b51">[343d392b51]</a>.</li>
       <li>Add SQLiteSourceId property to the SQLiteConnection class to return the SQLite source identifier.</li>
       <li>Add MemoryUsed and MemoryHighwater properties to the SQLiteConnection class to help determine the memory usage of SQLite.</li>
-      <li>Add DateTimeKind connection string property to control the DateTimeKind of parsed DateTime values. Partial fix for <a href="http://system.data.sqlite.org/index.html/info/343d392b51">[343d392b51]</a>.</li>
+      <li>Add DateTimeKind connection string property to control the DateTimeKind of parsed DateTime values. Partial fix for <a href="http://system.data.sqlite.org/index.html/info/343d392b51">[343d392b51]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Improve the robustness of the SQLiteLog class when it will be initialized and unloaded multiple times.</li>
       <li>Fix the name of the interop assembly for Windows CE. Add unit tests to prevent this type of issue from happening again. Fix for <a href="http://system.data.sqlite.org/index.html/info/737ca4ff74">[737ca4ff74]</a>.</li>
       <li>Formally support the SQL type name BOOLEAN in addition to BOOL. Fix for <a href="http://system.data.sqlite.org/index.html/info/544dba0a2f">[544dba0a2f]</a>.</li>

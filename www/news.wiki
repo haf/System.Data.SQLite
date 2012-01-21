@@ -3,6 +3,20 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.78.0 - January XX, 2012 <font color="red">(release pending)</font></b>
+</p>
+<ul>
+    <li>Updated to SQLite 3.7.10 <a href="http://www.sqlite.org/src/info/ebd01a8def">[ebd01a8def]</a>.</li>
+    <li>Redesign the VS designer support installer and integrate it into the setup packages.</li>
+    <li>Refactor all IDisposable implementations to conform to best practices, potentially eliminating leaks in certain circumstances.</li>
+    <li>Even more enhancements to the build and test automation.</li>
+    <li>Support parameter binding to more primitive types, including unsigned integer types.</li>
+    <li>Recognize the TIMESTAMP column data type as the DateTime type. Fix for [bb4b04d457].</li>
+    <li>Prevent logging superfluous messages having to do with library initialization checking. Fix for [3fc172d1be].</li>
+    <li>Support the DateTimeKind and BaseSchemaName connection string properties in the SQLiteConnectionStringBuilder class. Fix for [f3ec1e0066].</li>
+    <li>Overloads of the SQLiteConvert.ToDateTime and SQLiteConvert.ToJulianDay methods that do not require an instance should be static. Partial fix for [4bbf851fa5].&nbsp;<b>** Potentially Incompatible Change **</b></li>
+</ul>
+<p>
     <b>1.0.77.0 - November 28, 2011</b>
 </p>
 <ul>
@@ -19,7 +33,7 @@
     <li>When returning schema information that may be used by the .NET Framework to construct dynamic SQL, use a fake schema name (instead of null) so that the table names will be properly qualified with the catalog name (i.e. the attached database name). Partial fix for [343d392b51].</li>
     <li>Add SQLiteSourceId property to the SQLiteConnection class to return the SQLite source identifier.</li>
     <li>Add MemoryUsed and MemoryHighwater properties to the SQLiteConnection class to help determine the memory usage of SQLite.</li>
-    <li>Add DateTimeKind connection string property to control the DateTimeKind of parsed DateTime values. Partial fix for [343d392b51].</li>
+    <li>Add DateTimeKind connection string property to control the DateTimeKind of parsed DateTime values. Partial fix for [343d392b51].&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Improve the robustness of the SQLiteLog class when it will be initialized and unloaded multiple times.</li>
     <li>Fix the name of the interop assembly for Windows CE. Add unit tests to prevent this type of issue from happening again. Fix for [737ca4ff74].</li>
     <li>Formally support the SQL type name BOOLEAN in addition to BOOL. Fix for [544dba0a2f].</li>
