@@ -529,6 +529,13 @@ if {![info exists no([file tail [info script]])]} then {
     #   set no(mono) true
     # }
 
+    ###########################################################################
+    ######################### BEGIN Eagle Constraints #########################
+    ###########################################################################
+
+    tputs $test_channel [appendArgs \
+        "---- start of Eagle specific test constraints...\n"]
+
     #
     # NOTE: Has administrator detection support been disabled?  We do
     #       this check [nearly] first as it may [eventually] be used
@@ -618,6 +625,20 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has strong name detection support been disabled?
+    #
+    if {![info exists no(strongName)]} then {
+      checkForStrongName $test_channel
+    }
+
+    #
+    # NOTE: Has certificate detection support been disabled?
+    #
+    if {![info exists no(certificate)]} then {
+      checkForCertificate $test_channel
+    }
+
+    #
     # NOTE: Has database testing support been disabled?
     #
     if {![info exists no(sql)]} then {
@@ -676,6 +697,7 @@ if {![info exists no([file tail [info script]])]} then {
       # NOTE: Can we access the local database?
       #
       checkForDatabase $test_channel $test_database
+
       unset password user timeout database server
     }
 
@@ -960,6 +982,17 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(test)]} then {
       #
+      # NOTE: Has DateTime testing support been disabled?
+      #
+      if {![info exists no(testDateTime)]} then {
+        #
+        # NOTE: For test "vwait-1.11".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestSetDateTimeNowCallback*
+      }
+
+      #
       # NOTE: Has remoting testing support been disabled?
       #
       if {![info exists no(testRemoting)]} then {
@@ -1102,6 +1135,15 @@ if {![info exists no([file tail [info script]])]} then {
       #
       if {![info exists no(testMarshaller)]} then {
         #
+        # NOTE: These are not currently used by any tests.
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestSaveObjects*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestRestoreObjects*
+
+        #
         # NOTE: For test "basic-1.29".
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
@@ -1122,8 +1164,8 @@ if {![info exists no([file tail [info script]])]} then {
         #
         # NOTE: For test "object-2.3".
         #
-        checkForObjectMember $test_channel Eagle._Components.Private.ArrayOps \
-            *ToHexadecimalString*
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestToHexadecimalString*
 
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestMulti2Array*
@@ -1388,6 +1430,10 @@ if {![info exists no([file tail [info script]])]} then {
       #
       checkForGarudaDll $test_channel
     }
+
+    ###########################################################################
+    ########################## END Eagle Constraints ##########################
+    ###########################################################################
   } else {
     #
     # HACK: Reset the test counts for tcltest.
@@ -1401,6 +1447,13 @@ if {![info exists no([file tail [info script]])]} then {
     # HACK: Reset the list of failed files.
     #
     set ::tcltest::failFiles [list]
+
+    ###########################################################################
+    ########################## BEGIN Tcl Constraints ##########################
+    ###########################################################################
+
+    tputs $test_channel [appendArgs \
+        "---- start of Tcl specific test constraints...\n"]
 
     #
     # NOTE: Has compile/runtime option testing support been disabled?
@@ -1416,7 +1469,18 @@ if {![info exists no([file tail [info script]])]} then {
         checkForCompileOption $test_channel TEST
       }
     }
+
+    ###########################################################################
+    ########################### END Tcl Constraints ###########################
+    ###########################################################################
   }
+
+  #############################################################################
+  ####################### BEGIN Tcl & Eagle Constraints #######################
+  #############################################################################
+
+  tputs $test_channel [appendArgs \
+      "---- start of common (Tcl & Eagle) test constraints...\n"]
 
   #
   # NOTE: Has checking for the extra files needed by various tests been
@@ -1699,17 +1763,17 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Have very precise timing tests been disabled?
-  #
-  if {![info exists no(preciseTiming)]} then {
-    checkForTiming $test_channel 25 preciseTiming; # 1/40th second.
-  }
-
-  #
   # NOTE: Have precise timing tests been disabled?
   #
   if {![info exists no(timing)]} then {
     checkForTiming $test_channel 50; # 1/20th second.
+  }
+
+  #
+  # NOTE: Have very precise timing tests been disabled?
+  #
+  if {![info exists no(preciseTiming)]} then {
+    checkForTiming $test_channel 25 preciseTiming; # 1/40th second.
   }
 
   #
@@ -1730,6 +1794,10 @@ if {![info exists no([file tail [info script]])]} then {
   if {![info exists no(network)]} then {
     checkForNetwork $test_channel $test_host $test_timeout
   }
+
+  #############################################################################
+  ######################## END Eagle & Tcl Constraints ########################
+  #############################################################################
 
   #
   # NOTE: For Eagle, dump the platform information, including
@@ -1764,7 +1832,7 @@ if {![info exists no([file tail [info script]])]} then {
         set test_cops [calculateBogoCops]
       }
 
-      tputs $test_channel [appendArgs $test_cops \n]
+      tputs $test_channel [appendArgs [formatDecimal $test_cops] \n]
 
       set percent [expr {[calculateRelativePerformance iterations 1] * 100}]
 
@@ -1808,6 +1876,8 @@ if {![info exists no([file tail [info script]])]} then {
         [list [getPlatformInfo suffix <none>]] " " \
         [list $timeStamp] \n]
 
+    unset timeStamp
+
     tputs $test_channel [appendArgs "---- os: " \
         [getPlatformInfo os <none>] \n]
 
@@ -1825,8 +1895,6 @@ if {![info exists no([file tail [info script]])]} then {
 
     tputs $test_channel [appendArgs "---- certificate: " \
         [getPlatformInfo certificate <none>] \n]
-
-    unset timeStamp
   }
 
   #

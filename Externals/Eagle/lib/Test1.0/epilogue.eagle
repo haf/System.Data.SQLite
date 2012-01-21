@@ -19,6 +19,12 @@ if {![info exists no([file tail [info script]])]} then {
     error "cannot run, current level is not global"
   }
 
+  #
+  # NOTE: Show when the tests actually ended (now).
+  #
+  tputs $test_channel [appendArgs "---- tests ended at " \
+      [clock format [clock seconds]] \n]
+
   if {[isEagle]} then {
     #
     # NOTE: Show the current state of the memory.
@@ -39,15 +45,7 @@ if {![info exists no([file tail [info script]])]} then {
         [formatListAsDict $stack] \n]
 
     unset stack
-  }
 
-  #
-  # NOTE: Show when the tests actually ended (now).
-  #
-  tputs $test_channel [appendArgs "---- tests ended at " \
-      [clock format [clock seconds]] \n]
-
-  if {[isEagle]} then {
     #
     # NOTE: Check for and display any duplicate test names that we found.  In
     #       theory, this checking may produce false positives if a test file
@@ -70,47 +68,39 @@ if {![info exists no([file tail [info script]])]} then {
     tputs $test_channel \n; # NOTE: Blank line.
 
     if {$eagle_tests(passed) > 0} then {
-      host result Ok [appendArgs "PASSED: " $eagle_tests(passed) \n]
-      tlog [appendArgs "PASSED: " $eagle_tests(passed) \n]
+      tresult Ok [appendArgs "PASSED: " $eagle_tests(passed) \n]
     }
 
     if {$eagle_tests(failed) > 0} then {
-      host result Error [appendArgs "FAILED: " $eagle_tests(failed) \n]
-      tlog [appendArgs "FAILED: " $eagle_tests(failed) \n]
+      tresult Error [appendArgs "FAILED: " $eagle_tests(failed) \n]
 
       if {[llength $eagle_tests(failedNames)] > 0} then {
-        host result Error [appendArgs "FAILED: " $eagle_tests(failedNames) \n]
-        tlog [appendArgs "FAILED: " $eagle_tests(failedNames) \n]
+        tresult Error [appendArgs "FAILED: " $eagle_tests(failedNames) \n]
       }
     }
 
     if {$eagle_tests(skipped) > 0} then {
-      host result Break [appendArgs "SKIPPED: " $eagle_tests(skipped) \n]
-      tlog [appendArgs "SKIPPED: " $eagle_tests(skipped) \n]
+      tresult Break [appendArgs "SKIPPED: " $eagle_tests(skipped) \n]
 
       if {[llength $eagle_tests(skippedNames)] > 0} then {
-        host result Break [appendArgs "SKIPPED: " $eagle_tests(skippedNames) \n]
-        tlog [appendArgs "SKIPPED: " $eagle_tests(skippedNames) \n]
+        tresult Break [appendArgs "SKIPPED: " $eagle_tests(skippedNames) \n]
       }
     }
 
     if {$eagle_tests(total) > 0} then {
-      host result Return [appendArgs "TOTAL: " $eagle_tests(total) \n]
-      tlog [appendArgs "TOTAL: " $eagle_tests(total) \n]
+      tresult Return [appendArgs "TOTAL: " $eagle_tests(total) \n]
 
       if {$eagle_tests(skipped) > 0} then {
         set percent [getSkipPercentage]
-        host result Break [appendArgs "SKIP PERCENTAGE: " \
-            [formatDecimal $percent] %\n]
 
-        tlog [appendArgs "SKIP PERCENTAGE: " [formatDecimal $percent] %\n]
+        tresult Break [appendArgs \
+            "SKIP PERCENTAGE: " [formatDecimal $percent] %\n]
       }
 
       set percent [getPassPercentage]
-      host result Return [appendArgs "PASS PERCENTAGE: " \
-          [formatDecimal $percent] %\n]
 
-      tlog [appendArgs "PASS PERCENTAGE: " [formatDecimal $percent] %\n]
+      tresult Return [appendArgs \
+          "PASS PERCENTAGE: " [formatDecimal $percent] %\n]
     } else {
       #
       # NOTE: No tests.
@@ -134,13 +124,11 @@ if {![info exists no([file tail [info script]])]} then {
       if {$passedOrSkipped == $eagle_tests(total)} then {
         set exitCode Success
 
-        host result Ok "OVERALL RESULT: SUCCESS\n"
-        tlog "OVERALL RESULT: SUCCESS\n"
+        tresult Ok "OVERALL RESULT: SUCCESS\n"
       } else {
         set exitCode Failure
 
-        host result Error "OVERALL RESULT: FAILURE\n"
-        tlog "OVERALL RESULT: FAILURE\n"
+        tresult Error "OVERALL RESULT: FAILURE\n"
       }
 
       unset passedOrSkipped
@@ -153,18 +141,12 @@ if {![info exists no([file tail [info script]])]} then {
       if {$percent >= $test_threshold} then {
         set exitCode Success
 
-        host result Ok [appendArgs "OVERALL RESULT: SUCCESS (" \
-            $percent "% >= " $test_threshold %)\n]
-
-        tlog [appendArgs "OVERALL RESULT: SUCCESS (" \
-            $percent "% >= " $test_threshold %)\n]
+        tresult Ok [appendArgs \
+            "OVERALL RESULT: SUCCESS (" $percent "% >= " $test_threshold %)\n]
       } else {
         set exitCode Failure
 
-        host result Error [appendArgs \
-            "OVERALL RESULT: FAILURE (" $percent "% < " $test_threshold %)\n]
-
-        tlog [appendArgs \
+        tresult Error [appendArgs \
             "OVERALL RESULT: FAILURE (" $percent "% < " $test_threshold %)\n]
       }
     }
@@ -176,38 +158,40 @@ if {![info exists no([file tail [info script]])]} then {
     tputs $test_channel \n; # NOTE: Blank line.
 
     if {$::tcltest::numTests(Passed) > 0} then {
-      tputs $test_channel \
-          [appendArgs "PASSED: " $::tcltest::numTests(Passed) \n]
+      tputs $test_channel [appendArgs \
+          "PASSED: " $::tcltest::numTests(Passed) \n]
     }
 
     if {$::tcltest::numTests(Failed) > 0} then {
-      tputs $test_channel \
-          [appendArgs "FAILED: " $::tcltest::numTests(Failed) \n]
+      tputs $test_channel [appendArgs \
+          "FAILED: " $::tcltest::numTests(Failed) \n]
 
       if {[llength $::tcltest::failFiles] > 0} then {
-        tputs $test_channel \
-            [appendArgs "FAILED: " $::tcltest::failFiles \n]
+        tputs $test_channel [appendArgs \
+            "FAILED: " $::tcltest::failFiles \n]
       }
     }
 
     if {$::tcltest::numTests(Skipped) > 0} then {
-      tputs $test_channel \
-          [appendArgs "SKIPPED: " $::tcltest::numTests(Skipped) \n]
+      tputs $test_channel [appendArgs \
+          "SKIPPED: " $::tcltest::numTests(Skipped) \n]
     }
 
     if {$::tcltest::numTests(Total) > 0} then {
-      tputs $test_channel \
-          [appendArgs "TOTAL: " $::tcltest::numTests(Total) \n]
+      tputs $test_channel [appendArgs \
+          "TOTAL: " $::tcltest::numTests(Total) \n]
 
       if {$::tcltest::numTests(Skipped) > 0} then {
         set percent [getSkipPercentage]
-        tputs $test_channel [appendArgs "SKIP PERCENTAGE: " \
-            [formatDecimal $percent] %\n]
+
+        tputs $test_channel [appendArgs \
+            "SKIP PERCENTAGE: " [formatDecimal $percent] %\n]
       }
 
       set percent [getPassPercentage]
-      tputs $test_channel [appendArgs "PASS PERCENTAGE: " \
-          [formatDecimal $percent] %\n]
+
+      tputs $test_channel [appendArgs \
+          "PASS PERCENTAGE: " [formatDecimal $percent] %\n]
     } else {
       #
       # NOTE: No tests.
@@ -248,13 +232,13 @@ if {![info exists no([file tail [info script]])]} then {
       if {$percent >= $test_threshold} then {
         set exitCode 0; # Success.
 
-        tputs $test_channel [appendArgs "OVERALL RESULT: SUCCESS (" \
-            $percent "% >= " $test_threshold %)\n]
+        tputs $test_channel [appendArgs \
+            "OVERALL RESULT: SUCCESS (" $percent "% >= " $test_threshold %)\n]
       } else {
         set exitCode 1; # Failure.
 
-        tputs $test_channel [appendArgs "OVERALL RESULT: FAILURE (" \
-            $percent "% < " $test_threshold %)\n]
+        tputs $test_channel [appendArgs \
+            "OVERALL RESULT: FAILURE (" $percent "% < " $test_threshold %)\n]
       }
     }
 

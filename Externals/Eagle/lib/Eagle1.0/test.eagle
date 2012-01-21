@@ -552,8 +552,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Display and log the result of the test we just completed.
       #
-      host result $code $result
-      tlog $result
+      tresult $code $result
 
       #
       # NOTE: If the test failed with an actual error (i.e. not just a
@@ -571,8 +570,7 @@ namespace eval ::Eagle {
       #       processing further test files.
       #
       if {$code != 0 && [isStopOnFailure]} then {
-        host result Error "OVERALL RESULT: STOP-ON-FAILURE\n"
-        tlog "OVERALL RESULT: STOP-ON-FAILURE\n"
+        tresult Error "OVERALL RESULT: STOP-ON-FAILURE\n"
 
         error ""; # no message
       }
@@ -1266,6 +1264,10 @@ namespace eval ::Eagle {
       }
     }
 
+    proc tresult { code result } {
+      host result $code $result; tlog $result
+    }
+
     proc getPassPercentage {} {
       if {$::eagle_tests(total) > 0} then {
         return [expr \
@@ -1631,8 +1633,8 @@ namespace eval ::Eagle {
       #
       # NOTE: Try the source release directory structure.
       #
-      set ::test_path [file join [file normalize [file dirname [file dirname \
-          [info library]]]] Library Tests]
+      set ::test_path [file join [file normalize [file dirname \
+          [file dirname [info library]]]] Library Tests]
 
       if {![file exists $::test_path] || \
           ![file isdirectory $::test_path]} then {
@@ -1640,7 +1642,8 @@ namespace eval ::Eagle {
         # NOTE: Try for the test package directory.
         #
         set ::test_path [file join [file normalize [file dirname \
-            [file dirname [info script]]]] Test1.0]
+            [file dirname [info script]]]] [appendArgs Test \
+            [info engine Version]]]
       }
 
       if {![file exists $::test_path] || \
@@ -1651,8 +1654,8 @@ namespace eval ::Eagle {
         #       name that originates from the "update.bat" tool.  This must
         #       match the casing used in "update.bat".
         #
-        set ::test_path [file join [file normalize [file dirname [file dirname \
-            [info library]]]] Tests]
+        set ::test_path [file join [file normalize [file dirname \
+            [file dirname [info library]]]] Tests]
       }
     }
 
@@ -1695,7 +1698,7 @@ namespace eval ::Eagle {
     #
     # NOTE: Setup the test path relative to the path of this file.
     #
-    if {![info exists ::test_path]} then {
+    if {![interp issafe] && ![info exists ::test_path]} then {
       #
       # NOTE: Try the source release directory structure.
       #
@@ -1727,7 +1730,7 @@ namespace eval ::Eagle {
     #
     # NOTE: Load and configure the tcltest package unless we are prevented.
     #
-    if {![info exists ::no(configureTcltest)]} then {
+    if {![interp issafe] && ![info exists ::no(configureTcltest)]} then {
       configureTcltest [list test testConstraint] false
     }
 

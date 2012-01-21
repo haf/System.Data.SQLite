@@ -771,6 +771,43 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForStrongName { channel } {
+      tputs $channel "---- checking for strong name... "
+
+      set strongName [object invoke Interpreter.GetActive GetStrongName]
+
+      if {[string length $strongName] > 0} then {
+        #
+        # NOTE: Yes, it appears that the core library was signed with a
+        #       strong name key.
+        #
+        addConstraint strongName
+
+        tputs $channel yes\n
+      } else {
+        tputs $channel no\n
+      }
+    }
+
+    proc checkForCertificate { channel } {
+      tputs $channel "---- checking for certificate... "
+
+      set certificate [object invoke Interpreter.GetActive GetCertificate]
+
+      if {[string length $certificate] > 0} then {
+        #
+        # NOTE: Yes, it appears that the core library was signed with a
+        #       code-signing certificate.
+        #
+        addConstraint certificate
+
+        tputs $channel [appendArgs "yes (" \
+            [object invoke $certificate Subject] ")\n"]
+      } else {
+        tputs $channel no\n
+      }
+    }
+
     proc checkForAdministrator { channel } {
       tputs $channel "---- checking for administrator... "
 
