@@ -10,9 +10,9 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup Label="UserMacros">
     <ConfigurationYear>2010</ConfigurationYear>
-    <INTEROP_BUILD_NUMBER>077</INTEROP_BUILD_NUMBER>
-    <INTEROP_MANIFEST_VERSION>1.0.77.0</INTEROP_MANIFEST_VERSION>
-    <INTEROP_RC_VERSION>1,0,77,0</INTEROP_RC_VERSION>
+    <INTEROP_BUILD_NUMBER>078</INTEROP_BUILD_NUMBER>
+    <INTEROP_MANIFEST_VERSION>1.0.78.0</INTEROP_MANIFEST_VERSION>
+    <INTEROP_RC_VERSION>1,0,78,0</INTEROP_RC_VERSION>
     <INTEROP_ASSEMBLY_RESOURCES>/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp /ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp /ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp</INTEROP_ASSEMBLY_RESOURCES>
     <INTEROP_KEY_FILE>$(ProjectDir)..\System.Data.SQLite\System.Data.SQLite.snk</INTEROP_KEY_FILE>
     <INTEROP_NATIVE_NAME>SQLite.Interop</INTEROP_NATIVE_NAME>

@@ -111,8 +111,11 @@
     &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any
     errors should occur.  EagleTest should produce &quot;success&quot; messages
     very similar to the following:<br /><br />
-    PASSED: 107<br />
-    TOTAL: 107<br />
+    PASSED: 113<br />
+    SKIPPED: 2<br />
+    SKIPPED: installer-1.1 installer-1.2<br />
+    TOTAL: 115<br />
+    SKIP PERCENTAGE: 1.7391%<br />
     PASS PERCENTAGE: 100%<br />
     OVERALL RESULT: SUCCESS<br />
   </li>
