@@ -3,8 +3,8 @@
 <p>
   Follow these steps to obtain the latest (i.e. unreleased) source code for the
   System.Data.SQLite project.
-  To obtain the latest officially released source code instead, please refer to
-  the [./downloads.wiki | downloads page].
+  To obtain the latest officially released source code instead, refer to the
+  [./downloads.wiki | downloads page].
   Unless otherwise noted, all steps need to be done in the order specified.
 </p>
 
@@ -22,11 +22,12 @@
 <h2>Obtain &amp; Install Fossil</h2>
 
 <p>
-  [http://www.fossil-scm.org | Fossil] is a computer program that must be
-  installed on your machine before you use it.  Fortunately, installing Fossil
-  is very easy.  Fossil consists of a single executable file that you simply
-  download and run.  For convenience, the Fossil executable file should be
-  placed in a directory present in your
+  The [http://www.fossil-scm.org | Fossil] open-source
+  [http://en.wikipedia.org/wiki/Revision_control | version control] system is
+  a computer program that must be installed on your machine before you use it.
+  Fortunately, installing Fossil is very easy.  Fossil consists of a single
+  executable file that you simply download and run.  For convenience, the Fossil
+  executable file should be placed in a directory present in your
   [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].  To uninstall
   Fossil, simply delete the executable file.
   [http://www.fossil-scm.org/index.html/doc/tip/www/quickstart.wiki | Detailed instructions]
