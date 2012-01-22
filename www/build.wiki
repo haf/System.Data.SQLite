@@ -77,8 +77,9 @@
   </li>
 
   <li>
-    The string &quot;&lt;root&gt;&quot; represents the root of your source tree
-    for the System.Data.SQLite project.
+    The string &quot;&lt;root&gt;&quot; represents the root directory of your
+    local source tree (i.e. the working check-out directory) for the
+    System.Data.SQLite project.
   </li>
 
   <li>
@@ -211,9 +212,9 @@
 
   <li>
     Enter the following command to build the binaries for Win32 (x86):&nbsp;
-    <b>build.bat ReleaseNativeOnly Win32</b><br /><i>You may need to enter the
-    command &quot;<b>setenv /x86</b>&quot; first if you are using a
-    &quot;Windows SDK Command Prompt&quot; or &quot;Visual Studio Command
+    <b>build.bat&nbsp;ReleaseNativeOnly&nbsp;Win32</b><br /><i>You may need to
+    enter the command &quot;<b>setenv&nbsp;/x86</b>&quot; first if you are using
+    a &quot;Windows SDK Command Prompt&quot; or &quot;Visual Studio Command
     Prompt&quot; window.</i>
   </li>
 
@@ -225,9 +226,10 @@
 
   <li>
     Enter the following command to build the binaries for x64:&nbsp;<b>build.bat
-    ReleaseNativeOnly x64</b><br /><i>You may need to enter the command
-    &quot;<b>setenv /x64</b>&quot; first if you are using a &quot;Windows SDK
-    Command Prompt&quot; or &quot;Visual Studio Command Prompt&quot; window.</i>
+    &nbsp;ReleaseNativeOnly&nbsp;x64</b><br /><i>You may need to enter the
+    command&quot;<b>setenv&nbsp;/x64</b>&quot; first if you are using a
+    &quot;Windows SDK Command Prompt&quot; or &quot;Visual Studio Command
+    Prompt&quot; window.</i>
   </li>
 
   <li>

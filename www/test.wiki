@@ -5,8 +5,9 @@
 
 <ol>
   <li>
-    The string &quot;&lt;root&gt;&quot; represents the root of the source tree
-    (i.e. the working check-out directory) for the System.Data.SQLite project.
+    The string &quot;&lt;root&gt;&quot; represents the root directory of your
+    local source tree (i.e. the working check-out directory) for the
+    System.Data.SQLite project.
   </li>
 
   <li>
@@ -51,7 +52,7 @@
 <p>
   The binaries to test must be [./build.wiki | built] or
   [./downloads.wiki | downloaded].  If the binaries are downloaded, they must be
-  placed in the appropriate build output directory (e.g.
+  placed according to the build output directory structure (e.g.
   &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;configuration&gt;\bin&quot; for the
   separate managed and interop assemblies or
   &quot;&lt;root&gt;\bin\&lt;year&gt;\&lt;platform&gt;\&lt;configuration&gt;&quot;
@@ -79,13 +80,13 @@
   <li>
     Enter the following command to run all the unit tests against the binaries
     built with a separate managed and interop assembly:
-    <b>Externals\Eagle\bin\EagleShell.exe -file Tests\all.eagle</b>
+    <b>Externals\Eagle\bin\EagleShell.exe&nbsp;-file&nbsp;Tests\all.eagle</b>
   </li>
 
   <li>
     Enter the following command to run all the unit tests against the binaries
     built with a mixed-mode assembly:
-    <b>Externals\Eagle\bin\EagleShell.exe -initialize -runtimeOption native -file Tests\all.eagle</b>
+    <b>Externals\Eagle\bin\EagleShell.exe&nbsp;-initialize&nbsp;-runtimeOption&nbsp;native&nbsp;-file&nbsp;Tests\all.eagle</b>
   </li>
 
   <li>
@@ -94,7 +95,7 @@
     2010) add the following command line argument right after
     &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
     command lines:
-    <b>-preInitialize &quot;set test_year 2008&quot;</b>
+    <b>-preInitialize&nbsp;&quot;set&nbsp;test_year&nbsp;2008&quot;</b>
   </li>
 
   <li>
@@ -103,7 +104,7 @@
     build configuration) add the following command line argument right after
     &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
     command lines:
-    <b>-preInitialize &quot;set test_configuration Debug&quot;</b>
+    <b>-preInitialize&nbsp;&quot;set&nbsp;test_configuration&nbsp;Debug&quot;</b>
   </li>
 
   <li>

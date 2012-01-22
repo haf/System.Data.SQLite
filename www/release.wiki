@@ -69,7 +69,7 @@
   <li>
     Enter the following command to build all the documentation in
     [http://en.wikipedia.org/wiki/Microsoft_Compiled_HTML_Help | CHM]
-    format:&nbsp;<b>tclsh.exe buildChm.tcl</b><br /><i>This assumes that
+    format:&nbsp;<b>tclsh.exe&nbsp;buildChm.tcl</b><br /><i>This assumes that
     [http://www.activestate.com/activetcl | ActiveTcl] version 8.4 or later, the
     [http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=21138 | HTML Help Workshop],
     and [http://ndoc3.sourceforge.net/ | NDoc3] have all been installed using
@@ -157,7 +157,7 @@
 
   <li>
     Enter the following command to update the sizes and hashes on the downloads
-    page based on all the built release packages:&nbsp;<b>tclsh.exe
+    page based on all the built release packages:&nbsp;<b>tclsh.exe&nbsp;
     updateFileInfo.tcl</b><br /><i>This assumes that
     [http://www.activestate.com/activetcl | ActiveTcl] version 8.4 or later has
     been installed using the default settings and that the Fossil binary is
@@ -177,32 +177,32 @@
 
   <li>
     Enter the following command to build the &quot;default&quot; NuGet package:
-    &nbsp;<b>nuget.exe pack SQLite.nuspec</b><br /><i>This assumes that the
-    NuGet binary is available somewhere along the
-    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
-    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
-  </li>
-
-  <li>
-    Enter the following command to build the &quot;managed-only&quot; NuGet
-    package:&nbsp;<b>nuget.exe pack SQLite.MSIL.nuspec</b><br /><i>This assumes
+    &nbsp;<b>nuget.exe&nbsp;pack&nbsp;SQLite.nuspec</b><br /><i>This assumes
     that the NuGet binary is available somewhere along the
     [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
     to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
   </li>
 
   <li>
-    Enter the following command to build the NuGet package for x86:
-    &nbsp;<b>nuget.exe pack SQLite.x86.nuspec</b><br /><i>This assumes that the
-    NuGet binary is available somewhere along the
+    Enter the following command to build the &quot;managed-only&quot; NuGet
+    package:&nbsp;<b>nuget.exe&nbsp;pack&nbsp;SQLite.MSIL.nuspec</b><br />
+    <i>This assumes that the NuGet binary is available somewhere along the
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
+    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+  </li>
+
+  <li>
+    Enter the following command to build the NuGet package for x86:&nbsp;
+    <b>nuget.exe&nbsp;pack&nbsp;SQLite.x86.nuspec</b><br /><i>This assumes that
+    the NuGet binary is available somewhere along the
     [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
     to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
   </li>
 
   <li>
     Enter the following command to build the NuGet package for x64:
-    &nbsp;<b>nuget.exe pack SQLite.x64.nuspec</b><br /><i>This assumes that the
-    NuGet binary is available somewhere along the
+    &nbsp;<b>nuget.exe&nbsp;pack&nbsp;SQLite.x64.nuspec</b><br /><i>This assumes
+    that the NuGet binary is available somewhere along the
     [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
     to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
   </li>
