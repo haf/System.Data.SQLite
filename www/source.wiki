@@ -2,10 +2,9 @@
 
 <p>
   Follow these steps to obtain the latest (i.e. unreleased) source code for the
-  System.Data.SQLite project.
-  To obtain the latest officially released source code instead, refer to the
-  [./downloads.wiki | downloads page].
-  Unless otherwise noted, all steps need to be done in the order specified.
+  System.Data.SQLite project.  To obtain the latest officially released source
+  code instead, refer to the [./downloads.wiki | downloads page].  Unless
+  otherwise noted, all steps need to be done in the order specified.
 </p>
 
 <a name="assumptions"></a>
@@ -75,9 +74,9 @@
   <li>Change the current directory to &quot;&lt;root&gt;&quot;.</li>
 
   <li>
-    Enter the following command to create a complete
-    working copy of all the files that are currently part of the
-    System.Data.SQLite project:&nbsp;<b>fossil&nbsp;open&nbsp;sds.fossil</b>
+    Enter the following command to create a complete working copy of all the
+    files that are currently part of the System.Data.SQLite project:
+    &nbsp;<b>fossil&nbsp;open&nbsp;sds.fossil</b>
   </li>
 
   <li>
