@@ -1,0 +1,420 @@
+<title>Frequently Asked Questions</title>
+
+<a name="faq"></a>
+<h2>Frequently Asked Questions</h2>
+
+<ol>
+  <li>
+    <a href="#q1">When will the <b>next version</b> of System.Data.SQLite be
+    released?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q2">When are you planning on adding feature &quot;X&quot;?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q3">What versions of <b>.NET Framework</b> are supported?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q4">What versions of <b>Visual Studio</b> are supported?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q5">Is there a <b>NuGet</b> package?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q6">How do I build the binaries for <b>Mono</b>?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q7">How do I build the binaries for <b>.NET Compact Framework</b>?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q8">How do I install System.Data.SQLite on a <b>development
+    machine</b>?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q9">How do I install System.Data.SQLite on <b>end-user
+    machines</b>?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q10">Do I need to add an assembly reference to the
+    &quot;<b>sqlite3.dll</b>&quot; or &quot;<b>SQLite.Interop.dll</b>&quot; in
+    my project?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q11">Why do I get a <b>DllNotFoundException</b> (for
+    &quot;sqlite3.dll&quot; or &quot;SQLite.Interop.dll&quot;) when trying to
+    run my application?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q12">Why do I get a <b>BadImageFormatException</b> (for
+    &quot;sqlite3.dll&quot; or &quot;SQLite.Interop.dll&quot;) when trying to
+    run my application?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q13">Why do I get the error &quot;<b>This assembly is built by a
+    runtime newer than the currently loaded runtime and cannot be loaded.</b>
+    &quot;?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q14">What is a <b>mixed-mode assembly</b>?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q15">What is a &quot;<b>bundle</b>&quot; package (i.e. from the
+    download page)?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q16">What is the difference between the &quot;<b>Setup</b>&quot;
+    and &quot;<b>Precompiled Binary</b>&quot; packages (i.e. from the download
+    page)?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q17">Why is System.Data.SQLite <b>leaking</b> memory, resources,
+    etc?</a>
+  </li>
+  <br>
+  <li>
+    <a href="#q18">What are the <b>support options</b> for System.Data.SQLite?</a>
+  </li>
+</ol>
+
+<hr>
+<a name="q1"></a>
+<p>
+  <b>(1) When will the next version of System.Data.SQLite be released?</b>
+</p>
+
+<p>
+  The release schedule for the System.Data.SQLite project is roughly
+  synchronized (within about two or three weeks) with that of the
+  [http://www.sqlite.org/ | SQLite] core itself.  The release history for the
+  System.Data.SQLite project is [./news.wiki | here].
+</p>
+
+<hr>
+<a name="q2"></a>
+<p>
+  <b>(2) When are you planning on adding feature &quot;X&quot;?</b>
+</p>
+
+<p>
+  This question is hard to answer precisely.  It depends on a number of factors,
+  including but not limited to:
+  <ul>
+    <li>
+      Can the feature be implemented in a backward compatible manner?
+    </li>
+
+    <li>
+      Can the feature be implemented in a portable fashion for all the currently
+      supported versions of the .NET Framework and/or Visual Studio?
+    </li>
+
+    <li>
+      Does the feature fit well with the current design of the project?
+    </li>
+
+    <li>
+      How much time will it take to design, implement, and test the feature?
+    </li>
+
+    <li>
+      Will the feature benefit the entire community or only a tiny subset
+      thereof?
+    </li>
+  </ul>
+</p>
+
+<hr>
+<a name="q3"></a>
+<p>
+  <b>(3) What versions of .NET Framework are supported?</b>
+</p>
+
+<p>
+  <ul>
+    <li>
+      The .NET Framework 2.0 SP2 (or higher) for the System.Data.SQLite assembly.
+    </li>
+
+    <li>
+      The .NET Framework 3.5 SP1 (or higher) for the System.Data.SQLite.Linq
+      assembly.
+    </li>
+
+    <li>
+      All sub-projects are fully supported with the .NET Framework 4.0.
+    </li>
+  </ul>
+</p>
+
+<hr>
+<a name="q4"></a>
+<p>
+  <b>(4) What versions of Visual Studio are supported?</b>
+</p>
+
+<p>
+  Currently, Visual Studio 2005, 2008, and 2010 are supported, including the
+  &quot;Express&quot; editions; however, in order to build the entire solution,
+  including the necessary native code, the &quot;Professional&quot; edition (or
+  higher) is required.  It may be possible to install both Visual C# Express
+  and Visual C++ Express and then build the corresponding sub-projects via their
+  respective integrated development environments (IDE); however, this
+  configuration has <b>not</b> been tested.  The design-time components are
+  <b>no longer</b> supported for the Express editions due to licensing
+  restrictions.
+</p>
+
+<hr>
+<a name="q5"></a>
+<p>
+  <b>(5) Is there a NuGet package?</b>
+</p>
+
+<p>
+  Yes, the following official NuGet packages are available:
+
+  <ul>
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite">
+      System.Data.SQLite</a>: The SQLite database engine combined with a
+      complete ADO.NET provider all rolled into a single mixed-mode assembly for
+      x86.
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.x86">
+      System.Data.SQLite.x86</a>: This currently contains the same content as
+      the &quot;System.Data.SQLite&quot; package, above.
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.x64">
+      System.Data.SQLite.x64</a>: The SQLite database engine combined with a
+      complete ADO.NET provider all rolled into a single mixed-mode assembly for
+      x64.
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.MSIL">
+      System.Data.SQLite.MSIL</a>: Just the ADO.NET provider for SQLite
+      (managed-only).
+    </li>
+  </ul>
+</p>
+
+<hr>
+<a name="q6"></a>
+<p>
+  <b>(6) How do I build the binaries for Mono?</b>
+</p>
+
+<p>
+  This is documented on the [./build.wiki#mono | build procedures] page.
+</p>
+
+<hr>
+<a name="q7"></a>
+<p>
+  <b>(7) How do I build the binaries for .NET Compact Framework?</b>
+</p>
+
+<p>
+  This is documented on the [./release.wiki#buildCeBinaries | release procedures]
+  page.
+</p>
+
+<hr>
+<a name="q8"></a>
+<p>
+  <b>(8) How do I install System.Data.SQLite on a development machine?</b>
+</p>
+
+<p>
+  Strictly speaking, there is no need to install System.Data.SQLite on any
+  development machine (e.g. via the setup).  The recommended way to use the
+  assemblies is:
+
+  <ul>
+    <li>
+      Download the precompiled binary package for your target framework and
+      processor architecture (e.g. 32-bit x86, .NET Framework 2.0).
+    </li>
+
+    <li>
+      Extract the package to a directory named "Externals" inside your project
+      directory.
+    </li>
+
+    <li>
+      Add a reference to the "System.Data.SQLite" assembly from the "Externals"
+      directory.
+    </li>
+
+    <li>
+      If necessary (i.e. you require LINQ support), also add a reference to the
+      "System.Data.SQLite.Linq" assembly from the "Externals" directory.
+    </li>
+  </ul>
+
+  Alternatively, when using Visual Studio 2010, you can simply use the NuGet
+  package that corresponds to your target processor architecture.  Installing
+  the assemblies into the Global Assembly Cache is not recommended as it may
+  cause conflicts with other applications installed on the machine.
+</p>
+
+<hr>
+<a name="q9"></a>
+<p>
+  <b>(9) How do I install System.Data.SQLite on end-user machines?</b>
+</p>
+
+<p>
+  Strictly speaking, there is no need to install System.Data.SQLite on any
+  end-user machine (e.g. via the setup).  The recommended way to deploy the
+  assemblies is &quot;application local&quot; (i.e. copy them to the directory
+  the application is installed to).  Installing the assemblies into the Global
+  Assembly Cache is not recommended as it may cause conflicts with other
+  applications installed on the machine.
+</p>
+
+<hr>
+<a name="q10"></a>
+<p>
+  <b>(10) Do I need to add an assembly reference to the
+  &quot;sqlite3.dll&quot; or &quot;SQLite.Interop.dll&quot; in my project?</b>
+</p>
+
+<p>
+  No, because they are not managed assemblies and contain no managed code.
+</p>
+
+<hr>
+<a name="q11"></a>
+<p>
+  <b>(11) Why do I get a <b>DllNotFoundException</b> (for &quot;sqlite3.dll&quot;
+  or &quot;SQLite.Interop.dll&quot;) when trying to run my application?</b>
+</p>
+
+<p>
+  Either the named dynamic link library (DLL) cannot be located or it cannot be
+  loaded due to missing dependencies.  Make sure the named dynamic link library
+  is located in the application directory or a directory along the system PATH
+  and try again.  Also, be sure the necessary Visual C++ runtime redistributable
+  has been installed unless you are using a dynamic link library that was built
+  statically linked to it.
+</p>
+
+<hr>
+<a name="q12"></a>
+<p>
+  <b>(12) Why do I get a BadImageFormatException (for &quot;sqlite3.dll&quot; or
+  &quot;SQLite.Interop.dll&quot;) when trying to run my application?</b>
+</p>
+
+<p>
+  The named dynamic link library (DLL) contains native code that was built for a
+  processor architecture that is not compatible with the current process (e.g.
+  you cannot load a 32-bit dynamic link library into a 64-bit process or
+  vice-versa).  Another explanation is that the named dynamic link library was
+  built for a later version of the CLR than is available in the current process
+  (e.g. you cannot load an assembly built for the .NET Framework 4.0 into a .NET
+  Framework 2.0 process, regardless of the processor architecture).
+</p>
+
+<hr>
+<a name="q13"></a>
+<p>
+  <b>(13) Why do I get the error &quot;This assembly is built by a runtime newer
+  than the currently loaded runtime and cannot be loaded.&quot;?</b>
+</p>
+
+<p>
+  Because the assembly was built for the .NET Framework 4.0 and you are trying
+  to load it into a process that is using the .NET Framework 2.0.
+</p>
+
+<hr>
+<a name="q14"></a>
+<p>
+  <b>(14) What is a mixed-mode assembly?</b>
+</p>
+
+<p>
+  A mixed-mode assembly is a dynamic link library that contains both managed and
+  native code for a particular processor architecture.  Since it contains native
+  code it can only be loaded into a process that matches the processor
+  architecture it was compiled for.  Also see this
+  <a href="http://stackoverflow.com/questions/7266936/what-is-a-mixed-mode-assembly">StackOverflow question</a>.
+</p>
+
+<hr>
+<a name="q15"></a>
+<p>
+  <b>(15) What is a &quot;bundle&quot; package (i.e. from the download page)?</b>
+</p>
+
+<p>
+  The &quot;bundle&quot; packages listed on the download page contains the
+  System.Data.SQLite mixed-mode assembly in a file named
+  &quot;System.Data.SQLite.dll&quot; (see <a href="#q14">question #14</a>)
+  instead of separate &quot;System.Data.SQLite.dll&quot; and
+  &quot;SQLite.Interop.dll&quot; files to contain the managed and native code,
+  respectively.
+</p>
+
+<hr>
+<a name="q16"></a>
+<p>
+  <b>(16) What is the difference between the &quot;Setup&quot; and
+  &quot;Precompiled Binary&quot; packages (i.e. from the download page)?</b>
+</p>
+
+<p>
+  The &quot;Setup&quot; packages are designed to install the necessary files,
+  optionally installing the assemblies into the Global Assembly Cache,
+  generating native images for the managed assemblies via Ngen, adding Start
+  Menu shortcuts, modifying the .NET Framework machine configuration files to
+  register the ADO.NET provider, and installing the design-time components for
+  Visual Studio.  The &quot;Precompiled Binary&quot; packages are simply ZIP
+  files that contain all the binaries compiled for a particular .NET Framework
+  and processor architecture.
+</p>
+
+<hr>
+<a name="q17"></a>
+<p>
+  <b>(17) Why is System.Data.SQLite leaking memory, resources, etc?</b>
+</p>
+
+<p>
+  All System.Data.SQLite objects that implement IDisposable, either directly or
+  indirectly, should be explicitly disposed when they are no longer needed.  If
+  this is the case and you are still seeing a leak of some kind, please file a
+  <a href="/index.html/tktnew">ticket</a>.
+</p>
+
+<hr>
+<a name="q18"></a>
+<p>
+  <b>(18) What are the support options for System.Data.SQLite?</b>
+</p>
+
+<p>
+  This is discussed on the [./support.wiki | support] page.
+</p>

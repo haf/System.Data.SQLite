@@ -5,6 +5,7 @@
     <td>
       <ul>
         <li>[./features.wiki | Features]</li>
+        <li>[./faq.wiki | Frequently Asked Questions]</li>
         <li>[./news.wiki | News]</li>
         <li>[./support.wiki | Support]</li>
         <li>[./downloads.wiki | Downloads]</li>
