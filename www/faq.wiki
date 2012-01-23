@@ -90,6 +90,11 @@
   <li>
     <a href="#q18">What are the <b>support options</b> for System.Data.SQLite?</a>
   </li>
+  <br>
+  <li>
+    <a href="#q19">When the solution is loaded in Visual Studio, why do no files
+    show up for several of the projects in the Solution Explorer window?</a>
+  </li>
 </ol>
 
 <hr>
@@ -419,4 +424,22 @@
 
 <p>
   This is discussed on the [./support.wiki | support] page.
+</p>
+
+<hr>
+<a name="q19"></a>
+<p>
+  <b>(19) When the solution is loaded in Visual Studio, why do no files show up
+  for several of the projects in the Solution Explorer window?</b>
+</p>
+
+<p>
+  Several of the sub-projects (i.e. primarily those that build variants of the
+  System.Data.SQLite assembly) share an MSBuild &quot;targets&quot; file that
+  contains the actual references to the C# source code files.  Unfortunately,
+  due to limitations on how Visual Studio reads and interprets MSBuild files at
+  design-time, the C# source code files do not show up in the Solution Explorer
+  window.  This limitation is largely cosmetic and does <b>not</b> impact the
+  correctness of the build process itself, whether in Visual Studio or when
+  using MSBuild on the command line.
 </p>
