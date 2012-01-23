@@ -356,10 +356,10 @@
 </p>
 
 <p>
-  A mixed-mode assembly is a dynamic link library that contains both managed and
-  native code for a particular processor architecture.  Since it contains native
-  code it can only be loaded into a process that matches the processor
-  architecture it was compiled for.  Also see this
+  A mixed-mode assembly is a dynamic link library that contains both managed
+  code and native code for a particular processor architecture.  Since it
+  contains native code it can only be loaded into a process that matches the
+  processor architecture it was compiled for.  Also see this
   <a href="http://stackoverflow.com/questions/7266936/what-is-a-mixed-mode-assembly">StackOverflow question</a>.
 </p>
 
@@ -374,8 +374,8 @@
   System.Data.SQLite mixed-mode assembly in a file named
   &quot;System.Data.SQLite.dll&quot; (see <a href="#q14">question #14</a>)
   instead of separate &quot;System.Data.SQLite.dll&quot; and
-  &quot;SQLite.Interop.dll&quot; files to contain the managed and native code,
-  respectively.
+  &quot;SQLite.Interop.dll&quot; files to contain the managed code and native
+  code, respectively.
 </p>
 
 <hr>
