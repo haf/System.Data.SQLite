@@ -93,7 +93,8 @@
   <br>
   <li>
     <a href="#q19">When the solution is loaded in Visual Studio, why do no files
-    show up for several of the projects in the Solution Explorer window?</a>
+    show up for several of the projects in the <b>Solution Explorer</b> window?
+    </a>
   </li>
 </ol>
 
