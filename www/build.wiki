@@ -86,6 +86,12 @@
     The string &quot;&lt;year&gt;&quot; represents the version of Visual Studio
     being used (e.g. 2008).
   </li>
+
+  <li>
+    For now, the project will always be built on modern Windows using the .NET
+    Framework even when they will eventually be deployed to run under Mono on
+    Unix.
+  </li>
 </ol>
 
 <a name="all"></a>
@@ -211,6 +217,17 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
+    Enter the following command to build the managed-only binaries:
+    &nbsp;<b>build.bat&nbsp;ReleaseManagedOnly</b>
+  </li>
+
+  <li>
+    Make sure everything succeeds with no errors; the log file
+    &quot;%TEMP%\System.Data.SQLite.Build_ReleaseManagedOnly_Win32_&lt;year&gt;_Unknown.log&quot;
+    may be checked if any errors should occur.
+  </li>
+
+  <li>
     Enter the following command to build the binaries for Win32 (x86):&nbsp;
     <b>build.bat&nbsp;ReleaseNativeOnly&nbsp;Win32</b><br /><i>You may need to
     enter the command &quot;<b>setenv&nbsp;/x86</b>&quot; first if you are using
@@ -250,5 +267,42 @@
     &quot;success&quot; messages very similar to the following:&nbsp;
     <b>Successful compile (X.XXX sec). Resulting Setup program filename
     is:&nbsp;abc</b>
+  </li>
+</ol>
+
+<a name="mono"></a>
+<h2>Mono Build</h2>
+
+<ol>
+  <li>
+    Complete the steps outlined in the [./build.wiki#all | All Builds] section
+    (above).
+  </li>
+
+  <li>
+    Make sure the &quot;&lt;root&gt;\bin&quot; and &quot;&lt;root&gt;\obj&quot;
+    directories are completely free of all output files.  In theory, you should
+    be able to simply delete these directories.
+  </li>
+
+  <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+
+  <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
+
+  <li>
+    Enter the following command to set the environment variable used to pass
+    the necessary extra arguments to MSBuild:
+    &nbsp;<b>SET&nbsp;MSBUILD_ARGS=/property:UseInteropDll=false&nbsp;/property:UseSqliteStandard=true</b>
+  </li>
+
+  <li>
+    Enter the following command to build the managed-only binaries for Mono:
+    &nbsp;<b>build.bat&nbsp;ReleaseManagedOnly</b>
+  </li>
+
+  <li>
+    Make sure everything succeeds with no errors; the log file
+    &quot;%TEMP%\System.Data.SQLite.Build_ReleaseManagedOnly_Win32_&lt;year&gt;_Unknown.log&quot;
+    may be checked if any errors should occur.
   </li>
 </ol>
