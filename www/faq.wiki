@@ -271,7 +271,9 @@
       "System.Data.SQLite.Linq" assembly from the "Externals" directory.
     </li>
   </ul>
+</p>
 
+<p>
   Alternatively, when using Visual Studio 2010, you can simply use the NuGet
   package that corresponds to your target processor architecture.  Installing
   the assemblies into the Global Assembly Cache is not recommended as it may
