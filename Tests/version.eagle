@@ -137,6 +137,7 @@ runTest {test version-1.6 {'testlinq' binary version} -body {
 ###############################################################################
 
 set patterns [list \
+    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs <version> [string map [list . \\.] $version(full)] \
         </version>] \
     [appendArgs <version> [string map [list . \\.] $version(full)] \
@@ -196,6 +197,7 @@ set patterns [list \
         $version(full)] \"\\)]]
 
 set fileNames [list \
+    readme.htm \
     SQLite.nuspec \
     SQLite.MSIL.nuspec \
     SQLite.x64.nuspec \

@@ -130,13 +130,11 @@ http://system.data.sqlite.org/index.html/timeline?y=ci</a>
 </ul>
 
 <h2><strong>Design-Time Support</strong></h2>
-<font color="red">Currently not included.  We are still updating the Design-Time
-support installer.</font>
 <p>
-In Windows Explorer, navigate to the <strong>SQLite.NET\bin\Designer</strong> folder
-and execute the <strong>INSTALL.EXE</strong> file.&nbsp; The program will automatically
-detect what version(s) of Visual Studio 2005/2008 are installed and allow you to
-selectively install and uninstall the designer for each edition.</p>
+Download and run one of the setup packages and then select the
+&quot;<b>Install the designer components for Visual Studio 20XX.</b>&quot;
+option when prompted.
+</p>
 <h2>
 <strong>DbFactory Support (Non-Compact Framework)</strong></h2>
 In order to use the SQLiteFactory and have the SQLite data provider enumerated in
@@ -148,7 +146,7 @@ app.config file:<br />
         &lt;DbProviderFactories&gt;
             &lt;remove invariant="System.Data.SQLite" /&gt;
             &lt;add name="SQLite Data Provider" invariant="System.Data.SQLite" description=".Net Framework Data Provider for SQLite"
-                 type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite" /&gt;
+                 type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=1.0.78.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139" /&gt;
         &lt;/DbProviderFactories&gt;
     &lt;/system.data&gt;
 &lt;/configuration&gt;
@@ -192,7 +190,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <b>1.0.78.0 - January XX, 2012</b>
 </p>
 <ul>
-    <li>Updated to SQLite 3.7.10 <a href="http://www.sqlite.org/src/info/ebd01a8def">[ebd01a8def]</a>.</li>
+    <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_10.html">SQLite 3.7.10</a>.</li>
     <li>Redesign the VS designer support installer and integrate it into the setup packages.</li>
     <li>Refactor all IDisposable implementations to conform to best practices, potentially eliminating leaks in certain circumstances.</li>
     <li>Even more enhancements to the build and test automation.</li>
@@ -206,7 +204,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <b>1.0.77.0 - November 28, 2011</b>
 </p>
 <ul>
-    <li>Updated to SQLite 3.7.9 <a href="http://www.sqlite.org/src/info/a499ae3835">[a499ae3835]</a>.</li>
+    <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_9.html">SQLite 3.7.9</a>.</li>
     <li>More enhancements to the build and test automation.</li>
     <li>Plug native memory leak when closing a database connection containing a statement that cannot be finalized for some reason.</li>
     <li>The SQLite3 class should always attempt to dispose the contained SQLiteConnectionHandle, even when called via the finalizer.</li>
@@ -236,7 +234,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <b>1.0.75.0 - October 3, 2011</b>
 </p>
 <ul>
-    <li>Updated to SQLite 3.7.8 <a href="http://www.sqlite.org/src/info/3e0da808d2">[3e0da808d2]</a>.</li>
+    <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_8.html">SQLite 3.7.8</a>.</li>
     <li>More enhancements to the build system.</li>
     <li>Add official <a href="http://www.nuget.org/">NuGet</a> packages for x86 and x64.</li>
     <li>Add Changes and LastInsertRowId properties to the connection class.</li>
@@ -265,7 +263,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <b>1.0.74.0 - July 4, 2011</b>
 </p>
 <ul>
-    <li>Updated to SQLite 3.7.7.1 <a href="http://www.sqlite.org/src/info/af0d91adf4">[af0d91adf4]</a>.</li>
+    <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_7_1.html">SQLite 3.7.7.1</a>.</li>
     <li>Fix incorrect hard-coded .NET Framework version information SQLiteFactory_Linq.cs that was causing IServiceProvider.GetService to fail when running against the .NET Framework 3.5.</li>
     <li>Fix all XML documentation warnings.</li>
     <li>Restore support for the mixed-mode assembly (i.e. the one that can be registered in the Global Assembly Cache).</li>
@@ -284,7 +282,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
   <b>1.0.73.0 - June 2, 2011</b>
 </p>
 <ul>
-  <li>Updated to SQLite 3.7.6.3 <a href="http://www.sqlite.org/src/info/ed1da510a2">[ed1da510a2]</a>
+  <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_6_3.html">SQLite 3.7.6.3</a>.
   <li>Minor optimization to GetBytes(). Fix for [8c1650482e].</li>
   <li>Update various assembly information settings.</li>
   <li>Correct System.Data.SQLite.Linq version and resource information. Fix for [6489c5a396] and [133daf50d6].</li>
@@ -317,7 +315,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
   <b>1.0.69.0 - April 12, 2011</b>
 </p>
 <ul>
-  <li>Code merge with SQLite 3.7.6</li>
+  <li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_6.html">SQLite 3.7.6</a></li>
   <li>New VS2008 and VS2010 solution files</li>
   <li>Build and packaging automation</li>
   <li>New Inno Setup files</li>
@@ -327,14 +325,14 @@ it to extend its functionality, but the core engine's source is not changed.</p>
   <b>1.0.68.0 - February 2011</b>
 </p>
 <ul>
-  <li>Code merge with SQLite 3.7.5</li>
+  <li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_5.html">SQLite 3.7.5</a></li>
   <li>Continuing work on supporting Visual Studio 2010</li>
 </ul>
 
 <p>
 <b>1.0.67.0 - January 3, 2011</b></p>
 <ul>
-<li>Code merge with SQLite 3.7.4</li>
+<li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_4.html">SQLite 3.7.4</a></li>
 <li>Continuing work on supporting Visual Studio 2010</li>
 </ul>
 <p>

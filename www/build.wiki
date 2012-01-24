@@ -117,6 +117,7 @@
     following files:
 
     <ul>
+      <li>&lt;root&gt;\readme.htm</li>
       <li>&lt;root&gt;\SQLite.nuspec</li>
       <li>&lt;root&gt;\SQLite.MSIL.nuspec</li>
       <li>&lt;root&gt;\SQLite.x86.nuspec</li>
