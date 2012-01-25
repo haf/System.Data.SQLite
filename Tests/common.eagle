@@ -439,7 +439,7 @@ namespace eval ::Eagle {
     }
 
     proc setupDb {
-            fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags "LogPrepare"}
+            fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
             {extra ""} {delete true} {varName db} } {
       #
       # NOTE: For now, all test databases used by the test suite are placed into
