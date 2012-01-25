@@ -8,6 +8,8 @@
 <ul>
     <li>Updated to [http://www.sqlite.org/releaselog/3_7_10.html|SQLite 3.7.10]
     <li>Redesign the VS designer support installer and integrate it into the setup packages.</li>
+    <li>When emitting SQL for foreign keys in the VS designer, be sure to take all returned schema rows into account. Remainder of fix for [b226147b37].</li>
+    <li>Add Flags connection string property to control extra behavioral flags for the connection.</li>
     <li>Refactor all IDisposable implementations to conform to best practices, potentially eliminating leaks in certain circumstances.</li>
     <li>Even more enhancements to the build and test automation.</li>
     <li>Support parameter binding to more primitive types, including unsigned integer types.</li>
