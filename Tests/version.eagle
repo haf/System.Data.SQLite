@@ -156,6 +156,8 @@ set patterns [list \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
+    [appendArgs <Version> [string map [list . \\.] \
+        $version(full)] </Version>] \
     [appendArgs Value=\" [format %03d $version(build)] \"] \
     [appendArgs Value=\" [string map [list . \\.] $version(full)] \"] \
     [appendArgs Value=\" [string map [list . ,] $version(full)] \"] \
@@ -208,6 +210,7 @@ set fileNames [list \
     [file join Membership Properties AssemblyInfo.cs] \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Designer AssemblyInfo.cs] \
+    [file join SQLite.Designer source.extension.vsixmanifest] \
     [file join SQLite.Interop props SQLite.Interop.vsprops] \
     [file join SQLite.Interop props SQLite.Interop.vsprops] \
     [file join SQLite.Interop props SQLite.Interop.vsprops] \

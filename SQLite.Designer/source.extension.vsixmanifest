@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="67b5f3a9-cde1-430f-a12b-af95bb064851">
     <Name>SQLite Designer</Name>
     <Author>Robert Simpson</Author>
-    <Version>1.0.38.1</Version>
+    <Version>1.0.78.0</Version>
     <Description>ADO.NET Data Designer for SQLite</Description>
     <Locale>1033</Locale>
     <InstalledByMsi>false</InstalledByMsi>
