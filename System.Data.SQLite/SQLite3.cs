@@ -368,6 +368,12 @@ namespace System.Data.SQLite
         }
       }
 
+      if ((cnn != null) &&
+          ((cnn.Flags & SQLiteConnectionFlags.LogPrepare) == SQLiteConnectionFlags.LogPrepare))
+      {
+          LogMessage(0, String.Format("Preparing {{{0}}}...", strSql));
+      }
+
       IntPtr stmt = IntPtr.Zero;
       IntPtr ptr = IntPtr.Zero;
       int len = 0;

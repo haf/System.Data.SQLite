@@ -439,8 +439,8 @@ namespace eval ::Eagle {
     }
 
     proc setupDb {
-            fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {extra ""}
-            {delete true} {varName db} } {
+            fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags "LogPrepare"}
+            {extra ""} {delete true} {varName db} } {
       #
       # NOTE: For now, all test databases used by the test suite are placed into
       #       the temporary directory.  Each database used by a test should be
@@ -501,6 +501,14 @@ namespace eval ::Eagle {
       #
       if {[string length $dateTimeKind] > 0} then {
         append connection {;DateTimeKind=${dateTimeKind}}
+      }
+
+      #
+      # NOTE: If the caller specified a SQLiteConnectionFlags, add the necessary
+      #       portion of the connection string now.
+      #
+      if {[string length $flags] > 0} then {
+        append connection {;Flags=${flags}}
       }
 
       #

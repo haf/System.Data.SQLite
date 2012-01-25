@@ -369,6 +369,28 @@ namespace System.Data.SQLite
     Default = 0x06,
   }
 
+  /// <summary>
+  /// The extra behavioral flags that can be applied to a connection.
+  /// </summary>
+  [Flags()]
+  public enum SQLiteConnectionFlags
+  {
+      /// <summary>
+      /// No extra flags.
+      /// </summary>
+      None = 0x0,
+
+      /// <summary>
+      /// Enable logging of all SQL statements to be prepared.
+      /// </summary>
+      LogPrepare = 0x1,
+
+      /// <summary>
+      /// The default extra flags for new connections.
+      /// </summary>
+      Default = None
+  }
+
   // These are the options to the internal sqlite3_config call.
   internal enum SQLiteConfigOpsEnum
   {

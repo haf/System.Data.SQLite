@@ -540,6 +540,34 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Gets/Sets the extra behavioral flags.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(SQLiteConnectionFlags.Default)]
+    public SQLiteConnectionFlags Flags
+    {
+        get
+        {
+            object value;
+
+            if (TryGetValue("flags", out value))
+            {
+                if (value is SQLiteConnectionFlags)
+                    return (SQLiteConnectionFlags)value;
+                else if (value != null)
+                    return (SQLiteConnectionFlags)TypeDescriptor.GetConverter(
+                        typeof(SQLiteConnectionFlags)).ConvertFrom(value);
+            }
+
+            return SQLiteConnectionFlags.Default;
+        }
+        set
+        {
+            this["flags"] = value;
+        }
+    }
+
+    /// <summary>
     /// Helper function for retrieving values from the connectionstring
     /// </summary>
     /// <param name="keyword">The keyword to retrieve settings for</param>

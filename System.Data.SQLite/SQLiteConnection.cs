@@ -163,6 +163,12 @@ namespace System.Data.SQLite
   /// <description>N</description>
   /// <description>False</description>
   /// </item>
+  /// <item>
+  /// <description>Flags</description>
+  /// <description>Extra behavioral flags for the connection.  See the SQLiteConnectionFlags enumeration for possible values.</description>
+  /// <description>N</description>
+  /// <description>Default</description>
+  /// </item>
   /// </list>
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
@@ -226,6 +232,12 @@ namespace System.Data.SQLite
     internal string _baseSchemaName;
 
     /// <summary>
+    /// The extra behavioral flags for this connection, if any.  See the
+    /// SQLiteConnectionFlags enumeration for a list of possible values.
+    /// </summary>
+    private SQLiteConnectionFlags _flags;
+
+    /// <summary>
     /// Default command timeout
     /// </summary>
     private int _defaultTimeout = 30;
@@ -270,6 +282,7 @@ namespace System.Data.SQLite
       SQLiteLog.Initialize();
 #endif
 
+      _flags = SQLiteConnectionFlags.Default;
       _connectionState = ConnectionState.Closed;
       _connectionString = "";
       //_commandList = new List<WeakReference>();
@@ -831,6 +844,9 @@ namespace System.Data.SQLite
       Close();
 
       SortedList<string, string> opts = ParseConnectionString(_connectionString);
+
+      _flags = (SQLiteConnectionFlags)Enum.Parse(typeof(SQLiteConnectionFlags), FindKey(opts, "Flags", "Default"), true);
+
       string fileName;
 
       if (Convert.ToInt32(FindKey(opts, "Version", "3"), CultureInfo.InvariantCulture) != 3)
@@ -1016,6 +1032,16 @@ namespace System.Data.SQLite
     {
       get { return _defaultTimeout; }
       set { _defaultTimeout = value; }
+    }
+
+    /// <summary>
+    /// Gets/sets the extra behavioral flags for this connection.  See the
+    /// SQLiteConnectionFlags enumeration for a list of possible values.
+    /// </summary>
+    public SQLiteConnectionFlags Flags
+    {
+      get { return _flags; }
+      set { _flags = value; }
     }
 
     /// <summary>

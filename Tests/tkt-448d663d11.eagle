@@ -36,7 +36,7 @@ runTest {test tkt-448d663d11-1.2 {missing journal mode, WAL db} -body {
   set fileName tkt-448d663d11-1.2.db
   file copy -force [file join $path wal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName "" "" "" "" false
+  setupDb $fileName "" "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -51,7 +51,7 @@ runTest {test tkt-448d663d11-1.3 {missing journal mode, non-WAL db} -body {
   set fileName tkt-448d663d11-1.3.db
   file copy -force [file join $path nonWal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName "" "" "" "" false
+  setupDb $fileName "" "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -78,7 +78,7 @@ runTest {test tkt-448d663d11-1.5 {'Default' journal mode, WAL db} -body {
   set fileName tkt-448d663d11-1.5.db
   file copy -force [file join $path wal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName Default "" "" "" false
+  setupDb $fileName Default "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -93,7 +93,7 @@ runTest {test tkt-448d663d11-1.6 {'Default' journal mode, non-WAL db} -body {
   set fileName tkt-448d663d11-1.6.db
   file copy -force [file join $path nonWal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName Default "" "" "" false
+  setupDb $fileName Default "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -120,7 +120,7 @@ runTest {test tkt-448d663d11-1.8 {'Delete' journal mode, WAL db} -body {
   set fileName tkt-448d663d11-1.8.db
   file copy -force [file join $path wal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName Delete "" "" "" false
+  setupDb $fileName Delete "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -135,7 +135,7 @@ runTest {test tkt-448d663d11-1.9 {'Delete' journal mode, non-WAL db} -body {
   set fileName tkt-448d663d11-1.9.db
   file copy -force [file join $path nonWal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName Delete "" "" "" false
+  setupDb $fileName Delete "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -210,7 +210,7 @@ runTest {test tkt-448d663d11-1.15 {'Wal' journal mode, non-WAL db} -body {
   set fileName tkt-448d663d11-1.15.db
   file copy -force [file join $path nonWal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName Wal "" "" "" false
+  setupDb $fileName Wal "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -225,7 +225,7 @@ runTest {test tkt-448d663d11-1.16 {'Wal' journal mode, WAL db} -body {
   set fileName tkt-448d663d11-1.16.db
   file copy -force [file join $path wal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName Wal "" "" "" false
+  setupDb $fileName Wal "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -252,7 +252,7 @@ runTest {test tkt-448d663d11-1.18 {'Bad' journal mode, non-WAL db} -body {
   set fileName tkt-448d663d11-1.18.db
   file copy -force [file join $path nonWal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName Bad "" "" "" false
+  setupDb $fileName Bad "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
@@ -267,7 +267,7 @@ runTest {test tkt-448d663d11-1.19 {'Bad' journal mode, WAL db} -body {
   set fileName tkt-448d663d11-1.19.db
   file copy -force [file join $path wal.db] \
       [file join [getDatabaseDirectory] $fileName]
-  setupDb $fileName Bad "" "" "" false
+  setupDb $fileName Bad "" "" "" "" false
   sql execute -execute scalar $db "PRAGMA journal_mode;"
 } -cleanup {
   cleanupDb $fileName
