@@ -409,18 +409,10 @@ namespace SQLite.Designer.Design
         builder.AppendFormat("CONSTRAINT [CK_{0}_{1}] CHECK {2}", Name, n + 1, check);
       }
 
-      List<ForeignKey> keys = new List<ForeignKey>();
-
-      for (int x = 0; x < ForeignKeys.Count; x++)
-      {
-        ForeignKey key = ForeignKeys[x];
-        keys.Add(key);
-      }
-
-      if (keys.Count > 0)
+      if (ForeignKeys.Count > 0)
       {
         builder.Append(separator);
-        WriteFKeys(keys, builder);
+        WriteFKeys(ForeignKeys, builder);
       }
 
       builder.Append("\r\n);\r\n");
@@ -489,7 +481,7 @@ namespace SQLite.Designer.Design
             ForeignKey key = keys[index];
 
             if (index > 0)
-                builder.Append(",\r\n");
+                builder.Append(",\r\n    ");
 
             builder.AppendFormat(
                 "CONSTRAINT [{0}] FOREIGN KEY (", key.Name);
