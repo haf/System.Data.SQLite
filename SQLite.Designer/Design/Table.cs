@@ -409,34 +409,10 @@ namespace SQLite.Designer.Design
         builder.AppendFormat("CONSTRAINT [CK_{0}_{1}] CHECK {2}", Name, n + 1, check);
       }
 
-      List<ForeignKey> keys = new List<ForeignKey>();
-
-      for (int x = 0; x < ForeignKeys.Count; x++)
-      {
-        ForeignKey key = ForeignKeys[x];
-
-        if (String.IsNullOrEmpty(key.From.Column) == true || String.IsNullOrEmpty(key.From.Catalog) == true ||
-          String.IsNullOrEmpty(key.To.Table) == true || String.IsNullOrEmpty(key.To.Column) == true)
-          continue;
-
-        if (keys.Count > 0)
-        {
-          if (keys[0].Name == key.Name && keys[0].To.Catalog == key.To.Catalog && keys[0].To.Table == key.To.Table)
-          {
-            keys.Add(key);
-            continue;
-          }
-          builder.Append(separator);
-          WriteFKeys(keys, builder);
-          keys.Clear();
-        }
-        keys.Add(key);
-      }
-
-      if (keys.Count > 0)
+      if (ForeignKeys.Count > 0)
       {
         builder.Append(separator);
-        WriteFKeys(keys, builder);
+        WriteFKeys(ForeignKeys, builder);
       }
 
       builder.Append("\r\n);\r\n");
@@ -500,33 +476,58 @@ namespace SQLite.Designer.Design
 
     private void WriteFKeys(List<ForeignKey> keys, StringBuilder builder)
     {
-      builder.AppendFormat("CONSTRAINT [{0}] FOREIGN KEY (", keys[0].Name);
-      string separator = "";
+        for (int index = 0; index < keys.Count; )
+        {
+            ForeignKey key = keys[index];
 
-      foreach (ForeignKey key in keys)
-      {
-        builder.AppendFormat("{0}[{1}]", separator, key.From.Column);
-        separator = ", ";
-      }
+            if (index > 0)
+                builder.Append(",\r\n    ");
 
-      builder.AppendFormat(") REFERENCES [{0}] (", keys[0].To.Table);
+            builder.AppendFormat(
+                "CONSTRAINT [{0}] FOREIGN KEY (", key.Name);
 
-      separator = "";
-      foreach (ForeignKey key in keys)
-      {
-        builder.AppendFormat("{0}[{1}]", separator, key.To.Column);
-        separator = ", ";
-      }
-      builder.Append(")");
+            int startIndex = index;
 
-      if (!String.IsNullOrEmpty(keys[0].Match))
-          builder.AppendFormat(" MATCH {0}", keys[0].Match);
+            do
+            {
+                builder.AppendFormat("{0}[{1}]",
+                    index > startIndex ? ", " : String.Empty,
+                    keys[index].From.Column);
 
-      if (!String.IsNullOrEmpty(keys[0].OnUpdate))
-          builder.AppendFormat(" ON UPDATE {0}", keys[0].OnUpdate);
+                index++;
+            } while (index < keys.Count && keys[index].Id == key.Id);
 
-      if (!String.IsNullOrEmpty(keys[0].OnDelete))
-          builder.AppendFormat(" ON DELETE {0}", keys[0].OnDelete);
+            builder.AppendFormat(") REFERENCES [{0}]", key.To.Table);
+
+            if (!String.IsNullOrEmpty(key.To.Column))
+            {
+                builder.Append(" (");
+                index = startIndex;
+
+                do
+                {
+                    builder.AppendFormat("{0}[{1}]",
+                        index > startIndex ? ", " : String.Empty,
+                        keys[index].To.Column);
+
+                    index++;
+                } while (index < keys.Count && keys[index].Id == key.Id);
+
+                builder.Append(')');
+            }
+
+            if (!String.IsNullOrEmpty(key.Match))
+                builder.AppendFormat(" MATCH {0}", key.Match);
+
+            if (!String.IsNullOrEmpty(key.OnUpdate))
+                builder.AppendFormat(" ON UPDATE {0}", key.OnUpdate);
+
+            if (!String.IsNullOrEmpty(key.OnDelete))
+                builder.AppendFormat(" ON DELETE {0}", key.OnDelete);
+
+            if (index == startIndex)
+                index++;
+        }
     }
 
     [Browsable(false)]

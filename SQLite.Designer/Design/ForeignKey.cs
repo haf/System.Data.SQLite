@@ -284,6 +284,8 @@ namespace SQLite.Designer.Design
   internal class ForeignKey : IHaveConnection, ICloneable
   {
     internal Table _table;
+    internal int _id;
+    internal int _ordinal;
     internal ForeignKeyFromItem _from;
     internal ForeignKeyToItem _to;
     internal string _name;
@@ -295,6 +297,8 @@ namespace SQLite.Designer.Design
     private ForeignKey(ForeignKey source)
     {
       _table = source._table;
+      _id = source._id;
+      _ordinal = source._ordinal;
       _from = new ForeignKeyFromItem(this, source._from.Column);
       _to = new ForeignKeyToItem(this, source._to.Catalog, source._to.Table, source._to.Column);
       _name = source._name;
@@ -325,6 +329,8 @@ namespace SQLite.Designer.Design
       _table = table;
       if (row != null)
       {
+        _id = (int)row["FKEY_ID"];
+        _ordinal = (int)row["FKEY_FROM_ORDINAL_POSITION"];
         _from = new ForeignKeyFromItem(this, row["FKEY_FROM_COLUMN"].ToString());
         _to = new ForeignKeyToItem(this, row["FKEY_TO_CATALOG"].ToString(), row["FKEY_TO_TABLE"].ToString(), row["FKEY_TO_COLUMN"].ToString());
         _name = row["CONSTRAINT_NAME"].ToString();
@@ -334,6 +340,8 @@ namespace SQLite.Designer.Design
       }
       else
       {
+        _id = -1;
+        _ordinal = -1;
         _from = new ForeignKeyFromItem(this, "");
         _to = new ForeignKeyToItem(this, _table.Catalog, "", "");
       }
@@ -357,7 +365,7 @@ namespace SQLite.Designer.Design
       {
         if (String.IsNullOrEmpty(_name) == false) return _name;
 
-        return String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}_{3}", _from.Table, _from.Column, _to.Table, _to.Column);
+        return String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}", _from.Table, _id, _ordinal);
       }
       set
       {
@@ -383,6 +391,22 @@ namespace SQLite.Designer.Design
     }
 
     #endregion
+
+    [DisplayName("Id")]
+    [Category("Id")]
+    [Description("The identifier of this foreign key.")]
+    public int Id
+    {
+      get { return _id; }
+    }
+
+    [DisplayName("Ordinal")]
+    [Category("Ordinal")]
+    [Description("The column ordinal of this foreign key.")]
+    public int Ordinal
+    {
+      get { return _ordinal; }
+    }
 
     [DisplayName("From Key")]
     [Category("From")]
