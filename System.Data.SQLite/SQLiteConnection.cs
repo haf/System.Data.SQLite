@@ -2350,6 +2350,7 @@ namespace System.Data.SQLite
       tbl.Columns.Add("CONSTRAINT_TYPE", typeof(string));
       tbl.Columns.Add("IS_DEFERRABLE", typeof(bool));
       tbl.Columns.Add("INITIALLY_DEFERRED", typeof(bool));
+      tbl.Columns.Add("FKEY_ID", typeof(int));
       tbl.Columns.Add("FKEY_FROM_COLUMN", typeof(string));
       tbl.Columns.Add("FKEY_FROM_ORDINAL_POSITION", typeof(int));
       tbl.Columns.Add("FKEY_TO_CATALOG", typeof(string));
@@ -2385,12 +2386,13 @@ namespace System.Data.SQLite
                 {
                   row = tbl.NewRow();
                   row["CONSTRAINT_CATALOG"] = strCatalog;
-                  row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}", rdTables[2], rdKey.GetInt32(0));
+                  row["CONSTRAINT_NAME"] = String.Format(CultureInfo.InvariantCulture, "FK_{0}_{1}_{2}", rdTables[2], rdKey.GetInt32(0), rdKey.GetInt32(1));
                   row["TABLE_CATALOG"] = strCatalog;
                   row["TABLE_NAME"] = builder.UnquoteIdentifier(rdTables.GetString(2));
                   row["CONSTRAINT_TYPE"] = "FOREIGN KEY";
                   row["IS_DEFERRABLE"] = false;
                   row["INITIALLY_DEFERRED"] = false;
+                  row["FKEY_ID"] = rdKey[0];
                   row["FKEY_FROM_COLUMN"] = builder.UnquoteIdentifier(rdKey[3].ToString());
                   row["FKEY_TO_CATALOG"] = strCatalog;
                   row["FKEY_TO_TABLE"] = builder.UnquoteIdentifier(rdKey[2].ToString());

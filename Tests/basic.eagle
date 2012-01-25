@@ -261,6 +261,7 @@ runTest {test data-1.5 {GetSchema with ForeignKeys} -setup {
               [$foreignKey Item CONSTRAINT_TYPE] \
               [$foreignKey Item IS_DEFERRABLE] \
               [$foreignKey Item INITIALLY_DEFERRED] \
+              [$foreignKey Item FKEY_ID] \
               [$foreignKey Item FKEY_FROM_COLUMN] \
               [$foreignKey Item FKEY_TO_CATALOG] \
               [$foreignKey Item FKEY_TO_TABLE] \
@@ -281,9 +282,9 @@ runTest {test data-1.5 {GetSchema with ForeignKeys} -setup {
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
-\{\{main FK_t1_0 main t1 \{FOREIGN KEY\} False False x main t2 \{\} 0 \{SET\
-DEFAULT\} CASCADE NONE\} \{main FK_t2_0 main t2 \{FOREIGN KEY\} False False x\
-main t3 \{\} 0 \{NO ACTION\} \{NO ACTION\} NONE\}\}$}}
+\{\{main FK_t1_0_0 main t1 \{FOREIGN KEY\} False False 0 x main t2 \{\} 0 \{SET\
+DEFAULT\} CASCADE NONE\} \{main FK_t2_0_0 main t2 \{FOREIGN KEY\} False False 0\
+x main t3 \{\} 0 \{NO ACTION\} \{NO ACTION\} NONE\}\}$}}
 
 ###############################################################################
 
