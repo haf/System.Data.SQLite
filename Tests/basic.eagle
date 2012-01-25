@@ -155,7 +155,7 @@ runTest {test data-1.4 {GetSchema with ReservedWords} -setup {
   setupDb [set fileName data-1.4.db]
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getDatabaseDirectory] data-1.4.db]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
 
   unset -nocomplain results errors
 
@@ -215,7 +215,7 @@ runTest {test data-1.5 {GetSchema with ForeignKeys} -setup {
   sql execute $db "CREATE TABLE t2(x INTEGER REFERENCES t3);"
 
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getDatabaseDirectory] data-1.5.db]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
 
   unset -nocomplain results errors
 
@@ -292,7 +292,7 @@ runTest {test data-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
   setupDb [set fileName data-1.6.db]
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getDatabaseDirectory] data-1.6.db]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
 
   unset -nocomplain results errors
 

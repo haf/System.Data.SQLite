@@ -404,19 +404,24 @@ namespace eval ::Eagle {
             text memory symbols strict resultsVarName errorsVarName fileNames
             args } {
       #
+      # NOTE: Since we are going to use this method name a lot, assign it to a
+      #       variable first.
+      #
+      set add ReferencedAssemblies.Add
+
+      #
       # NOTE: Create the base command to evaluate and add the property settings
       #       that are almost always needed by our unit tests (i.e. the System
       #       and System.Data assembly references).
       #
       set command [list compileCSharp $text $memory $symbols $strict results \
-          errors ReferencedAssemblies.Add System.dll ReferencedAssemblies.Add \
-          System.Data.dll ReferencedAssemblies.Add System.Xml.dll]
+          errors $add System.dll $add System.Data.dll $add System.Xml.dll]
 
       #
       # NOTE: Add all the provided file names as assembly references.
       #
       foreach fileName $fileNames {
-        lappend command ReferencedAssemblies.Add [getBinaryFileName $fileName]
+        lappend command $add [getBinaryFileName $fileName]
       }
 
       #
