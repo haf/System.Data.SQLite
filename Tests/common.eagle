@@ -509,6 +509,29 @@ namespace eval ::Eagle {
       }
 
       #
+      # NOTE: If there are any global (per test run) connection flags currently
+      #       set, use them now (i.e. by combining them with the ones for this
+      #       connection).
+      #
+      if {[info exists ::connection_flags] && \
+          [string length $::connection_flags] > 0} then {
+        #
+        # NOTE: Show (and log) that we detected some global connection flags.
+        #
+        tputs $::test_channel [appendArgs \
+            "---- global connection flags detected: " $::connection_flags \n]
+
+        #
+        # NOTE: Combine and/or replace the connection flags and then show the
+        #       new value.
+        #
+        set flags [combineFlags $flags $::connection_flags]
+
+        tputs $::test_channel [appendArgs \
+            "---- combined connection flags are: " $flags \n]
+      }
+
+      #
       # NOTE: If the caller specified a SQLiteConnectionFlags, add the necessary
       #       portion of the connection string now.
       #

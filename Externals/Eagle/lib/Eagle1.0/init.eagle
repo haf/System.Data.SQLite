@@ -78,6 +78,25 @@ namespace eval ::Eagle {
     return [expr {[info exists ::env($name)] ? $::env($name) : ""}]
   }
 
+  proc combineFlags { flags1 flags2 } {
+    #
+    # NOTE: This should work properly in both Tcl and Eagle.
+    #
+    set result [list]
+
+    foreach flags [list $flags1 $flags2] {
+      foreach flag [split $flags ", "] {
+        set flag [string trim $flag]
+
+        if {[string length $flag] > 0} then {
+          lappend result $flag
+        }
+      }
+    }
+
+    return [join $result ,]
+  }
+
   proc getCompileInfo {} {
     #
     # NOTE: Return the important compile-time information for use by the
@@ -1675,7 +1694,7 @@ namespace eval ::Eagle {
         exportAndImportPackageCommands isEagle isMono getEnvironmentVariable \
         getPluginPath getDictionaryValue getColumnValue getRowColumnValue \
         appendArgs haveGaruda lappendArgs readFile filter map reduce \
-        getPlatformInfo execShell] false false
+        getPlatformInfo execShell combineFlags] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
