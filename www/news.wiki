@@ -3,6 +3,13 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.79.0 - January 28, 2012</b>
+</p>
+<ul>
+    <li>Use the WoW64 registry keys when installing the VS designer components on 64-bit Windows. Fix for [d8491abd0b].</li>
+    <li>Correct resource name used by the LINQ assembly to locate several key string resources. Fix for [fbebb30da9].</li>
+</ul>
+<p>
     <b>1.0.78.0 - January 27, 2012</b>
 </p>
 <ul>
