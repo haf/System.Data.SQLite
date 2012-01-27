@@ -28,6 +28,32 @@
   </li>
 </ol>
 
+<a name="testBinaries"></a>
+<h2>Test x86 &amp; x64 Binaries</h2>
+
+<ol>
+  <li>
+    The binaries for all supported architectures and platforms must be tested
+    using procedures very similar to those documented in the normal
+    [./test.wiki | test procedures].
+  </li>
+
+  <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+
+  <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
+
+  <li>
+    Enter the following command to test all the x86 or x64 binaries, depending
+    on the processor architecture of the current machine:&nbsp;
+    <b>test_all.bat</b><br />
+  </li>
+
+  <li>
+    Locate a machine with a processor architecture different from the one tested
+    in the previous step and then repeat all the previous steps.
+  </li>
+</ol>
+
 <a name="buildCeBinaries"></a>
 <h2>Build Windows CE Binaries</h2>
 
@@ -39,6 +65,56 @@
   <li>
     Enter the following command to build all the binaries available for Windows
     CE:&nbsp;<b>build_ce.bat</b><br />
+  </li>
+</ol>
+
+<a name="testCeBinaries"></a>
+<h2>Test Windows CE Binaries</h2>
+
+<ol>
+  <li>
+    Launch <b>Visual Studio 2008</b>, &quot;<b>Professional</b>&quot; edition or
+    &quot;better&quot;. As of this writing, in January 2012, <b>Visual Studio
+    2010 and later will not work</b> as they do not include the necessary
+    built-in support for Windows CE and the .NET Compact Framework.
+  </li>
+
+  <li>
+    Open the &quot;<b>SQLite.NET.2008.sln</b>&quot; solution file in the
+    &quot;&lt;root&gt;&quot; directory.
+  </li>
+
+  <li>
+    Change the active solution configuration to &quot;<b>Debug</b>&quot;.
+  </li>
+
+  <li>
+    Change the active solution platform to &quot;<b>Pocket PC 2003
+    (ARMV4)</b>&quot;.
+  </li>
+
+  <li>
+    Right-click the &quot;<b>testce</b>&quot; project in the Solution Explorer
+    window and select &quot;<b>Set as StartUp Project</b>&quot;.
+  </li>
+
+  <li>
+    Select &quot;<b>Start Debugging</b>&quot; from the &quot;<b>Debug</b>&quot;
+    menu.
+  </li>
+
+  <li>
+    If any rebuild prompts appear (e.g. &quot;<b>SQLite.Interop.CE.2008</b>&quot;,
+    &quot;<b>Would you like to build it?</b>&quot;), select &quot;<b>Yes</b>&quot;.
+  </li>
+
+  <li>
+    When prompted for the device type to deploy the application to, select the
+    &quot;<b>Pocket PC 2003 SE Emulator</b>&quot; device.
+  </li>
+
+  <li>
+    Make sure all that the tests pass (i.e. they emit &quot;<b>SUCCESS</b>&quot;).
   </li>
 </ol>
 
