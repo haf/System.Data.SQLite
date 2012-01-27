@@ -1156,6 +1156,7 @@ namespace System.Data.SQLite
     /// </returns>
     internal static bool StaticIsInitialized()
     {
+#if !PLATFORM_COMPACTFRAMEWORK
         //
         // NOTE: Save the state of the logging class and then restore it
         //       after we are done to avoid logging too many false errors.
@@ -1165,6 +1166,7 @@ namespace System.Data.SQLite
 
         try
         {
+#endif
             //
             // NOTE: This method [ab]uses the fact that SQLite will always
             //       return SQLITE_ERROR for any unknown configuration option
@@ -1175,11 +1177,13 @@ namespace System.Data.SQLite
                 (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE, null, (IntPtr)0);
 
             return (rc == /* SQLITE_MISUSE */ 21);
+#if !PLATFORM_COMPACTFRAMEWORK
         }
         finally
         {
             SQLiteLog.Enabled = savedEnabled;
         }
+#endif
     }
 
     /// <summary>
