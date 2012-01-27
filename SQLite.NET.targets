@@ -69,4 +69,26 @@
     <Touch AlwaysCreate="true"
            Files="$(TargetPath).StrongNameSign.done" />
   </Target>
+
+  <!--
+  ******************************************************************************
+  -->
+
+  <Target Name="Mark32BitOnly"
+          Condition="'$(Mark32BitOnly)' != 'false'"
+          Inputs="$(TargetPath)"
+          Outputs="$(TargetPath).Mark32BitOnly.done">
+    <GetFrameworkSDKPath>
+      <Output TaskParameter="Path"
+              PropertyName="DirForMark32BitOnly" />
+    </GetFrameworkSDKPath>
+
+    <Exec Condition="'$(DirForMark32BitOnly)' != '' And
+                     HasTrailingSlash('$(DirForMark32BitOnly)') And
+                     Exists('$(DirForMark32BitOnly)bin\CorFlags.exe')"
+          Command="&quot;$(DirForMark32BitOnly)bin\CorFlags.exe&quot; &quot;$(TargetPath)&quot; /32BIT+ /Force" />
+
+    <Touch AlwaysCreate="true"
+           Files="$(TargetPath).Mark32BitOnly.done" />
+  </Target>
 </Project>
