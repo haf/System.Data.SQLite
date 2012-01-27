@@ -2716,6 +2716,11 @@ namespace System.Data.SQLite
                         "Original command line is: {0}",
                         Environment.CommandLine), traceCategory);
 
+                    TraceOps.DebugAndTrace(TracePriority.MediumLow,
+                        debugCallback, traceCallback, String.Format(
+                        "Running process is {0}.", Is64BitProcess() ?
+                            "64-bit" : "32-bit"), traceCategory);
+
                     if (!configuration.whatIf)
                     {
                         //
@@ -3820,6 +3825,12 @@ namespace System.Data.SQLite
                 if (!Directory.Exists(directory))
                     return false;
 
+                TraceOps.DebugAndTrace(TracePriority.Lower,
+                    debugCallback, traceCallback, String.Format(
+                    ".NET Framework {0} found in directory {1}.",
+                    ForDisplay(frameworkVersion), ForDisplay(directory)),
+                    traceCategory);
+
                 return true;
             }
         }
@@ -4211,6 +4222,12 @@ namespace System.Data.SQLite
 
                 if (!Directory.Exists(directory))
                     return false;
+
+                TraceOps.DebugAndTrace(TracePriority.Lower,
+                    debugCallback, traceCallback, String.Format(
+                    "Visual Studio {0} found in directory {1}.",
+                    ForDisplay(vsVersion), ForDisplay(directory)),
+                    traceCategory);
 
                 return true;
             }
@@ -5410,6 +5427,29 @@ namespace System.Data.SQLite
             {
                 Configuration configuration = null;
                 string error = null;
+
+                ///////////////////////////////////////////////////////////////
+
+                #region Debugger Hook
+                if (Environment.GetEnvironmentVariable("Break") != null)
+                {
+                    Console.WriteLine(
+                        "Attach a debugger to process {0} and " +
+                        "press any key to continue.",
+                        Process.GetCurrentProcess().Id);
+
+                    try
+                    {
+                        Console.ReadKey(true); /* throw */
+                    }
+                    catch (InvalidOperationException) // Console.ReadKey
+                    {
+                        // do nothing.
+                    }
+
+                    Debugger.Break();
+                }
+                #endregion
 
                 ///////////////////////////////////////////////////////////////
 
