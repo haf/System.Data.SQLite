@@ -232,6 +232,7 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Interactive Support Methods
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static DialogResult ShowMessage(
                 TracePriority tracePriority,
                 TraceCallback debugCallback,
@@ -1374,6 +1375,7 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Static Methods
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static MockRegistryKey OpenSubKey(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1406,6 +1408,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static MockRegistryKey CreateSubKey(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1458,6 +1461,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static void DeleteSubKey(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1484,6 +1488,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static void DeleteSubKeyTree(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1509,6 +1514,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static string[] GetSubKeyNames(
                 MockRegistryKey key,
                 bool whatIf,
@@ -1528,6 +1534,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static object GetValue(
                 MockRegistryKey key,
                 string name,
@@ -1551,6 +1558,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static void SetValue(
                 MockRegistryKey key,
                 string name,
@@ -1577,6 +1585,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static void DeleteValue(
                 MockRegistryKey key,
                 string name,
@@ -1963,6 +1972,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static bool FromArgs(
                 string[] args,
                 bool strict,
@@ -2600,6 +2610,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static bool Process(
                 string[] args,
                 Configuration configuration,
@@ -2757,6 +2768,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static bool CheckRuntimeVersion(
                 Configuration configuration,
                 bool strict,
@@ -3814,6 +3826,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool ForEachFrameworkConfig(
             MockRegistry registry,
             FrameworkList frameworkList,
@@ -4008,6 +4021,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool ForEachFrameworkRegistry(
             MockRegistry registry,
             FrameworkList frameworkList,
@@ -4204,6 +4218,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool ForEachVsVersionRegistry(
             MockRegistry registry,
             VsList vsList,
@@ -4285,6 +4300,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Configuration File Handling
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool AddDbProviderFactory(
             string fileName,
             string invariant,
@@ -4390,6 +4406,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool RemoveDbProviderFactory(
             string fileName,
             string invariant,
@@ -5384,6 +5401,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Application Entry Point
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static int Main(
             string[] args
             )
