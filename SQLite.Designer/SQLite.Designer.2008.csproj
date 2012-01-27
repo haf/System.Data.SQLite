@@ -24,6 +24,7 @@
     <ConfigurationYear>2008</ConfigurationYear>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
     <OutputPath>$(BinaryOutputPath)</OutputPath>
     <DocumentationFile>$(BinaryOutputPath)SQLite.Designer.xml</DocumentationFile>
@@ -195,6 +196,21 @@
   </ItemGroup>
   <Import Project="$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.Properties.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition="'$(VSSDK90Install)' == '' Or
+                            !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.Data.ConnectionUI.dll') Or
+                            !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Data.dll') Or
+                            !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Data.Services.dll') Or
+                            !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Shell.dll') Or
+                            !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Shell.Interop.dll') Or
+                            !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Shell.Interop.8.0.dll')">
+    <!--
+        NOTE: We cannot build this project without the necessary reference
+              assemblies; therefore, skip building it altogether.
+    -->
+    <BuildDependsOn>
+      MissingVsSdk
+    </BuildDependsOn>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

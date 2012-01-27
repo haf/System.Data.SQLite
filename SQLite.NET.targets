@@ -91,4 +91,13 @@
     <Touch AlwaysCreate="true"
            Files="$(TargetPath).Mark32BitOnly.done" />
   </Target>
+
+  <!--
+  ******************************************************************************
+  -->
+
+  <Target Name="MissingVsSdk"
+          Condition="'$(ProjectName)' != ''">
+    <Warning Text="The Visual Studio SDK is missing, skipping project &quot;$(ProjectName)&quot;..." />
+  </Target>
 </Project>
