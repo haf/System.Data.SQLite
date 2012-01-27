@@ -1572,10 +1572,12 @@ namespace eval ::Eagle {
         #
         if {[string length $directory] == 0} then {
           #
-          # NOTE: Registry hive where WiX install information
-          #       is stored.
+          # NOTE: Registry hive where WiX install information is stored.  Make
+          #       sure to look in the WoW64 registry because WiX is currently
+          #       always installed as a 32-bit application.
           #
-          set key {HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Installer XML}
+          set key [appendArgs HKEY_LOCAL_MACHINE\\ \
+              [getSoftwareRegistryKey true] {\Microsoft\Windows Installer XML}]
 
           #
           # NOTE: The versions of WiX that we support.
@@ -1680,10 +1682,12 @@ namespace eval ::Eagle {
 
       if {$::tcl_platform(platform) eq "windows"} then {
         #
-        # NOTE: Registry hive where Visual Studio install information
-        #       is stored.
+        # NOTE: Registry hive where Visual Studio install information is
+        #       stored.  Make sure to look in the WoW64 registry because
+        #       Visual Studio is currently always a 32-bit application.
         #
-        set key {HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio}
+        set key [appendArgs HKEY_LOCAL_MACHINE\\ \
+            [getSoftwareRegistryKey true] {\Microsoft\VisualStudio}]
 
         #
         # NOTE: The versions of Visual Studio that we support.

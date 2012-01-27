@@ -52,6 +52,25 @@ namespace eval ::Eagle {
     }
   }
 
+  proc getSoftwareRegistryKey { wow64 } {
+    if {$wow64 && [info exists ::tcl_platform(machine)] && \
+        $::tcl_platform(machine) eq "amd64"} then {
+      #
+      # NOTE: Return the WoW64 registry key name because we are running on a
+      #       64-bit operating system and the caller specifically requested
+      #       the Win32 registry key name.
+      #
+      return Software\\Wow6432Node
+    } else {
+      #
+      # NOTE: Return the native registry key name because we are either not
+      #       running on a 64-bit operating system or the caller wants the
+      #       native registry key name (i.e. not the WoW64 registry key name).
+      #
+      return Software
+    }
+  }
+
   proc haveConstraint { name } {
     if {[isEagle]} then {
       return [expr {
