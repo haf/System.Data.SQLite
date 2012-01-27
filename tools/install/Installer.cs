@@ -35,6 +35,7 @@ namespace System.Data.SQLite
         string typeName,
         AssemblyName assemblyName,
         object clientData,
+        bool wow64,
         bool throwOnMissing,
         bool whatIf,
         bool verbose,
@@ -50,6 +51,7 @@ namespace System.Data.SQLite
         Version frameworkVersion,
         string platformName,
         object clientData,
+        bool wow64,
         bool throwOnMissing,
         bool whatIf,
         bool verbose,
@@ -63,6 +65,7 @@ namespace System.Data.SQLite
         Version vsVersion,
         Installer.Package package,
         object clientData,
+        bool wow64,
         bool throwOnMissing,
         bool whatIf,
         bool verbose,
@@ -229,6 +232,7 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Interactive Support Methods
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static DialogResult ShowMessage(
                 TracePriority tracePriority,
                 TraceCallback debugCallback,
@@ -1371,6 +1375,7 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Static Methods
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static MockRegistryKey OpenSubKey(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1403,6 +1408,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static MockRegistryKey CreateSubKey(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1455,6 +1461,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static void DeleteSubKey(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1481,6 +1488,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static void DeleteSubKeyTree(
                 MockRegistryKey rootKey,
                 string subKeyName,
@@ -1506,6 +1514,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static string[] GetSubKeyNames(
                 MockRegistryKey key,
                 bool whatIf,
@@ -1525,6 +1534,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static object GetValue(
                 MockRegistryKey key,
                 string name,
@@ -1548,6 +1558,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static void SetValue(
                 MockRegistryKey key,
                 string name,
@@ -1574,6 +1585,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static void DeleteValue(
                 MockRegistryKey key,
                 string name,
@@ -1759,6 +1771,7 @@ namespace System.Data.SQLite
                 TracePriority debugPriority,
                 TracePriority tracePriority,
                 bool install,
+                bool wow64,
                 bool noRuntimeVersion,
                 bool noDesktop,
                 bool noCompact,
@@ -1788,6 +1801,7 @@ namespace System.Data.SQLite
                 this.debugPriority = debugPriority;
                 this.tracePriority = tracePriority;
                 this.install = install;
+                this.wow64 = wow64;
                 this.noRuntimeVersion = noRuntimeVersion;
                 this.noDesktop = noDesktop;
                 this.noCompact = noCompact;
@@ -1952,12 +1966,13 @@ namespace System.Data.SQLite
                     TraceOps.DebugFormat, TraceOps.TraceFormat,
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, true, false, false, false, false,
-                    false, false, false, false, false, false, true, true,
-                    false, false, false);
+                    false, false, false, false, false, false, false, true,
+                    true, false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static bool FromArgs(
                 string[] args,
                 bool strict,
@@ -2546,6 +2561,27 @@ namespace System.Data.SQLite
 
                             configuration.whatIf = (bool)value;
                         }
+                        else if (MatchOption(newArg, "wow64"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.wow64 = (bool)value;
+                        }
                         else
                         {
                             error = TraceOps.DebugAndTrace(
@@ -2574,6 +2610,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static bool Process(
                 string[] args,
                 Configuration configuration,
@@ -2731,6 +2768,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public static bool CheckRuntimeVersion(
                 Configuration configuration,
                 bool strict,
@@ -2923,6 +2961,10 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "Wow64", ForDisplay(wow64)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "NoRuntimeVersion", ForDisplay(noRuntimeVersion)),
                         traceCategory);
 
@@ -3107,6 +3149,15 @@ namespace System.Data.SQLite
             {
                 get { return install; }
                 set { install = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool wow64;
+            public bool Wow64
+            {
+                get { return wow64; }
+                set { wow64 = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3359,12 +3410,26 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static readonly string VsIdFormat = "B";
+        private const string RootKeyName = "Software";
+        private const string Wow64SubKeyName = "Wow6432Node";
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static readonly string FrameworkKeyName =
-            "Software\\Microsoft\\.NETFramework";
+        //
+        // NOTE: The .NET Framework has both 32-bit and 64-bit editions.
+        //
+        private static readonly bool NetFxIs32BitOnly = false;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        //
+        // NOTE: For now, Visual Studio is always a 32-bit application.
+        //
+        private static readonly bool VsIs32BitOnly = true;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static readonly string VsIdFormat = "B";
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -3430,6 +3495,33 @@ namespace System.Data.SQLite
             TraceOps.TraceCore(String.Format(
                 TraceOps.TraceFormat, TraceOps.NextTraceId(),
                 TraceOps.TimeStamp(DateTime.UtcNow), message), category);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Generic Platform Handling
+        private static bool Is64BitProcess()
+        {
+            //
+            // NOTE: Returns true if the current process is 64-bit.  If this
+            //       is true, we *know* that we must be running on a 64-bit
+            //       operating system as well.  However, if this is false, we
+            //       do not necessarily know that we are running on a 32-bit
+            //       operating system, due to WoW64 (Win32-on-Win64), etc.
+            //
+            return (IntPtr.Size == sizeof(long)); // NOTE: Pointer is 64-bits?
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static string GetRootKeyName(
+            bool wow64
+            )
+        {
+            return String.Format("{0}{1}", RootKeyName,
+                wow64 && Is64BitProcess() ?
+                    "\\" + Wow64SubKeyName : String.Empty);
         }
         #endregion
 
@@ -3540,6 +3632,33 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region .NET Framework Handling
+        private static string GetFrameworkRootKeyName(
+            bool wow64
+            )
+        {
+            return String.Format("{0}\\Microsoft\\.NETFramework",
+                GetRootKeyName(wow64));
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static string GetFrameworkKeyName(
+            string frameworkName,
+            Version frameworkVersion,
+            string platformName,
+            bool wow64
+            )
+        {
+            string format = !String.IsNullOrEmpty(platformName) ?
+                "{0}\\Microsoft\\{1}\\v{2}\\{3}" :
+                "{0}\\Microsoft\\{1}\\v{2}";
+
+            return String.Format(format, GetRootKeyName(wow64),
+                frameworkName, frameworkVersion, platformName);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static string GetImageRuntimeVersion(
             string fileName
             )
@@ -3565,12 +3684,14 @@ namespace System.Data.SQLite
         private static string GetFrameworkDirectory(
             MockRegistryKey rootKey,
             Version frameworkVersion,
+            bool wow64,
             bool whatIf,
             bool verbose
             )
         {
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
-                    rootKey, FrameworkKeyName, false, whatIf, verbose))
+                    rootKey, GetFrameworkRootKeyName(wow64), false,
+                    whatIf, verbose))
             {
                 if (key == null)
                     return null;
@@ -3673,16 +3794,13 @@ namespace System.Data.SQLite
             string frameworkName,
             Version frameworkVersion,
             string platformName,
+            bool wow64,
             bool whatIf,
             bool verbose
             )
         {
-            string format = !String.IsNullOrEmpty(platformName) ?
-                "Software\\Microsoft\\{0}\\v{1}\\{2}" :
-                "Software\\Microsoft\\{0}\\v{1}";
-
-            string keyName = String.Format(
-                format, frameworkName, frameworkVersion, platformName);
+            string keyName = GetFrameworkKeyName(
+                frameworkName, frameworkVersion, platformName, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -3694,7 +3812,7 @@ namespace System.Data.SQLite
                     return true;
 
                 string directory = GetFrameworkDirectory(
-                    rootKey, frameworkVersion, whatIf, verbose);
+                    rootKey, frameworkVersion, wow64, whatIf, verbose);
 
                 if (String.IsNullOrEmpty(directory))
                     return false;
@@ -3708,6 +3826,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool ForEachFrameworkConfig(
             MockRegistry registry,
             FrameworkList frameworkList,
@@ -3718,6 +3837,7 @@ namespace System.Data.SQLite
             string typeName,
             AssemblyName assemblyName,
             object clientData,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -3819,7 +3939,7 @@ namespace System.Data.SQLite
 
                     if (!HaveFramework(
                             rootKey, frameworkName, frameworkVersion,
-                            platformName, whatIf, verbose))
+                            platformName, wow64, whatIf, verbose))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback,
@@ -3833,7 +3953,7 @@ namespace System.Data.SQLite
                         continue;
 
                     string directory = GetFrameworkDirectory(
-                        rootKey, frameworkVersion, whatIf, verbose);
+                        rootKey, frameworkVersion, wow64, whatIf, verbose);
 
                     if (String.IsNullOrEmpty(directory))
                     {
@@ -3876,8 +3996,8 @@ namespace System.Data.SQLite
 
                     if (!callback(
                             fileName, invariant, name, description, typeName,
-                            assemblyName, clientData, throwOnMissing, whatIf,
-                            verbose, ref localSaved, ref error))
+                            assemblyName, clientData, wow64, throwOnMissing,
+                            whatIf, verbose, ref localSaved, ref error))
                     {
                         return false;
                     }
@@ -3901,11 +4021,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool ForEachFrameworkRegistry(
             MockRegistry registry,
             FrameworkList frameworkList,
             FrameworkRegistryCallback callback,
             object clientData,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -3999,7 +4121,7 @@ namespace System.Data.SQLite
 
                     if (!HaveFramework(
                             rootKey, frameworkName, frameworkVersion,
-                            platformName, whatIf, verbose))
+                            platformName, wow64, whatIf, verbose))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback,
@@ -4014,7 +4136,7 @@ namespace System.Data.SQLite
 
                     if (!callback(
                             rootKey, frameworkName, frameworkVersion,
-                            platformName, clientData, throwOnMissing,
+                            platformName, clientData, wow64, throwOnMissing,
                             whatIf, verbose, ref error))
                     {
                         return false;
@@ -4060,6 +4182,7 @@ namespace System.Data.SQLite
         private static bool HaveVsVersion(
             MockRegistryKey rootKey,
             Version vsVersion,
+            bool wow64,
             bool whatIf,
             bool verbose
             )
@@ -4067,8 +4190,7 @@ namespace System.Data.SQLite
             if (vsVersion == null)
                 return false;
 
-            string format = "Software\\Microsoft\\VisualStudio\\{0}";
-            string keyName = String.Format(format, vsVersion);
+            string keyName = GetVsKeyName(vsVersion, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -4096,12 +4218,14 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool ForEachVsVersionRegistry(
             MockRegistry registry,
             VsList vsList,
             VisualStudioRegistryCallback callback,
             Package package,
             object clientData,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -4148,7 +4272,7 @@ namespace System.Data.SQLite
                     "vsVersion = {0}", ForDisplay(vsVersion)),
                     traceCategory);
 
-                if (!HaveVsVersion(rootKey, vsVersion, whatIf, verbose))
+                if (!HaveVsVersion(rootKey, vsVersion, wow64, whatIf, verbose))
                 {
                     TraceOps.DebugAndTrace(TracePriority.Low,
                         debugCallback, traceCallback,
@@ -4162,7 +4286,7 @@ namespace System.Data.SQLite
                     continue;
 
                 if (!callback(
-                        rootKey, vsVersion, package, clientData,
+                        rootKey, vsVersion, package, clientData, wow64,
                         throwOnMissing, whatIf, verbose, ref error))
                 {
                     return false;
@@ -4176,6 +4300,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Configuration File Handling
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool AddDbProviderFactory(
             string fileName,
             string invariant,
@@ -4281,6 +4406,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool RemoveDbProviderFactory(
             string fileName,
             string invariant,
@@ -4341,6 +4467,7 @@ namespace System.Data.SQLite
             string typeName,
             AssemblyName assemblyName,
             object clientData,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -4380,15 +4507,21 @@ namespace System.Data.SQLite
         private static string GetAssemblyFoldersKeyName(
             string frameworkName,
             Version frameworkVersion,
-            string platformName
+            string platformName,
+            bool wow64
             )
         {
+            //
+            // NOTE: This registry key appears to always be 32-bit only
+            //       (i.e. probably because it is only used by Visual
+            //       Studio, which is currently always 32-bit only).
+            //
             string format = !String.IsNullOrEmpty(platformName) ?
-                "Software\\Microsoft\\{0}\\v{1}\\{2}\\AssemblyFoldersEx" :
-                "Software\\Microsoft\\{0}\\v{1}\\AssemblyFoldersEx";
+                "{0}\\Microsoft\\{1}\\v{2}\\{3}\\AssemblyFoldersEx" :
+                "{0}\\Microsoft\\{1}\\v{2}\\AssemblyFoldersEx";
 
-            return String.Format(format, frameworkName, frameworkVersion,
-                platformName);
+            return String.Format(format, GetRootKeyName(wow64),
+                frameworkName, frameworkVersion, platformName);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -4400,13 +4533,14 @@ namespace System.Data.SQLite
             string platformName,
             string subKeyName,
             string directory,
+            bool wow64,
             bool whatIf,
             bool verbose,
             ref string error
             )
         {
             string keyName = GetAssemblyFoldersKeyName(
-                frameworkName, frameworkVersion, platformName);
+                frameworkName, frameworkVersion, platformName, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, true, whatIf, verbose))
@@ -4448,6 +4582,7 @@ namespace System.Data.SQLite
             Version frameworkVersion,
             string platformName,
             string subKeyName,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -4455,7 +4590,7 @@ namespace System.Data.SQLite
             )
         {
             string keyName = GetAssemblyFoldersKeyName(
-                frameworkName, frameworkVersion, platformName);
+                frameworkName, frameworkVersion, platformName, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, true, whatIf, verbose))
@@ -4484,6 +4619,7 @@ namespace System.Data.SQLite
             Version frameworkVersion,
             string platformName,
             object clientData,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -4502,16 +4638,18 @@ namespace System.Data.SQLite
             {
                 return RemoveFromAssemblyFolders(
                     rootKey, frameworkName, frameworkVersion, platformName,
-                    LegacyProjectName, false, whatIf, verbose, ref error) &&
+                    LegacyProjectName, wow64, false, whatIf, verbose,
+                    ref error) &&
                 AddToAssemblyFolders(
                     rootKey, frameworkName, frameworkVersion, platformName,
-                    ProjectName, pair.X, whatIf, verbose, ref error);
+                    ProjectName, pair.X, wow64, whatIf, verbose, ref error);
             }
             else
             {
                 return RemoveFromAssemblyFolders(
                     rootKey, frameworkName, frameworkVersion, platformName,
-                    ProjectName, throwOnMissing, whatIf, verbose, ref error);
+                    ProjectName, wow64, throwOnMissing, whatIf, verbose,
+                    ref error);
             }
         }
         #endregion
@@ -4519,15 +4657,26 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Visual Studio Handling
+        private static string GetVsRootKeyName(
+            bool wow64
+            )
+        {
+            return String.Format("{0}\\Microsoft\\VisualStudio",
+                GetRootKeyName(wow64));
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static string GetVsKeyName(
-            Version vsVersion
+            Version vsVersion,
+            bool wow64
             )
         {
             if (vsVersion == null)
                 return null;
 
-            return String.Format("Software\\Microsoft\\VisualStudio\\{0}",
-                vsVersion);
+            return String.Format(
+                "{0}\\{1}", GetVsRootKeyName(wow64), vsVersion);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -4537,6 +4686,7 @@ namespace System.Data.SQLite
             MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
+            bool wow64,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4554,7 +4704,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion);
+            string keyName = GetVsKeyName(vsVersion, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -4616,6 +4766,7 @@ namespace System.Data.SQLite
             MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
+            bool wow64,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4633,7 +4784,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion);
+            string keyName = GetVsKeyName(vsVersion, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -4675,6 +4826,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             Package package,
             object clientData,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -4698,12 +4850,14 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsDataSource(
-                    rootKey, vsVersion, package, whatIf, verbose, ref error);
+                    rootKey, vsVersion, package, wow64, whatIf, verbose,
+                    ref error);
             }
             else
             {
                 return RemoveVsDataSource(
-                    rootKey, vsVersion, package, whatIf, verbose, ref error);
+                    rootKey, vsVersion, package, wow64, whatIf, verbose,
+                    ref error);
             }
         }
         #endregion
@@ -4716,6 +4870,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             Package package,
             string fileName,
+            bool wow64,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4733,7 +4888,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion);
+            string keyName = GetVsKeyName(vsVersion, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -4827,6 +4982,7 @@ namespace System.Data.SQLite
             MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
+            bool wow64,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4838,7 +4994,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion);
+            string keyName = GetVsKeyName(vsVersion, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -4880,6 +5036,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             Package package,
             object clientData,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -4897,14 +5054,14 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsDataProvider(
-                    rootKey, vsVersion, package, pair.X,
-                    whatIf, verbose, ref error);
+                    rootKey, vsVersion, package, pair.X, wow64, whatIf,
+                    verbose, ref error);
             }
             else
             {
                 return RemoveVsDataProvider(
-                    rootKey, vsVersion, package, whatIf,
-                    verbose, ref error);
+                    rootKey, vsVersion, package, wow64, whatIf, verbose,
+                    ref error);
             }
         }
         #endregion
@@ -4944,6 +5101,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             Package package,
             string fileName,
+            bool wow64,
             bool whatIf,
             bool verbose,
             ref string error
@@ -4961,7 +5119,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion);
+            string keyName = GetVsKeyName(vsVersion, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -5114,6 +5272,7 @@ namespace System.Data.SQLite
             MockRegistryKey rootKey,
             Version vsVersion,
             Package package,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -5132,7 +5291,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion);
+            string keyName = GetVsKeyName(vsVersion, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -5208,6 +5367,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             Package package,
             object clientData,
+            bool wow64,
             bool throwOnMissing,
             bool whatIf,
             bool verbose,
@@ -5225,14 +5385,14 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsPackage(
-                    rootKey, vsVersion, package, pair.X, whatIf, verbose,
-                    ref error);
+                    rootKey, vsVersion, package, pair.X, wow64, whatIf,
+                    verbose, ref error);
             }
             else
             {
                 return RemoveVsPackage(
-                    rootKey, vsVersion, package, throwOnMissing, whatIf,
-                    verbose, ref error);
+                    rootKey, vsVersion, package, wow64, throwOnMissing,
+                    whatIf, verbose, ref error);
             }
         }
         #endregion
@@ -5241,6 +5401,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Application Entry Point
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static int Main(
             string[] args
             )
@@ -5384,7 +5545,9 @@ namespace System.Data.SQLite
                     {
                         if (!ForEachFrameworkRegistry(registry,
                                 frameworkList, ProcessAssemblyFolders,
-                                directoryData, configuration.ThrowOnMissing,
+                                directoryData,
+                                NetFxIs32BitOnly || configuration.Wow64,
+                                configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
                                 ref error))
                         {
@@ -5413,8 +5576,9 @@ namespace System.Data.SQLite
                         if (!ForEachFrameworkConfig(registry,
                                 frameworkList, ProcessDbProviderFactory,
                                 InvariantName, ProviderName, Description,
-                                FactoryTypeName, assemblyName,
-                                directoryData, configuration.ThrowOnMissing,
+                                FactoryTypeName, assemblyName, directoryData,
+                                NetFxIs32BitOnly || configuration.Wow64,
+                                configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
                                 ref saved, ref error))
                         {
@@ -5440,7 +5604,9 @@ namespace System.Data.SQLite
                     {
                         if (!ForEachVsVersionRegistry(registry,
                                 vsList, ProcessVsPackage, package,
-                                fileNameData, configuration.ThrowOnMissing,
+                                fileNameData,
+                                VsIs32BitOnly || configuration.Wow64,
+                                configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
                                 ref error))
                         {
@@ -5466,7 +5632,9 @@ namespace System.Data.SQLite
                     {
                         if (!ForEachVsVersionRegistry(registry,
                                 vsList, ProcessVsDataSource, package,
-                                fileNameData, configuration.ThrowOnMissing,
+                                fileNameData,
+                                VsIs32BitOnly || configuration.Wow64,
+                                configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
                                 ref error))
                         {
@@ -5492,7 +5660,9 @@ namespace System.Data.SQLite
                     {
                         if (!ForEachVsVersionRegistry(registry,
                                 vsList, ProcessVsDataProvider, package,
-                                fileNameData, configuration.ThrowOnMissing,
+                                fileNameData,
+                                VsIs32BitOnly || configuration.Wow64,
+                                configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
                                 ref error))
                         {
