@@ -39,9 +39,8 @@
     etc.
     <br />
     <font color="red">
-      Currently not included.  We are still updating the design-time support
-      installer.  Due to Visual Studio licensing restrictions, the Express
-      Editions can no longer be supported.
+      Due to Visual Studio licensing restrictions, the Express Editions can no
+      longer be supported.
     </font>
   </li>
 

@@ -77,7 +77,7 @@
         database engine without omission. Here's a brief summary:</p>
       <UL>
         <LI>
-        Written from scratch on VS2005/2008 specifically for ADO.NET, implenting all the
+        Written from scratch on Visual Studio 2008 specifically for ADO.NET, implenting all the
         base classes and features recently introduced in the framework, including automatic
         transaction enlistment.<li>Supports the Full and Compact .NET Framework, as well as
           native C/C++ development.&nbsp; 100% binary compatible with the original sqlite3.dll.</li>
@@ -90,15 +90,22 @@
           runs queries faster, and has a smaller database file size as well. </li>
         <li>Encrypted database support.&nbsp; Encrypted databases are fully encrypted and
           support both binary and cleartext password types. </li>
-        <li>Visual Studio 2005/2008 Design-Time Support.&nbsp; You can add a SQLite 
+        <li>Visual Studio 2005/2008/2010 Design-Time Support.&nbsp; You can add a SQLite 
         database to the Servers list, design queries with the Query Designer, 
         drag-and-drop tables onto a Typed DataSet, etc.</li>
             <li>Full SQLite schema editing inside Visual Studio.&nbsp; You can create/edit 
               tables, views, triggers, indexes, check constraints and foreign keys. </li>
         <li>
-        Single file redistributable (except Compact Framework).&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
+        Available as a single file redistributable (except Compact Framework).&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
         are combined into one multi-module assembly. </li>
-        <li>Binaries included for Itanium, x64, x86 and ARM processors. </li>
+        <li>Also available as separate native and managed assemblies and optionally with the Visual C++ Runtime statically linked. </li>
+        <li>
+          Binaries included for Itanium, x64, x86 and ARM processors.
+          <br />
+          <font color="red">
+            Itanium processor support not currently included.
+          </font>
+        </li>
         <li>
         DbProviderFactory support. </li>
         <li>
@@ -134,17 +141,25 @@
       </UL>
       <br>
       <h1 class="heading">Distributing the Binaries (Desktop)</h1>
-      <p><b>System.Data.SQLite.DLL</b> is a mixed assembly signed with a strong name 
-        in case you want to add it to the Global Assembly Cache (GAC). This is the only DLL required to be redistributed with 
-        your SQLite.NET application(s).&nbsp; It 
-        comes in&nbsp;3
-        flavors: Win32, Itanium and x64 (AMD64).</p>
+      <p>When using the mixed-mode assembly, the <b>System.Data.SQLite.DLL</b> file
+        includes all the native and managed code. In that case, this is the only
+        DLL required to be redistributed with your SQLite.NET application(s).&nbsp;
+        When using separate native and managed assemblies, the
+        <b>System.Data.SQLite.DLL</b> file contains all the managed code and the
+        <b>SQLite.Interop.DLL</b> file contains all the native code.
+        The native code comes in&nbsp;3 flavors: Win32, Itanium and x64 (AMD64).
+        <br />
+        <font color="red">
+          Itanium processor support not currently included.
+        </font>
+      </p>
       <h1 class="heading">Distributing the Binaries (Compact Framework)</h1>
-      <p><b>System.Data.SQLite.DLL </b>and <b>SQLite.Interop.XXX.DLL</b> must be 
-        deployed on the Compact Framework.&nbsp; The XXX is the build number of the 
-        System.Data.SQLite library (e.g. &quot;078&quot;).&nbsp; SQLite.Interop.XXX is a fully 
-        native assembly compiled for the ARM processor, and System.Data.SQLite is the 
-        fully-managed Compact Framework assembly.</p>
+      <p>Both the <b>System.Data.SQLite.DLL </b>and <b>SQLite.Interop.XXX.DLL</b> files
+        must be deployed on the Compact Framework.&nbsp; The XXX is the build number of
+        the System.Data.SQLite library (e.g. &quot;078&quot;).&nbsp; The
+        <b>SQLite.Interop.XXX.DLL</b> file is a fully native assembly compiled for
+        the ARM processor, and System.Data.SQLite is the fully-managed Compact
+        Framework assembly.</p>
       <hr />
       <div id="footer">
         <p>
