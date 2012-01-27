@@ -3403,7 +3403,16 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        //
+        // NOTE: The .NET Framework has both 32-bit and 64-bit editions.
+        //
         private static readonly bool NetFxIs32BitOnly = false;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        //
+        // NOTE: For now, Visual Studio is always a 32-bit application.
+        //
         private static readonly bool VsIs32BitOnly = true;
 
         ///////////////////////////////////////////////////////////////////////
@@ -3480,7 +3489,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Generic Platform Handling
-        private static bool Is64Bit()
+        private static bool Is64BitProcess()
         {
             //
             // NOTE: Returns true if the current process is 64-bit.  If this
@@ -3489,7 +3498,7 @@ namespace System.Data.SQLite
             //       do not necessarily know that we are running on a 32-bit
             //       operating system, due to WoW64 (Win32-on-Win64), etc.
             //
-            return (IntPtr.Size == sizeof(long));
+            return (IntPtr.Size == sizeof(long)); // NOTE: Pointer is 64-bits?
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -3499,7 +3508,8 @@ namespace System.Data.SQLite
             )
         {
             return String.Format("{0}{1}", RootKeyName,
-                wow64 && Is64Bit() ? "\\" + Wow64SubKeyName : String.Empty);
+                wow64 && Is64BitProcess() ?
+                    "\\" + Wow64SubKeyName : String.Empty);
         }
         #endregion
 
@@ -5574,10 +5584,6 @@ namespace System.Data.SQLite
                     if (configuration.HasFlags(
                             InstallFlags.VsPackage, true))
                     {
-                        //
-                        // NOTE: For now, Visual Studio is always a 32-bit
-                        //       native application.
-                        //
                         if (!ForEachVsVersionRegistry(registry,
                                 vsList, ProcessVsPackage, package,
                                 fileNameData,
@@ -5606,10 +5612,6 @@ namespace System.Data.SQLite
                     if (configuration.HasFlags(
                             InstallFlags.VsDataSource, true))
                     {
-                        //
-                        // NOTE: For now, Visual Studio is always a 32-bit
-                        //       native application.
-                        //
                         if (!ForEachVsVersionRegistry(registry,
                                 vsList, ProcessVsDataSource, package,
                                 fileNameData,
@@ -5638,10 +5640,6 @@ namespace System.Data.SQLite
                     if (configuration.HasFlags(
                             InstallFlags.VsDataProvider, true))
                     {
-                        //
-                        // NOTE: For now, Visual Studio is always a 32-bit
-                        //       native application.
-                        //
                         if (!ForEachVsVersionRegistry(registry,
                                 vsList, ProcessVsDataProvider, package,
                                 fileNameData,
