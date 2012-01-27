@@ -232,6 +232,12 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
+    Replace the version numbers for the previous release in the local working
+    copy of the [./downloads.wiki | downloads page] with the new version numbers
+    for System.Data.SQLite and the SQLite core.
+  </li>
+
+  <li>
     Enter the following command to update the sizes and hashes on the downloads
     page based on all the built release packages:&nbsp;<b>tclsh.exe&nbsp;
     updateFileInfo.tcl</b><br /><i>This assumes that
