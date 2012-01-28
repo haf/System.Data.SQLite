@@ -4337,10 +4337,10 @@ namespace System.Data.SQLite
             document.PreserveWhitespace = true;
             document.Load(fileName);
 
-            XmlElement element = document.SelectSingleNode(String.Format(
-                XPathForAddElement, invariant)) as XmlElement;
+            XmlElement addElement = document.SelectSingleNode(
+                String.Format(XPathForAddElement, invariant)) as XmlElement;
 
-            if (element == null)
+            if (addElement == null)
             {
                 string[] elementNames = {
                         "system.data", "DbProviderFactories"
@@ -4351,56 +4351,56 @@ namespace System.Data.SQLite
 
                 foreach (string elementName in elementNames)
                 {
-                    element = previousElement.SelectSingleNode(
+                    addElement = previousElement.SelectSingleNode(
                         elementName) as XmlElement;
 
-                    if (element == null)
+                    if (addElement == null)
                     {
-                        element = document.CreateElement(
+                        addElement = document.CreateElement(
                             elementName, String.Empty);
 
-                        previousElement.AppendChild(element);
+                        previousElement.AppendChild(addElement);
                     }
 
-                    previousElement = element;
+                    previousElement = addElement;
                 }
 
-                element = document.CreateElement(
+                addElement = document.CreateElement(
                     "add", String.Empty);
 
-                previousElement.AppendChild(element);
+                previousElement.AppendChild(addElement);
 
                 dirty = true;
             }
 
-            if (!String.Equals(element.GetAttribute("name"),
+            if (!String.Equals(addElement.GetAttribute("name"),
                     name, StringComparison.InvariantCulture))
             {
-                element.SetAttribute("name", name);
+                addElement.SetAttribute("name", name);
                 dirty = true;
             }
 
-            if (!String.Equals(element.GetAttribute("invariant"),
+            if (!String.Equals(addElement.GetAttribute("invariant"),
                     invariant, StringComparison.InvariantCulture))
             {
-                element.SetAttribute("invariant", invariant);
+                addElement.SetAttribute("invariant", invariant);
                 dirty = true;
             }
 
-            if (!String.Equals(element.GetAttribute("description"),
+            if (!String.Equals(addElement.GetAttribute("description"),
                     description, StringComparison.InvariantCulture))
             {
-                element.SetAttribute("description", description);
+                addElement.SetAttribute("description", description);
                 dirty = true;
             }
 
             string fullTypeName = String.Format("{0}, {1}",
                 typeName, assemblyName);
 
-            if (!String.Equals(element.GetAttribute("type"),
+            if (!String.Equals(addElement.GetAttribute("type"),
                     fullTypeName, StringComparison.InvariantCulture))
             {
-                element.SetAttribute("type", fullTypeName);
+                addElement.SetAttribute("type", fullTypeName);
                 dirty = true;
             }
 
@@ -4409,7 +4409,7 @@ namespace System.Data.SQLite
                 if (verbose)
                     TraceOps.DebugAndTrace(TracePriority.Highest,
                         debugCallback, traceCallback, String.Format(
-                        "element = {0}", ForDisplay(element)),
+                        "addElement = {0}", ForDisplay(addElement)),
                         traceCategory);
 
                 if (!whatIf)
@@ -4439,21 +4439,21 @@ namespace System.Data.SQLite
             document.PreserveWhitespace = true;
             document.Load(fileName);
 
-            XmlElement element = document.SelectSingleNode(String.Format(
-                XPathForAddElement, invariant)) as XmlElement;
+            XmlElement addElement = document.SelectSingleNode(
+                String.Format(XPathForAddElement, invariant)) as XmlElement;
 
-            if (element != null)
+            if (addElement != null)
             {
-                element.ParentNode.RemoveChild(element);
+                addElement.ParentNode.RemoveChild(addElement);
                 dirty = true;
             }
 
-            element = document.SelectSingleNode(String.Format(
-                XPathForRemoveElement, invariant)) as XmlElement;
+            XmlElement removeElement = document.SelectSingleNode(
+                String.Format(XPathForRemoveElement, invariant)) as XmlElement;
 
-            if (element != null)
+            if (removeElement != null)
             {
-                element.ParentNode.RemoveChild(element);
+                removeElement.ParentNode.RemoveChild(removeElement);
                 dirty = true;
             }
 
@@ -4462,7 +4462,8 @@ namespace System.Data.SQLite
                 if (verbose)
                     TraceOps.DebugAndTrace(TracePriority.Highest,
                         debugCallback, traceCallback, String.Format(
-                        "element = {0}", ForDisplay(element)),
+                        "addElement = {0}, removeElement = {1}",
+                        ForDisplay(addElement), ForDisplay(removeElement)),
                         traceCategory);
 
                 if (!whatIf)
