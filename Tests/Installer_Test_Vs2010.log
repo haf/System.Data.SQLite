@@ -14,8 +14,8 @@ Installer.exe: #13: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", s
 Installer.exe: #14: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
 Installer.exe: #15: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework", writable = False
 Installer.exe: #16: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
-Installer.exe: #17: Installer.RemoveDbProviderFactory: element = <null>
-Installer.exe: #18: Installer.AddDbProviderFactory: element = <add name="SQLite Data Provider" invariant="System.Data.SQLite" description=".NET Framework Data Provider for SQLite" type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=[file version $systemDataSQLiteDllFile], Culture=neutral, PublicKeyToken=db937bc2d44ff139" />
+Installer.exe: #17: Installer.RemoveDbProviderFactory: addElement = <null>, removeElement = <null>
+Installer.exe: #18: Installer.AddDbProviderFactory: addElement = <add name="SQLite Data Provider" invariant="System.Data.SQLite" description=".NET Framework Data Provider for SQLite" type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=[file version $systemDataSQLiteDllFile], Culture=neutral, PublicKeyToken=db937bc2d44ff139" />
 Installer.exe: #19: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\10.0", writable = False
 Installer.exe: #20: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #21: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\10.0", writable = False

@@ -11,7 +11,7 @@ Installer.exe: #10: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", s
 Installer.exe: #11: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
 Installer.exe: #12: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework", writable = False
 Installer.exe: #13: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
-Installer.exe: #14: Installer.RemoveDbProviderFactory: element = <null>
+Installer.exe: #14: Installer.RemoveDbProviderFactory: addElement = <null>, removeElement = <null>
 Installer.exe: #15: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\9.0", writable = False
 Installer.exe: #16: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\9.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #17: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\9.0", writable = False
