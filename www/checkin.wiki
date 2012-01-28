@@ -2,13 +2,13 @@
 
 Before every check-in:
 
-  1.   <b>fossil diff</b> &rarr; no stray changes
+  1.   <b>fossil diff</b> &rarr; No stray changes.
 
-  2.   <b>fossil extra</b> &rarr; no unmanaged files need to be added.
+  2.   <b>fossil extra</b> &rarr; No unmanaged files need to be added.
 
   3.   The check-in will go onto the desired branch.
 
-  4.   "Autosync" is enabled &rarr;
+  4.   The &quot;autosync&quot; setting is enabled. &rarr;
        <ol>
        <li> The check-in will not cause a unintentional fork.
        <li> The local system clock is set correctly.
@@ -19,3 +19,7 @@ Before every check-in to <b>trunk</b>:
   5.   No compiler warnings on the development machine.
 
   6.   Changes will not cause problems on a future <b>bisect</b>.
+
+  7.   Build binaries as outlined on the [./build.wiki | build procedures] page.
+
+  8.   Run unit tests as outlined on the [./test.wiki | test procedures] page.
