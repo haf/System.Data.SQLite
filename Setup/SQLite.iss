@@ -18,6 +18,22 @@
 #define OutputConfiguration StringChange(StringChange(BaseConfiguration, "Debug", "setup"), "Release", "setup")
 #endif
 
+#if AppProcessor == "x86"
+#if Pos("NativeOnly", AppConfiguration) == 0
+#define VsFlags
+#else
+#define VsFlags "unchecked"
+#endif
+#endif
+
+#if Pos("NativeOnly", AppConfiguration) == 0
+#if AppProcessor == "x86"
+#define GacFlags
+#else
+#define GacFlags "unchecked"
+#endif
+#endif
+
 [Setup]
 AllowNoIcons=true
 
@@ -68,12 +84,12 @@ Name: Application\Test; Description: Test components.; Types: custom compact ful
 Components: Application\Core\MSIL Or Application\LINQ; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
 
 #if AppProcessor == "x86"
-Components: {#InstallerCondition}; Name: vs2008; Description: Install the designer components for Visual Studio 2008.; Check: CheckIsNetFx2Setup()
-Components: {#InstallerCondition}; Name: vs2010; Description: Install the designer components for Visual Studio 2010.; Check: CheckIsNetFx4Setup()
+Components: {#InstallerCondition}; Name: vs2008; Description: Install the designer components for Visual Studio 2008.; Flags: {#VsFlags}; Check: CheckIsNetFx2Setup()
+Components: {#InstallerCondition}; Name: vs2010; Description: Install the designer components for Visual Studio 2010.; Flags: {#VsFlags}; Check: CheckIsNetFx4Setup()
 #endif
 
 #if Pos("NativeOnly", AppConfiguration) == 0
-Components: Application\Core\MSIL Or Application\LINQ; Name: gac; Description: Install the assemblies into the global assembly cache.; Flags: unchecked; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
+Components: Application\Core\MSIL Or Application\LINQ; Name: gac; Description: Install the assemblies into the global assembly cache.; Flags: {#GacFlags}; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
 #endif
 
 [Run]
