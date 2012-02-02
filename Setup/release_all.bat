@@ -11,7 +11,7 @@
 
 SETLOCAL
 
-REM SET _ECHO=ECHO
+REM SET __ECHO=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -25,14 +25,14 @@ SET TOOLS=%TOOLS:~0,-1%
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% CALL "%TOOLS%\vsSp.bat"
+%__ECHO% CALL "%TOOLS%\vsSp.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not detect Visual Studio.
   GOTO errors
 )
 
-%_ECHO% CALL "%TOOLS%\set_common.bat"
+%__ECHO% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not set common variables.
@@ -60,7 +60,7 @@ IF NOT DEFINED YEARS (
 FOR %%C IN (%RELEASE_CONFIGURATIONS%) DO (
   FOR %%P IN (%PLATFORMS%) DO (
     FOR %%Y IN (%YEARS%) DO (
-      %_ECHO% CALL "%TOOLS%\release.bat" %%C %%P %%Y
+      %__ECHO% CALL "%TOOLS%\release.bat" %%C %%P %%Y
 
       IF ERRORLEVEL 1 (
         ECHO Could not build release archive for %%C/%%P/%%Y.
@@ -95,4 +95,4 @@ GOTO no_errors
   GOTO end_of_file
 
 :end_of_file
-%_ECHO% EXIT /B %ERRORLEVEL%
+%__ECHO% EXIT /B %ERRORLEVEL%

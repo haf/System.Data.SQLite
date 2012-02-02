@@ -11,7 +11,7 @@
 
 SETLOCAL
 
-REM SET _ECHO=ECHO
+REM SET __ECHO=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -44,14 +44,14 @@ SET TOOLS=%TOOLS:~0,-1%
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% CALL "%TOOLS%\vsSp.bat"
+%__ECHO% CALL "%TOOLS%\vsSp.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not detect Visual Studio.
   GOTO errors
 )
 
-%_ECHO% CALL "%TOOLS%\set_common.bat"
+%__ECHO% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not set common variables.
@@ -79,7 +79,7 @@ IF NOT DEFINED PLATFORM (
 
 %_VECHO% Platform = '%PLATFORM%'
 
-%_ECHO% PUSHD "%ROOT%"
+%__ECHO% PUSHD "%ROOT%"
 
 IF ERRORLEVEL 1 (
   ECHO Could not change directory to "%ROOT%".
@@ -88,7 +88,7 @@ IF ERRORLEVEL 1 (
 
 FOR %%Y IN (%YEARS%) DO (
   IF NOT DEFINED NOMANAGEDONLY (
-    %_ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}" -file Tests\all.eagle
+    %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}" -file Tests\all.eagle
 
     IF ERRORLEVEL 1 (
       ECHO Testing of "%%Y" managed-only assembly failed.
@@ -98,42 +98,42 @@ FOR %%Y IN (%YEARS%) DO (
 
   IF NOT DEFINED NOMIXEDMODE (
     IF NOT DEFINED NOXCOPY (
-      %_ECHO% XCOPY "bin\%%Y\Release\bin\test.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
+      %__ECHO% XCOPY "bin\%%Y\Release\bin\test.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
 
       IF ERRORLEVEL 1 (
         ECHO Failed to copy "bin\%%Y\Release\bin\test.*" to "bin\%%Y\%PLATFORM%\Release".
         GOTO errors
       )
 
-      %_ECHO% XCOPY "bin\%%Y\Release\bin\System.Data.SQLite.Linq.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
+      %__ECHO% XCOPY "bin\%%Y\Release\bin\System.Data.SQLite.Linq.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
 
       IF ERRORLEVEL 1 (
         ECHO Failed to copy "bin\%%Y\Release\bin\System.Data.SQLite.Linq.*" to "bin\%%Y\%PLATFORM%\Release".
         GOTO errors
       )
 
-      %_ECHO% XCOPY "bin\%%Y\Release\bin\testlinq.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
+      %__ECHO% XCOPY "bin\%%Y\Release\bin\testlinq.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
 
       IF ERRORLEVEL 1 (
         ECHO Failed to copy "bin\%%Y\Release\bin\testlinq.*" to "bin\%%Y\%PLATFORM%\Release".
         GOTO errors
       )
 
-      %_ECHO% XCOPY "bin\%%Y\Release\bin\northwindEF.db" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
+      %__ECHO% XCOPY "bin\%%Y\Release\bin\northwindEF.db" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
 
       IF ERRORLEVEL 1 (
         ECHO Failed to copy "bin\%%Y\Release\bin\northwindEF.db" to "bin\%%Y\%PLATFORM%\Release".
         GOTO errors
       )
 
-      %_ECHO% XCOPY "bin\%%Y\Release\bin\SQLite.Designer.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
+      %__ECHO% XCOPY "bin\%%Y\Release\bin\SQLite.Designer.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
 
       IF ERRORLEVEL 1 (
         ECHO Failed to copy "bin\%%Y\Release\bin\SQLite.Designer.*" to "bin\%%Y\%PLATFORM%\Release".
         GOTO errors
       )
 
-      %_ECHO% XCOPY "bin\%%Y\Release\bin\Installer.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
+      %__ECHO% XCOPY "bin\%%Y\Release\bin\Installer.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
 
       IF ERRORLEVEL 1 (
         ECHO Failed to copy "bin\%%Y\Release\bin\Installer.*" to "bin\%%Y\%PLATFORM%\Release".
@@ -141,7 +141,7 @@ FOR %%Y IN (%YEARS%) DO (
       )
     )
 
-    %_ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}" -initialize -runtimeOption native -file Tests\all.eagle
+    %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}" -initialize -runtimeOption native -file Tests\all.eagle
 
     IF ERRORLEVEL 1 (
       ECHO Testing of "%%Y" mixed-mode assembly failed.
@@ -150,7 +150,7 @@ FOR %%Y IN (%YEARS%) DO (
   )
 )
 
-%_ECHO% POPD
+%__ECHO% POPD
 
 IF ERRORLEVEL 1 (
   ECHO Could not restore directory.
@@ -187,4 +187,4 @@ GOTO no_errors
   GOTO end_of_file
 
 :end_of_file
-%_ECHO% EXIT /B %ERRORLEVEL%
+%__ECHO% EXIT /B %ERRORLEVEL%

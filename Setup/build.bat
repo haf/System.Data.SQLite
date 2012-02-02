@@ -11,7 +11,7 @@
 
 SETLOCAL
 
-REM SET _ECHO=ECHO
+REM SET __ECHO=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -54,7 +54,7 @@ IF EXIST "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat" (
   CALL :fn_ResetErrorLevel
 
   %_AECHO% Running "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat"...
-  %_ECHO% CALL "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat"
+  %__ECHO% CALL "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat"
 
   IF ERRORLEVEL 1 (
     ECHO File "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat" failed.
@@ -130,7 +130,7 @@ IF NOT EXIST "%FRAMEWORKDIR%" (
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% PUSHD "%ROOT%"
+%__ECHO% PUSHD "%ROOT%"
 
 IF ERRORLEVEL 1 (
   ECHO Could not change directory to "%ROOT%".
@@ -193,14 +193,14 @@ SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREF
 
 %_VECHO% Logging = '%LOGGING%'
 
-%_ECHO% MSBuild.exe "%SOLUTION%" "/target:%TARGET%" "/property:Configuration=%CONFIGURATION%" "/property:Platform=%PLATFORM%" %LOGGING% %MSBUILD_ARGS%
+%__ECHO% MSBuild.exe "%SOLUTION%" "/target:%TARGET%" "/property:Configuration=%CONFIGURATION%" "/property:Platform=%PLATFORM%" %LOGGING% %MSBUILD_ARGS%
 
 IF ERRORLEVEL 1 (
   ECHO Build failed.
   GOTO errors
 )
 
-%_ECHO% POPD
+%__ECHO% POPD
 
 IF ERRORLEVEL 1 (
   ECHO Could not restore directory.
@@ -212,8 +212,8 @@ GOTO no_errors
 :fn_UnquoteVariable
   SETLOCAL
   IF NOT DEFINED %1 GOTO :EOF
-  SET _ECHO_CMD=ECHO %%%1%%
-  FOR /F "delims=" %%V IN ('%_ECHO_CMD%') DO (
+  SET __ECHO_CMD=ECHO %%%1%%
+  FOR /F "delims=" %%V IN ('%__ECHO_CMD%') DO (
     SET VALUE=%%V
   )
   SET VALUE=%VALUE:"=%
@@ -257,4 +257,4 @@ GOTO no_errors
   GOTO end_of_file
 
 :end_of_file
-%_ECHO% EXIT /B %ERRORLEVEL%
+%__ECHO% EXIT /B %ERRORLEVEL%

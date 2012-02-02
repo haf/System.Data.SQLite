@@ -11,7 +11,7 @@
 
 SETLOCAL
 
-REM SET _ECHO=ECHO
+REM SET __ECHO=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -32,7 +32,7 @@ SET BASE_PLATFORM=PocketPC
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% CALL "%TOOLS%\build_all.bat"
+%__ECHO% CALL "%TOOLS%\build_all.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Failed to build PocketPC binaries.
@@ -68,4 +68,4 @@ IF ERRORLEVEL 1 (
   GOTO end_of_file
 
 :end_of_file
-%_ECHO% EXIT /B %ERRORLEVEL%
+%__ECHO% EXIT /B %ERRORLEVEL%

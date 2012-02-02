@@ -11,7 +11,7 @@
 
 SETLOCAL
 
-REM SET _ECHO=ECHO
+REM SET __ECHO=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -29,7 +29,7 @@ SET TOOLS=%TOOLS:~0,-1%
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% PUSHD "%ROOT%"
+%__ECHO% PUSHD "%ROOT%"
 
 IF ERRORLEVEL 1 (
   ECHO Could not change directory to "%ROOT%".
@@ -67,7 +67,7 @@ REM "
 CALL :fn_ResetErrorLevel
 
 IF NOT EXIST Setup\Output (
-  %_ECHO% MKDIR Setup\Output
+  %__ECHO% MKDIR Setup\Output
 
   IF ERRORLEVEL 1 (
     ECHO Could not create directory "Setup\Output".
@@ -75,14 +75,14 @@ IF NOT EXIST Setup\Output (
   )
 )
 
-%_ECHO% zip.exe -v -r Setup\Output\sqlite-netFx-source-%VERSION%.zip * -x @exclude_src.txt
+%__ECHO% zip.exe -v -r Setup\Output\sqlite-netFx-source-%VERSION%.zip * -x @exclude_src.txt
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive source files.
   GOTO errors
 )
 
-%_ECHO% POPD
+%__ECHO% POPD
 
 IF ERRORLEVEL 1 (
   ECHO Could not restore directory.
@@ -120,4 +120,4 @@ GOTO no_errors
   GOTO end_of_file
 
 :end_of_file
-%_ECHO% EXIT /B %ERRORLEVEL%
+%__ECHO% EXIT /B %ERRORLEVEL%

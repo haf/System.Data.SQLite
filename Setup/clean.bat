@@ -11,7 +11,7 @@
 
 SETLOCAL
 
-REM SET _ECHO=ECHO
+REM SET __ECHO=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -60,7 +60,7 @@ CALL :fn_ResetErrorLevel
 
 FOR %%D IN (%CLEANDIRS%) DO (
   IF EXIST "%SOURCE%\%%D" (
-    %_ECHO% RMDIR /S /Q "%SOURCE%\%%D"
+    %__ECHO% RMDIR /S /Q "%SOURCE%\%%D"
 
     IF ERRORLEVEL 1 (
       ECHO Could not remove directory "%SOURCE%\%%D".
@@ -77,7 +77,7 @@ FOR %%D IN (%CLEANDIRS%) DO (
 )
 
 IF EXIST "%SOURCE%\*.nupkg" (
-  %_ECHO% DEL /Q "%SOURCE%\*.nupkg"
+  %__ECHO% DEL /Q "%SOURCE%\*.nupkg"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%SOURCE%\*.nupkg".
@@ -93,7 +93,7 @@ IF EXIST "%SOURCE%\*.nupkg" (
 )
 
 IF EXIST "%SOURCE%\Doc\SQLite.NET.chw" (
-  %_ECHO% DEL /Q "%SOURCE%\Doc\SQLite.NET.chw"
+  %__ECHO% DEL /Q "%SOURCE%\Doc\SQLite.NET.chw"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%SOURCE%\Doc\SQLite.NET.chw".
@@ -109,7 +109,7 @@ IF EXIST "%SOURCE%\Doc\SQLite.NET.chw" (
 )
 
 IF EXIST "%SOURCE%\Externals\Eagle\bin\sqlite3.*" (
-  %_ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\sqlite3.*"
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\sqlite3.*"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\sqlite3.*".
@@ -125,7 +125,7 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\sqlite3.*" (
 )
 
 IF EXIST "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*" (
-  %_ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*"
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*".
@@ -141,7 +141,7 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*" (
 )
 
 IF EXIST "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.*" (
-  %_ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.*"
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.*"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.*".
@@ -157,7 +157,7 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.*" (
 )
 
 IF EXIST "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.Linq.*" (
-  %_ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.Linq.*"
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.Linq.*"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.Linq.*".
@@ -173,7 +173,7 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.Linq.*" (
 )
 
 IF EXIST "%TEMP%\EagleShell.exe.test.*.log" (
-  %_ECHO% DEL /Q "%TEMP%\EagleShell.exe.test.*.log"
+  %__ECHO% DEL /Q "%TEMP%\EagleShell.exe.test.*.log"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%TEMP%\EagleShell.exe.test.*.log".
@@ -189,7 +189,7 @@ IF EXIST "%TEMP%\EagleShell.exe.test.*.log" (
 )
 
 IF EXIST "%TEMP%\mono.exe.test.*.log" (
-  %_ECHO% DEL /Q "%TEMP%\mono.exe.test.*.log"
+  %__ECHO% DEL /Q "%TEMP%\mono.exe.test.*.log"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%TEMP%\mono.exe.test.*.log".
@@ -205,7 +205,7 @@ IF EXIST "%TEMP%\mono.exe.test.*.log" (
 )
 
 IF EXIST "%TEMP%\tclsh*.exe.test.*.log" (
-  %_ECHO% DEL /Q "%TEMP%\tclsh*.exe.test.*.log"
+  %__ECHO% DEL /Q "%TEMP%\tclsh*.exe.test.*.log"
 
   IF ERRORLEVEL 1 (
     ECHO Could not delete "%TEMP%\tclsh*.exe.test.*.log".
@@ -253,4 +253,4 @@ GOTO no_errors
   GOTO end_of_file
 
 :end_of_file
-%_ECHO% EXIT /B %ERRORLEVEL%
+%__ECHO% EXIT /B %ERRORLEVEL%

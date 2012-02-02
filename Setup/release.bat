@@ -11,7 +11,7 @@
 
 SETLOCAL
 
-REM SET _ECHO=ECHO
+REM SET __ECHO=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -82,7 +82,7 @@ IF NOT DEFINED TYPE (
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% CALL "%TOOLS%\set_common.bat"
+%__ECHO% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not set common variables.
@@ -110,7 +110,7 @@ SET TOOLS=%TOOLS:~0,-1%
 
 CALL :fn_ResetErrorLevel
 
-%_ECHO% PUSHD "%ROOT%"
+%__ECHO% PUSHD "%ROOT%"
 
 IF ERRORLEVEL 1 (
   ECHO Could not change directory to "%ROOT%".
@@ -148,7 +148,7 @@ REM "
 CALL :fn_ResetErrorLevel
 
 IF NOT EXIST Setup\Output (
-  %_ECHO% MKDIR Setup\Output
+  %__ECHO% MKDIR Setup\Output
 
   IF ERRORLEVEL 1 (
     ECHO Could not create directory "Setup\Output".
@@ -157,25 +157,25 @@ IF NOT EXIST Setup\Output (
 )
 
 IF DEFINED BASE_CONFIGURATIONSUFFIX (
-  %_ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%BASE_CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
+  %__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%BASE_CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
 ) ELSE (
-  %_ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
+  %__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
 )
 
 IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
   IF NOT DEFINED BASE_CONFIGURATIONSUFFIX (
-    %_ECHO% zip -v -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
+    %__ECHO% zip -v -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
   )
 )
 
-%_ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%%CONFIGURATIONSUFFIX%" -x @exclude_bin.txt
+%__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%%CONFIGURATIONSUFFIX%" -x @exclude_bin.txt
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive binary files.
   GOTO errors
 )
 
-%_ECHO% POPD
+%__ECHO% POPD
 
 IF ERRORLEVEL 1 (
   ECHO Could not restore directory.
@@ -186,8 +186,8 @@ GOTO no_errors
 
 :fn_SetVariable
   SETLOCAL
-  SET _ECHO_CMD=ECHO %%%2%%
-  FOR /F "delims=" %%V IN ('%_ECHO_CMD%') DO (
+  SET __ECHO_CMD=ECHO %%%2%%
+  FOR /F "delims=" %%V IN ('%__ECHO_CMD%') DO (
     SET VALUE=%%V
   )
   ENDLOCAL && (
@@ -198,8 +198,8 @@ GOTO no_errors
 :fn_UnquoteVariable
   SETLOCAL
   IF NOT DEFINED %1 GOTO :EOF
-  SET _ECHO_CMD=ECHO %%%1%%
-  FOR /F "delims=" %%V IN ('%_ECHO_CMD%') DO (
+  SET __ECHO_CMD=ECHO %%%1%%
+  FOR /F "delims=" %%V IN ('%__ECHO_CMD%') DO (
     SET VALUE=%%V
   )
   SET VALUE=%VALUE:"=%
@@ -236,4 +236,4 @@ GOTO no_errors
   GOTO end_of_file
 
 :end_of_file
-%_ECHO% EXIT /B %ERRORLEVEL%
+%__ECHO% EXIT /B %ERRORLEVEL%

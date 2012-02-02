@@ -11,7 +11,7 @@
 
 SETLOCAL
 
-REM SET _ECHO=ECHO
+REM SET __ECHO=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -42,7 +42,7 @@ SET PATH=%ProgramFiles%\Inno Setup 5;%PATH%
 
 %_VECHO% Path = '%PATH%'
 
-%_ECHO% ISCC.exe "%TOOLS%\SQLite.iss" "/dAppId=%APPID%" "/dAppPublicKey=%PUBLICKEY%" "/dAppURL=%URL%" "/dIsNetFx2=%ISNETFX2%" "/dVcRuntime=%VCRUNTIME%" "/dAppConfiguration=%CONFIGURATION%" "/dAppPlatform=%PLATFORM%" "/dAppProcessor=%PROCESSOR%" "/dFramework=%FRAMEWORK%" "/dYear=%YEAR%"
+%__ECHO% ISCC.exe "%TOOLS%\SQLite.iss" "/dAppId=%APPID%" "/dAppPublicKey=%PUBLICKEY%" "/dAppURL=%URL%" "/dIsNetFx2=%ISNETFX2%" "/dVcRuntime=%VCRUNTIME%" "/dAppConfiguration=%CONFIGURATION%" "/dAppPlatform=%PLATFORM%" "/dAppProcessor=%PROCESSOR%" "/dFramework=%FRAMEWORK%" "/dYear=%YEAR%"
 
 IF %ERRORLEVEL% NEQ 0 (
   ECHO Failed to compile setup.
@@ -53,8 +53,8 @@ GOTO no_errors
 
 :fn_SetVariable
   SETLOCAL
-  SET _ECHO_CMD=ECHO %%%2%%
-  FOR /F "delims=" %%V IN ('%_ECHO_CMD%') DO (
+  SET __ECHO_CMD=ECHO %%%2%%
+  FOR /F "delims=" %%V IN ('%__ECHO_CMD%') DO (
     SET VALUE=%%V
   )
   ENDLOCAL && (
@@ -85,4 +85,4 @@ GOTO no_errors
   GOTO end_of_file
 
 :end_of_file
-%_ECHO% EXIT /B %ERRORLEVEL%
+%__ECHO% EXIT /B %ERRORLEVEL%
