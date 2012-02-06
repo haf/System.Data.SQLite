@@ -379,6 +379,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return 30;
       }
     }
@@ -391,6 +392,7 @@ namespace System.Data.SQLite
     /// <returns></returns>
     public object Clone()
     {
+      CheckDisposed();
       return new SQLiteConnection(this);
     }
 
@@ -432,6 +434,7 @@ namespace System.Data.SQLite
     [Obsolete("Use one of the standard BeginTransaction methods, this one will be removed soon")]
     public SQLiteTransaction BeginTransaction(IsolationLevel isolationLevel, bool deferredLock)
     {
+      CheckDisposed();
       return (SQLiteTransaction)BeginDbTransaction(deferredLock == false ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted);
     }
 
@@ -445,6 +448,7 @@ namespace System.Data.SQLite
     [Obsolete("Use one of the standard BeginTransaction methods, this one will be removed soon")]
     public SQLiteTransaction BeginTransaction(bool deferredLock)
     {
+      CheckDisposed();
       return (SQLiteTransaction)BeginDbTransaction(deferredLock == false ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted);
     }
 
@@ -464,6 +468,7 @@ namespace System.Data.SQLite
     /// <returns>Returns a SQLiteTransaction object.</returns>
     public new SQLiteTransaction BeginTransaction(IsolationLevel isolationLevel)
     {
+      CheckDisposed();
       return (SQLiteTransaction)BeginDbTransaction(isolationLevel);
     }
 
@@ -473,6 +478,7 @@ namespace System.Data.SQLite
     /// <returns>Returns a SQLiteTransaction object.</returns>
     public new SQLiteTransaction BeginTransaction()
     {
+      CheckDisposed();
       return (SQLiteTransaction)BeginDbTransaction(_defaultIsolation);
     }
 
@@ -500,6 +506,7 @@ namespace System.Data.SQLite
     /// <param name="databaseName"></param>
     public override void ChangeDatabase(string databaseName)
     {
+      CheckDisposed();
       throw new NotImplementedException();
     }
 
@@ -508,6 +515,8 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Close()
     {
+      CheckDisposed();
+
       if (_sql != null)
       {
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -694,10 +703,13 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return _connectionString;
       }
       set
       {
+        CheckDisposed();
+
         if (value == null)
           throw new ArgumentNullException();
 
@@ -714,6 +726,7 @@ namespace System.Data.SQLite
     /// <returns>Returns an instantiated SQLiteCommand object already assigned to this connection.</returns>
     public new SQLiteCommand CreateCommand()
     {
+      CheckDisposed();
       return new SQLiteCommand(this);
     }
 
@@ -736,6 +749,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return _dataSource;
       }
     }
@@ -750,6 +764,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return "main";
       }
     }
@@ -803,6 +818,8 @@ namespace System.Data.SQLite
     /// <param name="transaction">The distributed transaction to enlist in</param>
     public override void EnlistTransaction(System.Transactions.Transaction transaction)
     {
+      CheckDisposed();
+
       if (_enlistment != null && transaction == _enlistment._scope)
         return;
       else if (_enlistment != null)
@@ -838,6 +855,8 @@ namespace System.Data.SQLite
     /// </summary>
     public override void Open()
     {
+      CheckDisposed();
+
       if (_connectionState != ConnectionState.Closed)
         throw new InvalidOperationException();
 
@@ -1024,14 +1043,23 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Opens the connection using the parameters found in the <see cref="ConnectionString">ConnectionString</see> and then returns it.
+    /// </summary>
+    /// <returns>The current connection object.</returns>
+    public SQLiteConnection OpenAndReturn()
+    {
+        CheckDisposed(); Open(); return this;
+    }
+
+    /// <summary>
     /// Gets/sets the default command timeout for newly-created commands.  This is especially useful for 
     /// commands used internally such as inside a SQLiteTransaction, where setting the timeout is not possible.
     /// This can also be set in the ConnectionString with "Default Timeout"
     /// </summary>
     public int DefaultTimeout
     {
-      get { return _defaultTimeout; }
-      set { _defaultTimeout = value; }
+      get { CheckDisposed(); return _defaultTimeout; }
+      set { CheckDisposed(); _defaultTimeout = value; }
     }
 
     /// <summary>
@@ -1040,8 +1068,8 @@ namespace System.Data.SQLite
     /// </summary>
     public SQLiteConnectionFlags Flags
     {
-      get { return _flags; }
-      set { _flags = value; }
+      get { CheckDisposed(); return _flags; }
+      set { CheckDisposed(); _flags = value; }
     }
 
     /// <summary>
@@ -1054,6 +1082,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return SQLiteVersion;
         //if (_connectionState != ConnectionState.Open)
         //  throw new InvalidOperationException();
@@ -1072,6 +1101,8 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
+
         if (_sql == null)
           throw new InvalidOperationException("Database connection not valid for getting last insert rowid.");
 
@@ -1090,6 +1121,8 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
+
         if (_sql == null)
           throw new InvalidOperationException("Database connection not valid for getting number of changes.");
 
@@ -1107,6 +1140,8 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
+
         if (_sql == null)
           throw new InvalidOperationException("Database connection not valid for getting memory used.");
 
@@ -1124,6 +1159,8 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
+
         if (_sql == null)
           throw new InvalidOperationException("Database connection not valid for getting maximum memory used.");
 
@@ -1159,6 +1196,7 @@ namespace System.Data.SQLite
     {
       get
       {
+        CheckDisposed();
         return _connectionState;
       }
     }
@@ -1166,6 +1204,8 @@ namespace System.Data.SQLite
     /// Passes a shutdown request off to SQLite.
     public int Shutdown()
     {
+        CheckDisposed();
+
         // make sure we have an instance of the base class
         if (_sql == null)
         {
@@ -1191,11 +1231,15 @@ namespace System.Data.SQLite
     /// Enables or disabled extended result codes returned by SQLite
     public void SetExtendedResultCodes(bool bOnOff)
     {
+      CheckDisposed();
+
       if (_sql != null) _sql.SetExtendedResultCodes(bOnOff);
     }
     /// Enables or disabled extended result codes returned by SQLite
     public int ResultCode()
     {
+      CheckDisposed();
+
       if (_sql == null) 
         throw new InvalidOperationException("Database connection not valid for getting result code.");
       return _sql.ResultCode();
@@ -1203,6 +1247,8 @@ namespace System.Data.SQLite
     /// Enables or disabled extended result codes returned by SQLite
     public int ExtendedResultCode()
     {
+      CheckDisposed();
+
       if (_sql == null)
         throw new InvalidOperationException("Database connection not valid for getting extended result code.");
       return _sql.ExtendedResultCode();
@@ -1211,6 +1257,11 @@ namespace System.Data.SQLite
     /// Add a log message via the SQLite sqlite3_log interface.
     public void LogMessage(int iErrCode, string zMessage)
     {
+      CheckDisposed();
+
+      if (_sql == null)
+          throw new InvalidOperationException("Database connection not valid for logging message.");
+
       _sql.LogMessage(iErrCode, zMessage);
     }
 
@@ -1224,6 +1275,8 @@ namespace System.Data.SQLite
     /// <param name="newPassword">The new password to assign to the database</param>
     public void ChangePassword(string newPassword)
     {
+      CheckDisposed();
+
       ChangePassword(String.IsNullOrEmpty(newPassword) ? null : System.Text.UTF8Encoding.UTF8.GetBytes(newPassword));
     }
 
@@ -1237,6 +1290,8 @@ namespace System.Data.SQLite
     /// <param name="newPassword">The new password to assign to the database</param>
     public void ChangePassword(byte[] newPassword)
     {
+      CheckDisposed();
+
       if (_connectionState != ConnectionState.Open)
         throw new InvalidOperationException("Database must be opened before changing the password.");
 
@@ -1250,6 +1305,8 @@ namespace System.Data.SQLite
     /// <param name="databasePassword">The password for the database</param>
     public void SetPassword(string databasePassword)
     {
+      CheckDisposed();
+
       SetPassword(String.IsNullOrEmpty(databasePassword) ? null : System.Text.UTF8Encoding.UTF8.GetBytes(databasePassword));
     }
 
@@ -1260,6 +1317,8 @@ namespace System.Data.SQLite
     /// <param name="databasePassword">The password for the database</param>
     public void SetPassword(byte[] databasePassword)
     {
+      CheckDisposed();
+
       if (_connectionState != ConnectionState.Closed)
         throw new InvalidOperationException("Password can only be set before the database is opened.");
 
@@ -1282,6 +1341,8 @@ namespace System.Data.SQLite
     /// <returns>Zero for success, non-zero for error.</returns>
     public int SetAvRetry(ref int count, ref int interval)
     {
+        CheckDisposed();
+
         if (_connectionState != ConnectionState.Open)
             throw new InvalidOperationException(
                 "Database must be opened before changing the AV retry parameters.");
@@ -1391,6 +1452,7 @@ namespace System.Data.SQLite
     /// <returns>A DataTable of the MetaDataCollections schema</returns>
     public override DataTable GetSchema()
     {
+      CheckDisposed();
       return GetSchema("MetaDataCollections", null);
     }
 
@@ -1401,6 +1463,7 @@ namespace System.Data.SQLite
     /// <returns>A DataTable of the specified collection</returns>
     public override DataTable GetSchema(string collectionName)
     {
+      CheckDisposed();
       return GetSchema(collectionName, new string[0]);
     }
 
@@ -1412,6 +1475,8 @@ namespace System.Data.SQLite
     /// <returns>A DataTable of the specified collection</returns>
     public override DataTable GetSchema(string collectionName, string[] restrictionValues)
     {
+      CheckDisposed();
+
       if (_connectionState != ConnectionState.Open)
         throw new InvalidOperationException();
 
@@ -2454,6 +2519,8 @@ namespace System.Data.SQLite
     {
       add
       {
+        CheckDisposed();
+
         if (_updateHandler == null)
         {
           _updateCallback = new SQLiteUpdateCallback(UpdateCallback);
@@ -2463,6 +2530,8 @@ namespace System.Data.SQLite
       }
       remove
       {
+        CheckDisposed();
+
         _updateHandler -= value;
         if (_updateHandler == null)
         {
@@ -2489,6 +2558,8 @@ namespace System.Data.SQLite
     {
       add
       {
+        CheckDisposed();
+
         if (_commitHandler == null)
         {
           _commitCallback = new SQLiteCommitCallback(CommitCallback);
@@ -2498,6 +2569,8 @@ namespace System.Data.SQLite
       }
       remove
       {
+        CheckDisposed();
+
         _commitHandler -= value;
         if (_commitHandler == null)
         {
@@ -2515,6 +2588,8 @@ namespace System.Data.SQLite
     {
       add
       {
+        CheckDisposed();
+
         if (_traceHandler == null)
         {
           _traceCallback = new SQLiteTraceCallback(TraceCallback);
@@ -2524,6 +2599,8 @@ namespace System.Data.SQLite
       }
       remove
       {
+        CheckDisposed();
+
         _traceHandler -= value;
         if (_traceHandler == null)
         {
@@ -2547,6 +2624,8 @@ namespace System.Data.SQLite
     {
       add
       {
+        CheckDisposed();
+
         if (_rollbackHandler == null)
         {
           _rollbackCallback = new SQLiteRollbackCallback(RollbackCallback);
@@ -2556,6 +2635,8 @@ namespace System.Data.SQLite
       }
       remove
       {
+        CheckDisposed();
+
         _rollbackHandler -= value;
         if (_rollbackHandler == null)
         {
