@@ -5163,6 +5163,25 @@ namespace System.Data.SQLite
                         return false;
                     }
 
+                    //
+                    // NOTE: *WARNING* Changing any of these values will likely
+                    //       require a new "package load key" (PLK) to be
+                    //       generated in order to properly support loading the
+                    //       package into Visual Studio 2008 and earlier without
+                    //       the matching Visual Studio SDK being installed.
+                    //       Please refer to the "SQLite.Designer\plk.txt" file
+                    //       for the existing official values and update them if
+                    //       necessary.  Also, the newly generated package load
+                    //       key itself, which is a 128 character alphanumeric
+                    //       string, must be placed in the resource string named
+                    //       "400" in the "SQLite.Designer\VSPackage.resx" file
+                    //       and then the designer assembly itself must be
+                    //       recompiled.  As of this writing (in February 2012),
+                    //       the following URL is the proper place to generate
+                    //       package load keys:
+                    //
+                    //       http://msdn.microsoft.com/en-us/vstudio/cc655795
+                    //
                     using (MockRegistryKey packageKey =
                             RegistryHelper.CreateSubKey(subKey,
                             package.PackageId.ToString(VsIdFormat), whatIf,

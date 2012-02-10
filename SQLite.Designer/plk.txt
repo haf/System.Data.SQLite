@@ -1,0 +1,24 @@
+Package Load Key (PLK)
+
+  RZE1PAAIMRZRE2CKM3CIRRIREIJQR1PTAEHTRHKTCPP1KKRRJQK9CTM9ZHMRETI9
+  E9J8REKEA1MER9PDKQDIH8HMRRH2DIACHIP1KHK2IAZKM8R0EZRTKDHADII9ICCH
+
+Company Name
+
+  http://system.data.sqlite.org/
+
+Package Name
+
+  System.Data.SQLite Designer Package
+
+Package GUID
+
+  {dcbe6c8d-0e57-4099-a183-98ff74c64d9c}
+
+PLK Version
+
+  1.0
+
+Min. Visual Studio Version
+
+  Visual Studio 2005
