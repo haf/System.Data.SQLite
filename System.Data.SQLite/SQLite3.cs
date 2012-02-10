@@ -371,7 +371,10 @@ namespace System.Data.SQLite
       if ((cnn != null) &&
           ((cnn.Flags & SQLiteConnectionFlags.LogPrepare) == SQLiteConnectionFlags.LogPrepare))
       {
-          SQLiteLog.LogMessage(0, String.Format("Preparing {{{0}}}...", strSql));
+          if ((strSql == null) || (strSql.Length == 0) || (strSql.Trim().Length == 0))
+              SQLiteLog.LogMessage(0, "Preparing {<nothing>}...");
+          else
+              SQLiteLog.LogMessage(0, String.Format("Preparing {{{0}}}...", strSql));
       }
 
       IntPtr stmt = IntPtr.Zero;
