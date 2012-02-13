@@ -1099,6 +1099,88 @@ runTest {test data-1.20 {LINQ SQL_CONSTRAINTS resource} -body {
 
 ###############################################################################
 
+runTest {test data-1.21 {SQLiteTransaction disposal} -setup {
+  setupDb [set fileName data-1.21.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x TEXT);"
+
+  sql execute $db {
+    INSERT INTO t1 (x) VALUES('test1');
+    INSERT INTO t1 (x) VALUES('test2');
+    INSERT INTO t1 (x) VALUES('test3');
+  }
+
+  set sql "SELECT x FROM t1 ORDER BY x COLLATE DOTHROW;"
+
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      \[SQLiteFunction(Name = "DOTHROW", FuncType = FunctionType.Collation)\]
+      public class Test${id} : SQLiteFunction
+      {
+        public override int Compare(
+          string param1,
+          string param2
+          )
+        {
+          throw new Exception("not implemented");
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          SQLiteFunction.RegisterFunction(typeof(Test${id}));
+
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            using (SQLiteTransaction transaction =
+                connection.BeginTransaction())
+            {
+              try
+              {
+                SQLiteCommand command = connection.CreateCommand();
+
+                command.CommandText = "${sql}";
+                command.ExecuteNonQuery();
+              }
+              catch
+              {
+                // do nothing.
+              }
+            }
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+
+###############################################################################
+
 unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################
