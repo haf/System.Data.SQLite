@@ -51,7 +51,8 @@ runTest {test tkt-e1b2e0f769-1.1 {data reader cleanup} -setup {
           {
             List<long?> result = new List<long?>();
 
-            using (SQLiteTransaction transaction = connection.BeginTransaction())
+            using (SQLiteTransaction transaction =
+                connection.BeginTransaction())
             {
               using (SQLiteCommand command = connection.CreateCommand())
               {

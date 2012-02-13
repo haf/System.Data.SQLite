@@ -36,7 +36,9 @@ runTest {test tkt-201128cc88-1.1 {custom function with byte[] arg} -setup {
       \[SQLiteFunction(Name = "Base64", FuncType = FunctionType.Scalar)\]
       public class Test${id} : SQLiteFunction
       {
-        public override object Invoke(object\[\] args)
+        public override object Invoke(
+          object\[\] args
+          )
         {
           if (args == null)
             return null;
@@ -61,6 +63,8 @@ runTest {test tkt-201128cc88-1.1 {custom function with byte[] arg} -setup {
 
           return Convert.ToBase64String((byte\[\]) arg);
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         public static void Main()
         {
