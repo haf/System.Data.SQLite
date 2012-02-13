@@ -90,7 +90,7 @@ namespace System.Data.SQLite
 
                     if (IsValid(false))
                     {
-                        IssueRollback();
+                        IssueRollback(false);
                     }
                 }
 
@@ -161,19 +161,27 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
       IsValid(true);
-      IssueRollback();
+      IssueRollback(true);
     }
 
-    internal void IssueRollback()
+    internal void IssueRollback(bool throwError)
     {
       SQLiteConnection cnn = Interlocked.Exchange(ref _cnn, null);
 
       if (cnn != null)
       {
-        using (SQLiteCommand cmd = cnn.CreateCommand())
+        try
         {
-          cmd.CommandText = "ROLLBACK";
-          cmd.ExecuteNonQuery();
+          using (SQLiteCommand cmd = cnn.CreateCommand())
+          {
+            cmd.CommandText = "ROLLBACK";
+            cmd.ExecuteNonQuery();
+          }
+        }
+        catch
+        {
+          if (throwError)
+            throw;
         }
         cnn._transactionLevel = 0;
       }
