@@ -8,6 +8,11 @@
 namespace System.Data.SQLite
 {
   using System;
+
+#if DEBUG
+  using System.Diagnostics;
+#endif
+
   using System.Runtime.InteropServices;
   using System.Collections.Generic;
   using System.Globalization;
@@ -694,7 +699,15 @@ namespace System.Data.SQLite
           return _dbtypeNames[n].typeName;
       }
 
-      return String.Empty;
+      string defaultTypeName = String.Empty;
+
+#if DEBUG
+      Trace.WriteLine(String.Format(
+          "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
+          defaultTypeName, typ));
+#endif
+
+      return defaultTypeName;
     }
 
     private static SQLiteTypeNames[] _dbtypeNames = {
@@ -880,7 +893,15 @@ namespace System.Data.SQLite
         }
       }
 
-      return DbType.Object;
+      DbType defaultDbType = DbType.Object;
+
+#if DEBUG
+      Trace.WriteLine(String.Format(
+          "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
+          defaultDbType, Name));
+#endif
+
+      return defaultDbType;
     }
     #endregion
 
