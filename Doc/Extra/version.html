@@ -43,6 +43,19 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.80.0 - April XX, 2012</b></p>
+    <ul>
+      <li>Write warning message to the active trace listners (for the Debug build configuration only) if a column type or type name cannot be mapped properly. See ticket <a href="http://system.data.sqlite.org/index.html/info/4bbf851fa5">[4bbf851fa5]</a>.</li>
+      <li>When tracing SQL statements to be prepared, bypass the internal length limit of the sqlite3_log function by using the SQLiteLog class directly instead. Also, detect null and/or empty strings and emit a special message in that case.</li>
+      <li>For the setup, the Visual Studio task should only be initially checked if the GAC task is available and vice-versa.</li>
+      <li>Improve compatibility with custom command processors by using __ECHO instead of _ECHO in batch tools.</li>
+      <li>Add OpenAndReturn method to the SQLiteConnection class to open a connection and return it.</li>
+      <li>Add missing CheckDisposed calls to the SQLiteConnection class.</li>
+      <li>Add missing throw statement to the SQLiteConnection class.</li>
+      <li>Make sure the interop project uses /fp:precise for Windows CE.</li>
+      <li>Regenerate package load key to support loading the designer package into Visual Studio 2008 without having the matching SDK installed.</li>
+      <li>Modify transaction object disposal so that it can never cause an exception to be thrown.</li>
+    </ul>
     <p><b>1.0.79.0 - January 28, 2012</b></p>
     <ul>
       <li>Use the WoW64 registry keys when installing the VS designer components on 64-bit Windows. Fix for <a href="http://system.data.sqlite.org/index.html/info/d8491abd0b">[d8491abd0b]</a>.</li>
