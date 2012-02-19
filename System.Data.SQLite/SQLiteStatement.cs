@@ -44,24 +44,31 @@ namespace System.Data.SQLite
     /// </summary>
     internal SQLiteCommand     _command;
 
+    /// <summary>
+    /// The flags associated with the parent connection object.
+    /// </summary>
+    private SQLiteConnectionFlags _flags;
+
     private string[] _types;
 
     /// <summary>
     /// Initializes the statement and attempts to get all information about parameters in the statement
     /// </summary>
     /// <param name="sqlbase">The base SQLite object</param>
+    /// <param name="flags">The flags associated with the parent connection object</param>
     /// <param name="stmt">The statement</param>
     /// <param name="strCommand">The command text for this statement</param>
     /// <param name="previous">The previous command in a multi-statement command</param>
-    internal SQLiteStatement(SQLiteBase sqlbase, SQLiteStatementHandle stmt, string strCommand, SQLiteStatement previous)
+    internal SQLiteStatement(SQLiteBase sqlbase, SQLiteConnectionFlags flags, SQLiteStatementHandle stmt, string strCommand, SQLiteStatement previous)
     {
       _sql     = sqlbase;
       _sqlite_stmt = stmt;
       _sqlStatement  = strCommand;
+      _flags = flags;
 
       // Determine parameters for this statement (if any) and prepare space for them.
       int nCmdStart = 0;
-      int n = _sql.Bind_ParamCount(this);
+      int n = _sql.Bind_ParamCount(this, _flags);
       int x;
       string s;
 
@@ -75,7 +82,7 @@ namespace System.Data.SQLite
 
         for (x = 0; x < n; x++)
         {
-          s = _sql.Bind_ParamName(this, x + 1);
+          s = _sql.Bind_ParamName(this, _flags, x + 1);
           if (String.IsNullOrEmpty(s))
           {
             s = String.Format(CultureInfo.InvariantCulture, ";{0}", nCmdStart);
@@ -268,14 +275,25 @@ namespace System.Data.SQLite
       object obj = param.Value;
       DbType objType = param.DbType;
 
-      if (Convert.IsDBNull(obj) || obj == null)
+      if ((obj != null) && (objType == DbType.Object))
+          objType = SQLiteConvert.TypeToDbType(obj.GetType());
+
+#if !PLATFORM_COMPACTFRAMEWORK
+      if ((_flags & SQLiteConnectionFlags.LogPreBind) == SQLiteConnectionFlags.LogPreBind)
       {
-        _sql.Bind_Null(this, index);
+          IntPtr handle = _sqlite_stmt;
+
+          SQLiteLog.LogMessage(0, String.Format(
+              "Binding statement {0} paramter #{1} with database type {2} and raw value {{{3}}}...",
+              handle, index, objType, obj));
+      }
+#endif
+
+      if ((obj == null) || Convert.IsDBNull(obj))
+      {
+          _sql.Bind_Null(this, _flags, index);
         return;
       }
-
-      if (objType == DbType.Object)
-        objType = SQLiteConvert.TypeToDbType(obj.GetType());
 
       switch (objType)
       {
@@ -286,57 +304,57 @@ namespace System.Data.SQLite
           // NOTE: The old method (commented below) does not honor the selected date format
           //       for the connection.
           // _sql.Bind_DateTime(this, index, Convert.ToDateTime(obj, CultureInfo.CurrentCulture));
-          _sql.Bind_DateTime(this, index, (obj is string) ?
+            _sql.Bind_DateTime(this, _flags, index, (obj is string) ?
               _sql.ToDateTime((string)obj) : Convert.ToDateTime(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Boolean:
-          _sql.Bind_Int32(this, index, ToBoolean(obj, CultureInfo.CurrentCulture) ? 1 : 0);
+          _sql.Bind_Int32(this, _flags, index, ToBoolean(obj, CultureInfo.CurrentCulture) ? 1 : 0);
           break;
         case DbType.SByte:
-          _sql.Bind_Int32(this, index, Convert.ToSByte(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_Int32(this, _flags, index, Convert.ToSByte(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Int16:
-          _sql.Bind_Int32(this, index, Convert.ToInt16(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_Int32(this, _flags, index, Convert.ToInt16(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Int32:
-          _sql.Bind_Int32(this, index, Convert.ToInt32(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_Int32(this, _flags, index, Convert.ToInt32(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Int64:
-          _sql.Bind_Int64(this, index, Convert.ToInt64(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_Int64(this, _flags, index, Convert.ToInt64(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Byte:
-          _sql.Bind_UInt32(this, index, Convert.ToByte(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_UInt32(this, _flags, index, Convert.ToByte(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.UInt16:
-          _sql.Bind_UInt32(this, index, Convert.ToUInt16(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_UInt32(this, _flags, index, Convert.ToUInt16(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.UInt32:
-          _sql.Bind_UInt32(this, index, Convert.ToUInt32(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_UInt32(this, _flags, index, Convert.ToUInt32(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.UInt64:
-          _sql.Bind_UInt64(this, index, Convert.ToUInt64(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_UInt64(this, _flags, index, Convert.ToUInt64(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Single:
         case DbType.Double:
         case DbType.Currency:
         //case DbType.Decimal: // Dont store decimal as double ... loses precision
-          _sql.Bind_Double(this, index, Convert.ToDouble(obj, CultureInfo.CurrentCulture));
+          _sql.Bind_Double(this, _flags, index, Convert.ToDouble(obj, CultureInfo.CurrentCulture));
           break;
         case DbType.Binary:
-          _sql.Bind_Blob(this, index, (byte[])obj);
+          _sql.Bind_Blob(this, _flags, index, (byte[])obj);
           break;
         case DbType.Guid:
           if (_command.Connection._binaryGuid == true)
-            _sql.Bind_Blob(this, index, ((Guid)obj).ToByteArray());
+            _sql.Bind_Blob(this, _flags, index, ((Guid)obj).ToByteArray());
           else
-            _sql.Bind_Text(this, index, obj.ToString());
+            _sql.Bind_Text(this, _flags, index, obj.ToString());
 
           break;
         case DbType.Decimal: // Dont store decimal as double ... loses precision
-          _sql.Bind_Text(this, index, Convert.ToDecimal(obj, CultureInfo.CurrentCulture).ToString(CultureInfo.InvariantCulture));
+          _sql.Bind_Text(this, _flags, index, Convert.ToDecimal(obj, CultureInfo.CurrentCulture).ToString(CultureInfo.InvariantCulture));
           break;
         default:
-          _sql.Bind_Text(this, index, obj.ToString());
+          _sql.Bind_Text(this, _flags, index, obj.ToString());
           break;
       }
     }

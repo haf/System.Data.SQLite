@@ -88,7 +88,7 @@ namespace System.Data.SQLite
         return Marshal.PtrToStringUni(b, nbytelen / 2);
     }
 
-    internal override void Open(string strFilename, SQLiteOpenFlagsEnum flags, int maxPoolSize, bool usePool)
+    internal override void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool)
     {
       if (_sql != null) return;
 
@@ -104,7 +104,7 @@ namespace System.Data.SQLite
         IntPtr db;
 
 #if !SQLITE_STANDARD
-        int n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), (int)flags, out db);
+        int n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), (int)openFlags, out db);
 #else
         if ((flags & SQLiteOpenFlagsEnum.Create) == 0 && System.IO.File.Exists(strFilename) == false)
           throw new SQLiteException((int)SQLiteErrorCode.CantOpen, strFilename);
@@ -120,61 +120,51 @@ namespace System.Data.SQLite
 
         _sql = db;
       }
-      _functionsArray = SQLiteFunction.BindFunctions(this);
+      _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
     }
 
-    internal override void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt)
+    internal override void Bind_DateTime(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, DateTime dt)
     {
         switch (_datetimeFormat)
         {
             case SQLiteDateFormats.Ticks:
-                {
-                    long value = dt.Ticks;
-
-#if !PLATFORM_COMPACTFRAMEWORK
-                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, value);
-#else
-                    int n = UnsafeNativeMethods.sqlite3_bind_int64_interop(stmt._sqlite_stmt, index, ref value);
-#endif
-                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
-                    break;
-                }
             case SQLiteDateFormats.JulianDay:
-                {
-                    double value = ToJulianDay(dt);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-                    int n = UnsafeNativeMethods.sqlite3_bind_double(stmt._sqlite_stmt, index, value);
-#else
-                    int n = UnsafeNativeMethods.sqlite3_bind_double_interop(stmt._sqlite_stmt, index, ref value);
-#endif
-                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
-                    break;
-                }
             case SQLiteDateFormats.UnixEpoch:
                 {
-                    long value = Convert.ToInt64(dt.Subtract(UnixEpoch).TotalSeconds);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-                    int n = UnsafeNativeMethods.sqlite3_bind_int64(stmt._sqlite_stmt, index, value);
-#else
-                    int n = UnsafeNativeMethods.sqlite3_bind_int64_interop(stmt._sqlite_stmt, index, ref value);
-#endif
-                    if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+                    base.Bind_DateTime(stmt, flags, index, dt);
                     break;
                 }
             default:
                 {
-                    Bind_Text(stmt, index, ToString(dt));
+#if !PLATFORM_COMPACTFRAMEWORK
+                    if ((flags & SQLiteConnectionFlags.LogBind) == SQLiteConnectionFlags.LogBind)
+                    {
+                        SQLiteStatementHandle handle =
+                            (stmt != null) ? stmt._sqlite_stmt : null;
+
+                        LogBind(handle, index, dt);
+                    }
+#endif
+
+                    Bind_Text(stmt, flags, index, ToString(dt));
                     break;
                 }
         }
     }
 
-    internal override void Bind_Text(SQLiteStatement stmt, int index, string value)
+    internal override void Bind_Text(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, string value)
     {
-      int n = UnsafeNativeMethods.sqlite3_bind_text16(stmt._sqlite_stmt, index, value, value.Length * 2, (IntPtr)(-1));
-      if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+        SQLiteStatementHandle handle = stmt._sqlite_stmt;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+        if ((flags & SQLiteConnectionFlags.LogBind) == SQLiteConnectionFlags.LogBind)
+        {
+            LogBind(handle, index, value);
+        }
+#endif
+
+        int n = UnsafeNativeMethods.sqlite3_bind_text16(handle, index, value, value.Length * 2, (IntPtr)(-1));
+        if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
 
     internal override DateTime GetDateTime(SQLiteStatement stmt, int index)

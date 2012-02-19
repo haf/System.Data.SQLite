@@ -36,6 +36,18 @@ namespace System.Data.SQLite
       internal object _data;
     }
 
+    /////////////////////////////////////////////////////////////////////////
+
+    #region Private Constants
+    /// <summary>
+    /// The error code used for logging exceptions caught in user-provided
+    /// code.
+    /// </summary>
+    private const int COR_E_EXCEPTION = unchecked((int)0x80131500);
+    #endregion
+
+    /////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// The base connection this function is attached to
     /// </summary>
@@ -44,7 +56,13 @@ namespace System.Data.SQLite
     /// <summary>
     /// Internal array used to keep track of aggregate function context data
     /// </summary>
-    private Dictionary<long, AggregateData> _contextDataList;
+    private Dictionary<IntPtr, AggregateData> _contextDataList;
+
+    /// <summary>
+    /// The connection flags associated with this object (this should be the
+    /// same value as the flags associated with the parent connection object).
+    /// </summary>
+    private SQLiteConnectionFlags _flags;
 
     /// <summary>
     /// Holds a reference to the callback function for user functions
@@ -80,7 +98,7 @@ namespace System.Data.SQLite
     /// </summary>
     protected SQLiteFunction()
     {
-      _contextDataList = new Dictionary<long, AggregateData>();
+      _contextDataList = new Dictionary<IntPtr, AggregateData>();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,20 +145,22 @@ namespace System.Data.SQLite
 
                 IDisposable disp;
 
-                foreach (KeyValuePair<long, AggregateData> kv in _contextDataList)
+                foreach (KeyValuePair<IntPtr, AggregateData> kv in _contextDataList)
                 {
                     disp = kv.Value._data as IDisposable;
                     if (disp != null)
                         disp.Dispose();
                 }
                 _contextDataList.Clear();
+                _contextDataList = null;
+
+                _flags = SQLiteConnectionFlags.None;
 
                 _InvokeFunc = null;
                 _StepFunc = null;
                 _FinalFunc = null;
                 _CompareFunc = null;
                 _base = null;
-                _contextDataList = null;
             }
 
             //////////////////////////////////////
@@ -350,18 +370,48 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Internal scalar callback function, which wraps the raw context pointer and calls the virtual Invoke() method.
+    /// WARNING: Must not throw exceptions.
     /// </summary>
     /// <param name="context">A raw context pointer</param>
     /// <param name="nArgs">Number of arguments passed in</param>
     /// <param name="argsptr">A pointer to the array of arguments</param>
     internal void ScalarCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
-      _context = context;
-      SetReturnValue(context, Invoke(ConvertParams(nArgs, argsptr)));
+        try
+        {
+            _context = context;
+            SetReturnValue(context,
+                Invoke(ConvertParams(nArgs, argsptr))); /* throw */
+        }
+#if !PLATFORM_COMPACTFRAMEWORK
+        catch (Exception e) /* NOTE: Must catch ALL. */
+        {
+            try
+            {
+                if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
+                        SQLiteConnectionFlags.LogCallbackException)
+                {
+                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
+                        "Caught exception in \"Invoke\" method: {0}",
+                        e)); /* throw */
+                }
+            }
+            catch
+            {
+                // do nothing.
+            }
+        }
+#else
+        catch /* NOTE: Must catch ALL. */
+        {
+            // do nothing (Windows CE).
+        }
+#endif
     }
 
     /// <summary>
     /// Internal collation sequence function, which wraps up the raw string pointers and executes the Compare() virtual function.
+    /// WARNING: Must not throw exceptions.
     /// </summary>
     /// <param name="ptr">Not used</param>
     /// <param name="len1">Length of the string pv1</param>
@@ -369,19 +419,91 @@ namespace System.Data.SQLite
     /// <param name="len2">Length of the string pv2</param>
     /// <param name="ptr2">Pointer to the second string to compare</param>
     /// <returns>Returns -1 if the first string is less than the second.  0 if they are equal, or 1 if the first string is greater
-    /// than the second.</returns>
+    /// than the second.  Returns 0 if an exception is caught.</returns>
     internal int CompareCallback(IntPtr ptr, int len1, IntPtr ptr1, int len2, IntPtr ptr2)
     {
-      return Compare(SQLiteConvert.UTF8ToString(ptr1, len1), SQLiteConvert.UTF8ToString(ptr2, len2));
+        try
+        {
+            return Compare(SQLiteConvert.UTF8ToString(ptr1, len1),
+                SQLiteConvert.UTF8ToString(ptr2, len2)); /* throw */
+        }
+#if !PLATFORM_COMPACTFRAMEWORK
+        catch (Exception e) /* NOTE: Must catch ALL. */
+        {
+            try
+            {
+                if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
+                        SQLiteConnectionFlags.LogCallbackException)
+                {
+                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
+                        "Caught exception in \"Compare\" method: {0}",
+                        e)); /* throw */
+                }
+            }
+            catch
+            {
+                // do nothing.
+            }
+        }
+#else
+        catch /* NOTE: Must catch ALL. */
+        {
+            // do nothing (Windows CE).
+        }
+#endif
+
+        return 0;
     }
 
+    /// <summary>
+    /// Internal collation sequence function, which wraps up the raw string pointers and executes the Compare() virtual function.
+    /// WARNING: Must not throw exceptions.
+    /// </summary>
+    /// <param name="ptr">Not used</param>
+    /// <param name="len1">Length of the string pv1</param>
+    /// <param name="ptr1">Pointer to the first string to compare</param>
+    /// <param name="len2">Length of the string pv2</param>
+    /// <param name="ptr2">Pointer to the second string to compare</param>
+    /// <returns>Returns -1 if the first string is less than the second.  0 if they are equal, or 1 if the first string is greater
+    /// than the second.  Returns 0 if an exception is caught.</returns>
     internal int CompareCallback16(IntPtr ptr, int len1, IntPtr ptr1, int len2, IntPtr ptr2)
     {
-      return Compare(SQLite3_UTF16.UTF16ToString(ptr1, len1), SQLite3_UTF16.UTF16ToString(ptr2, len2));
+        try
+        {
+            return Compare(SQLite3_UTF16.UTF16ToString(ptr1, len1),
+                SQLite3_UTF16.UTF16ToString(ptr2, len2)); /* throw */
+        }
+#if !PLATFORM_COMPACTFRAMEWORK
+        catch (Exception e) /* NOTE: Must catch ALL. */
+        {
+            try
+            {
+                if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
+                        SQLiteConnectionFlags.LogCallbackException)
+                {
+                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
+                        "Caught exception in \"Compare\" method: {0}",
+                        e)); /* throw */
+                }
+            }
+            catch
+            {
+                // do nothing.
+            }
+        }
+#else
+        catch /* NOTE: Must catch ALL. */
+        {
+            // do nothing (Windows CE).
+        }
+#endif
+
+        return 0;
     }
 
     /// <summary>
     /// The internal aggregate Step function callback, which wraps the raw context pointer and calls the virtual Step() method.
+    /// WARNING: Must not throw exceptions.
     /// </summary>
     /// <remarks>
     /// This function takes care of doing the lookups and getting the important information put together to call the Step() function.
@@ -393,47 +515,121 @@ namespace System.Data.SQLite
     /// <param name="argsptr">A pointer to the array of arguments</param>
     internal void StepCallback(IntPtr context, int nArgs, IntPtr argsptr)
     {
-      long nAux;
-      AggregateData data;
+        try
+        {
+            AggregateData data = null;
 
-      nAux = (long)_base.AggregateContext(context);
-      if (_contextDataList.TryGetValue(nAux, out data) == false)
-      {
-        data = new AggregateData();
-        _contextDataList[nAux] = data;
-      }
+            if (_base != null)
+            {
+                IntPtr nAux = _base.AggregateContext(context);
 
-      try
-      {
-        _context = context;
-        Step(ConvertParams(nArgs, argsptr), data._count, ref data._data);
-      }
-      finally
-      {
-        data._count++;
-      }
+                if ((_contextDataList != null) &&
+                    !_contextDataList.TryGetValue(nAux, out data))
+                {
+                    data = new AggregateData();
+                    _contextDataList[nAux] = data;
+                }
+            }
+
+            if (data == null)
+                data = new AggregateData();
+
+            try
+            {
+                _context = context;
+                Step(ConvertParams(nArgs, argsptr),
+                    data._count, ref data._data); /* throw */
+            }
+            finally
+            {
+                data._count++;
+            }
+        }
+#if !PLATFORM_COMPACTFRAMEWORK
+        catch (Exception e) /* NOTE: Must catch ALL. */
+        {
+            try
+            {
+                if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
+                        SQLiteConnectionFlags.LogCallbackException)
+                {
+                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
+                        "Caught exception in \"Step\" method: {1}",
+                        e)); /* throw */
+                }
+            }
+            catch
+            {
+                // do nothing.
+            }
+        }
+#else
+        catch /* NOTE: Must catch ALL. */
+        {
+            // do nothing (Windows CE).
+        }
+#endif
     }
 
     /// <summary>
     /// An internal aggregate Final function callback, which wraps the context pointer and calls the virtual Final() method.
+    /// WARNING: Must not throw exceptions.
     /// </summary>
     /// <param name="context">A raw context pointer</param>
     internal void FinalCallback(IntPtr context)
     {
-      long n = (long)_base.AggregateContext(context);
-      object obj = null;
+        try
+        {
+            object obj = null;
 
-      if (_contextDataList.ContainsKey(n))
-      {
-        obj = _contextDataList[n]._data;
-        _contextDataList.Remove(n);
-      }
+            if (_base != null)
+            {
+                IntPtr n = _base.AggregateContext(context);
+                AggregateData aggData;
 
-      _context = context;
-      SetReturnValue(context, Final(obj));
+                if ((_contextDataList != null) &&
+                    _contextDataList.TryGetValue(n, out aggData))
+                {
+                    obj = aggData._data;
+                    _contextDataList.Remove(n);
+                }
+            }
 
-      IDisposable disp = obj as IDisposable;
-      if (disp != null) disp.Dispose();
+            try
+            {
+                _context = context;
+                SetReturnValue(context, Final(obj)); /* throw */
+            }
+            finally
+            {
+                IDisposable disp = obj as IDisposable;
+                if (disp != null) disp.Dispose(); /* throw */
+            }
+        }
+#if !PLATFORM_COMPACTFRAMEWORK
+        catch (Exception e) /* NOTE: Must catch ALL. */
+        {
+            try
+            {
+                if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
+                        SQLiteConnectionFlags.LogCallbackException)
+                {
+                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
+                        "Caught exception in \"Final\" method: {1}",
+                        e)); /* throw */
+                }
+            }
+            catch
+            {
+                // do nothing.
+            }
+        }
+#else
+        catch /* NOTE: Must catch ALL. */
+        {
+            // do nothing (Windows CE).
+        }
+#endif
     }
 
     /// <summary>
@@ -540,8 +736,9 @@ namespace System.Data.SQLite
     /// all the wrapped callback functions.  The interop function uses it to map CDecl callbacks to StdCall callbacks.
     /// </remarks>
     /// <param name="sqlbase">The base object on which the functions are to bind</param>
+    /// <param name="flags">The flags associated with the parent connection object</param>
     /// <returns>Returns an array of functions which the connection object should retain until the connection is closed.</returns>
-    internal static SQLiteFunction[] BindFunctions(SQLiteBase sqlbase)
+    internal static SQLiteFunction[] BindFunctions(SQLiteBase sqlbase, SQLiteConnectionFlags flags)
     {
       SQLiteFunction f;
       List<SQLiteFunction> lFunctions = new List<SQLiteFunction>();
@@ -549,7 +746,9 @@ namespace System.Data.SQLite
       foreach (SQLiteFunctionAttribute pr in _registeredFunctions)
       {
         f = (SQLiteFunction)Activator.CreateInstance(pr._instanceType);
+
         f._base = sqlbase;
+        f._flags = flags;
         f._InvokeFunc = (pr.FuncType == FunctionType.Scalar) ? new SQLiteCallback(f.ScalarCallback) : null;
         f._StepFunc = (pr.FuncType == FunctionType.Aggregate) ? new SQLiteCallback(f.StepCallback) : null;
         f._FinalFunc = (pr.FuncType == FunctionType.Aggregate) ? new SQLiteFinalCallback(f.FinalCallback) : null;

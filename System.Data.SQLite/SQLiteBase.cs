@@ -58,10 +58,11 @@ namespace System.Data.SQLite
     /// to bind all attributed user-defined functions and collating sequences to the new connection.
     /// </remarks>
     /// <param name="strFilename">The filename of the database to open.  SQLite automatically creates it if it doesn't exist.</param>
-    /// <param name="flags">The open flags to use when creating the connection</param>
+    /// <param name="connectionFlags">The flags associated with the parent connection object</param>
+    /// <param name="openFlags">The open flags to use when creating the connection</param>
     /// <param name="maxPoolSize">The maximum size of the pool for the given filename</param>
     /// <param name="usePool">If true, the connection can be pulled from the connection pool</param>
-    internal abstract void Open(string strFilename, SQLiteOpenFlagsEnum flags, int maxPoolSize, bool usePool);
+    internal abstract void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool);
     /// <summary>
     /// Closes the currently-open database.
     /// </summary>
@@ -113,19 +114,19 @@ namespace System.Data.SQLite
     internal abstract int Reset(SQLiteStatement stmt);
     internal abstract void Cancel();
 
-    internal abstract void Bind_Double(SQLiteStatement stmt, int index, double value);
-    internal abstract void Bind_Int32(SQLiteStatement stmt, int index, Int32 value);
-    internal abstract void Bind_UInt32(SQLiteStatement stmt, int index, UInt32 value);
-    internal abstract void Bind_Int64(SQLiteStatement stmt, int index, Int64 value);
-    internal abstract void Bind_UInt64(SQLiteStatement stmt, int index, UInt64 value);
-    internal abstract void Bind_Text(SQLiteStatement stmt, int index, string value);
-    internal abstract void Bind_Blob(SQLiteStatement stmt, int index, byte[] blobData);
-    internal abstract void Bind_DateTime(SQLiteStatement stmt, int index, DateTime dt);
-    internal abstract void Bind_Null(SQLiteStatement stmt, int index);
+    internal abstract void Bind_Double(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, double value);
+    internal abstract void Bind_Int32(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, Int32 value);
+    internal abstract void Bind_UInt32(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, UInt32 value);
+    internal abstract void Bind_Int64(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, Int64 value);
+    internal abstract void Bind_UInt64(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, UInt64 value);
+    internal abstract void Bind_Text(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, string value);
+    internal abstract void Bind_Blob(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, byte[] blobData);
+    internal abstract void Bind_DateTime(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, DateTime dt);
+    internal abstract void Bind_Null(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index);
 
-    internal abstract int Bind_ParamCount(SQLiteStatement stmt);
-    internal abstract string Bind_ParamName(SQLiteStatement stmt, int index);
-    internal abstract int Bind_ParamIndex(SQLiteStatement stmt, string paramName);
+    internal abstract int Bind_ParamCount(SQLiteStatement stmt, SQLiteConnectionFlags flags);
+    internal abstract string Bind_ParamName(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index);
+    internal abstract int Bind_ParamIndex(SQLiteStatement stmt, SQLiteConnectionFlags flags, string paramName);
 
     internal abstract int ColumnCount(SQLiteStatement stmt);
     internal abstract string ColumnName(SQLiteStatement stmt, int index);
@@ -384,6 +385,27 @@ namespace System.Data.SQLite
       /// Enable logging of all SQL statements to be prepared.
       /// </summary>
       LogPrepare = 0x1,
+
+      /// <summary>
+      /// Enable logging of all bound parameter types and raw values.
+      /// </summary>
+      LogPreBind = 0x2,
+
+      /// <summary>
+      /// Enable logging of all bound parameter strongly typed values.
+      /// </summary>
+      LogBind = 0x4,
+
+      /// <summary>
+      /// Enable logging of all exceptions caught from user-provided
+      /// managed code called from native code via delegates.
+      /// </summary>
+      LogCallbackException = 0x8,
+
+      /// <summary>
+      /// Enable all logging.
+      /// </summary>
+      LogAll = LogPrepare | LogPreBind | LogBind | LogCallbackException,
 
       /// <summary>
       /// The default extra flags for new connections.
