@@ -77,6 +77,18 @@ namespace System.Data.SQLite
     };
 
     /// <summary>
+    /// The internal default format for UTC DateTime values when converting
+    /// to a string.
+    /// </summary>
+    private static readonly string _datetimeFormatUtc = _datetimeFormats[5];
+
+    /// <summary>
+    /// The internal default format for local DateTime values when converting
+    /// to a string.
+    /// </summary>
+    private static readonly string _datetimeFormatLocal = _datetimeFormats[19];
+
+    /// <summary>
     /// An UTF-8 Encoding instance, so we can convert strings to and from UTF-8
     /// </summary>
     private static Encoding _utf8 = new UTF8Encoding();
@@ -351,6 +363,19 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns the default DateTime format string to use for the specified
+    /// DateTimeKind.
+    /// </summary>
+    /// <param name="kind">The DateTimeKind to use.</param>
+    /// <returns>
+    /// The default DateTime format string to use for the specified DateTimeKind.
+    /// </returns>
+    private static string GetDateTimeKindFormat(DateTimeKind kind)
+    {
+        return (kind == DateTimeKind.Utc) ? _datetimeFormatUtc : _datetimeFormatLocal;
+    }
+
+    /// <summary>
     /// Converts a DateTime to a string value, using the current DateTimeFormat specified for the connection when it was opened.
     /// </summary>
     /// <param name="dateValue">The DateTime value to convert</param>
@@ -359,23 +384,24 @@ namespace System.Data.SQLite
     /// string, a formatted date and time string in the current culture, or an ISO8601-format date/time string.</returns>
     public string ToString(DateTime dateValue)
     {
-      switch (_datetimeFormat)
-      {
-        case SQLiteDateFormats.Ticks:
-          return dateValue.Ticks.ToString(CultureInfo.InvariantCulture);
-        case SQLiteDateFormats.JulianDay:
-          return ToJulianDay(dateValue).ToString(CultureInfo.InvariantCulture);
-        case SQLiteDateFormats.UnixEpoch:
-          return ((long)(dateValue.Subtract(UnixEpoch).Ticks / TimeSpan.TicksPerSecond)).ToString();
-        case SQLiteDateFormats.InvariantCulture:
-          return dateValue.ToString(FullFormat, CultureInfo.InvariantCulture);
-        case SQLiteDateFormats.CurrentCulture:
-          return dateValue.ToString(FullFormat, CultureInfo.CurrentCulture);
-        default:
-          return (dateValue.Kind == DateTimeKind.Utc) ?
-              dateValue.ToString(_datetimeFormats[5], CultureInfo.InvariantCulture) : // include "Z"
-              dateValue.ToString(_datetimeFormats[19], CultureInfo.InvariantCulture);
-      }
+        switch (_datetimeFormat)
+        {
+            case SQLiteDateFormats.Ticks:
+                return dateValue.Ticks.ToString(CultureInfo.InvariantCulture);
+            case SQLiteDateFormats.JulianDay:
+                return ToJulianDay(dateValue).ToString(CultureInfo.InvariantCulture);
+            case SQLiteDateFormats.UnixEpoch:
+                return ((long)(dateValue.Subtract(UnixEpoch).Ticks / TimeSpan.TicksPerSecond)).ToString();
+            case SQLiteDateFormats.InvariantCulture:
+                return dateValue.ToString(FullFormat, CultureInfo.InvariantCulture);
+            case SQLiteDateFormats.CurrentCulture:
+                return dateValue.ToString(FullFormat, CultureInfo.CurrentCulture);
+            default:
+                return (dateValue.Kind == DateTimeKind.Unspecified) ?
+                    DateTime.SpecifyKind(dateValue, _datetimeKind).ToString(
+                        GetDateTimeKindFormat(_datetimeKind), CultureInfo.InvariantCulture) :
+                    dateValue.ToString(GetDateTimeKindFormat(dateValue.Kind), CultureInfo.InvariantCulture);
+        }
     }
 
     /// <summary>
