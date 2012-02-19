@@ -883,7 +883,7 @@ namespace System.Data.SQLite
   {
     public static implicit operator IntPtr(SQLiteConnectionHandle db)
     {
-      return db.handle;
+      return (db != null) ? db.handle : IntPtr.Zero;
     }
 
     public static implicit operator SQLiteConnectionHandle(IntPtr db)
@@ -959,7 +959,7 @@ namespace System.Data.SQLite
   {
     public static implicit operator IntPtr(SQLiteStatementHandle stmt)
     {
-      return stmt.handle;
+      return (stmt != null) ? stmt.handle : IntPtr.Zero;
     }
 
     public static implicit operator SQLiteStatementHandle(IntPtr stmt)
