@@ -6,7 +6,11 @@
     <b>1.0.80.0 - April XX, 2012 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
-    <li>Write warning message to the active trace listners (for the Debug build configuration only) if a column type or type name cannot be mapped properly. See ticket [4bbf851fa5].</li>
+    <li>In the SQLiteFunction class, when calling user-provided methods from a delegate called by native code, avoid throwing exceptions, optionally tracing the caught exceptions. Fix for [8a426d12eb].</li>
+    <li>Support tracing of all parameter binding activity and use the connection flags to control what is traced.</li>
+    <li>When converting a DateTime instance of an &quot;Unspecified&quot; kind to a string, use the same kind as the connection, if available.</li>
+    <li>In the implicit conversion operators (to IntPtr) for both the SQLiteConnectionHandle and SQLiteStatementHandle classes, return IntPtr.Zero if the instance being converted is null.</li>
+    <li>Write warning message to the active trace listners (for the Debug build configuration only) if a column type or type name cannot be mapped properly. See [4bbf851fa5].</li>
     <li>When tracing SQL statements to be prepared, bypass the internal length limit of the sqlite3_log function by using the SQLiteLog class directly instead. Also, detect null and/or empty strings and emit a special message in that case.</li>
     <li>For the setup, the Visual Studio task should only be initially checked if the GAC task is available and vice-versa.</li>
     <li>Improve compatibility with custom command processors by using __ECHO instead of _ECHO in batch tools.</li>
