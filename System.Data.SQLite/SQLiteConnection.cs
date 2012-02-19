@@ -941,7 +941,7 @@ namespace System.Data.SQLite
           flags |= SQLiteOpenFlagsEnum.ReadWrite;
         }
 
-        _sql.Open(fileName, flags, maxPoolSize, usePooling);
+        _sql.Open(fileName, _flags, flags, maxPoolSize, usePooling);
 
         _binaryGuid = (SQLiteConvert.ToBoolean(FindKey(opts, "BinaryGUID", Boolean.TrueString)) == true);
 

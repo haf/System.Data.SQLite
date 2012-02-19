@@ -88,7 +88,7 @@ namespace System.Data.SQLite
         return Marshal.PtrToStringUni(b, nbytelen / 2);
     }
 
-    internal override void Open(string strFilename, SQLiteOpenFlagsEnum flags, int maxPoolSize, bool usePool)
+    internal override void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool)
     {
       if (_sql != null) return;
 
@@ -104,7 +104,7 @@ namespace System.Data.SQLite
         IntPtr db;
 
 #if !SQLITE_STANDARD
-        int n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), (int)flags, out db);
+        int n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), (int)openFlags, out db);
 #else
         if ((flags & SQLiteOpenFlagsEnum.Create) == 0 && System.IO.File.Exists(strFilename) == false)
           throw new SQLiteException((int)SQLiteErrorCode.CantOpen, strFilename);
@@ -120,7 +120,7 @@ namespace System.Data.SQLite
 
         _sql = db;
       }
-      _functionsArray = SQLiteFunction.BindFunctions(this);
+      _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
     }
 
     internal override void Bind_DateTime(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, DateTime dt)

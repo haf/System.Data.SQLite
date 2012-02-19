@@ -212,7 +212,7 @@ namespace System.Data.SQLite
         return (_sql != null);
     }
 
-    internal override void Open(string strFilename, SQLiteOpenFlagsEnum flags, int maxPoolSize, bool usePool)
+    internal override void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool)
     {
       if (_sql != null) return;
 
@@ -228,9 +228,9 @@ namespace System.Data.SQLite
         IntPtr db;
 
 #if !SQLITE_STANDARD
-        int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), (int)flags, out db);
+        int n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), (int)openFlags, out db);
 #else
-        int n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, (int)flags, IntPtr.Zero);
+        int n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, (int)openFlags, IntPtr.Zero);
 #endif
 
 #if DEBUG
@@ -243,7 +243,7 @@ namespace System.Data.SQLite
       }
       // Bind functions to this connection.  If any previous functions of the same name
       // were already bound, then the new bindings replace the old.
-      _functionsArray = SQLiteFunction.BindFunctions(this);
+      _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
       SetTimeout(0);
     }
 
