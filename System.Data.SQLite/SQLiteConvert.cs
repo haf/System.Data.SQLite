@@ -363,6 +363,17 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Converts a DateTime struct to the whole number of seconds since the
+    /// Unix epoch.
+    /// </summary>
+    /// <param name="value">The DateTime to convert</param>
+    /// <returns>The whole number of seconds since the Unix epoch</returns>
+    public static long ToUnixEpoch(DateTime value)
+    {
+        return (value.Subtract(UnixEpoch).Ticks / TimeSpan.TicksPerSecond);
+    }
+
+    /// <summary>
     /// Returns the default DateTime format string to use for the specified
     /// DateTimeKind.
     /// </summary>
