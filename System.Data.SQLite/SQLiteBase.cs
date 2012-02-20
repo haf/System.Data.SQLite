@@ -410,7 +410,7 @@ namespace System.Data.SQLite
       /// <summary>
       /// The default extra flags for new connections.
       /// </summary>
-      Default = None
+      Default = LogCallbackException
   }
 
   // These are the options to the internal sqlite3_config call.

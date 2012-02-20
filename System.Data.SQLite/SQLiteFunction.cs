@@ -452,6 +452,13 @@ namespace System.Data.SQLite
         }
 #endif
 
+        //
+        // NOTE: This must be done to prevent the core SQLite library from
+        //       using our (invalid) result.
+        //
+        if (_base != null)
+            _base.Cancel();
+
         return 0;
     }
 
@@ -497,6 +504,13 @@ namespace System.Data.SQLite
             // do nothing (Windows CE).
         }
 #endif
+
+        //
+        // NOTE: This must be done to prevent the core SQLite library from
+        //       using our (invalid) result.
+        //
+        if (_base != null)
+            _base.Cancel();
 
         return 0;
     }

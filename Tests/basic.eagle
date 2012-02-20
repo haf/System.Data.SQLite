@@ -1004,8 +1004,8 @@ Format=False\} 0 \{True, Read Only=True\} 0 \{secret, Password=secret\} 0\
 Size=8192\} 0 \{UnixEpoch, DateTimeFormat=UnixEpoch\} 0 \{Utc,\
 DateTimeKind=Utc\} 0 \{sqlite_schema, BaseSchemaName=sqlite_schema\} 0\
 \{Memory, Journal Mode=Memory\} 0 \{Serializable, Default\
-IsolationLevel=Serializable\} 0 \{False, Foreign Keys=False\} 0 \{None,\
-Flags=None\}$}}
+IsolationLevel=Serializable\} 0 \{False, Foreign Keys=False\} 0\
+\{LogCallbackException, Flags=LogCallbackException\}$}}
 
 ###############################################################################
 
