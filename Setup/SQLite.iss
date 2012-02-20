@@ -99,14 +99,14 @@ Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx2InstallRoot|
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 
 #if AppProcessor == "x86"
-Components: {#InstallerCondition}; Tasks: vs2008; Filename: {app}\bin\Installer.exe; Parameters: "-install true -wow64 true -installFlags AllExceptGAC -tracePriority Lowest -verbose true -noCompact true -noNetFx40 true -noVs2010 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
-Components: {#InstallerCondition}; Tasks: vs2010; Filename: {app}\bin\Installer.exe; Parameters: "-install true -wow64 true -installFlags AllExceptGAC -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noVs2008 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
+Components: {#InstallerCondition}; Tasks: vs2008; Filename: {app}\bin\Installer.exe; Parameters: "-install true -wow64 true -installFlags AllExceptGAC -tracePriority Lowest -verbose true -noCompact true -noNetFx40 true -noVs2005 true -noVs2010 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
+Components: {#InstallerCondition}; Tasks: vs2010; Filename: {app}\bin\Installer.exe; Parameters: "-install true -wow64 true -installFlags AllExceptGAC -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noVs2005 true -noVs2008 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 #endif
 
 [UninstallRun]
 #if AppProcessor == "x86"
-Components: {#InstallerCondition}; Tasks: vs2010; Filename: {app}\bin\Installer.exe; Parameters: "-install false -wow64 true -installFlags AllExceptGAC -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noVs2008 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
-Components: {#InstallerCondition}; Tasks: vs2008; Filename: {app}\bin\Installer.exe; Parameters: "-install false -wow64 true -installFlags AllExceptGAC -tracePriority Lowest -verbose true -noCompact true -noNetFx40 true -noVs2010 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
+Components: {#InstallerCondition}; Tasks: vs2010; Filename: {app}\bin\Installer.exe; Parameters: "-install false -wow64 true -installFlags AllExceptGAC -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noVs2005 true -noVs2008 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
+Components: {#InstallerCondition}; Tasks: vs2008; Filename: {app}\bin\Installer.exe; Parameters: "-install false -wow64 true -installFlags AllExceptGAC -tracePriority Lowest -verbose true -noCompact true -noNetFx40 true -noVs2005 true -noVs2010 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
 #endif
 
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()

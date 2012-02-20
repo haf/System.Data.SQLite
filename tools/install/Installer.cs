@@ -1777,6 +1777,7 @@ namespace System.Data.SQLite
                 bool noCompact,
                 bool noNetFx20,
                 bool noNetFx40,
+                bool noVs2005,
                 bool noVs2008,
                 bool noVs2010,
                 bool noTrace,
@@ -1807,6 +1808,7 @@ namespace System.Data.SQLite
                 this.noCompact = noCompact;
                 this.noNetFx20 = noNetFx20;
                 this.noNetFx40 = noNetFx40;
+                this.noVs2005 = noVs2005;
                 this.noVs2008 = noVs2008;
                 this.noVs2010 = noVs2010;
                 this.noTrace = noTrace;
@@ -1966,8 +1968,8 @@ namespace System.Data.SQLite
                     TraceOps.DebugFormat, TraceOps.TraceFormat,
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, true, false, false, false, false,
-                    false, false, false, false, false, false, false, true,
-                    true, false, false, false);
+                    false, false, false, false, false, false, false, false,
+                    true, true, false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2401,6 +2403,27 @@ namespace System.Data.SQLite
                             }
 
                             configuration.noTrace = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noVs2005"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noVs2005 = (bool)value;
                         }
                         else if (MatchOption(newArg, "noVs2008"))
                         {
@@ -2859,6 +2882,7 @@ namespace System.Data.SQLite
                         //       an assembly compiled for the CLR v2.0.
                         //
                         configuration.noNetFx20 = true;
+                        configuration.noVs2005 = true;
                         configuration.noVs2008 = true;
 
                         TraceOps.DebugAndTrace(TracePriority.Medium,
@@ -2987,6 +3011,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "NoNetFx40", ForDisplay(noNetFx40)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoVs2005", ForDisplay(noVs2005)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3208,6 +3236,15 @@ namespace System.Data.SQLite
             {
                 get { return noNetFx40; }
                 set { noNetFx40 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noVs2005;
+            public bool NoVs2005
+            {
+                get { return noVs2005; }
+                set { noVs2005 = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -4178,7 +4215,8 @@ namespace System.Data.SQLite
             {
                 vsList.Versions = new VersionList();
 
-                // vsList.Versions.Add(new Version(8, 0)); // Visual Studio 2005
+                if ((configuration == null) || !configuration.NoVs2005)
+                    vsList.Versions.Add(new Version(8, 0)); // Visual Studio 2005
 
                 if ((configuration == null) || !configuration.NoVs2008)
                     vsList.Versions.Add(new Version(9, 0)); // Visual Studio 2008
