@@ -1,0 +1,35 @@
+Installer.exe: #1: Configuration.Process: No actual changes will be made to this system because "what-if" mode is enabled.
+Installer.exe: #2: Installer.Main: GacRemove: assemblyPath = "[file nativename [file join [getBuildDirectory] System.Data.SQLite.Linq.dll]]"
+Installer.exe: #3: Installer.Main: GacRemove: assemblyPath = "[file nativename [file join [getBuildDirectory] System.Data.SQLite.dll]]"
+Installer.exe: #4: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework\v2.0.50727", writable = False
+Installer.exe: #5: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework", writable = False
+Installer.exe: #6: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
+Installer.exe: #7: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework\v2.0.50727\AssemblyFoldersEx", writable = True
+Installer.exe: #8: RegistryHelper.DeleteSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework\v2.0.50727\AssemblyFoldersEx", subKeyName = "System.Data.SQLite"
+Installer.exe: #9: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework\v2.0.50727", writable = False
+Installer.exe: #10: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework", writable = False
+Installer.exe: #11: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
+Installer.exe: #12: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework", writable = False
+Installer.exe: #13: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
+Installer.exe: #14: Installer.RemoveDbProviderFactory: addElement = <null>, removeElement = <null>
+Installer.exe: #15: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #16: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #17: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #18: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Packages", writable = True
+Installer.exe: #19: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Packages", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
+Installer.exe: #20: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Menus", writable = True
+Installer.exe: #21: RegistryHelper.DeleteValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Menus", name = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
+Installer.exe: #22: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Services", writable = True
+Installer.exe: #23: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Services", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9d}"
+Installer.exe: #24: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #25: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #26: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #27: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "DataSources", writable = True
+Installer.exe: #28: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataSources", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c71}"
+Installer.exe: #29: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #30: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #31: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #32: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "DataProviders", writable = True
+Installer.exe: #33: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataProviders", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}"
+Installer.exe: #34: Installer.Main: subKeysCreated = 0, subKeysDeleted = 5, keyValuesSet = 0, keyValuesDeleted = 1
+Installer.exe: #35: Installer.Main: Success.

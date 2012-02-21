@@ -26,12 +26,26 @@ runSQLiteTestPrologue
 #
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
 set installerExeFile [getBuildFileName Installer.exe]
+
+#
+# NOTE: The various install/uninstall log files used to test the design-time
+#       component installer.
+#
+set testInstallVs2005LogFile [file nativename [file join $path \
+    Installer_Test_Vs2005.log]]
+
 set testInstallVs2008LogFile [file nativename [file join $path \
     Installer_Test_Vs2008.log]]
+
 set testInstallVs2010LogFile [file nativename [file join $path \
     Installer_Test_Vs2010.log]]
+
+set testUninstallVs2005LogFile [file nativename [file join $path \
+    Uninstaller_Test_Vs2005.log]]
+
 set testUninstallVs2008LogFile [file nativename [file join $path \
     Uninstaller_Test_Vs2008.log]]
+
 set testUninstallVs2010LogFile [file nativename [file join $path \
     Uninstaller_Test_Vs2010.log]]
 
@@ -44,6 +58,11 @@ if {![haveConstraint [appendArgs file_ \
 }
 
 if {![haveConstraint [appendArgs file_ \
+    [file tail $testInstallVs2005LogFile]]]} then {
+  checkForFile $test_channel $testInstallVs2005LogFile
+}
+
+if {![haveConstraint [appendArgs file_ \
     [file tail $testInstallVs2008LogFile]]]} then {
   checkForFile $test_channel $testInstallVs2008LogFile
 }
@@ -51,6 +70,11 @@ if {![haveConstraint [appendArgs file_ \
 if {![haveConstraint [appendArgs file_ \
     [file tail $testInstallVs2010LogFile]]]} then {
   checkForFile $test_channel $testInstallVs2010LogFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $testUninstallVs2005LogFile]]]} then {
+  checkForFile $test_channel $testUninstallVs2005LogFile
 }
 
 if {![haveConstraint [appendArgs file_ \
@@ -65,7 +89,77 @@ if {![haveConstraint [appendArgs file_ \
 
 ###############################################################################
 
-runTest {test installer-1.1 {installer tool / Visual Studio 2008} -setup {
+runTest {test installer-1.1 {installer tool / Visual Studio 2005} -setup {
+  set fileName [file join [getTemporaryPath] [file tail [string map [list \
+      .log [appendArgs _ [pid] .log]] $testInstallVs2005LogFile]]]
+
+  cleanupFile $fileName
+} -body {
+  set output ""
+
+  set code [catch {
+    testClrExec $installerExeFile [list -eventflags Wait -stdout output \
+        -success 0] -debugPriority Lowest -tracePriority MediumHigh \
+        -noRuntimeVersion true -noCompact true -noNetFx40 true -noVs2008 true \
+        -noVs2010 true -whatIf true -verbose true -confirm true -install true \
+        -logFileName [appendArgs \" [file nativename $fileName] \"] \
+        -traceFormat [appendArgs \" "#{0}: {2}" \"] -debug true -wow64 true
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  set wow64 [expr {[haveConstraint amd64.64bit] ? "\\Wow6432Node" : ""}]
+
+  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+      [subst -nobackslashes [readFile $testInstallVs2005LogFile]]] : $error}]
+} -cleanup {
+  cleanupFile $fileName
+
+  unset -nocomplain wow64 code output error fileName
+} -constraints {eagle administrator visualStudio2005\
+System.Data.SQLite.dll_v2.0.50727 file_Installer.exe\
+file_Installer_Test_Vs2005.log} -result {0 True}}
+
+###############################################################################
+
+runTest {test installer-1.2 {uninstaller tool / Visual Studio 2005} -setup {
+  set fileName [file join [getTemporaryPath] [file tail [string map [list \
+      .log [appendArgs _ [pid] .log]] $testUninstallVs2005LogFile]]]
+
+  cleanupFile $fileName
+} -body {
+  set output ""
+
+  set code [catch {
+    testClrExec $installerExeFile [list -eventflags Wait -stdout output \
+        -success 0] -debugPriority Lowest -tracePriority MediumHigh \
+        -noRuntimeVersion true -noCompact true -noNetFx40 true -noVs2008 true \
+        -noVs2010 true -whatIf true -verbose true -confirm true -install false \
+        -logFileName [appendArgs \" [file nativename $fileName] \"] \
+        -traceFormat [appendArgs \" "#{0}: {2}" \"] -debug true -wow64 true
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  set wow64 [expr {[haveConstraint amd64.64bit] ? "\\Wow6432Node" : ""}]
+
+  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+      [subst -nobackslashes [readFile $testUninstallVs2005LogFile]]] : $error}]
+} -cleanup {
+  cleanupFile $fileName
+
+  unset -nocomplain wow64 code output error fileName
+} -constraints {eagle administrator visualStudio2005\
+System.Data.SQLite.dll_v2.0.50727 file_Installer.exe\
+file_Uninstaller_Test_Vs2005.log} -result {0 True}}
+
+###############################################################################
+
+runTest {test installer-1.3 {installer tool / Visual Studio 2008} -setup {
   set fileName [file join [getTemporaryPath] [file tail [string map [list \
       .log [appendArgs _ [pid] .log]] $testInstallVs2008LogFile]]]
 
@@ -100,7 +194,7 @@ file_Installer_Test_Vs2008.log} -result {0 True}}
 
 ###############################################################################
 
-runTest {test installer-1.2 {uninstaller tool / Visual Studio 2008} -setup {
+runTest {test installer-1.4 {uninstaller tool / Visual Studio 2008} -setup {
   set fileName [file join [getTemporaryPath] [file tail [string map [list \
       .log [appendArgs _ [pid] .log]] $testUninstallVs2008LogFile]]]
 
@@ -135,7 +229,7 @@ file_Uninstaller_Test_Vs2008.log} -result {0 True}}
 
 ###############################################################################
 
-runTest {test installer-1.3 {installer tool / Visual Studio 2010} -setup {
+runTest {test installer-1.5 {installer tool / Visual Studio 2010} -setup {
   set fileName [file join [getTemporaryPath] [file tail [string map [list \
       .log [appendArgs _ [pid] .log]] $testInstallVs2010LogFile]]]
 
@@ -170,7 +264,7 @@ file_Installer_Test_Vs2010.log} -result {0 True}}
 
 ###############################################################################
 
-runTest {test installer-1.4 {uninstaller tool / Visual Studio 2010} -setup {
+runTest {test installer-1.6 {uninstaller tool / Visual Studio 2010} -setup {
   set fileName [file join [getTemporaryPath] [file tail [string map [list \
       .log [appendArgs _ [pid] .log]] $testUninstallVs2010LogFile]]]
 
@@ -206,7 +300,8 @@ file_Uninstaller_Test_Vs2010.log} -result {0 True}}
 ###############################################################################
 
 unset -nocomplain testUninstallVs2010LogFile testUninstallVs2008LogFile \
-    testInstallVs2010LogFile testInstallVs2008LogFile installerExeFile \
+    testUninstallVs2005LogFile testInstallVs2010LogFile \
+    testInstallVs2008LogFile testInstallVs2005LogFile installerExeFile \
     systemDataSQLiteDllFile
 
 ###############################################################################
