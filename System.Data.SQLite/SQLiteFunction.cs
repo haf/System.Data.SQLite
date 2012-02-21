@@ -436,7 +436,7 @@ namespace System.Data.SQLite
                         SQLiteConnectionFlags.LogCallbackException)
                 {
                     SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
-                        "Caught exception in \"Compare\" method: {0}",
+                        "Caught exception in \"Compare\" (UTF8) method: {0}",
                         e)); /* throw */
                 }
             }
@@ -489,7 +489,7 @@ namespace System.Data.SQLite
                         SQLiteConnectionFlags.LogCallbackException)
                 {
                     SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
-                        "Caught exception in \"Compare\" method: {0}",
+                        "Caught exception in \"Compare\" (UTF16) method: {0}",
                         e)); /* throw */
                 }
             }
