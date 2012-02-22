@@ -7,6 +7,8 @@
 </p>
 <ul>
     <li>In the SQLiteFunction class, when calling user-provided methods from a delegate called by native code, avoid throwing exceptions, optionally tracing the caught exceptions. Fix for [8a426d12eb].</li>
+    <li>Add Visual Studio 2005 support to the redesigned designer support installer.</li>
+    <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process.  For now, this feature is disabled by default at compile-time.</li>
     <li>Support tracing of all parameter binding activity and use the connection flags to control what is traced.</li>
     <li>When converting a DateTime instance of an &quot;Unspecified&quot; kind to a string, use the same kind as the connection, if available.</li>
     <li>Add static ToUnixEpoch method to the SQLiteConvert class to convert a DateTime value to the number of whole seconds since the Unix epoch.</li>
