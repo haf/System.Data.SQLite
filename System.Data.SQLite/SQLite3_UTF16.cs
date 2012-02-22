@@ -106,7 +106,7 @@ namespace System.Data.SQLite
 #if !SQLITE_STANDARD
         int n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), (int)openFlags, out db);
 #else
-        if ((flags & SQLiteOpenFlagsEnum.Create) == 0 && System.IO.File.Exists(strFilename) == false)
+        if ((openFlags & SQLiteOpenFlagsEnum.Create) == 0 && System.IO.File.Exists(strFilename) == false)
           throw new SQLiteException((int)SQLiteErrorCode.CantOpen, strFilename);
 
         int n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
