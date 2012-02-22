@@ -30,6 +30,20 @@ namespace System.Data.SQLite
   internal static class UnsafeNativeMethods
   {
       #region Optional Native SQLite Library Pre-Loading Code
+      //
+      // NOTE: If we are looking for the standard SQLite DLL ("sqlite3.dll"),
+      //       the interop DLL ("SQLite.Interop.dll"), or we are running on the
+      //       .NET Compact Framework, we should include this code (only if the
+      //       feature has actually been enabled).  This code would be totally
+      //       redundant if this module has been bundled into the mixed-mode
+      //       assembly.
+      //
+#if SQLITE_STANDARD || USE_INTEROP_DLL || PLATFORM_COMPACTFRAMEWORK
+
+      //
+      // NOTE: Only compile in the native library pre-load code if the feature
+      //       has been enabled for this build.
+      //
 #if PRELOAD_NATIVE_LIBRARY
 #if !PLATFORM_COMPACTFRAMEWORK
       /// <summary>
@@ -349,6 +363,7 @@ namespace System.Data.SQLite
 
           return IntPtr.Zero;
       }
+#endif
 #endif
       #endregion
 
