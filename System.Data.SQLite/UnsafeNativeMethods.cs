@@ -55,6 +55,10 @@ namespace System.Data.SQLite
 #endif
 
       /////////////////////////////////////////////////////////////////////////
+
+      private static readonly string DllFileExtension = ".dll";
+
+      /////////////////////////////////////////////////////////////////////////
       /// <summary>
       /// Stores the mappings between processor architecture names and platform
       /// names.
@@ -90,11 +94,29 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
-      /// Attempts to initialize this class by pre-loading the native SQLite
-      /// library for the processor architecture of the current process.
+      /// For now, this method simply calls the Initialize method.
       /// </summary>
       static UnsafeNativeMethods()
       {
+          Initialize();
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Attempts to initialize this class by pre-loading the native SQLite
+      /// library for the processor architecture of the current process.
+      /// </summary>
+      internal static void Initialize()
+      {
+#if !PLATFORM_COMPACTFRAMEWORK
+          //
+          // NOTE: If the "NoPreLoadSQLite" environment variable is set, skip
+          //       all our special code and simply return.
+          //
+          if (Environment.GetEnvironmentVariable("No_PreLoadSQLite") != null)
+              return;
+#endif
+
           //
           // TODO: Make sure this list is updated if the supported processor
           //       architecture names and/or platform names changes.
@@ -151,6 +173,42 @@ namespace System.Data.SQLite
 
           return null;
 #endif
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Determines if the dynamic link library file name requires a suffix
+      /// and adds it if necessary.
+      /// </summary>
+      /// <param name="fileName">
+      /// The original dynamic link library file name to inspect.
+      /// </param>
+      /// <returns>
+      /// The dynamic link library file name, possibly modified to include an
+      /// extension.
+      /// </returns>
+      private static string FixUpDllFileName(
+          string fileName
+          )
+      {
+          if (!String.IsNullOrEmpty(fileName))
+          {
+              PlatformID platformId = Environment.OSVersion.Platform;
+
+              if ((platformId == PlatformID.Win32S) ||
+                  (platformId == PlatformID.Win32Windows) ||
+                  (platformId == PlatformID.Win32NT) ||
+                  (platformId == PlatformID.WinCE))
+              {
+                  if (!fileName.EndsWith(DllFileExtension,
+                        StringComparison.InvariantCultureIgnoreCase))
+                  {
+                      return fileName + DllFileExtension;
+                  }
+              }
+          }
+
+          return fileName;
       }
 
       /////////////////////////////////////////////////////////////////////////
@@ -262,7 +320,8 @@ namespace System.Data.SQLite
           // NOTE: If the native SQLite library exists in the base directory
           //       itself, stop now.
           //
-          string fileName = Path.Combine(directory, SQLITE_DLL);
+          string fileName = FixUpDllFileName(Path.Combine(directory,
+              SQLITE_DLL));
 
           if (File.Exists(fileName))
               return IntPtr.Zero;
@@ -284,8 +343,8 @@ namespace System.Data.SQLite
           // NOTE: Build the full path and file name for the native SQLite
           //       library using the processor architecture name.
           //
-          fileName = Path.Combine(Path.Combine(directory,
-              processorArchitecture), SQLITE_DLL);
+          fileName = FixUpDllFileName(Path.Combine(Path.Combine(directory,
+              processorArchitecture), SQLITE_DLL));
 
           //
           // NOTE: If the file name based on the processor architecture name
@@ -309,8 +368,8 @@ namespace System.Data.SQLite
               // NOTE: Build the full path and file name for the native SQLite
               //       library using the platform name.
               //
-              fileName = Path.Combine(Path.Combine(directory, platformName),
-                  SQLITE_DLL);
+              fileName = FixUpDllFileName(Path.Combine(Path.Combine(directory,
+                  platformName), SQLITE_DLL));
 
               //
               // NOTE: If the file does not exist, skip trying to load it.

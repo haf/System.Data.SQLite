@@ -278,6 +278,10 @@ namespace System.Data.SQLite
     /// <param name="connectionString">The connection string to use on the connection</param>
     public SQLiteConnection(string connectionString)
     {
+#if (SQLITE_STANDARD || USE_INTEROP_DLL || PLATFORM_COMPACTFRAMEWORK) && PRELOAD_NATIVE_LIBRARY
+      UnsafeNativeMethods.Initialize();
+#endif
+
 #if !PLATFORM_COMPACTFRAMEWORK
       SQLiteLog.Initialize();
 #endif
