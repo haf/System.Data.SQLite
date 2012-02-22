@@ -57,4 +57,11 @@
   <PropertyGroup Condition="'$(ThrowOnDisposed)' != 'false'">
     <DefineConstants>$(DefineConstants);THROW_ON_DISPOSED</DefineConstants>
   </PropertyGroup>
+
+  <!--
+      NOTE: Attempt to pre-load the native SQLite library?
+  -->
+  <PropertyGroup Condition="'$(PreLoadNativeLibrary)' != 'false'">
+    <DefineConstants>$(DefineConstants);PRELOAD_NATIVE_LIBRARY</DefineConstants>
+  </PropertyGroup>
 </Project>

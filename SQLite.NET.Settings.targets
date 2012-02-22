@@ -114,6 +114,16 @@
               is accessed.
     -->
     <ThrowOnDisposed Condition="'$(ThrowOnDisposed)' == ''">true</ThrowOnDisposed>
+
+    <!--
+        NOTE: *EXPERIMENTAL* Attempt to pre-load the native SQLite library?  By
+              default, this is disabled.  If this is enabled, an attempt will be
+              made to pre-load the native SQLite library appropriate to the
+              processor architecture of the currently running process upon using
+              the component.  This feature is experimental and may be modified
+              or removed in a future release.
+    -->
+    <PreLoadNativeLibrary Condition="'$(PreLoadNativeLibrary)' == ''">false</PreLoadNativeLibrary>
   </PropertyGroup>
 
   <!--
