@@ -46,7 +46,7 @@
     <None Include="props\sqlite3.props">
       <Filter>Property Files</Filter>
     </None>
-    <None Include="props\SQLite.Interop.props">
+    <None Include="props\SQLite.Interop.2010.props">
       <Filter>Property Files</Filter>
     </None>
   </ItemGroup>

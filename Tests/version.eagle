@@ -161,6 +161,9 @@ set patterns [list \
     [appendArgs Value=\" [format %03d $version(build)] \"] \
     [appendArgs Value=\" [string map [list . \\.] $version(full)] \"] \
     [appendArgs Value=\" [string map [list . ,] $version(full)] \"] \
+    [appendArgs Value=\" [format %03d $version(build)] \"] \
+    [appendArgs Value=\" [string map [list . \\.] $version(full)] \"] \
+    [appendArgs Value=\" [string map [list . ,] $version(full)] \"] \
     [appendArgs <INTEROP_BUILD_NUMBER> [format %03d $version(build)] \
         </INTEROP_BUILD_NUMBER>] \
     [appendArgs <INTEROP_MANIFEST_VERSION> [string map [list . \\.] \
@@ -211,12 +214,15 @@ set fileNames [list \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Designer source.extension.vsixmanifest] \
-    [file join SQLite.Interop props SQLite.Interop.vsprops] \
-    [file join SQLite.Interop props SQLite.Interop.vsprops] \
-    [file join SQLite.Interop props SQLite.Interop.vsprops] \
-    [file join SQLite.Interop props SQLite.Interop.props] \
-    [file join SQLite.Interop props SQLite.Interop.props] \
-    [file join SQLite.Interop props SQLite.Interop.props] \
+    [file join SQLite.Interop props SQLite.Interop.2005.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.2005.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.2005.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.2008.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.2008.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.2008.vsprops] \
+    [file join SQLite.Interop props SQLite.Interop.2010.props] \
+    [file join SQLite.Interop props SQLite.Interop.2010.props] \
+    [file join SQLite.Interop props SQLite.Interop.2010.props] \
     [file join SQLite.Interop src win interop.h] \
     [file join System.Data.SQLite AssemblyInfo.cs] \
     [file join System.Data.SQLite AssemblyInfo.cs] \

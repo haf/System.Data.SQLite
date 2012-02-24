@@ -50,7 +50,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="props\sqlite3.props" />
-  <Import Project="props\SQLite.Interop.props" />
+  <Import Project="props\SQLite.Interop.2010.props" />
   <PropertyGroup Condition="('$(Configuration)' == 'DebugNativeOnly' Or
                              '$(Configuration)' == 'ReleaseNativeOnly') And
                             (('$(Platform)' == 'Win32' And
@@ -452,7 +452,7 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Comman
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="props\SQLite.Interop.props" />
+    <None Include="props\SQLite.Interop.2010.props" />
     <None Include="props\sqlite3.props" />
   </ItemGroup>
   <ItemGroup>

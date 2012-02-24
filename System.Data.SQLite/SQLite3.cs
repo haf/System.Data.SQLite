@@ -233,7 +233,7 @@ namespace System.Data.SQLite
         int n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, (int)openFlags, IntPtr.Zero);
 #endif
 
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
         Trace.WriteLine(String.Format("Open: {0}", db));
 #endif
 
@@ -406,7 +406,7 @@ namespace System.Data.SQLite
           len = -1;
 #endif
 
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
           Trace.WriteLine(String.Format("Prepare: {0}", stmt));
 #endif
 

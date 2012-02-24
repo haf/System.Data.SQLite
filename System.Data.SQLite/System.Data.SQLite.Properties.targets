@@ -21,6 +21,18 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Only use functionality available in the .NET Compact Framework 2.0?
+            By default, this is disabled.  This must be enabled to successfully
+            build the project using Visual Studio 2005 and/or the .NET Compact
+            Framework 2.0 (if necessary, it will typically be enabled from
+            within the project file itself).
+  -->
+  <PropertyGroup Condition="'$(IsCompactFramework)' != 'false' And
+                            '$(TargetFrameworkVersion)' == 'v2.0'">
+    <DefineConstants>$(DefineConstants);NET_COMPACT_20</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: For interaction with the native SQLite implementation, use the
             custom build interop DLL (i.e. "SQLite.Interop.DLL")?
   -->

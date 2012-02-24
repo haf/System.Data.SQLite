@@ -738,7 +738,7 @@ namespace System.Data.SQLite
 
       string defaultTypeName = String.Empty;
 
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
       Trace.WriteLine(String.Format(
           "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
           defaultTypeName, typ));
@@ -932,7 +932,7 @@ namespace System.Data.SQLite
 
       DbType defaultDbType = DbType.Object;
 
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
       Trace.WriteLine(String.Format(
           "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
           defaultDbType, Name));

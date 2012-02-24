@@ -1313,7 +1313,7 @@ namespace System.Data.SQLite
       {
         SQLiteBase.CloseConnection(this);
 
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
         try
         {
           Trace.WriteLine(String.Format(
@@ -1328,13 +1328,13 @@ namespace System.Data.SQLite
         return true;
 #endif
       }
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
       catch (SQLiteException e)
 #else
       catch (SQLiteException)
 #endif
       {
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
         try
         {
           Trace.WriteLine(String.Format(
@@ -1389,7 +1389,7 @@ namespace System.Data.SQLite
       {
         SQLiteBase.FinalizeStatement(this);
 
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
         try
         {
           Trace.WriteLine(String.Format(
@@ -1404,13 +1404,13 @@ namespace System.Data.SQLite
         return true;
 #endif
       }
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
       catch (SQLiteException e)
 #else
       catch (SQLiteException)
 #endif
       {
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
         try
         {
           Trace.WriteLine(String.Format(

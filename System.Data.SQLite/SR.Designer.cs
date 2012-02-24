@@ -25,7 +25,9 @@ namespace System.Data.SQLite {
     // with the /str option, or rebuild your VS project.
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+#if !NET_COMPACT_20
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+#endif
     internal class SR {
         
         private static global::System.Resources.ResourceManager resourceMan;

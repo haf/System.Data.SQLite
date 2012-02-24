@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <!--
  *
- * SQLite.Interop.CE.2008.vcproj -
+ * SQLite.Interop.CE.2005.vcproj -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -9,8 +9,8 @@
 -->
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
-	Name="SQLite.Interop.CE.2008"
+	Version="8.00"
+	Name="SQLite.Interop.CE.2005"
 	ProjectGUID="{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -34,7 +34,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -131,7 +131,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -230,7 +230,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -324,7 +324,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -418,7 +418,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -514,7 +514,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -859,7 +859,7 @@
 			Name="Property Files"
 			>
 			<File
-				RelativePath=".\props\SQLite.Interop.2008.vsprops"
+				RelativePath=".\props\SQLite.Interop.2005.vsprops"
 				>
 			</File>
 			<File

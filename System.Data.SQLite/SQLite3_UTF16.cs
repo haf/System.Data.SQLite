@@ -112,7 +112,7 @@ namespace System.Data.SQLite
         int n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
 #endif
 
-#if DEBUG
+#if DEBUG && !NET_COMPACT_20
         Trace.WriteLine(String.Format("Open: {0}", db));
 #endif
 

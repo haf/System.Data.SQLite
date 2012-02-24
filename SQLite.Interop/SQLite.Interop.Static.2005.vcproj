@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <!--
  *
- * SQLite.Interop.2008.vcproj -
+ * SQLite.Interop.Static.2005.vcproj -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -9,9 +9,9 @@
 -->
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
-	Name="SQLite.Interop.2008"
-	ProjectGUID="{53784BC1-A8BC-4AC8-8A3E-158D6807345A}"
+	Version="8.00"
+	Name="SQLite.Interop.Static.2005"
+	ProjectGUID="{490CBC51-A3B2-4397-89F9-16E858DCB4F8}"
 	RootNamespace="SQLite.Interop"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
@@ -29,10 +29,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -53,11 +53,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES)"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES)"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -125,10 +125,10 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -150,11 +150,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;x64;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES)"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;x64;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES)"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -222,10 +222,10 @@
 		</Configuration>
 		<Configuration
 			Name="DebugNativeOnly|Win32"
-			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -246,11 +246,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES)"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES)"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -312,10 +312,10 @@
 		</Configuration>
 		<Configuration
 			Name="DebugNativeOnly|x64"
-			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -337,11 +337,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;x64;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES)"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;x64;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES)"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -403,10 +403,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -430,10 +430,10 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES)"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES)"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -501,10 +501,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -529,10 +529,10 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;x64;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES)"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;x64;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES)"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -600,10 +600,10 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNativeOnly|Win32"
-			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -627,10 +627,10 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES)"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES)"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -692,10 +692,10 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNativeOnly|x64"
-			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
+			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2005.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -720,10 +720,10 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;x64;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES)"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;x64;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES)"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -1169,7 +1169,7 @@
 			Name="Property Files"
 			>
 			<File
-				RelativePath=".\props\SQLite.Interop.2008.vsprops"
+				RelativePath=".\props\SQLite.Interop.2005.vsprops"
 				>
 			</File>
 			<File

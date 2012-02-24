@@ -127,8 +127,9 @@
       <li>&lt;root&gt;\Membership\Properties\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\SQLite.Designer\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\SQLite.Designer\source.extension.vsixmanifest</li>
-      <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.vsprops</li>
-      <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.props</li>
+      <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2005.vsprops</li>
+      <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2008.vsprops</li>
+      <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2010.props</li>
       <li>&lt;root&gt;\SQLite.Interop\src\win\interop.h</li>
       <li>&lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\System.Data.SQLite\SQLite3.cs</li>

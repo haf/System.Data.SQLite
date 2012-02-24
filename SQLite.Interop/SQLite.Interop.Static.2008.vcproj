@@ -32,7 +32,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -128,7 +128,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -225,7 +225,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -315,7 +315,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -406,7 +406,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -504,7 +504,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -603,7 +603,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -695,7 +695,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)Static"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -1169,7 +1169,7 @@
 			Name="Property Files"
 			>
 			<File
-				RelativePath=".\props\SQLite.Interop.vsprops"
+				RelativePath=".\props\SQLite.Interop.2008.vsprops"
 				>
 			</File>
 			<File
