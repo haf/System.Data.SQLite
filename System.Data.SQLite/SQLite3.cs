@@ -24,6 +24,8 @@ namespace System.Data.SQLite
   /// </summary>
   internal class SQLite3 : SQLiteBase
   {
+    private static object syncRoot = new object();
+
     //
     // NOTE: This is the public key for the System.Data.SQLite assembly.  If you change the
     //       SNK file, you will need to change this as well.
@@ -1391,34 +1393,41 @@ namespace System.Data.SQLite
     /// </returns>
     internal static bool StaticIsInitialized()
     {
-#if !PLATFORM_COMPACTFRAMEWORK
         //
-        // NOTE: Save the state of the logging class and then restore it
-        //       after we are done to avoid logging too many false errors.
+        // BUGFIX: Prevent races with other threads for this entire block, due
+        //         to the try/finally semantics.  See ticket [72905c9a77].
         //
-        bool savedEnabled = SQLiteLog.Enabled;
-        SQLiteLog.Enabled = false;
-
-        try
+        lock (syncRoot)
         {
-#endif
-            //
-            // NOTE: This method [ab]uses the fact that SQLite will always
-            //       return SQLITE_ERROR for any unknown configuration option
-            //       *unless* the SQLite library has already been initialized.
-            //       In that case it will always return SQLITE_MISUSE.
-            //
-            int rc = UnsafeNativeMethods.sqlite3_config(
-                (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE, null, (IntPtr)0);
-
-            return (rc == /* SQLITE_MISUSE */ 21);
 #if !PLATFORM_COMPACTFRAMEWORK
-        }
-        finally
-        {
-            SQLiteLog.Enabled = savedEnabled;
-        }
+            //
+            // NOTE: Save the state of the logging class and then restore it
+            //       after we are done to avoid logging too many false errors.
+            //
+            bool savedEnabled = SQLiteLog.Enabled;
+            SQLiteLog.Enabled = false;
+
+            try
+            {
 #endif
+                //
+                // NOTE: This method [ab]uses the fact that SQLite will always
+                //       return SQLITE_ERROR for any unknown configuration option
+                //       *unless* the SQLite library has already been initialized.
+                //       In that case it will always return SQLITE_MISUSE.
+                //
+                int rc = UnsafeNativeMethods.sqlite3_config(
+                    (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE, null, (IntPtr)0);
+
+                return (rc == /* SQLITE_MISUSE */ 21);
+#if !PLATFORM_COMPACTFRAMEWORK
+            }
+            finally
+            {
+                SQLiteLog.Enabled = savedEnabled;
+            }
+#endif
+        }
     }
 
     /// <summary>
