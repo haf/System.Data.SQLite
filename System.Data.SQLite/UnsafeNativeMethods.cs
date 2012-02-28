@@ -201,7 +201,7 @@ namespace System.Data.SQLite
                   (platformId == PlatformID.WinCE))
               {
                   if (!fileName.EndsWith(DllFileExtension,
-                        StringComparison.InvariantCultureIgnoreCase))
+                          StringComparison.OrdinalIgnoreCase))
                   {
                       return fileName + DllFileExtension;
                   }

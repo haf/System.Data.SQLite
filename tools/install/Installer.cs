@@ -2850,7 +2850,7 @@ namespace System.Data.SQLite
                     }
                     else if (String.Equals(
                             coreImageRuntimeVersion, CLRv2ImageRuntimeVersion,
-                            StringComparison.InvariantCulture))
+                            StringComparison.Ordinal))
                     {
                         //
                         // NOTE: For the CLR v2.0 runtime, make sure we disable
@@ -2874,7 +2874,7 @@ namespace System.Data.SQLite
                     }
                     else if (String.Equals(
                             coreImageRuntimeVersion, CLRv4ImageRuntimeVersion,
-                            StringComparison.InvariantCulture))
+                            StringComparison.Ordinal))
                     {
                         //
                         // NOTE: For the CLR v4.0 runtime, make sure we disable
@@ -4412,21 +4412,21 @@ namespace System.Data.SQLite
             }
 
             if (!String.Equals(addElement.GetAttribute("name"),
-                    name, StringComparison.InvariantCulture))
+                    name, StringComparison.Ordinal))
             {
                 addElement.SetAttribute("name", name);
                 dirty = true;
             }
 
             if (!String.Equals(addElement.GetAttribute("invariant"),
-                    invariant, StringComparison.InvariantCulture))
+                    invariant, StringComparison.Ordinal))
             {
                 addElement.SetAttribute("invariant", invariant);
                 dirty = true;
             }
 
             if (!String.Equals(addElement.GetAttribute("description"),
-                    description, StringComparison.InvariantCulture))
+                    description, StringComparison.Ordinal))
             {
                 addElement.SetAttribute("description", description);
                 dirty = true;
@@ -4436,7 +4436,7 @@ namespace System.Data.SQLite
                 typeName, assemblyName);
 
             if (!String.Equals(addElement.GetAttribute("type"),
-                    fullTypeName, StringComparison.InvariantCulture))
+                    fullTypeName, StringComparison.Ordinal))
             {
                 addElement.SetAttribute("type", fullTypeName);
                 dirty = true;
