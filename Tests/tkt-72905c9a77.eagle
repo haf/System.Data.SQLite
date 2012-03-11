@@ -1,0 +1,276 @@
+###############################################################################
+#
+# tkt-72905c9a77.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require EagleLibrary
+package require EagleTest
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+#
+# NOTE: This value is needed as part of the test result; therefore, it must be
+#       set outside of the test setup.
+#
+set id [object invoke Interpreter.GetActive NextId]
+
+###############################################################################
+
+#
+# NOTE: *WARNING* This test has been extremely carefully designed; however, it
+#       is still quite sensitive to machine timing, resource availability, etc.
+#       This test MAY pass even if the bug under test has not been fixed (or
+#       has been regressed somehow).  However, due to the unpredictable nature
+#       of race conditions, it really is the best that can be done.
+#
+runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
+  set version [file version [getBinaryFileName System.Data.SQLite.dll]]
+  set fileName tkt-72905c9a77-1.1.db
+} -body {
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Reflection;
+    using System.Text;
+    using System.Threading;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static string GetTraceOutput()
+        {
+          //
+          // NOTE: Create a memory stream to capture all the trace output for
+          //       this test.
+          //
+          MemoryStream memoryStream = new MemoryStream();
+
+          //
+          // NOTE: Create the trace listener using the memory stream we just
+          //       created.
+          //
+          using (TraceListener listener = new TextWriterTraceListener(
+              memoryStream))
+          {
+            //
+            // NOTE: Add the trace listener to the collection of active trace
+            //       listeners (for this application domain).
+            //
+            Trace.Listeners.Add(listener);
+
+            //
+            // NOTE: Lookup the type for the private SQLite3 class in the
+            //       System.Data.SQLite assembly.  We need the type in order to
+            //       lookup the method used in this test (via reflection).
+            //       This is only necessary because the method under test is
+            //       private and cannot normally be executed from C#.
+            //
+            Type type = Type.GetType(
+                "System.Data.SQLite.SQLite3, System.Data.SQLite, " +
+                "Version=${version}, Culture=neutral, " +
+                "PublicKeyToken=db937bc2d44ff139");
+
+            //
+            // NOTE: Grab the method object for the private method we need for
+            //       this test.
+            //
+            MethodInfo methodInfo = type.GetMethod("StaticIsInitialized",
+                BindingFlags.Static | BindingFlags.NonPublic);
+
+            //
+            // NOTE: Create the event that will be used to synchronize all the
+            //       created threads so that they start doing their actual test
+            //       "work" at approximately the same time.
+            //
+            using (ManualResetEvent goEvent = new ManualResetEvent(false))
+            {
+              //
+              // NOTE: Create 4 threads for each processor on the machine.
+              //       Under normal circumstances, this should give us a good
+              //       chance of triggering the race condition being tested.
+              //
+              int count = 4 * Environment.ProcessorCount;
+
+              //
+              // NOTE: Create a random number generator suitable for waiting a
+              //       random number of milliseconds between each attempt to
+              //       cause the race condition on a given thread.
+              //
+              Random random = new Random();
+
+              //
+              // NOTE: Create a (reusable) delegate that will contain the code
+              //       that each created thread is to execute.
+              //
+              ThreadStart threadStart = delegate()
+              {
+                try
+                {
+                  //
+                  // NOTE: Wait forever for the "GO" signal so that all threads
+                  //       can start working at approximately the same time.
+                  //
+                  goEvent.WaitOne();
+
+                  //
+                  // NOTE: Force the SQLiteLog.StaticIsInitialized method to
+                  //       be repeatedly called on every thread right away to
+                  //       thoroughly test its locking semantics.  Also, use a
+                  //       random delay, in milliseconds, between zero and the
+                  //       number of test threads squared after each attempt.
+                  //
+                  for (int index = 0; index < (count * count); index++)
+                  {
+                    methodInfo.Invoke(null, null);
+                    Thread.Sleep(random.Next(0, (count * count)));
+                  }
+
+                  //
+                  // NOTE: Create and open a connection and use it to log a
+                  //       test message just to make sure that the logging
+                  //       system is initialized and in working order.
+                  //
+                  using (SQLiteConnection connection = new SQLiteConnection(
+                      "Data Source=${dataSource};"))
+                  {
+                    connection.Open();
+                    connection.LogMessage(0, "TEST ${id}");
+                  }
+                }
+                catch (Exception e)
+                {
+                  //
+                  // NOTE: We caught an exception.  Since this will impact the
+                  //       captured trace output, this will cause the test to
+                  //       fail (just as it should).
+                  //
+                  Trace.WriteLine(String.Format("CAUGHT: {0}", e));
+                }
+              };
+
+              //
+              // NOTE: Create the array of thread objects.
+              //
+              Thread\[\] thread = new Thread\[count\];
+
+              //
+              // NOTE: Create each of the test threads with a suitable stack
+              //       size.  We must specify a stack size here because the
+              //       default one for the process would be the same as the
+              //       parent executable (the Eagle shell), which is 16MB,
+              //       too large to be useful.
+              //
+              for (int index = 0; index < count; index++)
+              {
+                thread\[index\] = new Thread(threadStart, 1048576);
+
+                //
+                // NOTE: Name each thread for a better debugging experience.
+                //
+                thread\[index\].Name = String.Format(
+                    "[file rootname ${fileName}] #{0}", index);
+              }
+
+              //
+              // NOTE: Force logging to be initialized now; otherwise, there is
+              //       no way for the native SQLite library to impact the trace
+              //       listener we are monitoring for output.
+              //
+              SQLiteLog.Initialize();
+
+              //
+              // NOTE: Start all the threads now.  They should not actually do
+              //       any of the test "work" until we signal the event.
+              //
+              for (int index = 0; index < count; index++)
+                thread\[index\].Start();
+
+              //
+              // NOTE: Send the signal that all threads should start doing
+              //       their test "work" now.
+              //
+              goEvent.Set(); /* GO */
+
+              //
+              // NOTE: Wait forever for each thread to finish its test "work"
+              //       and then die.
+              //
+              for (int index = 0; index < count; index++)
+                thread\[index\].Join();
+            }
+
+            //
+            // NOTE: *REQUIRED* Force all the trace listeners to be flushed to
+            //       disk now so that we do not lose any output.  Without this
+            //       method call, loss of trace output was observed.
+            //
+            Trace.Flush();
+
+            //
+            // NOTE: The trace listener used by this test can be removed now
+            //       as all the trace output should have been flushed to the
+            //       memory stream now.
+            //
+            Trace.Listeners.Remove(listener);
+
+            //
+            // NOTE: Return a string containing all the trace output we saw
+            //       (from all threads) during the above test code.
+            //
+            return Encoding.UTF8.GetString(memoryStream.ToArray());
+          }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetTraceOutput
+      } result] : [set result ""]}] [string map [list \r\n \n] $result]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors dataSource fileName version
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-match regexp -result [appendArgs "^Ok\
+System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{" [string repeat \
+"SQLite message \\(0\\): TEST $id
+" [expr {4 * [info processors]}]] "\\}\$"]}
+
+###############################################################################
+
+unset -nocomplain id
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

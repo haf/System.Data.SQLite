@@ -178,6 +178,8 @@ runTest {test data-1.4 {GetSchema with ReservedWords} -setup {
           }
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         public static void Main()
         {
           // do nothing.
@@ -237,6 +239,8 @@ runTest {test data-1.5 {GetSchema with ForeignKeys} -setup {
             return connection.GetSchema("ForeignKeys").Rows;
           }
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         public static void Main()
         {
@@ -335,6 +339,8 @@ runTest {test data-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
           }
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         public static void Main()
         {
           // do nothing.
@@ -398,7 +404,7 @@ runTest {test data-1.7 {properly closed database file (non-query)} -setup {
     BEGIN EXCLUSIVE TRANSACTION; \
     CREATE TABLE t1(x INTEGER); \
     INSERT INTO t1 (x) VALUES(1); \
-    SELECT * FROM t1; \
+    SELECT x FROM t1; \
   }
 
   unset -nocomplain results errors
@@ -456,7 +462,7 @@ runTest {test data-1.8 {properly closed database file (reader #1)} -setup {
     BEGIN EXCLUSIVE TRANSACTION; \
     CREATE TABLE t1(x INTEGER); \
     INSERT INTO t1 (x) VALUES(1); \
-    SELECT * FROM t1; \
+    SELECT x FROM t1; \
   }
 
   unset -nocomplain results errors
@@ -517,7 +523,7 @@ runTest {test data-1.9 {properly closed database file (reader #2)} -setup {
     BEGIN EXCLUSIVE TRANSACTION; \
     CREATE TABLE t1(x INTEGER); \
     INSERT INTO t1 (x) VALUES(1); \
-    SELECT * FROM t1; \
+    SELECT x FROM t1; \
   }
 
   unset -nocomplain results errors
@@ -868,6 +874,8 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
           return builder.ToString();
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         public static void Main()
         {
           // do nothing.
@@ -942,6 +950,8 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
 
           return String.Format("{0}, {1}", propertyValue, builder);
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         public static void Main()
         {
