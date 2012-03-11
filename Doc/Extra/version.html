@@ -46,8 +46,10 @@
     <p><b>1.0.80.0 - April XX, 2012</b></p>
     <ul>
       <li>In the SQLiteFunction class, when calling user-provided methods from a delegate called by native code, avoid throwing exceptions, optionally tracing the caught exceptions. Fix for <a href="http://system.data.sqlite.org/index.html/info/8a426d12eb">[8a426d12eb]</a>.</li>
+      <li>Add Visual Studio 2005 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
       <li>Add Visual Studio 2005 support to the redesigned designer support installer.</li>
-      <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process.  For now, this feature is disabled by default at compile-time.</li>
+      <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process.  This feature is now enabled by default at compile-time.</li>
+      <li>Acquire and hold a static data lock while checking if the native SQLite library has been initialized to prevent a subtle race condition that can result in superfluous error messages. Fix for <a href="http://system.data.sqlite.org/index.html/info/72905c9a77">[72905c9a77]</a>.</li>
       <li>Support tracing of all parameter binding activity and use the connection flags to control what is traced.</li>
       <li>When converting a DateTime instance of an &quot;Unspecified&quot; kind to a string, use the same kind as the connection, if available.</li>
       <li>Add static ToUnixEpoch method to the SQLiteConvert class to convert a DateTime value to the number of whole seconds since the Unix epoch.</li>
