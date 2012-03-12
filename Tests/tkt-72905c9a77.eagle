@@ -33,10 +33,11 @@ set id [object invoke Interpreter.GetActive NextId]
 #       is still quite sensitive to machine timing, resource availability, etc.
 #       This test MAY pass even if the bug under test has not been fixed (or
 #       has been regressed somehow).  However, due to the unpredictable nature
-#       of race conditions, it really is the best that can be done.
+#       of race conditions, it really is the best that can be done.  This test
+#       will only work as intended if the version of System.Data.SQLite being
+#       tested is 1.0.77.0 or higher.
 #
 runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
-  set version [file version [getBinaryFileName System.Data.SQLite.dll]]
   set fileName tkt-72905c9a77-1.1.db
 } -body {
   set dataSource [file join [getDatabaseDirectory] $fileName]
@@ -78,20 +79,24 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
             Trace.Listeners.Add(listener);
 
             //
-            // NOTE: Lookup the type for the private SQLite3 class in the
-            //       System.Data.SQLite assembly.  We need the type in order to
-            //       lookup the method used in this test (via reflection).
-            //       This is only necessary because the method under test is
-            //       private and cannot normally be executed from C#.
+            // NOTE: Attempt to lookup the type for the private SQLite3 class
+            //       in the System.Data.SQLite assembly.  We need the type in
+            //       order to lookup the primary method used for this test (via
+            //       reflection).  This is only necessary because the method
+            //       under test is private and cannot normally be executed from
+            //       C# directly.  If this fails, the following statement will
+            //       throw a NullReferenceException, which is fine as that will
+            //       cause the whole test to fail.
             //
-            Type type = Type.GetType(
-                "System.Data.SQLite.SQLite3, System.Data.SQLite, " +
-                "Version=${version}, Culture=neutral, " +
-                "PublicKeyToken=db937bc2d44ff139");
+            Type type = Type.GetType("System.Data.SQLite.SQLite3, " +
+                "System.Data.SQLite");
 
             //
-            // NOTE: Grab the method object for the private method we need for
-            //       this test.
+            // NOTE: Attempt to lookup the method object for the private method
+            //       we need for this test.  If this fails, the first attempt
+            //       to invoke the method using this variable will throw a
+            //       NullReferenceException, which is fine as that will cause
+            //       the whole test to fail.
             //
             MethodInfo methodInfo = type.GetMethod("StaticIsInitialized",
                 BindingFlags.Static | BindingFlags.NonPublic);
@@ -258,7 +263,7 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result code results errors dataSource fileName version
+  unset -nocomplain result code results errors dataSource fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -match regexp -result [appendArgs "^Ok\
