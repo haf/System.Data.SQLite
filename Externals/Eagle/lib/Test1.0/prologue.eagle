@@ -277,6 +277,22 @@ if {![info exists no([file tail [info script]])]} then {
       #
       set test_exit_on_complete $test_flags(-exitOnComplete)
     }
+
+    if {[info exists test_flags(-preTest)] && \
+        [string length $test_flags(-preTest)] > 0} then {
+      #
+      # NOTE: Set the pre-test script to the one provided by the command line.
+      #
+      set test_script(pre) $test_flags(-preTest)
+    }
+
+    if {[info exists test_flags(-postTest)] && \
+        [string length $test_flags(-postTest)] > 0} then {
+      #
+      # NOTE: Set the pre-test script to the one provided by the command line.
+      #
+      set test_script(post) $test_flags(-postTest)
+    }
   }
 
   #
@@ -313,20 +329,49 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: Show both the pre-test and post-test scripts now, prior to actually
+  #       evaluating either of them (even if their use has been disabled).
+  #
+  tputs $test_channel [appendArgs "---- pre-test script: " \
+      [expr {[info exists test_script(pre)] && \
+      [string length $test_script(pre)] > 0 ? \
+      [appendArgs \" $test_script(pre) \"] : "<none>"}] \n]
+
+  tputs $test_channel [appendArgs "---- post-test script: " \
+      [expr {[info exists test_script(post)] && \
+      [string length $test_script(post)] > 0 ? \
+      [appendArgs \" $test_script(post) \"] : "<none>"}] \n]
+
+  #
   # NOTE: Are we being prevented from evaluating the "pre-test" script?
   #
   if {![info exists no(preTest)]} then {
     #
     # NOTE: Evaluate the specified pre-test script now, if any.
     #
-    if {[info exists test_flags(-preTest)] && \
-        [string length $test_flags(-preTest)] > 0} then {
+    if {[info exists test_script(pre)] && \
+        [string length $test_script(pre)] > 0} then {
       #
       # TODO: Perhaps use [uplevel] here instead of [eval].  For now, it does
       #       not matter since we enforce this file being evaluated at the
       #       top-level.
       #
-      eval $test_flags(-preTest)
+      if {[catch $test_script(pre) test_script(pre,result)]} then {
+        #
+        # NOTE: Make 100% sure, even in "quiet" mode, that this script error
+        #       gets into the test log file.
+        #
+        tputs $test_channel [appendArgs "---- pre-test script error: " \
+            $test_script(pre,result) \n]
+
+        #
+        # NOTE: The pre-test script failed in some way.  This is considered
+        #       to be an overall failure of the test suite; therefore, raise
+        #       the error now that we are sure it has been recorded in the
+        #       test log file.
+        #
+        error $test_script(pre,result)
+      }
     }
   }
 
@@ -934,6 +979,18 @@ if {![info exists no([file tail [info script]])]} then {
         # NOTE: For tests "tclLoad-1.5" and "tclLoad-1.6".
         #
         checkForCompileOption $test_channel TCL_THREADS
+      }
+
+      #
+      # NOTE: Has runtime license checking support been disabled (at
+      #       compile-time).  This only applies to third-party plugins
+      #       and applications.
+      #
+      if {![info exists no(compileLicensing)]} then {
+        #
+        # NOTE: This is not currently used by any tests.
+        #
+        checkForCompileOption $test_channel LICENSING
       }
     }
 
@@ -1643,10 +1700,37 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
-    # NOTE: For test "sql-1.2".
+    # NOTE: For tests "sql-1.2", "sql-1.4", "sql-1.5", "sql-1.6", "sql-1.7",
+    #       "sql-1.8", and "sql-1.9".
     #
     if {![info exists no(sqlite3.dll)]} then {
       checkForFile $test_channel [file join $bin_path sqlite3.dll]
+
+      #
+      # NOTE: Did we manage to find the native SQLite library?  If not, do we
+      #       at least know the machine type?
+      #
+      if {![haveConstraint file_sqlite3.dll] && \
+          [info exists tcl_platform(machine)]} then {
+        #
+        # NOTE: Ok, now try to check for the machine specific native SQLite
+        #       library.
+        #
+        checkForFile $test_channel [file join $bin_path [machineToPlatform \
+            $tcl_platform(machine) true] sqlite3.dll]
+
+        #
+        # NOTE: Did we manage to find the native SQLite library yet?
+        #
+        if {![haveConstraint file_sqlite3.dll]} then {
+          #
+          # NOTE: Ok, now try to check for the platform specific native SQLite
+          #       library.
+          #
+          checkForFile $test_channel [file join $bin_path [machineToPlatform \
+              $tcl_platform(machine) false] sqlite3.dll]
+        }
+      }
     }
 
     if {![info exists no(System.Data.SQLite.dll)]} then {
@@ -1664,6 +1748,10 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {![info exists no(platform)]} then {
     checkForPlatform $test_channel
+  }
+
+  if {![info exists no(windowsCommandProcessor)]} then {
+    checkForWindowsCommandProcessor $test_channel cmd.exe
   }
 
   if {![info exists no(version)]} then {

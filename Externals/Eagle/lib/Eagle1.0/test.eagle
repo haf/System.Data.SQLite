@@ -58,7 +58,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Return the WoW64 registry key name because we are running on a
       #       64-bit operating system and the caller specifically requested
-      #       the Win32 registry key name.
+      #       the WoW64 registry key name.
       #
       return Software\\Wow6432Node
     } else {
@@ -265,7 +265,7 @@ namespace eval ::Eagle {
       }
     }
 
-    if {[isEagle]} then {
+    if {[isEagle] && [llength [info commands object]] > 0} then {
       #
       # NOTE: Eagle fallback, use whatever is reported by the
       #       underlying framework and/or operating system.
@@ -850,7 +850,7 @@ namespace eval ::Eagle {
   }
 
   proc formatDecimal { value {places 4} } {
-    if {[isEagle]} then {
+    if {[isEagle] && [llength [info commands object]] > 0} then {
       #
       # HACK: This works; however, in order to do this kind of thing cleanly,
       #       we really need the Tcl [format] command.
@@ -1227,6 +1227,30 @@ namespace eval ::Eagle {
     }
   }
 
+  proc machineToPlatform { machine {architecture false} } {
+    #
+    # NOTE: Cannot use "-nocase" option here because Tcl 8.4 does not
+    #       support it (i.e. because it is pre-TIP #241).
+    #
+    switch -exact -- [string tolower $machine] {
+      amd64 {
+        return x64
+      }
+      intel {
+        if {!$architecture && \
+            [info exists ::tcl_platform(platform)] && \
+            $::tcl_platform(platform) eq "windows"} then {
+          return Win32
+        } else {
+          return x86
+        }
+      }
+      default {
+        return unknown
+      }
+    }
+  }
+
   if {[isEagle]} then {
     ###########################################################################
     ############################ BEGIN Eagle ONLY #############################
@@ -1542,24 +1566,6 @@ namespace eval ::Eagle {
       }]
     }
 
-    proc machineToPlatform { machine } {
-      switch -exact -nocase -- $machine {
-        amd64 {
-          return x64
-        }
-        intel {
-          if {$::tcl_platform(platform) eq "windows"} then {
-            return Win32
-          } else {
-            return x86
-          }
-        }
-        default {
-          return unknown
-        }
-      }
-    }
-
     proc getGarudaDll {} {
       #
       # NOTE: Get the Garuda DLL of the same platform (i.e. machine type)
@@ -1658,10 +1664,39 @@ namespace eval ::Eagle {
       if {![file exists $::test_path] || \
           ![file isdirectory $::test_path]} then {
         #
+        # NOTE: Try the source release directory structure again; this time,
+        #       assume only the embedded script library was used.
+        #
+        set ::test_path [file join [info base] Library Tests]
+      }
+
+      if {![file exists $::test_path] || \
+          ![file isdirectory $::test_path]} then {
+        #
         # NOTE: Try for the test package directory.
         #
         set ::test_path [file join [file normalize [file dirname \
             [file dirname [info script]]]] [appendArgs Test \
+            [info engine Version]]]
+      }
+
+      if {![file exists $::test_path] || \
+          ![file isdirectory $::test_path]} then {
+        #
+        # NOTE: Try for the test package directory again; this time, use the
+        #       base path and assume the source release directory structure.
+        #
+        set ::test_path [file join [info base] lib [appendArgs Test \
+            [info engine Version]]]
+      }
+
+      if {![file exists $::test_path] || \
+          ![file isdirectory $::test_path]} then {
+        #
+        # NOTE: Try for the test package directory again; this time, use the
+        #       base path.
+        #
+        set ::test_path [file join [info base] [appendArgs Test \
             [info engine Version]]]
       }
 
@@ -1675,6 +1710,15 @@ namespace eval ::Eagle {
         #
         set ::test_path [file join [file normalize [file dirname \
             [file dirname [info library]]]] Tests]
+      }
+
+      if {![file exists $::test_path] || \
+          ![file isdirectory $::test_path]} then {
+        #
+        # NOTE: Fallback to using the base directory and checking for a
+        #       "Tests" directory beneath it.
+        #
+        set ::test_path [file join [info base] Tests]
       }
     }
 
@@ -1764,7 +1808,7 @@ namespace eval ::Eagle {
         runTestEpilogue runTest runAllTests fixConstraints sourceIfValid \
         isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
         returnInfoScript tputs formatDecimal formatList configureTcltest \
-        tsource testShim] false false
+        machineToPlatform tsource testShim] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

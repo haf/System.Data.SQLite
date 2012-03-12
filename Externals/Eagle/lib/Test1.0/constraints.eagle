@@ -23,7 +23,15 @@ namespace eval ::Eagle {
   proc checkForPlatform { channel } {
     tputs $channel "---- checking for platform... "
 
-    addConstraint $::tcl_platform(platform)
+    if {[info exists ::tcl_platform(platform)]} then {
+      addConstraint $::tcl_platform(platform)
+
+      tputs $channel [appendArgs $::tcl_platform(platform) \n]
+    } else {
+      tputs $channel [appendArgs unknown \n]
+    }
+
+    ###########################################################################
 
     if {![isEagle]} then {
       #
@@ -36,7 +44,7 @@ namespace eval ::Eagle {
       # NOTE: Add the necessary constraints for each version
       #       of Mono we know about.
       #
-      foreach version [list 20 22 24 26 28 210 30] {
+      foreach version [list 20 22 24 26 28 210 212 30] {
         addConstraint [appendArgs monoToDo $version]
         addConstraint [appendArgs monoBug $version]
         addConstraint [appendArgs monoCrash $version]
@@ -46,8 +54,39 @@ namespace eval ::Eagle {
         addConstraint $constraint; # running in Tcl.
       }
     }
+  }
+
+  proc checkForWindowsCommandProcessor { channel pattern {constraint ""} } {
+    tputs $channel "---- checking for Windows Command Processor... "
 
-    tputs $channel [appendArgs $::tcl_platform(platform) \n]
+    if {[info exists ::tcl_platform(platform)] && \
+        $::tcl_platform(platform) eq "windows"} then {
+      #
+      # NOTE: Grab the "ComSpec" from the Windows environment and make sure it
+      #       matches the file pattern supplied by the caller (e.g. "cmd.exe").
+      #
+      if {[info exists ::env(ComSpec)] && \
+          [string match -nocase $pattern [file tail $::env(ComSpec)]]} then {
+        #
+        # NOTE: We are running with a matching command processor.
+        #
+        if {[string length $constraint] > 0} then {
+          addConstraint [appendArgs comSpec_ $constraint]
+        } else {
+          addConstraint [appendArgs comSpec_ \
+              [string map [list * _ - _ ? _ \[ _ \\ _ \] _] $pattern]]
+        }
+
+        tputs $channel [appendArgs "yes (\"" $::env(ComSpec) "\")\n"]
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
+      }
+    }
+
+    tputs $channel no\n
   }
 
   proc checkForEagle { channel } {
@@ -385,7 +424,8 @@ namespace eval ::Eagle {
       #
       # NOTE: Use the appropriate environment variable for the platform.
       #
-      if {$::tcl_platform(platform) eq "windows"} then {
+      if {[info exists ::tcl_platform(platform)] && \
+          $::tcl_platform(platform) eq "windows"} then {
         set pathName PATH
       } else {
         #
@@ -412,7 +452,8 @@ namespace eval ::Eagle {
         #
         if {[info exists ::tcl_platform(pathSeparator)]} then {
           set separator $::tcl_platform(pathSeparator)
-        } elseif {$::tcl_platform(platform) eq "windows"} then {
+        } elseif {[info exists ::tcl_platform(platform)] && \
+            $::tcl_platform(platform) eq "windows"} then {
           set separator \;
         } else {
           set separator :
@@ -774,9 +815,9 @@ namespace eval ::Eagle {
     proc checkForStrongName { channel } {
       tputs $channel "---- checking for strong name... "
 
-      set strongName [object invoke Interpreter.GetActive GetStrongName]
-
-      if {[string length $strongName] > 0} then {
+      if {[catch {object invoke Interpreter.GetActive GetStrongName} \
+              strongName] == 0 && \
+          [string length $strongName] > 0} then {
         #
         # NOTE: Yes, it appears that the core library was signed with a
         #       strong name key.
@@ -792,9 +833,9 @@ namespace eval ::Eagle {
     proc checkForCertificate { channel } {
       tputs $channel "---- checking for certificate... "
 
-      set certificate [object invoke Interpreter.GetActive GetCertificate]
-
-      if {[string length $certificate] > 0} then {
+      if {[catch {object invoke Interpreter.GetActive GetCertificate} \
+              certificate] == 0 && \
+          [string length $certificate] > 0} then {
         #
         # NOTE: Yes, it appears that the core library was signed with a
         #       code-signing certificate.
@@ -837,9 +878,9 @@ namespace eval ::Eagle {
     proc checkForPrimaryThread { channel } {
       tputs $channel "---- checking for primary thread... "
 
-      set threadId [object invoke Interpreter.GetActive ThreadId]
-
-      if {[info tid] == $threadId} then {
+      if {[catch {object invoke Interpreter.GetActive ThreadId} \
+              threadId] == 0 && \
+          [info tid] == $threadId} then {
         addConstraint primaryThread
 
         tputs $channel [appendArgs "yes (" $threadId ")\n"]
@@ -851,9 +892,8 @@ namespace eval ::Eagle {
     proc checkForDefaultAppDomain { channel } {
       tputs $channel "---- checking for default application domain... "
 
-      set appDomain [object invoke AppDomain CurrentDomain]
-
-      if {[string length $appDomain] > 0} then {
+      if {[catch {object invoke AppDomain CurrentDomain} appDomain] == 0 && \
+          [string length $appDomain] > 0} then {
         if {[object invoke $appDomain IsDefaultAppDomain]} then {
           addConstraint defaultAppDomain
 
@@ -1008,6 +1048,13 @@ namespace eval ::Eagle {
               if {$majorVersion > 2 || $minorVersion > 10} then {
                 lappend monoVersions 210
               }
+
+              #
+              # NOTE: Check for any Mono version higher than 2.12.
+              #
+              if {$majorVersion > 2 || $minorVersion > 12} then {
+                lappend monoVersions 212
+              }
             }
 
             #
@@ -1046,7 +1093,7 @@ namespace eval ::Eagle {
           #       necessary constraints for each version of Mono we know
           #       about.
           #
-          foreach monoVersion [list 20 22 24 26 28 210 30] {
+          foreach monoVersion [list 20 22 24 26 28 210 212 30] {
             addConstraint [appendArgs monoToDo $monoVersion]
             addConstraint [appendArgs monoBug $monoVersion]
             addConstraint [appendArgs monoCrash $monoVersion]
@@ -1127,13 +1174,11 @@ namespace eval ::Eagle {
       #
       # NOTE: Grab the current thread culture.
       #
-      set culture [object invoke System.Threading.Thread.CurrentThread \
-          CurrentCulture]
-
-      set culture [object invoke Eagle._Components.Private.FormatOps \
-          CultureName $culture false]
-
-      if {[string length $culture] > 0} then {
+      if {[catch {object invoke System.Threading.Thread.CurrentThread \
+              CurrentCulture} culture] == 0 && \
+          [catch {object invoke Eagle._Components.Private.FormatOps \
+              CultureName $culture false} culture] == 0 && \
+          [string length $culture] > 0} then {
         #
         # NOTE: The culture information is present, use it and show it.
         #
@@ -1149,7 +1194,8 @@ namespace eval ::Eagle {
     proc checkForQuiet { channel } {
       tputs $channel "---- checking for quiet... "
 
-      if {[object invoke Interpreter.GetActive Quiet]} then {
+      if {[catch {object invoke Interpreter.GetActive Quiet} quiet] == 0 && \
+          $quiet} then {
         #
         # NOTE: Yes, quiet mode is enabled.
         #
@@ -1206,7 +1252,8 @@ namespace eval ::Eagle {
       #       On some Unix systems, dlopen does not work (e.g. because
       #       Mono is statically linked, etc).
       #
-      if {$::tcl_platform(platform) eq "windows" || \
+      if {([info exists ::tcl_platform(platform)] && \
+           $::tcl_platform(platform) eq "windows") || \
           ([llength [info commands library]] > 0 && \
            [catch {library test}] == 0)} then {
         #
@@ -1233,7 +1280,8 @@ namespace eval ::Eagle {
       #       Windows Form when the X server is unavailable (e.g. on
       #       OpenBSD).
       #
-      if {$::tcl_platform(platform) eq "windows" || \
+      if {([info exists ::tcl_platform(platform)] && \
+           $::tcl_platform(platform) eq "windows") || \
           [info exists ::env(DISPLAY)]} then {
         #
         # NOTE: Is the Windows Forms assembly available?
@@ -1347,7 +1395,8 @@ namespace eval ::Eagle {
           $object . $member "\"... "]
 
       if {[catch {object members -flags +NonPublic -pattern $member $object} \
-          members] == 0 && [llength $members] > 0} then {
+              members] == 0 && \
+          [llength $members] > 0} then {
         #
         # NOTE: Yes, it appears that it is available.
         #
@@ -1501,7 +1550,8 @@ namespace eval ::Eagle {
       # NOTE: Platform must be Windows for this constraint to
       #       even be checked (i.e. we require the registry).
       #
-      if {$::tcl_platform(platform) eq "windows"} then {
+      if {[info exists ::tcl_platform(platform)] && \
+          $::tcl_platform(platform) eq "windows"} then {
         #
         # NOTE: Indicate that we have not found it yet.
         #
@@ -1582,27 +1632,21 @@ namespace eval ::Eagle {
           #
           # NOTE: The versions of WiX that we support.
           #
-          set versions [list 3.5 3.0]
+          set versions [list 3.6 3.5 3.0]
 
           #
           # NOTE: Check each version, stopping when one is found.
           #
           foreach version $versions {
             #
-            # NOTE: Attempt to fetch the WiX install directory
-            #       value from the registry, removing the
-            #       trailing backslash, if any.
+            # NOTE: Attempt to fetch the WiX install directory value from the
+            #       registry, removing the trailing backslash, if any.  Does
+            #       the directory name look valid and does it actually exist?
             #
-            set directory [file normalize [string trimright [object invoke \
-                Microsoft.Win32.Registry GetValue \
-                [appendArgs $key \\ $version] InstallRoot \
-                null] \\]]
-
-            #
-            # NOTE: Does the directory name look valid and
-            #       does it actually exist?
-            #
-            if {[string length $directory] > 0 && \
+            if {[catch {file normalize [string trimright [object invoke \
+                    Microsoft.Win32.Registry GetValue [appendArgs $key \\ \
+                    $version] InstallRoot null] \\]} directory] == 0 && \
+                    [string length $directory] > 0 && \
                 [file isdirectory $directory]} then {
               #
               # NOTE: The file name of the primary WiX assembly.
@@ -1680,7 +1724,8 @@ namespace eval ::Eagle {
       #
       set visualStudioVersions [list]
 
-      if {$::tcl_platform(platform) eq "windows"} then {
+      if {[info exists ::tcl_platform(platform)] && \
+          $::tcl_platform(platform) eq "windows"} then {
         #
         # NOTE: Registry hive where Visual Studio install information is
         #       stored.  Make sure to look in the WoW64 registry because
@@ -1701,17 +1746,14 @@ namespace eval ::Eagle {
           #
           # NOTE: Attempt to fetch the Visual Studio install directory
           #       value from the registry, removing the trailing backslash,
-          #       if any.
+          #       if any.  Does the directory name look valid and does it
+          #       actually exist?
           #
-          set fileName [file normalize [file join [string trimright [object \
-              invoke Microsoft.Win32.Registry GetValue [appendArgs $key \\ \
-              [lindex $version 0]] InstallDir null] \\] msenv.dll]]
-
-          #
-          # NOTE: Does the directory name look valid and does it actually
-          #       exist?
-          #
-          if {[string length $fileName] > 0 && [file isfile $fileName]} then {
+          if {[catch {file normalize [file join [string trimright [object \
+                  invoke Microsoft.Win32.Registry GetValue [appendArgs $key \\ \
+                  [lindex $version 0]] InstallDir null] \\] msenv.dll]} \
+                  fileName] == 0 && \
+              [string length $fileName] > 0 && [file isfile $fileName]} then {
             #
             # NOTE: Yes, it appears that it is available.
             #
@@ -1748,7 +1790,8 @@ namespace eval ::Eagle {
       #
       # NOTE: Is the managed debugger attached?
       #
-      if {[object invoke System.Diagnostics.Debugger IsAttached]} then {
+      if {[catch {object invoke System.Diagnostics.Debugger IsAttached} \
+              attached] == 0 && $attached} then {
         #
         # NOTE: Yes, it appears that it is attached.
         #
@@ -1854,7 +1897,7 @@ namespace eval ::Eagle {
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
         checkForPerformance checkForTiming checkForInteractive checkForSymbols \
         checkForLogFile checkForNetwork checkForCompileOption \
-        checkForUserInteraction] false false
+        checkForWindowsCommandProcessor checkForUserInteraction] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

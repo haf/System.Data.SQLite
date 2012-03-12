@@ -266,14 +266,29 @@ if {![info exists no([file tail [info script]])]} then {
     #
     # NOTE: Evaluate the specified post-test script now, if any.
     #
-    if {[info exists test_flags(-postTest)] && \
-        [string length $test_flags(-postTest)] > 0} then {
+    if {[info exists test_script(post)] && \
+        [string length $test_script(post)] > 0} then {
       #
       # TODO: Perhaps use [uplevel] here instead of [eval].  For now, it does
       #       not matter since we enforce this file being evaluated at the
       #       top-level.
       #
-      eval $test_flags(-postTest)
+      if {[catch $test_script(post) test_script(post,result)]} then {
+        #
+        # NOTE: Make 100% sure, even in "quiet" mode, that this script error
+        #       gets into the test log file.
+        #
+        tputs $test_channel [appendArgs "---- post-test script error: " \
+            $test_script(post,result) \n]
+
+        #
+        # NOTE: The post-test script failed in some way.  This is considered
+        #       to be an overall failure of the test suite; therefore, raise
+        #       the error now that we are sure it has been recorded in the
+        #       test log file.
+        #
+        error $test_script(post,result)
+      }
     }
   }
 
@@ -293,7 +308,7 @@ if {![info exists no([file tail [info script]])]} then {
     # NOTE: For Eagle, even when not exiting, we still set the ExitCode
     #       property of the interpreter.
     #
-    if {[isEagle]} then {
+    if {[isEagle] && [llength [info commands object]] > 0} then {
       object invoke -alias Interpreter.GetActive ExitCode $exitCode
     }
 

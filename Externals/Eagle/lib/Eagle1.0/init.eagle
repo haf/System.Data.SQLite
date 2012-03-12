@@ -1265,20 +1265,20 @@ namespace eval ::Eagle {
                 # NOTE: The patch level from the line is less, we are more
                 #       up-to-date than the latest version?
                 #
-                return [list [appendArgs "your build " $enginePatchLevel \
+                return [list [appendArgs "running build " $enginePatchLevel \
                     " is newer than the latest build " $patchLevel]]
               } else {
                 #
                 # NOTE: The patch levels are equal, we are up-to-date.
                 #
-                return [list "you have the latest build"]
+                return [list "running build is the latest"]
               }
             }
           }
         }
       }
 
-      return [list "cannot determine if your build is the latest"]
+      return [list "cannot determine if running build is the latest"]
     }
 
     proc getReturnType { object member } {
