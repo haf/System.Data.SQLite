@@ -1704,7 +1704,7 @@ namespace eval ::Eagle {
   #
   # NOTE: Provide the Eagle library package to the interpreter.
   #
-  package provide EagleLibrary \
+  package provide Eagle.Library \
     [expr {[isEagle] ? [info engine PatchLevel] : "1.0"}]
 }
 

@@ -17,8 +17,8 @@
 if {![package vsatisfies [package provide Tcl] 8.4]} {return}
 if {[string length [package provide Eagle]] > 0} then {return}
 
-package ifneeded EagleLibrary 1.0 [list source [file join $dir init.eagle]]
-package ifneeded EagleSafe 1.0 [list source [file join $dir safe.eagle]]
-package ifneeded EagleShell 1.0 [list source [file join $dir shell.eagle]]
-package ifneeded EagleTest 1.0 [list source [file join $dir test.eagle]]
-package ifneeded NativeTcl 1.0 [list package provide NativeTcl 1.0]
+package ifneeded Eagle.Library 1.0 [list source [file join $dir init.eagle]]
+package ifneeded Eagle.Safe 1.0 [list source [file join $dir safe.eagle]]
+package ifneeded Eagle.Shell 1.0 [list source [file join $dir shell.eagle]]
+package ifneeded Eagle.Test 1.0 [list source [file join $dir test.eagle]]
+package ifneeded Native.Tcl 1.0 [list package provide Native.Tcl 1.0]

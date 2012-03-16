@@ -231,7 +231,7 @@ namespace eval ::Eagle {
       #       require one or more of the files in the build directory.  Callers
       #       to this procedure should keep in mind that the test script being
       #       returned cannot only rely on any script library procedures not
-      #       included in the EagleLibrary package (i.e. "init.eagle").  Also,
+      #       included in the Eagle.Library package (i.e. "init.eagle").  Also,
       #       all variable references and all "nested" commands (i.e. those in
       #       square brackets), unless they are specially quoted, will end up
       #       being evaluated in the context of the calling interpreter and not

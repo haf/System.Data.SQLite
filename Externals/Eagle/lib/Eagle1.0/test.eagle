@@ -1818,7 +1818,7 @@ namespace eval ::Eagle {
   #
   # NOTE: Provide the Eagle test package to the interpreter.
   #
-  package provide EagleTest \
+  package provide Eagle.Test \
     [expr {[isEagle] ? [info engine PatchLevel] : "1.0"}]
 }
 

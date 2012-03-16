@@ -8,8 +8,8 @@
 ###############################################################################
 
 package require Eagle
-package require EagleLibrary
-package require EagleTest
+package require Eagle.Library
+package require Eagle.Test
 
 runTestPrologue
 
@@ -34,8 +34,8 @@ runTest {test tkt-0d5b1ef362-1.1 {SQLiteLog.DomainUnload event} -setup \
   set x [object invoke -flags +NonPublic \
       AppDomain.CurrentDomain._domainUnload.GetInvocationList Length]
 
-  package require EagleLibrary
-  package require EagleTest
+  package require Eagle.Library
+  package require Eagle.Test
   package require System.Data.SQLite.Test
 
   object load -loadtype File [file join [getBinaryDirectory] \

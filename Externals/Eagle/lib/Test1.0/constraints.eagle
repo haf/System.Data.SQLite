@@ -1907,7 +1907,7 @@ namespace eval ::Eagle {
   #
   # NOTE: Provide the Eagle test constraints package to the interpreter.
   #
-  package provide EagleTestConstraints \
+  package provide Eagle.Test.Constraints \
     [expr {[isEagle] ? [info engine PatchLevel] : "1.0"}]
 }
 

@@ -185,23 +185,23 @@ if {![info exists no([file tail [info script]])]} then {
   #
   # NOTE: Check for and load the Eagle library package, if necessary.
   #
-  if {[catch {package present EagleLibrary}]} then {
-    package require EagleLibrary
+  if {[catch {package present Eagle.Library}]} then {
+    package require Eagle.Library
   }
 
   #
   # NOTE: Check for and load the Eagle test package, if necessary.
   #
-  if {[catch {package present EagleTest}]} then {
-    package require EagleTest
+  if {[catch {package present Eagle.Test}]} then {
+    package require Eagle.Test
   }
 
   #
   # NOTE: Check for and load the Eagle test constraints package, if
   #       necessary.
   #
-  if {[catch {package present EagleTestConstraints}]} then {
-    package require EagleTestConstraints
+  if {[catch {package present Eagle.Test.Constraints}]} then {
+    package require Eagle.Test.Constraints
   }
 
   #############################################################################

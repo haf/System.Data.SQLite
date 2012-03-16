@@ -14,8 +14,8 @@
 ###############################################################################
 
 package require Eagle
-package require EagleLibrary
-package require EagleTest
+package require Eagle.Library
+package require Eagle.Test
 
 runTestPrologue
 
