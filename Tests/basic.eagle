@@ -1322,6 +1322,65 @@ runTest {test data-1.24 {LINQ SQL_CONSTRAINTS resource} -body {
 
 ###############################################################################
 
+runTest {test data-1.25 {SQLiteDataReader GetValues w/collection} -setup {
+  setupDb [set fileName data-1.25.db]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x INTEGER PRIMARY KEY ASC, y TEXT);
+    INSERT INTO t1 (x, y) VALUES(1, 'aardvark');
+    INSERT INTO t1 (x, y) VALUES(2, 'bear');
+    INSERT INTO t1 (x, y) VALUES(3, 'chicken');
+    INSERT INTO t1 (x, y) VALUES(4, 'duck');
+    INSERT INTO t1 (x, y) VALUES(5, 'elephant');
+    INSERT INTO t1 (x, y) VALUES(6, 'frog');
+    INSERT INTO t1 (x, y) VALUES(7, 'goose');
+    INSERT INTO t1 (x, y) VALUES(8, 'horse');
+    INSERT INTO t1 (x, y) VALUES(9, 'iguana');
+    INSERT INTO t1 (x, y) VALUES(10, 'jellyfish');
+    INSERT INTO t1 (x, y) VALUES(11, 'kangaroo');
+    INSERT INTO t1 (x, y) VALUES(12, 'llama');
+    INSERT INTO t1 (x, y) VALUES(13, 'moose');
+    INSERT INTO t1 (x, y) VALUES(14, 'newt');
+    INSERT INTO t1 (x, y) VALUES(15, 'ostrich');
+    INSERT INTO t1 (x, y) VALUES(16, 'pig');
+    INSERT INTO t1 (x, y) VALUES(17, 'quail');
+    INSERT INTO t1 (x, y) VALUES(18, 'rhinoceros');
+    INSERT INTO t1 (x, y) VALUES(19, 'shark');
+    INSERT INTO t1 (x, y) VALUES(20, 'tiger');
+    INSERT INTO t1 (x, y) VALUES(21, 'unicorn');
+    INSERT INTO t1 (x, y) VALUES(22, 'viper');
+    INSERT INTO t1 (x, y) VALUES(23, 'weasel');
+    INSERT INTO t1 (x, y) VALUES(24, 'xerus');
+    INSERT INTO t1 (x, y) VALUES(25, 'yak');
+    INSERT INTO t1 (x, y) VALUES(26, 'zebra');
+  }
+
+  set connection [object invoke -flags +NonPublic -objectflags +NoDispose \
+      Interpreter.GetActive.connections get_Item $db]
+
+  set command [object create -alias System.Data.SQLite.SQLiteCommand \
+      "SELECT x, y, x, y FROM t1 ORDER BY y DESC;" $connection]
+
+  set reader [$command -alias ExecuteReader]
+  set collection [$reader -alias GetValues]
+  set result [list]
+
+  object foreach -alias item $collection {
+    lappend result [$collection GetValues $item]
+  }
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result item collection reader command connection db \
+      fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{{26 26} {zebra zebra}}}
+
+###############################################################################
+
 unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################

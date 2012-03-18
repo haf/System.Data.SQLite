@@ -197,6 +197,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Acquire and hold a static data lock while checking if the native SQLite library has been initialized to prevent a subtle race condition that can result in superfluous error messages. Fix for [72905c9a77].</li>
     <li>Support tracing of all parameter binding activity and use the connection flags to control what is traced.</li>
     <li>When converting a DateTime instance of an &quot;Unspecified&quot; kind to a string, use the same kind as the connection, if available.</li>
+    <li>Add overload of the SQLiteDataReader.GetValues method that returns a NameValueCollection.</li>
     <li>Add static ToUnixEpoch method to the SQLiteConvert class to convert a DateTime value to the number of whole seconds since the Unix epoch.</li>
     <li>In the implicit conversion operators (to IntPtr) for both the SQLiteConnectionHandle and SQLiteStatementHandle classes, return IntPtr.Zero if the instance being converted is null.</li>
     <li>Write warning message to the active trace listners (for the Debug build configuration only) if a column type or type name cannot be mapped properly. See [4bbf851fa5].</li>

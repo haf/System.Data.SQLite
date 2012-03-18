@@ -9,6 +9,7 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
+  using System.Collections.Specialized;
   using System.Data;
   using System.Data.Common;
   using System.Globalization;
@@ -286,7 +287,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns the number of visible fielsd in the current resultset
+    /// Returns the number of visible fields in the current resultset
     /// </summary>
     public override int VisibleFieldCount
     {
@@ -1063,6 +1064,37 @@ namespace System.Data.SQLite
       }
 
       return nMax;
+    }
+
+    /// <summary>
+    /// Returns a collection containing all the column names and values for the
+    /// current row of data in the current resultset, if any.  If there is no
+    /// current row or no current resultset, an exception may be thrown.
+    /// </summary>
+    /// <returns>
+    /// The collection containing the column name and value information for the
+    /// current row of data in the current resultset or null if this information
+    /// cannot be obtained.
+    /// </returns>
+    public NameValueCollection GetValues()
+    {
+        CheckDisposed();
+
+        if ((_activeStatement == null) || (_activeStatement._sql == null))
+            throw new InvalidOperationException();
+
+        int nMax = VisibleFieldCount;
+        NameValueCollection result = new NameValueCollection(nMax);
+
+        for (int n = 0; n < nMax; n++)
+        {
+            string name = _activeStatement._sql.ColumnName(_activeStatement, n);
+            string value = _activeStatement._sql.GetText(_activeStatement, n);
+
+            result.Add(name, value);
+        }
+
+        return result;
     }
 
     /// <summary>
