@@ -377,7 +377,7 @@ SQLITE_API int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySiz
   // If we failed, rollback
   if (rc)
   {
-    sqlite3BtreeRollback(pbt);
+    sqlite3BtreeRollback(pbt, SQLITE_OK);
   }
 
   // If we succeeded, destroy any previous read key this database used

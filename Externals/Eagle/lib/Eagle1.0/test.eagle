@@ -1183,15 +1183,24 @@ namespace eval ::Eagle {
 
       #
       # HACK: Compatibility shim(s) for use with various tests in the Tcl
-      #       test suite.
+      #       test suite.  Make sure these commands do not already exist
+      #       prior to attempt to adding them.
       #
-      interp alias {} testConstraint {} haveOrAddConstraint
-      interp alias {} ::tcltest::testConstraint {} haveOrAddConstraint
+      if {[llength [info commands testConstraint]] == 0} then {
+        interp alias {} testConstraint {} haveOrAddConstraint
+      }
+
+      if {[llength [info commands ::tcltest::testConstraint]] == 0} then {
+        interp alias {} ::tcltest::testConstraint {} haveOrAddConstraint
+      }
 
       #
-      # NOTE: This is needed by most tests in the Tcl test suite.
+      # NOTE: This is needed by most tests in the Tcl test suite.  Make
+      #       sure this command does not already exist prior to adding it.
       #
-      proc ::tcltest::cleanupTests { args } {}
+      if {[llength [info commands ::tcltest::cleanupTests]] == 0} then {
+        proc ::tcltest::cleanupTests { args } {}
+      }
 
       #
       # NOTE: Fake having the tcltest package.

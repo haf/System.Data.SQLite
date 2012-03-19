@@ -379,6 +379,19 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForTestConfiguration { channel } {
+    tputs $channel [appendArgs "---- checking for test configuration... "]
+
+    if {[info exists ::test_configuration] && \
+        [string length $::test_configuration] > 0} then {
+      addConstraint [appendArgs configuration. $::test_configuration]
+
+      tputs $channel [appendArgs $::test_configuration \n]
+    } else {
+      tputs $channel [appendArgs unknown \n]
+    }
+  }
+
   proc checkForFile { channel name {constraint ""} } {
     tputs $channel [appendArgs "---- checking for file \"" $name \
         "\"... "]
@@ -1897,7 +1910,8 @@ namespace eval ::Eagle {
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
         checkForPerformance checkForTiming checkForInteractive checkForSymbols \
         checkForLogFile checkForNetwork checkForCompileOption \
-        checkForWindowsCommandProcessor checkForUserInteraction] false false
+        checkForWindowsCommandProcessor checkForUserInteraction \
+        checkForTestConfiguration] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
