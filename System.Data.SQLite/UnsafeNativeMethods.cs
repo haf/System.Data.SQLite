@@ -150,6 +150,20 @@ namespace System.Data.SQLite
       private static string GetBaseDirectory()
       {
 #if !PLATFORM_COMPACTFRAMEWORK
+          //
+          // NOTE: If the "PreLoadSQLite_BaseDirectory" environment variable
+          //       is set, use it verbatim for the base directory.
+          //
+          string directory = Environment.GetEnvironmentVariable(
+              "PreLoadSQLite_BaseDirectory");
+
+          if (directory != null)
+              return directory;
+
+          //
+          // NOTE: Otherwise, fallback on using the base directory of the
+          //       current application domain.
+          //
           return AppDomain.CurrentDomain.BaseDirectory;
 #else
           Assembly assembly = Assembly.GetExecutingAssembly();
