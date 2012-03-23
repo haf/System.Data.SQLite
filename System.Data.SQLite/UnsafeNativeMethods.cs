@@ -60,13 +60,6 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
-      /// Stores the mappings between processor architecture names and platform
-      /// names.
-      /// </summary>
-      private static Dictionary<string, string> processorArchitecturePlatforms;
-
-      /////////////////////////////////////////////////////////////////////////
-      /// <summary>
       /// This is the P/Invoke method that wraps the native Win32 LoadLibrary
       /// function.  See the MSDN documentation for full details on what it
       /// does.
@@ -84,6 +77,19 @@ namespace System.Data.SQLite
 #endif
           SetLastError = true)]
       private static extern IntPtr LoadLibrary(string fileName);
+
+      /// <summary>
+      /// This lock is used to protect the static _SQLiteModule and
+      /// processorArchitecturePlatforms fields, below.
+      /// </summary>
+      private static readonly object staticSyncRoot = new object();
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Stores the mappings between processor architecture names and platform
+      /// names.
+      /// </summary>
+      private static Dictionary<string, string> processorArchitecturePlatforms;
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
@@ -117,25 +123,29 @@ namespace System.Data.SQLite
               return;
 #endif
 
-          //
-          // TODO: Make sure this list is updated if the supported processor
-          //       architecture names and/or platform names changes.
-          //
-          if (processorArchitecturePlatforms == null)
+          lock (staticSyncRoot)
           {
-              processorArchitecturePlatforms =
-                  new Dictionary<string, string>();
+              //
+              // TODO: Make sure this list is updated if the supported
+              //       processor architecture names and/or platform names
+              //       changes.
+              //
+              if (processorArchitecturePlatforms == null)
+              {
+                  processorArchitecturePlatforms =
+                      new Dictionary<string, string>();
 
-              processorArchitecturePlatforms.Add("X86", "Win32");
-              processorArchitecturePlatforms.Add("AMD64", "x64");
-              processorArchitecturePlatforms.Add("IA64", "Itanium");
+                  processorArchitecturePlatforms.Add("X86", "Win32");
+                  processorArchitecturePlatforms.Add("AMD64", "x64");
+                  processorArchitecturePlatforms.Add("IA64", "Itanium");
+              }
+
+              //
+              // BUGBUG: What about other application domains?
+              //
+              if (_SQLiteModule == IntPtr.Zero)
+                  _SQLiteModule = PreLoadSQLiteDll(null, null);
           }
-
-          //
-          // BUGBUG: What about other application domains?
-          //
-          if (_SQLiteModule == IntPtr.Zero)
-              _SQLiteModule = PreLoadSQLiteDll(null, null);
       }
 
       /////////////////////////////////////////////////////////////////////////
@@ -269,26 +279,29 @@ namespace System.Data.SQLite
           if (String.IsNullOrEmpty(processorArchitecture))
               return null;
 
-          if (processorArchitecturePlatforms == null)
-              return null;
-
-          string platformName;
-
-          if (processorArchitecturePlatforms.TryGetValue(
-                  processorArchitecture, out platformName))
+          lock (staticSyncRoot)
           {
-              return platformName;
-          }
+              if (processorArchitecturePlatforms == null)
+                  return null;
 
-          if (processorArchitecturePlatforms.TryGetValue(
+              string platformName;
+
+              if (processorArchitecturePlatforms.TryGetValue(
+                      processorArchitecture, out platformName))
+              {
+                  return platformName;
+              }
+
+              if (processorArchitecturePlatforms.TryGetValue(
 #if !PLATFORM_COMPACTFRAMEWORK
-                  processorArchitecture.ToUpperInvariant(),
+                      processorArchitecture.ToUpperInvariant(),
 #else
-                  processorArchitecture.ToUpper(),
+                      processorArchitecture.ToUpper(),
 #endif
-                  out platformName))
-          {
-              return platformName;
+                      out platformName))
+              {
+                  return platformName;
+              }
           }
 
           return null;
