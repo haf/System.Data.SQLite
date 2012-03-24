@@ -1553,6 +1553,7 @@ namespace System.Data.SQLite
                 "Backup object has an invalid handle.");
 
         int n = UnsafeNativeMethods.sqlite3_backup_finish(handle);
+        handle.SetHandleAsInvalid();
 
         if ((n > 0) && (n != backup._stepResult))
             throw new SQLiteException(n, SQLiteLastError());

@@ -353,6 +353,7 @@ namespace System.Data.SQLite
         lock (_lock)
         {
             int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+            backup.SetHandleAsInvalid();
             if (n > 0) throw new SQLiteException(n, null);
         }
     }
