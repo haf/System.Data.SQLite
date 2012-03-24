@@ -223,6 +223,61 @@ namespace System.Data.SQLite
 
     internal abstract int FileControl(string zDbName, int op, IntPtr pArg);
 
+    /// <summary>
+    /// Creates a new SQLite backup object based on the provided destination
+    /// database connection.  The source database connection is the one
+    /// associated with this object.  The source and destination database
+    /// connections cannot be the same.
+    /// </summary>
+    /// <param name="destCnn">The destination database connection.</param>
+    /// <param name="destName">The destination database name.</param>
+    /// <param name="sourceName">The source database name.</param>
+    /// <returns>The newly created backup object.</returns>
+    internal abstract SQLiteBackup InitializeBackup(
+        SQLiteConnection destCnn, string destName,
+        string sourceName);
+
+    /// <summary>
+    /// Copies up to N pages from the source database to the destination
+    /// database associated with the specified backup object.
+    /// </summary>
+    /// <param name="backup">The backup object to use.</param>
+    /// <param name="nPage">
+    /// The number of pages to copy or negative to copy all remaining pages.
+    /// </param>
+    /// <param name="retry">
+    /// Set to true if the operation needs to be retried due to database
+    /// locking issues.
+    /// </param>
+    /// <returns>
+    /// True if there are more pages to be copied, false otherwise.
+    /// </returns>
+    internal abstract bool StepBackup(SQLiteBackup backup, int nPage, out bool retry);
+
+    /// <summary>
+    /// Returns the number of pages remaining to be copied from the source
+    /// database to the destination database associated with the specified
+    /// backup object.
+    /// </summary>
+    /// <param name="backup">The backup object to check.</param>
+    /// <returns>The number of pages remaining to be copied.</returns>
+    internal abstract int RemainingBackup(SQLiteBackup backup);
+
+    /// <summary>
+    /// Returns the total number of pages in the source database associated
+    /// with the specified backup object.
+    /// </summary>
+    /// <param name="backup">The backup object to check.</param>
+    /// <returns>The total number of pages in the source database.</returns>
+    internal abstract int PageCountBackup(SQLiteBackup backup);
+
+    /// <summary>
+    /// Destroys the backup object, rolling back any backup that may be in
+    /// progess.
+    /// </summary>
+    /// <param name="backup">The backup object to destroy.</param>
+    internal abstract void FinishBackup(SQLiteBackup backup);
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     #region IDisposable Members
@@ -291,6 +346,16 @@ namespace System.Data.SQLite
 #else
       return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
 #endif
+    }
+
+    internal static void FinishBackup(SQLiteBackupHandle backup)
+    {
+        lock (_lock)
+        {
+            int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+            backup.SetHandleAsInvalid();
+            if (n > 0) throw new SQLiteException(n, null);
+        }
     }
 
     internal static void FinalizeStatement(SQLiteStatementHandle stmt)
@@ -403,9 +468,15 @@ namespace System.Data.SQLite
       LogCallbackException = 0x8,
 
       /// <summary>
+      /// Enable logging of backup API errors.
+      /// </summary>
+      LogBackup = 0x10,
+
+      /// <summary>
       /// Enable all logging.
       /// </summary>
-      LogAll = LogPrepare | LogPreBind | LogBind | LogCallbackException,
+      LogAll = LogPrepare | LogPreBind | LogBind |
+               LogCallbackException | LogBackup,
 
       /// <summary>
       /// The default extra flags for new connections.

@@ -1370,6 +1370,197 @@ namespace System.Data.SQLite
         return rc;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Creates a new SQLite backup object based on the provided destination
+    /// database connection.  The source database connection is the one
+    /// associated with this object.  The source and destination database
+    /// connections cannot be the same.
+    /// </summary>
+    /// <param name="destCnn">The destination database connection.</param>
+    /// <param name="destName">The destination database name.</param>
+    /// <param name="sourceName">The source database name.</param>
+    /// <returns>The newly created backup object.</returns>
+    internal override SQLiteBackup InitializeBackup(
+        SQLiteConnection destCnn,
+        string destName,
+        string sourceName
+        )
+    {
+        if (destCnn == null)
+            throw new ArgumentNullException("destCnn");
+
+        if (destName == null)
+            throw new ArgumentNullException("destName");
+
+        if (sourceName == null)
+            throw new ArgumentNullException("sourceName");
+
+        SQLite3 destSqlite3 = destCnn._sql as SQLite3;
+
+        if (destSqlite3 == null)
+            throw new ArgumentException(
+                "Destination connection has no wrapper.",
+                "destCnn");
+
+        SQLiteConnectionHandle destHandle = destSqlite3._sql;
+
+        if (destHandle == null)
+            throw new ArgumentException(
+                "Destination connection has an invalid handle.",
+                "destCnn");
+
+        SQLiteConnectionHandle sourceHandle = _sql;
+
+        if (sourceHandle == null)
+            throw new InvalidOperationException(
+                "Source connection has an invalid handle.");
+
+        byte[] zDestName = ToUTF8(destName);
+        byte[] zSourceName = ToUTF8(sourceName);
+
+        IntPtr backup = UnsafeNativeMethods.sqlite3_backup_init(
+            destHandle, zDestName, sourceHandle, zSourceName);
+
+        if (backup == IntPtr.Zero)
+            throw new SQLiteException(ResultCode(), SQLiteLastError());
+
+        return new SQLiteBackup(
+            this, backup, destHandle, zDestName, sourceHandle, zSourceName);
+    }
+
+    /// <summary>
+    /// Copies up to N pages from the source database to the destination
+    /// database associated with the specified backup object.
+    /// </summary>
+    /// <param name="backup">The backup object to use.</param>
+    /// <param name="nPage">
+    /// The number of pages to copy, negative to copy all remaining pages.
+    /// </param>
+    /// <param name="retry">
+    /// Set to true if the operation needs to be retried due to database
+    /// locking issues; otherwise, set to false.
+    /// </param>
+    /// <returns>
+    /// True if there are more pages to be copied, false otherwise.
+    /// </returns>
+    internal override bool StepBackup(
+        SQLiteBackup backup,
+        int nPage,
+        out bool retry
+        )
+    {
+        retry = false;
+
+        if (backup == null)
+            throw new ArgumentNullException("backup");
+
+        SQLiteBackupHandle handle = backup._sqlite_backup;
+
+        if (handle == null)
+            throw new InvalidOperationException(
+                "Backup object has an invalid handle.");
+
+        int n = UnsafeNativeMethods.sqlite3_backup_step(handle, nPage);
+        backup._stepResult = n; /* NOTE: Save for use by FinishBackup. */
+
+        if (n == (int)SQLiteErrorCode.Ok)
+        {
+            return true;
+        }
+        else if (n == (int)SQLiteErrorCode.Busy)
+        {
+            retry = true;
+            return true;
+        }
+        else if (n == (int)SQLiteErrorCode.Locked)
+        {
+            retry = true;
+            return true;
+        }
+        else if (n == (int)SQLiteErrorCode.Done)
+        {
+            return false;
+        }
+        else
+        {
+            throw new SQLiteException(n, SQLiteLastError());
+        }
+    }
+
+    /// <summary>
+    /// Returns the number of pages remaining to be copied from the source
+    /// database to the destination database associated with the specified
+    /// backup object.
+    /// </summary>
+    /// <param name="backup">The backup object to check.</param>
+    /// <returns>The number of pages remaining to be copied.</returns>
+    internal override int RemainingBackup(
+        SQLiteBackup backup
+        )
+    {
+        if (backup == null)
+            throw new ArgumentNullException("backup");
+
+        SQLiteBackupHandle handle = backup._sqlite_backup;
+
+        if (handle == null)
+            throw new InvalidOperationException(
+                "Backup object has an invalid handle.");
+
+        return UnsafeNativeMethods.sqlite3_backup_remaining(handle);
+    }
+
+    /// <summary>
+    /// Returns the total number of pages in the source database associated
+    /// with the specified backup object.
+    /// </summary>
+    /// <param name="backup">The backup object to check.</param>
+    /// <returns>The total number of pages in the source database.</returns>
+    internal override int PageCountBackup(
+        SQLiteBackup backup
+        )
+    {
+        if (backup == null)
+            throw new ArgumentNullException("backup");
+
+        SQLiteBackupHandle handle = backup._sqlite_backup;
+
+        if (handle == null)
+            throw new InvalidOperationException(
+                "Backup object has an invalid handle.");
+
+        return UnsafeNativeMethods.sqlite3_backup_pagecount(handle);
+    }
+
+    /// <summary>
+    /// Destroys the backup object, rolling back any backup that may be in
+    /// progess.
+    /// </summary>
+    /// <param name="backup">The backup object to destroy.</param>
+    internal override void FinishBackup(
+        SQLiteBackup backup
+        )
+    {
+        if (backup == null)
+            throw new ArgumentNullException("backup");
+
+        SQLiteBackupHandle handle = backup._sqlite_backup;
+
+        if (handle == null)
+            throw new InvalidOperationException(
+                "Backup object has an invalid handle.");
+
+        int n = UnsafeNativeMethods.sqlite3_backup_finish(handle);
+        handle.SetHandleAsInvalid();
+
+        if ((n > 0) && (n != backup._stepResult))
+            throw new SQLiteException(n, SQLiteLastError());
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Determines if the SQLite core library has been initialized for the
     /// current process.

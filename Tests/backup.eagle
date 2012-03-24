@@ -1,0 +1,118 @@
+###############################################################################
+#
+# backup.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test backup-1.1 {BackupDatabase method, memory to disk} -setup {
+  setupDb [set fileName(1) :memory:] "" "" "" "" "" false memDb
+  setupDb [set fileName(2) backup-1.1.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName(2)]
+
+  sql execute $memDb {
+    CREATE TABLE t1(x TEXT);
+  }
+
+  for {set index 0} {$index < 10} {incr index} {
+    sql execute $memDb [subst {
+      INSERT INTO t1 (x) VALUES('[string repeat ! 1048576]');
+    }]
+  }
+
+  set memSource [object invoke -flags +NonPublic -objectflags +NoDispose \
+      Interpreter.GetActive.connections get_Item $memDb]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+    using System.Text;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id}
+      {
+        public static string GetRows(
+          SQLiteConnection source
+          )
+        {
+          using (SQLiteConnection destination = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            destination.Open();
+            source.BackupDatabase(destination, "main", "main", -1, null, 0);
+
+            using (SQLiteCommand command = new SQLiteCommand(
+                "SELECT length(x) FROM t1;", destination))
+            {
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                int rowCount = 0;
+                StringBuilder builder = new StringBuilder();
+
+                builder.Append(dataReader.FieldCount);
+                builder.Append(' ');
+
+                while (dataReader.Read())
+                {
+                  builder.Append(dataReader.GetInt64(0));
+                  builder.Append(' ');
+                  rowCount++;
+                }
+
+                builder.Append(rowCount);
+                return builder.ToString();
+              }
+            }
+          }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetRows $memSource
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName(2)
+  cleanupDb $fileName(1) memDb
+
+  unset -nocomplain result results errors code index memSource dataSource id \
+      memDb db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
+\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
+1048576 10\}$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

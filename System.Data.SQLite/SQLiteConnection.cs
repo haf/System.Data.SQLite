@@ -332,6 +332,144 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    #region Backup API Members
+    /// <summary>
+    /// Raised between each backup step.
+    /// </summary>
+    /// <param name="source">
+    /// The source database connection.
+    /// </param>
+    /// <param name="destination">
+    /// The destination database connection.
+    /// </param>
+    /// <param name="remainingPages">
+    /// The number of pages remaining to be copied.
+    /// </param>
+    /// <param name="totalPages">
+    /// The total number of pages in the source database.
+    /// </param>
+    /// <param name="retry">
+    /// Set to true if the operation needs to be retried due to database
+    /// locking issues; otherwise, set to false.
+    /// </param>
+    /// <returns>
+    /// True to continue with the backup process or false to halt the backup
+    /// process, rolling back any changes that have been made so far.
+    /// </returns>
+    public delegate bool SQLiteBackupCallback(
+        SQLiteConnection source, SQLiteConnection destination,
+        int remainingPages, int totalPages, bool retry);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Backs up the database, using the specified database connection as the
+    /// destination.
+    /// </summary>
+    /// <param name="destination">The destination database connection.</param>
+    /// <param name="destinationName">The destination database name.</param>
+    /// <param name="sourceName">The source database name.</param>
+    /// <param name="nPage">
+    /// The number of pages to copy or negative to copy all remaining pages.
+    /// </param>
+    /// <param name="callback">
+    /// The method to invoke between each step of the backup process.  This
+    /// parameter may be null (i.e. no callbacks will be performed).
+    /// </param>
+    /// <param name="retryMilliseconds">
+    /// The number of milliseconds to sleep after encountering a locking error
+    /// during the backup process.  A value less than zero means that no sleep
+    /// should be performed.
+    /// </param>
+    public void BackupDatabase(
+        SQLiteConnection destination,
+        string destinationName,
+        string sourceName,
+        int nPage,
+        SQLiteBackupCallback callback,
+        int retryMilliseconds
+        )
+    {
+        CheckDisposed();
+
+        if (_connectionState != ConnectionState.Open)
+            throw new InvalidOperationException(
+                "Source database is not open.");
+
+        if (destination == null)
+            throw new ArgumentNullException("destination");
+
+        if (destination._connectionState != ConnectionState.Open)
+            throw new ArgumentException(
+                "Destination database is not open.", "destination");
+
+        if (destinationName == null)
+            throw new ArgumentNullException("destinationName");
+
+        if (sourceName == null)
+            throw new ArgumentNullException("sourceName");
+
+        SQLiteBase sqliteBase = _sql;
+
+        if (sqliteBase == null)
+            throw new InvalidOperationException(
+                "Connection object has an invalid handle.");
+
+        SQLiteBackup backup = null;
+
+        try
+        {
+            backup = sqliteBase.InitializeBackup(
+                destination, destinationName, sourceName); /* throw */
+
+            bool retry;
+
+            while (sqliteBase.StepBackup(backup, nPage, out retry)) /* throw */
+            {
+                //
+                // NOTE: If a callback was supplied by our caller, call it.
+                //       If it returns false, halt the backup process.
+                //
+                if ((callback != null) && !callback(this,
+                        destination, sqliteBase.RemainingBackup(backup),
+                        sqliteBase.PageCountBackup(backup), retry))
+                {
+                    break;
+                }
+
+                //
+                // NOTE: If we need to retry the previous operation, wait for
+                //       the number of milliseconds specified by our caller
+                //       unless the caller used a negative number, in that case
+                //       skip sleeping at all because we do not want to block
+                //       this thread forever.
+                //
+                if (retry && (retryMilliseconds >= 0))
+                    System.Threading.Thread.Sleep(retryMilliseconds);
+            }
+        }
+        catch (Exception e)
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            if ((_flags & SQLiteConnectionFlags.LogBackup) == SQLiteConnectionFlags.LogBackup)
+            {
+                SQLiteLog.LogMessage(0, String.Format(
+                    "Caught exception while backing up database: {0}", e));
+            }
+#endif
+
+            throw;
+        }
+        finally
+        {
+            if (backup != null)
+                sqliteBase.FinishBackup(backup); /* throw */
+        }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     #region IDisposable "Pattern" Members
     private bool disposed;
     private void CheckDisposed() /* throw */

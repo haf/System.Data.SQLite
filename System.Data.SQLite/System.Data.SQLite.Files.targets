@@ -17,6 +17,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="SQLite3.cs" />
     <Compile Include="SQLite3_UTF16.cs" />
+    <Compile Include="SQLiteBackup.cs" />
     <Compile Include="SQLiteBase.cs" />
     <Compile Include="SQLiteCommand.cs">
       <SubType>Component</SubType>
