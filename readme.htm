@@ -194,6 +194,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Add Visual Studio 2005 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
     <li>Add Visual Studio 2005 support to the redesigned designer support installer.</li>
     <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process.  This feature is now enabled by default at compile-time.</li>
+    <li>Add support for the native <a href="http://www.sqlite.org/backup.html">SQLite Online Backup API</a>. Fix for [c71846ed57].</li>
     <li>Acquire and hold a static data lock while checking if the native SQLite library has been initialized to prevent a subtle race condition that can result in superfluous error messages. Fix for [72905c9a77].</li>
     <li>Support tracing of all parameter binding activity and use the connection flags to control what is traced.</li>
     <li>When converting a DateTime instance of an &quot;Unspecified&quot; kind to a string, use the same kind as the connection, if available.</li>
