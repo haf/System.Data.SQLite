@@ -447,21 +447,35 @@ namespace eval ::Eagle {
       eval $command
     }
 
+    proc isMemoryDb { fileName } {
+      #
+      # NOTE: Is the specified database file name really an in-memory database?
+      #
+      return [expr {$fileName eq ":memory:"}]
+    }
+
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
             {extra ""} {delete true} {varName db} } {
+      #
+      # NOTE: First, see if the caller has requested an in-memory database.
+      #
+      set isMemory [isMemoryDb $fileName]
+
       #
       # NOTE: For now, all test databases used by the test suite are placed into
       #       the temporary directory.  Each database used by a test should be
       #       cleaned up by that test using the "cleanupDb" procedure, below.
       #
-      set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
+      if {!$isMemory} then {
+        set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
+      }
 
       #
       # NOTE: By default, delete any pre-existing database with the same file
       #       name if it currently exists.
       #
-      if {$delete && [file exists $fileName]} then {
+      if {!$isMemory && $delete && [file exists $fileName]} then {
         #
         # NOTE: Attempt to delete any pre-existing database with the same file
         #       name.
@@ -579,15 +593,22 @@ namespace eval ::Eagle {
       }
 
       #
+      # NOTE: First, see if the caller has requested an in-memory database.
+      #
+      set isMemory [isMemoryDb $fileName]
+
+      #
       # NOTE: Build the full path to the database file name.  For now, all test
       #       database files are stored in the temporary directory.
       #
-      set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
+      if {!$isMemory} then {
+        set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
+      }
 
       #
       # NOTE: Check if the file still exists.
       #
-      if {[file exists $fileName]} then {
+      if {!$isMemory && [file exists $fileName]} then {
         #
         # NOTE: Skip deleting database files if somebody sets the global
         #       variable to prevent it.

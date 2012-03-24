@@ -1378,12 +1378,12 @@ namespace System.Data.SQLite
     /// associated with this object.  The source and destination database
     /// connections cannot be the same.
     /// </summary>
-    /// <param name="destCnn">The destination database connection handle.</param>
+    /// <param name="destCnn">The destination database connection.</param>
     /// <param name="destName">The destination database name.</param>
     /// <param name="sourceName">The source database name.</param>
     /// <returns>The newly created backup object.</returns>
     internal override SQLiteBackup InitializeBackup(
-        SQLiteConnectionHandle destCnn,
+        SQLiteConnection destCnn,
         string destName,
         string sourceName
         )
@@ -1397,17 +1397,37 @@ namespace System.Data.SQLite
         if (sourceName == null)
             throw new ArgumentNullException("sourceName");
 
+        SQLite3 destSqlite3 = destCnn._sql as SQLite3;
+
+        if (destSqlite3 == null)
+            throw new ArgumentException(
+                "Destination connection has no wrapper.",
+                "destCnn");
+
+        SQLiteConnectionHandle destHandle = destSqlite3._sql;
+
+        if (destHandle == null)
+            throw new ArgumentException(
+                "Destination connection has an invalid handle.",
+                "destCnn");
+
+        SQLiteConnectionHandle sourceHandle = _sql;
+
+        if (sourceHandle == null)
+            throw new InvalidOperationException(
+                "Source connection has an invalid handle.");
+
         byte[] zDestName = ToUTF8(destName);
         byte[] zSourceName = ToUTF8(sourceName);
 
         IntPtr backup = UnsafeNativeMethods.sqlite3_backup_init(
-            destCnn, zDestName, _sql, zSourceName);
+            destHandle, zDestName, sourceHandle, zSourceName);
 
         if (backup == IntPtr.Zero)
             throw new SQLiteException(ResultCode(), SQLiteLastError());
 
-        return new SQLiteBackup(this, backup, destCnn, zDestName, _sql,
-            zSourceName);
+        return new SQLiteBackup(
+            this, backup, destHandle, zDestName, sourceHandle, zSourceName);
     }
 
     /// <summary>
@@ -1418,14 +1438,21 @@ namespace System.Data.SQLite
     /// <param name="nPage">
     /// The number of pages to copy, negative to copy all remaining pages.
     /// </param>
+    /// <param name="retry">
+    /// Set to true if the operation needs to be retried due to database
+    /// locking issues; otherwise, set to false.
+    /// </param>
     /// <returns>
     /// True if there are more pages to be copied, false otherwise.
     /// </returns>
     internal override bool StepBackup(
         SQLiteBackup backup,
-        int nPage
+        int nPage,
+        out bool retry
         )
     {
+        retry = false;
+
         if (backup == null)
             throw new ArgumentNullException("backup");
 
@@ -1439,11 +1466,27 @@ namespace System.Data.SQLite
         backup._stepResult = n; /* NOTE: Save for use by FinishBackup. */
 
         if (n == (int)SQLiteErrorCode.Ok)
+        {
             return true;
+        }
+        else if (n == (int)SQLiteErrorCode.Busy)
+        {
+            retry = true;
+            return true;
+        }
+        else if (n == (int)SQLiteErrorCode.Locked)
+        {
+            retry = true;
+            return true;
+        }
         else if (n == (int)SQLiteErrorCode.Done)
+        {
             return false;
+        }
         else
+        {
             throw new SQLiteException(n, SQLiteLastError());
+        }
     }
 
     /// <summary>
@@ -1511,7 +1554,7 @@ namespace System.Data.SQLite
 
         int n = UnsafeNativeMethods.sqlite3_backup_finish(handle);
 
-        if (n > 0 && n != backup._stepResult)
+        if ((n > 0) && (n != backup._stepResult))
             throw new SQLiteException(n, SQLiteLastError());
     }
 

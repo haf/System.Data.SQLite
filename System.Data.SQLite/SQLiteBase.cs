@@ -229,12 +229,12 @@ namespace System.Data.SQLite
     /// associated with this object.  The source and destination database
     /// connections cannot be the same.
     /// </summary>
-    /// <param name="destCnn">The destination database connection handle.</param>
+    /// <param name="destCnn">The destination database connection.</param>
     /// <param name="destName">The destination database name.</param>
     /// <param name="sourceName">The source database name.</param>
     /// <returns>The newly created backup object.</returns>
     internal abstract SQLiteBackup InitializeBackup(
-        SQLiteConnectionHandle destCnn, string destName,
+        SQLiteConnection destCnn, string destName,
         string sourceName);
 
     /// <summary>
@@ -243,12 +243,16 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="backup">The backup object to use.</param>
     /// <param name="nPage">
-    /// The number of pages to copy, negative to copy all remaining pages.
+    /// The number of pages to copy or negative to copy all remaining pages.
+    /// </param>
+    /// <param name="retry">
+    /// Set to true if the operation needs to be retried due to database
+    /// locking issues.
     /// </param>
     /// <returns>
     /// True if there are more pages to be copied, false otherwise.
     /// </returns>
-    internal abstract bool StepBackup(SQLiteBackup backup, int nPage);
+    internal abstract bool StepBackup(SQLiteBackup backup, int nPage, out bool retry);
 
     /// <summary>
     /// Returns the number of pages remaining to be copied from the source
@@ -463,9 +467,15 @@ namespace System.Data.SQLite
       LogCallbackException = 0x8,
 
       /// <summary>
+      /// Enable logging of backup API errors.
+      /// </summary>
+      LogBackup = 0x10,
+
+      /// <summary>
       /// Enable all logging.
       /// </summary>
-      LogAll = LogPrepare | LogPreBind | LogBind | LogCallbackException,
+      LogAll = LogPrepare | LogPreBind | LogBind |
+               LogCallbackException | LogBackup,
 
       /// <summary>
       /// The default extra flags for new connections.
