@@ -1235,6 +1235,40 @@ namespace System.Data.SQLite
 #endif
     internal static extern int sqlite3_file_control(IntPtr db, byte[] zDbName, int op, IntPtr pArg);
 
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_backup_init(IntPtr destDb, byte[] zDestName, IntPtr sourceDb, byte[] zSourceName);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_backup_step(IntPtr backup, int nPage);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_backup_finish(IntPtr backup);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_backup_remaining(IntPtr backup);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_backup_pagecount(IntPtr backup);
     #endregion
   }
 
@@ -1460,5 +1494,81 @@ namespace System.Data.SQLite
     {
       get { return (handle == IntPtr.Zero); }
     }
+  }
+
+  // Provides finalization support for unmanaged SQLite backup objects.
+  internal class SQLiteBackupHandle : CriticalHandle
+  {
+      public static implicit operator IntPtr(SQLiteBackupHandle backup)
+      {
+          return (backup != null) ? backup.handle : IntPtr.Zero;
+      }
+
+      public static implicit operator SQLiteBackupHandle(IntPtr backup)
+      {
+          return new SQLiteBackupHandle(backup);
+      }
+
+      private SQLiteBackupHandle(IntPtr backup)
+          : this()
+      {
+          SetHandle(backup);
+      }
+
+      internal SQLiteBackupHandle()
+          : base(IntPtr.Zero)
+      {
+      }
+
+      protected override bool ReleaseHandle()
+      {
+          try
+          {
+              SQLiteBase.FinishBackup(this);
+
+#if DEBUG && !NET_COMPACT_20
+              try
+              {
+                  Trace.WriteLine(String.Format(
+                      "FinishBackup: {0}", handle));
+              }
+              catch
+              {
+              }
+#endif
+
+#if DEBUG
+              return true;
+#endif
+          }
+#if DEBUG && !NET_COMPACT_20
+          catch (SQLiteException e)
+#else
+          catch (SQLiteException)
+#endif
+          {
+#if DEBUG && !NET_COMPACT_20
+              try
+              {
+                  Trace.WriteLine(String.Format(
+                      "FinishBackup: {0}, exception: {1}",
+                      handle, e));
+              }
+              catch
+              {
+              }
+#endif
+          }
+#if DEBUG
+          return false;
+#else
+          return true;
+#endif
+      }
+
+      public override bool IsInvalid
+      {
+          get { return (handle == IntPtr.Zero); }
+      }
   }
 }
