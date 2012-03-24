@@ -195,6 +195,7 @@ runTest {test data-1.4 {GetSchema with ReservedWords} -setup {
       } result] : [set result ""]}] $result
 } -cleanup {
   cleanupDb $fileName
+
   unset -nocomplain result results errors code dataSource id db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
