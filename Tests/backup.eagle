@@ -101,8 +101,8 @@ runTest {test backup-1.1 {BackupDatabase method, memory to disk} -setup {
         object invoke _Dynamic${id}.Test${id} GetRows $memSource
       } result] : [set result ""]}] $result
 } -cleanup {
-  cleanupDb $fileName(1)
-  cleanupDb $fileName(2) memDb
+  cleanupDb $fileName(2)
+  cleanupDb $fileName(1) memDb
 
   unset -nocomplain result results errors code index memSource dataSource id \
       memDb db fileName
