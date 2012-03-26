@@ -45,9 +45,11 @@ runTest {test tkt-e1b2e0f769-1.1 {data reader cleanup} -setup {
 
       namespace _Dynamic${id}
       {
-        public class Test${id}
+        public static class Test${id}
         {
-          public static List<long?> Tkt_e1b2e0f769(SQLiteConnection connection)
+          public static List<long?> Tkt_e1b2e0f769(
+            SQLiteConnection connection
+            )
           {
             List<long?> result = new List<long?>();
 
@@ -91,6 +93,8 @@ runTest {test tkt-e1b2e0f769-1.1 {data reader cleanup} -setup {
             connection.Close();
             return result;
           }
+
+          /////////////////////////////////////////////////////////////////////
 
           public static int Main()
           {

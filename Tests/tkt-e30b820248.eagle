@@ -50,7 +50,7 @@ runTest {test tkt-e30b820248-1.1 {disposal ordering} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static void Main()
         {
@@ -147,7 +147,7 @@ for {set i 2} {$i < 5} {incr i} {
 
       namespace _Dynamic${id}
       {
-        public class Test${id}
+        public static class Test${id}
         {
           #region Private Static Data
           private static SQLiteConnection connection;
@@ -165,7 +165,9 @@ for {set i 2} {$i < 5} {incr i} {
 
           /////////////////////////////////////////////////////////////////////
 
-          public static SQLiteCommand CreateCommand(string sql)
+          public static SQLiteCommand CreateCommand(
+            string sql
+            )
           {
             SQLiteCommand command = connection.CreateCommand();
             command.CommandText = sql;
@@ -175,7 +177,9 @@ for {set i 2} {$i < 5} {incr i} {
 
           /////////////////////////////////////////////////////////////////////
 
-          public static SQLiteDataReader ExecuteReader(SQLiteCommand command)
+          public static SQLiteDataReader ExecuteReader(
+            SQLiteCommand command
+            )
           {
             SQLiteDataReader dataReader = command.ExecuteReader();
             connection.LogMessage(0, "Command executed.");
@@ -184,7 +188,9 @@ for {set i 2} {$i < 5} {incr i} {
 
           /////////////////////////////////////////////////////////////////////
 
-          public static SQLiteDataReader ExecuteReader(string sql)
+          public static SQLiteDataReader ExecuteReader(
+            string sql
+            )
           {
             SQLiteCommand command = CreateCommand(sql);
             SQLiteDataReader dataReader = command.ExecuteReader();

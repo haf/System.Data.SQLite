@@ -92,7 +92,7 @@ runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static int Main()
         {

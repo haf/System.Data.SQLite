@@ -55,7 +55,7 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static string GetTraceOutput()
         {

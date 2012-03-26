@@ -120,7 +120,7 @@ runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter update fail} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static void Main()
         {
@@ -226,7 +226,7 @@ runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter update success} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static void Main()
         {
@@ -373,7 +373,7 @@ runTest {test tkt-343d392b51-3.2 {adapter, attached db, table names} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static void Main()
         {

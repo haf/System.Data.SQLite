@@ -165,7 +165,7 @@ runTest {test data-1.4 {GetSchema with ReservedWords} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static DataTable GetReservedWords()
         {
@@ -228,7 +228,7 @@ runTest {test data-1.5 {GetSchema with ForeignKeys} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static DataRowCollection GetForeignKeys()
         {
@@ -307,7 +307,7 @@ runTest {test data-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static bool TestSetAvRetry(
           ref int count,
@@ -416,7 +416,7 @@ runTest {test data-1.7 {properly closed database file (non-query)} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static void Main()
         {
@@ -474,7 +474,7 @@ runTest {test data-1.8 {properly closed database file (reader #1)} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static void Main()
         {
@@ -535,7 +535,7 @@ runTest {test data-1.9 {properly closed database file (reader #2)} -setup {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static void Main()
         {
@@ -858,7 +858,7 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static string GetConnectionString(
           string format,
@@ -926,7 +926,7 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
 
     namespace _Dynamic${id}
     {
-      public class Test${id}
+      public static class Test${id}
       {
         public static string GetConnectionString(
           string key,
