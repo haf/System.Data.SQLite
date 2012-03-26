@@ -20,9 +20,10 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-set params(pages) [list -1 -1 0 0 1 1 1000 1000]
+set params(pages) [list -1 -1 0 0 1 1 2 2 1000 1000]
 
 set params(callbacks) [list null "new SQLiteBackupCallback(BackupCallback)" \
+                            null "new SQLiteBackupCallback(BackupCallback)" \
                             null "new SQLiteBackupCallback(BackupCallback)" \
                             null "new SQLiteBackupCallback(BackupCallback)" \
                             null "new SQLiteBackupCallback(BackupCallback)"]
@@ -44,6 +45,12 @@ set params(results) [list \
     1048576 1048576 10\\} 0\$" \
     "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
     1048576 1048576 10\\} 10283\$" \
+    "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
+    1048576 1048576 10\\} 0\$" \
+    "1 \\{System\\.Reflection\\.TargetInvocationException: Exception has been\
+    thrown by the target of an invocation\\. --->\
+    System\\.Data\\.SQLite\\.SQLiteException: SQLite error\\r\\nno such table:\
+    t1\\r\\n.*?" \
     "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
     1048576 1048576 10\\} \\{\\}\$" \
     "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
@@ -128,7 +135,7 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
 
             count++;
 
-            return true;
+            return (pages != 2);
           }
 
           /////////////////////////////////////////////////////////////////////
@@ -152,7 +159,7 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
               Result error = null;
 
               code = interpreter.SetVariableValue(
-                VariableFlags.GlobalOnly, "callbackResults", (pages > 1) ?
+                VariableFlags.GlobalOnly, "callbackResults", (pages > 2) ?
                     results.ToString().Trim() : count.ToString(), null,
                 ref error);
 
@@ -208,7 +215,7 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
     unset -nocomplain result results errors code index memSource dataSource \
         id memDb db fileName callbackResults
   } -constraints \
-  {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -match regexp -result [appendArgs \
 "^Ok System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} " \
 [lindex $params(results) $i]]}
