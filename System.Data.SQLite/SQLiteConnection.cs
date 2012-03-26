@@ -427,18 +427,18 @@ namespace System.Data.SQLite
                     break;
             }
         }
+#if !PLATFORM_COMPACTFRAMEWORK
         catch (Exception e)
         {
-#if !PLATFORM_COMPACTFRAMEWORK
             if ((_flags & SQLiteConnectionFlags.LogBackup) == SQLiteConnectionFlags.LogBackup)
             {
                 SQLiteLog.LogMessage(0, String.Format(
                     "Caught exception while backing up database: {0}", e));
             }
-#endif
 
             throw;
         }
+#endif
         finally
         {
             if (backup != null)
