@@ -20,97 +20,203 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test backup-1.1 {BackupDatabase method, memory to disk} -setup {
-  setupDb [set fileName(1) :memory:] "" "" "" "" "" false memDb
-  setupDb [set fileName(2) backup-1.1.db]
-} -body {
-  set id [object invoke Interpreter.GetActive NextId]
-  set dataSource [file join [getDatabaseDirectory] $fileName(2)]
+set params(pages) [list -1 -1 0 0 1 1 1000 1000]
 
-  sql execute $memDb {
-    CREATE TABLE t1(x TEXT);
-  }
+set params(callbacks) [list null "new SQLiteBackupCallback(BackupCallback)" \
+                            null "new SQLiteBackupCallback(BackupCallback)" \
+                            null "new SQLiteBackupCallback(BackupCallback)" \
+                            null "new SQLiteBackupCallback(BackupCallback)"]
 
-  for {set index 0} {$index < 10} {incr index} {
-    sql execute $memDb [subst {
-      INSERT INTO t1 (x) VALUES('[string repeat ! 1048576]');
-    }]
-  }
+set params(results) [list \
+    "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
+    1048576 1048576 10\\} 0\$" \
+    "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
+    1048576 1048576 10\\} 0\$" \
+    "1 \\{System\\.Reflection\\.TargetInvocationException: Exception has been\
+    thrown by the target of an invocation\\. --->\
+    System\\.Data\\.SQLite\\.SQLiteException: SQLite error\\r\\nno such table:\
+    t1\\r\\n.*?" \
+    "1 \\{System\\.Reflection\\.TargetInvocationException: Exception has been\
+    thrown by the target of an invocation\\. --->\
+    System\\.Data\\.SQLite\\.SQLiteException: SQLite error\\r\\nno such table:\
+    t1\\r\\n.*?" \
+    "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
+    1048576 1048576 10\\} 0\$" \
+    "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
+    1048576 1048576 10\\} 10283\$" \
+    "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
+    1048576 1048576 10\\} \\{\\}\$" \
+    "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
+    1048576 1048576 10\\} \\{System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 9284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 8284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 7284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 6284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 5284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 4284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 3284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 2284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 1284 10284 False\
+    System\\.Data\\.SQLite\\.SQLiteConnection main\
+    System\\.Data\\.SQLite\\.SQLiteConnection main 1000 284 10284 False\\}\$"]
 
-  set memSource [object invoke -flags +NonPublic -objectflags +NoDispose \
-      Interpreter.GetActive.connections get_Item $memDb]
+###############################################################################
 
-  unset -nocomplain results errors
+for {set i 0} {$i < [llength $params(pages)]} {incr i} {
+  set pages [lindex $params(pages) $i]
+  set callback [lindex $params(callbacks) $i]
 
-  set code [compileCSharpWith [subst {
-    using System.Data.SQLite;
-    using System.Text;
+  runTest {test [appendArgs backup-1. $i] {BackupDatabase method} -setup {
+    setupDb [set fileName(1) :memory:] "" "" "" "" "" false memDb
+    setupDb [set fileName(2) [appendArgs backup-1. $i .db]]
+  } -body {
+    set id [object invoke Interpreter.GetActive NextId]
+    set dataSource [file join [getDatabaseDirectory] $fileName(2)]
 
-    namespace _Dynamic${id}
-    {
-      public class Test${id}
+    sql execute $memDb {
+      CREATE TABLE t1(x TEXT);
+    }
+
+    for {set index 0} {$index < 10} {incr index} {
+      sql execute $memDb [subst {
+        INSERT INTO t1 (x) VALUES('[string repeat ! 1048576]');
+      }]
+    }
+
+    set memSource [object invoke -flags +NonPublic -objectflags +NoDispose \
+        Interpreter.GetActive.connections get_Item $memDb]
+
+    unset -nocomplain results errors
+
+    set code [compileCSharpWith [subst {
+      using System;
+      using System.Data.SQLite;
+      using System.Text;
+      using Eagle._Components.Public;
+
+      namespace _Dynamic${id}
       {
-        public static string GetRows(
-          SQLiteConnection source
-          )
+        public static class Test${id}
         {
-          using (SQLiteConnection destination = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+          public static int count = 0;
+          public static readonly StringBuilder results = new StringBuilder();
+
+          /////////////////////////////////////////////////////////////////////
+
+          public static bool BackupCallback(
+            SQLiteConnection source,
+            string sourceName,
+            SQLiteConnection destination,
+            string destinationName,
+            int pages,
+            int remainingPages,
+            int totalPages,
+            bool retry
+            )
           {
-            destination.Open();
-            source.BackupDatabase(destination, "main", "main", -1, null, 0);
+            results.AppendFormat("{0} {1} {2} {3} {4} {5} {6} {7} ", source,
+              sourceName, destination, destinationName, pages, remainingPages,
+              totalPages, retry);
 
-            using (SQLiteCommand command = new SQLiteCommand(
-                "SELECT length(x) FROM t1;", destination))
+            count++;
+
+            return true;
+          }
+
+          /////////////////////////////////////////////////////////////////////
+
+          public static string BackupAndGetData(
+            Interpreter interpreter,
+            SQLiteConnection source
+            )
+          {
+            using (SQLiteConnection destination = new SQLiteConnection(
+                "Data Source=${dataSource};"))
             {
-              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              destination.Open();
+
+              int pages = ${pages};
+
+              source.BackupDatabase(destination, "main", "main", pages,
+                ${callback}, 0);
+
+              ReturnCode code;
+              Result error = null;
+
+              code = interpreter.SetVariableValue(
+                VariableFlags.GlobalOnly, "callbackResults", (pages > 1) ?
+                    results.ToString().Trim() : count.ToString(), null,
+                ref error);
+
+              if (code != ReturnCode.Ok)
+                Utility.Complain(interpreter, code, error);
+
+              using (SQLiteCommand command = new SQLiteCommand(
+                  "SELECT length(x) FROM t1;", destination))
               {
-                int rowCount = 0;
-                StringBuilder builder = new StringBuilder();
-
-                builder.Append(dataReader.FieldCount);
-                builder.Append(' ');
-
-                while (dataReader.Read())
+                using (SQLiteDataReader dataReader = command.ExecuteReader())
                 {
-                  builder.Append(dataReader.GetInt64(0));
-                  builder.Append(' ');
-                  rowCount++;
-                }
+                  StringBuilder builder = new StringBuilder();
+                  int rowCount = 0;
 
-                builder.Append(rowCount);
-                return builder.ToString();
+                  builder.Append(dataReader.FieldCount);
+                  builder.Append(' ');
+
+                  while (dataReader.Read())
+                  {
+                    builder.Append(dataReader.GetInt64(0));
+                    builder.Append(' ');
+                    rowCount++;
+                  }
+
+                  builder.Append(rowCount);
+                  return builder.ToString();
+                }
               }
             }
           }
-        }
 
-        ///////////////////////////////////////////////////////////////////////
+          /////////////////////////////////////////////////////////////////////
 
-        public static void Main()
-        {
-          // do nothing.
+          public static void Main()
+          {
+            // do nothing.
+          }
         }
       }
-    }
-  }] true true true results errors System.Data.SQLite.dll]
+    }] true true true results errors [list System.Data.SQLite.dll Eagle.dll]]
 
-  list $code $results \
-      [expr {[info exists errors] ? $errors : ""}] \
-      [expr {$code eq "Ok" ? [catch {
-        object invoke _Dynamic${id}.Test${id} GetRows $memSource
-      } result] : [set result ""]}] $result
-} -cleanup {
-  cleanupDb $fileName(2)
-  cleanupDb $fileName(1) memDb
+    set callbackResults [list]
 
-  unset -nocomplain result results errors code index memSource dataSource id \
-      memDb db fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
--match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
-\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
-1048576 10\}$}}
+    list $code $results \
+        [expr {[info exists errors] ? $errors : ""}] \
+        [expr {$code eq "Ok" ? [catch {
+          object invoke _Dynamic${id}.Test${id} BackupAndGetData "" $memSource
+        } result] : [set result ""]}] $result $callbackResults
+  } -cleanup {
+    cleanupDb $fileName(2)
+    cleanupDb $fileName(1) memDb
+
+    unset -nocomplain result results errors code index memSource dataSource \
+        id memDb db fileName callbackResults
+  } -constraints \
+  {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-match regexp -result [appendArgs \
+"^Ok System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} " \
+[lindex $params(results) $i]]}
+}
+
+###############################################################################
+
+unset -nocomplain i params pages callback
 
 ###############################################################################
 

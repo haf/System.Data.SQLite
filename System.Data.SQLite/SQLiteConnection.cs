@@ -334,42 +334,13 @@ namespace System.Data.SQLite
 
     #region Backup API Members
     /// <summary>
-    /// Raised between each backup step.
-    /// </summary>
-    /// <param name="source">
-    /// The source database connection.
-    /// </param>
-    /// <param name="destination">
-    /// The destination database connection.
-    /// </param>
-    /// <param name="remainingPages">
-    /// The number of pages remaining to be copied.
-    /// </param>
-    /// <param name="totalPages">
-    /// The total number of pages in the source database.
-    /// </param>
-    /// <param name="retry">
-    /// Set to true if the operation needs to be retried due to database
-    /// locking issues; otherwise, set to false.
-    /// </param>
-    /// <returns>
-    /// True to continue with the backup process or false to halt the backup
-    /// process, rolling back any changes that have been made so far.
-    /// </returns>
-    public delegate bool SQLiteBackupCallback(
-        SQLiteConnection source, SQLiteConnection destination,
-        int remainingPages, int totalPages, bool retry);
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
-    /// <summary>
     /// Backs up the database, using the specified database connection as the
     /// destination.
     /// </summary>
     /// <param name="destination">The destination database connection.</param>
     /// <param name="destinationName">The destination database name.</param>
     /// <param name="sourceName">The source database name.</param>
-    /// <param name="nPage">
+    /// <param name="pages">
     /// The number of pages to copy or negative to copy all remaining pages.
     /// </param>
     /// <param name="callback">
@@ -385,7 +356,7 @@ namespace System.Data.SQLite
         SQLiteConnection destination,
         string destinationName,
         string sourceName,
-        int nPage,
+        int pages,
         SQLiteBackupCallback callback,
         int retryMilliseconds
         )
@@ -424,14 +395,15 @@ namespace System.Data.SQLite
 
             bool retry;
 
-            while (sqliteBase.StepBackup(backup, nPage, out retry)) /* throw */
+            while (sqliteBase.StepBackup(backup, pages, out retry)) /* throw */
             {
                 //
                 // NOTE: If a callback was supplied by our caller, call it.
                 //       If it returns false, halt the backup process.
                 //
-                if ((callback != null) && !callback(this,
-                        destination, sqliteBase.RemainingBackup(backup),
+                if ((callback != null) && !callback(this, sourceName,
+                        destination, destinationName, pages,
+                        sqliteBase.RemainingBackup(backup),
                         sqliteBase.PageCountBackup(backup), retry))
                 {
                     break;
@@ -446,6 +418,13 @@ namespace System.Data.SQLite
                 //
                 if (retry && (retryMilliseconds >= 0))
                     System.Threading.Thread.Sleep(retryMilliseconds);
+
+                //
+                // NOTE: There is no point in calling the native API to copy
+                //       zero pages as it does nothing; therefore, stop now.
+                //
+                if (pages == 0)
+                    break;
             }
         }
         catch (Exception e)
@@ -2863,6 +2842,55 @@ namespace System.Data.SQLite
   /// <param name="sender">The connection executing the statement</param>
   /// <param name="e">Event arguments of the trace</param>
   public delegate void SQLiteTraceEventHandler(object sender, TraceEventArgs e);
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+
+  #region Backup API Members
+  /// <summary>
+  /// Raised between each backup step.
+  /// </summary>
+  /// <param name="source">
+  /// The source database connection.
+  /// </param>
+  /// <param name="sourceName">
+  /// The source database name.
+  /// </param>
+  /// <param name="destination">
+  /// The destination database connection.
+  /// </param>
+  /// <param name="destinationName">
+  /// The destination database name.
+  /// </param>
+  /// <param name="pages">
+  /// The number of pages copied with each step.
+  /// </param>
+  /// <param name="remainingPages">
+  /// The number of pages remaining to be copied.
+  /// </param>
+  /// <param name="totalPages">
+  /// The total number of pages in the source database.
+  /// </param>
+  /// <param name="retry">
+  /// Set to true if the operation needs to be retried due to database
+  /// locking issues; otherwise, set to false.
+  /// </param>
+  /// <returns>
+  /// True to continue with the backup process or false to halt the backup
+  /// process, rolling back any changes that have been made so far.
+  /// </returns>
+  public delegate bool SQLiteBackupCallback(
+    SQLiteConnection source,
+    string sourceName,
+    SQLiteConnection destination,
+    string destinationName,
+    int pages,
+    int remainingPages,
+    int totalPages,
+    bool retry
+  );
+  #endregion
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////
 
   /// <summary>
   /// Whenever an update event is triggered on a connection, this enum will indicate
