@@ -35,23 +35,49 @@ namespace eval ::Eagle {
 
     if {![isEagle]} then {
       #
-      # BUGFIX: We do not want to skip any Mono bugs in Tcl.
-      #         Also, fake the culture.
+      # BUGFIX: We do not normally want to skip any Mono bugs in native Tcl.
       #
-      set constraints [list monoToDo monoBug monoCrash culture.en_US]
+      if {![info exists ::no(runtimeVersion)]} then {
+        set constraints [list monoToDo monoBug monoCrash]
 
-      #
-      # NOTE: Add the necessary constraints for each version
-      #       of Mono we know about.
-      #
-      foreach version [list 20 22 24 26 28 210 212 30] {
-        addConstraint [appendArgs monoToDo $version]
-        addConstraint [appendArgs monoBug $version]
-        addConstraint [appendArgs monoCrash $version]
+        #
+        # NOTE: Add the necessary constraints for each version of Mono that
+        #       we know about.
+        #
+        foreach version [list 20 22 24 26 28 210 211 212 30] {
+          addConstraint [appendArgs monoToDo $version]
+          addConstraint [appendArgs monoBug $version]
+          addConstraint [appendArgs monoCrash $version]
+        }
+
+        #
+        # NOTE: Also add just the generic Mono constraints that do not have
+        #       a trailing version.
+        #
+        foreach constraint $constraints {
+          addConstraint $constraint
+        }
       }
 
-      foreach constraint $constraints {
-        addConstraint $constraint; # running in Tcl.
+      #
+      # NOTE: This test constraint is needed by test "benchmark-1.22".
+      #
+      if {![info exists ::no(compileWindows)]} then {
+        #
+        # NOTE: If the current platform is Windows the Tcl binary must have
+        #       been compiled for Windows.
+        #
+        if {[info exists ::tcl_platform(platform)] && \
+            $::tcl_platform(platform) eq "windows"} then {
+          addConstraint compile.WINDOWS
+        }
+      }
+
+      #
+      # NOTE: Just fake the invariant culture when running in native Tcl.
+      #
+      if {![info exists ::no(culture)]} then {
+        addConstraint culture.invariant
       }
     }
   }
@@ -153,13 +179,6 @@ namespace eval ::Eagle {
       #
       addConstraint eagleBug
       addConstraint eagleCrash
-
-      #
-      # HACK: Needed by tests "socket-*.*".
-      #
-      if {![info exists ::no(compileNetwork)]} then {
-        addConstraint compile.NETWORK
-      }
 
       tputs $channel no\n
     }
@@ -537,7 +556,7 @@ namespace eval ::Eagle {
       addConstraint native
 
       #
-      # HACK: Needed by test "benchmark-1.22".
+      # NOTE: This test constraint is needed by test "benchmark-1.22".
       #
       if {![info exists ::no(compileNative)]} then {
         addConstraint compile.NATIVE
@@ -747,6 +766,13 @@ namespace eval ::Eagle {
       # HACK: Running in Tcl, just assume we have network access.
       #
       addConstraint [appendArgs network_ $host]
+
+      #
+      # NOTE: This test constraint is needed by tests "socket-*.*".
+      #
+      if {![info exists ::no(compileNetwork)]} then {
+        addConstraint compile.NETWORK
+      }
 
       tputs $channel yes\n
     }
@@ -1063,6 +1089,13 @@ namespace eval ::Eagle {
               }
 
               #
+              # NOTE: Check for any Mono version higher than 2.11.
+              #
+              if {$majorVersion > 2 || $minorVersion > 11} then {
+                lappend monoVersions 211
+              }
+
+              #
               # NOTE: Check for any Mono version higher than 2.12.
               #
               if {$majorVersion > 2 || $minorVersion > 12} then {
@@ -1106,7 +1139,7 @@ namespace eval ::Eagle {
           #       necessary constraints for each version of Mono we know
           #       about.
           #
-          foreach monoVersion [list 20 22 24 26 28 210 212 30] {
+          foreach monoVersion [list 20 22 24 26 28 210 211 212 30] {
             addConstraint [appendArgs monoToDo $monoVersion]
             addConstraint [appendArgs monoBug $monoVersion]
             addConstraint [appendArgs monoCrash $monoVersion]

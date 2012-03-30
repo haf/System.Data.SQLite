@@ -132,14 +132,14 @@ namespace eval ::Eagle {
 
     if {[string length $result] > 0} then {
       #
-      # HACK: Fixup for the magic expression (via [expr]) test
-      #       constraint syntax supported by Tcltest and not by
-      #       EagleTest.  This needs to happen for Tcl in test
-      #       constraints that contain any characters that are
-      #       not alphanumeric, not a period, and not a colon
-      #       (e.g. in this case, the exclamation point);
-      #       however, it should only be required when the
-      #       number of test constraints is greater than one.
+      # HACK: Fixup for the semi-magical expression (via [expr]) test
+      #       constraint syntax supported by the Tcltest package and not
+      #       by the Eagle.Test package.  This needs to happen for Tcl
+      #       in test constraints that contain any characters that are
+      #       not alphanumeric, not a period, and not a colon (e.g. in
+      #       this case, the exclamation point); however, it should only
+      #       be required when the number of test constraints is greater
+      #       than one.
       #
       if {![isEagle]} then {
         if {[string first ! $result] != -1} then {
@@ -684,8 +684,7 @@ namespace eval ::Eagle {
       set array(types,$index) [llength [object types]]
       set array(interfaces,$index) [llength [object interfaces]]
       set array(namespaces,$index) [llength [object namespaces]]
-      set array(processes,$index,list) [getProcesses ""]; # volatile, external
-      set array(processes,$index) [llength $array(processes,$index,list)]
+      set array(processes,$index) [llength [getProcesses ""]]
       set array(assemblies,$index) [llength [object assemblies]]
 
       #
