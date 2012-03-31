@@ -12,6 +12,8 @@
 SETLOCAL
 
 REM SET __ECHO=ECHO
+REM SET __ECHO2=ECHO
+REM SET __ECHO3=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -82,7 +84,7 @@ IF NOT DEFINED TYPE (
 
 CALL :fn_ResetErrorLevel
 
-%__ECHO% CALL "%TOOLS%\set_common.bat"
+%__ECHO3% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not set common variables.
@@ -110,7 +112,7 @@ SET TOOLS=%TOOLS:~0,-1%
 
 CALL :fn_ResetErrorLevel
 
-%__ECHO% PUSHD "%ROOT%"
+%__ECHO2% PUSHD "%ROOT%"
 
 IF ERRORLEVEL 1 (
   ECHO Could not change directory to "%ROOT%".
@@ -181,7 +183,7 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
-%__ECHO% POPD
+%__ECHO2% POPD
 
 IF ERRORLEVEL 1 (
   ECHO Could not restore directory.

@@ -12,6 +12,7 @@
 SETLOCAL
 
 REM SET __ECHO=ECHO
+REM SET __ECHO3=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -25,14 +26,14 @@ SET TOOLS=%TOOLS:~0,-1%
 
 CALL :fn_ResetErrorLevel
 
-%__ECHO% CALL "%TOOLS%\vsSp.bat"
+%__ECHO3% CALL "%TOOLS%\vsSp.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not detect Visual Studio.
   GOTO errors
 )
 
-%__ECHO% CALL "%TOOLS%\set_common.bat"
+%__ECHO3% CALL "%TOOLS%\set_common.bat"
 
 IF ERRORLEVEL 1 (
   ECHO Could not set common variables.
@@ -60,14 +61,14 @@ IF NOT DEFINED YEARS (
 FOR %%C IN (%BAKE_CONFIGURATIONS%) DO (
   FOR %%P IN (%PROCESSORS%) DO (
     FOR %%Y IN (%YEARS%) DO (
-      %__ECHO% CALL "%TOOLS%\set_%%C_%%P_%%Y.bat"
+      %__ECHO3% CALL "%TOOLS%\set_%%C_%%P_%%Y.bat"
 
       IF ERRORLEVEL 1 (
         ECHO Could not set variables for %%C/%%P/%%Y.
         GOTO errors
       )
 
-      %__ECHO% CALL "%TOOLS%\bake.bat"
+      %__ECHO3% CALL "%TOOLS%\bake.bat"
 
       IF ERRORLEVEL 1 (
         ECHO Could not bake setup for %%C/%%P/%%Y.

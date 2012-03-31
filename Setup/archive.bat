@@ -12,6 +12,7 @@
 SETLOCAL
 
 REM SET __ECHO=ECHO
+REM SET __ECHO2=ECHO
 IF NOT DEFINED _AECHO (SET _AECHO=REM)
 IF NOT DEFINED _CECHO (SET _CECHO=REM)
 IF NOT DEFINED _VECHO (SET _VECHO=REM)
@@ -29,7 +30,7 @@ SET TOOLS=%TOOLS:~0,-1%
 
 CALL :fn_ResetErrorLevel
 
-%__ECHO% PUSHD "%ROOT%"
+%__ECHO2% PUSHD "%ROOT%"
 
 IF ERRORLEVEL 1 (
   ECHO Could not change directory to "%ROOT%".
@@ -82,7 +83,7 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
-%__ECHO% POPD
+%__ECHO2% POPD
 
 IF ERRORLEVEL 1 (
   ECHO Could not restore directory.
