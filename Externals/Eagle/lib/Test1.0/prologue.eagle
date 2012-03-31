@@ -75,7 +75,7 @@ if {![info exists no([file tail [info script]])]} then {
   #       Eagle or whatever project the Eagle binaries are being used by).
   #
   if {![info exists root_path]} then {
-    set pattern {^local-root:\s+(.*)\s+$}
+    set pattern {^local-root:\s+?(.*?)\s+?$}
 
     if {[catch {set exec [exec -- fossil info]}] || \
         [regexp -line -- $pattern $exec dummy directory] == 0} then {

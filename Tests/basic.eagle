@@ -908,9 +908,9 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{Date\
-Source=test\.db\} 0 \{Date Source=test\.db;DateTimeFormat=ISO8601\} 0 \{Date\
-Source=test\.db;DateTimeKind=Unspecified\} 0 \{Date\
-Source=test\.db;DateTimeFormat=ISO8601;DateTimeKind=Utc\}$}}
+Source=test\.db\} 0 \{Date Source=test\.db;DateTimeFormat=(?:Default|ISO8601)\}\
+0 \{Date Source=test\.db;DateTimeKind=Unspecified\} 0 \{Date\
+Source=test\.db;DateTimeFormat=(?:Default|ISO8601);DateTimeKind=Utc\}$}}
 
 ###############################################################################
 
@@ -1016,7 +1016,7 @@ Size=8192\} 0 \{UnixEpoch, DateTimeFormat=UnixEpoch\} 0 \{Utc,\
 DateTimeKind=Utc\} 0 \{sqlite_schema, BaseSchemaName=sqlite_schema\} 0\
 \{Memory, Journal Mode=Memory\} 0 \{Serializable, Default\
 IsolationLevel=Serializable\} 0 \{False, Foreign Keys=False\} 0\
-\{LogCallbackException, Flags=LogCallbackException\}$}}
+\{LogCallbackException, Flags=(?:Default|LogCallbackException)\}$}}
 
 ###############################################################################
 

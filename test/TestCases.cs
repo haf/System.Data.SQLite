@@ -1200,6 +1200,10 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
             builder.DataAdapter = adp;
             builder.ConflictOption = ConflictOption.OverwriteChanges;
 
+            //
+            // NOTE: *MONO* This test fails on all recent versions of Mono (e.g.
+            //       2.10, 2.11) for reasons that are presently unknown.
+            //
             using (DbCommand updatecmd = builder.GetUpdateCommand())
             {
               if (updatecmd.Parameters.Count != 4)
