@@ -43,37 +43,41 @@
     <div id="mainSection">
     <div id="mainBody">
       <h1 class="heading">About SQLite.NET</h1>
-      <p>This class library is an ADO.NET wrapper around the popular (and free!) 
-        SQLite database engine. For information on SQL syntax, features of SQLite and a 
-        good understanding of how it works and what it does, I highly recommend heading 
-        over to <a target="_blank" href="http://www.sqlite.org">sqlite.org</a> and 
+      <p>This class library is an ADO.NET wrapper around the popular (and free!)
+        SQLite database engine. For information on SQL syntax, features of SQLite and a
+        good understanding of how it works and what it does, I highly recommend heading
+        over to <a target="_blank" href="http://www.sqlite.org">sqlite.org</a> and
         reading the documentation there.</p>
-      <P>The C# provider, the very minor C code modifications to SQLite, documentation and 
-        etc&nbsp;were written by <A href="mailto:robert@blackcastlesoft.com">Robert 
+      <P>The C# provider, the very minor C code modifications to SQLite, documentation and
+        etc&nbsp;were written by <A href="mailto:robert@blackcastlesoft.com">Robert
           Simpson</A>, and the SourceForge project page can be found <A target="_blank" href="http://sourceforge.net/projects/sqlite-dotnet2">
           here</A>.</P>
+      <p>The System.Data.SQLite project is currently maintained by the
+         <A target="_blank" href="http://www.sqlite.org/">SQLite Development Team</a> and
+         the latest source code and project information can be found
+         <A target="_blank" href="http://system.data.sqlite.org/">here</A>.</p>
       <DIV>
         <br>
       </DIV>
       <h1 class="heading">What's New?</h1>
-      <p><a href="version.html">Click here to see the version history of this SQLite.NET 
+      <p><a href="version.html">Click here to see the version history of this SQLite.NET
           provider</a></p>
       <DIV>
         <br>
       </DIV>
       <h1 class="heading">Using this library</h1>
-      <p>The following are links to information on various aspects of the library and 
+      <p>The following are links to information on various aspects of the library and
         how to use it in your application(s)
       </p>
       <p><a href="designer.html">How to install&nbsp;Visual Studio Design-Time Support</a></p>
-      <P><A href="dbfactorysupport.html">How to configure and enumerate SQLite.NET 
+      <P><A href="dbfactorysupport.html">How to configure and enumerate SQLite.NET
           through the DbProviderFactories object</A></P>
       <p><a href="optimizing.html">Getting the best performance out of SQLite</a></p>
-      <p><a href="limitations.html">Limitations of the SQLite.NET provider and the SQLite 
+      <p><a href="limitations.html">Limitations of the SQLite.NET provider and the SQLite
           engine (compared to other providers and engines)</a></p>
       <br>
       <h1 class="heading">SQLite.NET Provider Features</h1>
-      <p>This SQLite provider implements every feature of the underlying SQLite 
+      <p>This SQLite provider implements every feature of the underlying SQLite
         database engine without omission. Here's a brief summary:</p>
       <UL>
         <LI>
@@ -81,7 +85,7 @@
         base classes and features recently introduced in the framework, including automatic
         transaction enlistment.<li>Supports the Full and Compact .NET Framework, as well as
           native C/C++ development.&nbsp; 100% binary compatible with the original sqlite3.dll.</li>
-        <li>Full support for Mono via a &quot;managed only&quot; provider that runs against the 
+        <li>Full support for Mono via a &quot;managed only&quot; provider that runs against the
           official SQLite 3.6.1 or higher library.</li>
         <li>Full Entity Framework support (ADO.NET 3.5 SP1)</li>
         <li>
@@ -90,13 +94,13 @@
           runs queries faster, and has a smaller database file size as well. </li>
         <li>Encrypted database support.&nbsp; Encrypted databases are fully encrypted and
           support both binary and cleartext password types. </li>
-        <li>Visual Studio 2005/2008/2010 Design-Time Support.&nbsp; You can add a SQLite 
-        database to the Servers list, design queries with the Query Designer, 
+        <li>Visual Studio 2005/2008/2010 Design-Time Support.&nbsp; You can add a SQLite
+        database to the Servers list, design queries with the Query Designer,
         drag-and-drop tables onto a Typed DataSet, etc.</li>
-            <li>Full SQLite schema editing inside Visual Studio.&nbsp; You can create/edit 
+            <li>Full SQLite schema editing inside Visual Studio.&nbsp; You can create/edit
               tables, views, triggers, indexes, check constraints and foreign keys. </li>
         <li>
-        Available as a single file redistributable (except Compact Framework).&nbsp; The core sqlite3 codebase and the ADO.NET wrapper 
+        Available as a single file redistributable (except Compact Framework).&nbsp; The core sqlite3 codebase and the ADO.NET wrapper
         are combined into one multi-module assembly. </li>
         <li>Also available as separate native and managed assemblies and optionally with the Visual C++ Runtime statically linked. </li>
         <li>
@@ -110,33 +114,33 @@
         DbProviderFactory support. </li>
         <li>
           Full support for ATTACH'ed databases.&nbsp; Exposed as <i>Catalogs</i>
-        in the schema.&nbsp; When cloning a connection, all attached databases are 
+        in the schema.&nbsp; When cloning a connection, all attached databases are
         automatically re-attached to the new connection. </li>
         <li>
           DbConnection.GetSchema(...) support includes the <i>MetaDataCollections</i>, <i>
           DataSourceInformation</i>, <i>Columns</i>, <i>Tables</i>, <i>Views, ViewColumns, </i>
-          <i>Catalogs, </i><i>Indexes, 
+          <i>Catalogs, </i><i>Indexes,
             IndexColumns, ForeignKeys </i>and <em>Triggers</em>.
         </li>
         <li>
-        Enhanced DbDataReader.GetSchemaTable() functionality returns catalog, namespace 
+        Enhanced DbDataReader.GetSchemaTable() functionality returns catalog, namespace
         and detailed schema information even for complex queries. </li>
         <li>
         Named and unnamed parameters. </li>
         <li>
-        Full UTF-8 and UTF-16 support, each with optimized pipelines into the native 
+        Full UTF-8 and UTF-16 support, each with optimized pipelines into the native
         database core. </li>
         <li>
         Multiple simultaneous DataReaders (one DataReader per Command however). </li>
         <li>
-        Full support for user-defined scalar and aggregate functions, encapsulated into 
-        an easy-to-use base class in which only a couple of overrides are necessary to 
+        Full support for user-defined scalar and aggregate functions, encapsulated into
+        an easy-to-use base class in which only a couple of overrides are necessary to
         implement new SQL functions. </li>
         <li>
-        Full support for user-defined collating sequences, every bit as simple to 
+        Full support for user-defined collating sequences, every bit as simple to
         implement as user-defined functions and uses the same base class. </li>
         <li>
-          Full source for the entire engine and wrapper.&nbsp; No copyrights.&nbsp; 
+          Full source for the entire engine and wrapper.&nbsp; No copyrights.&nbsp;
           Public Domain.&nbsp; 100% free for commercial and non-commercial use.&nbsp;</li>
       </UL>
       <br>

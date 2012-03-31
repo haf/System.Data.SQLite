@@ -3,9 +3,10 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.80.0 - April XX, 2012 <font color="red">(release scheduled)</font></b>
+    <b>1.0.80.0 - April 1, 2012</b>
 </p>
 <ul>
+    <li>Updated to [http://www.sqlite.org/releaselog/3_7_11.html|SQLite 3.7.11].</li>
     <li>In the SQLiteFunction class, when calling user-provided methods from a delegate called by native code, avoid throwing exceptions, optionally tracing the caught exceptions. Fix for [8a426d12eb].</li>
     <li>Add Visual Studio 2005 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
     <li>Add Visual Studio 2005 support to the redesigned designer support installer.</li>
