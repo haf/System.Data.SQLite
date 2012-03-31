@@ -105,7 +105,7 @@ foreach {dummy fileName fileSize fileHash} \
   #
   # NOTE: Get the fully qualified file name based on the configured directory.
   #
-  set fullFileName [file join $directory $fileName]
+  set fullFileName [file join $directory [file tail $fileName]]
 
   #
   # NOTE: If the file does not exist, issue a warning and skip it.
