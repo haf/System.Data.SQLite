@@ -223,6 +223,23 @@
   </li>
 </ol>
 
+<a name="verifyAllPackages"></a>
+<h2>Verify All Release Packages</h2>
+
+<ol>
+  <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+
+  <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
+
+  <li>
+    Enter the following command to build all the source release packages:&nbsp;
+    <b>..\Externals\Eagle\bin\EagleShell.exe -file verify.eagle Output</b><br />
+    <i>If errors are generated, the file &quot;&lt;root&gt;\Setup\verify.lst&quot;
+    may need to be updated to account for the files that have been added and/or
+    removed from the release archives since the previous release.</i>
+  </li>
+</ol>
+
 <a name="updateDownloadsPage"></a>
 <h2>Update Downloads Page</h2>
 
