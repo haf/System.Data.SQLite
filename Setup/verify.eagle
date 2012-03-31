@@ -79,19 +79,22 @@ if {$argc == 1} then {
       }
 
       #
-      # NOTE: Attempt to extract the version information from the
-      #       manifest file name.
+      # NOTE: Attempt to extract the version and/or date/time
+      #       information from the manifest file name.
       #
       regexp -- {(\d+)\.(\d+)\.(\d+)\.(\d+)} $manifest dummy \
           major minor build revision
+
+      regexp -- {(\d{4})-(\d{2})-(\d{2})-(\d{2})} $manifest \
+          dummy year month day sequence
 
       #
       # HACK: Attempt to match and remove sub-strings from the
       #       manifest file name that look like a version number
       #       in the format "<major>.<minor>.<build>.<revision>"
       #       and/or a date/time string matching the format
-      #       "YYYY-MM-DD-NN" (where NN is a generic incrementing
-      #       sequence number).
+      #       "YYYY-MM-DD-NN" (where the NN portion is a generic
+      #       incrementing sequence number).
       #
       regsub -- {\d+\.\d+\.\d+\.\d+} $manifest {} manifest
       regsub -- {\d{4}-\d{2}-\d{2}-\d{2}} $manifest {} manifest
