@@ -157,8 +157,14 @@ IF NOT EXIST Setup\Output (
 )
 
 IF DEFINED BASE_CONFIGURATIONSUFFIX (
+  FOR /F "delims=" %%F IN ('DIR /B /S /AD "bin\%YEAR%\%BASE_CONFIGURATION%%BASE_CONFIGURATIONSUFFIX%\bin" 2^> NUL') DO (
+    %__ECHO% RMDIR /S /Q "%%F"
+  )
   %__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%BASE_CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
 ) ELSE (
+  FOR /F "delims=" %%F IN ('DIR /B /S /AD "bin\%YEAR%\%BASE_CONFIGURATION%\bin" 2^> NUL') DO (
+    %__ECHO% RMDIR /S /Q "%%F"
+  )
   %__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
 )
 
