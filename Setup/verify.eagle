@@ -1,0 +1,191 @@
+###############################################################################
+#
+# verify.eagle -- Release Archive Verification Tool
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+
+proc usage { error } {
+  if {[string length $error] > 0} then {puts stdout $error}
+
+  puts stdout "usage:\
+[file tail [info nameofexecutable]]\
+[file tail [info script]] <directory>"
+
+  #
+  # NOTE: Indicate to the caller, if any, that we have failed.
+  #
+  exit 1
+}
+
+set argc [llength $argv]
+
+if {$argc == 1} then {
+  set directory [lindex $argv 0]
+
+  if {[string length $directory] > 0} then {
+    set exitCode 0
+
+    set script [info script]
+    set path [file dirname $script]
+    set rootName [file rootname [file tail $script]]
+
+    if {![info exists rar]} then {
+      if {[info exists env(UnRAR)]} then {
+        set rar $env(UnRAR)
+      }
+
+      if {![info exists rar] || ![file exists $rar]} then {
+        set rar [file join $path UnRAR.exe]
+      }
+    }
+
+    if {![info exists zip]} then {
+      if {[info exists env(UnZip)]} then {
+        set zip $env(UnZip)
+      }
+
+      if {![info exists zip] || ![file exists $zip]} then {
+        set zip [file join $path UnZip.exe]
+      }
+    }
+
+    source [file join $path [appendArgs $rootName .lst]]
+
+    if {![array exists manifests]} then {
+      usage "master archive manifest is missing"
+    }
+
+    set archiveFileNames [list]
+
+    foreach extension [list exe rar zip] {
+      eval lappend archiveFileNames [findFilesRecursive \
+          [file join $directory [appendArgs *. $extension]]]
+    }
+
+    foreach archiveFileName $archiveFileNames {
+      set manifest [file tail $archiveFileName]
+
+      #
+      # HACK: Skip all the Inno Setup files because we cannot
+      #       easily validate them from this tool.
+      #
+      if {[string match -nocase *Setup*.exe $manifest]} then {
+        continue
+      }
+
+      #
+      # NOTE: Attempt to extract the version information from the
+      #       manifest file name.
+      #
+      regexp -- {(\d+)\.(\d+)\.(\d+)\.(\d+)} $manifest dummy \
+          major minor build revision
+
+      #
+      # HACK: Attempt to match and remove sub-strings from the
+      #       manifest file name that look like a version number
+      #       in the format "<major>.<minor>.<build>.<revision>"
+      #       and/or a date/time string matching the format
+      #       "YYYY-MM-DD-NN" (where NN is a generic incrementing
+      #       sequence number).
+      #
+      regsub -- {\d+\.\d+\.\d+\.\d+} $manifest {} manifest
+      regsub -- {\d{4}-\d{2}-\d{2}-\d{2}} $manifest {} manifest
+
+      if {![info exists manifests($manifest)]} then {
+        puts stdout [appendArgs \
+            "WARNING: Cannot find master manifest \"" \
+            $manifest "\" for archive \"" $archiveFileName \
+            "\", skipped."]
+
+        continue
+      }
+
+      set manifestFileNames [list]
+
+      foreach list [lrange $manifests($manifest) 1 end] {
+        set rawManifestFileNames [set [appendArgs \
+            [appendArgs [lindex $manifests($manifest) 0] \
+            _manifests] ( $list )]]
+
+        if {[info exists manifests($manifest,subst)]} then {
+          set rawManifestFileNames [subst $rawManifestFileNames]
+        }
+
+        foreach manifestFileName $rawManifestFileNames {
+          lappend manifestFileNames $manifestFileName
+        }
+      }
+
+      set listCommand [list]
+      lappend listCommand exec -success Success -nocarriagereturns --
+
+      if {[file extension $archiveFileName] eq ".zip"} then {
+        if {![file exists $zip]} then {
+          usage [appendArgs "tool \"" $zip "\" is missing"]
+        }
+
+        lappend listCommand $zip -Z -1 $archiveFileName
+      } else {
+        if {![file exists $rar]} then {
+          usage [appendArgs "tool \"" $rar "\" is missing"]
+        }
+
+        lappend listCommand $rar vb -- $archiveFileName
+      }
+
+      if {[catch {eval $listCommand} result] == 0} then {
+        set containedFileNames [split [string map [list \\ /] \
+            [string trim $result]] \n]
+
+        foreach manifestFileName $manifestFileNames {
+          #
+          # TODO: Should we use -nocase here because Windows
+          #       is the primary release platform?
+          #
+          if {[lsearch -exact -- $containedFileNames \
+              $manifestFileName] == -1} then {
+            puts stdout [appendArgs \
+                "ERROR: Archive \"" $archiveFileName \
+                "\" missing file \"" $manifestFileName \
+                "\" from manifest \"" $manifest "\"."]
+
+            set exitCode 1
+          }
+        }
+
+        foreach containedFileName $containedFileNames {
+          #
+          # TODO: Should we use -nocase here because Windows
+          #       is the primary release platform?
+          #
+          if {[lsearch -exact -- $manifestFileNames \
+              $containedFileName] == -1} then {
+            puts stdout [appendArgs \
+                "ERROR: Archive \"" $archiveFileName \
+                "\" contains file \"" $containedFileName \
+                "\" not in manifest \"" $manifest "\"."]
+
+            set exitCode 1
+          }
+        }
+      } else {
+        puts stdout [appendArgs \
+            "ERROR: Failed to get list of files in archive \"" \
+            $archiveFileName "\", error: " $result]
+
+        set exitCode 1
+      }
+    }
+
+    exit $exitCode
+  } else {
+    usage "invalid directory"
+  }
+} else {
+  usage ""
+}
