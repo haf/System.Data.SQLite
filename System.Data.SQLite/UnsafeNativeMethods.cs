@@ -86,10 +86,60 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
-      /// Stores the mappings between processor architecture names and platform
-      /// names.
+      /// This class represents the concept of a platform as understood by the
+      /// native library pre-loading code.
       /// </summary>
-      private static Dictionary<string, string> processorArchitecturePlatforms;
+      private sealed class Platform
+      {
+          #region Private Data
+          private string name;
+          private int bits;
+          #endregion
+
+          /////////////////////////////////////////////////////////////////////
+
+          #region Public Constructors
+          public Platform(
+              string name,
+              int bits
+              )
+          {
+              this.name = name;
+              this.bits = bits;
+          }
+          #endregion
+
+          /////////////////////////////////////////////////////////////////////
+
+          #region Public Properties
+          /// <summary>
+          /// The name of the platform.  This is used to help locate the
+          /// native library to pre-load.
+          /// </summary>
+          public string Name
+          {
+              get { return name; }
+          }
+
+          /////////////////////////////////////////////////////////////////////
+
+          /// <summary>
+          /// The number of bits needed to represent memory addresses on this
+          /// platform.
+          /// </summary>
+          public int Bits
+          {
+              get { return bits; }
+          }
+          #endregion
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Stores the mappings between processor architecture names and platform
+      /// names (and bits).
+      /// </summary>
+      private static Dictionary<string, Platform> processorArchitecturePlatforms;
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
@@ -132,12 +182,27 @@ namespace System.Data.SQLite
               //
               if (processorArchitecturePlatforms == null)
               {
+                  //
+                  // NOTE: Create the map of processor architecture names
+                  //       to platform names using a case-insensitive string
+                  //       comparer.
+                  //
                   processorArchitecturePlatforms =
-                      new Dictionary<string, string>();
+                      new Dictionary<string, Platform>(
+                          StringComparer.OrdinalIgnoreCase);
 
-                  processorArchitecturePlatforms.Add("X86", "Win32");
-                  processorArchitecturePlatforms.Add("AMD64", "x64");
-                  processorArchitecturePlatforms.Add("IA64", "Itanium");
+                  //
+                  // NOTE: Setup the list of platform names associated with
+                  //       the supported processor architectures.
+                  //
+                  processorArchitecturePlatforms.Add("X86",
+                      new Platform("Win32", 32));
+
+                  processorArchitecturePlatforms.Add("AMD64",
+                      new Platform("x64", 64));
+
+                  processorArchitecturePlatforms.Add("IA64",
+                      new Platform("Itanium", 64));
               }
 
               //
@@ -237,6 +302,20 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
+      /// Determines and then returns the number of bits used to represent
+      /// memory addresses for the current process.
+      /// </summary>
+      /// <returns>
+      /// The number of bits used to represent memory addresses for the
+      /// current process or zero if this value cannot be determined.
+      /// </returns>
+      private static int GetProcessBits()
+      {
+          return IntPtr.Size * 8;
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
       /// Queries and returns the processor architecture of the current
       /// process.
       /// </summary>
@@ -249,9 +328,42 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
           //
-          // BUGBUG: Will this always be reliable?
+          // NOTE: If the "PreLoadSQLite_ProcessorArchitecture" environment
+          //       variable is set, use it verbatim for the current processor
+          //       architecture.
           //
-          return Environment.GetEnvironmentVariable(PROCESSOR_ARCHITECTURE);
+          string processorArchitecture = Environment.GetEnvironmentVariable(
+              "PreLoadSQLite_ProcessorArchitecture");
+
+          if (processorArchitecture != null)
+              return processorArchitecture;
+
+          //
+          // BUGBUG: Will this always be reliable?  There seems to be some
+          //         evidence that this is not necessarily 100% reliable on
+          //         some 64-bit platforms for child processes started from
+          //         a WoW64 process (e.g. the Visual Studio debugger).
+          //
+          processorArchitecture = Environment.GetEnvironmentVariable(
+              PROCESSOR_ARCHITECTURE);
+
+          if (processorArchitecture != null)
+          {
+              if (processorArchitecturePlatforms == null)
+                  return null;
+
+              Platform platform;
+
+              if (processorArchitecturePlatforms.TryGetValue(
+                      processorArchitecture, out platform) &&
+                  (platform != null) &&
+                  (platform.Bits == GetProcessBits()))
+              {
+                  return processorArchitecture;
+              }
+          }
+
+          return null;
 #else
           //
           // BUGBUG: No way to determine this value on the .NET Compact
@@ -284,23 +396,13 @@ namespace System.Data.SQLite
               if (processorArchitecturePlatforms == null)
                   return null;
 
-              string platformName;
+              Platform platform;
 
               if (processorArchitecturePlatforms.TryGetValue(
-                      processorArchitecture, out platformName))
+                      processorArchitecture, out platform) &&
+                  (platform != null))
               {
-                  return platformName;
-              }
-
-              if (processorArchitecturePlatforms.TryGetValue(
-#if !PLATFORM_COMPACTFRAMEWORK
-                      processorArchitecture.ToUpperInvariant(),
-#else
-                      processorArchitecture.ToUpper(),
-#endif
-                      out platformName))
-              {
-                  return platformName;
+                  return platform.Name;
               }
           }
 
