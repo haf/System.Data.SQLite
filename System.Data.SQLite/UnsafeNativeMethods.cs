@@ -195,7 +195,7 @@ namespace System.Data.SQLite
                   // NOTE: Setup the list of platform names associated with
                   //       the supported processor architectures.
                   //
-                  processorArchitecturePlatforms.Add("X86",
+                  processorArchitecturePlatforms.Add("x86",
                       new Platform("Win32", 32));
 
                   processorArchitecturePlatforms.Add("AMD64",
@@ -311,6 +311,11 @@ namespace System.Data.SQLite
       /// </returns>
       private static int GetProcessBits()
       {
+          //
+          // NOTE: The number of bits used to represent memory addresses for
+          //       the current process is the size of an IntPtr (in bytes),
+          //       multiplied by the number of bits per byte (8).
+          //
           return IntPtr.Size * 8;
       }
 
@@ -339,27 +344,29 @@ namespace System.Data.SQLite
               return processorArchitecture;
 
           //
-          // BUGBUG: Will this always be reliable?  There seems to be some
-          //         evidence that this is not necessarily 100% reliable on
-          //         some 64-bit platforms for child processes started from
-          //         a WoW64 process (e.g. the Visual Studio debugger).
+          // NOTE: We cannot sanity check the processor architecture value
+          //       without the mappings between processor architecture names
+          //       and platform bits; therefore, return null in that case.
           //
-          processorArchitecture = Environment.GetEnvironmentVariable(
-              PROCESSOR_ARCHITECTURE);
-
-          if (processorArchitecture != null)
+          if (processorArchitecturePlatforms != null)
           {
-              if (processorArchitecturePlatforms == null)
-                  return null;
+              //
+              // BUGBUG: Will this always be reliable?
+              //
+              processorArchitecture = Environment.GetEnvironmentVariable(
+                  PROCESSOR_ARCHITECTURE);
 
-              Platform platform;
-
-              if (processorArchitecturePlatforms.TryGetValue(
-                      processorArchitecture, out platform) &&
-                  (platform != null) &&
-                  (platform.Bits == GetProcessBits()))
+              if (processorArchitecture != null)
               {
-                  return processorArchitecture;
+                  Platform platform;
+
+                  if (processorArchitecturePlatforms.TryGetValue(
+                          processorArchitecture, out platform) &&
+                      (platform != null) &&
+                      (platform.Bits == GetProcessBits()))
+                  {
+                      return processorArchitecture;
+                  }
               }
           }
 
