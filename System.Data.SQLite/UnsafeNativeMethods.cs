@@ -132,10 +132,20 @@ namespace System.Data.SQLite
               //
               if (processorArchitecturePlatforms == null)
               {
+                  //
+                  // NOTE: Create the map of processor architecture names
+                  //       to platform names using a case-insensitive string
+                  //       comparer.
+                  //
                   processorArchitecturePlatforms =
-                      new Dictionary<string, string>();
+                      new Dictionary<string, string>(
+                          StringComparer.OrdinalIgnoreCase);
 
-                  processorArchitecturePlatforms.Add("X86", "Win32");
+                  //
+                  // NOTE: Setup the list of platform names associated with
+                  //       the supported processor architectures.
+                  //
+                  processorArchitecturePlatforms.Add("x86", "Win32");
                   processorArchitecturePlatforms.Add("AMD64", "x64");
                   processorArchitecturePlatforms.Add("IA64", "Itanium");
               }
@@ -249,6 +259,17 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
           //
+          // NOTE: If the "PreLoadSQLite_ProcessorArchitecture" environment
+          //       variable is set, use it verbatim for the current processor
+          //       architecture.
+          //
+          string processorArchitecture = Environment.GetEnvironmentVariable(
+              "PreLoadSQLite_ProcessorArchitecture");
+
+          if (processorArchitecture != null)
+              return processorArchitecture;
+
+          //
           // BUGBUG: Will this always be reliable?
           //
           return Environment.GetEnvironmentVariable(PROCESSOR_ARCHITECTURE);
@@ -288,17 +309,6 @@ namespace System.Data.SQLite
 
               if (processorArchitecturePlatforms.TryGetValue(
                       processorArchitecture, out platformName))
-              {
-                  return platformName;
-              }
-
-              if (processorArchitecturePlatforms.TryGetValue(
-#if !PLATFORM_COMPACTFRAMEWORK
-                      processorArchitecture.ToUpperInvariant(),
-#else
-                      processorArchitecture.ToUpper(),
-#endif
-                      out platformName))
               {
                   return platformName;
               }
