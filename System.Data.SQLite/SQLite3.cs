@@ -154,6 +154,9 @@ namespace System.Data.SQLite
             {
                 foreach (string element in list)
                 {
+                    if (element == null)
+                        continue;
+
                     if (result.Length > 0)
                         result.Append(' ');
 

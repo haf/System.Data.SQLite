@@ -126,7 +126,7 @@
     <PreLoadNativeLibrary Condition="'$(PreLoadNativeLibrary)' == ''">true</PreLoadNativeLibrary>
 
     <!--
-        NOTE: Enable using the "well-known" extension functions form the custom
+        NOTE: Enable using the "well-known" extension functions from the custom
               built interop DLL (i.e. "SQLite.Interop.dll")?  By default, this
               is enabled.  If this is disabled, the "well-known" extension
               functions will be unavailable.  If this is enabled, it must also
@@ -141,7 +141,7 @@
     <InteropExtensionFunctions Condition="'$(InteropExtensionFunctions)' == ''">true</InteropExtensionFunctions>
 
     <!--
-        NOTE: Enable exposing the CryptoAPI based codec form the custom built
+        NOTE: Enable exposing the CryptoAPI based codec from the custom built
               interop DLL (i.e. "SQLite.Interop.dll")?  By default, this is
               enabled.  If this is disabled, support for encrypted databases
               will be unavailable.  If this is enabled, it must also be enabled
