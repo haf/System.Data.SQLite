@@ -69,9 +69,11 @@ runTest {test tkt-00f86f9739-1.1 {LINQ with StartsWith} -body {
   set result
 } -cleanup {
   unset -nocomplain code output error result value
-} -constraints {eagle monoToDo file_testlinq.exe file_northwindEF.db} -result \
-{0 {} 0 {DRACD OLDWO RATTC} 0 {ALFKI CACTU CHOPS FOLKO GALED KOENE LILAS MAGAA\
-MAISD OCEAN RANCH SAVEA THECR} 0 {} 0 {} 0 {} 0 {}}}
+} -constraints \
+{eagle monoToDo defineConstant.System.Data.SQLite.INTEROP_EXTENSION_FUNCTIONS\
+file_testlinq.exe file_northwindEF.db} -result {0 {} 0 {DRACD OLDWO RATTC} 0\
+{ALFKI CACTU CHOPS FOLKO GALED KOENE LILAS MAGAA MAISD OCEAN RANCH SAVEA THECR}\
+0 {} 0 {} 0 {} 0 {}}}
 
 ###############################################################################
 

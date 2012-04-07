@@ -201,8 +201,10 @@ namespace System.Data.SQLite
     /// <returns></returns>
     internal abstract void LogMessage(int iErrCode, string zMessage);
 
+#if INTEROP_CODEC
     internal abstract void SetPassword(byte[] passwordBytes);
     internal abstract void ChangePassword(byte[] newPasswordBytes);
+#endif
 
     internal abstract void SetUpdateHook(SQLiteUpdateCallback func);
     internal abstract void SetCommitHook(SQLiteCommitCallback func);

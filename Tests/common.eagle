@@ -366,6 +366,29 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForSQLiteDefineConstant { channel name } {
+      tputs $channel [appendArgs \
+          "---- checking for System.Data.SQLite define constant \"" $name \
+          "\"... "]
+
+      if {[catch {object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
+              DefineConstants} defineConstants] == 0} then {
+        if {[lsearch -exact -nocase $defineConstants $name] != -1} then {
+          #
+          # NOTE: Yes, this define constant was enabled when the managed
+          #       assembly was compiled.
+          #
+          addConstraint [appendArgs defineConstant.System.Data.SQLite. $name]
+
+          tputs $channel yes\n
+        } else {
+          tputs $channel no\n
+        }
+      } else {
+        tputs $channel error\n
+      }
+    }
+
     proc getDateTimeFormat {} {
       #
       # NOTE: This procedure simply returns the "default" DateTime format used
@@ -835,6 +858,20 @@ namespace eval ::Eagle {
           }
         }
 
+        catch {
+          tputs $::test_channel \
+              "---- define constants for \"System.Data.SQLite\"... "
+
+          if {[catch {object invoke -flags +NonPublic \
+                  System.Data.SQLite.SQLite3 DefineConstants} \
+                  defineConstants] == 0} then {
+            tputs $::test_channel [appendArgs [formatList [lsort \
+                $defineConstants]] \n]
+          } else {
+            tputs $::test_channel unknown\n
+          }
+        }
+
         #
         # NOTE: Now, we need to know if the SQLite core library is available
         #       (i.e. because the managed-only System.Data.SQLite assembly can
@@ -843,6 +880,13 @@ namespace eval ::Eagle {
         #       found it (above), this should always succeed.
         #
         checkForSQLite $::test_channel
+
+        #
+        # NOTE: Attempt to determine if the custom extension functions were
+        #       compiled into the SQLite interop assembly.
+        #
+        checkForSQLiteDefineConstant $::test_channel \
+            INTEROP_EXTENSION_FUNCTIONS
 
         #
         # NOTE: Report the resource usage prior to running any tests.

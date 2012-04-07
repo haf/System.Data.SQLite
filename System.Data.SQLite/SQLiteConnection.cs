@@ -220,10 +220,13 @@ namespace System.Data.SQLite
     /// The database filename minus path and extension
     /// </summary>
     private string _dataSource;
+
+#if INTEROP_CODEC
     /// <summary>
     /// Temporary password storage, emptied after the database has been opened
     /// </summary>
     private byte[] _password;
+#endif
 
     /// <summary>
     /// The "stub" (i.e. placeholder) base schema name to use when returning
@@ -1066,6 +1069,7 @@ namespace System.Data.SQLite
 
         _binaryGuid = (SQLiteConvert.ToBoolean(FindKey(opts, "BinaryGUID", Boolean.TrueString)) == true);
 
+#if INTEROP_CODEC
         string password = FindKey(opts, "Password", null);
 
         if (String.IsNullOrEmpty(password) == false)
@@ -1073,6 +1077,7 @@ namespace System.Data.SQLite
         else if (_password != null)
           _sql.SetPassword(_password);
         _password = null;
+#endif
 
         _dataSource = Path.GetFileNameWithoutExtension(fileName);
 
@@ -1290,6 +1295,15 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns a string containing the define constants (i.e. compile-time
+    /// options) used to compile this assembly, delimited with spaces.
+    /// </summary>
+    public static string DefineConstants
+    {
+        get { return SQLite3.DefineConstants; }
+    }
+
+    /// <summary>
     /// Returns the version of the underlying SQLite database engine
     /// </summary>
     public static string SQLiteVersion
@@ -1386,6 +1400,7 @@ namespace System.Data.SQLite
       _sql.LogMessage(iErrCode, zMessage);
     }
 
+#if INTEROP_CODEC
     /// <summary>
     /// Change the password (or assign a password) to an open database.
     /// </summary>
@@ -1448,6 +1463,7 @@ namespace System.Data.SQLite
 
       _password = databasePassword;
     }
+#endif
 
     /// <summary>
     /// Queries or modifies the number of retries or the retry interval (in milliseconds) for

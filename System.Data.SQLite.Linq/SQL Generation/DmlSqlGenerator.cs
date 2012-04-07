@@ -197,7 +197,11 @@ namespace System.Data.SQLite
       commandText.AppendLine();
 
       // where
+#if INTEROP_EXTENSION_FUNCTIONS
       commandText.Append("WHERE last_rows_affected() > 0");
+#else
+      commandText.Append("WHERE changes() > 0");
+#endif
       EntitySetBase table = ((DbScanExpression)tree.Target.Expression).Target;
       bool identity = false;
       foreach (EdmMember keyMember in table.ElementType.KeyMembers)

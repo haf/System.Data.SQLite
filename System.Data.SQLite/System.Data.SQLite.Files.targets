@@ -35,6 +35,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="SQLiteDataReader.cs" />
+    <Compile Include="SQLiteDefineConstants.cs" />
     <Compile Include="SQLiteException.cs" />
     <Compile Include="SQLiteFactory.cs" />
     <Compile Include="SQLiteFunction.cs" />

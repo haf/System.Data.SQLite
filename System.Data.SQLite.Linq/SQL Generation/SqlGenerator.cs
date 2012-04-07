@@ -328,13 +328,18 @@ namespace System.Data.SQLite
     private static Dictionary<string, FunctionHandler> InitializeCanonicalFunctionHandlers()
     {
       Dictionary<string, FunctionHandler> functionHandlers = new Dictionary<string, FunctionHandler>(16, StringComparer.Ordinal);
+
+#if INTEROP_EXTENSION_FUNCTIONS
       functionHandlers.Add("IndexOf", HandleCanonicalFunctionIndexOf);
+#endif
+
       functionHandlers.Add("Length", HandleCanonicalFunctionLength);
       functionHandlers.Add("NewGuid", HandleCanonicalFunctionNewGuid);
       functionHandlers.Add("Round", HandleCanonicalFunctionRound);
       functionHandlers.Add("ToLower", HandleCanonicalFunctionToLower);
       functionHandlers.Add("ToUpper", HandleCanonicalFunctionToUpper);
       functionHandlers.Add("Trim", HandleCanonicalFunctionTrim);
+      functionHandlers.Add("Left", HandleCanonicalFunctionLeft);
       functionHandlers.Add("Right", HandleCanonicalFunctionRight);
       functionHandlers.Add("CurrentDateTime", HandleGetDateFunction);
       functionHandlers.Add("CurrentUtcDateTime", HandleGetUtcDateFunction);
@@ -2860,6 +2865,7 @@ namespace System.Data.SQLite
       return result;
     }
 
+#if INTEROP_EXTENSION_FUNCTIONS
     /// <summary>
     ///  Function rename IndexOf -> CHARINDEX
     /// </summary>
@@ -2870,6 +2876,7 @@ namespace System.Data.SQLite
     {
       return sqlgen.HandleFunctionDefaultGivenName(e, "CHARINDEX");
     }
+#endif
 
     /// <summary>
     ///  Function rename NewGuid -> NEWID
@@ -2943,6 +2950,27 @@ namespace System.Data.SQLite
       result.Append(")");
 
       return result;
+    }
+
+    /// <summary>
+    /// LEFT(string, length) -> SUBSTR(string, 1, length)
+    /// </summary>
+    /// <param name="sqlgen"></param>
+    /// <param name="e"></param>
+    /// <returns></returns>
+    private static ISqlFragment HandleCanonicalFunctionLeft(SqlGenerator sqlgen, DbFunctionExpression e)
+    {
+        SqlBuilder result = new SqlBuilder();
+
+        result.Append("SUBSTR(");
+
+        Debug.Assert(e.Arguments.Count == 2, "Left should have two arguments");
+        result.Append(e.Arguments[0].Accept(sqlgen));
+        result.Append(", 1, ");
+        result.Append(e.Arguments[1].Accept(sqlgen));
+        result.Append(")");
+
+        return result;
     }
 
     /// <summary>

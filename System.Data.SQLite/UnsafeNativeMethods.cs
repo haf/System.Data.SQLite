@@ -472,7 +472,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     private const string SQLITE_DLL = "System.Data.SQLite.dll";
 #else
-    internal const string SQLITE_DLL = "SQLite.Interop.080.dll";
+    internal const string SQLITE_DLL = "SQLite.Interop.081.dll";
 #endif // PLATFORM_COMPACTFRAMEWORK
 
 #else
@@ -1128,6 +1128,7 @@ namespace System.Data.SQLite
 #endif
     internal static extern void sqlite3_result_text16(IntPtr context, string strName, int nLen, IntPtr pvReserved);
 
+#if INTEROP_CODEC
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 #else
@@ -1141,6 +1142,7 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern int sqlite3_rekey(IntPtr db, byte[] key, int keylen);
+#endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

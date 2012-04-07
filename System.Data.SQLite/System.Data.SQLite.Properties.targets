@@ -76,4 +76,20 @@
   <PropertyGroup Condition="'$(PreLoadNativeLibrary)' != 'false'">
     <DefineConstants>$(DefineConstants);PRELOAD_NATIVE_LIBRARY</DefineConstants>
   </PropertyGroup>
+
+  <!--
+      NOTE: Enable support (in the managed assemblies) for the custom extension
+            functions?
+  -->
+  <PropertyGroup Condition="'$(InteropExtensionFunctions)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_EXTENSION_FUNCTIONS</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+      NOTE: Enable support (in the managed assemblies) for encrypted databases
+            using the CryptoAPI based codec?
+  -->
+  <PropertyGroup Condition="'$(InteropCodec)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_CODEC</DefineConstants>
+  </PropertyGroup>
 </Project>

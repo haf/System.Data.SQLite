@@ -8,6 +8,7 @@
 namespace System.Data.SQLite
 {
   using System;
+  using System.Collections.Generic;
 #if DEBUG
   using System.Diagnostics;
 #endif
@@ -37,7 +38,7 @@ namespace System.Data.SQLite
         "d8215c18a4349a436dd499e3c385cc683015f886f6c10bd90115eb2bd61b67750839e3a19941dc9c";
 
 #if !PLATFORM_COMPACTFRAMEWORK
-    internal const string DesignerVersion = "1.0.80.0";
+    internal const string DesignerVersion = "1.0.81.0";
 #endif
 
     /// <summary>
@@ -140,6 +141,28 @@ namespace System.Data.SQLite
       {
         return SQLite3.SQLiteVersion;
       }
+    }
+
+    internal static string DefineConstants
+    {
+        get
+        {
+            StringBuilder result = new StringBuilder();
+            IList<string> list = SQLiteDefineConstants.OptionList;
+
+            if (list != null)
+            {
+                foreach (string element in list)
+                {
+                    if (result.Length > 0)
+                        result.Append(' ');
+
+                    result.Append(element);
+                }
+            }
+
+            return result.ToString();
+        }
     }
 
     internal static string SQLiteVersion
@@ -1323,6 +1346,7 @@ namespace System.Data.SQLite
       UnsafeNativeMethods.sqlite3_log(iErrCode, ToUTF8(zMessage));
     }
 
+#if INTEROP_CODEC
     internal override void SetPassword(byte[] passwordBytes)
     {
       int n = UnsafeNativeMethods.sqlite3_key(_sql, passwordBytes, passwordBytes.Length);
@@ -1334,6 +1358,7 @@ namespace System.Data.SQLite
       int n = UnsafeNativeMethods.sqlite3_rekey(_sql, newPasswordBytes, (newPasswordBytes == null) ? 0 : newPasswordBytes.Length);
       if (n > 0) throw new SQLiteException(n, SQLiteLastError());
     }
+#endif
 
     internal override void SetUpdateHook(SQLiteUpdateCallback func)
     {

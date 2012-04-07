@@ -1,9 +1,14 @@
 #define SQLITE_API __declspec(dllexport)
 #include "../core/sqlite3.c"
-#include "../contrib/extension-functions.c"
-#include "crypt.c"
 
+#if defined(INTEROP_EXTENSION_FUNCTIONS)
+#include "../contrib/extension-functions.c"
 extern int RegisterExtensionFunctions(sqlite3 *db);
+#endif
+
+#if defined(INTEROP_CODEC)
+#include "crypt.c"
+#endif
 
 #ifdef SQLITE_OS_WIN
 
@@ -113,8 +118,10 @@ SQLITE_API int WINAPI sqlite3_open_interop(const char*filename, int flags, sqlit
   ret = sqlite3_open_v2(filename, ppdb, flags, NULL);
   //sqlite3_enable_shared_cache(0);
 
+#if defined(INTEROP_EXTENSION_FUNCTIONS)
   if (ret == 0)
     RegisterExtensionFunctions(*ppdb);
+#endif
 
   return ret;
 }

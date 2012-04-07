@@ -79,6 +79,7 @@ namespace test
         throw new InconclusiveException("Not a SQLite database");
     }
 
+#if INTEROP_CODEC
     /// <summary>
     /// Tests changing password on an encrypted database.
     /// </summary>
@@ -147,6 +148,7 @@ namespace test
 
         }
     }
+#endif
 
     [Test(Sequence=1)]
     internal string VersionTest()
@@ -219,6 +221,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       }
     }
 
+#if INTEROP_EXTENSION_FUNCTIONS
     [Test(Sequence = 8)]
     internal void FunctionWithCollation()
     {
@@ -234,6 +237,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         }
       }
     }
+#endif
 
     [Test(Sequence = 9)]
     internal void FunctionWithCollation2()
