@@ -1,7 +1,7 @@
 ﻿/********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -93,7 +93,7 @@ namespace System.Data.SQLite
   /// </item>
   /// <item>
   /// <description>Password</description>
-  /// <description>{password}</description>
+  /// <description>{password} - Using this parameter requires that the CryptoAPI based codec be enabled at compile-time for both the native interop assembly and the core managed assemblies; otherwise, using this parameter may result in an exception being thrown when attempting to open the connection.</description>
   /// <description>N</description>
   /// <description></description>
   /// </item>
@@ -510,7 +510,7 @@ namespace System.Data.SQLite
 #endif
 
     /// <summary>
-    /// Creates a clone of the connection.  All attached databases and user-defined functions are cloned.  If the existing connection is open, the cloned connection 
+    /// Creates a clone of the connection.  All attached databases and user-defined functions are cloned.  If the existing connection is open, the cloned connection
     /// will also be opened.
     /// </summary>
     /// <returns></returns>
@@ -552,7 +552,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="isolationLevel">This parameter is ignored.</param>
     /// <param name="deferredLock">When TRUE, SQLite defers obtaining a write lock until a write operation is requested.
-    /// When FALSE, a writelock is obtained immediately.  The default is TRUE, but in a multi-threaded multi-writer 
+    /// When FALSE, a writelock is obtained immediately.  The default is TRUE, but in a multi-threaded multi-writer
     /// environment, one may instead choose to lock the database immediately to avoid any possible writer deadlock.</param>
     /// <returns>Returns a SQLiteTransaction object.</returns>
     [Obsolete("Use one of the standard BeginTransaction methods, this one will be removed soon")]
@@ -566,7 +566,7 @@ namespace System.Data.SQLite
     /// OBSOLETE.  Creates a new SQLiteTransaction if one isn't already active on the connection.
     /// </summary>
     /// <param name="deferredLock">When TRUE, SQLite defers obtaining a write lock until a write operation is requested.
-    /// When FALSE, a writelock is obtained immediately.  The default is false, but in a multi-threaded multi-writer 
+    /// When FALSE, a writelock is obtained immediately.  The default is false, but in a multi-threaded multi-writer
     /// environment, one may instead choose to lock the database immediately to avoid any possible writer deadlock.</param>
     /// <returns>Returns a SQLiteTransaction object.</returns>
     [Obsolete("Use one of the standard BeginTransaction methods, this one will be removed soon")]
@@ -581,7 +581,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="isolationLevel">Supported isolation levels are Serializable, ReadCommitted and Unspecified.</param>
     /// <remarks>
-    /// Unspecified will use the default isolation level specified in the connection string.  If no isolation level is specified in the 
+    /// Unspecified will use the default isolation level specified in the connection string.  If no isolation level is specified in the
     /// connection string, Serializable is used.
     /// Serializable transactions are the default.  In this mode, the engine gets an immediate lock on the database, and no other threads
     /// may begin a transaction.  Other threads may read from the database, but not write.
@@ -647,7 +647,7 @@ namespace System.Data.SQLite
         if (_enlistment != null)
         {
           // If the connection is enlisted in a transaction scope and the scope is still active,
-          // we cannot truly shut down this connection until the scope has completed.  Therefore make a 
+          // we cannot truly shut down this connection until the scope has completed.  Therefore make a
           // hidden connection temporarily to hold open the connection until the scope has completed.
           SQLiteConnection cnn = new SQLiteConnection();
           cnn._sql = _sql;
@@ -904,7 +904,7 @@ namespace System.Data.SQLite
       else
             throw new InvalidOperationException ("Invalid connection string: invalid URI");
     }
-    
+
     /// <summary>
     /// Parses the connection string into component parts
     /// </summary>
@@ -1178,7 +1178,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Gets/sets the default command timeout for newly-created commands.  This is especially useful for 
+    /// Gets/sets the default command timeout for newly-created commands.  This is especially useful for
     /// commands used internally such as inside a SQLiteTransaction, where setting the timeout is not possible.
     /// This can also be set in the ConnectionString with "Default Timeout"
     /// </summary>
@@ -1296,7 +1296,8 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Returns a string containing the define constants (i.e. compile-time
-    /// options) used to compile this assembly, delimited with spaces.
+    /// options) used to compile the core managed assembly, delimited with
+    /// spaces.
     /// </summary>
     public static string DefineConstants
     {
@@ -1375,7 +1376,7 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
 
-      if (_sql == null) 
+      if (_sql == null)
         throw new InvalidOperationException("Database connection not valid for getting result code.");
       return _sql.ResultCode();
     }
@@ -1915,7 +1916,7 @@ namespace System.Data.SQLite
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
       string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
-      
+
       using (SQLiteCommand cmdTables = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'table'", strCatalog, master), this))
       using (SQLiteDataReader rdTables = cmdTables.ExecuteReader())
       {
@@ -2487,7 +2488,7 @@ namespace System.Data.SQLite
       if (String.IsNullOrEmpty(strCatalog)) strCatalog = "main";
 
       string master = (String.Compare(strCatalog, "temp", StringComparison.OrdinalIgnoreCase) == 0) ? _tempmasterdb : _masterdb;
-      
+
       tbl.BeginLoadData();
 
       using (SQLiteCommand cmdViews = new SQLiteCommand(String.Format(CultureInfo.InvariantCulture, "SELECT * FROM [{0}].[{1}] WHERE [type] LIKE 'view'", strCatalog, master), this))
@@ -2838,7 +2839,7 @@ namespace System.Data.SQLite
   internal delegate void SQLiteRollbackCallback(IntPtr puser);
 
   /// <summary>
-  /// Raised when a transaction is about to be committed.  To roll back a transaction, set the 
+  /// Raised when a transaction is about to be committed.  To roll back a transaction, set the
   /// rollbackTrans boolean value to true.
   /// </summary>
   /// <param name="sender">The connection committing the transaction</param>
