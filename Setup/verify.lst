@@ -113,6 +113,8 @@ set sds_manifests(source) {
   Setup/SQLite.iss
   Setup/test_all.bat
   Setup/updateFileInfo.tcl
+  Setup/verify.eagle
+  Setup/verify.lst
   Setup/vsSp.bat
   SQLite.Designer/
   SQLite.Designer/AssemblyInfo.cs
@@ -244,6 +246,7 @@ set sds_manifests(source) {
   System.Data.SQLite/SQLiteDataAdapter.bmp
   System.Data.SQLite/SQLiteDataAdapter.cs
   System.Data.SQLite/SQLiteDataReader.cs
+  System.Data.SQLite/SQLiteDefineConstants.cs
   System.Data.SQLite/SQLiteEnlistment.cs
   System.Data.SQLite/SQLiteException.cs
   System.Data.SQLite/SQLiteFactory.cs
