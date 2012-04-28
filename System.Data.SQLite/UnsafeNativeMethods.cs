@@ -1430,6 +1430,13 @@ namespace System.Data.SQLite
     {
       get { return (handle == IntPtr.Zero); }
     }
+
+#if DEBUG
+    public override string ToString()
+    {
+        return handle.ToString();
+    }
+#endif
   }
 
   // Provides finalization support for unmanaged SQLite statements.
@@ -1506,6 +1513,13 @@ namespace System.Data.SQLite
     {
       get { return (handle == IntPtr.Zero); }
     }
+
+#if DEBUG
+    public override string ToString()
+    {
+        return handle.ToString();
+    }
+#endif
   }
 
   // Provides finalization support for unmanaged SQLite backup objects.
@@ -1582,5 +1596,12 @@ namespace System.Data.SQLite
       {
           get { return (handle == IntPtr.Zero); }
       }
+
+#if DEBUG
+      public override string ToString()
+      {
+          return handle.ToString();
+      }
+#endif
   }
 }

@@ -93,10 +93,15 @@ namespace System.Data.SQLite
       if (_sql != null) return;
 
       _usePool = usePool;
+      _fileName = strFilename;
+
       if (usePool)
       {
-        _fileName = strFilename;
         _sql = SQLiteConnectionPool.Remove(strFilename, maxPoolSize, out _poolVersion);
+
+#if DEBUG && !NET_COMPACT_20
+        Trace.WriteLine(String.Format("Open (Pool): {0}", (_sql != null) ? _sql.ToString() : "<null>"));
+#endif
       }
 
       if (_sql == null)
