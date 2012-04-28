@@ -126,6 +126,7 @@ namespace System.Data.SQLite
         _sql = db;
       }
       _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
+      SetTimeout(0);
     }
 
     internal override void Bind_DateTime(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, DateTime dt)
