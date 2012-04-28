@@ -1,0 +1,207 @@
+###############################################################################
+#
+# tkt-996d13cd87.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
+  set fileName tkt-996d13cd87-1.1.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+    using System.Threading;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static void Main()
+        {
+          //
+          // NOTE: This is the total number of test threads to create.
+          //
+          int count = 10;
+
+          //
+          // NOTE: Create the event that will be used to synchronize all the
+          //       created threads so that they start doing their actual test
+          //       "work" at approximately the same time.
+          //
+          using (ManualResetEvent goEvent = new ManualResetEvent(false))
+          {
+            //
+            // NOTE: Create a (reusable) delegate that will contain the code
+            //       that half the created threads are to execute.  This code
+            //       will repeatedly create, open, and close a single database
+            //       connection with pool enabled.
+            //
+            ThreadStart threadStart = delegate()
+            {
+              try
+              {
+                //
+                // NOTE: Wait forever for the "GO" signal so that all threads
+                //       can start working at approximately the same time.
+                //
+                goEvent.WaitOne();
+
+                //
+                // NOTE: Create a random number generator suitable for waiting
+                //       a random number of milliseconds between each attempt
+                //       to cause the race condition on a given thread.
+                //
+                Random random = new Random();
+
+                //
+                // NOTE: Repeatedly try to create, open, and close a pooled
+                //       database connection and then wait a random number of
+                //       milliseconds before doing it again.
+                //
+                for (int index = 0; index < count; index++)
+                {
+                  using (SQLiteConnection connection = new SQLiteConnection(
+                      "Data Source=${dataSource};Pooling=True;"))
+                  {
+                    connection.Open();
+                    connection.Close();
+                  }
+
+                  Thread.Sleep(random.Next(0, count));
+                }
+              }
+              catch (Exception e)
+              {
+                Console.WriteLine(e);
+              }
+            };
+
+            //
+            // NOTE: Create a (reusable) delegate that will contain the code
+            //       that half the created threads are to execute.  This code
+            //       will repeatedly force a full garbage collection.
+            //
+            ThreadStart threadStart2 = delegate()
+            {
+              try
+              {
+                //
+                // NOTE: Wait forever for the "GO" signal so that all threads
+                //       can start working at approximately the same time.
+                //
+                goEvent.WaitOne();
+
+                //
+                // NOTE: Create a random number generator suitable for waiting
+                //       a random number of milliseconds between each attempt
+                //       to cause the race condition on a given thread.
+                //
+                Random random = new Random();
+
+                //
+                // NOTE: Repeatedly force a full garbage collection and then
+                //       wait a random number of milliseconds before doing it
+                //       again.
+                //
+                for (int index = 0; index < count; index++)
+                {
+                  GC.GetTotalMemory(true);
+                  Thread.Sleep(random.Next(0, count));
+                }
+              }
+              catch (Exception e)
+              {
+                Console.WriteLine(e);
+              }
+            };
+
+            //
+            // NOTE: Create the array of thread objects.
+            //
+            Thread\[\] thread = new Thread\[count\];
+
+            //
+            // NOTE: Create each of the test threads with a suitable stack
+            //       size.  We must specify a stack size here because the
+            //       default one for the process would be the same as the
+            //       parent executable (the Eagle shell), which is 16MB,
+            //       too large to be useful.
+            //
+            for (int index = 0; index < count; index++)
+            {
+              thread\[index\] = new Thread(
+                  (index % 2) == 0 ? threadStart : threadStart2, 1048576);
+
+              //
+              // NOTE: Name each thread for a better debugging experience.
+              //
+              thread\[index\].Name = String.Format(
+                  "[file rootname ${fileName}] #{0}", index);
+            }
+
+            //
+            // NOTE: Start all the threads now.  They should not actually do
+            //       any of the test "work" until we signal the event.
+            //
+            for (int index = 0; index < count; index++)
+              thread\[index\].Start();
+
+            //
+            // NOTE: Send the signal that all threads should start doing
+            //       their test "work" now.
+            //
+            goEvent.Set(); /* GO */
+
+            //
+            // NOTE: Wait forever for each thread to finish its test "work"
+            //       and then die.
+            //
+            for (int index = 0; index < count; index++)
+              thread\[index\].Join();
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  object invoke System.Data.SQLite.SQLiteConnection ClearAllPools
+  object invoke GC GetTotalMemory true
+
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code dataSource id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
