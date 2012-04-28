@@ -119,6 +119,10 @@ namespace System.Data.SQLite
           {
               SQLiteBase.ResetConnection(_sql);
               SQLiteConnectionPool.Add(_fileName, _sql, _poolVersion);
+
+#if DEBUG && !NET_COMPACT_20
+              Trace.WriteLine(String.Format("Close (Pool): {0}", _sql));
+#endif
           }
           else
           {
