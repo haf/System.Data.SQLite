@@ -73,14 +73,18 @@ namespace System.Data.SQLite
         ResizePool(queue, false);
 
         // Try and get a pooled connection from the queue
-        while (queue.Queue.Count > 0)
+        Queue<WeakReference> poolQueue = queue.Queue;
+        if (poolQueue == null) return null;
+
+        while (poolQueue.Count > 0)
         {
-          WeakReference cnn = queue.Queue.Dequeue();
+          WeakReference cnn = poolQueue.Dequeue();
           SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
-          if (hdl != null)
+          if ((hdl != null) && !hdl.IsClosed)
           {
             return hdl;
           }
+          GC.KeepAlive(hdl);
         }
         return null;
       }
@@ -104,6 +108,7 @@ namespace System.Data.SQLite
             {
               hdl.Dispose();
             }
+            GC.KeepAlive(hdl);
           }
           
           // Keep track of the highest revision so we can go one higher when we're finished
@@ -131,14 +136,19 @@ namespace System.Data.SQLite
         if (_connections.TryGetValue(fileName, out queue) == true)
         {
           queue.PoolVersion++;
-          while (queue.Queue.Count > 0)
+
+          Queue<WeakReference> poolQueue = queue.Queue;
+          if (poolQueue == null) return;
+
+          while (poolQueue.Count > 0)
           {
-            WeakReference cnn = queue.Queue.Dequeue();
+            WeakReference cnn = poolQueue.Dequeue();
             SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
             if (hdl != null)
             {
               hdl.Dispose();
             }
+            GC.KeepAlive(hdl);
           }
         }
       }
@@ -162,7 +172,11 @@ namespace System.Data.SQLite
         if (_connections.TryGetValue(fileName, out queue) == true && version == queue.PoolVersion)
         {
           ResizePool(queue, true);
-          queue.Queue.Enqueue(new WeakReference(hdl, false));
+
+          Queue<WeakReference> poolQueue = queue.Queue;
+          if (poolQueue == null) return;
+
+          poolQueue.Enqueue(new WeakReference(hdl, false));
           GC.KeepAlive(hdl);
         }
         else
@@ -185,14 +199,18 @@ namespace System.Data.SQLite
 
       if (forAdding && target > 0) target--;
 
-      while (queue.Queue.Count > target)
+      Queue<WeakReference> poolQueue = queue.Queue;
+      if (poolQueue == null) return;
+
+      while (poolQueue.Count > target)
       {
-        WeakReference cnn = queue.Queue.Dequeue();
+        WeakReference cnn = poolQueue.Dequeue();
         SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
         if (hdl != null)
         {
           hdl.Dispose();
         }
+        GC.KeepAlive(hdl);
       }
     }
   }

@@ -1385,6 +1385,7 @@ namespace System.Data.SQLite
       try
       {
         SQLiteBase.CloseConnection(this);
+        SetHandle(IntPtr.Zero);
 
 #if DEBUG && !NET_COMPACT_20
         try
@@ -1468,6 +1469,7 @@ namespace System.Data.SQLite
       try
       {
         SQLiteBase.FinalizeStatement(this);
+        SetHandle(IntPtr.Zero);
 
 #if DEBUG && !NET_COMPACT_20
         try
@@ -1551,6 +1553,7 @@ namespace System.Data.SQLite
           try
           {
               SQLiteBase.FinishBackup(this);
+              SetHandle(IntPtr.Zero);
 
 #if DEBUG && !NET_COMPACT_20
               try
