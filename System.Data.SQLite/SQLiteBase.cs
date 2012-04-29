@@ -420,6 +420,7 @@ namespace System.Data.SQLite
 
     internal static bool IsAutocommit(IntPtr db)
     {
+      if (db == IntPtr.Zero) return false;
       return (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
     }
 
