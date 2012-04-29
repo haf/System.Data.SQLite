@@ -340,8 +340,9 @@ namespace System.Data.SQLite
     // a SQLiteStatementHandle, SQLiteConnectionHandle, and SQLiteFunctionCookieHandle.
     // Therefore these functions have to be static, and have to be low-level.
 
-    internal static string SQLiteLastError(SQLiteConnectionHandle db)
+    internal static string SQLiteLastError(IntPtr db)
     {
+      if (db == IntPtr.Zero) return "invalid database handle";
 #if !SQLITE_STANDARD
       int len;
       return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
@@ -350,45 +351,48 @@ namespace System.Data.SQLite
 #endif
     }
 
-    internal static void FinishBackup(SQLiteBackupHandle backup)
+    internal static void FinishBackup(IntPtr backup)
     {
+        if (backup == IntPtr.Zero) return;
         lock (_lock)
         {
             int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
-            backup.SetHandleAsInvalid();
             if (n > 0) throw new SQLiteException(n, null);
         }
     }
 
-    internal static void FinalizeStatement(SQLiteStatementHandle stmt)
+    internal static void FinalizeStatement(IntPtr stmt)
     {
+      if (stmt == IntPtr.Zero) return;
       lock (_lock)
       {
 #if !SQLITE_STANDARD
         int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
 #else
-      int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
+        int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
 #endif
         if (n > 0) throw new SQLiteException(n, null);
       }
     }
 
-    internal static void CloseConnection(SQLiteConnectionHandle db)
+    internal static void CloseConnection(IntPtr db)
     {
+      if (db == IntPtr.Zero) return;
       lock (_lock)
       {
 #if !SQLITE_STANDARD
         int n = UnsafeNativeMethods.sqlite3_close_interop(db);
 #else
-      ResetConnection(db);
-      int n = UnsafeNativeMethods.sqlite3_close(db);
+        ResetConnection(db);
+        int n = UnsafeNativeMethods.sqlite3_close(db);
 #endif
         if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
       }
     }
 
-    internal static void ResetConnection(SQLiteConnectionHandle db)
+    internal static void ResetConnection(IntPtr db)
     {
+      if (db == IntPtr.Zero) return;
       lock (_lock)
       {
         IntPtr stmt = IntPtr.Zero;
@@ -414,9 +418,9 @@ namespace System.Data.SQLite
       }
     }
 
-    internal static bool IsAutocommit(SQLiteConnectionHandle hdl)
+    internal static bool IsAutocommit(IntPtr db)
     {
-      return (UnsafeNativeMethods.sqlite3_get_autocommit(hdl) == 1);
+      return (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
     }
 
   }
