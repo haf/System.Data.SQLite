@@ -130,7 +130,7 @@ namespace System.Data.SQLite
         {
           WeakReference cnn = poolQueue.Dequeue();
           SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
-          if ((hdl != null) && !hdl.IsClosed)
+          if ((hdl != null) && !hdl.IsClosed && !hdl.IsInvalid)
           {
             return hdl;
           }
