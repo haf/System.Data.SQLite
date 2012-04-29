@@ -8,6 +8,7 @@
 namespace System.Data.SQLite
 {
   using System;
+  using System.Collections.Generic;
 
   /// <summary>
   /// This internal class provides the foundation of SQLite support.  It defines all the abstract members needed to implement
@@ -86,6 +87,12 @@ namespace System.Data.SQLite
     /// When pooling is enabled, force this connection to be disposed rather than returned to the pool
     /// </summary>
     internal abstract void ClearPool();
+
+    /// <summary>
+    /// When pooling is enabled, returns the number of pool entries matching the current file name.
+    /// </summary>
+    /// <returns>The number of pool entries matching the current file name.</returns>
+    internal abstract int CountPool();
 
     /// <summary>
     /// Prepares a SQL statement for execution.

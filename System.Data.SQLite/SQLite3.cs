@@ -289,6 +289,17 @@ namespace System.Data.SQLite
       SQLiteConnectionPool.ClearPool(_fileName);
     }
 
+    internal override int CountPool()
+    {
+        Dictionary<string, int> counts = null;
+        int totalCount = 0;
+
+        SQLiteConnectionPool.GetCounts(_fileName,
+            ref counts, ref totalCount);
+
+        return totalCount;
+    }
+
     internal override void SetTimeout(int nTimeoutMS)
     {
       int n = UnsafeNativeMethods.sqlite3_busy_timeout(_sql, nTimeoutMS);

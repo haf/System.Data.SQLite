@@ -40,6 +40,56 @@ namespace System.Data.SQLite
     private static int _poolVersion = 1;
 
     /// <summary>
+    /// Counts the number of pool entries matching the specified file name.
+    /// </summary>
+    /// <param name="fileName">The file name to match or null to match all files.</param>
+    /// <param name="counts">The pool entry counts for each matching file.</param>
+    /// <param name="totalCount">The total number of pool entries for all matching files.</param>
+    internal static void GetCounts(
+        string fileName,
+        ref Dictionary<string, int> counts,
+        ref int totalCount
+        )
+    {
+        lock (_connections)
+        {
+            if (counts == null)
+            {
+                counts = new Dictionary<string, int>(
+                    StringComparer.OrdinalIgnoreCase);
+            }
+
+            if (fileName != null)
+            {
+                Pool queue;
+
+                if (_connections.TryGetValue(fileName, out queue))
+                {
+                    Queue<WeakReference> poolQueue = queue.Queue;
+                    int count = (poolQueue != null) ? poolQueue.Count : 0;
+
+                    counts.Add(fileName, count);
+                    totalCount += count;
+                }
+            }
+            else
+            {
+                foreach (KeyValuePair<string, Pool> pair in _connections)
+                {
+                    if (pair.Value == null)
+                        continue;
+
+                    Queue<WeakReference> poolQueue = pair.Value.Queue;
+                    int count = (poolQueue != null) ? poolQueue.Count : 0;
+
+                    counts.Add(pair.Key, count);
+                    totalCount += count;
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Attempt to pull a pooled connection out of the queue for active duty
     /// </summary>
     /// <param name="fileName">The filename for a desired connection</param>
