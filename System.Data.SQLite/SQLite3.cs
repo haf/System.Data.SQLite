@@ -392,7 +392,7 @@ namespace System.Data.SQLite
 
     internal override string SQLiteLastError()
     {
-      return SQLiteBase.SQLiteLastError(_sql);
+      return SQLiteBase.SQLiteLastError(_sql, _sql);
     }
 
     internal override SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, uint timeoutMS, out string strRemain)

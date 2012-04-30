@@ -344,15 +344,20 @@ namespace System.Data.SQLite
     // a SQLiteStatementHandle, SQLiteConnectionHandle, and SQLiteFunctionCookieHandle.
     // Therefore these functions have to be static, and have to be low-level.
 
-    internal static string SQLiteLastError(IntPtr db)
+    internal static string SQLiteLastError(SQLiteConnectionHandle hdl, IntPtr db)
     {
-      if (db == IntPtr.Zero) return "invalid database handle";
+        if ((hdl == null) || (db == IntPtr.Zero))
+            return "invalid connection or database handle";
+
+        lock (hdl)
+        {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
+            int len;
+            return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
 #else
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
+            return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
 #endif
+        }
     }
 
     internal static void FinishBackup(IntPtr backup)
@@ -384,7 +389,7 @@ namespace System.Data.SQLite
             ResetConnection(hdl, db);
             int n = UnsafeNativeMethods.sqlite3_close(db);
 #endif
-            if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+            if (n > 0) throw new SQLiteException(n, SQLiteLastError(hdl, db));
         }
     }
 
@@ -403,7 +408,7 @@ namespace System.Data.SQLite
 #if !SQLITE_STANDARD
                     n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
 #else
-                n = UnsafeNativeMethods.sqlite3_reset(stmt);
+                    n = UnsafeNativeMethods.sqlite3_reset(stmt);
 #endif
                 }
             } while (stmt != IntPtr.Zero);
@@ -411,7 +416,7 @@ namespace System.Data.SQLite
             if (IsAutocommit(db) == false) // a transaction is pending on the connection
             {
                 n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
-                if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+                if (n > 0) throw new SQLiteException(n, SQLiteLastError(hdl, db));
             }
         }
     }
