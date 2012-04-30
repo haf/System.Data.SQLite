@@ -1393,7 +1393,7 @@ namespace System.Data.SQLite
           ref handle, IntPtr.Zero);
 
         if (localHandle != IntPtr.Zero)
-          SQLiteBase.CloseConnection(localHandle);
+          SQLiteBase.CloseConnection(this, localHandle);
 
 #if DEBUG && !NET_COMPACT_20
         try
@@ -1408,7 +1408,7 @@ namespace System.Data.SQLite
 #else
         if (handle != IntPtr.Zero)
         {
-          SQLiteBase.CloseConnection(handle);
+          SQLiteBase.CloseConnection(this, handle);
           SetHandle(IntPtr.Zero);
         }
 #endif

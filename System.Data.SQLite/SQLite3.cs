@@ -117,7 +117,7 @@ namespace System.Data.SQLite
       {
           if (_usePool)
           {
-              SQLiteBase.ResetConnection(_sql);
+              SQLiteBase.ResetConnection(_sql, _sql);
               SQLiteConnectionPool.Add(_fileName, _sql, _poolVersion);
 
 #if DEBUG && !NET_COMPACT_20

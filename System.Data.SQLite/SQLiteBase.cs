@@ -8,6 +8,7 @@
 namespace System.Data.SQLite
 {
   using System;
+  using System.Threading;
 
   /// <summary>
   /// This internal class provides the foundation of SQLite support.  It defines all the abstract members needed to implement
@@ -373,40 +374,46 @@ namespace System.Data.SQLite
         if (n > 0) throw new SQLiteException(n, null);
     }
 
-    internal static void CloseConnection(IntPtr db)
+    internal static void CloseConnection(SQLiteConnectionHandle hdl, IntPtr db)
     {
-        if (db == IntPtr.Zero) return;
+        if ((hdl == null) || (db == IntPtr.Zero)) return;
+        lock (hdl)
+        {
 #if !SQLITE_STANDARD
-        int n = UnsafeNativeMethods.sqlite3_close_interop(db);
+            int n = UnsafeNativeMethods.sqlite3_close_interop(db);
 #else
-        ResetConnection(db);
-        int n = UnsafeNativeMethods.sqlite3_close(db);
+            ResetConnection(hdl, db);
+            int n = UnsafeNativeMethods.sqlite3_close(db);
 #endif
-        if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+            if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+        }
     }
 
-    internal static void ResetConnection(IntPtr db)
+    internal static void ResetConnection(SQLiteConnectionHandle hdl, IntPtr db)
     {
-        if (db == IntPtr.Zero) return;
-        IntPtr stmt = IntPtr.Zero;
-        int n;
-        do
+        if ((hdl == null) || (db == IntPtr.Zero)) return;
+        lock (hdl)
         {
-            stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
-            if (stmt != IntPtr.Zero)
+            IntPtr stmt = IntPtr.Zero;
+            int n;
+            do
             {
+                stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
+                if (stmt != IntPtr.Zero)
+                {
 #if !SQLITE_STANDARD
-                n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+                    n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
 #else
                 n = UnsafeNativeMethods.sqlite3_reset(stmt);
 #endif
-            }
-        } while (stmt != IntPtr.Zero);
+                }
+            } while (stmt != IntPtr.Zero);
 
-        if (IsAutocommit(db) == false) // a transaction is pending on the connection
-        {
-            n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
-            if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+            if (IsAutocommit(db) == false) // a transaction is pending on the connection
+            {
+                n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+                if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+            }
         }
     }
 
