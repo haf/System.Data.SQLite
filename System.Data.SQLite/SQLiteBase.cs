@@ -78,7 +78,7 @@ namespace System.Data.SQLite
     /// Returns the text of the last error issued by SQLite
     /// </summary>
     /// <returns></returns>
-    internal abstract string SQLiteLastError();
+    internal abstract string GetLastError();
 
     /// <summary>
     /// When pooling is enabled, force this connection to be disposed rather than returned to the pool
@@ -344,7 +344,7 @@ namespace System.Data.SQLite
     // a SQLiteStatementHandle, SQLiteConnectionHandle, and SQLiteFunctionCookieHandle.
     // Therefore these functions have to be static, and have to be low-level.
 
-    internal static string SQLiteLastError(SQLiteConnectionHandle hdl, IntPtr db)
+    internal static string GetLastError(SQLiteConnectionHandle hdl, IntPtr db)
     {
         if ((hdl == null) || (db == IntPtr.Zero))
             return "invalid connection or database handle";
@@ -389,7 +389,7 @@ namespace System.Data.SQLite
             ResetConnection(hdl, db);
             int n = UnsafeNativeMethods.sqlite3_close(db);
 #endif
-            if (n > 0) throw new SQLiteException(n, SQLiteLastError(hdl, db));
+            if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
         }
     }
 
@@ -416,7 +416,7 @@ namespace System.Data.SQLite
             if (IsAutocommit(db) == false) // a transaction is pending on the connection
             {
                 n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
-                if (n > 0) throw new SQLiteException(n, SQLiteLastError(hdl, db));
+                if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
             }
         }
     }

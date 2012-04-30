@@ -169,7 +169,7 @@ namespace System.Data.SQLite
 #endif
 
         int n = UnsafeNativeMethods.sqlite3_bind_text16(handle, index, value, value.Length * 2, (IntPtr)(-1));
-        if (n > 0) throw new SQLiteException(n, SQLiteLastError());
+        if (n > 0) throw new SQLiteException(n, GetLastError());
     }
 
     internal override DateTime GetDateTime(SQLiteStatement stmt, int index)
