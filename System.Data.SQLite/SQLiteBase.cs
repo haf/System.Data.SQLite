@@ -8,7 +8,6 @@
 namespace System.Data.SQLite
 {
   using System;
-  using System.Threading;
 
   /// <summary>
   /// This internal class provides the foundation of SQLite support.  It defines all the abstract members needed to implement
