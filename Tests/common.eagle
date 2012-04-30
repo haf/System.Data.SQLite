@@ -807,9 +807,16 @@ namespace eval ::Eagle {
           #
           if {![info exists ::no(deleteSqliteFiles)]} then {
             tryDeleteAssembly sqlite3.dll
+            removeConstraint file_sqlite3.dll
+
             tryDeleteAssembly SQLite.Interop.dll
+            removeConstraint file_SQLite.Interop.dll
+
             tryDeleteAssembly System.Data.SQLite.dll
+            removeConstraint file_System.Data.SQLite.dll
+
             tryDeleteAssembly System.Data.SQLite.Linq.dll
+            removeConstraint file_System.Data.SQLite.Linq.dll
           }
 
           #

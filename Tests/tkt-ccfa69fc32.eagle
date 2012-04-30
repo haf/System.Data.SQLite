@@ -24,6 +24,8 @@ runSQLiteTestPrologue
 # NOTE: Setup the variables that refer to the various files required by the
 #       tests in this file.
 #
+set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
+set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
 set testLinqExeFile [getBuildFileName testlinq.exe]
 set northwindEfDbFile [file nativename [file join [file dirname $path] \
     testlinq northwindEF.db]]
@@ -31,6 +33,16 @@ set northwindEfDbFile [file nativename [file join [file dirname $path] \
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
 #
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteDllFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteLinqDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteLinqDllFile
+}
+
 if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
   checkForFile $test_channel $testLinqExeFile
 }
@@ -69,7 +81,8 @@ runTest {test tkt-ccfa69fc32-1.1 {Entity Framework / Transaction Scope} -body {
   set result
 } -cleanup {
   unset -nocomplain code output error result add
-} -constraints {eagle monoToDo file_testlinq.exe file_northwindEF.db} -match \
+} -constraints {eagle monoToDo file_System.Data.SQLite.dll\
+file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db} -match \
 glob -result {0 {1581 1730 1833 2116 2139} 0 {System.Data.UpdateException: *\
 ---> System.Data.SQLite.SQLiteException: Abort due to constraint violation
 PRIMARY KEY must be unique
@@ -77,7 +90,8 @@ PRIMARY KEY must be unique
 
 ###############################################################################
 
-unset -nocomplain testLinqExeFile northwindEfDbFile
+unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
+    testLinqExeFile northwindEfDbFile
 
 ###############################################################################
 

@@ -24,6 +24,8 @@ runSQLiteTestPrologue
 # NOTE: Setup the variables that refer to the various files required by the
 #       tests in this file.
 #
+set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
+set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
 set testLinqExeFile [getBuildFileName testlinq.exe]
 set northwindEfDbFile [file nativename [file join [file dirname $path] \
     testlinq northwindEF.db]]
@@ -31,6 +33,16 @@ set northwindEfDbFile [file nativename [file join [file dirname $path] \
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
 #
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteDllFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteLinqDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteLinqDllFile
+}
+
 if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
   checkForFile $test_channel $testLinqExeFile
 }
@@ -71,13 +83,15 @@ runTest {test tkt-00f86f9739-1.1 {LINQ with StartsWith} -body {
   unset -nocomplain code output error result value
 } -constraints \
 {eagle monoToDo defineConstant.System.Data.SQLite.INTEROP_EXTENSION_FUNCTIONS\
-file_testlinq.exe file_northwindEF.db} -result {0 {} 0 {DRACD OLDWO RATTC} 0\
-{ALFKI CACTU CHOPS FOLKO GALED KOENE LILAS MAGAA MAISD OCEAN RANCH SAVEA THECR}\
-0 {} 0 {} 0 {} 0 {}}}
+file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll file_testlinq.exe\
+file_northwindEF.db} -result {0 {} 0 {DRACD OLDWO RATTC} 0 {ALFKI CACTU CHOPS\
+FOLKO GALED KOENE LILAS MAGAA MAISD OCEAN RANCH SAVEA THECR} 0 {} 0 {} 0 {} 0\
+{}}}
 
 ###############################################################################
 
-unset -nocomplain testLinqExeFile northwindEfDbFile
+unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
+    testLinqExeFile northwindEfDbFile
 
 ###############################################################################
 

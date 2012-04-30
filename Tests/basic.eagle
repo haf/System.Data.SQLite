@@ -24,6 +24,8 @@ runSQLiteTestPrologue
 # NOTE: Setup the variables that refer to the various files required by the
 #       tests in this file.
 #
+set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
+set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
 set testExeFile [getBuildFileName test.exe]
 set testLinqExeFile [getBuildFileName testlinq.exe]
 set testLinqOutFile [file nativename [file join $path testlinq.out]]
@@ -33,6 +35,16 @@ set northwindEfDbFile [file nativename [file join [file dirname $path] \
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
 #
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteDllFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteLinqDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteLinqDllFile
+}
+
 if {![haveConstraint [appendArgs file_ [file tail $testExeFile]]]} then {
   checkForFile $test_channel $testExeFile
 }
@@ -78,7 +90,7 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
   cleanupDb $fileName
 
   unset -nocomplain code output error fileName
-} -constraints {eagle file_test.exe} -result {0 {}}}
+} -constraints {eagle file_System.Data.SQLite.dll file_test.exe} -result {0 {}}}
 
 ###############################################################################
 
@@ -117,8 +129,8 @@ runTest {test data-1.2 {unit tests from the 'testlinq' project} -setup {
 
   unset -nocomplain code output error savedEncoding encoding
 } -constraints \
-{eagle monoToDo file_testlinq.exe file_northwindEF.db file_testlinq.out} \
--result {0 True {}}}
+{eagle monoToDo file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
+file_testlinq.exe file_northwindEF.db file_testlinq.out} -result {0 True {}}}
 
 ###############################################################################
 
@@ -1382,7 +1394,8 @@ runTest {test data-1.25 {SQLiteDataReader GetValues w/collection} -setup {
 
 ###############################################################################
 
-unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
+unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
+    testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################
 
