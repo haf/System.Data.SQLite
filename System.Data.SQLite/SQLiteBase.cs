@@ -18,8 +18,6 @@ namespace System.Data.SQLite
     internal SQLiteBase(SQLiteDateFormats fmt, DateTimeKind kind)
       : base(fmt, kind) { }
 
-    static internal object _lock = new object();
-
     /// <summary>
     /// Returns a string representing the active version of SQLite
     /// </summary>
@@ -360,32 +358,24 @@ namespace System.Data.SQLite
     internal static void FinishBackup(IntPtr backup)
     {
         if (backup == IntPtr.Zero) return;
-        lock (_lock)
-        {
-            int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
-            if (n > 0) throw new SQLiteException(n, null);
-        }
+        int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+        if (n > 0) throw new SQLiteException(n, null);
     }
 
     internal static void FinalizeStatement(IntPtr stmt)
     {
-      if (stmt == IntPtr.Zero) return;
-      lock (_lock)
-      {
+        if (stmt == IntPtr.Zero) return;
 #if !SQLITE_STANDARD
         int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
 #else
         int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
 #endif
         if (n > 0) throw new SQLiteException(n, null);
-      }
     }
 
     internal static void CloseConnection(IntPtr db)
     {
-      if (db == IntPtr.Zero) return;
-      lock (_lock)
-      {
+        if (db == IntPtr.Zero) return;
 #if !SQLITE_STANDARD
         int n = UnsafeNativeMethods.sqlite3_close_interop(db);
 #else
@@ -393,35 +383,31 @@ namespace System.Data.SQLite
         int n = UnsafeNativeMethods.sqlite3_close(db);
 #endif
         if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
-      }
     }
 
     internal static void ResetConnection(IntPtr db)
     {
-      if (db == IntPtr.Zero) return;
-      lock (_lock)
-      {
+        if (db == IntPtr.Zero) return;
         IntPtr stmt = IntPtr.Zero;
         int n;
         do
         {
-          stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
-          if (stmt != IntPtr.Zero)
-          {
+            stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
+            if (stmt != IntPtr.Zero)
+            {
 #if !SQLITE_STANDARD
-            n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+                n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
 #else
-            n = UnsafeNativeMethods.sqlite3_reset(stmt);
+                n = UnsafeNativeMethods.sqlite3_reset(stmt);
 #endif
-          }
+            }
         } while (stmt != IntPtr.Zero);
 
         if (IsAutocommit(db) == false) // a transaction is pending on the connection
         {
-          n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
-          if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+            n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+            if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
         }
-      }
     }
 
     internal static bool IsAutocommit(IntPtr db)
