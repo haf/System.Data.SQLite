@@ -26,6 +26,11 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getDatabaseDirectory] $fileName]
 
+  set sql { \
+    CREATE TABLE t1(x TEXT); \
+    INSERT INTO t1 (x) VALUES(HEX(RANDOMBLOB(1000))); \
+  }
+
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
@@ -49,7 +54,7 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
           //
           // NOTE: This is the total number of test threads to create.
           //
-          int count = 200;
+          int count = 100;
 
           //
           // NOTE: Create a random number generator suitable for waiting a
@@ -86,18 +91,21 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
                 //       database connection and then wait a random number of
                 //       milliseconds before doing it again.
                 //
-                for (int index = 0; index < count; index++)
+                Thread.Sleep(random.Next(0, 500));
+
+                SQLiteConnection connection = new SQLiteConnection(
+                    "Data Source=${dataSource};Pooling=True;");
+
+                connection.Open();
+
+                using (SQLiteCommand command = new SQLiteCommand("${sql}",
+                    connection))
                 {
-                  Thread.Sleep(random.Next(0, 250));
-
-                  SQLiteConnection connection = new SQLiteConnection(
-                      "Data Source=${dataSource};Pooling=True;");
-
-                  connection.Open();
-                  connection.Close();
-
-                  connection = null;
+                  command.ExecuteNonQuery();
                 }
+
+                connection.Close();
+                connection = null;
               }
               catch (Exception e)
               {
@@ -125,7 +133,7 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
                 // NOTE: Wait a random number of milliseconds before forcing a
                 //       full garbage collection.
                 //
-                Thread.Sleep(random.Next(0, count * 100));
+                Thread.Sleep(random.Next(0, 1000));
                 GC.GetTotalMemory(true);
               }
               catch (Exception e)
@@ -211,7 +219,7 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
 
   cleanupDb $fileName
 
-  unset -nocomplain result results errors code dataSource id db fileName
+  unset -nocomplain result results errors code sql dataSource id db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 0$}}
