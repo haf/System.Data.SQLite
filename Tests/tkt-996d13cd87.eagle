@@ -20,7 +20,7 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
+runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
   set fileName tkt-996d13cd87-1.1.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
@@ -31,18 +31,32 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
   set code [compileCSharpWith [subst {
     using System;
     using System.Data.SQLite;
+    using System.Diagnostics;
     using System.Threading;
 
     namespace _Dynamic${id}
     {
       public static class Test${id}
       {
-        public static void Main()
+        public static int Main()
         {
+          //
+          // NOTE: This is the total number of exceptions caught by all the
+          //       test threads.
+          //
+          int errors = 0;
+
           //
           // NOTE: This is the total number of test threads to create.
           //
-          int count = 10;
+          int count = 200;
+
+          //
+          // NOTE: Create a random number generator suitable for waiting a
+          //       random number of milliseconds between each attempt to
+          //       cause the race condition on a given thread.
+          //
+          Random random = new Random();
 
           //
           // NOTE: Create the event that will be used to synchronize all the
@@ -57,7 +71,7 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
             //       will repeatedly create, open, and close a single database
             //       connection with pool enabled.
             //
-            ThreadStart threadStart = delegate()
+            ThreadStart threadStart1 = delegate()
             {
               try
               {
@@ -68,32 +82,27 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
                 goEvent.WaitOne();
 
                 //
-                // NOTE: Create a random number generator suitable for waiting
-                //       a random number of milliseconds between each attempt
-                //       to cause the race condition on a given thread.
-                //
-                Random random = new Random();
-
-                //
                 // NOTE: Repeatedly try to create, open, and close a pooled
                 //       database connection and then wait a random number of
                 //       milliseconds before doing it again.
                 //
                 for (int index = 0; index < count; index++)
                 {
-                  using (SQLiteConnection connection = new SQLiteConnection(
-                      "Data Source=${dataSource};Pooling=True;"))
-                  {
-                    connection.Open();
-                    connection.Close();
-                  }
+                  Thread.Sleep(random.Next(0, 250));
 
-                  Thread.Sleep(random.Next(0, count));
+                  SQLiteConnection connection = new SQLiteConnection(
+                      "Data Source=${dataSource};Pooling=True;");
+
+                  connection.Open();
+                  connection.Close();
+
+                  connection = null;
                 }
               }
               catch (Exception e)
               {
-                Console.WriteLine(e);
+                Interlocked.Increment(ref errors);
+                Trace.WriteLine(e);
               }
             };
 
@@ -113,26 +122,16 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
                 goEvent.WaitOne();
 
                 //
-                // NOTE: Create a random number generator suitable for waiting
-                //       a random number of milliseconds between each attempt
-                //       to cause the race condition on a given thread.
+                // NOTE: Wait a random number of milliseconds before forcing a
+                //       full garbage collection.
                 //
-                Random random = new Random();
-
-                //
-                // NOTE: Repeatedly force a full garbage collection and then
-                //       wait a random number of milliseconds before doing it
-                //       again.
-                //
-                for (int index = 0; index < count; index++)
-                {
-                  GC.GetTotalMemory(true);
-                  Thread.Sleep(random.Next(0, count));
-                }
+                Thread.Sleep(random.Next(0, count * 100));
+                GC.GetTotalMemory(true);
               }
               catch (Exception e)
               {
-                Console.WriteLine(e);
+                Interlocked.Increment(ref errors);
+                Trace.WriteLine(e);
               }
             };
 
@@ -150,8 +149,18 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
             //
             for (int index = 0; index < count; index++)
             {
-              thread\[index\] = new Thread(
-                  (index % 2) == 0 ? threadStart : threadStart2, 1048576);
+              //
+              // NOTE: Figure out what kind of thread to create (i.e. one
+              //       that uses a connection or one that calls the GC).
+              //
+              ThreadStart threadStart;
+
+              if (index == 0)
+                threadStart = threadStart2;
+              else
+                threadStart = threadStart1;
+
+              thread\[index\] = new Thread(threadStart, 1048576);
 
               //
               // NOTE: Name each thread for a better debugging experience.
@@ -180,6 +189,12 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
             for (int index = 0; index < count; index++)
               thread\[index\].Join();
           }
+
+          //
+          // NOTE: Return the total number of exceptions caught by the test
+          //       threads.  For this test to pass, this number must be zero.
+          //
+          return errors;
         }
       }
     }
@@ -199,7 +214,7 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool usage} -setup {
   unset -nocomplain result results errors code dataSource id db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 0$}}
 
 ###############################################################################
 
