@@ -426,8 +426,7 @@ namespace eval ::Eagle {
   proc addToPath { dir } {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
-    #
-    # NOTE: Normalize to an operating system native path.
+    #       Normalize to an operating system native path.
     #
     set dir [file nativename $dir]
 
@@ -500,8 +499,7 @@ namespace eval ::Eagle {
   proc removeFromPath { dir } {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
-    #
-    # NOTE: Normalize to an operating system native path.
+    #       Normalize to an operating system native path.
     #
     set dir [file nativename $dir]
 
@@ -528,36 +526,41 @@ namespace eval ::Eagle {
     }
 
     #
-    # NOTE: We need to separate the directories in the path
-    #       so that we can selectively remove the one we are
-    #       looking for.
+    # NOTE: Does the necessary environment variable exist?
     #
-    set dirs [split $::env($name) $separator]
-
-    #
-    # BUGBUG: Consider exact case only for now.
-    #
-    set index [lsearch -exact $dirs $dir]
-
-    #
-    # NOTE: Is the directory in the loader search path?
-    #
-    if {$index != -1} then {
+    if {[info exists ::env($name)]} then {
       #
-      # NOTE: Remove the directory from the loader search path.
+      # NOTE: We need to separate the directories in the path
+      #       so that we can selectively remove the one we are
+      #       looking for.
       #
-      set dirs [lreplace $dirs $index $index]
+      set dirs [split $::env($name) $separator]
 
       #
-      # NOTE: Replace the original loader search path with
-      #       our modified one.
+      # BUGBUG: Consider exact case only for now.
       #
-      set ::env($name) [join $dirs $separator]
+      set index [lsearch -exact $dirs $dir]
 
       #
-      # NOTE: Yes, we altered the search path.
+      # NOTE: Is the directory in the loader search path?
       #
-      return true
+      if {$index != -1} then {
+        #
+        # NOTE: Remove the directory from the loader search path.
+        #
+        set dirs [lreplace $dirs $index $index]
+
+        #
+        # NOTE: Replace the original loader search path with
+        #       our modified one.
+        #
+        set ::env($name) [join $dirs $separator]
+
+        #
+        # NOTE: Yes, we altered the search path.
+        #
+        return true
+      }
     }
 
     #
@@ -734,7 +737,17 @@ namespace eval ::Eagle {
       return $result
     }
 
-    proc waitForProcesses { ids timeout } {
+    proc waitForProcesses { ids timeout {collect true} } {
+      #
+      # NOTE: If requested, run the garbage collector now.  This may be
+      #       necessary to successfully wait for processes that are being
+      #       kept alive via runtime callable wrappers for out-of-process
+      #       COM servers (e.g. Excel).
+      #
+      if {$collect} then {
+        debug collect true true
+      }
+
       #
       # NOTE: Wait for each process in the list to exit.
       #

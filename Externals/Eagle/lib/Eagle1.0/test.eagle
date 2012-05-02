@@ -833,6 +833,25 @@ namespace eval ::Eagle {
     return [expr {[string length $result] > 0 ? $result : $default}]
   }
 
+  proc pathToRegexp { path {list false} } {
+    #
+    # NOTE: This procedure needs to escape all characters that
+    #       have any special meaning to the regular expression
+    #       engine.  Typically, the only characters we need to
+    #       really worry about are the directory separator and
+    #       the file extension separator (e.g. backslash and
+    #       period on Windows and/or forward slash and period
+    #       on Unix).  Since the forward slash has no special
+    #       meaning to the regular expression engine, Windows
+    #       is somewhat more difficult to handle.
+    #
+    set map [list \
+        \\ \\\\ \$ \\\$ ( \\( ) \\) * \\* + \\+ - \\- . \\. \
+        ? \\? \[ \\\[ \] \\\] ^ \\^ \{ \\\{ \} \\\}]
+
+    return [string map $map [expr {$list ? [list $path] : $path}]]
+  }
+
   proc inverseLsearchGlob { noCase patterns element } {
     #
     # NOTE: Perform the inverse of [lsearch -glob], attempt

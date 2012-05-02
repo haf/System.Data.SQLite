@@ -914,6 +914,23 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForHostType { channel } {
+      tputs $channel "---- checking for host type... "
+
+      if {[set code [catch {object invoke \
+              Interpreter.GetActive.Host.GetType ToString} hostType]] == 0 && \
+          [string length $hostType] > 0} then {
+        addConstraint [appendArgs hostType. [string map \
+            [list , _ + _ & _ * _ \[ _ \] _ . _ \\ _] $hostType]]
+
+        tputs $channel [appendArgs $hostType \n]
+      } elseif {$code == 0} then {
+        tputs $channel unknown\n
+      } else {
+        tputs $channel error\n
+      }
+    }
+
     proc checkForPrimaryThread { channel } {
       tputs $channel "---- checking for primary thread... "
 

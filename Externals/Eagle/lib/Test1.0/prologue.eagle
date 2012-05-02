@@ -70,12 +70,14 @@ if {![info exists no([file tail [info script]])]} then {
     unset pkg_dir
   }
 
+  #############################################################################
+
   #
-  # NOTE: Set the local root directory of the source checkout (i.e. of
-  #       Eagle or whatever project the Eagle binaries are being used by).
+  # NOTE: Set the local root directory of the source checkout (i.e. of Eagle or
+  #       whatever project the Eagle binaries are being used by).
   #
-  if {![info exists root_path]} then {
-    set pattern {^local-root:\s+(.*?)\s+?$}
+  if {![info exists root_path] && ![info exists no(fossil)]} then {
+    set pattern {^local-root:\s+(.*?)\s+$}
 
     if {[catch {set exec [exec -- fossil info]}] || \
         [regexp -line -- $pattern $exec dummy directory] == 0} then {
@@ -99,6 +101,8 @@ if {![info exists no([file tail [info script]])]} then {
 
     unset -nocomplain directory dummy exec pattern
   }
+
+  #############################################################################
 
   #
   # NOTE: Set the executable file name for the process, if
@@ -598,6 +602,13 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has host type detection support been disabled?
+    #
+    if {![info exists no(hostType)]} then {
+      checkForHostType $test_channel
+    }
+
+    #
     # NOTE: Has primary thread detection support been disabled?  We do
     #       this check [nearly] first as it may [eventually] be used
     #       to help determine if other constraints should be skipped.
@@ -686,7 +697,7 @@ if {![info exists no([file tail [info script]])]} then {
     #
     # NOTE: Has database testing support been disabled?
     #
-    if {![info exists no(sql)]} then {
+    if {![info exists no(database)]} then {
       #
       # NOTE: Set the server name, if necessary.
       #
@@ -1038,6 +1049,17 @@ if {![info exists no([file tail [info script]])]} then {
     # NOTE: Has custom test method support been disabled?
     #
     if {![info exists no(test)]} then {
+      #
+      # NOTE: Has script stream testing support been disabled?
+      #
+      if {![info exists no(testScriptStream)]} then {
+        #
+        # NOTE: For tests "basic-1.46" and "basic-1.47".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestScriptStream*
+      }
+
       #
       # NOTE: Has DateTime testing support been disabled?
       #
@@ -1942,6 +1964,36 @@ if {![info exists no([file tail [info script]])]} then {
 
     ###########################################################################
 
+    #
+    # NOTE: Get the source checkout (i.e. of Eagle or whatever project the
+    #       Eagle binaries are being used by).
+    #
+    if {![info exists no(fossil)]} then {
+      set pattern {^checkout:\s+(.*?)\s+$}
+
+      if {[catch {set exec [exec -- fossil info]}] || \
+          [regexp -line -- $pattern $exec dummy checkout] == 0} then {
+        #
+        # NOTE: We could not query the source checkout from Fossil.
+        #
+        set checkout <none>
+      }
+
+      unset -nocomplain dummy exec pattern
+    } else {
+      #
+      # NOTE: Querying the source checkout from Fossil was disabled.
+      #
+      set checkout <none>
+    }
+
+    tputs $test_channel [appendArgs "---- checkout: " \
+        $checkout \n]
+
+    unset checkout
+
+    ###########################################################################
+
     set timeStamp [getPlatformInfo timeStamp ""]
 
     if {[string length $timeStamp] > 0} then {
@@ -1969,7 +2021,9 @@ if {![info exists no([file tail [info script]])]} then {
         [list [getPlatformInfo text <none>]] " " \
         [list [getPlatformInfo configuration <none>]] " " \
         [list [getPlatformInfo suffix <none>]] " " \
-        [list $timeStamp] \n]
+        [list $timeStamp] " " \
+        [list [getPlatformInfo sourceId <none>]] " " \
+        [list [getPlatformInfo sourceTimeStamp <none>]] \n]
 
     unset timeStamp
 
