@@ -1382,6 +1382,26 @@ runTest {test data-1.25 {SQLiteDataReader GetValues w/collection} -setup {
 
 ###############################################################################
 
+runTest {test data-1.26 {LINQ ISQLiteSchemaExtensions.BuildTempSchema} -setup {
+  setupDb [set fileName data-1.26.db]
+} -body {
+  set connection [object invoke -flags +NonPublic -objectflags +NoDispose \
+      Interpreter.GetActive.connections Item $db]
+
+  set providerServices [object invoke -flags +NonPublic \
+      System.Data.SQLite.SQLiteProviderServices Instance]
+
+  object invoke -flags +NonPublic -type \
+      System.Data.SQLite.ISQLiteSchemaExtensions $providerServices \
+      BuildTempSchema $connection
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain providerServices connection db fileName
+} -constraints {eagle System.Data.SQLite System.Data.SQLite.Linq} -result {}}
+
+###############################################################################
+
 unset -nocomplain testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
 ###############################################################################
