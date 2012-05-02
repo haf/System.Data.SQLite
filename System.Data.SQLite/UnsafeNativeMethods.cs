@@ -24,6 +24,10 @@ namespace System.Data.SQLite
 
   using System.Runtime.InteropServices;
 
+#if !PLATFORM_COMPACTFRAMEWORK
+  using System.Threading;
+#endif
+
 #if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
   [SuppressUnmanagedCodeSecurity]
 #endif
@@ -1384,16 +1388,28 @@ namespace System.Data.SQLite
     {
       try
       {
-        SQLiteBase.CloseConnection(this);
+#if !PLATFORM_COMPACTFRAMEWORK
+        IntPtr localHandle = Interlocked.Exchange(
+          ref handle, IntPtr.Zero);
+
+        if (localHandle != IntPtr.Zero)
+          SQLiteBase.CloseConnection(this, localHandle);
 
 #if DEBUG && !NET_COMPACT_20
         try
         {
           Trace.WriteLine(String.Format(
-              "CloseConnection: {0}", handle));
+              "CloseConnection: {0}", localHandle));
         }
         catch
         {
+        }
+#endif
+#else
+        if (handle != IntPtr.Zero)
+        {
+          SQLiteBase.CloseConnection(this, handle);
+          SetHandle(IntPtr.Zero);
         }
 #endif
 
@@ -1418,6 +1434,10 @@ namespace System.Data.SQLite
         {
         }
 #endif
+      }
+      finally
+      {
+        SetHandleAsInvalid();
       }
 #if DEBUG
       return false;
@@ -1467,16 +1487,28 @@ namespace System.Data.SQLite
     {
       try
       {
-        SQLiteBase.FinalizeStatement(this);
+#if !PLATFORM_COMPACTFRAMEWORK
+        IntPtr localHandle = Interlocked.Exchange(
+          ref handle, IntPtr.Zero);
+
+        if (localHandle != IntPtr.Zero)
+          SQLiteBase.FinalizeStatement(localHandle);
 
 #if DEBUG && !NET_COMPACT_20
         try
         {
           Trace.WriteLine(String.Format(
-              "FinalizeStatement: {0}", handle));
+              "FinalizeStatement: {0}", localHandle));
         }
         catch
         {
+        }
+#endif
+#else
+        if (handle != IntPtr.Zero)
+        {
+          SQLiteBase.FinalizeStatement(handle);
+          SetHandle(IntPtr.Zero);
         }
 #endif
 
@@ -1501,6 +1533,10 @@ namespace System.Data.SQLite
         {
         }
 #endif
+      }
+      finally
+      {
+        SetHandleAsInvalid();
       }
 #if DEBUG
       return false;
@@ -1550,16 +1586,28 @@ namespace System.Data.SQLite
       {
           try
           {
-              SQLiteBase.FinishBackup(this);
+#if !PLATFORM_COMPACTFRAMEWORK
+              IntPtr localHandle = Interlocked.Exchange(
+                  ref handle, IntPtr.Zero);
+
+              if (localHandle != IntPtr.Zero)
+                  SQLiteBase.FinishBackup(localHandle);
 
 #if DEBUG && !NET_COMPACT_20
               try
               {
                   Trace.WriteLine(String.Format(
-                      "FinishBackup: {0}", handle));
+                      "FinishBackup: {0}", localHandle));
               }
               catch
               {
+              }
+#endif
+#else
+              if (handle != IntPtr.Zero)
+              {
+                SQLiteBase.FinishBackup(handle);
+                SetHandle(IntPtr.Zero);
               }
 #endif
 
@@ -1584,6 +1632,10 @@ namespace System.Data.SQLite
               {
               }
 #endif
+          }
+          finally
+          {
+              SetHandleAsInvalid();
           }
 #if DEBUG
           return false;

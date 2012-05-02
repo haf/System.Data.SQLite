@@ -674,6 +674,18 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns the number of pool entries for the file name associated with this connection.
+    /// </summary>
+    public int PoolCount
+    {
+        get
+        {
+            if (_sql == null) return 0;
+            return _sql.CountPool();
+        }
+    }
+
+    /// <summary>
     /// Clears the connection pool associated with the connection.  Any other active connections using the same database file
     /// will be discarded instead of returned to the pool when they are closed.
     /// </summary>

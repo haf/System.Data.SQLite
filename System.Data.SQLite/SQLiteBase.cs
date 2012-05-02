@@ -18,8 +18,6 @@ namespace System.Data.SQLite
     internal SQLiteBase(SQLiteDateFormats fmt, DateTimeKind kind)
       : base(fmt, kind) { }
 
-    static internal object _lock = new object();
-
     /// <summary>
     /// Returns a string representing the active version of SQLite
     /// </summary>
@@ -80,12 +78,18 @@ namespace System.Data.SQLite
     /// Returns the text of the last error issued by SQLite
     /// </summary>
     /// <returns></returns>
-    internal abstract string SQLiteLastError();
+    internal abstract string GetLastError();
 
     /// <summary>
     /// When pooling is enabled, force this connection to be disposed rather than returned to the pool
     /// </summary>
     internal abstract void ClearPool();
+
+    /// <summary>
+    /// When pooling is enabled, returns the number of pool entries matching the current file name.
+    /// </summary>
+    /// <returns>The number of pool entries matching the current file name.</returns>
+    internal abstract int CountPool();
 
     /// <summary>
     /// Prepares a SQL statement for execution.
@@ -340,83 +344,87 @@ namespace System.Data.SQLite
     // a SQLiteStatementHandle, SQLiteConnectionHandle, and SQLiteFunctionCookieHandle.
     // Therefore these functions have to be static, and have to be low-level.
 
-    internal static string SQLiteLastError(SQLiteConnectionHandle db)
+    internal static string GetLastError(SQLiteConnectionHandle hdl, IntPtr db)
     {
-#if !SQLITE_STANDARD
-      int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
-#else
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
-#endif
-    }
+        if ((hdl == null) || (db == IntPtr.Zero))
+            return "invalid connection or database handle";
 
-    internal static void FinishBackup(SQLiteBackupHandle backup)
-    {
-        lock (_lock)
+        lock (hdl)
         {
-            int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
-            backup.SetHandleAsInvalid();
-            if (n > 0) throw new SQLiteException(n, null);
+#if !SQLITE_STANDARD
+            int len;
+            return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
+#else
+            return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
+#endif
         }
     }
 
-    internal static void FinalizeStatement(SQLiteStatementHandle stmt)
+    internal static void FinishBackup(IntPtr backup)
     {
-      lock (_lock)
-      {
+        if (backup == IntPtr.Zero) return;
+        int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+        if (n > 0) throw new SQLiteException(n, null);
+    }
+
+    internal static void FinalizeStatement(IntPtr stmt)
+    {
+        if (stmt == IntPtr.Zero) return;
 #if !SQLITE_STANDARD
         int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
 #else
-      int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
+        int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
 #endif
         if (n > 0) throw new SQLiteException(n, null);
-      }
     }
 
-    internal static void CloseConnection(SQLiteConnectionHandle db)
+    internal static void CloseConnection(SQLiteConnectionHandle hdl, IntPtr db)
     {
-      lock (_lock)
-      {
-#if !SQLITE_STANDARD
-        int n = UnsafeNativeMethods.sqlite3_close_interop(db);
-#else
-      ResetConnection(db);
-      int n = UnsafeNativeMethods.sqlite3_close(db);
-#endif
-        if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
-      }
-    }
-
-    internal static void ResetConnection(SQLiteConnectionHandle db)
-    {
-      lock (_lock)
-      {
-        IntPtr stmt = IntPtr.Zero;
-        int n;
-        do
+        if ((hdl == null) || (db == IntPtr.Zero)) return;
+        lock (hdl)
         {
-          stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
-          if (stmt != IntPtr.Zero)
-          {
 #if !SQLITE_STANDARD
-            n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+            int n = UnsafeNativeMethods.sqlite3_close_interop(db);
 #else
-            n = UnsafeNativeMethods.sqlite3_reset(stmt);
+            ResetConnection(hdl, db);
+            int n = UnsafeNativeMethods.sqlite3_close(db);
 #endif
-          }
-        } while (stmt != IntPtr.Zero);
-
-        if (IsAutocommit(db) == false) // a transaction is pending on the connection
-        {
-          n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
-          if (n > 0) throw new SQLiteException(n, SQLiteLastError(db));
+            if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
         }
-      }
     }
 
-    internal static bool IsAutocommit(SQLiteConnectionHandle hdl)
+    internal static void ResetConnection(SQLiteConnectionHandle hdl, IntPtr db)
     {
-      return (UnsafeNativeMethods.sqlite3_get_autocommit(hdl) == 1);
+        if ((hdl == null) || (db == IntPtr.Zero)) return;
+        lock (hdl)
+        {
+            IntPtr stmt = IntPtr.Zero;
+            int n;
+            do
+            {
+                stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
+                if (stmt != IntPtr.Zero)
+                {
+#if !SQLITE_STANDARD
+                    n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+#else
+                    n = UnsafeNativeMethods.sqlite3_reset(stmt);
+#endif
+                }
+            } while (stmt != IntPtr.Zero);
+
+            if (IsAutocommit(db) == false) // a transaction is pending on the connection
+            {
+                n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
+                if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
+            }
+        }
+    }
+
+    internal static bool IsAutocommit(IntPtr db)
+    {
+      if (db == IntPtr.Zero) return false;
+      return (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
     }
 
   }

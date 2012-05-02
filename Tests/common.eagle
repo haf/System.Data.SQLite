@@ -807,9 +807,16 @@ namespace eval ::Eagle {
           #
           if {![info exists ::no(deleteSqliteFiles)]} then {
             tryDeleteAssembly sqlite3.dll
+            removeConstraint file_sqlite3.dll
+
             tryDeleteAssembly SQLite.Interop.dll
+            removeConstraint file_SQLite.Interop.dll
+
             tryDeleteAssembly System.Data.SQLite.dll
+            removeConstraint file_System.Data.SQLite.dll
+
             tryDeleteAssembly System.Data.SQLite.Linq.dll
+            removeConstraint file_System.Data.SQLite.Linq.dll
           }
 
           #
@@ -898,6 +905,13 @@ namespace eval ::Eagle {
         #
         tputs $::test_channel [appendArgs "---- constraints: " \
             [formatList [lsort [getConstraints]]] \n]
+
+        #
+        # NOTE: Show when our tests actually began (now).
+        #
+        tputs $::test_channel [appendArgs \
+            "---- System.Data.SQLite tests began at " \
+            [clock format [clock seconds]] \n]
       }
     }
 
@@ -906,6 +920,13 @@ namespace eval ::Eagle {
       # NOTE: Skip running our custom epilogue if the main one has been skipped.
       #
       if {![info exists ::no(epilogue.eagle)]} then {
+        #
+        # NOTE: Show when our tests actually ended (now).
+        #
+        tputs $::test_channel [appendArgs \
+            "---- System.Data.SQLite tests ended at " \
+            [clock format [clock seconds]] \n]
+
         #
         # NOTE: Also report the resource usage after running the tests.
         #

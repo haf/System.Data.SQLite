@@ -127,6 +127,25 @@ namespace eval ::Eagle {
     return $result
   }
 
+  proc removeConstraint { name } {
+    if {[isEagle]} then {
+      if {[info exists ::eagle_tests(constraints)]} then {
+        set index [lsearch -exact $::eagle_tests(constraints) $name]
+
+        if {$index != -1} then {
+          set ::eagle_tests(constraints) [lreplace \
+              $::eagle_tests(constraints) $index $index]
+        }
+      }
+    } else {
+      if {[info exists ::tcltest::testConstraints($name)]} then {
+        unset ::tcltest::testConstraints($name)
+      }
+    }
+
+    return ""
+  }
+
   proc fixConstraints { constraints } {
     set result [string trim $constraints]
 
@@ -1816,7 +1835,7 @@ namespace eval ::Eagle {
         runTestEpilogue runTest runAllTests fixConstraints sourceIfValid \
         isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
         returnInfoScript tputs formatDecimal formatList configureTcltest \
-        machineToPlatform tsource testShim] false false
+        removeConstraint machineToPlatform tsource testShim] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
