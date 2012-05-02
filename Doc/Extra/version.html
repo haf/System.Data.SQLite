@@ -48,6 +48,16 @@
       <li>Support compiling the interop assembly without support for the custom extension functions and the CryptoAPI based codec.</li>
       <li>Add DefineConstants property to the SQLiteConnection class to return the list of define constants used when compiling the core managed assembly.</li>
       <li>Add release archive verification tool to the release automation.</li>
+      <li>Fix subtle race condition between threads fetching connection handles from the connection pool any garbage collection (GC) threads that may be running. Fix for <a href="http://system.data.sqlite.org/index.html/info/996d13cd87">[996d13cd87]</a>.</li>
+      <li>Add missing call to SetTimeout in the SQLite3_UTF16.Open method.</li>
+      <li>Add checks to prevent the SQLiteConnectionPool.Remove method from returning any connection handles that are closed or invalid.</li>
+      <li>Modify static SQLiteBase helper methods to prevent them from passing IntPtr.Zero to the SQLite native library.</li>
+      <li>Remove static locks from the static helper methods in the SQLiteBase class, replacing them with a lock on the connection handle instance being operated upon.</li>
+      <li>Revise CriticalHandle derived classes to make them more thread-safe.</li>
+      <li>Add connection pool related diagnostic messages when compiled with the DEBUG define constant.</li>
+      <li>Add PoolCount property to the SQLiteConnection class to return the number of pool entries for the file name associated with the connection.</li>
+      <li>Rename internal SQLiteLastError methods to GetLastError.</li>
+      <li>Add assembly file test constraints to all tests that execute the &quot;test.exe&quot; or &quot;testlinq.exe&quot; files.</li>
     </ul>
     <p><b>1.0.80.0 - April 1, 2012</b></p>
     <ul>
