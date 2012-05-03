@@ -149,12 +149,14 @@ namespace System.Data.SQLite
         while (poolQueue.Count > 0)
         {
           WeakReference cnn = poolQueue.Dequeue();
+          if (cnn == null) continue;
           SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
           if ((hdl != null) && !hdl.IsClosed && !hdl.IsInvalid)
           {
             Interlocked.Increment(ref _poolOpened);
             return hdl;
           }
+          cnn.Target = null;
           GC.KeepAlive(hdl);
         }
         return null;
@@ -179,11 +181,13 @@ namespace System.Data.SQLite
           while (poolQueue.Count > 0)
           {
             WeakReference cnn = poolQueue.Dequeue();
+            if (cnn == null) continue;
             SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
             if (hdl != null)
             {
               hdl.Dispose();
             }
+            cnn.Target = null;
             GC.KeepAlive(hdl);
           }
           
@@ -219,11 +223,13 @@ namespace System.Data.SQLite
           while (poolQueue.Count > 0)
           {
             WeakReference cnn = poolQueue.Dequeue();
+            if (cnn == null) continue;
             SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
             if (hdl != null)
             {
               hdl.Dispose();
             }
+            cnn.Target = null;
             GC.KeepAlive(hdl);
           }
         }
@@ -282,11 +288,13 @@ namespace System.Data.SQLite
       while (poolQueue.Count > target)
       {
         WeakReference cnn = poolQueue.Dequeue();
+        if (cnn == null) continue;
         SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
         if (hdl != null)
         {
           hdl.Dispose();
         }
+        cnn.Target = null;
         GC.KeepAlive(hdl);
       }
     }
