@@ -1457,14 +1457,17 @@ namespace System.Data.SQLite
   // Provides finalization support for unmanaged SQLite statements.
   internal class SQLiteStatementHandle : CriticalHandle
   {
+    private SQLiteConnectionHandle cnn;
+
     public static implicit operator IntPtr(SQLiteStatementHandle stmt)
     {
       return (stmt != null) ? stmt.handle : IntPtr.Zero;
     }
 
-    internal SQLiteStatementHandle(IntPtr stmt)
+    internal SQLiteStatementHandle(SQLiteConnectionHandle cnn, IntPtr stmt)
       : this()
     {
+      this.cnn = cnn;
       SetHandle(stmt);
     }
 
@@ -1482,7 +1485,7 @@ namespace System.Data.SQLite
           ref handle, IntPtr.Zero);
 
         if (localHandle != IntPtr.Zero)
-          SQLiteBase.FinalizeStatement(localHandle);
+          SQLiteBase.FinalizeStatement(cnn, localHandle);
 
 #if DEBUG && !NET_COMPACT_20
         try
@@ -1497,7 +1500,7 @@ namespace System.Data.SQLite
 #else
         if (handle != IntPtr.Zero)
         {
-          SQLiteBase.FinalizeStatement(handle);
+          SQLiteBase.FinalizeStatement(cnn, handle);
           SetHandle(IntPtr.Zero);
         }
 #endif
@@ -1551,14 +1554,17 @@ namespace System.Data.SQLite
   // Provides finalization support for unmanaged SQLite backup objects.
   internal class SQLiteBackupHandle : CriticalHandle
   {
+      private SQLiteConnectionHandle cnn;
+
       public static implicit operator IntPtr(SQLiteBackupHandle backup)
       {
           return (backup != null) ? backup.handle : IntPtr.Zero;
       }
 
-      internal SQLiteBackupHandle(IntPtr backup)
+      internal SQLiteBackupHandle(SQLiteConnectionHandle cnn, IntPtr backup)
           : this()
       {
+          this.cnn = cnn;
           SetHandle(backup);
       }
 
@@ -1576,7 +1582,7 @@ namespace System.Data.SQLite
                   ref handle, IntPtr.Zero);
 
               if (localHandle != IntPtr.Zero)
-                  SQLiteBase.FinishBackup(localHandle);
+                  SQLiteBase.FinishBackup(cnn, localHandle);
 
 #if DEBUG && !NET_COMPACT_20
               try
@@ -1591,7 +1597,7 @@ namespace System.Data.SQLite
 #else
               if (handle != IntPtr.Zero)
               {
-                SQLiteBase.FinishBackup(handle);
+                SQLiteBase.FinishBackup(cnn, handle);
                 SetHandle(IntPtr.Zero);
               }
 #endif

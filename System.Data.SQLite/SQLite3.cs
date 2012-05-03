@@ -538,7 +538,7 @@ namespace System.Data.SQLite
 
         strRemain = UTF8ToString(ptr, len);
 
-        if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, flags, new SQLiteStatementHandle(stmt), strSql.Substring(0, strSql.Length - strRemain.Length), previous);
+        if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, flags, new SQLiteStatementHandle(_sql, stmt), strSql.Substring(0, strSql.Length - strRemain.Length), previous);
 
         return cmd;
       }
@@ -1480,8 +1480,8 @@ namespace System.Data.SQLite
             throw new SQLiteException(ResultCode(), GetLastError());
 
         return new SQLiteBackup(
-            this, new SQLiteBackupHandle(backup), destHandle, zDestName,
-            sourceHandle, zSourceName);
+            this, new SQLiteBackupHandle(destHandle, backup),
+            destHandle, zDestName, sourceHandle, zSourceName);
     }
 
     /// <summary>

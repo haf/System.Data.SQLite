@@ -367,22 +367,28 @@ namespace System.Data.SQLite
 #pragma warning restore 162
     }
 
-    internal static void FinishBackup(IntPtr backup)
+    internal static void FinishBackup(SQLiteConnectionHandle hdl, IntPtr backup)
     {
-        if (backup == IntPtr.Zero) return;
-        int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
-        if (n > 0) throw new SQLiteException(n, null);
+        if ((hdl == null) || (backup == IntPtr.Zero)) return;
+        lock (hdl)
+        {
+            int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+            if (n > 0) throw new SQLiteException(n, null);
+        }
     }
 
-    internal static void FinalizeStatement(IntPtr stmt)
+    internal static void FinalizeStatement(SQLiteConnectionHandle hdl, IntPtr stmt)
     {
-        if (stmt == IntPtr.Zero) return;
+        if ((hdl == null) || (stmt == IntPtr.Zero)) return;
+        lock (hdl)
+        {
 #if !SQLITE_STANDARD
-        int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
+            int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
 #else
-        int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
+            int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
 #endif
-        if (n > 0) throw new SQLiteException(n, null);
+            if (n > 0) throw new SQLiteException(n, null);
+        }
     }
 
     internal static void CloseConnection(SQLiteConnectionHandle hdl, IntPtr db)
