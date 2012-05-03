@@ -57,6 +57,12 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
           int count = 100;
 
           //
+          // NOTE: This is the total number of times we should force a full
+          //       garbage collection.
+          //
+          int gcCount = 2;
+
+          //
           // NOTE: Create a random number generator suitable for waiting a
           //       random number of milliseconds between each attempt to
           //       cause the race condition on a given thread.
@@ -133,8 +139,11 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
                 // NOTE: Wait a random number of milliseconds before forcing a
                 //       full garbage collection.
                 //
-                Thread.Sleep(random.Next(0, 1000));
-                GC.GetTotalMemory(true);
+                for (int index = 0; index < gcCount; index++)
+                {
+                  Thread.Sleep(random.Next(0, 1000));
+                  GC.GetTotalMemory(true);
+                }
               }
               catch (Exception e)
               {
@@ -212,7 +221,11 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
       [expr {[info exists errors] ? $errors : ""}] \
       [expr {$code eq "Ok" ? [catch {
         object invoke _Dynamic${id}.Test${id} Main
-      } result] : [set result ""]}] $result
+      } result] : [set result ""]}] $result \
+      [expr {[object invoke -flags +NonPublic \
+          System.Data.SQLite.SQLiteConnectionPool _poolOpened] > 0}] \
+      [expr {[object invoke -flags +NonPublic \
+          System.Data.SQLite.SQLiteConnectionPool _poolClosed] > 0}]
 } -cleanup {
   object invoke System.Data.SQLite.SQLiteConnection ClearAllPools
   object invoke GC GetTotalMemory true
@@ -222,7 +235,8 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
   unset -nocomplain result results errors code sql dataSource id db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \d+$}}
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \d+ True\
+True$}}
 
 ###############################################################################
 

@@ -9,6 +9,7 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
+  using System.Threading;
 
   internal static class SQLiteConnectionPool
   {
@@ -40,19 +41,38 @@ namespace System.Data.SQLite
     private static int _poolVersion = 1;
 
     /// <summary>
+    /// The number of connections successfully opened from any pool.
+    /// This value is incremented by the Remove method.
+    /// </summary>
+    private static int _poolOpened = 0;
+
+    /// <summary>
+    /// The number of connections successfully closed from any pool.
+    /// This value is incremented by the Add method.
+    /// </summary>
+    private static int _poolClosed = 0;
+
+    /// <summary>
     /// Counts the number of pool entries matching the specified file name.
     /// </summary>
     /// <param name="fileName">The file name to match or null to match all files.</param>
     /// <param name="counts">The pool entry counts for each matching file.</param>
+    /// <param name="openCount">The total number of connections successfully opened from any pool.</param>
+    /// <param name="closeCount">The total number of connections successfully closed from any pool.</param>
     /// <param name="totalCount">The total number of pool entries for all matching files.</param>
     internal static void GetCounts(
         string fileName,
         ref Dictionary<string, int> counts,
+        ref int openCount,
+        ref int closeCount,
         ref int totalCount
         )
     {
         lock (_connections)
         {
+            openCount = _poolOpened;
+            closeCount = _poolClosed;
+
             if (counts == null)
             {
                 counts = new Dictionary<string, int>(
@@ -132,6 +152,7 @@ namespace System.Data.SQLite
           SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
           if ((hdl != null) && !hdl.IsClosed && !hdl.IsInvalid)
           {
+            Interlocked.Increment(ref _poolOpened);
             return hdl;
           }
           GC.KeepAlive(hdl);
@@ -150,9 +171,14 @@ namespace System.Data.SQLite
       {
         foreach (KeyValuePair<string, Pool> pair in _connections)
         {
-          while (pair.Value.Queue.Count > 0)
+          if (pair.Value == null)
+            continue;
+
+          Queue<WeakReference> poolQueue = pair.Value.Queue;
+
+          while (poolQueue.Count > 0)
           {
-            WeakReference cnn = pair.Value.Queue.Dequeue();
+            WeakReference cnn = poolQueue.Dequeue();
             SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
             if (hdl != null)
             {
@@ -227,6 +253,7 @@ namespace System.Data.SQLite
           if (poolQueue == null) return;
 
           poolQueue.Enqueue(new WeakReference(hdl, false));
+          Interlocked.Increment(ref _poolClosed);
           GC.KeepAlive(hdl);
         }
         else

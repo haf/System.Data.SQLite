@@ -396,6 +396,7 @@ namespace System.Data.SQLite
     internal static void ResetConnection(SQLiteConnectionHandle hdl, IntPtr db)
     {
         if ((hdl == null) || (db == IntPtr.Zero)) return;
+        if (hdl.IsClosed || hdl.IsInvalid) return;
         lock (hdl)
         {
             IntPtr stmt = IntPtr.Zero;
@@ -419,6 +420,7 @@ namespace System.Data.SQLite
                 if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
             }
         }
+        GC.KeepAlive(hdl);
     }
 
     internal static bool IsAutocommit(IntPtr db)

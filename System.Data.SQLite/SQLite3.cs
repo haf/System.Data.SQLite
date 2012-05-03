@@ -293,10 +293,13 @@ namespace System.Data.SQLite
     internal override int CountPool()
     {
         Dictionary<string, int> counts = null;
+        int openCount = 0;
+        int closeCount = 0;
         int totalCount = 0;
 
         SQLiteConnectionPool.GetCounts(_fileName,
-            ref counts, ref totalCount);
+            ref counts, ref openCount, ref closeCount,
+            ref totalCount);
 
         return totalCount;
     }
