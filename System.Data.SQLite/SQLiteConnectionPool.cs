@@ -254,12 +254,12 @@ namespace System.Data.SQLite
 
           poolQueue.Enqueue(new WeakReference(hdl, false));
           Interlocked.Increment(ref _poolClosed);
-          GC.KeepAlive(hdl);
         }
         else
         {
           hdl.Close();
         }
+        GC.KeepAlive(hdl);
       }
     }
 
