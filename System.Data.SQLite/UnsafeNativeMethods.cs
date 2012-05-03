@@ -1368,18 +1368,13 @@ namespace System.Data.SQLite
       return (db != null) ? db.handle : IntPtr.Zero;
     }
 
-    public static implicit operator SQLiteConnectionHandle(IntPtr db)
-    {
-      return new SQLiteConnectionHandle(db);
-    }
-
-    private SQLiteConnectionHandle(IntPtr db)
+    internal SQLiteConnectionHandle(IntPtr db)
       : this()
     {
       SetHandle(db);
     }
 
-    internal SQLiteConnectionHandle()
+    private SQLiteConnectionHandle()
       : base(IntPtr.Zero)
     {
     }
@@ -1467,18 +1462,13 @@ namespace System.Data.SQLite
       return (stmt != null) ? stmt.handle : IntPtr.Zero;
     }
 
-    public static implicit operator SQLiteStatementHandle(IntPtr stmt)
-    {
-      return new SQLiteStatementHandle(stmt);
-    }
-
-    private SQLiteStatementHandle(IntPtr stmt)
+    internal SQLiteStatementHandle(IntPtr stmt)
       : this()
     {
       SetHandle(stmt);
     }
 
-    internal SQLiteStatementHandle()
+    private SQLiteStatementHandle()
       : base(IntPtr.Zero)
     {
     }
@@ -1566,18 +1556,13 @@ namespace System.Data.SQLite
           return (backup != null) ? backup.handle : IntPtr.Zero;
       }
 
-      public static implicit operator SQLiteBackupHandle(IntPtr backup)
-      {
-          return new SQLiteBackupHandle(backup);
-      }
-
-      private SQLiteBackupHandle(IntPtr backup)
+      internal SQLiteBackupHandle(IntPtr backup)
           : this()
       {
           SetHandle(backup);
       }
 
-      internal SQLiteBackupHandle()
+      private SQLiteBackupHandle()
           : base(IntPtr.Zero)
       {
       }

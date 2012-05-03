@@ -28,7 +28,7 @@ runTest {test tkt-996d13cd87-1.1 {SQLiteConnectionPool stress} -setup {
 
   set sql { \
     CREATE TABLE t1(x TEXT); \
-    INSERT INTO t1 (x) VALUES(HEX(RANDOMBLOB(1000))); \
+    INSERT INTO t1 (x) VALUES(RANDOMBLOB(1000)); \
   }
 
   unset -nocomplain results errors
