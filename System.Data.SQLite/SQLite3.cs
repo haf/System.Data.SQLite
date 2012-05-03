@@ -283,6 +283,7 @@ namespace System.Data.SQLite
       // were already bound, then the new bindings replace the old.
       _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
       SetTimeout(0);
+      GC.KeepAlive(_sql);
     }
 
     internal override void ClearPool()
