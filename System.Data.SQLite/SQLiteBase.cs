@@ -347,7 +347,10 @@ namespace System.Data.SQLite
     internal static string GetLastError(SQLiteConnectionHandle hdl, IntPtr db)
     {
         if ((hdl == null) || (db == IntPtr.Zero))
-            return "invalid connection or database handle";
+            return "null connection or database handle";
+
+        if (hdl.IsClosed || hdl.IsInvalid)
+            return "closed or invalid connection handle";
 
         lock (hdl)
         {
@@ -358,6 +361,10 @@ namespace System.Data.SQLite
             return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
 #endif
         }
+
+#pragma warning disable 162
+        GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
+#pragma warning restore 162
     }
 
     internal static void FinishBackup(IntPtr backup)
@@ -414,7 +421,7 @@ namespace System.Data.SQLite
                 }
             } while (stmt != IntPtr.Zero);
 
-            if (IsAutocommit(db) == false) // a transaction is pending on the connection
+            if (IsAutocommit(hdl, db) == false) // a transaction is pending on the connection
             {
                 n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
                 if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
@@ -423,12 +430,18 @@ namespace System.Data.SQLite
         GC.KeepAlive(hdl);
     }
 
-    internal static bool IsAutocommit(IntPtr db)
+    internal static bool IsAutocommit(SQLiteConnectionHandle hdl, IntPtr db)
     {
       if (db == IntPtr.Zero) return false;
-      return (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
+      if (hdl.IsClosed || hdl.IsInvalid) return false;
+      lock (hdl)
+      {
+          return (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
+      }
+#pragma warning disable 162
+      GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
+#pragma warning restore 162
     }
-
   }
 
   internal interface ISQLiteSchemaExtensions

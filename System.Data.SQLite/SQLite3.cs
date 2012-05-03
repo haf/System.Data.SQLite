@@ -192,7 +192,7 @@ namespace System.Data.SQLite
     {
       get
       {
-        return IsAutocommit(_sql);
+        return IsAutocommit(_sql, _sql);
       }
     }
 
