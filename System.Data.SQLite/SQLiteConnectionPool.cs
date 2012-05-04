@@ -118,6 +118,7 @@ namespace System.Data.SQLite
     /// <returns>Returns NULL if no connections were available.  Even if none are, the poolversion will still be a valid pool version</returns>
     internal static SQLiteConnectionHandle Remove(string fileName, int maxPoolSize, out int version)
     {
+        int localVersion;
         Queue<WeakReference> poolQueue;
 
         //
@@ -125,8 +126,10 @@ namespace System.Data.SQLite
         //       connections because other methods of this class are called from
         //       the GC finalizer thread and we use the WaitForPendingFinalizers
         //       method (below).  Holding this lock while calling that method
-        //       would therefore result in a deadlock.  This lock is held while
-        //       a temporary copy of the queue is created.
+        //       would therefore result in a deadlock.  Instead, this lock is
+        //       held only while a temporary copy of the queue is created, and
+        //       if necessary, when committing changes back to that original
+        //       queue prior to returning from this method.
         //
         lock (_connections)
         {
@@ -147,77 +150,127 @@ namespace System.Data.SQLite
             }
 
             // We found a pool for this file, so use its version number
-            version = queue.PoolVersion;
+            version = localVersion = queue.PoolVersion;
             queue.MaxPoolSize = maxPoolSize;
 
             ResizePool(queue, false);
 
             // Try and get a pooled connection from the queue
-            poolQueue = new Queue<WeakReference>(queue.Queue);
+            poolQueue = queue.Queue;
             if (poolQueue == null) return null;
+
+            //
+            // NOTE: Temporarily tranfer the queue for this file into a local
+            //       variable.  The queue for this file will be modified and
+            //       then committed back to the real pool list (below) prior
+            //       to returning from this method.
+            //
+            _connections.Remove(fileName);
+            poolQueue = new Queue<WeakReference>(poolQueue);
         }
 
-        while (poolQueue.Count > 0)
+        try
         {
-            WeakReference cnn = poolQueue.Dequeue();
-            if (cnn == null) continue;
-
-            SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
-            if (hdl == null) continue;
-
-            //
-            // BUGFIX: For ticket [996d13cd87], step #1.  After this point,
-            //         make sure that the finalizer for the connection handle
-            //         just obtained from the queue cannot START running (i.e.
-            //         it may still be pending but it will no longer start
-            //         after this point).
-            //
-            GC.SuppressFinalize(hdl);
-
-            try
+            while (poolQueue.Count > 0)
             {
-                //
-                // BUGFIX: For ticket [996d13cd87], step #2.  Now, we must wait
-                //         for all pending finalizers which have STARTED running
-                //         and have not yet COMPLETED.  This must be done just
-                //         in case the finalizer for the connection handle just
-                //         obtained from the queue has STARTED running at some
-                //         point before SuppressFinalize was called on it.
-                //
-                //         After this point, checking properties of the
-                //         connection handle (e.g. IsClosed) should work
-                //         reliably without having to worry that they will
-                //         (due to the finalizer) change out from under us.
-                //
-                GC.WaitForPendingFinalizers();
+                WeakReference cnn = poolQueue.Dequeue();
+                if (cnn == null) continue;
+
+                SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
+                if (hdl == null) continue;
 
                 //
-                // BUGFIX: For ticket [996d13cd87], step #3.  Next, verify that
-                //         the connection handle is actually valid and [still?]
-                //         not closed prior to actually returning it to our
-                //         caller.
+                // BUGFIX: For ticket [996d13cd87], step #1.  After this point,
+                //         make sure that the finalizer for the connection
+                //         handle just obtained from the queue cannot START
+                //         running (i.e. it may still be pending but it will no
+                //         longer start after this point).
                 //
-                if (!hdl.IsClosed && !hdl.IsInvalid)
+                GC.SuppressFinalize(hdl);
+
+                try
                 {
-                    Interlocked.Increment(ref _poolOpened);
-                    return hdl;
+                    //
+                    // BUGFIX: For ticket [996d13cd87], step #2.  Now, we must wait
+                    //         for all pending finalizers which have STARTED running
+                    //         and have not yet COMPLETED.  This must be done just
+                    //         in case the finalizer for the connection handle just
+                    //         obtained from the queue has STARTED running at some
+                    //         point before SuppressFinalize was called on it.
+                    //
+                    //         After this point, checking properties of the
+                    //         connection handle (e.g. IsClosed) should work
+                    //         reliably without having to worry that they will
+                    //         (due to the finalizer) change out from under us.
+                    //
+                    GC.WaitForPendingFinalizers();
+
+                    //
+                    // BUGFIX: For ticket [996d13cd87], step #3.  Next, verify that
+                    //         the connection handle is actually valid and [still?]
+                    //         not closed prior to actually returning it to our
+                    //         caller.
+                    //
+                    if (!hdl.IsClosed && !hdl.IsInvalid)
+                    {
+                        Interlocked.Increment(ref _poolOpened);
+                        return hdl;
+                    }
                 }
-            }
-            finally
-            {
-                //
-                // BUGFIX: For ticket [996d13cd87], step #4.  Finally, we must
-                //         re-register the connection handle for finalization
-                //         now that we have a strong reference to it (i.e. the
-                //         finalizer run at least until the connection is
-                //         subsequently closed).
-                //
-                GC.ReRegisterForFinalize(hdl);
-            }
+                finally
+                {
+                    //
+                    // BUGFIX: For ticket [996d13cd87], step #4.  Next, we must
+                    //         re-register the connection handle for finalization
+                    //         now that we have a strong reference to it (i.e. the
+                    //         finalizer run at least until the connection is
+                    //         subsequently closed).
+                    //
+                    GC.ReRegisterForFinalize(hdl);
+                }
 
 #pragma warning disable 162
-            GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
+                GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
 #pragma warning restore 162
+            }
+        }
+        finally
+        {
+            //
+            // BUGFIX: For ticket [996d13cd87], step #5.  Finally, commit any
+            //         changes to the pool/queue for this database file.
+            //
+            lock (_connections)
+            {
+                //
+                // NOTE: We must check [again] if a pool exists for this file
+                //       because one may have been added while the search for
+                //       an available connection was in progress (above).
+                //
+                Pool queue;
+                Queue<WeakReference> newPoolQueue;
+                bool addPool;
+
+                if (_connections.TryGetValue(fileName, out queue))
+                {
+                    addPool = false;
+                }
+                else
+                {
+                    addPool = true;
+                    queue = new Pool(localVersion, maxPoolSize);
+                }
+
+                newPoolQueue = queue.Queue;
+
+                while (poolQueue.Count > 0)
+                    newPoolQueue.Enqueue(poolQueue.Dequeue());
+
+                ResizePool(queue, false);
+
+                if (addPool)
+                    _connections.Add(fileName, queue);
+            }
         }
 
         return null;
