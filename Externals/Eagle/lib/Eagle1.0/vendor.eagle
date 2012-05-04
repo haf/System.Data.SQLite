@@ -113,7 +113,7 @@ namespace eval ::Eagle {
             # NOTE: Force Eagle to rebuild the auto-path list for the current
             #       interpreter right now.
             #
-            object invoke Utility RefreshAutoPathList
+            object invoke Utility RefreshAutoPathList true
           }
 
           #

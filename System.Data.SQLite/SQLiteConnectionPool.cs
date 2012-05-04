@@ -118,49 +118,107 @@ namespace System.Data.SQLite
     /// <returns>Returns NULL if no connections were available.  Even if none are, the poolversion will still be a valid pool version</returns>
     internal static SQLiteConnectionHandle Remove(string fileName, int maxPoolSize, out int version)
     {
-      lock (_connections)
-      {
-        Pool queue;
+        Queue<WeakReference> poolQueue;
 
-        // Default to the highest pool version
-        version = _poolVersion;
-
-        // If we didn't find a pool for this file, create one even though it will be empty.
-        // We have to do this here because otherwise calling ClearPool() on the file will not work for active connections
-        // that have never seen the pool yet.
-        if (_connections.TryGetValue(fileName, out queue) == false)
+        //
+        // NOTE: This lock cannot be held while checking the queue for available
+        //       connections because other methods of this class are called from
+        //       the GC finalizer thread and we use the WaitForPendingFinalizers
+        //       method (below).  Holding this lock while calling that method
+        //       would therefore result in a deadlock.  This lock is held while
+        //       a temporary copy of the queue is created.
+        //
+        lock (_connections)
         {
-          queue = new Pool(_poolVersion, maxPoolSize);
-          _connections.Add(fileName, queue);
+            Pool queue;
 
-          return null;
+            // Default to the highest pool version
+            version = _poolVersion;
+
+            // If we didn't find a pool for this file, create one even though it will be empty.
+            // We have to do this here because otherwise calling ClearPool() on the file will not work for active connections
+            // that have never seen the pool yet.
+            if (_connections.TryGetValue(fileName, out queue) == false)
+            {
+                queue = new Pool(_poolVersion, maxPoolSize);
+                _connections.Add(fileName, queue);
+
+                return null;
+            }
+
+            // We found a pool for this file, so use its version number
+            version = queue.PoolVersion;
+            queue.MaxPoolSize = maxPoolSize;
+
+            ResizePool(queue, false);
+
+            // Try and get a pooled connection from the queue
+            poolQueue = new Queue<WeakReference>(queue.Queue);
+            if (poolQueue == null) return null;
         }
-
-        // We found a pool for this file, so use its version number
-        version = queue.PoolVersion;
-        queue.MaxPoolSize = maxPoolSize;
-
-        ResizePool(queue, false);
-
-        // Try and get a pooled connection from the queue
-        Queue<WeakReference> poolQueue = queue.Queue;
-        if (poolQueue == null) return null;
 
         while (poolQueue.Count > 0)
         {
-          WeakReference cnn = poolQueue.Dequeue();
-          if (cnn == null) continue;
-          SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
-          if ((hdl != null) && !hdl.IsClosed && !hdl.IsInvalid)
-          {
-            Interlocked.Increment(ref _poolOpened);
-            return hdl;
-          }
-          cnn.Target = null;
-          GC.KeepAlive(hdl);
+            WeakReference cnn = poolQueue.Dequeue();
+            if (cnn == null) continue;
+            SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
+
+            //
+            // BUGFIX: For ticket [996d13cd87], step #1.  After this point,
+            //         make sure that the finalizer for the connection handle
+            //         just obtained from the queue cannot START running (i.e.
+            //         it may still be pending but it will no longer start
+            //         after this point).
+            //
+            GC.SuppressFinalize(hdl);
+
+            try
+            {
+                //
+                // BUGFIX: For ticket [996d13cd87], step #2.  Now, we must wait
+                //         for all pending finalizers which have STARTED running
+                //         and have not yet COMPLETED.  This must be done just
+                //         in case the finalizer for the connection handle just
+                //         obtained from the queue has STARTED running at some
+                //         point before SuppressFinalize was called on it.
+                //
+                //         After this point, checking properties of the
+                //         connection handle (e.g. IsClosed) should work
+                //         reliably without having to worry that they will
+                //         (due to the finalizer) change out from under us.
+                //
+                GC.WaitForPendingFinalizers();
+
+                //
+                // BUGFIX: For ticket [996d13cd87], step #3.  Next, verify that
+                //         the connection handle is actually valid and [still?]
+                //         not closed prior to actually returning it to our
+                //         caller.
+                //
+                if ((hdl != null) && !hdl.IsClosed && !hdl.IsInvalid)
+                {
+                    Interlocked.Increment(ref _poolOpened);
+                    return hdl;
+                }
+            }
+            finally
+            {
+                //
+                // BUGFIX: For ticket [996d13cd87], step #4.  Finally, we must
+                //         re-register the connection handle for finalization
+                //         now that we have a strong reference to it (i.e. the
+                //         finalizer run at least until the connection is
+                //         subsequently closed).
+                //
+                GC.ReRegisterForFinalize(hdl);
+            }
+
+#pragma warning disable 162
+            GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
+#pragma warning restore 162
         }
+
         return null;
-      }
     }
 
     /// <summary>
@@ -187,7 +245,6 @@ namespace System.Data.SQLite
             {
               hdl.Dispose();
             }
-            cnn.Target = null;
             GC.KeepAlive(hdl);
           }
           
@@ -229,7 +286,6 @@ namespace System.Data.SQLite
             {
               hdl.Dispose();
             }
-            cnn.Target = null;
             GC.KeepAlive(hdl);
           }
         }
@@ -294,7 +350,6 @@ namespace System.Data.SQLite
         {
           hdl.Dispose();
         }
-        cnn.Target = null;
         GC.KeepAlive(hdl);
       }
     }

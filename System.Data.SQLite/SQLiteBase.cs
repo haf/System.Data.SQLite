@@ -349,11 +349,11 @@ namespace System.Data.SQLite
         if ((hdl == null) || (db == IntPtr.Zero))
             return "null connection or database handle";
 
-        if (hdl.IsClosed || hdl.IsInvalid)
-            return "closed or invalid connection handle";
-
         lock (hdl)
         {
+            if (hdl.IsClosed || hdl.IsInvalid)
+                return "closed or invalid connection handle";
+
 #if !SQLITE_STANDARD
             int len;
             return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);

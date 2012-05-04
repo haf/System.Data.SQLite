@@ -27,11 +27,20 @@ for {set i 1} {$i < 3} {incr i} {
       -setup {
     set fileName [appendArgs tkt-996d13cd87-1. $i .db]
 
-    object invoke -flags +NonPublic \
-        System.Data.SQLite.SQLiteConnectionPool _poolOpened 0
+    if {[catch {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.SQLiteConnectionPool _poolOpened 0
 
-    object invoke -flags +NonPublic \
-        System.Data.SQLite.SQLiteConnectionPool _poolClosed 0
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.SQLiteConnectionPool _poolClosed 0
+    }] == 0} then {
+      set havePoolCounts true
+    } else {
+      set havePoolCounts false
+
+      tputs $test_channel [appendArgs \
+          "==== WARNING: connection pool counts are not available\n"]
+    }
   } -body {
     set id [object invoke Interpreter.GetActive NextId]
     set dataSource [file join [getDatabaseDirectory] $fileName]
@@ -232,21 +241,24 @@ for {set i 1} {$i < 3} {incr i} {
         [expr {$code eq "Ok" ? [catch {
           object invoke _Dynamic${id}.Test${id} Main
         } result] : [set result ""]}] $result \
-        [expr {$pooling ? [object invoke -flags +NonPublic \
+        [expr {$havePoolCounts ? $pooling ? [object invoke -flags +NonPublic \
             System.Data.SQLite.SQLiteConnectionPool _poolOpened] > 0 : \
             [object invoke -flags +NonPublic \
-            System.Data.SQLite.SQLiteConnectionPool _poolOpened] == 0}] \
-        [expr {$pooling ? [object invoke -flags +NonPublic \
+            System.Data.SQLite.SQLiteConnectionPool _poolOpened] == 0} : \
+            True] \
+        [expr {$havePoolCounts ? $pooling ? [object invoke -flags +NonPublic \
             System.Data.SQLite.SQLiteConnectionPool _poolClosed] > 0 : \
             [object invoke -flags +NonPublic \
-            System.Data.SQLite.SQLiteConnectionPool _poolClosed] == 0}]
+            System.Data.SQLite.SQLiteConnectionPool _poolClosed] == 0} : \
+            True]
   } -cleanup {
     object invoke System.Data.SQLite.SQLiteConnection ClearAllPools
     object invoke GC GetTotalMemory true
 
     cleanupDb $fileName
 
-    unset -nocomplain result results errors code sql dataSource id db fileName
+    unset -nocomplain result results errors code sql dataSource id db \
+        havePoolCounts fileName
   } -constraints {eagle monoBug28 command.sql compile.DATA\
 SQLite System.Data.SQLite} -match regexp -result {^Ok\
 System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \d+ True True$}}
