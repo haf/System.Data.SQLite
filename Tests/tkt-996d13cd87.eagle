@@ -20,8 +20,8 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-for {set i 1} {$i < 3} {incr i} {
-  set pooling [expr {$i == 2 ? True : False}]
+for {set i 1} {$i < 11} {incr i} {
+  set pooling [expr {$i % 2 == 0 ? True : False}]
 
   runTest {test [appendArgs tkt-996d13cd87-1. $i] {SQLiteConnection stress} \
       -setup {
@@ -40,6 +40,31 @@ for {set i 1} {$i < 3} {incr i} {
 
       tputs $test_channel [appendArgs \
           "==== WARNING: connection pool counts are not available\n"]
+    }
+
+    proc getPoolCounts {} {
+      #
+      # NOTE: If we have the ability to determine the opened/closed pool
+      #       counts, fetch them now; otherwise, just set them to zero.
+      #
+      if {$::havePoolCounts} then {
+        set ::poolCounts(opened) [object invoke -flags +NonPublic \
+            System.Data.SQLite.SQLiteConnectionPool _poolOpened]
+
+        set ::poolCounts(closed) [object invoke -flags +NonPublic \
+            System.Data.SQLite.SQLiteConnectionPool _poolClosed]
+
+        tputs $::test_channel [appendArgs \
+            "---- opened " $::poolCounts(opened) " connections from the pool\n"]
+
+        tputs $::test_channel [appendArgs \
+            "---- closed " $::poolCounts(closed) " connections to the pool\n"]
+      } else {
+        set ::poolCounts(opened) 0
+        set ::poolCounts(closed) 0
+      }
+
+      return ""
     }
   } -body {
     set id [object invoke Interpreter.GetActive NextId]
@@ -240,17 +265,11 @@ for {set i 1} {$i < 3} {incr i} {
         [expr {[info exists errors] ? $errors : ""}] \
         [expr {$code eq "Ok" ? [catch {
           object invoke _Dynamic${id}.Test${id} Main
-        } result] : [set result ""]}] $result \
-        [expr {$havePoolCounts ? $pooling ? [object invoke -flags +NonPublic \
-            System.Data.SQLite.SQLiteConnectionPool _poolOpened] > 0 : \
-            [object invoke -flags +NonPublic \
-            System.Data.SQLite.SQLiteConnectionPool _poolOpened] == 0} : \
-            True] \
-        [expr {$havePoolCounts ? $pooling ? [object invoke -flags +NonPublic \
-            System.Data.SQLite.SQLiteConnectionPool _poolClosed] > 0 : \
-            [object invoke -flags +NonPublic \
-            System.Data.SQLite.SQLiteConnectionPool _poolClosed] == 0} : \
-            True]
+        } result] : [set result ""]}] $result [getPoolCounts] \
+        [expr {$havePoolCounts ? $pooling ? $poolCounts(opened) > 0 : \
+            $poolCounts(opened) == 0} : True] \
+        [expr {$havePoolCounts ? $pooling ? $poolCounts(closed) > 0 : \
+            $poolCounts(closed) == 0} : True]
   } -cleanup {
     object invoke System.Data.SQLite.SQLiteConnection ClearAllPools
     object invoke GC GetTotalMemory true
@@ -258,10 +277,12 @@ for {set i 1} {$i < 3} {incr i} {
     cleanupDb $fileName
 
     unset -nocomplain result results errors code sql dataSource id db \
-        havePoolCounts fileName
+        poolCounts havePoolCounts fileName
+
+    rename getPoolCounts ""
   } -constraints {eagle monoBug28 command.sql compile.DATA\
 SQLite System.Data.SQLite} -match regexp -result {^Ok\
-System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \d+ True True$}}
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \d+ \{\} True True$}}
 }
 
 ###############################################################################
