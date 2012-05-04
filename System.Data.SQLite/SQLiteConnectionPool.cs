@@ -161,7 +161,9 @@ namespace System.Data.SQLite
         {
             WeakReference cnn = poolQueue.Dequeue();
             if (cnn == null) continue;
+
             SQLiteConnectionHandle hdl = cnn.Target as SQLiteConnectionHandle;
+            if (hdl == null) continue;
 
             //
             // BUGFIX: For ticket [996d13cd87], step #1.  After this point,
@@ -195,7 +197,7 @@ namespace System.Data.SQLite
                 //         not closed prior to actually returning it to our
                 //         caller.
                 //
-                if ((hdl != null) && !hdl.IsClosed && !hdl.IsInvalid)
+                if (!hdl.IsClosed && !hdl.IsInvalid)
                 {
                     Interlocked.Increment(ref _poolOpened);
                     return hdl;
