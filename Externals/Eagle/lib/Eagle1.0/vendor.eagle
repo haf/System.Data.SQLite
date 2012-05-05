@@ -41,8 +41,8 @@ namespace eval ::Eagle {
           incr result
 
           if {!$quiet} then {
-            puts -nonewline $channel [appendArgs \
-                "Found vendor-specific test override \"" $varName "\".\n"]
+            tqputs $channel [appendArgs \
+                "---- found vendor-specific test override \"" $varName "\".\n"]
           }
         }
       }
@@ -97,9 +97,9 @@ namespace eval ::Eagle {
             # NOTE: If we have NOT been instructed to be quiet, report now.
             #
             if {!$quiet} then {
-              puts -nonewline $channel [appendArgs \
-                  "Found vendor-specific test package directory \"" $dir2 \
-                  "\", adding...\n"]
+              tqputs $channel [appendArgs \
+                  "---- found vendor-specific test package directory \"" \
+                  $dir2 "\", adding...\n"]
             }
 
             #
@@ -132,8 +132,8 @@ namespace eval ::Eagle {
       # NOTE: If we have NOT been instructed to be quiet, report now.
       #
       if {!$quiet} then {
-        puts -nonewline $channel \
-            "Could not find vendor-specific test package directory.\n"
+        tqputs $channel \
+            "---- could not find vendor-specific test package directory.\n"
       }
 
       #
@@ -150,8 +150,8 @@ namespace eval ::Eagle {
         object invoke -flags +NonPublic Interpreter.GetActive TestPath $dir
 
         if {!$quiet} then {
-          puts -nonewline $channel [appendArgs \
-              "Set interpreter test path to \"" $dir \".\n]
+          tqputs $channel [appendArgs \
+              "---- set interpreter test path to \"" $dir \".\n]
         }
       }
     }

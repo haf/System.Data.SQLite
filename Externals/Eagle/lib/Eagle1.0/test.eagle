@@ -42,13 +42,40 @@ namespace eval ::Eagle {
 
   proc tlog { string } {
     #
-    # NOTE: If a log file was configured, use it; otherwise,
-    #       ignore the message.
+    # NOTE: If a test log file was configured, use it; otherwise, ignore the
+    #       message.
     #
     set fileName [getTestLog]
 
     if {[string length $fileName] > 0} then {
-      appendSharedLogFile $fileName $string
+      #
+      # NOTE: Check for any queued test log data that needs to be sent to the
+      #       log file prior to sending the current string.
+      #
+      if {[info exists ::test_log_queue]} then {
+        #
+        # NOTE: Process each queued test log entry, in order, sending them to
+        #       the test log file (as long as they are not empty strings).
+        #       Each entry is removed from the queue after it is sent to the
+        #       test log file.
+        #
+        foreach entry [lsort -integer [array names ::test_log_queue]] {
+          set newString $::test_log_queue($entry)
+
+          if {[string length $newString] > 0} then {
+            appendSharedLogFile $fileName $newString
+          }
+
+          unset ::test_log_queue($entry)
+        }
+      }
+
+      #
+      # NOTE: If an empty string is supplied by the caller, do nothing.
+      #
+      if {[string length $string] > 0} then {
+        appendSharedLogFile $fileName $string
+      }
     }
   }
 
@@ -229,9 +256,8 @@ namespace eval ::Eagle {
 
   proc processTestArguments { varName args } {
     #
-    # NOTE: We are going to place the configured options in
-    #       the variable identified by the name provided by
-    #       the caller.
+    # NOTE: We are going to place the configured options in the variable
+    #       identified by the name provided by the caller.
     #
     upvar 1 $varName array
 
@@ -243,18 +269,30 @@ namespace eval ::Eagle {
         -suffix -threshold]
 
     foreach {name value} $args {
+      #
+      # NOTE: Use the [tqputs] command here just in case the test log file
+      #       has not been setup yet (i.e. by default, this procedure is
+      #       almost always called by the test prologue file prior to the
+      #       test log file having been setup and we do not want to just
+      #       lose this output).
+      #
       if {[lsearch -exact $options $name] != -1} then {
         set array($name) $value
 
-        tputs $::test_channel [appendArgs \
+        tqputs $::test_channel [appendArgs \
             "---- overrode test option \"" $name "\" with value \"" $value \
             \"\n]
       } else {
-        tputs $::test_channel [appendArgs \
+        tqputs $::test_channel [appendArgs \
             "---- unknown test option \"" $name "\" with value \"" $value \
             "\" ignored\n"]
       }
     }
+
+    #
+    # NOTE: Now, attempt to flush the test log queue, if available.
+    #
+    tlog ""
   }
 
   proc getTemporaryPath {} {
@@ -544,14 +582,12 @@ namespace eval ::Eagle {
         }
       }
 
-      if {[info exists channel]} then {
-        if {$channel eq "stdout"} then {
-          #
-          # NOTE: Write output for stdout to the test channel.
-          #
-          return [tputs $::test_channel [appendArgs [lindex $args end] \
-              $newLine]]
-        }
+      if {[info exists channel] && $channel eq "stdout"} then {
+        #
+        # NOTE: Write output for stdout to the test channel.
+        #
+        return [tputs $::test_channel [appendArgs [lindex $args end] \
+            $newLine]]
       }
 
       #

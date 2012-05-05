@@ -38,8 +38,8 @@ for {set i 1} {$i < 11} {incr i} {
     } else {
       set havePoolCounts false
 
-      tputs $test_channel [appendArgs \
-          "==== WARNING: connection pool counts are not available\n"]
+      tputs $test_channel \
+          "==== WARNING: connection pool counts are not available\n"
     }
 
     proc getPoolCounts {} {

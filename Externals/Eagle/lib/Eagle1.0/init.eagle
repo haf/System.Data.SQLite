@@ -226,6 +226,54 @@ namespace eval ::Eagle {
     return $result
   }
 
+  proc tqputs { channel string } {
+    #
+    # NOTE: If an output channel was provided, use it; otherwise, ignore the
+    #       message.
+    #
+    if {[string length $channel] > 0} then {
+      puts -nonewline $channel $string
+    }
+
+    tqlog $string
+  }
+
+  proc tqlog { string } {
+    #
+    # NOTE: If an empty string is supplied by the caller, do nothing.
+    #
+    if {[string length $string] > 0} then {
+      #
+      # NOTE: *SPECIAL* The special global variable "test_log_queue" is used
+      #       by the [tlog] script library procedure from the test package to
+      #       enable it to emit "queued" data into the test log file prior to
+      #       emitting the string requested by its caller.  The only job for
+      #       this procedure is to populate the "test_log_queue" variable for
+      #       later use by the test package.
+      #
+      if {[info exists ::test_log_queue]} then {
+        #
+        # NOTE: Use the next queued test log entry.
+        #
+        set entry [expr {[array size ::test_log_queue] + 1}]
+      } else {
+        #
+        # NOTE: Use the first queued test log entry.
+        #
+        set entry 1
+      }
+
+      #
+      # NOTE: Add the new entry to the test log queue.  All entries will be
+      #       sent to the actual test log file the very next time the [tlog]
+      #       command from the test package is executed.
+      #
+      set ::test_log_queue($entry) $string
+    }
+
+    return ""
+  }
+
   proc readFile { fileName } {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
@@ -1707,7 +1755,7 @@ namespace eval ::Eagle {
         exportAndImportPackageCommands isEagle isMono getEnvironmentVariable \
         getPluginPath getDictionaryValue getColumnValue getRowColumnValue \
         appendArgs haveGaruda lappendArgs readFile filter map reduce \
-        getPlatformInfo execShell combineFlags] false false
+        getPlatformInfo execShell combineFlags tqputs tqlog] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
