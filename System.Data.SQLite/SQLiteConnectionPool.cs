@@ -223,15 +223,13 @@ namespace System.Data.SQLite
                     // BUGFIX: For ticket [996d13cd87], step #4.  Next, we must
                     //         re-register the connection handle for finalization
                     //         now that we have a strong reference to it (i.e. the
-                    //         finalizer run at least until the connection is
-                    //         subsequently closed).
+                    //         finalizer will not run at least until the connection
+                    //         is subsequently closed).
                     //
                     GC.ReRegisterForFinalize(hdl);
                 }
 
-#pragma warning disable 162
-                GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
-#pragma warning restore 162
+                GC.KeepAlive(hdl);
             }
         }
         finally
