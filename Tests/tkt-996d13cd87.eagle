@@ -22,10 +22,14 @@ runSQLiteTestPrologue
 
 for {set i 1} {$i < 11} {incr i} {
   set pooling [expr {$i % 2 == 0 ? True : False}]
+  set count [expr {$i <= 2 ? 100 : int(rand() * 100 + 1)}]
 
   runTest {test [appendArgs tkt-996d13cd87-1. $i] {SQLiteConnection stress} \
       -setup {
     set fileName [appendArgs tkt-996d13cd87-1. $i .db]
+
+    tputs $test_channel [appendArgs \
+        "---- using a total of " $count " threads...\n"]
 
     if {[catch {
         object invoke -flags +NonPublic \
@@ -98,7 +102,7 @@ for {set i 1} {$i < 11} {incr i} {
             //
             // NOTE: This is the total number of test threads to create.
             //
-            int count = 100;
+            int count = ${count};
 
             //
             // NOTE: This is the total number of times we should force a full
@@ -287,7 +291,7 @@ System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \d+ \{\} True True$}}
 
 ###############################################################################
 
-unset -nocomplain pooling i
+unset -nocomplain count pooling i
 
 ###############################################################################
 
