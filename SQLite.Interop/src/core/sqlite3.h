@@ -107,9 +107,9 @@ extern "C" {
 ** [sqlite3_libversion_number()], [sqlite3_sourceid()],
 ** [sqlite_version()] and [sqlite_source_id()].
 */
-#define SQLITE_VERSION        "3.7.11"
-#define SQLITE_VERSION_NUMBER 3007011
-#define SQLITE_SOURCE_ID      "2012-03-19 17:42:46 036395c0a8e08883b11df025e3da9e2461e4b1eb"
+#define SQLITE_VERSION        "3.7.12"
+#define SQLITE_VERSION_NUMBER 3007012
+#define SQLITE_SOURCE_ID      "2012-05-01 14:21:57 bfa61e781cb442be641486e7e55a1518e888d830"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -1547,7 +1547,7 @@ struct sqlite3_mem_methods {
 ** [SQLITE_USE_URI] symbol defined.
 **
 ** [[SQLITE_CONFIG_PCACHE]] [[SQLITE_CONFIG_GETPCACHE]]
-** <dt>SQLITE_CONFIG_PCACHE and SQLITE_CONFNIG_GETPCACHE
+** <dt>SQLITE_CONFIG_PCACHE and SQLITE_CONFIG_GETPCACHE
 ** <dd> These options are obsolete and should not be used by new code.
 ** They are retained for backwards compatibility but are now no-ops.
 ** </dl>
@@ -6006,6 +6006,17 @@ SQLITE_API int sqlite3_db_status(sqlite3*, int op, int *pCur, int *pHiwtr, int r
 ** occurred.)^ ^The highwater mark associated with SQLITE_DBSTATUS_CACHE_MISS 
 ** is always 0.
 ** </dd>
+**
+** [[SQLITE_DBSTATUS_CACHE_WRITE]] ^(<dt>SQLITE_DBSTATUS_CACHE_WRITE</dt>
+** <dd>This parameter returns the number of dirty cache entries that have
+** been written to disk. Specifically, the number of pages written to the
+** wal file in wal mode databases, or the number of pages written to the
+** database file in rollback mode databases. Any pages written as part of
+** transaction rollback or database recovery operations are not included.
+** If an IO or other error occurs while writing a page to disk, the effect
+** on subsequent SQLITE_DBSTATUS_CACHE_WRITE requests is undefined). ^The
+** highwater mark associated with SQLITE_DBSTATUS_CACHE_WRITE is always 0.
+** </dd>
 ** </dl>
 */
 #define SQLITE_DBSTATUS_LOOKASIDE_USED       0
@@ -6017,7 +6028,8 @@ SQLITE_API int sqlite3_db_status(sqlite3*, int op, int *pCur, int *pHiwtr, int r
 #define SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL  6
 #define SQLITE_DBSTATUS_CACHE_HIT            7
 #define SQLITE_DBSTATUS_CACHE_MISS           8
-#define SQLITE_DBSTATUS_MAX                  8   /* Largest defined DBSTATUS */
+#define SQLITE_DBSTATUS_CACHE_WRITE          9
+#define SQLITE_DBSTATUS_MAX                  9   /* Largest defined DBSTATUS */
 
 
 /*
@@ -6973,7 +6985,11 @@ typedef struct sqlite3_rtree_geometry sqlite3_rtree_geometry;
 SQLITE_API int sqlite3_rtree_geometry_callback(
   sqlite3 *db,
   const char *zGeom,
-  int (*xGeom)(sqlite3_rtree_geometry *, int nCoord, double *aCoord, int *pRes),
+#ifdef SQLITE_RTREE_INT_ONLY
+  int (*xGeom)(sqlite3_rtree_geometry*, int n, sqlite3_int64 *a, int *pRes),
+#else
+  int (*xGeom)(sqlite3_rtree_geometry*, int n, double *a, int *pRes),
+#endif
   void *pContext
 );
 

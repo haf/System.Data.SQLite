@@ -73,7 +73,7 @@
 <ul>
   <li>
     You have or intend to acquire a
-    <a href="http://www.sqlite.org/draft/support.html">
+    <a href="http://www.sqlite.org/support.html">
     professional support contract</a>.
   </li>
 
