@@ -843,6 +843,16 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       #
+      # NOTE: Has expression flags support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileExpressionFlags)]} then {
+        #
+        # NOTE: For test "function-2.16".
+        #
+        checkForCompileOption $test_channel EXPRESSION_FLAGS
+      }
+
+      #
       # NOTE: Has isolated plugin support been enabled (at compile-time)?
       #
       if {![info exists no(compileIsolatedPlugins)]} then {
@@ -1777,6 +1787,10 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {![info exists no(platform)]} then {
     checkForPlatform $test_channel
+  }
+
+  if {![info exists no(tclOptions)]} then {
+    checkForTclOptions $test_channel
   }
 
   if {![info exists no(windowsCommandProcessor)]} then {

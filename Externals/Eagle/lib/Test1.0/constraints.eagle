@@ -58,6 +58,22 @@ namespace eval ::Eagle {
           addConstraint $constraint
         }
       }
+    }
+  }
+
+  proc checkForTclOptions { channel } {
+    tputs $channel "---- checking for Tcl options..."
+
+    if {![isEagle]} then {
+      set result [list]
+
+      #
+      # NOTE: This test constraint is needed by test "benchmark-1.22".
+      #
+      if {![info exists ::no(compileNative)]} then {
+        lappend result compile.NATIVE
+        addConstraint compile.NATIVE
+      }
 
       #
       # NOTE: This test constraint is needed by test "benchmark-1.22".
@@ -69,16 +85,30 @@ namespace eval ::Eagle {
         #
         if {[info exists ::tcl_platform(platform)] && \
             $::tcl_platform(platform) eq "windows"} then {
+          lappend result compile.WINDOWS
           addConstraint compile.WINDOWS
         }
+      }
+
+      #
+      # NOTE: This test constraint is needed by tests "socket-*.*".
+      #
+      if {![info exists ::no(compileNetwork)]} then {
+        lappend result compile.NETWORK
+        addConstraint compile.NETWORK
       }
 
       #
       # NOTE: Just fake the invariant culture when running in native Tcl.
       #
       if {![info exists ::no(culture)]} then {
+        lappend result culture.invariant
         addConstraint culture.invariant
       }
+
+      tputs $channel [appendArgs "yes (" $result ")\n"]
+    } else {
+      tputs $channel no\n
     }
   }
 
@@ -555,13 +585,6 @@ namespace eval ::Eagle {
       #
       addConstraint native
 
-      #
-      # NOTE: This test constraint is needed by test "benchmark-1.22".
-      #
-      if {![info exists ::no(compileNative)]} then {
-        addConstraint compile.NATIVE
-      }
-
       tputs $channel yes\n
     }
   }
@@ -766,13 +789,6 @@ namespace eval ::Eagle {
       # HACK: Running in Tcl, just assume we have network access.
       #
       addConstraint [appendArgs network_ $host]
-
-      #
-      # NOTE: This test constraint is needed by tests "socket-*.*".
-      #
-      if {![info exists ::no(compileNetwork)]} then {
-        addConstraint compile.NETWORK
-      }
 
       tputs $channel yes\n
     }
@@ -1961,7 +1977,7 @@ namespace eval ::Eagle {
         checkForPerformance checkForTiming checkForInteractive checkForSymbols \
         checkForLogFile checkForNetwork checkForCompileOption \
         checkForWindowsCommandProcessor checkForUserInteraction \
-        checkForTestConfiguration] false false
+        checkForTclOptions checkForTestConfiguration] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
