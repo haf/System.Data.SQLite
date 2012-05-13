@@ -109,7 +109,7 @@ extern "C" {
 */
 #define SQLITE_VERSION        "3.7.12"
 #define SQLITE_VERSION_NUMBER 3007012
-#define SQLITE_SOURCE_ID      "2012-05-01 14:21:57 bfa61e781cb442be641486e7e55a1518e888d830"
+#define SQLITE_SOURCE_ID      "2012-05-12 18:29:53 e536ac041815b118c461ceee798f9b7283269f58"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -458,6 +458,7 @@ SQLITE_API int sqlite3_exec(
 #define SQLITE_LOCKED_SHAREDCACHE      (SQLITE_LOCKED |  (1<<8))
 #define SQLITE_BUSY_RECOVERY           (SQLITE_BUSY   |  (1<<8))
 #define SQLITE_CANTOPEN_NOTEMPDIR      (SQLITE_CANTOPEN | (1<<8))
+#define SQLITE_CANTOPEN_ISDIR          (SQLITE_CANTOPEN | (2<<8))
 #define SQLITE_CORRUPT_VTAB            (SQLITE_CORRUPT | (1<<8))
 #define SQLITE_READONLY_RECOVERY       (SQLITE_READONLY | (1<<8))
 #define SQLITE_READONLY_CANTLOCK       (SQLITE_READONLY | (2<<8))
@@ -6014,7 +6015,7 @@ SQLITE_API int sqlite3_db_status(sqlite3*, int op, int *pCur, int *pHiwtr, int r
 ** database file in rollback mode databases. Any pages written as part of
 ** transaction rollback or database recovery operations are not included.
 ** If an IO or other error occurs while writing a page to disk, the effect
-** on subsequent SQLITE_DBSTATUS_CACHE_WRITE requests is undefined). ^The
+** on subsequent SQLITE_DBSTATUS_CACHE_WRITE requests is undefined.)^ ^The
 ** highwater mark associated with SQLITE_DBSTATUS_CACHE_WRITE is always 0.
 ** </dd>
 ** </dl>
