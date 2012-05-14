@@ -109,7 +109,7 @@ extern "C" {
 */
 #define SQLITE_VERSION        "3.7.12"
 #define SQLITE_VERSION_NUMBER 3007012
-#define SQLITE_SOURCE_ID      "2012-05-12 18:29:53 e536ac041815b118c461ceee798f9b7283269f58"
+#define SQLITE_SOURCE_ID      "2012-05-14 01:41:23 8654aa9540fe9fd210899d83d17f3f407096c004"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -772,7 +772,7 @@ struct sqlite3_io_methods {
 **
 ** <li>[[SQLITE_FCNTL_PERSIST_WAL]]
 ** ^The [SQLITE_FCNTL_PERSIST_WAL] opcode is used to set or query the
-** persistent [WAL | Write AHead Log] setting.  By default, the auxiliary
+** persistent [WAL | Write Ahead Log] setting.  By default, the auxiliary
 ** write ahead log and shared memory files used for transaction control
 ** are automatically deleted when the latest connection to the database
 ** closes.  Setting persistent WAL mode causes those files to persist after

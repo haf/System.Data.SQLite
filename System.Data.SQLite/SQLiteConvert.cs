@@ -850,8 +850,6 @@ namespace System.Data.SQLite
     /// <returns>The .NET DBType the text evaluates to.</returns>
     internal static DbType TypeNameToDbType(string Name)
     {
-      if (String.IsNullOrEmpty(Name)) return DbType.Object;
-
       lock (_syncRoot)
       {
         if (_typeNames == null)
@@ -913,6 +911,8 @@ namespace System.Data.SQLite
         }
       }
 
+      if (String.IsNullOrEmpty(Name)) return DbType.Object;
+
       SQLiteTypeNames value;
 
       if (_typeNames.TryGetValue(Name, out value))
@@ -924,7 +924,7 @@ namespace System.Data.SQLite
         int index = Name.IndexOf('(');
 
         if ((index > 0) &&
-            _typeNames.TryGetValue(Name.Substring(0, index), out value))
+            _typeNames.TryGetValue(Name.Substring(0, index).TrimEnd(), out value))
         {
           return value.dataType;
         }
