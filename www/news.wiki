@@ -6,7 +6,7 @@
     <b>1.0.81.0 - June XX, 2012 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
-    <li>Updated to [http://www.sqlite.org/releaselog/3_7_12.html|SQLite 3.7.12].</li>
+    <li>Updated to [http://www.sqlite.org/releaselog/3_7_12_1.html|SQLite 3.7.12.1].</li>
     <li>Support compiling the interop assembly without support for the custom extension functions and the CryptoAPI based codec.</li>
     <li>Add DefineConstants property to the SQLiteConnection class to return the list of define constants used when compiling the core managed assembly.</li>
     <li>Add release archive verification tool to the release automation.</li>
