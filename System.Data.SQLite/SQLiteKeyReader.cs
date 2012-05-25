@@ -345,15 +345,16 @@ namespace System.Data.SQLite
 
                 _stmt = null;
 
-                if (_keyInfo == null) return;
-
-                for (int n = 0; n < _keyInfo.Length; n++)
+                if (_keyInfo != null)
                 {
-                    if (_keyInfo[n].query != null)
-                        _keyInfo[n].query.Dispose();
-                }
+                    for (int n = 0; n < _keyInfo.Length; n++)
+                    {
+                        if (_keyInfo[n].query != null)
+                            _keyInfo[n].query.Dispose();
+                    }
 
-                _keyInfo = null;
+                    _keyInfo = null;
+                }
             }
 
             //////////////////////////////////////

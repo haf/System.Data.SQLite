@@ -1313,10 +1313,13 @@ namespace System.Data.SQLite
 
     private void LoadKeyInfo()
     {
-      if (_keyInfo != null)
-        _keyInfo.Dispose();
+        if (_keyInfo != null)
+        {
+            _keyInfo.Dispose();
+            _keyInfo = null;
+        }
 
-      _keyInfo = new SQLiteKeyReader(_command.Connection, this, _activeStatement);
+        _keyInfo = new SQLiteKeyReader(_command.Connection, this, _activeStatement);
     }
   }
 }
