@@ -20,8 +20,8 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test tkt-3aa50d8413 {FillSchema with multiple result sets} -setup {
-  setupDb [set fileName tkt-3aa50d8413.db]
+runTest {test tkt-3aa50d8413-1.1 {FillSchema with multiple result sets} -setup {
+  setupDb [set fileName tkt-3aa50d8413-1.1.db]
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getDatabaseDirectory] $fileName]
