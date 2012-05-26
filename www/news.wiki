@@ -10,6 +10,7 @@
     <li>Support compiling the interop assembly without support for the custom extension functions and the CryptoAPI based codec.</li>
     <li>Add DefineConstants property to the SQLiteConnection class to return the list of define constants used when compiling the core managed assembly.</li>
     <li>Add release archive verification tool to the release automation.</li>
+    <li>Fix NullReferenceException when calling the SQLiteDataAdapter.FillSchema method on a query that returns multiple result sets. Fix for [3aa50d8413].</li>
     <li>Fix subtle race condition between threads fetching connection handles from the connection pool any garbage collection (GC) threads that may be running. Fix for [996d13cd87].</li>
     <li>Add missing call to SetTimeout in the SQLite3_UTF16.Open method.</li>
     <li>Add checks to prevent the SQLiteConnectionPool.Remove method from returning any connection handles that are closed or invalid.</li>
