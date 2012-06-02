@@ -64,8 +64,16 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
   
   ret = sqlite3_close(db);
 
-  if (ret == SQLITE_BUSY && db->pVdbe)
+  if (ret == SQLITE_BUSY)
   {
+    sqlite3_mutex_enter(db->mutex);
+
+    if (!db->pVdbe)
+    {
+      sqlite3_mutex_leave(db->mutex);
+      return ret;
+    }
+
     while (db->pVdbe)
     {
       // Make a copy of the first prepared statement
@@ -102,6 +110,7 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
         po->magic = VDBE_MAGIC_DEAD;
       }
     }
+    sqlite3_mutex_leave(db->mutex);
     ret = sqlite3_close(db);
   }
 
@@ -236,21 +245,28 @@ SQLITE_API const void * WINAPI sqlite3_column_text16_interop(sqlite3_stmt *stmt,
 SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 {
   Vdbe *p;
-  sqlite3 *db;
-  int ret;
+  int ret = SQLITE_OK;
 
   p = (Vdbe *)stmt;
-  if (p && p->magic == VDBE_MAGIC_DEAD)
+  if (p)
   {
-    db = p->db;
-    if (db == NULL)
+    sqlite3 *db = p->db;
+
+    if (db != NULL)
+      sqlite3_mutex_enter(db->mutex);
+
+    if ((p->magic == VDBE_MAGIC_DEAD) && (db == NULL))
     {
       sqlite3DbFree_interop(db, p);
-      ret = SQLITE_OK;
     }
+    else
+    {
+      ret = sqlite3_finalize(stmt);
+    }
+
+    if (db != NULL)
+      sqlite3_mutex_leave(db->mutex);
   }
-  else
-    ret = sqlite3_finalize(stmt);
 
   return ret;
 }
