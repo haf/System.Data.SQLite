@@ -1516,7 +1516,13 @@ namespace System.Data.SQLite
             throw new InvalidOperationException(
                 "Backup object has an invalid handle.");
 
-        int n = UnsafeNativeMethods.sqlite3_backup_step(handle, nPage);
+        IntPtr handlePtr = handle;
+
+        if (handlePtr == IntPtr.Zero)
+            throw new InvalidOperationException(
+                "Backup object has an invalid handle pointer.");
+
+        int n = UnsafeNativeMethods.sqlite3_backup_step(handlePtr, nPage);
         backup._stepResult = n; /* NOTE: Save for use by FinishBackup. */
 
         if (n == (int)SQLiteErrorCode.Ok)
@@ -1563,7 +1569,13 @@ namespace System.Data.SQLite
             throw new InvalidOperationException(
                 "Backup object has an invalid handle.");
 
-        return UnsafeNativeMethods.sqlite3_backup_remaining(handle);
+        IntPtr handlePtr = handle;
+
+        if (handlePtr == IntPtr.Zero)
+            throw new InvalidOperationException(
+                "Backup object has an invalid handle pointer.");
+
+        return UnsafeNativeMethods.sqlite3_backup_remaining(handlePtr);
     }
 
     /// <summary>
@@ -1585,7 +1597,13 @@ namespace System.Data.SQLite
             throw new InvalidOperationException(
                 "Backup object has an invalid handle.");
 
-        return UnsafeNativeMethods.sqlite3_backup_pagecount(handle);
+        IntPtr handlePtr = handle;
+
+        if (handlePtr == IntPtr.Zero)
+            throw new InvalidOperationException(
+                "Backup object has an invalid handle pointer.");
+
+        return UnsafeNativeMethods.sqlite3_backup_pagecount(handlePtr);
     }
 
     /// <summary>
@@ -1606,7 +1624,13 @@ namespace System.Data.SQLite
             throw new InvalidOperationException(
                 "Backup object has an invalid handle.");
 
-        int n = UnsafeNativeMethods.sqlite3_backup_finish(handle);
+        IntPtr handlePtr = handle;
+
+        if (handlePtr == IntPtr.Zero)
+            throw new InvalidOperationException(
+                "Backup object has an invalid handle pointer.");
+
+        int n = UnsafeNativeMethods.sqlite3_backup_finish(handlePtr);
         handle.SetHandleAsInvalid();
 
         if ((n > 0) && (n != backup._stepResult))
