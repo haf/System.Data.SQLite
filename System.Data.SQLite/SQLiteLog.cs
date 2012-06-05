@@ -365,7 +365,11 @@ namespace System.Data.SQLite
             lock (syncRoot)
             {
                 enabled = _enabled;
-                handlers = _handlers;
+
+                if (_handlers != null)
+                    handlers = _handlers.Clone() as SQLiteLogEventHandler;
+                else
+                    handlers = null;
             }
 
             if (enabled && (handlers != null))
