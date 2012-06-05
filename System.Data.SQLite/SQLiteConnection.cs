@@ -1307,6 +1307,23 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Sets the status of the memory usage tracking subsystem in the SQLite core library.  By default, this is enabled.
+    /// If this is disabled, memory usage tracking will not be performed.  This is not really a per-connection value, it is
+    /// global to the process.
+    /// </summary>
+    /// <param name="value">Non-zero to enable memory usage tracking, zero otherwise.</param>
+    /// <returns>A standard SQLite return code (i.e. zero for success and non-zero for failure).</returns>
+    public int SetMemoryStatus(bool value)
+    {
+        CheckDisposed();
+
+        if (_sql == null)
+            throw new InvalidOperationException("Database connection not valid for setting memory status.");
+
+        return _sql.SetMemoryStatus(value);
+    }
+
+    /// <summary>
     /// Returns a string containing the define constants (i.e. compile-time
     /// options) used to compile the core managed assembly, delimited with
     /// spaces.

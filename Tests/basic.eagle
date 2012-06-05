@@ -1432,6 +1432,91 @@ runTest {test data-1.27 {VARCHAR / NVARCHAR types with spaces} -body {
 
 ###############################################################################
 
+runTest {test data-1.28 {SetMemoryStatus method} -setup {
+  #
+  # NOTE: Make sure that SQLite core library is completely shutdown prior to
+  #       starting this test.
+  #
+  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+      sqlite3_shutdown
+
+  #
+  # NOTE: Create an instance of the core SQLite library interop wrapper class.
+  #
+  set sqlite3 [object create -flags +NonPublic System.Data.SQLite.SQLite3 \
+      Default Unspecified]
+} -body {
+  set result(rc1) [object invoke -flags +NonPublic $sqlite3 SetMemoryStatus \
+      false]
+
+  set result(before) [object invoke -flags +NonPublic $sqlite3 MemoryUsed]
+
+  set result(ptr1) [object invoke -create -flags +NonPublic \
+      System.Data.SQLite.UnsafeNativeMethods sqlite3_malloc 100]
+
+  set result(after1) [object invoke -flags +NonPublic $sqlite3 MemoryUsed]
+
+  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+      sqlite3_free $result(ptr1)
+
+  set result(after2) [object invoke -flags +NonPublic $sqlite3 MemoryUsed]
+
+  set result(rc2) [object invoke -flags +NonPublic $sqlite3 SetMemoryStatus \
+      true]
+
+  set result(rc3) [object invoke -flags +NonPublic \
+      System.Data.SQLite.UnsafeNativeMethods sqlite3_shutdown]
+
+  set result(rc4) [object invoke -flags +NonPublic $sqlite3 SetMemoryStatus \
+      true]
+
+  set result(ptr2) [object invoke -create -flags +NonPublic \
+      System.Data.SQLite.UnsafeNativeMethods sqlite3_malloc 100]
+
+  set result(after3) [object invoke -flags +NonPublic $sqlite3 MemoryUsed]
+
+  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+      sqlite3_free $result(ptr2)
+
+  set result(after4) [object invoke -flags +NonPublic $sqlite3 MemoryUsed]
+
+  list $result(rc1) $result(rc2) $result(rc3) $result(rc4) $result(ptr1) \
+      $result(ptr2) $result(before) $result(after1) $result(after2) \
+      $result(after3) $result(after4) \
+      [expr {$result(before) == $result(after1)}] \
+      [expr {$result(before) == $result(after2)}] \
+      [expr {$result(after3) > 0}] \
+      [expr {$result(before) < $result(after3)}] \
+      [expr {$result(after1) < $result(after3)}] \
+      [expr {$result(after4) < $result(after3)}]
+} -cleanup {
+  catch {
+    #
+    # NOTE: Make sure that SQLite core library is completely shutdown prior
+    #       to attempting to reconfigure the memory status setting.
+    #
+    object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+        sqlite3_shutdown
+
+    #
+    # NOTE: Attempt to make sure the default value for the process-wide
+    #       memory usage tracking setting is restored.  This is not 100%
+    #       reliable because we have no idea what the original value was
+    #       upon entry into this test (i.e. because the underlying core
+    #       library property is currently write-only).
+    #
+    object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+        sqlite3_config_int SQLITE_CONFIG_MEMSTATUS 1
+  }
+
+  unset -nocomplain result sqlite3
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^0 21 0 0 System#IntPtr#\d+ System#IntPtr#\d+ \d+ \d+ \d+ \d+\
+\d+ True True True True True True$}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 

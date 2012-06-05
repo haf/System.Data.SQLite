@@ -476,7 +476,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     private const string SQLITE_DLL = "System.Data.SQLite.dll";
 #else
-    internal const string SQLITE_DLL = "SQLite.Interop.081.dll";
+    internal const string SQLITE_DLL = "SQLite.Interop.082.dll";
 #endif // PLATFORM_COMPACTFRAMEWORK
 
 #else
@@ -806,6 +806,27 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern IntPtr sqlite3_sourceid();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_malloc(int n);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_realloc(IntPtr p, int n);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern void sqlite3_free(IntPtr p);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -1170,13 +1191,27 @@ namespace System.Data.SQLite
     internal static extern IntPtr sqlite3_trace(IntPtr db, SQLiteTraceCallback func, IntPtr pvUser);
 
     // Since sqlite3_config() takes a variable argument list, we have to overload declarations
-    // for all possible calls.  For now, we are only exposing the SQLITE_CONFIG_LOG call.
+    // for all possible calls that we want to use.
 #if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_config", CallingConvention = CallingConvention.Cdecl)]
 #else
-    [DllImport(SQLITE_DLL)]
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_config")]
 #endif
-    internal static extern int sqlite3_config(int op, SQLiteLogCallback func, IntPtr pvUser);
+    internal static extern int sqlite3_config_none(SQLiteConfigOpsEnum op);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_config", CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_config")]
+#endif
+    internal static extern int sqlite3_config_int(SQLiteConfigOpsEnum op, int value);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_config", CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_config")]
+#endif
+    internal static extern int sqlite3_config_log(SQLiteConfigOpsEnum op, SQLiteLogCallback func, IntPtr pvUser);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

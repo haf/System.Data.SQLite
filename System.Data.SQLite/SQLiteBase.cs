@@ -31,13 +31,23 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract int Changes { get; }
     /// <summary>
-    /// Returns the amount of memory (in bytes) currently in use by the SQLite core library.
+    /// Returns the amount of memory (in bytes) currently in use by the SQLite core library.  This is not really a per-connection
+    /// value, it is global to the process.
     /// </summary>
     internal abstract long MemoryUsed { get; }
     /// <summary>
     /// Returns the maximum amount of memory (in bytes) used by the SQLite core library since the high-water mark was last reset.
+    /// This is not really a per-connection value, it is global to the process.
     /// </summary>
     internal abstract long MemoryHighwater { get; }
+    /// <summary>
+    /// Sets the status of the memory usage tracking subsystem in the SQLite core library.  By default, this is enabled.
+    /// If this is disabled, memory usage tracking will not be performed.  This is not really a per-connection value, it is
+    /// global to the process.
+    /// </summary>
+    /// <param name="value">Non-zero to enable memory usage tracking, zero otherwise.</param>
+    /// <returns>A standard SQLite return code (i.e. zero for success and non-zero for failure).</returns>
+    internal abstract int SetMemoryStatus(bool value);
     /// <summary>
     /// Shutdown the SQLite engine so that it can be restarted with different config options.
     /// We depend on auto initialization to recover.
@@ -215,6 +225,14 @@ namespace System.Data.SQLite
     internal abstract void SetTraceCallback(SQLiteTraceCallback func);
     internal abstract void SetRollbackHook(SQLiteRollbackCallback func);
     internal abstract int SetLogCallback(SQLiteLogCallback func);
+
+    /// <summary>
+    /// Checks if the SQLite core library has been initialized in the current process.
+    /// </summary>
+    /// <returns>
+    /// Non-zero if the SQLite core library has been initialized in the current process,
+    /// zero otherwise.
+    /// </returns>
     internal abstract bool IsInitialized();
 
     internal abstract int GetCursorForTable(SQLiteStatement stmt, int database, int rootPage);

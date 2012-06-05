@@ -38,7 +38,7 @@ namespace System.Data.SQLite
         "d8215c18a4349a436dd499e3c385cc683015f886f6c10bd90115eb2bd61b67750839e3a19941dc9c";
 
 #if !PLATFORM_COMPACTFRAMEWORK
-    internal const string DesignerVersion = "1.0.81.0";
+    internal const string DesignerVersion = "1.0.82.0";
 #endif
 
     /// <summary>
@@ -226,6 +226,14 @@ namespace System.Data.SQLite
       {
         return UnsafeNativeMethods.sqlite3_memory_highwater(0);
       }
+    }
+
+    internal override int SetMemoryStatus(bool value)
+    {
+        int rc = UnsafeNativeMethods.sqlite3_config_int(
+            SQLiteConfigOpsEnum.SQLITE_CONFIG_MEMSTATUS, value ? 1 : 0);
+
+        return rc;
     }
 
     /// <summary>
@@ -1417,8 +1425,8 @@ namespace System.Data.SQLite
     /// <returns>Returns a result code</returns>
     internal override int SetLogCallback(SQLiteLogCallback func)
     {
-        int rc = UnsafeNativeMethods.sqlite3_config(
-            (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_LOG, func, (IntPtr)0);
+        int rc = UnsafeNativeMethods.sqlite3_config_log(
+            SQLiteConfigOpsEnum.SQLITE_CONFIG_LOG, func, (IntPtr)0);
 
         return rc;
     }
@@ -1685,8 +1693,8 @@ namespace System.Data.SQLite
                 //       *unless* the SQLite library has already been initialized.
                 //       In that case it will always return SQLITE_MISUSE.
                 //
-                int rc = UnsafeNativeMethods.sqlite3_config(
-                    (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE, null, (IntPtr)0);
+                int rc = UnsafeNativeMethods.sqlite3_config_none(
+                    (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE);
 
                 return (rc == /* SQLITE_MISUSE */ 21);
 #if !PLATFORM_COMPACTFRAMEWORK
