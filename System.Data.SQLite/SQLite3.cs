@@ -230,6 +230,11 @@ namespace System.Data.SQLite
 
     internal override int SetMemoryStatus(bool value)
     {
+        return StaticSetMemoryStatus(value);
+    }
+
+    internal static int StaticSetMemoryStatus(bool value)
+    {
         int rc = UnsafeNativeMethods.sqlite3_config_int(
             SQLiteConfigOpsEnum.SQLITE_CONFIG_MEMSTATUS, value ? 1 : 0);
 

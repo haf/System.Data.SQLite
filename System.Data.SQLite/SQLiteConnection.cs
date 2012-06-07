@@ -1313,14 +1313,9 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="value">Non-zero to enable memory usage tracking, zero otherwise.</param>
     /// <returns>A standard SQLite return code (i.e. zero for success and non-zero for failure).</returns>
-    public int SetMemoryStatus(bool value)
+    public static int SetMemoryStatus(bool value)
     {
-        CheckDisposed();
-
-        if (_sql == null)
-            throw new InvalidOperationException("Database connection not valid for setting memory status.");
-
-        return _sql.SetMemoryStatus(value);
+        return SQLite3.StaticSetMemoryStatus(value);
     }
 
     /// <summary>
