@@ -1384,10 +1384,11 @@ runTest {test data-1.25 {SQLiteDataReader GetValues w/collection} -setup {
 
   set result
 } -cleanup {
-  cleanupDb $fileName
+  unset -nocomplain result item collection reader command connection
 
-  unset -nocomplain result item collection reader command connection db \
-      fileName
+  cleanupDb $fileName; # NOTE: After object disposal.
+
+  unset -nocomplain db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
 {{26 26} {zebra zebra}}}
