@@ -181,11 +181,11 @@ runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter update fail} -setup {
         object invoke _Dynamic${id}.Test${id} Main
       } result] : [set result ""]}] $result
 } -cleanup {
+  cleanupDb $fileName; unset -nocomplain db fileName
   cleanupDb $otherFileName
-  cleanupDb $fileName
 
   unset -nocomplain result code results errors i sql otherTable otherDbName \
-      otherDataSource dataSource id db otherFileName fileName
+      otherDataSource dataSource id otherFileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 glob -result {* System.Data.DBConcurrencyException: *}}
@@ -287,11 +287,11 @@ runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter update success} -setup {
         object invoke _Dynamic${id}.Test${id} Main
       } result] : [set result ""]}] $result
 } -cleanup {
+  cleanupDb $fileName; unset -nocomplain db fileName
   cleanupDb $otherFileName
-  cleanupDb $fileName
 
   unset -nocomplain result code results errors i sql otherTable otherDbName \
-      otherDataSource dataSource id db otherFileName fileName
+      otherDataSource dataSource id otherFileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
@@ -326,11 +326,10 @@ runTest {test tkt-343d392b51-3.1 {attached database, same table name} -setup {
       [sql execute -execute reader -format list $db [appendArgs \
       "SELECT x FROM " ${otherTable} ";"]]
 } -cleanup {
+  cleanupDb $fileName; unset -nocomplain db fileName
   cleanupDb $otherFileName
-  cleanupDb $fileName
 
-  unset -nocomplain i sql otherTable otherDbName otherDataSource db \
-      otherFileName fileName
+  unset -nocomplain i sql otherTable otherDbName otherDataSource otherFileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
 {{1 2} {2 4}}}
@@ -425,11 +424,11 @@ runTest {test tkt-343d392b51-3.2 {adapter, attached db, table names} -setup {
         object invoke _Dynamic${id}.Test${id} Main
       } result] : [set result ""]}] $result
 } -cleanup {
+  cleanupDb $fileName; unset -nocomplain db fileName
   cleanupDb $otherFileName
-  cleanupDb $fileName
 
   unset -nocomplain result code results errors i sql otherTable otherDbName \
-      otherDataSource dataSource id db otherFileName fileName
+      otherDataSource dataSource id otherFileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}

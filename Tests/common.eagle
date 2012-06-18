@@ -597,6 +597,17 @@ namespace eval ::Eagle {
 
     proc cleanupDb { fileName {varName db} } {
       #
+      # NOTE: Attempt to force all pending "garbage" objects to be collected,
+      #       including SQLite statements and backup objects; this should allow
+      #       the underlying database file to be deleted.
+      #
+      if {[catch {object invoke GC GetTotalMemory true} error]} then {
+        tputs $channel [appendArgs \
+            "==== WARNING: failed full garbage collection, error: " \
+            \n\t $error \n]
+      }
+
+      #
       # NOTE: Refer to the specified variable (e.g. "db") in the context of the
       #       caller.  The handle to the opened database is stored there.
       #
@@ -669,6 +680,17 @@ namespace eval ::Eagle {
     }
 
     proc cleanupFile { fileName {force false} } {
+      #
+      # NOTE: Attempt to force all pending "garbage" objects to be collected,
+      #       including SQLite statements and backup objects; this should allow
+      #       the underlying database file to be deleted.
+      #
+      if {[catch {object invoke GC GetTotalMemory true} error]} then {
+        tputs $channel [appendArgs \
+            "==== WARNING: failed full garbage collection, error: " \
+            \n\t $error \n]
+      }
+
       #
       # NOTE: Check if the file still exists.
       #
