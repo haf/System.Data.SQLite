@@ -19,6 +19,10 @@
 			<param name="Local" value="dbfactorysupport.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Environment Variables">
+			<param name="Local" value="environment.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Optimizing SQL Queries">
 			<param name="Local" value="optimizing.html">
 			</OBJECT>
