@@ -1002,15 +1002,16 @@ namespace System.Data.SQLite
   public enum SQLiteDateFormats
   {
     /// <summary>
-    /// Using ticks is not recommended and is not well supported with LINQ.
+    /// Use the value of DateTime.Ticks.  This value is not recommended and is not well supported with LINQ.
     /// </summary>
     Ticks = 0,
     /// <summary>
-    /// The ISO8601 format
+    /// Use the ISO-8601 format.  Uses the "yyyy-MM-dd HH:mm:ss.FFFFFFFK" format for UTC DateTime values and
+    /// "yyyy-MM-dd HH:mm:ss.FFFFFFF" format for local DateTime values).
     /// </summary>
     ISO8601 = 1,
     /// <summary>
-    /// JulianDay format, which is what SQLite uses internally
+    /// The interval of time in days and fractions of a day since January 1, 4713 BC.
     /// </summary>
     JulianDay = 2,
     /// <summary>

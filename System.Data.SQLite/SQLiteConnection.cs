@@ -30,7 +30,7 @@ namespace System.Data.SQLite
   /// </listheader>
   /// <item>
   /// <description>Data Source</description>
-  /// <description>{filename}</description>
+  /// <description>This may be a file name, the string ":memory:", or any supported URI (starting with SQLite 3.7.7).</description>
   /// <description>Y</description>
   /// <description></description>
   /// </item>
@@ -48,7 +48,14 @@ namespace System.Data.SQLite
   /// </item>
   /// <item>
   /// <description>DateTimeFormat</description>
-  /// <description><b>Ticks</b> - Use DateTime.Ticks<br/><b>ISO8601</b> - Use ISO8601 DateTime format</description>
+  /// <description>
+  /// <b>Ticks</b> - Use the value of DateTime.Ticks.<br/>
+  /// <b>ISO8601</b> - Use the ISO-8601 format.  Uses the "yyyy-MM-dd HH:mm:ss.FFFFFFFK" format for UTC
+  /// DateTime values and "yyyy-MM-dd HH:mm:ss.FFFFFFF" format for local DateTime values).<br/>
+  /// <b>JulianDay</b> - The interval of time in days and fractions of a day since January 1, 4713 BC.<br/>
+  /// <b>UnixEpoch</b> - The whole number of seconds since the Unix epoch (January 1, 1970).<br/>
+  /// <b>InvariantCulture</b> - Any culture-independent string value that the .NET Framework can interpret as a valid DateTime.<br/>
+  /// <b>CurrentCulture</b> - Any string value that the .NET Framework can interpret as a valid DateTime using the current culture.</description>
   /// <description>N</description>
   /// <description>ISO8601</description>
   /// </item>
@@ -717,7 +724,7 @@ namespace System.Data.SQLite
     /// </listheader>
     /// <item>
     /// <description>Data Source</description>
-    /// <description>{filename}</description>
+    /// <description>This may be a file name, the string ":memory:", or any supported URI (starting with SQLite 3.7.7).</description>
     /// <description>Y</description>
     /// <description></description>
     /// </item>
@@ -735,15 +742,37 @@ namespace System.Data.SQLite
     /// </item>
     /// <item>
     /// <description>DateTimeFormat</description>
-    /// <description><b>Ticks</b> - Use DateTime.Ticks<br/><b>ISO8601</b> - Use ISO8601 DateTime format<br/><b>JulianDay</b> - Use JulianDay format</description>
+    /// <description>
+    /// <b>Ticks</b> - Use the value of DateTime.Ticks.<br/>
+    /// <b>ISO8601</b> - Use the ISO-8601 format.  Uses the "yyyy-MM-dd HH:mm:ss.FFFFFFFK" format for UTC
+    /// DateTime values and "yyyy-MM-dd HH:mm:ss.FFFFFFF" format for local DateTime values).<br/>
+    /// <b>JulianDay</b> - The interval of time in days and fractions of a day since January 1, 4713 BC.<br/>
+    /// <b>UnixEpoch</b> - The whole number of seconds since the Unix epoch (January 1, 1970).<br/>
+    /// <b>InvariantCulture</b> - Any culture-independent string value that the .NET Framework can interpret as a valid DateTime.<br/>
+    /// <b>CurrentCulture</b> - Any string value that the .NET Framework can interpret as a valid DateTime using the current culture.</description>
     /// <description>N</description>
     /// <description>ISO8601</description>
     /// </item>
     /// <item>
-    /// <description>BinaryGUID</description>
-    /// <description><b>Yes/On/1</b> - Store GUID columns in binary form<br/><b>No/Off/0</b> - Store GUID columns as text</description>
+    /// <description>DateTimeKind</description>
+    /// <description><b>Unspecified</b> - Not specified as either UTC or local time.<br/><b>Utc</b> - The time represented is UTC.<br/><b>Local</b> - The time represented is local time.</description>
     /// <description>N</description>
-    /// <description>On</description>
+    /// <description>Unspecified</description>
+    /// </item>
+    /// <item>
+    /// <description>BaseSchemaName</description>
+    /// <description>Some base data classes in the framework (e.g. those that build SQL queries dynamically)
+    /// assume that an ADO.NET provider cannot support an alternate catalog (i.e. database) without supporting
+    /// alternate schemas as well; however, SQLite does not fit into this model.  Therefore, this value is used
+    /// as a placeholder and removed prior to preparing any SQL statements that may contain it.</description>
+    /// <description>N</description>
+    /// <description>sqlite_default_schema</description>
+    /// </item>
+    /// <item>
+    /// <description>BinaryGUID</description>
+    /// <description><b>True</b> - Store GUID columns in binary form<br/><b>False</b> - Store GUID columns as text</description>
+    /// <description>N</description>
+    /// <description>True</description>
     /// </item>
     /// <item>
     /// <description>Cache Size</description>
@@ -765,13 +794,13 @@ namespace System.Data.SQLite
     /// </item>
     /// <item>
     /// <description>Password</description>
-    /// <description>{password}</description>
+    /// <description>{password} - Using this parameter requires that the CryptoAPI based codec be enabled at compile-time for both the native interop assembly and the core managed assemblies; otherwise, using this parameter may result in an exception being thrown when attempting to open the connection.</description>
     /// <description>N</description>
     /// <description></description>
     /// </item>
     /// <item>
     /// <description>Enlist</description>
-    /// <description><B>Y</B> - Automatically enlist in distributed transactions<br/><b>N</b> - No automatic enlistment</description>
+    /// <description><b>Y</b> - Automatically enlist in distributed transactions<br/><b>N</b> - No automatic enlistment</description>
     /// <description>N</description>
     /// <description>Y</description>
     /// </item>
@@ -828,6 +857,18 @@ namespace System.Data.SQLite
     /// <description>The default transaciton isolation level</description>
     /// <description>N</description>
     /// <description>Serializable</description>
+    /// </item>
+    /// <item>
+    /// <description>Foreign Keys</description>
+    /// <description>Enable foreign key constraints</description>
+    /// <description>N</description>
+    /// <description>False</description>
+    /// </item>
+    /// <item>
+    /// <description>Flags</description>
+    /// <description>Extra behavioral flags for the connection.  See the SQLiteConnectionFlags enumeration for possible values.</description>
+    /// <description>N</description>
+    /// <description>Default</description>
     /// </item>
     /// </list>
     /// </remarks>
