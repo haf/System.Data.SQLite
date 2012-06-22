@@ -62,7 +62,7 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 {
   int ret;
   
-#if SQLITE_VERSION_NUMBER >= 3007013
+#if SQLITE_VERSION_NUMBER >= 3007014
   ret = sqlite3_close_v2(db);
 #else
   ret = sqlite3_close(db);
@@ -248,7 +248,7 @@ SQLITE_API const void * WINAPI sqlite3_column_text16_interop(sqlite3_stmt *stmt,
 
 SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 {
-#if SQLITE_VERSION_NUMBER >= 3007013
+#if SQLITE_VERSION_NUMBER >= 3007014
   return sqlite3_finalize(stmt);
 #else
   Vdbe *p;
