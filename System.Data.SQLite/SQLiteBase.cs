@@ -418,7 +418,17 @@ namespace System.Data.SQLite
             int n = UnsafeNativeMethods.sqlite3_close_interop(db);
 #else
             ResetConnection(hdl, db);
-            int n = UnsafeNativeMethods.sqlite3_close(db);
+
+            int n;
+
+            try
+            {
+                n = UnsafeNativeMethods.sqlite3_close_v2(db);
+            }
+            catch (EntryPointNotFoundException)
+            {
+                n = UnsafeNativeMethods.sqlite3_close(db);
+            }
 #endif
             if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
         }

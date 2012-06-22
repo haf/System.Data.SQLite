@@ -197,7 +197,7 @@ namespace System.Data.SQLite
       commandText.AppendLine();
 
       // where
-#if INTEROP_EXTENSION_FUNCTIONS
+#if USE_INTEROP_DLL && INTEROP_EXTENSION_FUNCTIONS
       commandText.Append("WHERE last_rows_affected() > 0");
 #else
       commandText.Append("WHERE changes() > 0");

@@ -329,7 +329,7 @@ namespace System.Data.SQLite
     {
       Dictionary<string, FunctionHandler> functionHandlers = new Dictionary<string, FunctionHandler>(16, StringComparer.Ordinal);
 
-#if INTEROP_EXTENSION_FUNCTIONS
+#if USE_INTEROP_DLL && INTEROP_EXTENSION_FUNCTIONS
       functionHandlers.Add("IndexOf", HandleCanonicalFunctionIndexOf);
 #endif
 
@@ -2865,7 +2865,7 @@ namespace System.Data.SQLite
       return result;
     }
 
-#if INTEROP_EXTENSION_FUNCTIONS
+#if USE_INTEROP_DLL && INTEROP_EXTENSION_FUNCTIONS
     /// <summary>
     ///  Function rename IndexOf -> CHARINDEX
     /// </summary>

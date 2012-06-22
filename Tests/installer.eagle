@@ -25,6 +25,7 @@ runSQLiteTestPrologue
 #       tests in this file.
 #
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
+set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
 set installerExeFile [getBuildFileName Installer.exe]
 
 #
@@ -52,6 +53,16 @@ set testUninstallVs2010LogFile [file nativename [file join $path \
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
 #
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteDllFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteLinqDllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteLinqDllFile
+}
+
 if {![haveConstraint [appendArgs file_ \
     [file tail $installerExeFile]]]} then {
   checkForFile $test_channel $installerExeFile
@@ -120,6 +131,7 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2005} -setup {
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator visualStudio2005\
 System.Data.SQLite.dll_v2.0.50727 file_Installer.exe\
+file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
 file_Installer_Test_Vs2005.log} -result {0 True}}
 
 ###############################################################################
@@ -155,6 +167,7 @@ runTest {test installer-1.2 {uninstaller tool / Visual Studio 2005} -setup {
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator visualStudio2005\
 System.Data.SQLite.dll_v2.0.50727 file_Installer.exe\
+file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
 file_Uninstaller_Test_Vs2005.log} -result {0 True}}
 
 ###############################################################################
@@ -190,6 +203,7 @@ runTest {test installer-1.3 {installer tool / Visual Studio 2008} -setup {
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator visualStudio2008\
 System.Data.SQLite.dll_v2.0.50727 file_Installer.exe\
+file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
 file_Installer_Test_Vs2008.log} -result {0 True}}
 
 ###############################################################################
@@ -225,6 +239,7 @@ runTest {test installer-1.4 {uninstaller tool / Visual Studio 2008} -setup {
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator visualStudio2008\
 System.Data.SQLite.dll_v2.0.50727 file_Installer.exe\
+file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
 file_Uninstaller_Test_Vs2008.log} -result {0 True}}
 
 ###############################################################################
@@ -260,6 +275,7 @@ runTest {test installer-1.5 {installer tool / Visual Studio 2010} -setup {
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator visualStudio2010\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe\
+file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
 file_Installer_Test_Vs2010.log} -result {0 True}}
 
 ###############################################################################
@@ -295,6 +311,7 @@ runTest {test installer-1.6 {uninstaller tool / Visual Studio 2010} -setup {
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator visualStudio2010\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe\
+file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
 file_Uninstaller_Test_Vs2010.log} -result {0 True}}
 
 ###############################################################################
@@ -302,7 +319,7 @@ file_Uninstaller_Test_Vs2010.log} -result {0 True}}
 unset -nocomplain testUninstallVs2010LogFile testUninstallVs2008LogFile \
     testUninstallVs2005LogFile testInstallVs2010LogFile \
     testInstallVs2008LogFile testInstallVs2005LogFile installerExeFile \
-    systemDataSQLiteDllFile
+    systemDataSQLiteLinqDllFile systemDataSQLiteDllFile
 
 ###############################################################################
 

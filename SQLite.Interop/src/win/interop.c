@@ -62,6 +62,9 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 {
   int ret;
   
+#if SQLITE_VERSION_NUMBER >= 3007013
+  ret = sqlite3_close_v2(db);
+#else
   ret = sqlite3_close(db);
 
   if (ret == SQLITE_BUSY)
@@ -113,6 +116,7 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
     sqlite3_mutex_leave(db->mutex);
     ret = sqlite3_close(db);
   }
+#endif
 
   return ret;
 }
@@ -244,6 +248,9 @@ SQLITE_API const void * WINAPI sqlite3_column_text16_interop(sqlite3_stmt *stmt,
 
 SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 {
+#if SQLITE_VERSION_NUMBER >= 3007013
+  return sqlite3_finalize(stmt);
+#else
   Vdbe *p;
   int ret = SQLITE_OK;
 
@@ -269,6 +276,7 @@ SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
   }
 
   return ret;
+#endif
 }
 
 SQLITE_API int WINAPI sqlite3_reset_interop(sqlite3_stmt *stmt)

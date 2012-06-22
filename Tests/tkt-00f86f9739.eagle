@@ -82,7 +82,8 @@ runTest {test tkt-00f86f9739-1.1 {LINQ with StartsWith} -body {
 } -cleanup {
   unset -nocomplain code output error result value
 } -constraints \
-{eagle monoToDo defineConstant.System.Data.SQLite.INTEROP_EXTENSION_FUNCTIONS\
+{eagle monoToDo defineConstant.System.Data.SQLite.USE_INTEROP_DLL\
+defineConstant.System.Data.SQLite.INTEROP_EXTENSION_FUNCTIONS SQLite\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll file_testlinq.exe\
 file_northwindEF.db} -result {0 {} 0 {DRACD OLDWO RATTC} 0 {ALFKI CACTU CHOPS\
 FOLKO GALED KOENE LILAS MAGAA MAISD OCEAN RANCH SAVEA THECR} 0 {} 0 {} 0 {} 0\

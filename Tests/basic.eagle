@@ -90,7 +90,8 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
   cleanupDb $fileName
 
   unset -nocomplain code output error fileName
-} -constraints {eagle file_System.Data.SQLite.dll file_test.exe} -result {0 {}}}
+} -constraints {eagle SQLite file_System.Data.SQLite.dll file_test.exe} \
+-result {0 {}}}
 
 ###############################################################################
 
@@ -129,8 +130,9 @@ runTest {test data-1.2 {unit tests from the 'testlinq' project} -setup {
 
   unset -nocomplain code output error savedEncoding encoding
 } -constraints \
-{eagle monoToDo file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_testlinq.exe file_northwindEF.db file_testlinq.out} -result {0 True {}}}
+{eagle monoToDo SQLite file_System.Data.SQLite.dll\
+file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db\
+file_testlinq.out} -result {0 True {}}}
 
 ###############################################################################
 
@@ -1411,7 +1413,8 @@ runTest {test data-1.26 {LINQ ISQLiteSchemaExtensions.BuildTempSchema} -setup {
   cleanupDb $fileName
 
   unset -nocomplain providerServices connection db fileName
-} -constraints {eagle System.Data.SQLite System.Data.SQLite.Linq} -result {}}
+} -constraints {eagle SQLite System.Data.SQLite System.Data.SQLite.Linq} \
+-result {}}
 
 ###############################################################################
 
