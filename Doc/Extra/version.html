@@ -45,7 +45,10 @@
     <h1 class="heading">Version History</h1>
     <p><b>1.0.82.0 - July XX, 2012</b></p>
     <ul>
-      <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_13.html">SQLite 3.7.13</a>.</li>
+      <li>Updated to <a href="http://www.sqlite.org/src/info/d5e6880279">SQLite 3.7.14</a>.</li>
+      <li>Fix the database cleanup ordering in the tests for ticket <a href="http://system.data.sqlite.org/index.html/info/343d392b51">[343d392b51]</a>.</li>
+      <li>Add support for the sqlite3_close_v2 function from the SQLite core library.</li>
+      <li>Improve support for the standard SQLite core library in the LINQ assembly and the test suite.</li>
       <li>Add SetMemoryStatus static method to the SQLiteConnection class.</li>
       <li>Improve threaded handling of the delegate used by the SQLiteLog class.</li>
     </ul>
