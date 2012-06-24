@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * SQLite.x64.nuspec -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
 <package>
   <metadata>
     <id>System.Data.SQLite.x64</id>

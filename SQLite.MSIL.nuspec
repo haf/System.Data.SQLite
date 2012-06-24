@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * SQLite.MSIL.nuspec -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
 <package>
   <metadata>
     <id>System.Data.SQLite.MSIL</id>
