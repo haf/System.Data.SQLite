@@ -25,7 +25,20 @@ if {![info exists no([file tail [info script]])]} then {
   tputs $test_channel [appendArgs "---- tests ended at " \
       [clock format [clock seconds]] \n]
 
+  #
+  # NOTE: Show the ending command count (for both Tcl and Eagle).
+  #
+  tputs $test_channel [appendArgs "---- ending command count: " \
+      [info cmdcount] \n]
+
   if {[isEagle]} then {
+    #
+    # NOTE: Show the ending operation count (for Eagle only).
+    #
+    tputs $test_channel [appendArgs "---- ending operation count: " \
+        [object invoke -flags +NonPublic Interpreter.GetActive \
+            OperationCount] \n]
+
     #
     # NOTE: Show the current state of the memory.
     #

@@ -201,6 +201,129 @@ namespace eval ::Eagle {
     return $result
   }
 
+  proc calculateBogoCops { {milliseconds 2000} {legacy false} } {
+    #
+    # NOTE: Verify that the number of milliseconds requested is greater than
+    #       zero.
+    #
+    if {$milliseconds <= 0} then {
+      error "number of milliseconds must be greater than zero"
+    }
+
+    #
+    # HACK: Different techniques are used here to calculate the performance of
+    #       the machine for Tcl and Eagle.
+    #
+    if {!$legacy && [isEagle]} then {
+      #
+      # NOTE: Save the current background error handler for later restoration
+      #       and then reset the current background error handler to nothing.
+      #
+      set bgerror [interp bgerror {}]
+      interp bgerror {} ""
+
+      try {
+        #
+        # NOTE: Save the current [after] flags for later restoration and then
+        #       reset them to process events immediately.
+        #
+        set flags [after flags]
+        after flags =Immediate
+
+        try {
+          set code [catch {
+            #
+            # NOTE: First, make sure that the [after] event queue for the
+            #       interpreter is totally empty.
+            #
+            catch {eval after cancel [after info]}
+
+            #
+            # NOTE: Schedule the event to cancel the script we are about to
+            #       evaluate, capturing the name so we can cancel it later, if
+            #       necessary.
+            #
+            set event [after $milliseconds [list interp cancel]]
+
+            #
+            # HACK: There is the potential for a "race condition" here.  If the
+            #       specified number of milliseconds elapses before (or after)
+            #       entering the [catch] script block (below) then the resulting
+            #       script cancellation error will not be caught and we will be
+            #       unable to return the correct result to the caller.
+            #
+            set before [info cmdcount]
+            catch {time {nop} -1}; # uses the [time] internal busy loop.
+            set after [info cmdcount]
+
+            #
+            # HACK: Mono has a bug that results in excessive trailing zeros
+            #       here (Mono bug #655780).
+            #
+            if {[isMono]} then {
+              expr {double(($after - $before) / ($milliseconds / 1000.0))}
+            } else {
+              expr {($after - $before) / ($milliseconds / 1000.0)}
+            }
+          } result]
+
+          #
+          # NOTE: If we failed to calculate the number of commands-per-second
+          #       due to some subtle race condition [as explained above], return
+          #       an obviously invalid result instead.
+          #
+          if {$code == 0} then {
+            return $result
+          } else {
+            return 0
+          }
+        } finally {
+          if {[info exists event]} then {
+            catch {after cancel $event}
+          }
+
+          after flags =$flags
+        }
+      } finally {
+        interp bgerror {} $bgerror
+      }
+    } else {
+      #
+      # NOTE: Record the initial Tcl command count.
+      #
+      set before [info cmdcount]
+
+      #
+      # NOTE: Calculate how many whole seconds we need to spin for.
+      #
+      set seconds [expr {$milliseconds / 1000}]
+
+      #
+      # NOTE: Calculate the value of [clock seconds] now and at the stop time.
+      #
+      set start [clock seconds]; set stop [expr {$start + $seconds}]
+
+      #
+      # NOTE: Do nothing for X seconds (i.e. except call [clock seconds]).
+      #
+      while {$start <= [clock seconds] && [clock seconds] < $stop} {}
+
+      #
+      # NOTE: Record the final Tcl command count.
+      #
+      set after [info cmdcount]
+
+      #
+      # NOTE: Calculate approximately how many Tcl commands per second were
+      #       executed during the timed loop (above).  Due to various things,
+      #       including overhead associated with [clock seconds], this number
+      #       is not as accurate as the one for Eagle; however, it's generally
+      #       good enough.
+      #
+      expr {($after - $before) / double($seconds)}
+    }
+  }
+
   proc calculateRelativePerformance { type value } {
     #
     # NOTE: Adjust the expected performance number based on the
@@ -1248,12 +1371,11 @@ namespace eval ::Eagle {
       #       that they use the script location of their caller and not
       #       their own.
       #
-      # BUGBUG: This does not yet fix the script location issues in the
-      #         test suite.
+      # BUGBUG: Even this does not yet fix the script location issues in
+      #         the test suite:
       #
-      # debug procedureflags test +ScriptLocation
-      # debug procedureflags runTest +ScriptLocation
-
+      #         debug procedureflags test +ScriptLocation
+      #         debug procedureflags runTest +ScriptLocation
       #
       # HACK: Compatibility shim(s) for use with various tests in the Tcl
       #       test suite.  Make sure these commands do not already exist
@@ -1467,75 +1589,6 @@ namespace eval ::Eagle {
       return false; # still alive (or error).
     }
 
-    proc calculateBogoCops { {milliseconds 2000} } {
-      #
-      # NOTE: Save the current background error handler for later restoration
-      #       and then reset the current background error handler to nothing.
-      #
-      set bgerror [interp bgerror {}]
-      interp bgerror {} ""
-
-      try {
-        #
-        # NOTE: Save the current [after] flags for later restoration and then
-        #       reset them to process events immediately.
-        #
-        set flags [after flags]
-        after flags =Immediate
-
-        try {
-          set code [catch {
-            #
-            # NOTE: Schedule the event to cancel the script we are about to
-            #       evaluate, capturing the name so we can cancel it later, if
-            #       necessary.
-            #
-            set event [after $milliseconds [list interp cancel]]
-
-            #
-            # HACK: There is the potential for a "race condition" here.  If the
-            #       specified number of milliseconds elapses before (or after)
-            #       entering the [catch] script block (below) then the resulting
-            #       script cancellation error will not be caught and we will be
-            #       unable to return the correct result to the caller.
-            #
-            set before [info cmdcount]
-            catch {time {nop} -1}; # uses the [time] internal busy loop.
-            set after [info cmdcount]
-
-            #
-            # HACK: Mono has a bug that results in excessive trailing zeros
-            #       here (Mono bug #655780).
-            #
-            if {[isMono]} then {
-              expr {double(($after - $before) / ($milliseconds / 1000.0))}
-            } else {
-              expr {($after - $before) / ($milliseconds / 1000.0)}
-            }
-          } result]
-
-          #
-          # NOTE: If we failed to calculate the number of commands-per-second
-          #       due to some subtle race condition [as explained above], return
-          #       an obviously invalid result instead.
-          #
-          if {$code == 0} then {
-            return $result
-          } else {
-            return 0
-          }
-        } finally {
-          if {[info exists event]} then {
-            catch {after cancel $event}
-          }
-
-          after flags =$flags
-        }
-      } finally {
-        interp bgerror {} $bgerror
-      }
-    }
-
     proc evalWithTimeout { script {milliseconds 2000} {resultVarName ""} } {
       #
       # NOTE: Save the current background error handler for later restoration
@@ -1562,6 +1615,12 @@ namespace eval ::Eagle {
           }
 
           return [catch {
+            #
+            # NOTE: First, make sure that the [after] event queue for the
+            #       interpreter is totally empty.
+            #
+            catch {eval after cancel [after info]}
+
             #
             # NOTE: Schedule the event to cancel the script we are about to
             #       evaluate, capturing the name so we can cancel it later, if
@@ -1890,7 +1949,8 @@ namespace eval ::Eagle {
         runTestEpilogue runTest runAllTests fixConstraints sourceIfValid \
         isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
         returnInfoScript tputs formatDecimal formatList configureTcltest \
-        removeConstraint machineToPlatform tsource testShim] false false
+        calculateBogoCops removeConstraint machineToPlatform tsource testShim] \
+        false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

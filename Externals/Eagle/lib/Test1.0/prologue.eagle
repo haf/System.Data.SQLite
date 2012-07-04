@@ -1155,17 +1155,6 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       #
-      # NOTE: Has IDisposable testing support been disabled?
-      #
-      if {![info exists no(testDisposable)]} then {
-        #
-        # NOTE: For test "object-2.8".
-        #
-        checkForObjectMember $test_channel Eagle._Tests.Default+Disposable \
-            *ToString* Eagle._Tests.Default.Disposable.ToString
-      }
-
-      #
       # NOTE: Has linked variable testing support been disabled?
       #
       if {![info exists no(testLinkedVariables)]} then {
@@ -1372,6 +1361,17 @@ if {![info exists no([file tail [info script]])]} then {
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TypeProperty*
+      }
+
+      #
+      # NOTE: Has IDisposable testing support been disabled?
+      #
+      if {![info exists no(testDisposable)]} then {
+        #
+        # NOTE: For test "object-2.8".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default+Disposable \
+            *ToString* Eagle._Tests.Default.Disposable.ToString
       }
     }
 
@@ -1926,6 +1926,50 @@ if {![info exists no([file tail [info script]])]} then {
     checkForNetwork $test_channel $test_host $test_timeout
   }
 
+  #
+  # NOTE: Figure out the approximate relative performance of this machine.
+  #
+  if {[haveConstraint performance]} then {
+    tputs $test_channel [appendArgs \
+        "---- checking for baseline BogoCops (commands-per-second)... "]
+
+    if {![info exists test_base_cops]} then {
+      #
+      # NOTE: The expected performance numbers for all the
+      #       performance tests will be calibrated based on
+      #       this number (which is based on the measured
+      #       performance of the actual machine that was
+      #       used to determine those expected performance
+      #       numbers).
+      #
+      if {[isEagle]} then {
+        set test_base_cops 36000.0; # NOTE: Eagle 1.0 Win32
+      } else {
+        set test_base_cops 1570000.0; # NOTE: Tcl 8.4.19 Win32
+      }
+    }
+
+    tputs $test_channel [appendArgs $test_base_cops \n]
+    tputs $test_channel [appendArgs \
+        "---- checking for current BogoCops (commands-per-second)... "]
+
+    if {![info exists test_cops]} then {
+      set test_cops [calculateBogoCops]
+    }
+
+    tputs $test_channel [appendArgs [formatDecimal $test_cops] \n]
+
+    set percent [expr {[calculateRelativePerformance iterations 1] * 100}]
+
+    tputs $test_channel [appendArgs \
+        "---- current BogoCops (commands-per-second) is " [formatDecimal \
+        [expr {$percent > 100 ? $percent - 100 : $percent}] 2] "% " \
+        [expr {$percent > 100 ? "faster than" : "as fast as"}] \
+        " the baseline\n"]
+
+    unset percent
+  }
+
   #############################################################################
   ######################## END Eagle & Tcl Constraints ########################
   #############################################################################
@@ -1935,49 +1979,6 @@ if {![info exists no([file tail [info script]])]} then {
   #       the compile options.
   #
   if {[isEagle]} then {
-    #
-    # NOTE: Figure out the approximate relative performance
-    #       of this machine.
-    #
-    if {[haveConstraint performance]} then {
-      tputs $test_channel [appendArgs \
-          "---- checking for baseline BogoCops (commands-per-second)... "]
-
-      if {![info exists test_base_cops]} then {
-        #
-        # NOTE: The expected performance numbers for all the
-        #       performance tests will be calibrated based on
-        #       this number (which is based on the measured
-        #       performance of the actual machine that was
-        #       used to determine those expected performance
-        #       numbers).
-        #
-        set test_base_cops 36000.0
-      }
-
-      tputs $test_channel [appendArgs $test_base_cops \n]
-      tputs $test_channel [appendArgs \
-          "---- checking for current BogoCops (commands-per-second)... "]
-
-      if {![info exists test_cops]} then {
-        set test_cops [calculateBogoCops]
-      }
-
-      tputs $test_channel [appendArgs [formatDecimal $test_cops] \n]
-
-      set percent [expr {[calculateRelativePerformance iterations 1] * 100}]
-
-      tputs $test_channel [appendArgs \
-          "---- current BogoCops (commands-per-second) is " [formatDecimal \
-          [expr {$percent > 100 ? $percent - 100 : $percent}] 2] "% " \
-          [expr {$percent > 100 ? "faster than" : "as fast as"}] \
-          " the baseline\n"]
-
-      unset percent
-    }
-
-    ###########################################################################
-
     #
     # NOTE: Get the source checkout (i.e. of Eagle or whatever project the
     #       Eagle binaries are being used by).
@@ -2072,6 +2073,21 @@ if {![info exists no([file tail [info script]])]} then {
   #
   tputs $test_channel [appendArgs "---- constraints: " \
       [formatList [lsort [getConstraints]]] \n]
+
+  #
+  # NOTE: Show the starting command count (for both Tcl and Eagle).
+  #
+  tputs $test_channel [appendArgs "---- starting command count: " \
+      [info cmdcount] \n]
+
+  if {[isEagle]} then {
+    #
+    # NOTE: Show the starting operation count (for Eagle only).
+    #
+    tputs $test_channel [appendArgs "---- starting operation count: " \
+        [object invoke -flags +NonPublic Interpreter.GetActive \
+            OperationCount] \n]
+  }
 
   #
   # NOTE: Show when the tests actually began (now).
