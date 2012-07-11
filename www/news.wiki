@@ -10,6 +10,7 @@
     <li>The [http://nuget.org/packages/System.Data.SQLite|primary NuGet package] now supports x86 / x64 and the .NET Framework 2.0 / 4.0 (i.e. in a single package).</li>
     <li>Fix the database cleanup ordering in the tests for ticket [343d392b51].</li>
     <li>Add support for the sqlite3_close_v2 function from the SQLite core library.</li>
+    <li>Add support for [http://www.sqlite.org/uri.html|URI file names] via the new FullUri connection string property.</li>
     <li>Improve support for the standard SQLite core library in the LINQ assembly and the test suite.</li>
     <li>Add SetMemoryStatus static method to the SQLiteConnection class.</li>
     <li>Improve threaded handling of the delegate used by the SQLiteLog class.</li>
