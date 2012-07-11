@@ -361,11 +361,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             public static void BackupAndGetData()
             {
               using (SQLiteConnection source = new SQLiteConnection(
-                  "FullUri=${srcFileName};"))
+                  "FullUri=${dstFileName};"))
               {
                 source.Open();
                 using (SQLiteConnection destination = new SQLiteConnection(
-                    "FullUri=${dstFileName};"))
+                    "FullUri=${srcFileName};"))
                 {
                   destination.Open();
 
@@ -417,11 +417,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             public static void BackupAndGetData()
             {
               using (SQLiteConnection source = new SQLiteConnection(
-                  "FullUri=${dstFileName};"))
+                  "FullUri=${srcFileName};"))
               {
                 source.Open();
                 using (SQLiteConnection destination = new SQLiteConnection(
-                    "FullUri=${srcFileName};"))
+                    "FullUri=${dstFileName};"))
                 {
                   destination.Open();
 
