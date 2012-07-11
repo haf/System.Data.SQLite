@@ -972,18 +972,17 @@ namespace System.Data.SQLite
       // First split into semi-colon delimited values.  The Split() function of SQLiteBase accounts for and properly
       // skips semi-colons in quoted strings
       string[] arParts = SQLiteConvert.Split(s, ';');
-      string[] arPiece;
 
       int x = arParts.Length;
       // For each semi-colon piece, split into key and value pairs by the presence of the = sign
       for (n = 0; n < x; n++)
       {
-        arPiece = SQLiteConvert.Split(arParts[n], '=');
-        if (arPiece.Length == 2)
-        {
-          ls.Add(arPiece[0], arPiece[1]);
-        }
-        else throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, "Invalid ConnectionString format for parameter \"{0}\"", (arPiece.Length > 0) ? arPiece[0] : "null"));
+        int indexOf = arParts[n].IndexOf('=');
+
+        if (indexOf != -1)
+          ls.Add(arParts[n].Substring(0, indexOf), arParts[n].Substring(indexOf + 1));
+        else
+          throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, "Invalid ConnectionString format for part \"{0}\"", arParts[n]));
       }
       return ls;
     }
@@ -1043,6 +1042,7 @@ namespace System.Data.SQLite
 
       _flags = (SQLiteConnectionFlags)Enum.Parse(typeof(SQLiteConnectionFlags), FindKey(opts, "Flags", "Default"), true);
 
+      bool fullUri = false;
       string fileName;
 
       if (Convert.ToInt32(FindKey(opts, "Version", "3"), CultureInfo.InvariantCulture) != 3)
@@ -1054,21 +1054,31 @@ namespace System.Data.SQLite
       {
         fileName = FindKey(opts, "Uri", "");
         if (String.IsNullOrEmpty(fileName))
-          throw new ArgumentException("Data Source cannot be empty.  Use :memory: to open an in-memory database");
+        {
+          fileName = FindKey(opts, "FullUri", "");
+          if (String.IsNullOrEmpty(fileName))
+            throw new ArgumentException("Data Source cannot be empty.  Use :memory: to open an in-memory database");
+          else
+            fullUri = true;
+        }
         else
           fileName = MapUriPath(fileName);
       }
 
-      if (String.Compare(fileName, ":MEMORY:", StringComparison.OrdinalIgnoreCase) == 0)
-        fileName = ":memory:";
-      else
+      if (!fullUri)
       {
+        if (String.Compare(fileName, ":MEMORY:", StringComparison.OrdinalIgnoreCase) == 0)
+          fileName = ":memory:";
+        else
+        {
 #if PLATFORM_COMPACTFRAMEWORK
-       if (fileName.StartsWith("./") || fileName.StartsWith(".\\"))
-         fileName = Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
+          if (fileName.StartsWith("./") || fileName.StartsWith(".\\"))
+            fileName = Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
 #endif
-       fileName = ExpandFileName(fileName);
+          fileName = ExpandFileName(fileName);
+        }
       }
+
       try
       {
         bool usePooling = (SQLiteConvert.ToBoolean(FindKey(opts, "Pooling", Boolean.FalseString)) == true);
@@ -1118,6 +1128,9 @@ namespace System.Data.SQLite
           flags |= SQLiteOpenFlagsEnum.ReadWrite;
         }
 
+        if (fullUri)
+            flags |= SQLiteOpenFlagsEnum.Uri;
+
         _sql.Open(fileName, _flags, flags, maxPoolSize, usePooling);
 
         _binaryGuid = (SQLiteConvert.ToBoolean(FindKey(opts, "BinaryGUID", Boolean.TrueString)) == true);
@@ -1132,7 +1145,10 @@ namespace System.Data.SQLite
         _password = null;
 #endif
 
-        _dataSource = Path.GetFileNameWithoutExtension(fileName);
+        if (!fullUri)
+          _dataSource = Path.GetFileNameWithoutExtension(fileName);
+        else
+          _dataSource = fileName;
 
         _version++;
 
@@ -1144,7 +1160,7 @@ namespace System.Data.SQLite
           {
             string defValue;
 
-            if (fileName != ":memory:")
+            if (!fullUri && fileName != ":memory:")
             {
               defValue = FindKey(opts, "Page Size", "1024");
               if (Convert.ToInt32(defValue, CultureInfo.InvariantCulture) != 1024)
