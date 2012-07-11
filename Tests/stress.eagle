@@ -26,8 +26,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   if {[info exists argv] && [llength $argv] > 0} then {
     parse options [list \
-        {null MustHaveIntegerValue -1 -1 -count0 $count(0)} \
-        {null MustHaveIntegerValue -1 -1 -count1 $count(1)}] $argv
+        [list null MustHaveIntegerValue -1 -1 -count0 $count(0)] \
+        [list null MustHaveIntegerValue -1 -1 -count1 $count(1)]] $argv
 
     set count(0) $options(-count0,value)
     set count(1) $options(-count1,value)
@@ -36,7 +36,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   tputs $test_channel [appendArgs \
-      "---- repeating all workloads " $count(0) " time(s)...\n"]
+      "---- workloads will repeat " $count(0) " time(s)...\n"]
 
   tputs $test_channel [appendArgs \
       "---- workloads will have " $count(1) " iteration(s)...\n"]
@@ -52,14 +52,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #1, CREATE TABLE statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 2} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
         puts -nonewline stdout 1; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -69,6 +68,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -77,14 +77,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #2, DROP TABLE statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 2} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "DROP TABLE IF EXISTS t" $index \;]
         puts -nonewline stdout 2; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -94,6 +93,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -102,14 +102,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #3, "small" SELECT statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 1} {$index <= $count} {incr index} {
         sql execute -execute reader $db [appendArgs \
             "SELECT x, y FROM " $table " WHERE z = 'small';"]
         puts -nonewline stdout 3; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -119,6 +118,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -127,14 +127,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #4, "big" SELECT statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 1} {$index <= $count} {incr index} {
         sql execute -execute reader $db [appendArgs \
             "SELECT x, y FROM " $table " WHERE z = 'big';"]
         puts -nonewline stdout 4; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -144,6 +143,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -152,8 +152,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #5, "small" INSERT statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "INSERT INTO " $table "(x, y, z) VALUES('" \
@@ -162,7 +162,6 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             "','small');"]
         puts -nonewline stdout 5; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -172,6 +171,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -180,8 +180,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #6, "big" INSERT statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "INSERT INTO " $table "(x, y, z) VALUES('" \
@@ -190,7 +190,6 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             "','big');"]
         puts -nonewline stdout 6; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -200,6 +199,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -208,15 +208,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #7, "small" UPDATE statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "UPDATE " $table \
             " SET y = '" [base64 encode [expr {randstr(10000)}]] \
             "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
         puts -nonewline stdout 7; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -226,6 +225,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -234,15 +234,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #8, "big" UPDATE statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "UPDATE " $table \
             " SET y = '" [base64 encode [expr {randstr(10000000)}]] \
             "' WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
         puts -nonewline stdout 8; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -252,6 +251,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -260,14 +260,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #9, "small" DELETE statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "DELETE FROM " $table \
             " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
         puts -nonewline stdout 9; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -277,6 +276,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -285,14 +285,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #10, "big" DELETE statements.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "DELETE FROM " $table \
             " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
         puts -nonewline stdout A; after [expr {int(rand() * 1000)}]
       }
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -302,6 +301,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
@@ -310,11 +310,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #11, VACUUM statement.
     #
+    setupDb $fileName "" "" "" "" "" false
     if {[catch {
-      setupDb $fileName "" "" "" "" "" false
       sql execute $db "VACUUM;"
       puts -nonewline stdout B; after [expr {int(rand() * 1000)}]
-      cleanupDb $fileName db false false
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
@@ -324,6 +323,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         puts stdout ""
       }
     }
+    cleanupDb $fileName db false false
   }]
 
   #############################################################################
