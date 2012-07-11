@@ -20,6 +20,12 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: Make sure all the variables used by this epilogue are unset.
+  #
+  unset -nocomplain memory stack name count passedOrSkipped percent \
+      exitCode
+
+  #
   # NOTE: Show when the tests actually ended (now).
   #
   tputs $test_channel [appendArgs "---- tests ended at " \
