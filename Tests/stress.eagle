@@ -21,19 +21,25 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
+  proc expectedError { error } {
+    return [expr {[regexp -- {\sno such table: t1\s} $error] || \
+        [regexp -- {\sdatabase is locked\s} $error]}]
+  }
+
+  #############################################################################
+
   proc showTest { indicator } {
-    puts -nonewline stdout $indicator; flush stdout
+    tputs $::test_channel $indicator
     after [expr {int(rand() * 1000)}]
   }
 
   #############################################################################
 
-  proc failThisTest { error } {
+  proc failTest { error } {
     set level [expr {[info level] - 1}]
 
-    puts stdout ""; flush stdout
-    puts stdout [appendArgs [info level $level] ": " $error]; flush stdout
-    puts stdout ""; flush stdout
+    tputs $::test_channel [appendArgs \
+        \n [info level $level] ": " $error \n]
 
     exit Failure; # halt all testing now.
   }
@@ -84,10 +90,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 1
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -107,10 +113,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 2
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -130,10 +136,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 3
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -153,10 +159,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 4
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -179,10 +185,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 5
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -204,10 +210,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 6
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -228,10 +234,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 7
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -252,10 +258,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 8
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -275,10 +281,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest 9
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -298,10 +304,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         showTest A
       }
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -318,10 +324,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       sql execute $db "VACUUM;"
       showTest B
     } error]} then {
-      if {[regexp -- {\sno such table: t1\s} $error]} then {
+      if {[expectedError $error]} then {
         showTest *
       } else {
-        failThisTest $error
+        failTest $error
       }
     }
     cleanupDb $dstFileName db false false
@@ -443,12 +449,15 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     foreach index(1) [array names thread] {
       $thread($index(1)) Join
     }
+
+    unset -nocomplain thread
   }
 
-  puts stdout ""
+  tputs $test_channel \n
 } -cleanup {
-  rename failThisTest ""
+  rename failTest ""
   rename showTest ""
+  rename expectedError ""
 
   cleanupDb $fileName(2)
   cleanupDb $fileName(1) srcDb
