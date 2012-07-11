@@ -474,12 +474,13 @@ namespace eval ::Eagle {
       #
       # NOTE: Is the specified database file name really an in-memory database?
       #
-      return [expr {$fileName eq ":memory:"}]
+      return [expr {$fileName eq ":memory:" || \
+          [string range $fileName 0 12] eq "file::memory:"}]
     }
 
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
-            {extra ""} {delete true} {varName db} } {
+            {extra ""} {delete true} {uri false} {varName db} } {
       #
       # NOTE: First, see if the caller has requested an in-memory database.
       #
@@ -521,9 +522,16 @@ namespace eval ::Eagle {
 
       #
       # NOTE: Start building the connection string.  The only required portion
-      #       of the connection string is the database file name itself.
+      #       of the connection string is the data source, which contains the
+      #       database file name itself.  If the caller wants to use a URI as
+      #       the data source, use the FullUri connection string property to
+      #       prevent the data source string from being mangled.
       #
-      set connection {Data Source=${fileName}}
+      if {$uri} then {
+        set connection {FullUri=${fileName}}
+      } else {
+        set connection {Data Source=${fileName}}
+      }
 
       #
       # NOTE: If the caller specified a journal mode, add the necessary portion
