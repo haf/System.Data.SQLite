@@ -21,6 +21,18 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
+  proc failThisTest { error } {
+    set level [expr {[info level] - 1}]
+
+    puts stdout ""
+    puts stdout [appendArgs [info level $level] ": " $error]
+    puts stdout ""
+
+    exit Failure; # halt all testing now.
+  }
+
+  #############################################################################
+
   set count(0) 1
   set count(1) 10
 
@@ -63,9 +75,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -88,9 +98,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -113,9 +121,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -138,9 +144,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -157,18 +161,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "INSERT INTO " $table "(x, y, z) VALUES('" \
-            [format %lX [expr {random()}]] ',' \
-            [base64 encode [expr {randstr(10000)}]] \
-            "','small');"]
+            [format %lX [expr {random()}]] "', '" \
+            [base64 encode -- [expr {randstr(10000)}]] \
+            "', 'small');"]
         puts -nonewline stdout 5; after [expr {int(rand() * 1000)}]
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -185,18 +187,15 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "INSERT INTO " $table "(x, y, z) VALUES('" \
-            [format %lX [expr {random()}]] ',' \
-            [base64 encode [expr {randstr(10000000)}]] \
-            "','big');"]
+            [format %lX [expr {random()}]] \
+            "', RANDOMBLOB(10000000), 'big');"]
         puts -nonewline stdout 6; after [expr {int(rand() * 1000)}]
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -212,7 +211,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "UPDATE " $table \
-            " SET y = '" [base64 encode [expr {randstr(10000)}]] \
+            " SET y = '" [base64 encode -- [expr {randstr(10000)}]] \
             "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
         puts -nonewline stdout 7; after [expr {int(rand() * 1000)}]
       }
@@ -220,9 +219,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -238,17 +235,15 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "UPDATE " $table \
-            " SET y = '" [base64 encode [expr {randstr(10000000)}]] \
-            "' WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
+            " SET y = RANDOMBLOB(10000000) WHERE x LIKE '" \
+            [format %X $index] "%' AND z = 'big';"]
         puts -nonewline stdout 8; after [expr {int(rand() * 1000)}]
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -271,9 +266,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -296,9 +289,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
@@ -318,9 +309,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
         puts -nonewline stdout *
       } else {
-        puts stdout ""
-        puts stdout [appendArgs [info level [info level]] ": " $error]
-        puts stdout ""
+        failThisTest $error
       }
     }
     cleanupDb $fileName db false false
