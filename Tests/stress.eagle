@@ -21,12 +21,19 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
+  proc showTest { indicator } {
+    puts -nonewline stdout $indicator; flush stdout
+    after [expr {int(rand() * 1000)}]
+  }
+
+  #############################################################################
+
   proc failThisTest { error } {
     set level [expr {[info level] - 1}]
 
-    puts stdout ""
-    puts stdout [appendArgs [info level $level] ": " $error]
-    puts stdout ""
+    puts stdout ""; flush stdout
+    puts stdout [appendArgs [info level $level] ": " $error]; flush stdout
+    puts stdout ""; flush stdout
 
     exit Failure; # halt all testing now.
   }
@@ -55,108 +62,113 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  setupDb [set fileName(1) :memory:] "" "" "" "" "" false srcDb
-  setupDb [set fileName(2) [file join [getDatabaseDirectory] stress.db]]
+  set fileName(1) "file::memory:?cache=shared"
+  set fileName(2) [file join [getDatabaseDirectory] stress.db]
 
   #############################################################################
 
-  set workload(1) [list [list srcDb fileName table count] {
+  setupDb $fileName(1) "" "" "" "" "" false true srcDb
+  setupDb $fileName(2)
+
+  #############################################################################
+
+  set workload(1) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #1, CREATE TABLE statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 2} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
-        puts -nonewline stdout 1; after [expr {int(rand() * 1000)}]
+        showTest 1
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(2) [list [list srcDb fileName table count] {
+  set workload(2) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #2, DROP TABLE statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 2} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "DROP TABLE IF EXISTS t" $index \;]
-        puts -nonewline stdout 2; after [expr {int(rand() * 1000)}]
+        showTest 2
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(3) [list [list srcDb fileName table count] {
+  set workload(3) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #3, "small" SELECT statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute -execute reader $db [appendArgs \
             "SELECT x, y FROM " $table " WHERE z = 'small';"]
-        puts -nonewline stdout 3; after [expr {int(rand() * 1000)}]
+        showTest 3
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(4) [list [list srcDb fileName table count] {
+  set workload(4) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #4, "big" SELECT statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute -execute reader $db [appendArgs \
             "SELECT x, y FROM " $table " WHERE z = 'big';"]
-        puts -nonewline stdout 4; after [expr {int(rand() * 1000)}]
+        showTest 4
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(5) [list [list srcDb fileName table count] {
+  set workload(5) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #5, "small" INSERT statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
@@ -164,168 +176,165 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             [format %lX [expr {random()}]] "', '" \
             [base64 encode -- [expr {randstr(10000)}]] \
             "', 'small');"]
-        puts -nonewline stdout 5; after [expr {int(rand() * 1000)}]
+        showTest 5
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(6) [list [list srcDb fileName table count] {
+  set workload(6) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #6, "big" INSERT statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs \
             "INSERT INTO " $table "(x, y, z) VALUES('" \
             [format %lX [expr {random()}]] \
             "', RANDOMBLOB(10000000), 'big');"]
-        puts -nonewline stdout 6; after [expr {int(rand() * 1000)}]
+        showTest 6
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(7) [list [list srcDb fileName table count] {
+  set workload(7) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #7, "small" UPDATE statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "UPDATE " $table \
             " SET y = '" [base64 encode -- [expr {randstr(10000)}]] \
             "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
-        puts -nonewline stdout 7; after [expr {int(rand() * 1000)}]
+        showTest 7
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(8) [list [list srcDb fileName table count] {
+  set workload(8) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #8, "big" UPDATE statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "UPDATE " $table \
             " SET y = RANDOMBLOB(10000000) WHERE x LIKE '" \
             [format %X $index] "%' AND z = 'big';"]
-        puts -nonewline stdout 8; after [expr {int(rand() * 1000)}]
+        showTest 8
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(9) [list [list srcDb fileName table count] {
+  set workload(9) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #9, "small" DELETE statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "DELETE FROM " $table \
             " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
-        puts -nonewline stdout 9; after [expr {int(rand() * 1000)}]
+        showTest 9
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(10) [list [list srcDb fileName table count] {
+  set workload(10) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #10, "big" DELETE statements.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       for {set index 1} {$index <= $count} {incr index} {
         sql execute $db [appendArgs "DELETE FROM " $table \
             " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
-        puts -nonewline stdout A; after [expr {int(rand() * 1000)}]
+        showTest A
       }
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(11) [list [list srcDb fileName table count] {
+  set workload(11) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #11, VACUUM statement.
     #
-    setupDb $fileName "" "" "" "" "" false
+    setupDb $dstFileName "" "" "" "" "" false
     if {[catch {
       sql execute $db "VACUUM;"
-      puts -nonewline stdout B; after [expr {int(rand() * 1000)}]
+      showTest B
     } error]} then {
       if {[regexp -- {\sno such table: t1\s} $error]} then {
-        puts -nonewline stdout *
+        showTest *
       } else {
         failThisTest $error
       }
     }
-    cleanupDb $fileName db false false
+    cleanupDb $dstFileName db false false
   }]
 
   #############################################################################
 
-  set workload(12) [list [list srcDb fileName table count] {
+  set workload(12) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #12, backup to in-memory database.
     #
     set id [object invoke Interpreter.GetActive NextId]
 
-    set source [object invoke -flags +NonPublic -objectflags +NoDispose \
-        Interpreter.GetActive.connections get_Item $srcDb]
-
     set code [compileCSharpWith [subst {
       using System;
       using System.Data.SQLite;
@@ -335,15 +344,18 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       {
         public static class Test${id}
         {
-          public static void BackupAndGetData(
-            SQLiteConnection source
-            )
+          public static void BackupAndGetData()
           {
-            using (SQLiteConnection destination = new SQLiteConnection(
-                "Data Source=:memory:;"))
+            using (SQLiteConnection source = new SQLiteConnection(
+                "FullUri=${srcFileName};"))
             {
-              destination.Open();
-              source.BackupDatabase(destination, "main", "main", -1, null, 0);
+              source.Open();
+              using (SQLiteConnection destination = new SQLiteConnection(
+                  "FullUri=${dstFileName};"))
+              {
+                destination.Open();
+                source.BackupDatabase(destination, "main", "main", -1, null, 0);
+              }
             }
           }
 
@@ -357,24 +369,21 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       }
     }] true true true results errors System.Data.SQLite.dll]
     if {$code eq "Ok"} then {
-      object invoke _Dynamic${id}.Test${id} BackupAndGetData $source
+      object invoke _Dynamic${id}.Test${id} BackupAndGetData
     } else {
       error $errors
     }
-    puts -nonewline stdout C; after [expr {int(rand() * 1000)}]
+    showTest C
   }]
 
   #############################################################################
 
-  set workload(13) [list [list srcDb fileName table count] {
+  set workload(13) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #13, backup from an in-memory database.
     #
     set id [object invoke Interpreter.GetActive NextId]
 
-    set source [object invoke -flags +NonPublic -objectflags +NoDispose \
-        Interpreter.GetActive.connections get_Item $srcDb]
-
     set code [compileCSharpWith [subst {
       using System;
       using System.Data.SQLite;
@@ -384,15 +393,18 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       {
         public static class Test${id}
         {
-          public static void BackupAndGetData(
-            SQLiteConnection source
-            )
+          public static void BackupAndGetData()
           {
-            using (SQLiteConnection destination = new SQLiteConnection(
-                "Data Source=${fileName};"))
+            using (SQLiteConnection source = new SQLiteConnection(
+                "FullUri=${dstFileName};"))
             {
-              destination.Open();
-              source.BackupDatabase(destination, "main", "main", -1, null, 0);
+              source.Open();
+              using (SQLiteConnection destination = new SQLiteConnection(
+                  "FullUri=${srcFileName};"))
+              {
+                destination.Open();
+                source.BackupDatabase(destination, "main", "main", -1, null, 0);
+              }
             }
           }
 
@@ -406,11 +418,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       }
     }] true true true results errors System.Data.SQLite.dll]
     if {$code eq "Ok"} then {
-      object invoke _Dynamic${id}.Test${id} BackupAndGetData $source
+      object invoke _Dynamic${id}.Test${id} BackupAndGetData
     } else {
       error $errors
     }
-    puts -nonewline stdout D; after [expr {int(rand() * 1000)}]
+    showTest D
   }]
 } -body {
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
@@ -420,7 +432,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
     foreach index(1) [array names workload] {
       set thread($index(1)) [object create -alias System.Threading.Thread \
-          [list apply $workload($index(1)) $srcDb $fileName(2) t1 $count(1)]]
+          [list apply $workload($index(1)) $fileName(1) $fileName(2) t1 \
+          $count(1)]]
     }
 
     foreach index(1) [array names thread] {
@@ -434,6 +447,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   puts stdout ""
 } -cleanup {
+  rename failThisTest ""
+  rename showTest ""
+
   cleanupDb $fileName(2)
   cleanupDb $fileName(1) srcDb
 
