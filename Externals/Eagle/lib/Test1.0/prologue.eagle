@@ -20,6 +20,13 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: Make sure all the variables used by this prologue are unset.
+  #
+  unset -nocomplain pkg_dir pattern exec dummy directory name value \
+      expr publicKeyToken encoding memory stack drive server database \
+      timeout user password percent checkout timeStamp
+
+  #
   # NOTE: Set the location of the test suite, if necessary.
   #
   if {![info exists test_path]} then {
