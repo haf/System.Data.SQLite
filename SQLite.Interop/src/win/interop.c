@@ -18,6 +18,7 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 typedef void (*SQLITEUSERFUNC)(sqlite3_context *, int, sqlite3_value **);
 typedef void (*SQLITEFUNCFINAL)(sqlite3_context *);
 
+#if SQLITE_VERSION_NUMBER < 3007014
 SQLITE_PRIVATE void * sqlite3DbMallocZero_interop(sqlite3 *db, int n)
 {
   void *p;
@@ -44,6 +45,7 @@ SQLITE_PRIVATE void sqlite3DbFree_interop(sqlite3 *db, void *p)
     sqlite3_mutex_leave(db->mutex);
   }
 }
+#endif
 
 /*
     The goal of this version of close is different than that of sqlite3_close(), and is designed to lend itself better to .NET's non-deterministic finalizers and
@@ -60,12 +62,10 @@ SQLITE_PRIVATE void sqlite3DbFree_interop(sqlite3 *db, void *p)
 */
 SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 {
-  int ret;
-  
 #if SQLITE_VERSION_NUMBER >= 3007014
-  ret = sqlite3_close_v2(db);
+  return sqlite3_close_v2(db);
 #else
-  ret = sqlite3_close(db);
+  int ret = sqlite3_close(db);
 
   if (ret == SQLITE_BUSY)
   {
@@ -116,9 +116,8 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
     sqlite3_mutex_leave(db->mutex);
     ret = sqlite3_close(db);
   }
-#endif
-
   return ret;
+#endif
 }
 
 SQLITE_API int WINAPI sqlite3_open_interop(const char*filename, int flags, sqlite3 **ppdb)
@@ -281,11 +280,15 @@ SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 
 SQLITE_API int WINAPI sqlite3_reset_interop(sqlite3_stmt *stmt)
 {
+#if SQLITE_VERSION_NUMBER >= 3007014
+  return sqlite3_reset(stmt);
+#else
   int ret;
 
   if (((Vdbe *)stmt)->magic == VDBE_MAGIC_DEAD) return SQLITE_SCHEMA;
   ret = sqlite3_reset(stmt);
   return ret;
+#endif
 }
 
 SQLITE_API int WINAPI sqlite3_create_function_interop(sqlite3 *psql, const char *zFunctionName, int nArg, int eTextRep, void *pvUser, SQLITEUSERFUNC func, SQLITEUSERFUNC funcstep, SQLITEFUNCFINAL funcfinal, int needCollSeq)
