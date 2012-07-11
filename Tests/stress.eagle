@@ -481,7 +481,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   cleanupDb $fileName(2)
   cleanupDb $fileName(1) srcDb
 
-  unset -nocomplain thread index workload srcDb db fileName options count
+  unset -nocomplain thread index workload srcDb db fileName compiled options \
+      count
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
 
