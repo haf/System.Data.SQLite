@@ -1,0 +1,286 @@
+###############################################################################
+#
+# stress.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test stress-1.1 {multithreaded stress testing} -setup {
+  setupDb [set fileName(1) :memory:] "" "" "" "" "" false memDb
+  setupDb [set fileName(2) [file join [getDatabaseDirectory] stress.db]]
+
+  #############################################################################
+
+  set workload(1) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #1, CREATE TABLE statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 2} {$index <= $count} {incr index} {
+      sql execute $db [appendArgs \
+          "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
+      puts -nonewline stdout 1; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(2) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #2, DROP TABLE statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 2} {$index <= $count} {incr index} {
+      sql execute $db [appendArgs \
+          "DROP TABLE IF EXISTS t" $index \;]
+      puts -nonewline stdout 2; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(3) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #3, "small" SELECT statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 1} {$index <= $count} {incr index} {
+      sql execute -execute reader $db [appendArgs \
+          "SELECT x, y FROM " $table " WHERE z = 'small';"]
+      puts -nonewline stdout 3; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(4) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #4, "big" SELECT statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 1} {$index <= $count} {incr index} {
+      sql execute -execute reader $db [appendArgs \
+          "SELECT x, y FROM " $table " WHERE z = 'big';"]
+      puts -nonewline stdout 4; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(5) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #5, "small" INSERT statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 1} {$index <= $count} {incr index} {
+      sql execute $db [appendArgs \
+          "INSERT INTO " $table "(x, y, z) VALUES('" \
+          [format %lX [expr {random()}]] ',' \
+          [base64 encode [expr {randstr(10000)}]] \
+          "','small');"]
+      puts -nonewline stdout 5; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(6) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #6, "big" INSERT statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 1} {$index <= $count} {incr index} {
+      sql execute $db [appendArgs \
+          "INSERT INTO " $table "(x, y, z) VALUES('" \
+          [format %lX [expr {random()}]] ',' \
+          [base64 encode [expr {randstr(10000000)}]] \
+          "','big');"]
+      puts -nonewline stdout 6; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(7) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #7, "small" UPDATE statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 1} {$index <= $count} {incr index} {
+      sql execute $db [appendArgs "UPDATE " $table \
+          " SET y = '" [base64 encode [expr {randstr(10000)}]] \
+          "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
+      puts -nonewline stdout 7; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(8) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #8, "big" UPDATE statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 1} {$index <= $count} {incr index} {
+      sql execute $db [appendArgs "UPDATE " $table \
+          " SET y = '" [base64 encode [expr {randstr(10000000)}]] \
+          "' WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
+      puts -nonewline stdout 8; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(9) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #9, "small" DELETE statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 1} {$index <= $count} {incr index} {
+      sql execute $db [appendArgs "DELETE FROM " $table \
+          " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
+      puts -nonewline stdout 9; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(10) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #10, "big" DELETE statements.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    for {set index 1} {$index <= $count} {incr index} {
+      sql execute $db [appendArgs "DELETE FROM " $table \
+          " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
+      puts -nonewline stdout A; after [expr {int(rand() * 1000)}]
+    }
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(11) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #11, VACUUM statement.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    sql execute $db "VACUUM;"
+    puts -nonewline stdout B; after [expr {int(rand() * 1000)}]
+    cleanupDb $fileName db false false
+  }]
+
+  #############################################################################
+
+  set workload(12) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #12, backup from an in-memory database.
+    #
+    set id [object invoke Interpreter.GetActive NextId]
+
+    set memSource [object invoke -flags +NonPublic -objectflags +NoDispose \
+        Interpreter.GetActive.connections get_Item $memDb]
+
+    set code [compileCSharpWith [subst {
+      using System;
+      using System.Data.SQLite;
+      using System.Text;
+
+      namespace _Dynamic${id}
+      {
+        public static class Test${id}
+        {
+          public static void BackupAndGetData(
+            SQLiteConnection source
+            )
+          {
+            using (SQLiteConnection destination = new SQLiteConnection(
+                "Data Source=${fileName};"))
+            {
+              destination.Open();
+              source.BackupDatabase(destination, "main", "main", -1, null, 0);
+            }
+          }
+
+          /////////////////////////////////////////////////////////////////////
+
+          public static void Main()
+          {
+            // do nothing.
+          }
+        }
+      }
+    }] true true true results errors System.Data.SQLite.dll]
+    if {$code eq "Ok"} then {
+      object invoke _Dynamic${id}.Test${id} BackupAndGetData $memSource
+    } else {
+      error $errors
+    }
+    puts -nonewline stdout C; after [expr {int(rand() * 1000)}]
+  }]
+
+  #############################################################################
+
+  set workload(13) [list [list memDb fileName table count] {
+    #
+    # NOTE: Workload #13, backup to in-memory database.
+    #
+    setupDb $fileName "" "" "" "" "" false
+    puts -nonewline stdout D; after [expr {int(rand() * 1000)}]
+    cleanupDb $fileName db false false
+  }]
+} -body {
+  sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
+
+  unset -nocomplain thread
+
+  foreach index [array names workload] {
+    set thread($index) [object create -alias System.Threading.Thread \
+        [list apply $workload($index) $memDb $fileName(2) t1 10]]
+  }
+
+  foreach index [array names thread] {
+    $thread($index) Start
+  }
+
+  foreach index [array names thread] {
+    $thread($index) Join
+  }
+
+  puts stdout ""
+} -cleanup {
+  cleanupDb $fileName(2)
+  cleanupDb $fileName(1) memDb
+
+  unset -nocomplain thread workload index memDb db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
