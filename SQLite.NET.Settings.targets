@@ -79,6 +79,13 @@
     <ConfigurationSuffix Condition="'$(ConfigurationSuffix)' == ''"></ConfigurationSuffix>
 
     <!--
+        NOTE: Enable extra internal state checking for the public members of
+              several key classes that use a connection.  By default, this is
+              disabled.
+    -->
+    <CheckState Condition="'$(CheckState)' == ''">false</CheckState>
+
+    <!--
         NOTE: For interaction with the native SQLite implementation, use the
               custom built interop DLL (i.e. "SQLite.Interop.dll")?  By default,
               this is enabled.  This property is mutually exclusive with the

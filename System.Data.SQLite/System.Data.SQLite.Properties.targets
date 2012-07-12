@@ -33,6 +33,13 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Enable extra internal state checking?
+  -->
+  <PropertyGroup Condition="'$(CheckState)' != 'false'">
+    <DefineConstants>$(DefineConstants);CHECK_STATE</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: For interaction with the native SQLite implementation, use the
             custom build interop DLL (i.e. "SQLite.Interop.DLL")?
   -->

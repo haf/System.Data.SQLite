@@ -44,7 +44,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The opaque pointer returned to us by the sqlite provider
     /// </summary>
-    protected SQLiteConnectionHandle _sql;
+    protected internal SQLiteConnectionHandle _sql;
     protected string _fileName;
     protected bool _usePool;
     protected int _poolVersion;

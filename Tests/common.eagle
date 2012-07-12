@@ -925,6 +925,9 @@ namespace eval ::Eagle {
         #       compiled into the SQLite interop assembly.
         #
         checkForSQLiteDefineConstant $::test_channel \
+            CHECK_STATE
+
+        checkForSQLiteDefineConstant $::test_channel \
             USE_INTEROP_DLL
 
         checkForSQLiteDefineConstant $::test_channel \

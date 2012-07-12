@@ -10,6 +10,7 @@ namespace System.Data.SQLite
   using System;
   using System.Data;
   using System.Data.Common;
+  using System.Diagnostics;
   using System.Collections.Generic;
   using System.Globalization;
   using System.ComponentModel;
@@ -456,6 +457,36 @@ namespace System.Data.SQLite
         }
     }
     #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    [Conditional("CHECK_STATE")]
+    internal static void Check(SQLiteConnection connection)
+    {
+        if (connection == null)
+            throw new ArgumentNullException("connection");
+
+        connection.CheckDisposed();
+
+        if (connection._connectionState != ConnectionState.Open)
+            throw new InvalidOperationException("The connection is not open.");
+
+        SQLite3 sql = connection._sql as SQLite3;
+
+        if (sql == null)
+            throw new InvalidOperationException("The connection handle wrapper is null.");
+
+        SQLiteConnectionHandle handle = sql._sql;
+
+        if (handle == null)
+            throw new InvalidOperationException("The connection handle is null.");
+
+        if (handle.IsInvalid)
+            throw new InvalidOperationException("The connection handle is invalid.");
+
+        if (handle.IsClosed)
+            throw new InvalidOperationException("The connection handle is closed.");
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -10,6 +10,7 @@ namespace System.Data.SQLite
   using System;
   using System.Data;
   using System.Data.Common;
+  using System.Diagnostics;
   using System.Collections.Generic;
   using System.ComponentModel;
 
@@ -141,6 +142,18 @@ namespace System.Data.SQLite
 
       if (transaction != null)
         Transaction = transaction;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    [Conditional("CHECK_STATE")]
+    internal static void Check(SQLiteCommand command)
+    {
+        if (command == null)
+            throw new ArgumentNullException("command");
+
+        command.CheckDisposed();
+        SQLiteConnection.Check(command._cnn);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -339,6 +352,7 @@ namespace System.Data.SQLite
       get
       {
         CheckDisposed();
+
         return _commandText;
       }
       set
@@ -587,6 +601,7 @@ namespace System.Data.SQLite
     public new SQLiteDataReader ExecuteReader(CommandBehavior behavior)
     {
       CheckDisposed();
+      SQLiteConnection.Check(_cnn);
       InitializeForReader();
 
       SQLiteDataReader rd = new SQLiteDataReader(this, behavior);
@@ -602,6 +617,7 @@ namespace System.Data.SQLite
     public new SQLiteDataReader ExecuteReader()
     {
       CheckDisposed();
+      SQLiteConnection.Check(_cnn);
       return ExecuteReader(CommandBehavior.Default);
     }
 
@@ -620,6 +636,7 @@ namespace System.Data.SQLite
     public override int ExecuteNonQuery()
     {
       CheckDisposed();
+      SQLiteConnection.Check(_cnn);
 
       using (SQLiteDataReader reader = ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
       {
@@ -636,6 +653,7 @@ namespace System.Data.SQLite
     public override object ExecuteScalar()
     {
       CheckDisposed();
+      SQLiteConnection.Check(_cnn);
 
       using (SQLiteDataReader reader = ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
       {
@@ -651,6 +669,7 @@ namespace System.Data.SQLite
     public override void Prepare()
     {
       CheckDisposed();
+      SQLiteConnection.Check(_cnn);
     }
 
     /// <summary>

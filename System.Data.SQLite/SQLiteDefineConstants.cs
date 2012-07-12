@@ -12,6 +12,10 @@ namespace System.Data.SQLite
     internal static class SQLiteDefineConstants
     {
         public static readonly IList<string> OptionList = new List<string>(new string[] {
+#if CHECK_STATE
+            "CHECK_STATE",
+#endif
+
 #if DEBUG
             "DEBUG",
 #endif

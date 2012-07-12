@@ -124,8 +124,9 @@ runTest {test tkt-e1b2e0f769-1.1 {data reader cleanup} -setup {
   unset -nocomplain result2 result1 code results errors sql table dataSource \
       id x db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 3 Ok\
+{eagle monoBug28 !defineConstant.System.Data.SQLite.CHECK_STATE command.sql\
+compile.DATA SQLite System.Data.SQLite} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 3 Ok\
 System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 0$}}
 
 ###############################################################################

@@ -116,6 +116,7 @@ namespace System.Data.SQLite
     public override void Commit()
     {
       CheckDisposed();
+      SQLiteConnection.Check(_cnn);
       IsValid(true);
 
       if (_cnn._transactionLevel - 1 == 0)
@@ -160,6 +161,7 @@ namespace System.Data.SQLite
     public override void Rollback()
     {
       CheckDisposed();
+      SQLiteConnection.Check(_cnn);
       IsValid(true);
       IssueRollback(true);
     }

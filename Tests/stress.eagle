@@ -47,7 +47,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   set count(0) 1
-  set count(1) 10
+  set count(1) 5
 
   if {[info exists argv] && [llength $argv] > 0} then {
     parse options [list \
