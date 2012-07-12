@@ -156,23 +156,38 @@ namespace eval ::Eagle {
       }
     }
 
-    checkForTestOverrides stdout \
-        [list binary_directory build_base_directory build_directory \
-              common_directory connection_flags database_directory \
-              datetime_format test_configuration test_year] false
+    #
+    # NOTE: Check for any overridden settings that may have been specified via
+    #       the command line, etc.
+    #
+    checkForTestOverrides stdout [list binary_directory build_base_directory \
+        build_directory common_directory connection_flags database_directory \
+        datetime_format test_configuration test_year vendor_directory] false
 
     #
     # NOTE: This variable will contain the name of the directory containing the
-    #       vendor-specific testing infrastructure.
+    #       vendor-specific testing infrastructure.  If the variable does not
+    #       already exist, create it; otherwise, it has been overridden and the
+    #       existing value should be left intact.
     #
-    set ::vendor_directory ""
+    set have_vendor_directory [info exists ::vendor_directory]
+
+    if {!$have_vendor_directory} then {
+      set ::vendor_directory ""
+    }
 
     #
     # NOTE: This procedure will attempt to find the vendor-specific testing
     #       infrastructure directory and add it to the auto-path for the
-    #       current interpreter.
+    #       current interpreter.  Normally, this will also set the variable
+    #       created above to point to the directory added to the auto-path;
+    #       however, this will not be done if the variable was not created
+    #       by us.
     #
-    addTestSuiteToAutoPath stdout ::vendor_directory false
+    addTestSuiteToAutoPath stdout [expr {$have_vendor_directory ? "" : \
+        "::vendor_directory"}] false
+
+    unset have_vendor_directory
 
     #
     # NOTE: If we actually found a vendor-specific testing infrastructure
