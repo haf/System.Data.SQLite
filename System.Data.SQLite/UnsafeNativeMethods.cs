@@ -8,7 +8,8 @@
 namespace System.Data.SQLite
 {
   using System;
-#if PRELOAD_NATIVE_LIBRARY || DEBUG
+
+#if !NET_COMPACT_20 && (TRACE_PRELOAD || TRACE_HANDLE)
   using System.Diagnostics;
 #endif
 
@@ -425,9 +426,11 @@ namespace System.Data.SQLite
               // NOTE: Show exactly where we are trying to load the native
               //       SQLite library from.
               //
+#if !NET_COMPACT_20 && TRACE_PRELOAD
               Trace.WriteLine(String.Format(
                   "Trying to load native SQLite library \"{0}\"...",
                   fileName));
+#endif
 
               //
               // NOTE: Attempt to load the native library.  This will either
@@ -436,8 +439,13 @@ namespace System.Data.SQLite
               //
               return LoadLibrary(fileName);
           }
+#if !NET_COMPACT_20 && TRACE_PRELOAD
           catch (Exception e)
+#else
+          catch (Exception)
+#endif
           {
+#if !NET_COMPACT_20 && TRACE_PRELOAD
               try
               {
                   //
@@ -459,6 +467,7 @@ namespace System.Data.SQLite
               {
                   // do nothing.
               }
+#endif
           }
 
           return IntPtr.Zero;
@@ -1432,7 +1441,7 @@ namespace System.Data.SQLite
         if (localHandle != IntPtr.Zero)
           SQLiteBase.CloseConnection(this, localHandle);
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
         try
         {
           Trace.WriteLine(String.Format(
@@ -1454,13 +1463,13 @@ namespace System.Data.SQLite
         return true;
 #endif
       }
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
       catch (SQLiteException e)
 #else
       catch (SQLiteException)
 #endif
       {
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
         try
         {
           Trace.WriteLine(String.Format(
@@ -1529,7 +1538,7 @@ namespace System.Data.SQLite
         if (localHandle != IntPtr.Zero)
           SQLiteBase.FinalizeStatement(cnn, localHandle);
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
         try
         {
           Trace.WriteLine(String.Format(
@@ -1551,13 +1560,13 @@ namespace System.Data.SQLite
         return true;
 #endif
       }
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
       catch (SQLiteException e)
 #else
       catch (SQLiteException)
 #endif
       {
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
         try
         {
           Trace.WriteLine(String.Format(
@@ -1626,7 +1635,7 @@ namespace System.Data.SQLite
               if (localHandle != IntPtr.Zero)
                   SQLiteBase.FinishBackup(cnn, localHandle);
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
               try
               {
                   Trace.WriteLine(String.Format(
@@ -1648,13 +1657,13 @@ namespace System.Data.SQLite
               return true;
 #endif
           }
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
           catch (SQLiteException e)
 #else
           catch (SQLiteException)
 #endif
           {
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_HANDLE
               try
               {
                   Trace.WriteLine(String.Format(

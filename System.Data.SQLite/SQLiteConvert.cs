@@ -9,7 +9,7 @@ namespace System.Data.SQLite
 {
   using System;
 
-#if DEBUG
+#if !NET_COMPACT_20 && TRACE_WARNING
   using System.Diagnostics;
 #endif
 
@@ -738,7 +738,7 @@ namespace System.Data.SQLite
 
       string defaultTypeName = String.Empty;
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_WARNING
       Trace.WriteLine(String.Format(
           "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
           defaultTypeName, typ));
@@ -932,7 +932,7 @@ namespace System.Data.SQLite
 
       DbType defaultDbType = DbType.Object;
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_WARNING
       Trace.WriteLine(String.Format(
           "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
           defaultDbType, Name));

@@ -21,6 +21,11 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
+  unset -nocomplain thread index workload srcDb db fileName compiled options \
+      count
+
+  #############################################################################
+
   proc expectedError { error } {
     return [expr {[regexp -- {\sno such table: t1\s} $error] || \
         [regexp -- {\sdatabase is locked\s} $error]}]
@@ -75,6 +80,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   set fileName(1) "file::memory:?cache=shared"
   set fileName(2) [file join [getDatabaseDirectory] stress.db]
+
+  #############################################################################
+
+  #
+  # NOTE: Make sure to remove any stale database from previous test runs.
+  #
+  cleanupFile $fileName(2)
 
   #############################################################################
 
@@ -480,6 +492,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   cleanupDb $fileName(2)
   cleanupDb $fileName(1) srcDb
+
+  foreach index(2) [array names workload] {
+    catch {
+      object removecallback [list apply $workload($index(2)) $fileName(1) \
+          $fileName(2) t1 $count(1)]
+    }
+  }
 
   unset -nocomplain thread index workload srcDb db fileName compiled options \
       count

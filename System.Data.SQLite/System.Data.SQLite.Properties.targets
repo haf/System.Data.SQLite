@@ -99,4 +99,29 @@
   <PropertyGroup Condition="'$(InteropCodec)' != 'false'">
     <DefineConstants>$(DefineConstants);INTEROP_CODEC</DefineConstants>
   </PropertyGroup>
+
+  <!--
+      NOTE: Enable various Trace.WriteLine statements included in the code,
+            based on several criteria (see the "SQLite.NET.Settings.targets"
+            file for more information).
+  -->
+  <PropertyGroup Condition="'$(TraceConnection)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACE_CONNECTION</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TraceHandle)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACE_HANDLE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TracePreLoad)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACE_PRELOAD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TraceStatement)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACE_STATEMENT</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TraceWarning)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACE_WARNING</DefineConstants>
+  </PropertyGroup>
 </Project>

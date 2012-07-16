@@ -60,6 +60,26 @@ namespace System.Data.SQLite
             "TRACE",
 #endif
 
+#if TRACE_CONNECTION
+            "TRACE_CONNECTION",
+#endif
+
+#if TRACE_HANDLE
+            "TRACE_HANDLE",
+#endif
+
+#if TRACE_PRELOAD
+            "TRACE_PRELOAD",
+#endif
+
+#if TRACE_STATEMENT
+            "TRACE_STATEMENT",
+#endif
+
+#if TRACE_WARNING
+            "TRACE_WARNING",
+#endif
+
 #if USE_INTEROP_DLL
             "USE_INTEROP_DLL",
 #endif

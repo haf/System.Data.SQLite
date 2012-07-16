@@ -169,6 +169,45 @@
 
   <!--
   ******************************************************************************
+  **                             Trace Properties                             **
+  ******************************************************************************
+  -->
+
+  <PropertyGroup>
+    <!--
+        NOTE: Enable tracing of events related to connection handling?  By
+              default, this is disabled.
+    -->
+    <TraceConnection Condition="'$(TraceConnection)' == ''">false</TraceConnection>
+
+    <!--
+        NOTE: Enable tracing of events related to CriticalHandle handling?  By
+              default, this is disabled.
+    -->
+    <TraceHandle Condition="'$(TraceHandle)' == ''">false</TraceHandle>
+
+    <!--
+        NOTE: Enable tracing of events related to the native library pre-loading
+              code?  By default, this is enabled.
+    -->
+    <TracePreLoad Condition="'$(TracePreLoad)' == ''">true</TracePreLoad>
+
+    <!--
+        NOTE: Enable tracing of events related to the prepared statements?  By
+              default, this is disabled.
+    -->
+    <TraceStatement Condition="'$(TraceStatement)' == ''">false</TraceStatement>
+
+    <!--
+        NOTE: Enable tracing of potentially important, but non-fatal error
+              conditions that cannot be reported another way?  By default, this
+              is enabled.
+    -->
+    <TraceWarning Condition="'$(TraceWarning)' == ''">true</TraceWarning>
+  </PropertyGroup>
+
+  <!--
+  ******************************************************************************
   **                            Warning Properties                            **
   ******************************************************************************
   -->

@@ -8,9 +8,11 @@
 namespace System.Data.SQLite
 {
   using System;
-#if DEBUG
+
+#if !NET_COMPACT_20 && TRACE_CONNECTION
   using System.Diagnostics;
 #endif
+
   using System.Runtime.InteropServices;
 
   /// <summary>
@@ -99,7 +101,7 @@ namespace System.Data.SQLite
       {
         _sql = SQLiteConnectionPool.Remove(strFilename, maxPoolSize, out _poolVersion);
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_CONNECTION
         Trace.WriteLine(String.Format("Open (Pool): {0}", (_sql != null) ? _sql.ToString() : "<null>"));
 #endif
       }
@@ -117,7 +119,7 @@ namespace System.Data.SQLite
         int n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
 #endif
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_CONNECTION
         Trace.WriteLine(String.Format("Open: {0}", db));
 #endif
 

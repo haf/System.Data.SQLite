@@ -9,9 +9,11 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
-#if DEBUG
+
+#if !NET_COMPACT_20 && (TRACE_CONNECTION || TRACE_STATEMENT)
   using System.Diagnostics;
 #endif
+
   using System.Runtime.InteropServices;
   using System.Text;
 
@@ -120,7 +122,7 @@ namespace System.Data.SQLite
               SQLiteBase.ResetConnection(_sql, _sql);
               SQLiteConnectionPool.Add(_fileName, _sql, _poolVersion);
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_CONNECTION
               Trace.WriteLine(String.Format("Close (Pool): {0}", _sql));
 #endif
           }
@@ -268,7 +270,7 @@ namespace System.Data.SQLite
       {
         _sql = SQLiteConnectionPool.Remove(strFilename, maxPoolSize, out _poolVersion);
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_CONNECTION
         Trace.WriteLine(String.Format("Open (Pool): {0}", (_sql != null) ? _sql.ToString() : "<null>"));
 #endif
       }
@@ -283,7 +285,7 @@ namespace System.Data.SQLite
         int n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, (int)openFlags, IntPtr.Zero);
 #endif
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_CONNECTION
         Trace.WriteLine(String.Format("Open: {0}", db));
 #endif
 
@@ -472,7 +474,7 @@ namespace System.Data.SQLite
           len = -1;
 #endif
 
-#if DEBUG && !NET_COMPACT_20
+#if !NET_COMPACT_20 && TRACE_STATEMENT
           Trace.WriteLine(String.Format("Prepare: {0}", stmt));
 #endif
 
@@ -1699,7 +1701,7 @@ namespace System.Data.SQLite
                 //       In that case it will always return SQLITE_MISUSE.
                 //
                 int rc = UnsafeNativeMethods.sqlite3_config_none(
-                    (int)SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE);
+                    SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE);
 
                 return (rc == /* SQLITE_MISUSE */ 21);
 #if !PLATFORM_COMPACTFRAMEWORK

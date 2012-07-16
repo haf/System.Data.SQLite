@@ -14,6 +14,7 @@
     <li>Improve support for the standard SQLite core library in the LINQ assembly and the test suite.</li>
     <li>Add SetMemoryStatus static method to the SQLiteConnection class.</li>
     <li>Improve threaded handling of the delegate used by the SQLiteLog class.</li>
+    <li>Add define constants to support enabling or disabling individual groups of trace statements.</li>
 </ul>
 <p>
     <b>1.0.81.0 - May 27, 2012</b>
