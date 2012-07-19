@@ -1532,6 +1532,11 @@ if {![info exists no([file tail [info script]])]} then {
     ###########################################################################
   } else {
     #
+    # NOTE: Make sure that Tcl honors the Eagle test constraints.
+    #
+    configureTcltest $test_flags(-constraints) [list] false
+
+    #
     # HACK: Reset the test counts for tcltest.
     #
     set ::tcltest::numTests(Total) 0

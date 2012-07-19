@@ -1364,7 +1364,7 @@ namespace eval ::Eagle {
     }
   }
 
-  proc configureTcltest { imports force } {
+  proc configureTcltest { constraints imports force } {
     if {[isEagle]} then {
       #
       # HACK: Flag the "test" and "runTest" script library procedures so
@@ -1403,14 +1403,28 @@ namespace eval ::Eagle {
       package provide tcltest 2.2.10; # Tcl 8.4
     } else {
       #
-      # NOTE: Load the tcltest package.
+      # NOTE: Attempt to detect if the tcltest package is already loaded.
+      #
+      set loaded [expr {[catch {package present tcltest}] == 0}]
+
+      #
+      # NOTE: Always attempt to load the tcltest package.
       #
       package require tcltest
 
       #
-      # NOTE: Configure tcltest for our use.
+      # NOTE: Configure tcltest for our use (only when it was not loaded).
       #
-      ::tcltest::configure -verbose bpste
+      if {!$loaded} then {
+        ::tcltest::configure -verbose bpste
+      }
+
+      #
+      # NOTE: We need to copy the Eagle test constraints over to Tcl.
+      #
+      if {[llength $constraints] > 0} then {
+        ::tcltest::configure -constraints $constraints
+      }
 
       #
       # NOTE: We need the [test] command in the global namespace.
@@ -1590,6 +1604,14 @@ namespace eval ::Eagle {
     }
 
     proc evalWithTimeout { script {milliseconds 2000} {resultVarName ""} } {
+      #
+      # NOTE: Verify that the number of milliseconds requested is greater than
+      #       zero.
+      #
+      if {$milliseconds <= 0} then {
+        error "number of milliseconds must be greater than zero"
+      }
+
       #
       # NOTE: Save the current background error handler for later restoration
       #       and then reset the current background error handler to nothing.
@@ -1867,7 +1889,7 @@ namespace eval ::Eagle {
     # NOTE: Fake having the tcltest package unless we are prevented.
     #
     if {![info exists ::no(configureTcltest)]} then {
-      configureTcltest [list] false
+      configureTcltest [list] [list] false
     }
 
     ###########################################################################
@@ -1935,7 +1957,7 @@ namespace eval ::Eagle {
     # NOTE: Load and configure the tcltest package unless we are prevented.
     #
     if {![interp issafe] && ![info exists ::no(configureTcltest)]} then {
-      configureTcltest [list test testConstraint] false
+      configureTcltest [list] [list test testConstraint] false
     }
 
     #
