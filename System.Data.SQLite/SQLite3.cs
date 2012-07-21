@@ -475,7 +475,7 @@ namespace System.Data.SQLite
 #endif
 
 #if !NET_COMPACT_20 && TRACE_STATEMENT
-          Trace.WriteLine(String.Format("Prepare: {0}", stmt));
+          Trace.WriteLine(String.Format("Prepare ({0}): {1}", n, stmt));
 #endif
 
           if (n == 17)

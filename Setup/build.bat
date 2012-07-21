@@ -47,8 +47,14 @@ IF DEFINED PLATFORM (
 
 %_VECHO% Platform = '%PLATFORM%'
 
+SET BASE_CONFIGURATION=%CONFIGURATION%
+SET BASE_CONFIGURATION=%BASE_CONFIGURATION:ManagedOnly=%
+SET BASE_CONFIGURATION=%BASE_CONFIGURATION:NativeOnly=%
+
+%_VECHO% BaseConfiguration = '%BASE_CONFIGURATION%'
+
 SET TOOLS=%~dp0
-SET TOOLS=%TOOLS:\\=\%
+SET TOOLS=%TOOLS:~0,-1%
 
 %_VECHO% Tools = '%TOOLS%'
 
@@ -60,6 +66,42 @@ IF EXIST "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat" (
 
   IF ERRORLEVEL 1 (
     ECHO File "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat" failed.
+    GOTO errors
+  )
+)
+
+IF EXIST "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat" (
+  CALL :fn_ResetErrorLevel
+
+  %_AECHO% Running "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat"...
+  %__ECHO3% CALL "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat"
+
+  IF ERRORLEVEL 1 (
+    ECHO File "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat" failed.
+    GOTO errors
+  )
+)
+
+IF EXIST "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%.bat" (
+  CALL :fn_ResetErrorLevel
+
+  %_AECHO% Running "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%.bat"...
+  %__ECHO3% CALL "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%.bat"
+
+  IF ERRORLEVEL 1 (
+    ECHO File "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%.bat" failed.
+    GOTO errors
+  )
+)
+
+IF EXIST "%TOOLS%\set_%USERNAME%.bat" (
+  CALL :fn_ResetErrorLevel
+
+  %_AECHO% Running "%TOOLS%\set_%USERNAME%.bat"...
+  %__ECHO3% CALL "%TOOLS%\set_%USERNAME%.bat"
+
+  IF ERRORLEVEL 1 (
+    ECHO File "%TOOLS%\set_%USERNAME%.bat" failed.
     GOTO errors
   )
 )
