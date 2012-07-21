@@ -8,6 +8,7 @@
 namespace System.Data.SQLite
 {
   using System;
+  using System.Globalization;
 
 #if !NET_COMPACT_20 && (TRACE_PRELOAD || TRACE_HANDLE)
   using System.Diagnostics;
@@ -428,6 +429,7 @@ namespace System.Data.SQLite
               //
 #if !NET_COMPACT_20 && TRACE_PRELOAD
               Trace.WriteLine(String.Format(
+                  CultureInfo.CurrentCulture,
                   "Trying to load native SQLite library \"{0}\"...",
                   fileName));
 #endif
@@ -459,6 +461,7 @@ namespace System.Data.SQLite
                   //       exception information.
                   //
                   Trace.WriteLine(String.Format(
+                      CultureInfo.CurrentCulture,
                       "Failed to load native SQLite library \"{0}\" " +
                       "(getLastError = {1}): {2}",
                       fileName, lastError, e)); /* throw */

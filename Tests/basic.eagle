@@ -980,28 +980,28 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
 
   if {$code eq "Ok"} then {
     set keys [list null Version Synchronous UseUTF16Encoding Pooling \
-                   BinaryGUID "Data Source" Uri "Default Timeout" \
+                   BinaryGUID "Data Source" Uri FullUri "Default Timeout" \
                    Enlist FailIfMissing "Legacy Format" "Read Only" \
                    Password "Page Size" "Max Page Count" "Cache Size" \
                    DateTimeFormat DateTimeKind BaseSchemaName \
                    "Journal Mode" "Default IsolationLevel" "Foreign Keys" \
-                   Flags]
+                   Flags SetDefaults]
 
-    set values [list null 3 Full True False \
-                     True test.db test.db 60 \
+    set values [list null 3 Normal True False \
+                     True test.db test.db file:test.db 60 \
                      False True False True \
                      secret 4096 1024 8192 \
                      UnixEpoch Utc sqlite_schema \
                      Memory Serializable False \
-                     Default]
+                     Default False]
 
     set propertyNames [list null Version SyncMode UseUTF16Encoding Pooling \
-                            BinaryGUID DataSource Uri DefaultTimeout \
+                            BinaryGUID DataSource Uri FullUri DefaultTimeout \
                             Enlist FailIfMissing LegacyFormat ReadOnly \
                             Password PageSize MaxPageCount CacheSize \
                             DateTimeFormat DateTimeKind BaseSchemaName \
                             JournalMode DefaultIsolationLevel ForeignKeys \
-                            Flags]
+                            Flags SetDefaults]
 
     foreach key $keys value $values propertyName $propertyNames {
       set code [catch {
@@ -1020,17 +1020,18 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 regexp -result {^System#CodeDom#Compiler#CompilerResults#\d+ Ok \{\} 0 \{, \} 0\
-\{3, Version=3\} 0 \{Full, Synchronous=Full\} 0 \{True, UseUTF16Encoding=True\}\
-0 \{False, Pooling=False\} 0 \{True, BinaryGUID=True\} 0 \{test\.db, Data\
-Source=test\.db\} 0 \{test\.db, Uri=test\.db\} 0 \{60, Default Timeout=60\} 0\
-\{False, Enlist=False\} 0 \{True, FailIfMissing=True\} 0 \{False, Legacy\
-Format=False\} 0 \{True, Read Only=True\} 0 \{secret, Password=secret\} 0\
-\{4096, Page Size=4096\} 0 \{1024, Max Page Count=1024\} 0 \{8192, Cache\
-Size=8192\} 0 \{UnixEpoch, DateTimeFormat=UnixEpoch\} 0 \{Utc,\
-DateTimeKind=Utc\} 0 \{sqlite_schema, BaseSchemaName=sqlite_schema\} 0\
-\{Memory, Journal Mode=Memory\} 0 \{Serializable, Default\
-IsolationLevel=Serializable\} 0 \{False, Foreign Keys=False\} 0\
-\{LogCallbackException, Flags=(?:Default|LogCallbackException)\}$}}
+\{3, Version=3\} 0 \{Normal, Synchronous=Normal\} 0 \{True,\
+UseUTF16Encoding=True\} 0 \{False, Pooling=False\} 0 \{True, BinaryGUID=True\}\
+0 \{test\.db, Data Source=test\.db\} 0 \{test\.db, Uri=test\.db\} 0\
+\{file:test.db, FullUri=file:test\.db\} 0 \{60, Default Timeout=60\} 0 \{False,\
+Enlist=False\} 0 \{True, FailIfMissing=True\} 0 \{False, Legacy Format=False\}\
+0 \{True, Read Only=True\} 0 \{secret, Password=secret\} 0 \{4096, Page\
+Size=4096\} 0 \{1024, Max Page Count=1024\} 0 \{8192, Cache Size=8192\} 0\
+\{UnixEpoch, DateTimeFormat=UnixEpoch\} 0 \{Utc, DateTimeKind=Utc\} 0\
+\{sqlite_schema, BaseSchemaName=sqlite_schema\} 0 \{Memory, Journal\
+Mode=Memory\} 0 \{Serializable, Default IsolationLevel=Serializable\} 0\
+\{False, Foreign Keys=False\} 0 \{LogCallbackException,\
+Flags=(?:Default|LogCallbackException)\} 0 \{False, SetDefaults=False\}$}}
 
 ###############################################################################
 

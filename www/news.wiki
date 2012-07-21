@@ -8,6 +8,8 @@
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.7.14].</li>
     <li>The [http://nuget.org/packages/System.Data.SQLite|primary NuGet package] now supports x86 / x64 and the .NET Framework 2.0 / 4.0 (i.e. in a single package).</li>
+    <li>Change the default value for the Synchronous connection string property to Full to match the default used by the SQLite core library itself.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>Add the ability to skip applying default connection settings to opened databases via the new SetDefaults connection string property.</li>
     <li>Fix the database cleanup ordering in the tests for ticket [343d392b51].</li>
     <li>Add support for the sqlite3_close_v2 function from the SQLite core library.</li>
     <li>Add support for [http://www.sqlite.org/uri.html|URI file names] via the new FullUri connection string property.</li>

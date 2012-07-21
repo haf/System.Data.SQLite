@@ -8,6 +8,7 @@
 namespace System.Data.SQLite
 {
   using System;
+  using System.Globalization;
   using System.Reflection;
   using System.Security.Permissions;
 
@@ -36,7 +37,7 @@ namespace System.Data.SQLite
             "4.0.0.0";
 #endif
 
-        _dbProviderServicesType = Type.GetType(String.Format("System.Data.Common.DbProviderServices, System.Data.Entity, Version={0}, Culture=neutral, PublicKeyToken=b77a5c561934e089", version), false);
+        _dbProviderServicesType = Type.GetType(String.Format(CultureInfo.InvariantCulture, "System.Data.Common.DbProviderServices, System.Data.Entity, Version={0}, Culture=neutral, PublicKeyToken=b77a5c561934e089", version), false);
     }
 
     /// <summary>
@@ -60,7 +61,7 @@ namespace System.Data.SQLite
         if (_sqliteServices == null)
         {
             Version version = this.GetType().Assembly.GetName().Version;
-            Type type = Type.GetType(String.Format("System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version={0}, Culture=neutral, PublicKeyToken=db937bc2d44ff139", version), false);
+            Type type = Type.GetType(String.Format(CultureInfo.InvariantCulture, "System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version={0}, Culture=neutral, PublicKeyToken=db937bc2d44ff139", version), false);
 
             if (type != null)
             {

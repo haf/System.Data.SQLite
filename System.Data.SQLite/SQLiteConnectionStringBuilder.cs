@@ -208,6 +208,24 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// An alternate to the data source property that uses the SQLite URI syntax.
+    /// </summary>
+    [Browsable(false)]
+    public string FullUri
+    {
+      get
+      {
+        object value;
+        TryGetValue("fulluri", out value);
+        return value.ToString();
+      }
+      set
+      {
+        this["fulluri"] = value;
+      }
+    }
+
+    /// <summary>
     /// Gets/sets the default command timeout for newly-created commands.  This is especially useful for 
     /// commands used internally such as inside a SQLiteTransaction, where setting the timeout is not possible.
     /// </summary>
@@ -477,7 +495,7 @@ namespace System.Data.SQLite
     /// Determines how SQLite handles the transaction journal file.
     /// </summary>
     [Browsable(true)]
-    [DefaultValue(SQLiteJournalModeEnum.Delete)]
+    [DefaultValue(SQLiteJournalModeEnum.Default)]
     [DisplayName("Journal Mode")]
     public SQLiteJournalModeEnum JournalMode
     {
@@ -564,6 +582,26 @@ namespace System.Data.SQLite
         set
         {
             this["flags"] = value;
+        }
+    }
+
+    /// <summary>
+    /// If enabled, apply the default connection settings to opened databases.
+    /// </summary>
+    [DisplayName("SetDefaults")]
+    [Browsable(true)]
+    [DefaultValue(true)]
+    public bool SetDefaults
+    {
+        get
+        {
+            object value;
+            TryGetValue("setdefaults", out value);
+            return SQLiteConvert.ToBoolean(value);
+        }
+        set
+        {
+            this["setdefaults"] = value;
         }
     }
 

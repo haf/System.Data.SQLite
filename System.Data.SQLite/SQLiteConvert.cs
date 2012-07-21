@@ -1082,6 +1082,45 @@ namespace System.Data.SQLite
   }
 
   /// <summary>
+  /// Possible values for the "synchronous" database setting.  This setting determines
+  /// how often the database engine calls the xSync method of the VFS.
+  /// </summary>
+  internal enum SQLiteSynchronousEnum
+  {
+      /// <summary>
+      /// Use the default "synchronous" database setting.  Currently, this should be
+      /// the same as using the FULL mode.
+      /// </summary>
+      Default = -1,
+
+      /// <summary>
+      /// The database engine continues without syncing as soon as it has handed
+      /// data off to the operating system.  If the application running SQLite
+      /// crashes, the data will be safe, but the database might become corrupted
+      /// if the operating system crashes or the computer loses power before that
+      /// data has been written to the disk surface.
+      /// </summary>
+      Off = 0,
+
+      /// <summary>
+      /// The database engine will still sync at the most critical moments, but
+      /// less often than in FULL mode.  There is a very small (though non-zero)
+      /// chance that a power failure at just the wrong time could corrupt the
+      /// database in NORMAL mode.
+      /// </summary>
+      Normal = 1,
+
+      /// <summary>
+      /// The database engine will use the xSync method of the VFS to ensure that
+      /// all content is safely written to the disk surface prior to continuing.
+      /// This ensures that an operating system crash or power failure will not
+      /// corrupt the database.  FULL synchronous is very safe, but it is also
+      /// slower.
+      /// </summary>
+      Full = 2
+  }
+
+  /// <summary>
   /// Struct used internally to determine the datatype of a column in a resultset
   /// </summary>
   internal class SQLiteType

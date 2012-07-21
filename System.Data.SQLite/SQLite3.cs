@@ -14,6 +14,7 @@ namespace System.Data.SQLite
   using System.Diagnostics;
 #endif
 
+  using System.Globalization;
   using System.Runtime.InteropServices;
   using System.Text;
 
@@ -430,10 +431,12 @@ namespace System.Data.SQLite
         if (!String.IsNullOrEmpty(baseSchemaName))
         {
           strSql = strSql.Replace(
-              String.Format("[{0}].", baseSchemaName), String.Empty);
+              String.Format(CultureInfo.InvariantCulture,
+              "[{0}].", baseSchemaName), String.Empty);
 
           strSql = strSql.Replace(
-              String.Format("{0}.", baseSchemaName), String.Empty);
+              String.Format(CultureInfo.InvariantCulture,
+              "{0}.", baseSchemaName), String.Empty);
         }
       }
 
@@ -446,7 +449,8 @@ namespace System.Data.SQLite
           if ((strSql == null) || (strSql.Length == 0) || (strSql.Trim().Length == 0))
               SQLiteLog.LogMessage(0, "Preparing {<nothing>}...");
           else
-              SQLiteLog.LogMessage(0, String.Format("Preparing {{{0}}}...", strSql));
+              SQLiteLog.LogMessage(0, String.Format(
+                  CultureInfo.CurrentCulture, "Preparing {{{0}}}...", strSql));
       }
 #endif
 

@@ -257,8 +257,8 @@ namespace System.Data.SQLite
                 return Convert.ToBoolean(obj, provider);
             default:
                 throw new SQLiteException((int)SQLiteErrorCode.Error,
-                    String.Format("Cannot convert type {0} to boolean",
-                    typeCode));
+                    String.Format(CultureInfo.CurrentCulture,
+                    "Cannot convert type {0} to boolean", typeCode));
         }
     }
 
