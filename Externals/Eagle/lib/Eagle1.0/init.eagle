@@ -1392,14 +1392,18 @@ namespace eval ::Eagle {
       return [expr {[$type IsValueType] ? 0 : "null"}]
     }
 
-    proc parray { a {pattern *} } {
+    proc parray { a args } {
+      if {[llength $args] > 2} then {
+        error "wrong # args: should be \"parray a ?pattern?\""
+      }
+
       upvar 1 $a array
 
       if {![array exists array]} {
         error "\"$a\" isn't an array"
       }
 
-      set names [lsort [array names array $pattern]]
+      set names [lsort [eval array names array $args]]
       set maxLength 0
 
       foreach name $names {
@@ -1412,7 +1416,7 @@ namespace eval ::Eagle {
 
       set maxLength [expr {$maxLength + [string length $a] + 2}]
       set hostLength [lindex [host size] 0]
-      set valueLength [expr {$hostLength - $maxLength - 5}]
+      set valueLength [expr {$hostLength - $maxLength - 5}]; # " ... "
 
       foreach name $names {
         #
@@ -1421,8 +1425,8 @@ namespace eval ::Eagle {
         set nameString [appendArgs $a ( $name )]
 
         #
-        # NOTE: If the value by itself is too long to fit on one host
-        #       line, just truncate and ellipsis it.
+        # NOTE: If the value by itself is too long to fit on one host line,
+        #       just truncate and ellipsis it.
         #
         set valueString $array($name)
 
@@ -1449,8 +1453,45 @@ namespace eval ::Eagle {
     }
 
     proc pdict { d } {
+      set maxLength 0
+
       foreach {name value} $d {
-        puts stdout "$name = $value"
+        set length [string length $name]
+
+        if {$length > $maxLength} {
+          set maxLength $length
+        }
+      }
+
+      set hostLength [lindex [host size] 0]
+      set valueLength [expr {$hostLength - $maxLength - 5}]; # " ... "
+
+      foreach {name value} $d {
+        #
+        # NOTE: If the value by itself is too long to fit on one host line,
+        #       just truncate and ellipsis it.
+        #
+        set valueString $value
+
+        if {[string length $valueString] > $valueLength} then {
+          set valueString [appendArgs [string range $valueString 0 \
+              [expr {$valueLength - 4}]] " ..."]
+        }
+
+        #
+        # HACK: Mono does not currently support calling the String.Format
+        #       overload that takes a variable number of arguments via
+        #       reflection (Mono bug #636939).
+        #
+        if {![isMono]} then {
+          set line [string format -verbatim -- "{0,-$maxLength} = {1}" \
+              $name $valueString]
+        } else {
+          set line [object invoke String Format "{0,-$maxLength} = {1}" \
+              $name $valueString]
+        }
+
+        puts stdout $line
       }
     }
 

@@ -1522,6 +1522,78 @@ regexp -result {^0 21 0 0 System#IntPtr#\d+ System#IntPtr#\d+ \d+ \d+ \d+ \d+\
 
 ###############################################################################
 
+runTest {test data-1.29 {SQLiteConnection.Open with SetDefaults=False} -setup {
+  setupDb [set fileName data-1.29.db] "" "" "" "" SetDefaults=False
+} -body {
+  set result [list]
+
+  lappend result [sql execute -execute scalar $db "PRAGMA page_size;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA max_page_count;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA legacy_file_format;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA synchronous;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA cache_size;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA journal_mode;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA foreign_keys;"]
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{1024 1073741823 0 2 2000 delete 0}}
+
+###############################################################################
+
+runTest {test data-1.30 {SQLiteConnection.Open with SetDefaults=True} -setup {
+  setupDb [set fileName data-1.30.db] "" "" "" "" SetDefaults=True
+} -body {
+  set result [list]
+
+  lappend result [sql execute -execute scalar $db "PRAGMA page_size;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA max_page_count;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA legacy_file_format;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA synchronous;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA cache_size;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA journal_mode;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA foreign_keys;"]
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{1024 1073741823 0 2 2000 delete 0}}
+
+###############################################################################
+
+runTest {test data-1.31 {SQLiteConnection.Open without SetDefaults} -setup {
+  setupDb [set fileName data-1.31.db]
+} -body {
+  set result [list]
+
+  lappend result [sql execute -execute scalar $db "PRAGMA page_size;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA max_page_count;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA legacy_file_format;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA synchronous;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA cache_size;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA journal_mode;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA foreign_keys;"]
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{1024 1073741823 0 2 2000 delete 0}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 

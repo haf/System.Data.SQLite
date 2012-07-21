@@ -653,9 +653,12 @@ namespace eval ::Eagle {
     }
   }
 
-  proc checkForTiming { channel threshold {constraint ""} {tries 1} } {
+  proc checkForTiming {
+          channel threshold {constraint ""} {tries 1} {delay 1000}
+          {asynchronous false} } {
     tputs $channel [appendArgs \
-        "---- checking for precision timing (" $threshold " milliseconds)... "]
+        "---- checking for precision timing (threshold of " $threshold \
+        " milliseconds, delay of " $delay " milliseconds)... "]
 
     #
     # HACK: Sometimes the first try takes quite a bit longer than subsequent
@@ -667,17 +670,36 @@ namespace eval ::Eagle {
 
     for {} {$try < $tries} {incr try} {
       #
-      # NOTE: Attempt to block for exactly one second.
+      # NOTE: Create a script that will set the final clicks value.  This must
+      #       use a global variable due to the nature of [after].
+      #
+      set stopScript {
+        set ::stopClicks [expr {[clock clicks -milliseconds] & 0x7fffffff}]
+      }
+
+      #
+      # NOTE: Set the initial clicks value and then attempt to wait for about
+      #       one second, either synchronously or asynchronously, depending on
+      #       the preference of the caller.
       #
       set start [expr {[clock clicks -milliseconds] & 0x7fffffff}]
-      after 1000; # wait for "exactly" one second.
-      set stop [expr {[clock clicks -milliseconds] & 0x7fffffff}]
+
+      if {$asynchronous} then {
+        set event [after $delay $stopScript]; vwait ::stopClicks
+      } else {
+        after $delay; eval $stopScript
+      }
+
+      #
+      # NOTE: Move the final clicks value from the global frame to this one.
+      #
+      set stop $::stopClicks; unset ::stopClicks
 
       #
       # NOTE: Calculate the difference between the actual and expected
       #       number of milliseconds.
       #
-      set difference [expr {abs($stop - $start - 1000)}]
+      set difference [expr {abs($stop - $start - $delay)}]
 
       #
       # NOTE: Are we within the threshold specified by the caller?
