@@ -1594,6 +1594,37 @@ runTest {test data-1.31 {SQLiteConnection.Open without SetDefaults} -setup {
 
 ###############################################################################
 
+runTest {test data-1.32 {SQLiteConnection.Open with PRAGMA overrides} -setup {
+  #
+  # NOTE: Attempt to open a connection with all available PRAGMA settings
+  #       set to non-default values in the connection string.
+  #
+  setupDb [set fileName data-1.32.db] "" "" "" "" [join [list \
+      "Page Size=4096" "Max Page Count=2048" "Legacy Format=True" \
+      Synchronous=Normal "Cache Size=4096" "Journal Mode=Wal" \
+      "Foreign Keys=True"] \;]
+} -body {
+  set result [list]
+
+  lappend result [sql execute -execute scalar $db "PRAGMA page_size;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA max_page_count;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA legacy_file_format;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA synchronous;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA cache_size;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA journal_mode;"]
+  lappend result [sql execute -execute scalar $db "PRAGMA foreign_keys;"]
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{4096 2048 1 1 4096 wal 1}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
