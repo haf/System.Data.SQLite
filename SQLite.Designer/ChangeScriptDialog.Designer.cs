@@ -1,4 +1,4 @@
-﻿namespace SQLite.Designer
+namespace SQLite.Designer
 {
   partial class ChangeScriptDialog
   {

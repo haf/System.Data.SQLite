@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Schema Namespace="EFSQLite" Provider="System.Data.SQLite" ProviderManifestToken="ISO8601" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
   <EntityContainer Name="Schema">
     <EntitySet Name="STables" EntityType="Self.Table">

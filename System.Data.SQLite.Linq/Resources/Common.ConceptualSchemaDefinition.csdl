@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Schema xmlns="http://schemas.microsoft.com/ado/2006/04/edm" xmlns:edm="http://schemas.microsoft.com/ado/2006/04/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" Namespace="Store" Alias="Self">
 
   <EntityContainer Name="SchemaInformation">
