@@ -99,21 +99,23 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #1, CREATE TABLE statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 2} {$index <= $count} {incr index} {
-        sql execute $db [appendArgs \
-            "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
-        showTest 1
+    lappend ::times(1) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 2} {$index <= $count} {incr index} {
+          sql execute $db [appendArgs \
+              "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
+          showTest 1
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -122,21 +124,23 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #2, DROP TABLE statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 2} {$index <= $count} {incr index} {
-        sql execute $db [appendArgs \
-            "DROP TABLE IF EXISTS t" $index \;]
-        showTest 2
+    lappend ::times(2) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 2} {$index <= $count} {incr index} {
+          sql execute $db [appendArgs \
+              "DROP TABLE IF EXISTS t" $index \;]
+          showTest 2
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -145,21 +149,23 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #3, "small" SELECT statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 1} {$index <= $count} {incr index} {
-        sql execute -execute reader $db [appendArgs \
-            "SELECT x, y FROM " $table " WHERE z = 'small';"]
-        showTest 3
+    lappend ::times(3) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute -execute reader $db [appendArgs \
+              "SELECT x, y FROM " $table " WHERE z = 'small';"]
+          showTest 3
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -168,21 +174,23 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #4, "big" SELECT statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 1} {$index <= $count} {incr index} {
-        sql execute -execute reader $db [appendArgs \
-            "SELECT x, y FROM " $table " WHERE z = 'big';"]
-        showTest 4
+    lappend ::times(4) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute -execute reader $db [appendArgs \
+              "SELECT x, y FROM " $table " WHERE z = 'big';"]
+          showTest 4
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -191,24 +199,26 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #5, "small" INSERT statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 1} {$index <= $count} {incr index} {
-        sql execute $db [appendArgs \
-            "INSERT INTO " $table "(x, y, z) VALUES('" \
-            [format %lX [expr {random()}]] "', '" \
-            [base64 encode -- [expr {randstr(10000)}]] \
-            "', 'small');"]
-        showTest 5
+    lappend ::times(5) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute $db [appendArgs \
+              "INSERT INTO " $table "(x, y, z) VALUES('" \
+              [format %lX [expr {random()}]] "', '" \
+              [base64 encode -- [expr {randstr(10000)}]] \
+              "', 'small');"]
+          showTest 5
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -217,23 +227,25 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #6, "big" INSERT statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 1} {$index <= $count} {incr index} {
-        sql execute $db [appendArgs \
-            "INSERT INTO " $table "(x, y, z) VALUES('" \
-            [format %lX [expr {random()}]] \
-            "', RANDOMBLOB(10000000), 'big');"]
-        showTest 6
+    lappend ::times(6) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute $db [appendArgs \
+              "INSERT INTO " $table "(x, y, z) VALUES('" \
+              [format %lX [expr {random()}]] \
+              "', RANDOMBLOB(10000000), 'big');"]
+          showTest 6
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -242,22 +254,24 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #7, "small" UPDATE statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 1} {$index <= $count} {incr index} {
-        sql execute $db [appendArgs "UPDATE " $table \
-            " SET y = '" [base64 encode -- [expr {randstr(10000)}]] \
-            "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
-        showTest 7
+    lappend ::times(7) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute $db [appendArgs "UPDATE " $table \
+              " SET y = '" [base64 encode -- [expr {randstr(10000)}]] \
+              "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
+          showTest 7
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -266,22 +280,24 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #8, "big" UPDATE statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 1} {$index <= $count} {incr index} {
-        sql execute $db [appendArgs "UPDATE " $table \
-            " SET y = RANDOMBLOB(10000000) WHERE x LIKE '" \
-            [format %X $index] "%' AND z = 'big';"]
-        showTest 8
+    lappend ::times(8) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute $db [appendArgs "UPDATE " $table \
+              " SET y = RANDOMBLOB(10000000) WHERE x LIKE '" \
+              [format %X $index] "%' AND z = 'big';"]
+          showTest 8
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -290,21 +306,23 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #9, "small" DELETE statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 1} {$index <= $count} {incr index} {
-        sql execute $db [appendArgs "DELETE FROM " $table \
-            " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
-        showTest 9
+    lappend ::times(9) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute $db [appendArgs "DELETE FROM " $table \
+              " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
+          showTest 9
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -313,21 +331,23 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #10, "big" DELETE statements.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      for {set index 1} {$index <= $count} {incr index} {
-        sql execute $db [appendArgs "DELETE FROM " $table \
-            " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
-        showTest A
+    lappend ::times(10) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute $db [appendArgs "DELETE FROM " $table \
+              " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
+          showTest A
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
-      }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -336,18 +356,20 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #11, VACUUM statement.
     #
-    setupDb $dstFileName "" "" "" "" "" false
-    if {[catch {
-      sql execute $db "VACUUM;"
-      showTest B
-    } error]} then {
-      if {[expectedError $error]} then {
-        showTest *
-      } else {
-        failTest $error
+    lappend ::times(11) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" false
+      if {[catch {
+        sql execute $db "VACUUM;"
+        showTest B
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
       }
-    }
-    cleanupDb $dstFileName db false false
+      cleanupDb $dstFileName db false false
+    }] 0]
   }]
 
   #############################################################################
@@ -356,54 +378,56 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #12, backup to in-memory database.
     #
-    if {[string is integer -strict $::compiled(12)]} then {
-      set id $::compiled(12); # NOTE: Already compiled.
-      object invoke _Dynamic${id}.Test${id} BackupAndGetData
-    } else {
-      set id [object invoke Interpreter.GetActive NextId]
-      set code [compileCSharpWith [subst {
-        using System;
-        using System.Data.SQLite;
-        using System.Text;
-
-        namespace _Dynamic${id}
-        {
-          public static class Test${id}
-          {
-            public static void BackupAndGetData()
-            {
-              using (SQLiteConnection source = new SQLiteConnection(
-                  "FullUri=${dstFileName};"))
-              {
-                source.Open();
-                using (SQLiteConnection destination = new SQLiteConnection(
-                    "FullUri=${srcFileName};"))
-                {
-                  destination.Open();
-
-                  source.BackupDatabase(
-                      destination, "main", "main", -1, null, 0);
-                }
-              }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            public static void Main()
-            {
-              // do nothing.
-            }
-          }
-        }
-      }] true true true results errors System.Data.SQLite.dll]
-      if {$code eq "Ok"} then {
-        set ::compiled(12) $id; # NOTE: Compiled OK.
+    lappend ::times(12) [lindex [time {
+      if {[string is integer -strict $::compiled(12)]} then {
+        set id $::compiled(12); # NOTE: Already compiled.
         object invoke _Dynamic${id}.Test${id} BackupAndGetData
       } else {
-        error $errors
+        set id [object invoke Interpreter.GetActive NextId]
+        set code [compileCSharpWith [subst {
+          using System;
+          using System.Data.SQLite;
+          using System.Text;
+
+          namespace _Dynamic${id}
+          {
+            public static class Test${id}
+            {
+              public static void BackupAndGetData()
+              {
+                using (SQLiteConnection source = new SQLiteConnection(
+                    "FullUri=${dstFileName};"))
+                {
+                  source.Open();
+                  using (SQLiteConnection destination = new SQLiteConnection(
+                      "FullUri=${srcFileName};"))
+                  {
+                    destination.Open();
+
+                    source.BackupDatabase(
+                        destination, "main", "main", -1, null, 0);
+                  }
+                }
+              }
+
+              /////////////////////////////////////////////////////////////////
+
+              public static void Main()
+              {
+                // do nothing.
+              }
+            }
+          }
+        }] true true true results errors System.Data.SQLite.dll]
+        if {$code eq "Ok"} then {
+          set ::compiled(12) $id; # NOTE: Compiled OK.
+          object invoke _Dynamic${id}.Test${id} BackupAndGetData
+        } else {
+          error $errors
+        }
       }
-    }
-    showTest C
+      showTest C
+    }] 0]
   }]
 
   #############################################################################
@@ -412,54 +436,56 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #13, backup from an in-memory database.
     #
-    if {[string is integer -strict $::compiled(13)]} then {
-      set id $::compiled(13); # NOTE: Already compiled.
-      object invoke _Dynamic${id}.Test${id} BackupAndGetData
-    } else {
-      set id [object invoke Interpreter.GetActive NextId]
-      set code [compileCSharpWith [subst {
-        using System;
-        using System.Data.SQLite;
-        using System.Text;
-
-        namespace _Dynamic${id}
-        {
-          public static class Test${id}
-          {
-            public static void BackupAndGetData()
-            {
-              using (SQLiteConnection source = new SQLiteConnection(
-                  "FullUri=${srcFileName};"))
-              {
-                source.Open();
-                using (SQLiteConnection destination = new SQLiteConnection(
-                    "FullUri=${dstFileName};"))
-                {
-                  destination.Open();
-
-                  source.BackupDatabase(
-                      destination, "main", "main", -1, null, 0);
-                }
-              }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            public static void Main()
-            {
-              // do nothing.
-            }
-          }
-        }
-      }] true true true results errors System.Data.SQLite.dll]
-      if {$code eq "Ok"} then {
-        set ::compiled(13) $id; # NOTE: Compiled OK.
+    lappend ::times(13) [lindex [time {
+      if {[string is integer -strict $::compiled(13)]} then {
+        set id $::compiled(13); # NOTE: Already compiled.
         object invoke _Dynamic${id}.Test${id} BackupAndGetData
       } else {
-        error $errors
+        set id [object invoke Interpreter.GetActive NextId]
+        set code [compileCSharpWith [subst {
+          using System;
+          using System.Data.SQLite;
+          using System.Text;
+
+          namespace _Dynamic${id}
+          {
+            public static class Test${id}
+            {
+              public static void BackupAndGetData()
+              {
+                using (SQLiteConnection source = new SQLiteConnection(
+                    "FullUri=${srcFileName};"))
+                {
+                  source.Open();
+                  using (SQLiteConnection destination = new SQLiteConnection(
+                      "FullUri=${dstFileName};"))
+                  {
+                    destination.Open();
+
+                    source.BackupDatabase(
+                        destination, "main", "main", -1, null, 0);
+                  }
+                }
+              }
+
+              /////////////////////////////////////////////////////////////////
+
+              public static void Main()
+              {
+                // do nothing.
+              }
+            }
+          }
+        }] true true true results errors System.Data.SQLite.dll]
+        if {$code eq "Ok"} then {
+          set ::compiled(13) $id; # NOTE: Compiled OK.
+          object invoke _Dynamic${id}.Test${id} BackupAndGetData
+        } else {
+          error $errors
+        }
       }
-    }
-    showTest D
+      showTest D
+    }] 0]
   }]
 } -body {
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
@@ -467,24 +493,36 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
     unset -nocomplain thread
 
-    foreach index(1) [array names workload] {
+    foreach index(1) [lsort -integer [array names workload]] {
       set thread($index(1)) [object create -alias System.Threading.Thread \
           [list apply $workload($index(1)) $fileName(1) $fileName(2) t1 \
           $count(1)]]
     }
 
-    foreach index(1) [array names thread] {
-      $thread($index(1)) Start
-    }
-
-    foreach index(1) [array names thread] {
-      $thread($index(1)) Join
+    foreach index(1) [list Start Join] {
+      foreach index(2) [array names thread] {
+        $thread($index(2)) $index(1)
+      }
     }
 
     unset -nocomplain thread
   }
 
   tputs $test_channel \n
+
+  foreach index(0) [lsort -integer [array names times]] {
+    set times(length) [llength $times($index(0))]
+
+    if {$times(length) > 0} then {
+      tputs $test_channel [appendArgs \
+          "---- average time for workload (" $index(0) ") is about " \
+          [expr int(([join $times($index(0)) +])/$times(length)/1000.0)] \
+          " milliseconds\n"]
+    } else {
+      tputs $test_channel [appendArgs \
+          "---- no times for workload (" $index(0) ")\n"]
+    }
+  }
 } -cleanup {
   rename failTest ""
   rename showTest ""
@@ -493,15 +531,15 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   cleanupDb $fileName(2)
   cleanupDb $fileName(1) srcDb
 
-  foreach index(2) [array names workload] {
+  foreach index(0) [array names workload] {
     catch {
-      object removecallback [list apply $workload($index(2)) $fileName(1) \
+      object removecallback [list apply $workload($index(0)) $fileName(1) \
           $fileName(2) t1 $count(1)]
     }
   }
 
   unset -nocomplain thread index workload srcDb db fileName compiled options \
-      count
+      count times
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
 
