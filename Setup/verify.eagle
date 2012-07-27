@@ -35,8 +35,8 @@ if {$argc == 1} then {
     set rootName [file rootname [file tail $script]]
 
     if {![info exists rar]} then {
-      if {[info exists env(UnRAR)]} then {
-        set rar $env(UnRAR)
+      if {[info exists env(UnRARTool)]} then {
+        set rar $env(UnRARTool)
       }
 
       if {![info exists rar] || ![file exists $rar]} then {
@@ -45,8 +45,8 @@ if {$argc == 1} then {
     }
 
     if {![info exists zip]} then {
-      if {[info exists env(UnZip)]} then {
-        set zip $env(UnZip)
+      if {[info exists env(UnZipTool)]} then {
+        set zip $env(UnZipTool)
       }
 
       if {![info exists zip] || ![file exists $zip]} then {
