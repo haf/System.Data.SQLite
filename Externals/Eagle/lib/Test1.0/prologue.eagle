@@ -1809,6 +1809,14 @@ if {![info exists no([file tail [info script]])]} then {
     checkForWindowsCommandProcessor $test_channel cmd.exe
   }
 
+  if {![info exists no(fossil)]} then {
+    checkForFossil $test_channel
+  }
+
+  if {![info exists no(testRepository)]} then {
+    checkForVariable $test_channel test_repository
+  }
+
   if {![info exists no(version)]} then {
     checkForVersion $test_channel
   }

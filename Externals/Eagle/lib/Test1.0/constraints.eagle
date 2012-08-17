@@ -61,6 +61,50 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForVariable { channel name {notEmpty true} {constraint ""} } {
+    tputs $channel [appendArgs "---- checking for variable \"" $name \
+        "\"... "]
+
+    #
+    # NOTE: First, normalize the variable name to be in the global scope.
+    #
+    set newName [appendArgs :: [string trimleft $name :]]
+
+    #
+    # NOTE: Next, always check if it actually exists (as of right now).
+    #
+    if {[info exists $newName]} then {
+      #
+      # NOTE: Next, optionally check if it constains anything.
+      #
+      if {!$notEmpty || [string length [set $newName]] > 0} then {
+        #
+        # NOTE: The variable exists and it either contains something
+        #       or we do not care about its contents.
+        #
+        if {[string length $constraint] > 0} then {
+          addConstraint [appendArgs variable_ $constraint]
+        } else {
+          addConstraint [appendArgs variable_ [string trimleft $newName :]]
+        }
+
+        #
+        # NOTE: Show that we found the variable and whether it actually
+        #       contained anything.
+        #
+        tputs $channel [appendArgs "yes (" \
+            [expr {$notEmpty ? "exists, not empty" : "exists"}] ")\n"]
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
+      }
+    }
+
+    tputs $channel no\n
+  }
+
   proc checkForTclOptions { channel } {
     tputs $channel "---- checking for Tcl options..."
 
@@ -139,6 +183,85 @@ namespace eval ::Eagle {
         # NOTE: We are done here, return now.
         #
         return
+      }
+    }
+
+    tputs $channel no\n
+  }
+
+  proc checkForFossil { channel } {
+    tputs $channel "---- checking for Fossil... "
+
+    if {[catch {set version [exec -- fossil version]}] == 0} then {
+      set version [string trim $version]
+      set pattern {^This is fossil version (.*) \[([0-9a-f]+)\]\
+          \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC$}
+
+      if {[regexp -- $pattern $version dummy version sourceId]} then {
+        #
+        # NOTE: Add a constraint to show that the Fossil executable
+        #       itself is available.
+        #
+        addConstraint fossil_version
+
+        #
+        # NOTE: Append the version of Fossil currently in use.
+        #
+        append result version " " $version " \[" $sourceId \]
+
+        if {[catch {set remote [exec -- fossil remote]}] == 0} then {
+          set remote [string trim $remote]; set valid false
+
+          if {[isEagle]} then {
+            #
+            # NOTE: With Eagle, we can actually validate the URI.
+            #
+            if {[uri isvalid $remote]} then {
+              set valid true
+            }
+          } else {
+            #
+            # HACK: Currently, there is no simple way to validate
+            #       an arbitrary URI with Tcl (i.e. without using
+            #       some hideously complex regular expression).
+            #
+            if {[string length $remote] > 0} then {
+              set valid true
+            }
+          }
+
+          if {$valid} then {
+            #
+            # NOTE: Add a constraint to show that a valid Fossil
+            #       repository URI appears to be available.
+            #
+            addConstraint fossil_repository
+
+            #
+            # NOTE: If we are not prevented from doing so, save the
+            #       test repository to the repository URI currently
+            #       in use to a suitably named global variable.
+            #
+            if {![info exists ::no(setRepository)]} then {
+              set ::test_repository $remote
+            }
+
+            #
+            # NOTE: Append the repository URI currently in use.
+            #
+            append result ", repository \"" $remote \"
+
+            #
+            # NOTE: Show the result of the checking.
+            #
+            tputs $channel [appendArgs "yes (" $result ")\n"]
+
+            #
+            # NOTE: We are done here, return now.
+            #
+            return
+          }
+        }
       }
     }
 
@@ -1999,7 +2122,8 @@ namespace eval ::Eagle {
         checkForPerformance checkForTiming checkForInteractive checkForSymbols \
         checkForLogFile checkForNetwork checkForCompileOption \
         checkForWindowsCommandProcessor checkForUserInteraction \
-        checkForTclOptions checkForTestConfiguration] false false
+        checkForTclOptions checkForTestConfiguration checkForVariable \
+        checkForFossil] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
