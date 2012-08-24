@@ -480,7 +480,7 @@ namespace eval ::Eagle {
 
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
-            {extra ""} {delete true} {uri false} {varName db} } {
+            {extra ""} {qualify true} {delete true} {uri false} {varName db} } {
       #
       # NOTE: First, see if the caller has requested an in-memory database.
       #
@@ -491,7 +491,7 @@ namespace eval ::Eagle {
       #       the temporary directory.  Each database used by a test should be
       #       cleaned up by that test using the "cleanupDb" procedure, below.
       #
-      if {!$isMemory} then {
+      if {!$isMemory && $qualify} then {
         set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
       }
 
@@ -532,6 +532,13 @@ namespace eval ::Eagle {
       } else {
         set connection {Data Source=${fileName}}
       }
+
+      #
+      # NOTE: Since this procedure has no special knowledge of what the default
+      #       setting is for the ToFullPath connection string propery, always
+      #       add the value we know about to the connection string.
+      #
+      append connection {;ToFullPath=${qualify}}
 
       #
       # NOTE: If the caller specified a journal mode, add the necessary portion
@@ -603,7 +610,8 @@ namespace eval ::Eagle {
       set db [sql open -type SQLite [subst $connection]]
     }
 
-    proc cleanupDb { fileName {varName db} {collect true} {delete true} } {
+    proc cleanupDb { fileName {varName db} {collect true} {qualify true}
+                     {delete true} } {
       #
       # NOTE: Attempt to force all pending "garbage" objects to be collected,
       #       including SQLite statements and backup objects; this should allow
@@ -644,7 +652,7 @@ namespace eval ::Eagle {
       # NOTE: Build the full path to the database file name.  For now, all test
       #       database files are stored in the temporary directory.
       #
-      if {!$isMemory} then {
+      if {!$isMemory && $qualify} then {
         set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
       }
 
@@ -919,6 +927,28 @@ namespace eval ::Eagle {
         #       found it (above), this should always succeed.
         #
         checkForSQLite $::test_channel
+
+        #
+        # NOTE: Check if the sqlite3_win32_set_directory function is available.
+        #
+        tputs $::test_channel \
+            "---- checking for function sqlite3_win32_set_directory... "
+
+        if {[catch {object invoke -flags +NonPublic \
+                System.Data.SQLite.UnsafeNativeMethods \
+                sqlite3_win32_set_directory 0 null}] == 0} then {
+          #
+          # NOTE: Calling the sqlite3_win32_set_directory function does not
+          #       cause an exception; therefore, it must be available (i.e.
+          #       even though it should return a failure return code in this
+          #       case).
+          #
+          addConstraint sqlite3_win32_set_directory
+
+          tputs $::test_channel yes\n
+        } else {
+          tputs $::test_channel no\n
+        }
 
         #
         # NOTE: Attempt to determine if the custom extension functions were

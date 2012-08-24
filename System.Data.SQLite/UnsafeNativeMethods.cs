@@ -811,6 +811,12 @@ namespace System.Data.SQLite
     // Standard API calls global across versions.  There are a few instances of interop calls
     // scattered in here, but they are only active when PLATFORM_COMPACTFRAMEWORK is declared.
     #region standard sqlite api calls
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+#else
+    [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
+#endif
+    internal static extern int sqlite3_win32_set_directory(uint type, string value);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

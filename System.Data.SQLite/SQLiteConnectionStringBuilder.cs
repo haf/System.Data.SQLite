@@ -606,6 +606,27 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// If enabled, attempt to resolve the provided data source file name to a
+    /// full path before opening.
+    /// </summary>
+    [DisplayName("ToFullPath")]
+    [Browsable(true)]
+    [DefaultValue(true)]
+    public bool ToFullPath
+    {
+        get
+        {
+            object value;
+            TryGetValue("tofullpath", out value);
+            return SQLiteConvert.ToBoolean(value);
+        }
+        set
+        {
+            this["tofullpath"] = value;
+        }
+    }
+
+    /// <summary>
     /// Helper function for retrieving values from the connectionstring
     /// </summary>
     /// <param name="keyword">The keyword to retrieve settings for</param>

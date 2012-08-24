@@ -65,9 +65,7 @@ if {![haveConstraint [appendArgs file_ [file tail $testLinqOutFile]]]} then {
 
 runTest {test data-1.1 {unit tests from the 'test' project} -setup {
   cleanupFile [file join [file dirname $testExeFile] Test.db3]
-
   set fileName [file join [getDatabaseDirectory] data-1.1.db]
-  cleanupDb $fileName
 } -body {
   set output ""
 
@@ -87,7 +85,7 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
 
   list $code [expr {$code == 0 ? "" : $error}]
 } -cleanup {
-  cleanupDb $fileName
+  cleanupFile $fileName
 
   unset -nocomplain code output error fileName
 } -constraints {eagle SQLite file_System.Data.SQLite.dll file_test.exe} \
@@ -985,7 +983,7 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                    Password "Page Size" "Max Page Count" "Cache Size" \
                    DateTimeFormat DateTimeKind BaseSchemaName \
                    "Journal Mode" "Default IsolationLevel" "Foreign Keys" \
-                   Flags SetDefaults]
+                   Flags SetDefaults ToFullPath]
 
     set values [list null 3 Normal True False \
                      True test.db test.db file:test.db 60 \
@@ -993,7 +991,7 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                      secret 4096 1024 8192 \
                      UnixEpoch Utc sqlite_schema \
                      Memory Serializable False \
-                     Default False]
+                     Default False False]
 
     set propertyNames [list null Version SyncMode UseUTF16Encoding Pooling \
                             BinaryGUID DataSource Uri FullUri DefaultTimeout \
@@ -1001,7 +999,7 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                             Password PageSize MaxPageCount CacheSize \
                             DateTimeFormat DateTimeKind BaseSchemaName \
                             JournalMode DefaultIsolationLevel ForeignKeys \
-                            Flags SetDefaults]
+                            Flags SetDefaults ToFullPath]
 
     foreach key $keys value $values propertyName $propertyNames {
       set code [catch {
@@ -1031,7 +1029,8 @@ Size=4096\} 0 \{1024, Max Page Count=1024\} 0 \{8192, Cache Size=8192\} 0\
 \{sqlite_schema, BaseSchemaName=sqlite_schema\} 0 \{Memory, Journal\
 Mode=Memory\} 0 \{Serializable, Default IsolationLevel=Serializable\} 0\
 \{False, Foreign Keys=False\} 0 \{LogCallbackException,\
-Flags=(?:Default|LogCallbackException)\} 0 \{False, SetDefaults=False\}$}}
+Flags=(?:Default|LogCallbackException)\} 0 \{False, SetDefaults=False\} 0\
+\{False, ToFullPath=False\}$}}
 
 ###############################################################################
 
@@ -1622,6 +1621,145 @@ runTest {test data-1.32 {SQLiteConnection.Open with PRAGMA overrides} -setup {
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
 {4096 2048 1 1 4096 wal 1}}
+
+###############################################################################
+
+runTest {test data-1.33 {sqlite3_win32_set_directory() API} -setup {
+  set directory(base) [getDatabaseDirectory]
+
+  if {[string length $directory(base)] == 0 || \
+      ![file exists $directory(base)] || \
+      ![file isdirectory $directory(base)]} then {
+    error [appendArgs "base directory \"" $directory(base) "\" is invalid"]
+  }
+
+  set directory(data) [file join $directory(base) \
+      [appendArgs sqlite .data. [pid]]]
+
+  file mkdir $directory(data)
+
+  tputs $test_channel [appendArgs "---- created data directory \"" \
+      $directory(data) \"\n]
+
+  set directory(temp) [file join $directory(base) \
+      [appendArgs sqlite .temp. [pid]]]
+
+  file mkdir $directory(temp)
+
+  tputs $test_channel [appendArgs "---- created temporary directory \"" \
+      $directory(temp) \"\n]
+
+  proc threadStart {} {
+    while {$::i < 100} {
+      set ::found(temp) [expr \
+          {[llength [file list $::directory(temp) etilqs_*]] > 0}]
+
+      if {$::found(temp)} then {
+        return
+      }
+    }
+  }
+
+  object import System.Threading
+} -body {
+  set result [list]
+
+  #
+  # NOTE: Attempt to modify the process-wide data and temporary directory
+  #       settings for the SQLite core library.
+  #
+  lappend result [object invoke -flags +NonPublic \
+      System.Data.SQLite.UnsafeNativeMethods sqlite3_win32_set_directory 1 \
+      $directory(data)]
+
+  lappend result [object invoke -flags +NonPublic \
+      System.Data.SQLite.UnsafeNativeMethods sqlite3_win32_set_directory 2 \
+      $directory(temp)]
+
+  setupDb [set fileName data-1.33.db] "" "" "" "" "" false false
+
+  sql execute $db "CREATE TABLE t1(x NOT NULL);"
+
+  for {set i 1} {$i < 100} {incr i} {
+    sql execute $db "INSERT INTO t1 (x) VALUES(?);" [list param1 String $i]
+  }
+
+  set found(data) [expr \
+      {[llength [file list $directory(data) $fileName]] == 1}]
+
+  set t [object create -alias Thread threadStart]
+  sql execute $db "BEGIN TRANSACTION;"; $t Start
+
+  for {set i 1} {$i < 100} {incr i} {
+    #
+    # NOTE: Execute a query that should force the creation of a temporary file
+    #       for its statement journal.
+    #
+    sql execute $db "UPDATE t1 SET x = ?;" [list param1 String $i]
+
+    #
+    # NOTE: Give the other thread some time to notice the temporary file.
+    #
+    after 1000
+
+    #
+    # NOTE: Stop when the other thread confirms that the temporary file was
+    #       created in the correct directory.
+    #
+    if {[info exists found(temp)] && $found(temp)} then {
+      break
+    }
+  }
+
+  $t Join; sql execute $db "COMMIT TRANSACTION;"
+  lappend result $found(data) $found(temp); set result
+} -cleanup {
+  #
+  # NOTE: Close the database; however, do not attempt to delete the file as
+  #       it is not located in the database directory known to the cleanupDb
+  #       procedure (i.e. the one returned by getDatabaseDirectory).
+  #
+  cleanupDb $fileName db true false false
+
+  #
+  # NOTE: Attempt to restore the process-wide data and temporary directory
+  #       settings for the SQLite core library.
+  #
+  catch {
+    object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+        sqlite3_win32_set_directory 1 null
+  }
+
+  catch {
+    object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+        sqlite3_win32_set_directory 2 null
+  }
+
+  if {[info exists directory(data)] && \
+      [file exists $directory(data)] && \
+      [file isdirectory $directory(data)]} then {
+    file delete -recursive -force $directory(data)
+  }
+
+  if {[info exists directory(temp)] && \
+      [file exists $directory(temp)] && \
+      [file isdirectory $directory(temp)]} then {
+    file delete -recursive -force $directory(temp)
+  }
+
+  object unimport -importpattern System.Threading
+
+  if {[info exists t] && [cleanupThread $t]} then {
+    unset t
+  }
+
+  catch {object removecallback threadStart}
+
+  unset -nocomplain t found i db fileName result directory
+
+  rename threadStart ""
+} -constraints {eagle windows monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite sqlite3_win32_set_directory} -result {0 0 True True}}
 
 ###############################################################################
 

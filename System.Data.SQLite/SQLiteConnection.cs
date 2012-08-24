@@ -221,6 +221,7 @@ namespace System.Data.SQLite
     private const bool DefaultReadOnly = false;
     private const bool DefaultBinaryGUID = true;
     private const bool DefaultUseUTF16Encoding = false;
+    private const bool DefaultToFullPath = true;
     private const bool DefaultPooling = false;
     private const bool DefaultLegacyFormat = false;
     private const bool DefaultForeignKeys = false;
@@ -1183,7 +1184,8 @@ namespace System.Data.SQLite
           if (fileName.StartsWith("./") || fileName.StartsWith(".\\"))
             fileName = Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase) + fileName.Substring(1);
 #endif
-          fileName = ExpandFileName(fileName);
+          bool toFullPath = SQLiteConvert.ToBoolean(FindKey(opts, "ToFullPath", DefaultToFullPath.ToString()));
+          fileName = ExpandFileName(fileName, toFullPath);
         }
       }
 
@@ -1756,11 +1758,16 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Expand the filename of the data source, resolving the |DataDirectory| macro as appropriate.
+    /// Expand the filename of the data source, resolving the |DataDirectory|
+    /// macro as appropriate.
     /// </summary>
     /// <param name="sourceFile">The database filename to expand</param>
+    /// <param name="toFullPath">
+    /// Non-zero if the returned file name should be converted to a full path
+    /// (except when using the .NET Compact Framework).
+    /// </param>
     /// <returns>The expanded path and filename of the filename</returns>
-    private string ExpandFileName(string sourceFile)
+    private string ExpandFileName(string sourceFile, bool toFullPath)
     {
       if (String.IsNullOrEmpty(sourceFile)) return sourceFile;
 
@@ -1786,7 +1793,8 @@ namespace System.Data.SQLite
       }
 
 #if !PLATFORM_COMPACTFRAMEWORK
-      sourceFile = Path.GetFullPath(sourceFile);
+      if (toFullPath)
+        sourceFile = Path.GetFullPath(sourceFile);
 #endif
 
       return sourceFile;
