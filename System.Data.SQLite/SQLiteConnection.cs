@@ -186,6 +186,15 @@ namespace System.Data.SQLite
   /// <description>N</description>
   /// <description>True</description>
   /// </item>
+  /// <item>
+  /// <description>ToFullPath</description>
+  /// <description>
+  /// <b>True</b> - Attempt to expand the data source file name to a fully qualified path before opening.<br/>
+  /// <b>False</b> - Skip attempting to expand the data source file name to a fully qualified path before opening.
+  /// </description>
+  /// <description>N</description>
+  /// <description>True</description>
+  /// </item>
   /// </list>
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
@@ -945,6 +954,15 @@ namespace System.Data.SQLite
     /// <description>
     /// <b>True</b> - Apply the default connection settings to the opened database.<br/>
     /// <b>False</b> - Skip applying the default connection settings to the opened database.
+    /// </description>
+    /// <description>N</description>
+    /// <description>True</description>
+    /// </item>
+    /// <item>
+    /// <description>ToFullPath</description>
+    /// <description>
+    /// <b>True</b> - Attempt to expand the data source file name to a fully qualified path before opening.<br/>
+    /// <b>False</b> - Skip attempting to expand the data source file name to a fully qualified path before opening.
     /// </description>
     /// <description>N</description>
     /// <description>True</description>

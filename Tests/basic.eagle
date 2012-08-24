@@ -1624,7 +1624,7 @@ runTest {test data-1.32 {SQLiteConnection.Open with PRAGMA overrides} -setup {
 
 ###############################################################################
 
-runTest {test data-1.33 {sqlite3_win32_set_directory() API} -setup {
+runTest {test data-1.33 {sqlite3_win32_set_directory function} -setup {
   set directory(base) [getDatabaseDirectory]
 
   if {[string length $directory(base)] == 0 || \
