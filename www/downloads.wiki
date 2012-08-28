@@ -592,8 +592,8 @@
       <big><b>This NuGet package does not include any code from the native
       SQLite core library and will not work properly without the native assembly
       &quot;SQLite.Interop.dll&quot; compiled for the processor architecture of
-      the parent process being present in a directory in the native library
-      search path.</b></big>
+      the host process being present in a directory in the native library search
+      path.</b></big>
       <br />
       (sha1: e018c036ca199fab0f382150dff09cc78b0c054e)
     </td>
