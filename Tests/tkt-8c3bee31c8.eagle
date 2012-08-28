@@ -1,0 +1,85 @@
+###############################################################################
+#
+# tkt-8c3bee31c8.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-8c3bee31c8-1.1 {built connection string quoting} -setup {
+  unset -nocomplain dataSource o result
+} -body {
+  set o [object create -alias System.Data.SQLite.SQLiteConnectionStringBuilder]
+
+  foreach dataSource [list \
+        "C:\\test_path\\test.db" \
+        "/test_path/test.db" \
+        "C:\\test path\\test.db" \
+        "/test path/test.db" \
+        "C:\\test'path\\test.db" \
+        "/test'path/test.db"] {
+    $o DataSource $dataSource
+    lappend result [list $dataSource [$o ToString]]
+  }
+
+  set result
+} -cleanup {
+  unset -nocomplain dataSource o result
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite} -result {{{C:\test_path\test.db}\
+{data source=C:\test_path\test.db}} {/test_path/test.db\
+{data source=/test_path/test.db}} {{C:\test path\test.db} {data source="C:\test\
+path\test.db"}} {{/test path/test.db} {data source="/test path/test.db"}}\
+{{C:\test'path\test.db} {data source="C:\test'path\test.db"}}\
+{/test'path/test.db {data source="/test'path/test.db"}}}}
+
+###############################################################################
+
+runTest {test tkt-8c3bee31c8-1.2 {open single quoted file name} -setup {
+  unset -nocomplain fileName o
+} -body {
+  set fileName [appendArgs ' [file join [getDatabaseDirectory] \
+      tkt-8c3bee31c8-1.2.db] ']
+
+  set o [object create -alias System.Data.SQLite.SQLiteConnection]
+  $o ConnectionString [appendArgs "Data Source=" $fileName \;]
+  $o Open; # NOTE: This command may throw an exception, failing the test.
+} -cleanup {
+  unset -nocomplain fileName o
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite} -result {}}
+
+###############################################################################
+
+runTest {test tkt-8c3bee31c8-1.3 {open double quoted file name} -setup {
+  unset -nocomplain fileName o
+} -body {
+  set fileName [appendArgs \" [file join [getDatabaseDirectory] \
+      tkt-8c3bee31c8-1.3.db] \"]
+
+  set o [object create -alias System.Data.SQLite.SQLiteConnection]
+  $o ConnectionString [appendArgs "Data Source=" $fileName \;]
+  $o Open; # NOTE: This command may throw an exception, failing the test.
+} -cleanup {
+  unset -nocomplain fileName o
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite} -result {}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

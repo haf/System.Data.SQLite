@@ -1174,6 +1174,7 @@ namespace System.Data.SQLite
         throw new NotSupportedException(String.Format(CultureInfo.CurrentCulture, "Only SQLite Version {0} is supported at this time", DefaultVersion));
 
       fileName = FindKey(opts, "Data Source", DefaultDataSource);
+      fileName = UnwrapFileName(fileName);
 
       if (String.IsNullOrEmpty(fileName))
       {
@@ -1773,6 +1774,41 @@ namespace System.Data.SQLite
         }
 
         return rc;
+    }
+
+    /// <summary>
+    /// Removes one set of surrounding single -OR- double quotes from the file
+    /// name and returns the resulting file name.  If the string is null, empty,
+    /// or contains quotes that are not balanced, nothing is done and the original
+    /// string will be returned.
+    /// </summary>
+    /// <param name="sourceFile">The database file name to process.</param>
+    /// <returns>The modified database file name.</returns>
+    private string UnwrapFileName(string sourceFile)
+    {
+        if (String.IsNullOrEmpty(sourceFile))
+        {
+            //
+            // NOTE: The string is null or empty, return it verbatim.
+            //
+            return sourceFile;
+        }
+
+        int length = sourceFile.Length;
+
+        if (((sourceFile[0] == '\'') && (sourceFile[length - 1] == '\'')) ||
+            ((sourceFile[0] == '"') && (sourceFile[length - 1] == '"')))
+        {
+            //
+            // NOTE: Remove the first and last character.
+            //
+            return sourceFile.Substring(1, length - 2);
+        }
+
+        //
+        // NOTE: No match, return the input string verbatim.
+        //
+        return sourceFile;
     }
 
     /// <summary>
