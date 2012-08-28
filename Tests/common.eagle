@@ -664,7 +664,7 @@ namespace eval ::Eagle {
         # NOTE: Skip deleting database files if somebody sets the global
         #       variable to prevent it.
         #
-        if {![info exists ::no(cleanupDb)]} then {
+        if {![info exists ::no(cleanupDbFile)]} then {
           #
           # NOTE: Attempt to delete the test database file now.
           #
