@@ -46,6 +46,7 @@
     <p><b>1.0.82.0 - September XX, 2012</b></p>
     <ul>
       <li>Updated to <a href="http://www.sqlite.org/src/info/trunk">SQLite 3.7.14</a>.</li>
+      <li>Properly handle quoted data source values in the connection string. Fix for <a href="http://system.data.sqlite.org/index.html/info/8c3bee31c8">[8c3bee31c8]</a>.</li>
       <li>The <a href="http://nuget.org/packages/System.Data.SQLite">primary NuGet package</a> now supports x86 / x64 and the .NET Framework 2.0 / 4.0 (i.e. in a single package).</li>
       <li>Change the default value for the Synchronous connection string property to Full to match the default used by the SQLite core library itself.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Add the ability to skip applying default connection settings to opened databases via the new SetDefaults connection string property.</li>
