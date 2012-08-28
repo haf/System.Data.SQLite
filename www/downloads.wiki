@@ -554,6 +554,91 @@
 
   <tr>
     <td colspan="4">
+      <b>Official NuGet Packages</b>
+    </td>
+  </tr>
+
+  <tr>
+    <td width="10">&nbsp;</td>
+    <td width="30%" valign="top" align="right">
+      <a href="http://nuget.org/api/v2/package/System.Data.SQLite/1.0.81.1">System.Data.SQLite.1.0.81.1.nupkg</a>
+      <br />
+      (2.80 MiB)
+    </td>
+    <td width="5"></td>
+    <td valign="top">
+      This NuGet package contains all the binaries for both the x86 and x64
+      versions of System.Data.SQLite 1.0.81.0 (3.7.12.1).  The .NET Framework
+      3.5 SP1 or 4.0 is required.  For the included native binaries, the version
+      of the Visual C++ runtime corresponding to the .NET Framework used by the
+      associated managed assembly is statically linked.
+      <br />
+      (sha1: c9caf814f914231f18ec61214245b49f5a07731d)
+    </td>
+  </tr>
+
+  <tr>
+    <td width="10">&nbsp;</td>
+    <td width="30%" valign="top" align="right">
+      <a href="http://nuget.org/api/v2/package/System.Data.SQLite.MSIL/1.0.81.0">System.Data.SQLite.MSIL.1.0.81.0.nupkg</a>
+      <br />
+      (267 KiB)
+    </td>
+    <td width="5"></td>
+    <td valign="top">
+      This NuGet package contains the managed binaries for System.Data.SQLite
+      1.0.81.0.  The .NET Framework 3.5 SP1 or 4.0 is required.
+      <br />
+      <big><b>This NuGet package does not include any code from the native
+      SQLite core library and will not work properly without the native assembly
+      &quot;SQLite.Interop.dll&quot; compiled for the processor architecture of
+      the parent process being present in a directory in the native library
+      search path.</b></big>
+      <br />
+      (sha1: e018c036ca199fab0f382150dff09cc78b0c054e)
+    </td>
+  </tr>
+
+  <tr>
+    <td width="10">&nbsp;</td>
+    <td width="30%" valign="top" align="right">
+      <a href="http://nuget.org/api/v2/package/System.Data.SQLite.x86/1.0.81.0">System.Data.SQLite.x86.1.0.81.0.nupkg</a>
+      <br />
+      (1.45 MiB)
+    </td>
+    <td width="5"></td>
+    <td valign="top">
+      This NuGet package contains all the binaries for the x86 version of
+      System.Data.SQLite 1.0.81.0 (3.7.12.1).  The .NET Framework 3.5 SP1 or 4.0
+      is required.  For the included native binaries, the version of the Visual
+      C++ runtime corresponding to the .NET Framework used by the associated
+      managed assembly is statically linked.
+      <br />
+      (sha1: dffd9693454e6e466490ee21f6d693891663eb40)
+    </td>
+  </tr>
+
+  <tr>
+    <td width="10">&nbsp;</td>
+    <td width="30%" valign="top" align="right">
+      <a href="http://nuget.org/api/v2/package/System.Data.SQLite.x64/1.0.81.0">System.Data.SQLite.x64.1.0.81.0.nupkg</a>
+      <br />
+      (1.65 MiB)
+    </td>
+    <td width="5"></td>
+    <td valign="top">
+      This NuGet package contains all the binaries for the x64 version of
+      System.Data.SQLite 1.0.81.0 (3.7.12.1).  The .NET Framework 3.5 SP1 or 4.0
+      is required.  For the included native binaries, the version of the Visual
+      C++ runtime corresponding to the .NET Framework used by the associated
+      managed assembly is statically linked.
+      <br />
+      (sha1: 0ab4adad078a1bab25bb9369a2303d19251bb3e1)
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="4">
       <b>Legacy Versions</b>
     </td>
   </tr>
