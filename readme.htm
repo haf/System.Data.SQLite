@@ -213,7 +213,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Add DefineConstants property to the SQLiteConnection class to return the list of define constants used when compiling the core managed assembly.</li>
     <li>Add release archive verification tool to the release automation.</li>
     <li>Fix NullReferenceException when calling the SQLiteDataAdapter.FillSchema method on a query that returns multiple result sets. Fix for [3aa50d8413].</li>
-    <li>Fix subtle race condition between threads fetching connection handles from the connection pool any garbage collection (GC) threads that may be running. Fix for [996d13cd87].</li>
+    <li>Fix subtle race condition between threads fetching connection handles from the connection pool and any garbage collection (GC) threads that may be running. Fix for [996d13cd87].</li>
     <li>Add missing call to SetTimeout in the SQLite3_UTF16.Open method.</li>
     <li>Add checks to prevent the SQLiteConnectionPool.Remove method from returning any connection handles that are closed or invalid.</li>
     <li>Modify static SQLiteBase helper methods to prevent them from passing IntPtr.Zero to the SQLite native library.</li>
@@ -356,7 +356,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
   <b>1.0.73.0 - June 2, 2011</b>
 </p>
 <ul>
-  <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_6_3.html">SQLite 3.7.6.3</a>.
+  <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_6_3.html">SQLite 3.7.6.3</a>.</li>
   <li>Minor optimization to GetBytes(). Fix for [8c1650482e].</li>
   <li>Update various assembly information settings.</li>
   <li>Correct System.Data.SQLite.Linq version and resource information. Fix for [6489c5a396] and [133daf50d6].</li>
@@ -373,41 +373,39 @@ it to extend its functionality, but the core engine's source is not changed.</p>
   <b>1.0.71.0 - April 27, 2011</b>
 </p>
 <ul>
-  <li>Updated to SQLite 3.7.6+ <a href="http://www.sqlite.org/src/info/1bd1484cd7">[1bd1484cd7]</a>
-   to get additional Windows error logging.</li>
+  <li>Updated to SQLite 3.7.6+ <a href="http://www.sqlite.org/src/info/1bd1484cd7">[1bd1484cd7]</a> to get additional Windows error logging.</li>
   <li>Updated setup to optionally add install directory to PATH if GAC option selected.</li>
 </ul>
 <p>
   <b>1.0.70.0 - April 22, 2011</b>
 </p>
 <ul>
-  <li>Added support for sqlite3_extended_result_codes(), sqlite3_errcode(), and sqlite3_extended_errcode()
-        via SetExtendedResultCodes(), ResultCode(), and ExtendedResultCode().</li>
+  <li>Added support for sqlite3_extended_result_codes(), sqlite3_errcode(), and sqlite3_extended_errcode() via SetExtendedResultCodes(), ResultCode(), and ExtendedResultCode().</li>
   <li>Added support for SQLITE_CONFIG_LOG via SQLiteLogEventHandler().</li>
 </ul>
 <p>
   <b>1.0.69.0 - April 12, 2011</b>
 </p>
 <ul>
-  <li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_6.html">SQLite 3.7.6</a></li>
-  <li>New VS2008 and VS2010 solution files</li>
-  <li>Build and packaging automation</li>
-  <li>New Inno Setup files</li>
-  <li>Designer support currently not ready for release</li>
+  <li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_6.html">SQLite 3.7.6</a>.</li>
+  <li>New VS2008 and VS2010 solution files.</li>
+  <li>Build and packaging automation.</li>
+  <li>New Inno Setup files.</li>
+  <li>Designer support currently not ready for release.</li>
 </ul>
 <p>
   <b>1.0.68.0 - February 2011</b>
 </p>
 <ul>
-  <li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_5.html">SQLite 3.7.5</a></li>
-  <li>Continuing work on supporting Visual Studio 2010</li>
+  <li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_5.html">SQLite 3.7.5</a>.</li>
+  <li>Continuing work on supporting Visual Studio 2010.</li>
 </ul>
 
 <p>
 <b>1.0.67.0 - January 3, 2011</b></p>
 <ul>
-<li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_4.html">SQLite 3.7.4</a></li>
-<li>Continuing work on supporting Visual Studio 2010</li>
+<li>Code merge with <a href="http://www.sqlite.org/releaselog/3_7_4.html">SQLite 3.7.4</a>.</li>
+<li>Continuing work on supporting Visual Studio 2010.</li>
 </ul>
 <p>
 <b>1.0.66.1 - August 1, 2010</b></p>
