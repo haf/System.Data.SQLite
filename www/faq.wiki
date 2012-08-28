@@ -206,15 +206,15 @@
   <ul>
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite">
-      System.Data.SQLite</a>: The SQLite database engine combined with a
-      complete ADO.NET provider all rolled into a single mixed-mode assembly for
-      x86.
+      System.Data.SQLite</a>: The SQLite database engine for both x86 and x64
+      along with the ADO.NET provider.
     </li>
 
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.x86">
-      System.Data.SQLite.x86</a>: This currently contains the same content as
-      the &quot;System.Data.SQLite&quot; package, above.
+      System.Data.SQLite.x86</a>: The SQLite database engine combined with a
+      complete ADO.NET provider all rolled into a single mixed-mode assembly for
+      x86.
     </li>
 
     <li>
