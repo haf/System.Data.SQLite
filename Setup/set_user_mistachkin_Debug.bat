@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: set_mistachkin_Debug.bat --
+:: set_user_mistachkin_Debug.bat --
 ::
 :: Custom Per-User Debug Build Settings
 ::

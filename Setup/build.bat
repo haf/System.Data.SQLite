@@ -70,38 +70,38 @@ IF EXIST "%TOOLS%\set_%CONFIGURATION%_%PLATFORM%.bat" (
   )
 )
 
-IF EXIST "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat" (
+IF EXIST "%TOOLS%\set_user_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat" (
   CALL :fn_ResetErrorLevel
 
-  %_AECHO% Running "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat"...
-  %__ECHO3% CALL "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat"
+  %_AECHO% Running "%TOOLS%\set_user_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat"...
+  %__ECHO3% CALL "%TOOLS%\set_user_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat"
 
   IF ERRORLEVEL 1 (
-    ECHO File "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat" failed.
+    ECHO File "%TOOLS%\set_user_%USERNAME%_%BASE_CONFIGURATION%_%PLATFORM%.bat" failed.
     GOTO errors
   )
 )
 
-IF EXIST "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%.bat" (
+IF EXIST "%TOOLS%\set_user_%USERNAME%_%BASE_CONFIGURATION%.bat" (
   CALL :fn_ResetErrorLevel
 
-  %_AECHO% Running "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%.bat"...
-  %__ECHO3% CALL "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%.bat"
+  %_AECHO% Running "%TOOLS%\set_user_%USERNAME%_%BASE_CONFIGURATION%.bat"...
+  %__ECHO3% CALL "%TOOLS%\set_user_%USERNAME%_%BASE_CONFIGURATION%.bat"
 
   IF ERRORLEVEL 1 (
-    ECHO File "%TOOLS%\set_%USERNAME%_%BASE_CONFIGURATION%.bat" failed.
+    ECHO File "%TOOLS%\set_user_%USERNAME%_%BASE_CONFIGURATION%.bat" failed.
     GOTO errors
   )
 )
 
-IF EXIST "%TOOLS%\set_%USERNAME%.bat" (
+IF EXIST "%TOOLS%\set_user_%USERNAME%.bat" (
   CALL :fn_ResetErrorLevel
 
-  %_AECHO% Running "%TOOLS%\set_%USERNAME%.bat"...
-  %__ECHO3% CALL "%TOOLS%\set_%USERNAME%.bat"
+  %_AECHO% Running "%TOOLS%\set_user_%USERNAME%.bat"...
+  %__ECHO3% CALL "%TOOLS%\set_user_%USERNAME%.bat"
 
   IF ERRORLEVEL 1 (
-    ECHO File "%TOOLS%\set_%USERNAME%.bat" failed.
+    ECHO File "%TOOLS%\set_user_%USERNAME%.bat" failed.
     GOTO errors
   )
 )

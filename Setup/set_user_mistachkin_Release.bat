@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: set_mistachkin_Release.bat --
+:: set_user_mistachkin_Release.bat --
 ::
 :: Custom Per-User Release Build Settings
 ::

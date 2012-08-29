@@ -35,6 +35,7 @@ Membership/obj/*
 Membership/Profile/*
 Membership/SiteMap/*
 obj/*
+Setup/set_user_*.bat
 Setup/Output/*
 SQLite.Designer/obj/*
 SQLite.Designer/Properties/*
