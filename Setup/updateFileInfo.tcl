@@ -133,13 +133,44 @@ foreach pattern [list $pattern1 $pattern2] {
     #       each (literal) match.  Since we are processing the matches in the
     #       exact order they appear in the data AND we are only replacing one
     #       literal instance per match AND the size sub-pattern is nothing like
-    #       the hash sub-pattern, this should be 100% reliable.
+    #       the hash sub-pattern, this should be 100% reliable.  In order to
+    #       avoid superfluous matches of the file size or hash, the starting
+    #       index is set to a position just beyond the matching file name.
     #
-    incr count [regsub -nocase -- "***=$fileSize" $data [getFileSize \
-        $fullFileName] data]
+    set start [string first $fileName $data]
 
-    incr count [regsub -nocase -- "***=$fileHash" $data [getFileHash \
-        $fullFileName] data]
+    if {$start == -1} then {
+      puts stdout "WARNING: Position for \"$fileName\" not found, skipped."
+      continue
+    }
+
+    incr start [string length $fileName]
+
+    #
+    # NOTE: Calculate the new file size and compare it to the old one.  If it
+    #       has not changed, do nothing.
+    #
+    set newFileSize [getFileSize $fullFileName]
+
+    if {$fileSize ne $newFileSize} then {
+      incr count [regsub -nocase -start $start -- "***=$fileSize" $data \
+          $newFileSize data]
+
+      incr start [string length $fileSize]
+    }
+
+    #
+    # NOTE: Calculate the new file hash and compare it to the old one.  If it
+    #       has not changed, do nothing.
+    #
+    set newFileHash [getFileHash $fullFileName]
+
+    if {$fileHash ne $newFileHash} then {
+      incr count [regsub -nocase -start $start -- "***=$fileHash" $data \
+          $newFileHash data]
+
+      incr start [string length $fileHash]
+    }
   }
 }
 

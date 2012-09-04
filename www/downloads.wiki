@@ -21,7 +21,7 @@
       This ZIP archive contains all current source code for System.Data.SQLite
       1.0.82.0 (3.7.14) combined into a single archive file.
       <br />
-      (sha1: 8160c782b2865438393b800f8de91a5595d86dc2)
+      (sha1: accec84da4a59815078e494afd398eb1b3c64898)
     </td>
   </tr>
 
@@ -186,7 +186,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx40-setup-x64-2010-1.0.82.0.exe">sqlite-netFx40-setup-x64-2010-1.0.82.0.exe</a>
       <br />
-      (11.66 MiB)
+      (11.64 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -210,7 +210,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx35-binary-bundle-Win32-2008-1.0.82.0.zip">sqlite-netFx35-binary-bundle-Win32-2008-1.0.82.0.zip</a>
       <br />
-      (1.65 MiB)
+      (1.66 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -228,7 +228,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx35-binary-Win32-2008-1.0.82.0.zip">sqlite-netFx35-binary-Win32-2008-1.0.82.0.zip</a>
       <br />
-      (1.64 MiB)
+      (1.65 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -292,7 +292,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx40-binary-bundle-Win32-2010-1.0.82.0.zip">sqlite-netFx40-binary-bundle-Win32-2010-1.0.82.0.zip</a>
       <br />
-      (1.73 MiB)
+      (1.71 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -333,7 +333,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx40-binary-bundle-x64-2010-1.0.82.0.zip">sqlite-netFx40-binary-bundle-x64-2010-1.0.82.0.zip</a>
       <br />
-      (1.72 MiB)
+      (1.73 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -351,7 +351,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx40-binary-x64-2010-1.0.82.0.zip">sqlite-netFx40-binary-x64-2010-1.0.82.0.zip</a>
       <br />
-      (1.71 MiB)
+      (1.72 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -392,7 +392,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx35-static-binary-Win32-2008-1.0.82.0.zip">sqlite-netFx35-static-binary-Win32-2008-1.0.82.0.zip</a>
       <br />
-      (1.92 MiB)
+      (1.86 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -416,7 +416,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx35-static-binary-bundle-x64-2008-1.0.82.0.zip">sqlite-netFx35-static-binary-bundle-x64-2008-1.0.82.0.zip</a>
       <br />
-      (1.92 MiB)
+      (1.90 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -476,7 +476,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx40-static-binary-Win32-2010-1.0.82.0.zip">sqlite-netFx40-static-binary-Win32-2010-1.0.82.0.zip</a>
       <br />
-      (1.90 MiB)
+      (1.91 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -499,7 +499,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx40-static-binary-bundle-x64-2010-1.0.82.0.zip">sqlite-netFx40-static-binary-bundle-x64-2010-1.0.82.0.zip</a>
       <br />
-      (1.91 MiB)
+      (1.92 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
@@ -517,7 +517,7 @@
     <td width="30%" valign="top" align="right">
       <a href="/downloads/1.0.82.0/sqlite-netFx40-static-binary-x64-2010-1.0.82.0.zip">sqlite-netFx40-static-binary-x64-2010-1.0.82.0.zip</a>
       <br />
-      (1.86 MiB)
+      (1.92 MiB)
     </td>
     <td width="5"></td>
     <td valign="top">
