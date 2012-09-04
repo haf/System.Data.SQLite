@@ -85,9 +85,13 @@ if {[info exists argv] && [llength $argv] > 1} then {
 #       this pattern assumes a particular structure for the [HTML] file to be
 #       updated.
 #
-set pattern {<a\
+set pattern1 {<a\
     href=".*?/(.*?\.(?:exe|zip|nupkg))">.*?\((\d+?\.\d+?) MiB\).*?sha1:\
     ([0-9A-F]{40})}
+
+set pattern2 {<a\
+    href=".*?/package/.*?/\d+\.\d+\.\d+\.\d+">(.*?)</a>.*?\((\d+?\.\d+?)\
+    MiB\).*?sha1: ([0-9A-F]{40})}
 
 #
 # NOTE: Grab all the data from the file to be updated.
@@ -95,39 +99,48 @@ set pattern {<a\
 set data [readFile $updateFileName]
 
 #
-# NOTE: Process each match in the data and capture the file name, size, and
-#       hash.
+# NOTE: Initialize the total number of changes made to zero.
 #
 set count 0
 
-foreach {dummy fileName fileSize fileHash} \
-    [regexp -all -inline -nocase -- $pattern $data] {
+#
+# NOTE: Process each regular expression pattern against the page text.
+#
+foreach pattern [list $pattern1 $pattern2] {
   #
-  # NOTE: Get the fully qualified file name based on the configured directory.
+  # NOTE: Process each match in the data and capture the file name, size, and
+  #       hash.
   #
-  set fullFileName [file join $directory [file tail $fileName]]
+  foreach {dummy fileName fileSize fileHash} \
+      [regexp -all -inline -nocase -- $pattern $data] {
+    #
+    # NOTE: Get the fully qualified file name based on the configured
+    #       directory.
+    #
+    set fullFileName [file join $directory [file tail $fileName]]
 
-  #
-  # NOTE: If the file does not exist, issue a warning and skip it.
-  #
-  if {![file exists $fullFileName]} then {
-    puts stdout "WARNING: File \"$fullFileName\" does not exist, skipped."
-    continue
+    #
+    # NOTE: If the file does not exist, issue a warning and skip it.
+    #
+    if {![file exists $fullFileName]} then {
+      puts stdout "WARNING: File \"$fullFileName\" does not exist, skipped."
+      continue
+    }
+
+    #
+    # NOTE: Replace the captured size and hash with ones calculated from the
+    #       actual file name.  This will only replace the first instance of
+    #       each (literal) match.  Since we are processing the matches in the
+    #       exact order they appear in the data AND we are only replacing one
+    #       literal instance per match AND the size sub-pattern is nothing like
+    #       the hash sub-pattern, this should be 100% reliable.
+    #
+    incr count [regsub -nocase -- "***=$fileSize" $data [getFileSize \
+        $fullFileName] data]
+
+    incr count [regsub -nocase -- "***=$fileHash" $data [getFileHash \
+        $fullFileName] data]
   }
-
-  #
-  # NOTE: Replace the captured size and hash with ones calculated from the
-  #       actual file name.  This will only replace the first instance of
-  #       each (literal) match.  Since we are processing the matches in the
-  #       exact order they appear in the data AND we are only replacing one
-  #       literal instance per match AND the size sub-pattern is nothing like
-  #       the hash sub-pattern, this should be 100% reliable.
-  #
-  incr count [regsub -nocase -- "***=$fileSize" $data [getFileSize \
-      $fullFileName] data]
-
-  incr count [regsub -nocase -- "***=$fileHash" $data [getFileHash \
-      $fullFileName] data]
 }
 
 #
