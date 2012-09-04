@@ -240,32 +240,6 @@
   </li>
 </ol>
 
-<a name="updateDownloadsPage"></a>
-<h2>Update Downloads Page</h2>
-
-<ol>
-  <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
-
-  <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
-
-  <li>
-    Replace the version numbers for the previous release in the local working
-    copy of the [./downloads.wiki | downloads page] with the new version numbers
-    for System.Data.SQLite and the SQLite core.
-  </li>
-
-  <li>
-    Enter the following command to update the sizes and hashes on the downloads
-    page based on all the built release packages:&nbsp;<b>tclsh.exe&nbsp;
-    updateFileInfo.tcl</b><br /><i>This assumes that
-    [http://www.activestate.com/activetcl | ActiveTcl] version 8.4 or later has
-    been installed using the default settings and that the Fossil binary is
-    available somewhere along the
-    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH] (i.e. for
-    calculating the SHA1 hashes).</i>
-  </li>
-</ol>
-
 <a name="buildNuGetPackages"></a>
 <h2>Build NuGet Packages</h2>
 
@@ -304,6 +278,38 @@
     that the NuGet binary is available somewhere along the
     [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
     to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+  </li>
+
+  <li>
+    Enter the following command to move the NuGet packages to the release output
+    directory:
+    &nbsp;<b>move *.nupkg Setup\Output</b>
+  </li>
+</ol>
+
+<a name="updateDownloadsPage"></a>
+<h2>Update Downloads Page</h2>
+
+<ol>
+  <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+
+  <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
+
+  <li>
+    Replace the version numbers for the previous release in the local working
+    copy of the [./downloads.wiki | downloads page] with the new version numbers
+    for System.Data.SQLite and the SQLite core.
+  </li>
+
+  <li>
+    Enter the following command to update the sizes and hashes on the downloads
+    page based on all the built release packages:&nbsp;<b>tclsh.exe&nbsp;
+    updateFileInfo.tcl</b><br /><i>This assumes that
+    [http://www.activestate.com/activetcl | ActiveTcl] version 8.4 or later has
+    been installed using the default settings and that the Fossil binary is
+    available somewhere along the
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH] (i.e. for
+    calculating the SHA1 hashes).</i>
   </li>
 </ol>
 

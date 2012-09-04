@@ -86,7 +86,7 @@ if {[info exists argv] && [llength $argv] > 1} then {
 #       updated.
 #
 set pattern {<a\
-    href=".*?/(.*?\.(?:exe|zip))">.*?\((\d+?\.\d+?) MiB\).*?sha1:\
+    href=".*?/(.*?\.(?:exe|zip|nupkg))">.*?\((\d+?\.\d+?) MiB\).*?sha1:\
     ([0-9A-F]{40})}
 
 #
