@@ -43,6 +43,17 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
+    <p><b>1.0.83.0 - November XX, 2012 <font color="red">(release scheduled)</font></b></p>
+    <ul>
+      <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_14.html">SQLite 3.7.14</a>.</li>
+      <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string argument.</li>
+      <li>All applicable calls into the SQLite core library now return a SQLiteErrorCode instead of an integer error code.</li>
+      <li>When available, the new sqlite3_errstr function from the core library is used to get the error message for a specific return code.</li>
+      <li>The SetMemoryStatus, Shutdown, ResultCode, ExtendedResultCode, and SetAvRetry methods of the SQLiteConnection class now return a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>The public constructor for the SQLiteException now takes a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>The ErrorCode field of the LogEventArgs is now an object instead of an integer.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>The names and messages associated with the SQLiteErrorCode enumeration values have been normalized to match those in the SQLite core library.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    </ul>
     <p><b>1.0.82.0 - September 3, 2012</b></p>
     <ul>
       <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_14.html">SQLite 3.7.14</a>.</li>

@@ -490,7 +490,7 @@ namespace System.Data.SQLite
         {
             if ((_flags & SQLiteConnectionFlags.LogBackup) == SQLiteConnectionFlags.LogBackup)
             {
-                SQLiteLog.LogMessage(0, String.Format(
+                SQLiteLog.LogMessage(String.Format(
                     CultureInfo.CurrentCulture,
                     "Caught exception while backing up database: {0}", e));
             }
@@ -1539,7 +1539,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="value">Non-zero to enable memory usage tracking, zero otherwise.</param>
     /// <returns>A standard SQLite return code (i.e. zero for success and non-zero for failure).</returns>
-    public static int SetMemoryStatus(bool value)
+    public static SQLiteErrorCode SetMemoryStatus(bool value)
     {
         return SQLite3.StaticSetMemoryStatus(value);
     }
@@ -1588,7 +1588,7 @@ namespace System.Data.SQLite
     }
 
     /// Passes a shutdown request off to SQLite.
-    public int Shutdown()
+    public SQLiteErrorCode Shutdown()
     {
         CheckDisposed();
 
@@ -1636,7 +1636,7 @@ namespace System.Data.SQLite
       if (_sql != null) _sql.SetExtendedResultCodes(bOnOff);
     }
     /// Enables or disabled extended result codes returned by SQLite
-    public int ResultCode()
+    public SQLiteErrorCode ResultCode()
     {
       CheckDisposed();
 
@@ -1645,7 +1645,7 @@ namespace System.Data.SQLite
       return _sql.ResultCode();
     }
     /// Enables or disabled extended result codes returned by SQLite
-    public int ExtendedResultCode()
+    public SQLiteErrorCode ExtendedResultCode()
     {
       CheckDisposed();
 
@@ -1741,7 +1741,7 @@ namespace System.Data.SQLite
     /// up with the final number of milliseconds to wait.  A negative value will cause the
     /// current interval to be queried and replace that negative value.</param>
     /// <returns>Zero for success, non-zero for error.</returns>
-    public int SetAvRetry(ref int count, ref int interval)
+    public SQLiteErrorCode SetAvRetry(ref int count, ref int interval)
     {
         CheckDisposed();
 
@@ -1749,7 +1749,7 @@ namespace System.Data.SQLite
             throw new InvalidOperationException(
                 "Database must be opened before changing the AV retry parameters.");
 
-        int rc;
+        SQLiteErrorCode rc;
         IntPtr pArg = IntPtr.Zero;
 
         try

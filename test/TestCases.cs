@@ -1622,8 +1622,8 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
         // Turn on extended result codes
         cnn.SetExtendedResultCodes(true);
 
-        int rc = cnn.ResultCode();
-        int xrc = cnn.ExtendedResultCode();
+        SQLiteErrorCode rc = cnn.ResultCode();
+        SQLiteErrorCode xrc = cnn.ExtendedResultCode();
 
         cnn.Close();
       }
@@ -1632,7 +1632,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     //Logging EventHandler
     public void OnLogEvent(object sender, LogEventArgs logEvent)
     {
-        int err_code = logEvent.ErrorCode;
+        object errorCode = logEvent.ErrorCode;
         string err_msg = logEvent.Message;
         logevents++;
     }

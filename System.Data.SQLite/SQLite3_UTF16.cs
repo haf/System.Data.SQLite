@@ -111,19 +111,19 @@ namespace System.Data.SQLite
         IntPtr db;
 
 #if !SQLITE_STANDARD
-        int n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), (int)openFlags, out db);
+        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), (int)openFlags, out db);
 #else
         if ((openFlags & SQLiteOpenFlagsEnum.Create) == 0 && System.IO.File.Exists(strFilename) == false)
           throw new SQLiteException((int)SQLiteErrorCode.CantOpen, strFilename);
 
-        int n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
+        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
 #endif
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
         Trace.WriteLine(String.Format("Open: {0}", db));
 #endif
 
-        if (n > 0) throw new SQLiteException(n, null);
+        if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
 
         _sql = new SQLiteConnectionHandle(db);
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
@@ -173,8 +173,8 @@ namespace System.Data.SQLite
         }
 #endif
 
-        int n = UnsafeNativeMethods.sqlite3_bind_text16(handle, index, value, value.Length * 2, (IntPtr)(-1));
-        if (n > 0) throw new SQLiteException(n, GetLastError());
+        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_text16(handle, index, value, value.Length * 2, (IntPtr)(-1));
+        if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
 
     internal override DateTime GetDateTime(SQLiteStatement stmt, int index)

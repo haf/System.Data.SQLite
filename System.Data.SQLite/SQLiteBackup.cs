@@ -50,7 +50,7 @@ namespace System.Data.SQLite
         /// the SQLite3 class should throw an exception when it receives a non-Ok
         /// return code from the core SQLite library.
         /// </summary>
-        internal int _stepResult;
+        internal SQLiteErrorCode _stepResult;
 
         /// <summary>
         /// Initializes the backup.

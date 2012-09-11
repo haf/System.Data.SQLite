@@ -35,12 +35,12 @@ set params(results) [list \
     1048576 1048576 10\\} 0\$" \
     "1 \\{System\\.Reflection\\.TargetInvocationException: Exception has been\
     thrown by the target of an invocation\\. --->\
-    System\\.Data\\.SQLite\\.SQLiteException: SQLite error\\r\\nno such table:\
-    t1\\r\\n.*?" \
+    System\\.Data\\.SQLite\\.SQLiteException: SQL logic error or missing\
+    database\\r\\nno such table: t1\\r\\n.*?" \
     "1 \\{System\\.Reflection\\.TargetInvocationException: Exception has been\
     thrown by the target of an invocation\\. --->\
-    System\\.Data\\.SQLite\\.SQLiteException: SQLite error\\r\\nno such table:\
-    t1\\r\\n.*?" \
+    System\\.Data\\.SQLite\\.SQLiteException: SQL logic error or missing\
+    database\\r\\nno such table: t1\\r\\n.*?" \
     "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
     1048576 1048576 10\\} 0\$" \
     "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
@@ -49,8 +49,8 @@ set params(results) [list \
     1048576 1048576 10\\} 0\$" \
     "1 \\{System\\.Reflection\\.TargetInvocationException: Exception has been\
     thrown by the target of an invocation\\. --->\
-    System\\.Data\\.SQLite\\.SQLiteException: SQLite error\\r\\nno such table:\
-    t1\\r\\n.*?" \
+    System\\.Data\\.SQLite\\.SQLiteException: SQL logic error or missing\
+    database\\r\\nno such table: t1\\r\\n.*?" \
     "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\
     1048576 1048576 10\\} \\{\\}\$" \
     "0 \\{1 1048576 1048576 1048576 1048576 1048576 1048576 1048576 1048576\

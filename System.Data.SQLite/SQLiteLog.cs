@@ -12,14 +12,15 @@ namespace System.Data.SQLite
     using System.Diagnostics;
 
     /// <summary>
-    /// Passed during an Log callback
+    /// Event data for logging event handlers.
     /// </summary>
     public class LogEventArgs : EventArgs
     {
         /// <summary>
-        /// The error code.
+        /// The error code.  The type of this object value should be
+        /// System.Int32 or SQLiteErrorCode.
         /// </summary>
-        public readonly int ErrorCode;
+        public readonly object ErrorCode;
 
         /// <summary>
         /// SQL statement text as the statement first begins executing
@@ -35,12 +36,15 @@ namespace System.Data.SQLite
         /// Constructs the LogEventArgs object.
         /// </summary>
         /// <param name="pUserData">Should be null.</param>
-        /// <param name="errorCode">The SQLite error code.</param>
+        /// <param name="errorCode">
+        /// The error code.  The type of this object value should be
+        /// System.Int32 or SQLiteErrorCode.
+        /// </param>
         /// <param name="message">The error message, if any.</param>
         /// <param name="data">The extra data, if any.</param>
         internal LogEventArgs(
             IntPtr pUserData,
-            int errorCode,
+            object errorCode,
             string message,
             object data
             )
@@ -169,9 +173,9 @@ namespace System.Data.SQLite
                 {
                     _callback = new SQLiteLogCallback(LogCallback);
 
-                    int rc = _sql.SetLogCallback(_callback);
+                    SQLiteErrorCode rc = _sql.SetLogCallback(_callback);
 
-                    if (rc != 0)
+                    if (rc != SQLiteErrorCode.Ok)
                         throw new SQLiteException(rc,
                             "Failed to initialize logging.");
                 }
@@ -191,8 +195,8 @@ namespace System.Data.SQLite
         /// <summary>
         /// Handles the AppDomain being unloaded.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">Should be null.</param>
+        /// <param name="e">The data associated with this event.</param>
         private static void DomainUnload(
             object sender,
             EventArgs e
@@ -218,15 +222,15 @@ namespace System.Data.SQLite
                 //
                 if (_sql != null)
                 {
-                    int rc = _sql.Shutdown();
+                    SQLiteErrorCode rc = _sql.Shutdown();
 
-                    if (rc != 0)
+                    if (rc != SQLiteErrorCode.Ok)
                         throw new SQLiteException(rc,
                             "Failed to shutdown interface.");
 
                     rc = _sql.SetLogCallback(null);
 
-                    if (rc != 0)
+                    if (rc != SQLiteErrorCode.Ok)
                         throw new SQLiteException(rc,
                             "Failed to shutdown logging.");
                 }
@@ -298,10 +302,53 @@ namespace System.Data.SQLite
         /// Log a message to all the registered log event handlers without going
         /// through the SQLite library.
         /// </summary>
-        /// <param name="errorCode">The error code or zero for success.</param>
+        /// <param name="message">The message to be logged.</param>
+        public static void LogMessage(
+            string message
+            )
+        {
+            LogMessage(null, message);
+        }
+
+        /// <summary>
+        /// Log a message to all the registered log event handlers without going
+        /// through the SQLite library.
+        /// </summary>
+        /// <param name="errorCode">The SQLite error code.</param>
+        /// <param name="message">The message to be logged.</param>
+        public static void LogMessage(
+            SQLiteErrorCode errorCode,
+            string message
+            )
+        {
+            LogMessage((object)errorCode, message);
+        }
+
+        /// <summary>
+        /// Log a message to all the registered log event handlers without going
+        /// through the SQLite library.
+        /// </summary>
+        /// <param name="errorCode">The integer error code.</param>
         /// <param name="message">The message to be logged.</param>
         public static void LogMessage(
             int errorCode,
+            string message
+            )
+        {
+            LogMessage((object)errorCode, message);
+        }
+
+        /// <summary>
+        /// Log a message to all the registered log event handlers without going
+        /// through the SQLite library.
+        /// </summary>
+        /// <param name="errorCode">
+        /// The error code.  The type of this object value should be
+        /// System.Int32 or SQLiteErrorCode.
+        /// </param>
+        /// <param name="message">The message to be logged.</param>
+        private static void LogMessage(
+            object errorCode,
             string message
             )
         {
@@ -352,7 +399,19 @@ namespace System.Data.SQLite
         /// <summary>
         /// Internal proxy function that calls any registered application log
         /// event handlers.
+        ///
+        /// WARNING: This method is used more-or-less directly by native code,
+        ///          do not modify its type signature.
         /// </summary>
+        /// <param name="pUserData">
+        /// The extra data associated with this message, if any.
+        /// </param>
+        /// <param name="errorCode">
+        /// The error code associated with this message.
+        /// </param>
+        /// <param name="pMessage">
+        /// The message string to be logged.
+        /// </param>
         private static void LogCallback(
             IntPtr pUserData,
             int errorCode,
@@ -405,11 +464,16 @@ namespace System.Data.SQLite
                     message = "<empty>";
             }
 
-            int errorCode = e.ErrorCode;
+            object errorCode = e.ErrorCode;
+            bool success = false;
 
-            Trace.WriteLine(String.Format(
-                "SQLite {0} ({1}): {2}", errorCode == 0 ?
-                "message" : "error", errorCode, message));
+            if (errorCode is SQLiteErrorCode)
+                success = ((SQLiteErrorCode)errorCode == SQLiteErrorCode.Ok);
+            else if (errorCode is int)
+                success = ((int)errorCode == 0);
+
+            Trace.WriteLine(String.Format("SQLite {0} ({1}): {2}",
+                success ? "message" : "error", errorCode, message));
         }
     }
 #endif

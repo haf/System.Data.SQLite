@@ -1261,7 +1261,7 @@ runTest {test data-1.22 {SQLiteFunction collation exception} -setup {
 regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 1\
 \{System\.Reflection\.TargetInvocationException: Exception has been thrown by\
 the target of an invocation\. ---> System\.Data\.SQLite\.SQLiteException:\
-Operation terminated by sqlite3_interrupt\(\).*$}}
+interrupted.*$}}
 
 ###############################################################################
 
@@ -1516,8 +1516,8 @@ runTest {test data-1.28 {SetMemoryStatus method} -setup {
   unset -nocomplain result sqlite3
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^0 21 0 0 System#IntPtr#\d+ System#IntPtr#\d+ \d+ \d+ \d+ \d+\
-\d+ True True True True True True$}}
+regexp -result {^Ok Misuse Ok Ok System#IntPtr#\d+ System#IntPtr#\d+ \d+ \d+ \d+\
+\d+ \d+ True True True True True True$}}
 
 ###############################################################################
 
@@ -1759,7 +1759,7 @@ runTest {test data-1.33 {sqlite3_win32_set_directory function} -setup {
 
   rename threadStart ""
 } -constraints {eagle windows monoBug28 command.sql compile.DATA SQLite\
-System.Data.SQLite sqlite3_win32_set_directory} -result {0 0 True True}}
+System.Data.SQLite sqlite3_win32_set_directory} -result {Ok Ok True True}}
 
 ###############################################################################
 

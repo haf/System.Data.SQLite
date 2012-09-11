@@ -84,7 +84,7 @@ runTest {test tkt-ccfa69fc32-1.1 {Entity Framework / Transaction Scope} -body {
 } -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll\
 file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db} -match \
 glob -result {0 {1581 1730 1833 2116 2139} 0 {System.Data.UpdateException: *\
----> System.Data.SQLite.SQLiteException: Abort due to constraint violation
+---> System.Data.SQLite.SQLiteException: constraint failed
 PRIMARY KEY must be unique
 *} 0 {1 2 3 4 5 6 7 8 9 10 1576 1577 1578 1579 1580 1581 1730 1833 2116 2139}}}
 

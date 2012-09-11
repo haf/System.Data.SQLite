@@ -37,11 +37,11 @@ namespace System.Data.SQLite
     /// Public constructor for generating a SQLite error given the base error code
     /// </summary>
     /// <param name="errorCode">The SQLite error code to report</param>
-    /// <param name="extendedInformation">Extra text to go along with the error message text</param>
-    public SQLiteException(int errorCode, string extendedInformation)
-      : base(GetStockErrorMessage(errorCode, extendedInformation))
+    /// <param name="message">Extra text to go along with the error message text</param>
+    public SQLiteException(SQLiteErrorCode errorCode, string message)
+      : base(GetStockErrorMessage(errorCode, message))
     {
-      _errorCode = (SQLiteErrorCode)errorCode;
+      _errorCode = errorCode;
     }
 
     /// <summary>
@@ -86,165 +86,135 @@ namespace System.Data.SQLite
     /// Initializes the exception class with the SQLite error code.
     /// </summary>
     /// <param name="errorCode">The SQLite error code</param>
-    /// <param name="errorMessage">A detailed error message</param>
+    /// <param name="message">A detailed error message</param>
     /// <returns>An error message string</returns>
-    private static string GetStockErrorMessage(int errorCode, string errorMessage)
+    private static string GetStockErrorMessage(
+        SQLiteErrorCode errorCode,
+        string message
+        )
     {
-      if (errorMessage == null) errorMessage = "";
-
-      if (errorMessage.Length > 0)
-        errorMessage = "\r\n" + errorMessage;
-
-      if (errorCode < 0 || errorCode >= _errorMessages.Length)
-        errorCode = 1;
-
-      return _errorMessages[errorCode] + errorMessage;
+        return String.Format("{0}{1}{2}",
+            SQLiteBase.GetErrorString(errorCode),
+            Environment.NewLine, message).Trim();
     }
-
-    private static string[] _errorMessages = {
-      "SQLite OK",
-      "SQLite error",
-      "An internal logic error in SQLite",
-      "Access permission denied",
-      "Callback routine requested an abort",
-      "The database file is locked",
-      "A table in the database is locked",
-      "malloc() failed",
-      "Attempt to write a read-only database",
-      "Operation terminated by sqlite3_interrupt()",
-      "Some kind of disk I/O error occurred",
-      "The database disk image is malformed",
-      "Table or record not found",
-      "Insertion failed because the database is full",
-      "Unable to open the database file",
-      "Database lock protocol error",
-      "Database is empty",
-      "The database schema changed",
-      "Too much data for one row of a table",
-      "Abort due to constraint violation",
-      "Data type mismatch",
-      "Library used incorrectly",
-      "Uses OS features not supported on host",
-      "Authorization denied",
-      "Auxiliary database format error",
-      "2nd parameter to sqlite3_bind() out of range",
-      "File opened that is not a database file",
-    };
   }
 
   /// <summary>
-  /// SQLite error codes
+  /// SQLite error codes.  Actually, this enumeration represents a return code,
+  /// which may also indicate success in one of several ways (e.g. SQLITE_OK,
+  /// SQLITE_ROW, and SQLITE_DONE).  Therefore, the name of this enumeration is
+  /// something of a misnomer.
   /// </summary>
   public enum SQLiteErrorCode
   {
     /// <summary>
-    /// Success
+    /// Successful result
     /// </summary>
-    Ok = 0,
+    Ok /* 0 */,
     /// <summary>
     /// SQL error or missing database
     /// </summary>
-    Error,
+    Error /* 1 */,
     /// <summary>
     /// Internal logic error in SQLite
     /// </summary>
-    Internal,
+    Internal /* 2 */,
     /// <summary>
     /// Access permission denied
     /// </summary>
-    Perm,
+    Perm /* 3 */,
     /// <summary>
     /// Callback routine requested an abort
     /// </summary>
-    Abort,
+    Abort /* 4 */,
     /// <summary>
     /// The database file is locked
     /// </summary>
-    Busy,
+    Busy /* 5 */,
     /// <summary>
     /// A table in the database is locked
     /// </summary>
-    Locked,
+    Locked /* 6 */,
     /// <summary>
-    /// malloc() failed
+    /// A malloc() failed
     /// </summary>
-    NoMem,
+    NoMem /* 7 */,
     /// <summary>
-    /// Attempt to write a read-only database
+    /// Attempt to write a readonly database
     /// </summary>
-    ReadOnly,
+    ReadOnly /* 8 */,
     /// <summary>
     /// Operation terminated by sqlite3_interrupt()
     /// </summary>
-    Interrupt,
+    Interrupt /* 9 */,
     /// <summary>
     /// Some kind of disk I/O error occurred
     /// </summary>
-    IOErr,
+    IoErr /* 10 */,
     /// <summary>
     /// The database disk image is malformed
     /// </summary>
-    Corrupt,
+    Corrupt /* 11 */,
     /// <summary>
-    /// Table or record not found
+    /// Unknown opcode in sqlite3_file_control()
     /// </summary>
-    NotFound,
+    NotFound /* 12 */,
     /// <summary>
     /// Insertion failed because database is full
     /// </summary>
-    Full,
+    Full /* 13 */,
     /// <summary>
     /// Unable to open the database file
     /// </summary>
-    CantOpen,
+    CantOpen /* 14 */,
     /// <summary>
     /// Database lock protocol error
     /// </summary>
-    Protocol,
+    Protocol /* 15 */,
     /// <summary>
     /// Database is empty
     /// </summary>
-    Empty,
+    Empty /* 16 */,
     /// <summary>
     /// The database schema changed
     /// </summary>
-    Schema,
+    Schema /* 17 */,
     /// <summary>
-    /// Too much data for one row of a table
+    /// String or BLOB exceeds size limit
     /// </summary>
-    TooBig,
+    TooBig /* 18 */,
     /// <summary>
     /// Abort due to constraint violation
     /// </summary>
-    Constraint,
+    Constraint /* 19 */,
     /// <summary>
     /// Data type mismatch
     /// </summary>
-    Mismatch,
+    Mismatch /* 20 */,
     /// <summary>
     /// Library used incorrectly
     /// </summary>
-    Misuse,
+    Misuse /* 21 */,
     /// <summary>
     /// Uses OS features not supported on host
     /// </summary>
-    NOLFS,
+    NoLfs /* 22 */,
     /// <summary>
     /// Authorization denied
     /// </summary>
-    Auth,
+    Auth /* 23 */,
     /// <summary>
     /// Auxiliary database format error
     /// </summary>
-    Format,
+    Format /* 24 */,
     /// <summary>
     /// 2nd parameter to sqlite3_bind out of range
     /// </summary>
-    Range,
+    Range /* 25 */,
     /// <summary>
     /// File opened that is not a database file
     /// </summary>
-    NotADatabase,
+    NotADb /* 26 */,
     /// <summary>
     /// sqlite3_step() has another row ready
     /// </summary>
@@ -252,6 +222,6 @@ namespace System.Data.SQLite
     /// <summary>
     /// sqlite3_step() has finished executing
     /// </summary>
-    Done = 101,
+    Done /* 101 */
   }
 }

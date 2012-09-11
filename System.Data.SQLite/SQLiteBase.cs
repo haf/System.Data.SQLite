@@ -8,6 +8,7 @@
 namespace System.Data.SQLite
 {
   using System;
+  // using System.Runtime.InteropServices;
 
   /// <summary>
   /// This internal class provides the foundation of SQLite support.  It defines all the abstract members needed to implement
@@ -47,12 +48,12 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="value">Non-zero to enable memory usage tracking, zero otherwise.</param>
     /// <returns>A standard SQLite return code (i.e. zero for success and non-zero for failure).</returns>
-    internal abstract int SetMemoryStatus(bool value);
+    internal abstract SQLiteErrorCode SetMemoryStatus(bool value);
     /// <summary>
     /// Shutdown the SQLite engine so that it can be restarted with different config options.
     /// We depend on auto initialization to recover.
     /// </summary>
-    internal abstract int Shutdown();
+    internal abstract SQLiteErrorCode Shutdown();
     /// <summary>
     /// Returns non-zero if a database connection is open.
     /// </summary>
@@ -125,7 +126,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="stmt">The statement to reset</param>
     /// <returns>Returns -1 if the schema changed while resetting, 0 if the reset was sucessful or 6 (SQLITE_LOCKED) if the reset failed due to a lock</returns>
-    internal abstract int Reset(SQLiteStatement stmt);
+    internal abstract SQLiteErrorCode Reset(SQLiteStatement stmt);
     internal abstract void Cancel();
 
     internal abstract void Bind_Double(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, double value);
@@ -197,13 +198,13 @@ namespace System.Data.SQLite
     /// associated with the database connection. 
     /// </summary>
     /// <returns>Result code</returns>
-    internal abstract int ResultCode();
+    internal abstract SQLiteErrorCode ResultCode();
     /// <summary>
     /// Returns the extended numeric result code for the most recent failed SQLite API call 
     /// associated with the database connection. 
     /// </summary>
     /// <returns>Extended result code</returns>
-    internal abstract int ExtendedResultCode();
+    internal abstract SQLiteErrorCode ExtendedResultCode();
 
     /// <summary>
     /// Add a log message via the SQLite sqlite3_log interface.
@@ -224,7 +225,7 @@ namespace System.Data.SQLite
     internal abstract void SetCommitHook(SQLiteCommitCallback func);
     internal abstract void SetTraceCallback(SQLiteTraceCallback func);
     internal abstract void SetRollbackHook(SQLiteRollbackCallback func);
-    internal abstract int SetLogCallback(SQLiteLogCallback func);
+    internal abstract SQLiteErrorCode SetLogCallback(SQLiteLogCallback func);
 
     /// <summary>
     /// Checks if the SQLite core library has been initialized in the current process.
@@ -245,7 +246,7 @@ namespace System.Data.SQLite
       get;
     }
 
-    internal abstract int FileControl(string zDbName, int op, IntPtr pArg);
+    internal abstract SQLiteErrorCode FileControl(string zDbName, int op, IntPtr pArg);
 
     /// <summary>
     /// Creates a new SQLite backup object based on the provided destination
@@ -362,6 +363,70 @@ namespace System.Data.SQLite
     // a SQLiteStatementHandle, SQLiteConnectionHandle, and SQLiteFunctionCookieHandle.
     // Therefore these functions have to be static, and have to be low-level.
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static string[] _errorMessages = {
+        /* SQLITE_OK          */ "not an error",
+        /* SQLITE_ERROR       */ "SQL logic error or missing database",
+        /* SQLITE_INTERNAL    */ "internal logic error",
+        /* SQLITE_PERM        */ "access permission denied",
+        /* SQLITE_ABORT       */ "callback requested query abort",
+        /* SQLITE_BUSY        */ "database is locked",
+        /* SQLITE_LOCKED      */ "database table is locked",
+        /* SQLITE_NOMEM       */ "out of memory",
+        /* SQLITE_READONLY    */ "attempt to write a readonly database",
+        /* SQLITE_INTERRUPT   */ "interrupted",
+        /* SQLITE_IOERR       */ "disk I/O error",
+        /* SQLITE_CORRUPT     */ "database disk image is malformed",
+        /* SQLITE_NOTFOUND    */ "unknown operation",
+        /* SQLITE_FULL        */ "database or disk is full",
+        /* SQLITE_CANTOPEN    */ "unable to open database file",
+        /* SQLITE_PROTOCOL    */ "locking protocol",
+        /* SQLITE_EMPTY       */ "table contains no data",
+        /* SQLITE_SCHEMA      */ "database schema has changed",
+        /* SQLITE_TOOBIG      */ "string or blob too big",
+        /* SQLITE_CONSTRAINT  */ "constraint failed",
+        /* SQLITE_MISMATCH    */ "datatype mismatch",
+        /* SQLITE_MISUSE      */ "library routine called out of sequence",
+        /* SQLITE_NOLFS       */ "large file support is disabled",
+        /* SQLITE_AUTH        */ "authorization denied",
+        /* SQLITE_FORMAT      */ "auxiliary database format error",
+        /* SQLITE_RANGE       */ "bind or column index out of range",
+        /* SQLITE_NOTADB      */ "file is encrypted or is not a database",
+    };
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static string FallbackGetErrorString(SQLiteErrorCode rc)
+    {
+        if (_errorMessages == null)
+            return null;
+
+        int index = (int)rc;
+
+        if ((index < 0) || (index >= _errorMessages.Length))
+            index = (int)SQLiteErrorCode.Error; /* Make into generic error. */
+
+        return _errorMessages[index];
+    }
+
+    internal static string GetErrorString(SQLiteErrorCode rc)
+    {
+        //try
+        //{
+        //    IntPtr ptr = UnsafeNativeMethods.sqlite3_errstr(rc);
+        //
+        //    if (ptr != IntPtr.Zero)
+        //        return Marshal.PtrToStringAnsi(ptr);
+        //}
+        //catch (EntryPointNotFoundException)
+        //{
+        //    // do nothing.
+        //}
+
+        return FallbackGetErrorString(rc);
+    }
+
     internal static string GetLastError(SQLiteConnectionHandle hdl, IntPtr db)
     {
         if ((hdl == null) || (db == IntPtr.Zero))
@@ -390,8 +455,8 @@ namespace System.Data.SQLite
         if ((hdl == null) || (backup == IntPtr.Zero)) return;
         lock (hdl)
         {
-            int n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
-            if (n > 0) throw new SQLiteException(n, null);
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+            if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
         }
     }
 
@@ -401,11 +466,11 @@ namespace System.Data.SQLite
         lock (hdl)
         {
 #if !SQLITE_STANDARD
-            int n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
 #else
-            int n = UnsafeNativeMethods.sqlite3_finalize(stmt);
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_finalize(stmt);
 #endif
-            if (n > 0) throw new SQLiteException(n, null);
+            if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
         }
     }
 
@@ -415,11 +480,11 @@ namespace System.Data.SQLite
         lock (hdl)
         {
 #if !SQLITE_STANDARD
-            int n = UnsafeNativeMethods.sqlite3_close_interop(db);
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_close_interop(db);
 #else
             ResetConnection(hdl, db);
 
-            int n;
+            SQLiteErrorCode n;
 
             try
             {
@@ -430,7 +495,7 @@ namespace System.Data.SQLite
                 n = UnsafeNativeMethods.sqlite3_close(db);
             }
 #endif
-            if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
+            if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError(hdl, db));
         }
     }
 
@@ -441,7 +506,7 @@ namespace System.Data.SQLite
         lock (hdl)
         {
             IntPtr stmt = IntPtr.Zero;
-            int n;
+            SQLiteErrorCode n;
             do
             {
                 stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
@@ -458,7 +523,7 @@ namespace System.Data.SQLite
             if (IsAutocommit(hdl, db) == false) // a transaction is pending on the connection
             {
                 n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
-                if (n > 0) throw new SQLiteException(n, GetLastError(hdl, db));
+                if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError(hdl, db));
             }
         }
         GC.KeepAlive(hdl);

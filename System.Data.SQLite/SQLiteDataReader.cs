@@ -231,7 +231,7 @@ namespace System.Data.SQLite
         throw new InvalidOperationException("DataReader has been closed");
 
       if (_version == 0)
-        throw new SQLiteException((int)SQLiteErrorCode.Abort, "Execution was aborted by the user");
+        throw new SQLiteException(SQLiteErrorCode.Abort, "Execution was aborted by the user");
 
       if (_command.Connection.State != ConnectionState.Open || _command.Connection._version != _version)
         throw new InvalidOperationException("Connection was closed, statement was terminated");
