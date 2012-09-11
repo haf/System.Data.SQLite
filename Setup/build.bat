@@ -236,6 +236,7 @@ SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREF
 :skip_setLogging
 
 %_VECHO% Logging = '%LOGGING%'
+%_VECHO% MsBuildArgs = '%MSBUILD_ARGS%'
 
 %__ECHO% MSBuild.exe "%SOLUTION%" "/target:%TARGET%" "/property:Configuration=%CONFIGURATION%" "/property:Platform=%PLATFORM%" %LOGGING% %MSBUILD_ARGS%
 
