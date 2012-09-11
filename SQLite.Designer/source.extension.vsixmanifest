@@ -3,7 +3,7 @@
   <Identifier Id="67b5f3a9-cde1-430f-a12b-af95bb064851">
     <Name>System.Data.SQLite Designer</Name>
     <Author>http://system.data.sqlite.org/</Author>
-    <Version>1.0.82.0</Version>
+    <Version>1.0.83.0</Version>
     <Description>ADO.NET Data Designer for SQLite</Description>
     <Locale>1033</Locale>
     <InstalledByMsi>false</InstalledByMsi>
