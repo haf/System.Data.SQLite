@@ -611,7 +611,7 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
-    internal static extern SQLiteErrorCode sqlite3_close_v2(IntPtr db);
+    internal static extern SQLiteErrorCode sqlite3_close_v2(IntPtr db); /* 3.7.14+ */
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -1294,12 +1294,12 @@ namespace System.Data.SQLite
 #endif
     internal static extern SQLiteErrorCode sqlite3_extended_errcode(IntPtr db);
 
-//#if !PLATFORM_COMPACTFRAMEWORK
-//    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-//#else
-//    [DllImport(SQLITE_DLL)]
-//#endif
-//    internal static extern IntPtr sqlite3_errstr(SQLiteErrorCode rc); /* 3.7.15+ */
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_errstr(SQLiteErrorCode rc); /* 3.7.15+ */
 
     // Since sqlite3_log() takes a variable argument list, we have to overload declarations
     // for all possible calls.  For now, we are only exposing a single string, and 

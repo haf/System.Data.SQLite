@@ -8,7 +8,10 @@
 namespace System.Data.SQLite
 {
   using System;
-  // using System.Runtime.InteropServices;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+  using System.Runtime.InteropServices;
+#endif
 
   /// <summary>
   /// This internal class provides the foundation of SQLite support.  It defines all the abstract members needed to implement
@@ -392,11 +395,17 @@ namespace System.Data.SQLite
         /* SQLITE_AUTH        */ "authorization denied",
         /* SQLITE_FORMAT      */ "auxiliary database format error",
         /* SQLITE_RANGE       */ "bind or column index out of range",
-        /* SQLITE_NOTADB      */ "file is encrypted or is not a database",
+        /* SQLITE_NOTADB      */ "file is encrypted or is not a database"
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    /// <summary>
+    /// Returns the error message for the specified SQLite return code using
+    /// the internal static lookup table.
+    /// </summary>
+    /// <param name="rc">The SQLite return code.</param>
+    /// <returns>The error message or null if it cannot be found.</returns>
     private static string FallbackGetErrorString(SQLiteErrorCode rc)
     {
         if (_errorMessages == null)
@@ -410,19 +419,32 @@ namespace System.Data.SQLite
         return _errorMessages[index];
     }
 
+    /// <summary>
+    /// Returns the error message for the specified SQLite return code using
+    /// the sqlite3_errstr() function, falling back to the internal lookup
+    /// table if necessary.
+    /// </summary>
+    /// <param name="rc">The SQLite return code.</param>
+    /// <returns>The error message or null if it cannot be found.</returns>
     internal static string GetErrorString(SQLiteErrorCode rc)
     {
-        //try
-        //{
-        //    IntPtr ptr = UnsafeNativeMethods.sqlite3_errstr(rc);
-        //
-        //    if (ptr != IntPtr.Zero)
-        //        return Marshal.PtrToStringAnsi(ptr);
-        //}
-        //catch (EntryPointNotFoundException)
-        //{
-        //    // do nothing.
-        //}
+        try
+        {
+            IntPtr ptr = UnsafeNativeMethods.sqlite3_errstr(rc);
+
+            if (ptr != IntPtr.Zero)
+            {
+#if !PLATFORM_COMPACTFRAMEWORK
+                return Marshal.PtrToStringAnsi(ptr);
+#else
+                return UTF8ToString(ptr, -1);
+#endif
+            }
+        }
+        catch (EntryPointNotFoundException)
+        {
+            // do nothing.
+        }
 
         return FallbackGetErrorString(rc);
     }

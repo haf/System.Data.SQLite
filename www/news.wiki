@@ -6,7 +6,7 @@
     <b>1.0.83.0 - November XX, 2012 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
-    <li>Updated to [http://www.sqlite.org/releaselog/3_7_14.html|SQLite 3.7.14].</li>
+    <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.7.15].</li>
     <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string argument.</li>
     <li>All applicable calls into the SQLite core library now return a SQLiteErrorCode instead of an integer error code.</li>
     <li>Make sure the error code of the SQLiteException class gets serialized.</li>

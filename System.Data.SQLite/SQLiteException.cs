@@ -11,6 +11,7 @@ namespace System.Data.SQLite
   using System.Data.Common;
 
 #if !PLATFORM_COMPACTFRAMEWORK
+  using System.Reflection;
   using System.Runtime.Serialization;
   using System.Security.Permissions;
 #endif
@@ -126,6 +127,35 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns the error message for the specified SQLite return code.
+    /// </summary>
+    /// <param name="errorCode">The SQLite return code.</param>
+    /// <returns>The error message or null if it cannot be found.</returns>
+    private static string GetErrorString(
+        SQLiteErrorCode errorCode
+        )
+    {
+#if !PLATFORM_COMPACTFRAMEWORK
+        //
+        // HACK: This must be done via reflection in order to prevent
+        //       the RuntimeHelpers.PrepareDelegate method from over-
+        //       eagerly attempting to locate the new (and optional)
+        //       sqlite3_errstr() function in the SQLite core library
+        //       because it happens to be in the static call graph for
+        //       the AppDomain.DomainUnload event handler registered
+        //       by the SQLiteLog class.
+        //
+        BindingFlags flags = BindingFlags.Static |
+            BindingFlags.NonPublic | BindingFlags.InvokeMethod;
+
+        return typeof(SQLiteBase).InvokeMember("GetErrorString",
+            flags, null, null, new object[] { errorCode }) as string;
+#else
+        return SQLiteBase.GetErrorString(errorCode);
+#endif
+    }
+
+    /// <summary>
     /// Returns the composite error message based on the SQLite return code
     /// and the optional detailed error message.
     /// </summary>
@@ -138,7 +168,7 @@ namespace System.Data.SQLite
         )
     {
         return String.Format("{0}{1}{2}",
-            SQLiteBase.GetErrorString(errorCode),
+            GetErrorString(errorCode),
             Environment.NewLine, message).Trim();
     }
   }
