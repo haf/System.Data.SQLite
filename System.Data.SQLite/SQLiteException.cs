@@ -12,14 +12,15 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
   using System.Runtime.Serialization;
+  using System.Security.Permissions;
 #endif
 
   /// <summary>
   /// SQLite exception class.
   /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
-  [Serializable]
-  public sealed class SQLiteException : DbException
+  [Serializable()]
+  public sealed class SQLiteException : DbException, ISerializable
 #else
   public sealed class SQLiteException : Exception
 #endif
@@ -27,17 +28,32 @@ namespace System.Data.SQLite
     private SQLiteErrorCode _errorCode;
 
 #if !PLATFORM_COMPACTFRAMEWORK
+    /// <summary>
+    /// Private constructor for use with serialization.
+    /// </summary>
+    /// <param name="info">
+    /// Holds the serialized object data about the exception being thrown.
+    /// </param>
+    /// <param name="context">
+    /// Contains contextual information about the source or destination.
+    /// </param>
     private SQLiteException(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {
+      _errorCode = (SQLiteErrorCode)info.GetInt32("errorCode");
     }
 #endif
 
     /// <summary>
-    /// Public constructor for generating a SQLite error given the base error code
+    /// Public constructor for generating a SQLite exception given the error
+    /// code and message.
     /// </summary>
-    /// <param name="errorCode">The SQLite error code to report</param>
-    /// <param name="message">Extra text to go along with the error message text</param>
+    /// <param name="errorCode">
+    /// The SQLite return code to report.
+    /// </param>
+    /// <param name="message">
+    /// Message text to go along with the return code message text.
+    /// </param>
     public SQLiteException(SQLiteErrorCode errorCode, string message)
       : base(GetStockErrorMessage(errorCode, message))
     {
@@ -45,33 +61,60 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Various public constructors that just pass along to the base Exception
+    /// Public constructor that uses the base class constructor for the error
+    /// message.
     /// </summary>
-    /// <param name="message">Passed verbatim to Exception</param>
+    /// <param name="message">Error message text.</param>
     public SQLiteException(string message)
       : base(message)
     {
     }
 
     /// <summary>
-    /// Various public constructors that just pass along to the base Exception
+    /// Public constructor that uses the default base class constructor.
     /// </summary>
     public SQLiteException()
     {
     }
 
     /// <summary>
-    /// Various public constructors that just pass along to the base Exception
-    /// <param name="message">Passed to Exception</param>
-    /// <param name="innerException">Passed to Exception</param>
+    /// Public constructor that uses the base class constructor for the error
+    /// message and inner exception.
     /// </summary>
+    /// <param name="message">Error message text.</param>
+    /// <param name="innerException">The original (inner) exception.</param>
     public SQLiteException(string message, Exception innerException)
       : base(message, innerException)
     {
     }
 
+#if !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
-    /// Retrieves the underlying SQLite error code for this exception
+    /// Adds extra information to the serialized object data specific to this
+    /// class type.  This is only used for serialization.
+    /// </summary>
+    /// <param name="info">
+    /// Holds the serialized object data about the exception being thrown.
+    /// </param>
+    /// <param name="context">
+    /// Contains contextual information about the source or destination.
+    /// </param>
+    [SecurityPermission(
+      SecurityAction.LinkDemand,
+      Flags = SecurityPermissionFlag.SerializationFormatter)]
+    public override void GetObjectData(
+      SerializationInfo info,
+      StreamingContext context)
+    {
+      if (info != null)
+        info.AddValue("errorCode", _errorCode);
+
+      base.GetObjectData(info, context);
+    }
+#endif
+
+    /// <summary>
+    /// Gets the underlying SQLite return code for this exception.
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
     public new SQLiteErrorCode ErrorCode
@@ -83,11 +126,12 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Initializes the exception class with the SQLite error code.
+    /// Returns the composite error message based on the SQLite return code
+    /// and the optional detailed error message.
     /// </summary>
-    /// <param name="errorCode">The SQLite error code</param>
-    /// <param name="message">A detailed error message</param>
-    /// <returns>An error message string</returns>
+    /// <param name="errorCode">The SQLite return code.</param>
+    /// <param name="message">Optional detailed error message.</param>
+    /// <returns>Error message text for the return code.</returns>
     private static string GetStockErrorMessage(
         SQLiteErrorCode errorCode,
         string message

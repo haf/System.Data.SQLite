@@ -93,6 +93,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="test.cfg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\System.Data.SQLite\System.Data.SQLite.Compact.2008.csproj">
       <Project>{AC139951-261A-4463-B6FA-AEBC25283A66}</Project>
       <Name>System.Data.SQLite.Compact.2008</Name>

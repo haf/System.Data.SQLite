@@ -1763,6 +1763,34 @@ System.Data.SQLite sqlite3_win32_set_directory} -result {Ok Ok True True}}
 
 ###############################################################################
 
+runTest {test data-1.34 {serialization of SQLiteException} -body {
+  set serializer [object create -alias \
+      System.Runtime.Serialization.Formatters.Binary.BinaryFormatter]
+
+  set stream [object create -alias System.IO.MemoryStream]
+
+  set exception(1) [object create -alias \
+      System.Data.SQLite.SQLiteException 14 "this is a test"]; # CantOpen
+
+  $serializer Serialize $stream $exception(1)
+
+  $stream Seek 0 Begin
+
+  set exception(2) [$serializer -alias Deserialize $stream]
+
+  list [$exception(1) ErrorCode] [$exception(1) Message] \
+      [$exception(2) ErrorCode] [$exception(2) Message] \
+      [expr {[$exception(1) ErrorCode] eq [$exception(2) ErrorCode]}] \
+      [expr {[$exception(1) Message] eq [$exception(2) Message]}]
+} -cleanup {
+  unset -nocomplain exception stream serializer
+} -constraints {eagle System.Data.SQLite} -result \
+[string map [list \n \r\n] {CantOpen {unable to open database file
+this is a test} CantOpen {unable to open database file
+this is a test} True True}]}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 

@@ -193,6 +193,8 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_14.html">SQLite 3.7.14</a>.</li>
     <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string argument.</li>
     <li>All applicable calls into the SQLite core library now return a SQLiteErrorCode instead of an integer error code.</li>
+    <li>Make sure the error code of the SQLiteException class gets serialized.</li>
+    <li>Make the test project for the .NET Compact Framework more flexible.</li>
     <li>When available, the new sqlite3_errstr function from the core library is used to get the error message for a specific return code.</li>
     <li>The SetMemoryStatus, Shutdown, ResultCode, ExtendedResultCode, and SetAvRetry methods of the SQLiteConnection class now return a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>The public constructor for the SQLiteException now takes a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>

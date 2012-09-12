@@ -79,7 +79,17 @@ namespace test
 
       frm.Show();
 
-      frm.WriteLine("\r\nBeginning Test on " + cnn.GetType().ToString());
+      Type type = cnn.GetType();
+      frm.WriteLine("\r\nBeginning Test on " + type.ToString());
+
+      SQLiteConnection cnn2 = cnn as SQLiteConnection;
+      if (cnn2 != null)
+      {
+          cnn2 = null;
+          frm.WriteLine("SQLite v" + SQLiteConnection.SQLiteVersion +
+              " [" + SQLiteConnection.SQLiteSourceId + "]");
+      }
+
       try { CreateTable(cnn); frm.WriteLine("SUCCESS - CreateTable"); }
       catch (Exception) { frm.WriteLine("FAIL - CreateTable"); }
 
