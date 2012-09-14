@@ -1961,7 +1961,8 @@ namespace eval ::Eagle {
         #
         # NOTE: The versions of Visual Studio that we support.
         #
-        set versions [list [list 8.0 2005] [list 9.0 2008] [list 10.0 2010]]
+        set versions [list [list 8.0 2005] [list 9.0 2008] \
+            [list 10.0 2010] [list 11.0 2012]]
 
         #
         # NOTE: Check each version and keep track of the ones we find.
