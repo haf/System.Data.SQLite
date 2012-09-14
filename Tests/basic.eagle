@@ -1784,7 +1784,7 @@ runTest {test data-1.34 {serialization of SQLiteException} -body {
       [expr {[$exception(1) Message] eq [$exception(2) Message]}]
 } -cleanup {
   unset -nocomplain exception stream serializer
-} -constraints {eagle System.Data.SQLite} -result \
+} -constraints {eagle SQLite System.Data.SQLite} -result \
 [string map [list \n \r\n] {CantOpen {unable to open database file
 this is a test} CantOpen {unable to open database file
 this is a test} True True}]}
