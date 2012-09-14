@@ -170,6 +170,12 @@ set patterns [list \
         $version(full)] </INTEROP_MANIFEST_VERSION>] \
     [appendArgs <INTEROP_RC_VERSION> [string map [list . ,] \
         $version(full)] </INTEROP_RC_VERSION>] \
+    [appendArgs <INTEROP_BUILD_NUMBER> [format %03d $version(build)] \
+        </INTEROP_BUILD_NUMBER>] \
+    [appendArgs <INTEROP_MANIFEST_VERSION> [string map [list . \\.] \
+        $version(full)] </INTEROP_MANIFEST_VERSION>] \
+    [appendArgs <INTEROP_RC_VERSION> [string map [list . ,] \
+        $version(full)] </INTEROP_RC_VERSION>] \
     [appendArgs \" [string map [list . \\.] $version(full)] \"] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
@@ -190,6 +196,7 @@ set patterns [list \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
+    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
@@ -223,6 +230,9 @@ set fileNames [list \
     [file join SQLite.Interop props SQLite.Interop.2010.props] \
     [file join SQLite.Interop props SQLite.Interop.2010.props] \
     [file join SQLite.Interop props SQLite.Interop.2010.props] \
+    [file join SQLite.Interop props SQLite.Interop.2012.props] \
+    [file join SQLite.Interop props SQLite.Interop.2012.props] \
+    [file join SQLite.Interop props SQLite.Interop.2012.props] \
     [file join SQLite.Interop src win interop.h] \
     [file join System.Data.SQLite AssemblyInfo.cs] \
     [file join System.Data.SQLite AssemblyInfo.cs] \
@@ -237,6 +247,7 @@ set fileNames [list \
     [file join testce AssemblyInfo.cs] \
     [file join testlinq 2008 App.config] \
     [file join testlinq 2010 App.config] \
+    [file join testlinq 2012 App.config] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join tools install Properties AssemblyInfo.cs] \

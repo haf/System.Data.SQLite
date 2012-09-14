@@ -1,33 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * Installer.2010.csproj -
+ * System.Data.SQLite.2012.csproj -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
  *
 -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.30319</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{A41FE2A5-07AD-4CE7-B836-1544634816F5}</ProjectGuid>
+    <ProjectGuid>{AC139952-261A-4463-B6FA-AEBC25283A66}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Installer</RootNamespace>
-    <AssemblyName>Installer</AssemblyName>
-    <DelaySign>true</DelaySign>
-    <OldToolsVersion>3.5</OldToolsVersion>
+    <RootNamespace>System.Data.SQLite</RootNamespace>
+    <AssemblyName>System.Data.SQLite</AssemblyName>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <SQLiteNetDir>$(MSBuildProjectDirectory)\..\..</SQLiteNetDir>
-    <ConfigurationYear>2010</ConfigurationYear>
+    <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+    <ConfigurationYear>2012</ConfigurationYear>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
     <OutputPath>$(BinaryOutputPath)</OutputPath>
+    <DocumentationFile>$(BinaryOutputPath)System.Data.SQLite.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,28 +39,10 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.EnterpriseServices" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Installer.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\manifest.xml" />
-  </ItemGroup>
+  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.References.targets" />
+  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Properties.targets" />
+  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Files.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <BuildDependsOn>
-      $(BuildDependsOn);
-      EmbedExeManifest;
-      StrongNameSign;
-      StrongNameSign2;
-    </BuildDependsOn>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

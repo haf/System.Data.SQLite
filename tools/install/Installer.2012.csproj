@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * Installer.2010.csproj -
+ * Installer.2012.csproj -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -11,18 +11,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.30319</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A41FE2A5-07AD-4CE7-B836-1544634816F5}</ProjectGuid>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <OutputType>Exe</OutputType>
     <RootNamespace>Installer</RootNamespace>
     <AssemblyName>Installer</AssemblyName>
     <DelaySign>true</DelaySign>
-    <OldToolsVersion>3.5</OldToolsVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..\..</SQLiteNetDir>
-    <ConfigurationYear>2010</ConfigurationYear>
+    <ConfigurationYear>2012</ConfigurationYear>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <Import Project="$(SQLiteNetDir)\SQLite.NET.targets" />

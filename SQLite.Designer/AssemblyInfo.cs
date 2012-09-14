@@ -30,7 +30,7 @@ using System.Resources;
 // to COM componenets.  If you need to access a type in this assembly from 
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
-[assembly: CLSCompliant(true)]
+// [assembly: CLSCompliant(true)]
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 [assembly: NeutralResourcesLanguage("en")]
 

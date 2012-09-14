@@ -159,6 +159,7 @@ set sds_manifests(source) {
   SQLite.Designer/SQLite.Designer.2005.csproj
   SQLite.Designer/SQLite.Designer.2008.csproj
   SQLite.Designer/SQLite.Designer.2010.csproj
+  SQLite.Designer/SQLite.Designer.2012.csproj
   SQLite.Designer/SQLiteAdapterDesigner.cs
   SQLite.Designer/SQLiteCommandDesigner.cs
   SQLite.Designer/SQLiteCommandHandler.cs
@@ -177,6 +178,7 @@ set sds_manifests(source) {
   SQLite.Designer/SQLiteDataViewSupport2005.xml
   SQLite.Designer/SQLiteDataViewSupport2008.xml
   SQLite.Designer/SQLiteDataViewSupport2010.xml
+  SQLite.Designer/SQLiteDataViewSupport2012.xml
   SQLite.Designer/SQLitePackage.cs
   SQLite.Designer/SQLiteProviderObjectFactory.cs
   SQLite.Designer/TableNameDialog.cs
@@ -189,18 +191,23 @@ set sds_manifests(source) {
   SQLite.Interop/props/SQLite.Interop.2005.vsprops
   SQLite.Interop/props/SQLite.Interop.2008.vsprops
   SQLite.Interop/props/SQLite.Interop.2010.props
+  SQLite.Interop/props/SQLite.Interop.2012.props
   SQLite.Interop/props/sqlite3.props
   SQLite.Interop/props/sqlite3.vsprops
   SQLite.Interop/SQLite.Interop.2005.vcproj
   SQLite.Interop/SQLite.Interop.2008.vcproj
   SQLite.Interop/SQLite.Interop.2010.vcxproj
   SQLite.Interop/SQLite.Interop.2010.vcxproj.filters
+  SQLite.Interop/SQLite.Interop.2012.vcxproj
+  SQLite.Interop/SQLite.Interop.2012.vcxproj.filters
   SQLite.Interop/SQLite.Interop.CE.2005.vcproj
   SQLite.Interop/SQLite.Interop.CE.2008.vcproj
   SQLite.Interop/SQLite.Interop.Static.2005.vcproj
   SQLite.Interop/SQLite.Interop.Static.2008.vcproj
   SQLite.Interop/SQLite.Interop.Static.2010.vcxproj
   SQLite.Interop/SQLite.Interop.Static.2010.vcxproj.filters
+  SQLite.Interop/SQLite.Interop.Static.2012.vcxproj
+  SQLite.Interop/SQLite.Interop.Static.2012.vcxproj.filters
   SQLite.Interop/src/
   SQLite.Interop/src/contrib/
   SQLite.Interop/src/contrib/extension-functions.c
@@ -221,6 +228,8 @@ set sds_manifests(source) {
   SQLite.NET.2008.sln
   SQLite.NET.2010.MSBuild.sln
   SQLite.NET.2010.sln
+  SQLite.NET.2012.MSBuild.sln
+  SQLite.NET.2012.sln
   SQLite.NET.Settings.targets
   SQLite.NET.targets
   SQLite.nuspec
@@ -266,6 +275,7 @@ set sds_manifests(source) {
   System.Data.SQLite/System.Data.SQLite.2005.csproj
   System.Data.SQLite/System.Data.SQLite.2008.csproj
   System.Data.SQLite/System.Data.SQLite.2010.csproj
+  System.Data.SQLite/System.Data.SQLite.2012.csproj
   System.Data.SQLite/System.Data.SQLite.CF.snk
   System.Data.SQLite/System.Data.SQLite.Compact.2005.csproj
   System.Data.SQLite/System.Data.SQLite.Compact.2008.csproj
@@ -273,6 +283,7 @@ set sds_manifests(source) {
   System.Data.SQLite/System.Data.SQLite.Module.2005.csproj
   System.Data.SQLite/System.Data.SQLite.Module.2008.csproj
   System.Data.SQLite/System.Data.SQLite.Module.2010.csproj
+  System.Data.SQLite/System.Data.SQLite.Module.2012.csproj
   System.Data.SQLite/System.Data.SQLite.Properties.targets
   System.Data.SQLite/System.Data.SQLite.References.targets
   System.Data.SQLite/System.Data.SQLite.snk
@@ -316,6 +327,7 @@ set sds_manifests(source) {
   System.Data.SQLite.Linq/SQLiteProviderServices.cs
   System.Data.SQLite.Linq/System.Data.SQLite.Linq.2008.csproj
   System.Data.SQLite.Linq/System.Data.SQLite.Linq.2010.csproj
+  System.Data.SQLite.Linq/System.Data.SQLite.Linq.2012.csproj
   test/
   test/app.config
   test/AssemblyInfo.cs
@@ -326,6 +338,7 @@ set sds_manifests(source) {
   test/test.2005.csproj
   test/test.2008.csproj
   test/test.2010.csproj
+  test/test.2012.csproj
   test/TestCases.cs
   test/TestCasesDialog.cs
   test/TestCasesDialog.Designer.cs
@@ -337,6 +350,7 @@ set sds_manifests(source) {
   testce/Form1.resx
   testce/Program.cs
   testce/TestCases.cs
+  testce/test.cfg
   testce/testce.2005.csproj
   testce/testce.2008.csproj
   testlinq/
@@ -344,16 +358,21 @@ set sds_manifests(source) {
   testlinq/2008/App.config
   testlinq/2010/
   testlinq/2010/App.config
+  testlinq/2012/
+  testlinq/2012/App.config
   testlinq/northwindEF.db
   testlinq/NorthwindModel2008.Designer.cs
   testlinq/NorthwindModel2008.edmx
   testlinq/NorthwindModel2010.Designer.cs
   testlinq/NorthwindModel2010.edmx
+  testlinq/NorthwindModel2012.Designer.cs
+  testlinq/NorthwindModel2012.edmx
   testlinq/Program.cs
   testlinq/Properties/
   testlinq/Properties/AssemblyInfo.cs
   testlinq/testlinq.2008.csproj
   testlinq/testlinq.2010.csproj
+  testlinq/testlinq.2012.csproj
   Tests/
   Tests/all.eagle
   Tests/backup.eagle
@@ -363,6 +382,7 @@ set sds_manifests(source) {
   Tests/Installer_Test_Vs2005.log
   Tests/Installer_Test_Vs2008.log
   Tests/Installer_Test_Vs2010.log
+  Tests/Installer_Test_Vs2012.log
   Tests/nonWal.db
   Tests/pkgIndex.eagle
   Tests/stress.eagle
@@ -393,6 +413,7 @@ set sds_manifests(source) {
   Tests/Uninstaller_Test_Vs2005.log
   Tests/Uninstaller_Test_Vs2008.log
   Tests/Uninstaller_Test_Vs2010.log
+  Tests/Uninstaller_Test_Vs2012.log
   Tests/version.eagle
   Tests/wal.db
   tools/
@@ -400,6 +421,7 @@ set sds_manifests(source) {
   tools/install/Installer.2005.csproj
   tools/install/Installer.2008.csproj
   tools/install/Installer.2010.csproj
+  tools/install/Installer.2012.csproj
   tools/install/Installer.cs
   tools/install/Properties/
   tools/install/Properties/AssemblyInfo.cs

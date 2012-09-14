@@ -23,9 +23,9 @@ namespace eval ::Eagle {
       # NOTE: See if the "year" setting has been overridden by the user (e.g. on
       #       the command line).  This helps control exactly which set of
       #       binaries we are testing, those produced using the Visual Studio
-      #       2005, 2008, or 2010 build systems.  To override this value via the
-      #       command line, enter a command similar to one of the following (all
-      #       on one line):
+      #       2005, 2008, 2010, or 2012 build systems.  To override this value
+      #       via the command line, enter a command similar to one of the
+      #       following (all on one line):
       #
       #       EagleShell.exe -preInitialize "set test_year 2005"
       #         -file .\path\to\all.eagle
@@ -34,6 +34,9 @@ namespace eval ::Eagle {
       #         -file .\path\to\all.eagle
       #
       #       EagleShell.exe -preInitialize "set test_year 2010"
+      #         -file .\path\to\all.eagle
+      #
+      #       EagleShell.exe -preInitialize "set test_year 2012"
       #         -file .\path\to\all.eagle
       #
       #       EagleShell.exe -preInitialize "unset -nocomplain test_year"
@@ -49,12 +52,41 @@ namespace eval ::Eagle {
       } else {
         #
         # NOTE: If Eagle has been compiled against the .NET Framework 4.0, use
-        #       "2010" as the test year; otherwise, use "2008" (we could use
+        #       "2010" by default (we could use "2012" in that case as well) as
+        #       the test year; otherwise, use "2008" by default (we could use
         #       "2005" in that case as well).  If another major [incompatible]
         #       version of the .NET Framework is released, this check will have
-        #       to be changed.
+        #       to be changed.  The default test year to use for a particular
+        #       .NET Framework version may be overridden using another global
+        #       variable (i.e. test_year_netFxYZ).
         #
-        return [expr {[haveConstraint imageRuntime40] ? "2010" : "2008"}]
+        if {[haveConstraint imageRuntime40]} then {
+          if {[info exists ::test_year_netFx40] && \
+              [string length $::test_year_netFx40] > 0} then {
+            #
+            # NOTE: Use the specified test year for the .NET Framework 4.0.
+            #
+            return $::test_year_netFx40
+          } else {
+            #
+            # NOTE: Use the default test year for the .NET Framework 4.0.
+            #
+            return 2010
+          }
+        } else {
+          if {[info exists ::test_year_netFx20] && \
+              [string length $::test_year_netFx20] > 0} then {
+            #
+            # NOTE: Use the specified test year for the .NET Framework 2.0.
+            #
+            return $::test_year_netFx20
+          } else {
+            #
+            # NOTE: Use the default test year for the .NET Framework 2.0.
+            #
+            return 2008
+          }
+        }
       }
     }
 

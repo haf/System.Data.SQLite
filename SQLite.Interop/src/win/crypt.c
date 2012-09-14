@@ -141,7 +141,7 @@ void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
 {
   LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)pArg;
   DWORD dwPageSize;
-  LPVOID pvTemp;
+  LPVOID pvTemp = NULL;
 
   if (!pBlock) return data;
   if (pBlock->pvCrypt == NULL) return NULL; // This only happens if CreateCryptBlock() failed to make scratch space

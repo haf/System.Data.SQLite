@@ -1765,6 +1765,8 @@ namespace System.Data.SQLite
                 string coreFileName,
                 string linqFileName,
                 string designerFileName,
+                string registryVersion,
+                string configVersion,
                 string debugFormat,
                 string traceFormat,
                 InstallFlags installFlags,
@@ -1777,9 +1779,11 @@ namespace System.Data.SQLite
                 bool noCompact,
                 bool noNetFx20,
                 bool noNetFx40,
+                bool noNetFx45,
                 bool noVs2005,
                 bool noVs2008,
                 bool noVs2010,
+                bool noVs2012,
                 bool noTrace,
                 bool noConsole,
                 bool noLog,
@@ -1796,6 +1800,8 @@ namespace System.Data.SQLite
                 this.coreFileName = coreFileName;
                 this.linqFileName = linqFileName;
                 this.designerFileName = designerFileName;
+                this.registryVersion = registryVersion;
+                this.configVersion = configVersion;
                 this.debugFormat = debugFormat;
                 this.traceFormat = traceFormat;
                 this.installFlags = installFlags;
@@ -1808,9 +1814,11 @@ namespace System.Data.SQLite
                 this.noCompact = noCompact;
                 this.noNetFx20 = noNetFx20;
                 this.noNetFx40 = noNetFx40;
+                this.noNetFx45 = noNetFx45;
                 this.noVs2005 = noVs2005;
                 this.noVs2008 = noVs2008;
                 this.noVs2010 = noVs2010;
+                this.noVs2012 = noVs2012;
                 this.noTrace = noTrace;
                 this.noConsole = noConsole;
                 this.noLog = noLog;
@@ -1964,12 +1972,12 @@ namespace System.Data.SQLite
                     ref designerFileName);
 
                 return new Configuration(thisAssembly, null, directory,
-                    coreFileName, linqFileName, designerFileName,
+                    coreFileName, linqFileName, designerFileName, null, null,
                     TraceOps.DebugFormat, TraceOps.TraceFormat,
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, true, false, false, false, false,
                     false, false, false, false, false, false, false, false,
-                    true, true, false, false, false);
+                    false, false, true, true, false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2066,7 +2074,11 @@ namespace System.Data.SQLite
                         //       to interpret the textual value as the correct
                         //       type.
                         //
-                        if (MatchOption(newArg, "confirm"))
+                        if (MatchOption(newArg, "configVersion"))
+                        {
+                            configuration.configVersion = text;
+                        }
+                        else if (MatchOption(newArg, "confirm"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2362,6 +2374,27 @@ namespace System.Data.SQLite
 
                             configuration.noNetFx40 = (bool)value;
                         }
+                        else if (MatchOption(newArg, "noNetFx45"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noNetFx45 = (bool)value;
+                        }
                         else if (MatchOption(newArg, "noRuntimeVersion"))
                         {
                             bool? value = ParseBoolean(text);
@@ -2466,6 +2499,31 @@ namespace System.Data.SQLite
                             }
 
                             configuration.noVs2010 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noVs2012"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noVs2012 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "registryVersion"))
+                        {
+                            configuration.registryVersion = text;
                         }
                         else if (MatchOption(newArg, "strict"))
                         {
@@ -2710,6 +2768,11 @@ namespace System.Data.SQLite
                         {
                             Trace.Listeners.Add(new TextWriterTraceListener(
                                 configuration.logFileName));
+
+                            //
+                            // NOTE: Technically, we created the log file.
+                            //
+                            filesCreated++;
                         }
                     }
 
@@ -2863,7 +2926,9 @@ namespace System.Data.SQLite
                         //       we currently disallow this mismatch.
                         //
                         configuration.noNetFx40 = true;
+                        configuration.noNetFx45 = true;
                         configuration.noVs2010 = true;
+                        configuration.noVs2012 = true;
 
                         TraceOps.DebugAndTrace(TracePriority.Medium,
                             debugCallback, traceCallback, String.Format(
@@ -2966,6 +3031,14 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "RegistryVersion", ForDisplay(registryVersion)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "ConfigVersion", ForDisplay(configVersion)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "DebugFormat", ForDisplay(debugFormat)),
                         traceCategory);
 
@@ -3014,6 +3087,10 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "NoNetFx45", ForDisplay(noNetFx45)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "NoVs2005", ForDisplay(noVs2005)),
                         traceCategory);
 
@@ -3023,6 +3100,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "NoVs2010", ForDisplay(noVs2010)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoVs2012", ForDisplay(noVs2012)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3128,6 +3209,24 @@ namespace System.Data.SQLite
             {
                 get { return designerFileName; }
                 set { designerFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string registryVersion;
+            public string RegistryVersion
+            {
+                get { return registryVersion; }
+                set { registryVersion = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string configVersion;
+            public string ConfigVersion
+            {
+                get { return configVersion; }
+                set { configVersion = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3240,6 +3339,15 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            private bool noNetFx45;
+            public bool NoNetFx45
+            {
+                get { return noNetFx45; }
+                set { noNetFx45 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             private bool noVs2005;
             public bool NoVs2005
             {
@@ -3263,6 +3371,15 @@ namespace System.Data.SQLite
             {
                 get { return noVs2010; }
                 set { noVs2010 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noVs2012;
+            public bool NoVs2012
+            {
+                get { return noVs2012; }
+                set { noVs2012 = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3492,6 +3609,12 @@ namespace System.Data.SQLite
 
         private static TraceCallback debugCallback = AppDebug;
         private static TraceCallback traceCallback = AppTrace;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static int filesCreated = 0;
+        private static int filesModified = 0;
+        private static int filesDeleted = 0;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -3798,6 +3921,9 @@ namespace System.Data.SQLite
                     if ((configuration == null) || !configuration.NoNetFx40)
                         desktopVersionList.Add(new Version(4, 0, 30319));
 
+                    if ((configuration == null) || !configuration.NoNetFx45)
+                        desktopVersionList.Add(new Version(4, 5, 50709));
+
                     frameworkList.Versions.Add(".NETFramework",
                         desktopVersionList);
                 }
@@ -3831,7 +3957,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static bool HaveFramework(
+        private static bool HaveFrameworkDirectory(
             MockRegistryKey rootKey,
             string frameworkName,
             Version frameworkVersion,
@@ -3864,8 +3990,42 @@ namespace System.Data.SQLite
 
                 TraceOps.DebugAndTrace(TracePriority.Lower,
                     debugCallback, traceCallback, String.Format(
-                    ".NET Framework {0} found in directory {1}.",
+                    ".NET Framework {0} found via directory {1}.",
                     ForDisplay(frameworkVersion), ForDisplay(directory)),
+                    traceCategory);
+
+                return true;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static bool HaveFrameworkRegistry(
+            MockRegistryKey rootKey,
+            string frameworkName,
+            Version frameworkVersion,
+            string platformName,
+            bool wow64,
+            bool whatIf,
+            bool verbose
+            )
+        {
+            string keyName = GetFrameworkKeyName(
+                frameworkName, frameworkVersion, platformName, wow64);
+
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
+                    rootKey, keyName, false, whatIf, verbose))
+            {
+                if (key == null)
+                    return false;
+
+                if (platformName != null) // NOTE: Skip non-desktop.
+                    return true;
+
+                TraceOps.DebugAndTrace(TracePriority.Lower,
+                    debugCallback, traceCallback, String.Format(
+                    ".NET Framework {0} found via registry {1}.",
+                    ForDisplay(frameworkVersion), ForDisplay(keyName)),
                     traceCategory);
 
                 return true;
@@ -3879,6 +4039,7 @@ namespace System.Data.SQLite
             MockRegistry registry,
             FrameworkList frameworkList,
             FrameworkConfigCallback callback,
+            string version, /* NOTE: Optional. */
             string invariant,
             string name,
             string description,
@@ -3969,11 +4130,23 @@ namespace System.Data.SQLite
                 //
                 VersionList frameworkVersionList;
 
-                if (!frameworkList.Versions.TryGetValue(
-                        frameworkName, out frameworkVersionList) ||
-                    (frameworkVersionList == null))
+                if (version != null)
                 {
-                    continue;
+                    //
+                    // NOTE: Manual override of the *ONE* framework version
+                    //       to process.
+                    //
+                    frameworkVersionList = new VersionList();
+                    frameworkVersionList.Add(new Version(version));
+                }
+                else
+                {
+                    if (!frameworkList.Versions.TryGetValue(
+                            frameworkName, out frameworkVersionList) ||
+                        (frameworkVersionList == null))
+                    {
+                        continue;
+                    }
                 }
 
                 foreach (Version frameworkVersion in frameworkVersionList)
@@ -3985,13 +4158,13 @@ namespace System.Data.SQLite
                         ForDisplay(frameworkVersion),
                         ForDisplay(platformName)), traceCategory);
 
-                    if (!HaveFramework(
+                    if (!HaveFrameworkDirectory(
                             rootKey, frameworkName, frameworkVersion,
                             platformName, wow64, whatIf, verbose))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback,
-                            ".NET Framework not found, skipping...",
+                            ".NET Framework directory not found, skipping...",
                             traceCategory);
 
                         continue;
@@ -4074,6 +4247,7 @@ namespace System.Data.SQLite
             MockRegistry registry,
             FrameworkList frameworkList,
             FrameworkRegistryCallback callback,
+            string version, /* NOTE: Optional. */
             object clientData,
             bool wow64,
             bool throwOnMissing,
@@ -4151,11 +4325,23 @@ namespace System.Data.SQLite
                 //
                 VersionList frameworkVersionList;
 
-                if (!frameworkList.Versions.TryGetValue(
-                        frameworkName, out frameworkVersionList) ||
-                    (frameworkVersionList == null))
+                if (version != null)
                 {
-                    continue;
+                    //
+                    // NOTE: Manual override of the *ONE* framework version
+                    //       to process.
+                    //
+                    frameworkVersionList = new VersionList();
+                    frameworkVersionList.Add(new Version(version));
+                }
+                else
+                {
+                    if (!frameworkList.Versions.TryGetValue(
+                            frameworkName, out frameworkVersionList) ||
+                        (frameworkVersionList == null))
+                    {
+                        continue;
+                    }
                 }
 
                 foreach (Version frameworkVersion in frameworkVersionList)
@@ -4167,13 +4353,13 @@ namespace System.Data.SQLite
                         ForDisplay(frameworkVersion),
                         ForDisplay(platformName)), traceCategory);
 
-                    if (!HaveFramework(
+                    if (!HaveFrameworkRegistry(
                             rootKey, frameworkName, frameworkVersion,
                             platformName, wow64, whatIf, verbose))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback,
-                            ".NET Framework not found, skipping...",
+                            ".NET Framework registry not found, skipping...",
                             traceCategory);
 
                         continue;
@@ -4216,13 +4402,16 @@ namespace System.Data.SQLite
                 vsList.Versions = new VersionList();
 
                 if ((configuration == null) || !configuration.NoVs2005)
-                    vsList.Versions.Add(new Version(8, 0)); // Visual Studio 2005
+                    vsList.Versions.Add(new Version(8, 0)); // 2005
 
                 if ((configuration == null) || !configuration.NoVs2008)
-                    vsList.Versions.Add(new Version(9, 0)); // Visual Studio 2008
+                    vsList.Versions.Add(new Version(9, 0)); // 2008
 
                 if ((configuration == null) || !configuration.NoVs2010)
-                    vsList.Versions.Add(new Version(10, 0));// Visual Studio 2010
+                    vsList.Versions.Add(new Version(10, 0));// 2010
+
+                if ((configuration == null) || !configuration.NoVs2012)
+                    vsList.Versions.Add(new Version(11, 0));// 2012
             }
         }
 
@@ -4381,8 +4570,8 @@ namespace System.Data.SQLite
             if (addElement == null)
             {
                 string[] elementNames = {
-                        "system.data", "DbProviderFactories"
-                    };
+                    "system.data", "DbProviderFactories"
+                };
 
                 XmlElement previousElement =
                     document.DocumentElement; /* configuration */
@@ -4453,6 +4642,8 @@ namespace System.Data.SQLite
                 if (!whatIf)
                     document.Save(fileName);
 
+                filesModified++;
+
                 saved = true;
             }
 
@@ -4506,6 +4697,8 @@ namespace System.Data.SQLite
 
                 if (!whatIf)
                     document.Save(fileName);
+
+                filesModified++;
 
                 saved = true;
             }
@@ -5643,7 +5836,7 @@ namespace System.Data.SQLite
                     {
                         if (!ForEachFrameworkRegistry(registry,
                                 frameworkList, ProcessAssemblyFolders,
-                                directoryData,
+                                configuration.RegistryVersion, directoryData,
                                 NetFxIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
@@ -5673,8 +5866,9 @@ namespace System.Data.SQLite
 
                         if (!ForEachFrameworkConfig(registry,
                                 frameworkList, ProcessDbProviderFactory,
-                                InvariantName, ProviderName, Description,
-                                FactoryTypeName, assemblyName, directoryData,
+                                configuration.ConfigVersion, InvariantName,
+                                ProviderName, Description, FactoryTypeName,
+                                assemblyName, directoryData,
                                 NetFxIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
@@ -5789,6 +5983,13 @@ namespace System.Data.SQLite
                         ForDisplay(RegistryHelper.SubKeysDeleted),
                         ForDisplay(RegistryHelper.KeyValuesSet),
                         ForDisplay(RegistryHelper.KeyValuesDeleted)),
+                        traceCategory);
+
+                    TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                        debugCallback, traceCallback, String.Format(
+                        "filesCreated = {0}, filesModified = {1}, " +
+                        "filesDeleted = {2}", ForDisplay(filesCreated),
+                        ForDisplay(filesModified), ForDisplay(filesDeleted)),
                         traceCategory);
                     #endregion
 
