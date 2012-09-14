@@ -52,13 +52,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NorthwindModel2008.edmx</DependentUpon>
     </Compile>
-    <Compile Condition="'$(TargetFrameworkVersion)' == 'v4.0'"
-             Include="NorthwindModel2010.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NorthwindModel2010.edmx</DependentUpon>
-    </Compile>
-    <Compile Condition="'$(TargetFrameworkVersion)' == 'v4.5'"
+    <Compile Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
+                        '$(TargetFrameworkVersion)' == 'v4.5'"
              Include="NorthwindModel2012.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -70,9 +65,8 @@
   <ItemGroup>
     <None Condition="'$(TargetFrameworkVersion)' == 'v3.5'"
           Include="2008\App.Config" />
-    <None Condition="'$(TargetFrameworkVersion)' == 'v4.0'"
-          Include="2010\App.Config" />
-    <None Condition="'$(TargetFrameworkVersion)' == 'v4.5'"
+    <None Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
+                     '$(TargetFrameworkVersion)' == 'v4.5'"
           Include="2012\App.Config" />
     <None Include="northwindEF.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -82,12 +76,8 @@
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>NorthwindModel2008.Designer.cs</LastGenOutput>
     </EntityDeploy>
-    <EntityDeploy Condition="'$(TargetFrameworkVersion)' == 'v4.0'"
-                  Include="NorthwindModel2010.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>NorthwindModel2010.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <EntityDeploy Condition="'$(TargetFrameworkVersion)' == 'v4.5'"
+    <EntityDeploy Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
+                             '$(TargetFrameworkVersion)' == 'v4.5'"
                   Include="NorthwindModel2012.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>NorthwindModel2012.Designer.cs</LastGenOutput>

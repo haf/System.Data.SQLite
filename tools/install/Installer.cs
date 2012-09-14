@@ -2521,7 +2521,7 @@ namespace System.Data.SQLite
 
                             configuration.noVs2012 = (bool)value;
                         }
-                        if (MatchOption(newArg, "registryVersion"))
+                        else if (MatchOption(newArg, "registryVersion"))
                         {
                             configuration.registryVersion = text;
                         }
