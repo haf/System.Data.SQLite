@@ -7,6 +7,8 @@
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.7.15].</li>
+    <li>Add Visual Studio 2012 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
+    <li>Add Visual Studio 2012 support to the redesigned designer support installer.</li>
     <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string argument.</li>
     <li>All applicable calls into the SQLite core library now return a SQLiteErrorCode instead of an integer error code.</li>
     <li>Make sure the error code of the SQLiteException class gets serialized.</li>

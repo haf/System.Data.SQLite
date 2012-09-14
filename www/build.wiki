@@ -225,9 +225,9 @@
 
   <li>
     Select the desired solution configuration (e.g. ReleaseNativeOnly) and and
-    solution platform (e.g. x64), then &quot;Build->Rebuild Solution&quot;.
-    Alternatively, you can select &quot;Build->Batch Build&quot;, &quot;Select
-    All&quot;, and then &quot;Rebuild&quot;.
+    solution platform (e.g. x64), then &quot;Build-&gt;Rebuild Solution&quot;.
+    Alternatively, you can select &quot;Build-&gt;Batch Build&quot;,
+    &quot;Select All&quot;, and then &quot;Rebuild&quot;.
   </li>
 </ol>
 
