@@ -350,6 +350,7 @@ set sds_manifests(source) {
   testce/Form1.resx
   testce/Program.cs
   testce/TestCases.cs
+  testce/test.cfg
   testce/testce.2005.csproj
   testce/testce.2008.csproj
   testlinq/

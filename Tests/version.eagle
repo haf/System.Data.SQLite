@@ -198,6 +198,7 @@ set patterns [list \
         $version(full)] \"\\)] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
+    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
@@ -246,6 +247,7 @@ set fileNames [list \
     [file join testce AssemblyInfo.cs] \
     [file join testlinq 2008 App.config] \
     [file join testlinq 2010 App.config] \
+    [file join testlinq 2012 App.config] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join tools install Properties AssemblyInfo.cs] \
