@@ -151,11 +151,12 @@
       <li>&lt;root&gt;\tools\install\Properties\AssemblyInfo.cs</li>
     </ul>
 
-    You'll need to update the INTEROP_BUILD_NUMBER, INTEROP_MANIFEST_VERSION,
-    and INTEROP_RC_VERSION properties in the &quot;.vsprops&quot; and
-    &quot;.props&quot; files, and the INTEROP_VERSION define in
-    &quot;interop.h&quot;.  This version number should track the release
-    versions of the System.Data.SQLite packages (i.e. [./news.wiki | 1.0.x]).
+    You'll need to update the INTEROP_BUILD_NUMBER, INTEROP_LINKER_VERSION,
+    INTEROP_MANIFEST_VERSION, and INTEROP_RC_VERSION properties in the
+    &quot;.vsprops&quot; and &quot;.props&quot; files, and the INTEROP_VERSION
+    define in &quot;interop.h&quot;.  This version number should track the
+    release versions of the System.Data.SQLite packages (i.e.
+    [./news.wiki | 1.0.x]).
   </li>
 </ol>
 
