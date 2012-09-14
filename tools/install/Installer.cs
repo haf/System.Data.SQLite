@@ -3908,7 +3908,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static bool HaveFramework(
+        private static bool HaveFrameworkDirectory(
             MockRegistryKey rootKey,
             string frameworkName,
             Version frameworkVersion,
@@ -3941,8 +3941,42 @@ namespace System.Data.SQLite
 
                 TraceOps.DebugAndTrace(TracePriority.Lower,
                     debugCallback, traceCallback, String.Format(
-                    ".NET Framework {0} found in directory {1}.",
+                    ".NET Framework {0} found via directory {1}.",
                     ForDisplay(frameworkVersion), ForDisplay(directory)),
+                    traceCategory);
+
+                return true;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static bool HaveFrameworkRegistry(
+            MockRegistryKey rootKey,
+            string frameworkName,
+            Version frameworkVersion,
+            string platformName,
+            bool wow64,
+            bool whatIf,
+            bool verbose
+            )
+        {
+            string keyName = GetFrameworkKeyName(
+                frameworkName, frameworkVersion, platformName, wow64);
+
+            using (MockRegistryKey key = RegistryHelper.OpenSubKey(
+                    rootKey, keyName, false, whatIf, verbose))
+            {
+                if (key == null)
+                    return false;
+
+                if (platformName != null) // NOTE: Skip non-desktop.
+                    return true;
+
+                TraceOps.DebugAndTrace(TracePriority.Lower,
+                    debugCallback, traceCallback, String.Format(
+                    ".NET Framework {0} found via registry {1}.",
+                    ForDisplay(frameworkVersion), ForDisplay(keyName)),
                     traceCategory);
 
                 return true;
@@ -4062,13 +4096,13 @@ namespace System.Data.SQLite
                         ForDisplay(frameworkVersion),
                         ForDisplay(platformName)), traceCategory);
 
-                    if (!HaveFramework(
+                    if (!HaveFrameworkDirectory(
                             rootKey, frameworkName, frameworkVersion,
                             platformName, wow64, whatIf, verbose))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback,
-                            ".NET Framework not found, skipping...",
+                            ".NET Framework directory not found, skipping...",
                             traceCategory);
 
                         continue;
@@ -4244,13 +4278,13 @@ namespace System.Data.SQLite
                         ForDisplay(frameworkVersion),
                         ForDisplay(platformName)), traceCategory);
 
-                    if (!HaveFramework(
+                    if (!HaveFrameworkRegistry(
                             rootKey, frameworkName, frameworkVersion,
                             platformName, wow64, whatIf, verbose))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback,
-                            ".NET Framework not found, skipping...",
+                            ".NET Framework registry not found, skipping...",
                             traceCategory);
 
                         continue;
