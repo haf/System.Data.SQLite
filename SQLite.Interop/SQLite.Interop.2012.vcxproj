@@ -167,7 +167,8 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>"$(TargetFrameworkSDKToolsDirectory)sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+      <Command Condition="'$(TargetFrameworkSDKToolsDirectory)'==''">"$(FrameworkSDKDir)Bin\sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+      <Command Condition="'$(TargetFrameworkSDKToolsDirectory)'!=''">"$(TargetFrameworkSDKToolsDirectory)sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -208,7 +209,8 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>"$(TargetFrameworkSDKToolsDirectory)sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+      <Command Condition="'$(TargetFrameworkSDKToolsDirectory)'==''">"$(FrameworkSDKDir)Bin\sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+      <Command Condition="'$(TargetFrameworkSDKToolsDirectory)'!=''">"$(TargetFrameworkSDKToolsDirectory)sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugNativeOnly|Win32'">
@@ -321,7 +323,8 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>"$(TargetFrameworkSDKToolsDirectory)sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+      <Command Condition="'$(TargetFrameworkSDKToolsDirectory)'==''">"$(FrameworkSDKDir)Bin\sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+      <Command Condition="'$(TargetFrameworkSDKToolsDirectory)'!=''">"$(TargetFrameworkSDKToolsDirectory)sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -364,7 +367,8 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>"$(TargetFrameworkSDKToolsDirectory)sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+      <Command Condition="'$(TargetFrameworkSDKToolsDirectory)'==''">"$(FrameworkSDKDir)Bin\sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
+      <Command Condition="'$(TargetFrameworkSDKToolsDirectory)'!=''">"$(TargetFrameworkSDKToolsDirectory)sn.exe" -Ra "$(TargetPath)" "$(INTEROP_KEY_FILE)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNativeOnly|Win32'">

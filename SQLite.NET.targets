@@ -66,10 +66,24 @@
                      Exists('$(DirForStrongName)bin\sn.exe')"
           Command="&quot;$(DirForStrongName)bin\sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(AssemblyOriginatorKeyFile)&quot;" />
 
-    <Exec Condition="'$(DirForStrongName)' != '' And
-                     HasTrailingSlash('$(DirForStrongName)') And
-                     Exists('$(DirForStrongName)sn.exe')"
-          Command="&quot;$(DirForStrongName)sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(AssemblyOriginatorKeyFile)&quot;" />
+    <Touch AlwaysCreate="true"
+           Files="$(TargetPath).StrongNameSign.done" />
+  </Target>
+
+  <!--
+  ******************************************************************************
+  -->
+
+  <Target Name="StrongNameSign2"
+          Condition="'$(StrongNameSign)' != 'false' And
+                     '$(SignAssembly)' != 'false' And
+                     Exists('$(AssemblyOriginatorKeyFile)')"
+          Inputs="$(TargetPath)"
+          Outputs="$(TargetPath).StrongNameSign.done">
+    <Exec Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
+                     HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And
+                     Exists('$(TargetFrameworkSDKToolsDirectory)sn.exe')"
+          Command="&quot;$(TargetFrameworkSDKToolsDirectory)sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(AssemblyOriginatorKeyFile)&quot;" />
 
     <Touch AlwaysCreate="true"
            Files="$(TargetPath).StrongNameSign.done" />
