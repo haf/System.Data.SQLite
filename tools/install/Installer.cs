@@ -1780,6 +1780,7 @@ namespace System.Data.SQLite
                 bool noVs2005,
                 bool noVs2008,
                 bool noVs2010,
+                bool noVs2012,
                 bool noTrace,
                 bool noConsole,
                 bool noLog,
@@ -1811,6 +1812,7 @@ namespace System.Data.SQLite
                 this.noVs2005 = noVs2005;
                 this.noVs2008 = noVs2008;
                 this.noVs2010 = noVs2010;
+                this.noVs2012 = noVs2012;
                 this.noTrace = noTrace;
                 this.noConsole = noConsole;
                 this.noLog = noLog;
@@ -2467,6 +2469,27 @@ namespace System.Data.SQLite
 
                             configuration.noVs2010 = (bool)value;
                         }
+                        else if (MatchOption(newArg, "noVs2012"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noVs2012 = (bool)value;
+                        }
                         else if (MatchOption(newArg, "strict"))
                         {
                             bool? value = ParseBoolean(text);
@@ -2864,6 +2887,7 @@ namespace System.Data.SQLite
                         //
                         configuration.noNetFx40 = true;
                         configuration.noVs2010 = true;
+                        configuration.noVs2012 = true;
 
                         TraceOps.DebugAndTrace(TracePriority.Medium,
                             debugCallback, traceCallback, String.Format(
@@ -3023,6 +3047,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "NoVs2010", ForDisplay(noVs2010)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoVs2012", ForDisplay(noVs2012)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3263,6 +3291,15 @@ namespace System.Data.SQLite
             {
                 get { return noVs2010; }
                 set { noVs2010 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noVs2012;
+            public bool NoVs2012
+            {
+                get { return noVs2012; }
+                set { noVs2012 = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -4216,13 +4253,16 @@ namespace System.Data.SQLite
                 vsList.Versions = new VersionList();
 
                 if ((configuration == null) || !configuration.NoVs2005)
-                    vsList.Versions.Add(new Version(8, 0)); // Visual Studio 2005
+                    vsList.Versions.Add(new Version(8, 0)); // 2005
 
                 if ((configuration == null) || !configuration.NoVs2008)
-                    vsList.Versions.Add(new Version(9, 0)); // Visual Studio 2008
+                    vsList.Versions.Add(new Version(9, 0)); // 2008
 
                 if ((configuration == null) || !configuration.NoVs2010)
-                    vsList.Versions.Add(new Version(10, 0));// Visual Studio 2010
+                    vsList.Versions.Add(new Version(10, 0));// 2010
+
+                if ((configuration == null) || !configuration.NoVs2012)
+                    vsList.Versions.Add(new Version(11, 0));// 2012
             }
         }
 
