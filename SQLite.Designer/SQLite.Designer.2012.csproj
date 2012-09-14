@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * SQLite.Designer.2010.csproj -
+ * SQLite.Designer.2012.csproj -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
  *
 -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.30319</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9B4A5CF6-5BE5-4926-ACC7-B729A8C05198}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SQLite.Designer</RootNamespace>
     <AssemblyName>SQLite.Designer</AssemblyName>
-    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
-    <ConfigurationYear>2010</ConfigurationYear>
+    <ConfigurationYear>2012</ConfigurationYear>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <Import Project="$(SQLiteNetDir)\SQLite.NET.targets" />
@@ -75,6 +74,12 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
   </ItemGroup>
@@ -154,7 +159,7 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SQLiteDataViewSupport2010.xml" />
+    <EmbeddedResource Include="SQLiteDataViewSupport2012.xml" />
     <EmbeddedResource Include="VSPackage.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>VSPackage.Designer.cs</LastGenOutput>
@@ -195,14 +200,16 @@
   </ItemGroup>
   <Import Project="$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.Properties.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition="'$(VSSDK100Install)' == '' Or
-                            !Exists('$(VSSDK100Install)VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.Data.ConnectionUI.dll') Or
-                            !Exists('$(VSSDK100Install)VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.VisualStudio.Data.dll') Or
-                            !Exists('$(VSSDK100Install)VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.VisualStudio.Data.Services.dll') Or
-                            !Exists('$(VSSDK100Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.OLE.Interop.dll') Or
-                            !Exists('$(VSSDK100Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.Shell.dll') Or
-                            !Exists('$(VSSDK100Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.Shell.Interop.dll') Or
-                            !Exists('$(VSSDK100Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.Shell.Interop.8.0.dll')">
+  <PropertyGroup Condition="'$(VSSDK110Install)' == '' Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.Data.ConnectionUI.dll') Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.VisualStudio.Data.dll') Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.VisualStudio.Data.Services.dll') Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.OLE.Interop.dll') Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.VisualStudio.Shell.11.0.dll') Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.Shell.Interop.dll') Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.Shell.Interop.8.0.dll') Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.Shell.Interop.9.0.dll') Or
+                            !Exists('$(VSSDK110Install)VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.Shell.Interop.10.0.dll')">
     <!--
         NOTE: We cannot build this project without the necessary reference
               assemblies; therefore, skip building it altogether.

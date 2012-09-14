@@ -200,6 +200,7 @@
                             !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.Data.ConnectionUI.dll') Or
                             !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Data.dll') Or
                             !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Data.Services.dll') Or
+                            !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.OLE.Interop.dll') Or
                             !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Shell.dll') Or
                             !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Shell.Interop.dll') Or
                             !Exists('$(VSSDK90Install)VisualStudioIntegration\Common\Assemblies\Microsoft.VisualStudio.Shell.Interop.8.0.dll')">

@@ -9,8 +9,11 @@
 </p>
 
 <p>
-  You will need a Visual Studio 2008, 2008 SP1, 2010, or 2010 SP1 development
-  environment for this build.
+  You will need a Visual Studio 2008, Visual Studio 2008 SP1, Visual Studio
+  2010, Visual Studio 2010 SP1, or Visual Studio 2012 development environment
+  for this build.  In order to build both the managed (C#) and native projects
+  (C++) for a particular solution together, the &quot;Professional Edition&quot;
+  (or better) of that particular version of Visual Studio is required.
 </p>
 
 <p>
@@ -19,13 +22,14 @@
 </p>
 
 <p>
-  In general, files with 2008 in the name (e.g.
-  &quot;SQLite.Interop.2008.vcproj&quot;) or files ending in
-  &quot;.vsprops&quot; are project and property files for the Visual Studio 2008
-  solution.  Files with 2010 in the name (e.g.
-  &quot;SQLite.Interop.2010.vcxproj&quot;) or files ending in &quot;.props&quot;
-  are project and property files for the Visual Studio 2010 solution.  When
-  making changes, you should make changes to both to keep them in sync.
+  In general, all files with 2005, 2008, 2010, or 2012 in the name (e.g.
+  &quot;SQLite.Interop.2005.vcproj&quot;) are files for Visual Studio 2005,
+  Visual Studio 2008, Visual Studio 2010, or Visual Studio 2012, respectively.
+  Files ending in &quot;.vsprops&quot; are property files for a Visual Studio
+  2005 or Visual Studio 2008 project.  Files ending in &quot;.props&quot; are
+  property files for a the Visual Studio 2010 or Visual Studio 2012 project.
+  When making changes, they should be made to the corresponding files for all
+  applicable versions of Visual Studio.
 </p>
 
 <p>
@@ -130,6 +134,7 @@
       <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2005.vsprops</li>
       <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2008.vsprops</li>
       <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2010.props</li>
+      <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2012.props</li>
       <li>&lt;root&gt;\SQLite.Interop\src\win\interop.h</li>
       <li>&lt;root&gt;\System.Data.SQLite\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\System.Data.SQLite\SQLite3.cs</li>
@@ -140,6 +145,7 @@
       <li>&lt;root&gt;\testce\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\testlinq\2008\App.config</li>
       <li>&lt;root&gt;\testlinq\2010\App.config</li>
+      <li>&lt;root&gt;\testlinq\2012\App.config</li>
       <li>&lt;root&gt;\testlinq\Properties\AssemblyInfo.cs</li>
       <li>&lt;root&gt;\Tests\version.eagle</li>
       <li>&lt;root&gt;\tools\install\Properties\AssemblyInfo.cs</li>
@@ -167,6 +173,12 @@
 
     <ul>
       <li>
+        The &quot;SQLite.NET.2005.sln&quot; file is the top-level solution
+        primarily designed for use with Visual Studio 2005 in the IDE; however,
+        it may also be used from the command line with MSBuild 2.0.
+      </li>
+
+      <li>
         The &quot;SQLite.NET.2008.sln&quot; file is the top-level solution
         primarily designed for use with Visual Studio 2008 in the IDE; however,
         it may also be used from the command line with MSBuild 3.5.
@@ -179,6 +191,18 @@
       </li>
 
       <li>
+        The &quot;SQLite.NET.2012.sln&quot; file is the top-level solution
+        primarily designed for use with Visual Studio 2012 in the IDE; however,
+        it may also be used from the command line with MSBuild 4.0.
+      </li>
+
+      <li>
+        The &quot;SQLite.NET.2005.MSBuild.sln&quot; file is the top-level
+        solution primarily designed for use with MSBuild 2.0 on the command
+        line; however, it may also be used from the Visual Studio 2005 IDE.
+      </li>
+
+      <li>
         The &quot;SQLite.NET.2008.MSBuild.sln&quot; file is the top-level
         solution primarily designed for use with MSBuild 3.5 on the command
         line; however, it may also be used from the Visual Studio 2008 IDE.
@@ -188,6 +212,12 @@
         The &quot;SQLite.NET.2010.MSBuild.sln&quot; file is the top-level
         solution primarily designed for use with MSBuild 4.0 on the command
         line; however, it may also be used from the Visual Studio 2010 IDE.
+      </li>
+
+      <li>
+        The &quot;SQLite.NET.2012.MSBuild.sln&quot; file is the top-level
+        solution primarily designed for use with MSBuild 4.0 on the command
+        line; however, it may also be used from the Visual Studio 2012 IDE.
       </li>
     </ul>
   </li>
