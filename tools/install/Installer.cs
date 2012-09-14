@@ -1765,6 +1765,8 @@ namespace System.Data.SQLite
                 string coreFileName,
                 string linqFileName,
                 string designerFileName,
+                string registryVersion,
+                string configVersion,
                 string debugFormat,
                 string traceFormat,
                 InstallFlags installFlags,
@@ -1798,6 +1800,8 @@ namespace System.Data.SQLite
                 this.coreFileName = coreFileName;
                 this.linqFileName = linqFileName;
                 this.designerFileName = designerFileName;
+                this.registryVersion = registryVersion;
+                this.configVersion = configVersion;
                 this.debugFormat = debugFormat;
                 this.traceFormat = traceFormat;
                 this.installFlags = installFlags;
@@ -1968,7 +1972,7 @@ namespace System.Data.SQLite
                     ref designerFileName);
 
                 return new Configuration(thisAssembly, null, directory,
-                    coreFileName, linqFileName, designerFileName,
+                    coreFileName, linqFileName, designerFileName, null, null,
                     TraceOps.DebugFormat, TraceOps.TraceFormat,
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, true, false, false, false, false,
@@ -2070,7 +2074,11 @@ namespace System.Data.SQLite
                         //       to interpret the textual value as the correct
                         //       type.
                         //
-                        if (MatchOption(newArg, "confirm"))
+                        if (MatchOption(newArg, "configVersion"))
+                        {
+                            configuration.configVersion = text;
+                        }
+                        else if (MatchOption(newArg, "confirm"))
                         {
                             bool? value = ParseBoolean(text);
 
@@ -2513,6 +2521,10 @@ namespace System.Data.SQLite
 
                             configuration.noVs2012 = (bool)value;
                         }
+                        if (MatchOption(newArg, "registryVersion"))
+                        {
+                            configuration.registryVersion = text;
+                        }
                         else if (MatchOption(newArg, "strict"))
                         {
                             bool? value = ParseBoolean(text);
@@ -2756,6 +2768,11 @@ namespace System.Data.SQLite
                         {
                             Trace.Listeners.Add(new TextWriterTraceListener(
                                 configuration.logFileName));
+
+                            //
+                            // NOTE: Technically, we created the log file.
+                            //
+                            filesCreated++;
                         }
                     }
 
@@ -3014,6 +3031,14 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "RegistryVersion", ForDisplay(registryVersion)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "ConfigVersion", ForDisplay(configVersion)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "DebugFormat", ForDisplay(debugFormat)),
                         traceCategory);
 
@@ -3184,6 +3209,24 @@ namespace System.Data.SQLite
             {
                 get { return designerFileName; }
                 set { designerFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string registryVersion;
+            public string RegistryVersion
+            {
+                get { return registryVersion; }
+                set { registryVersion = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string configVersion;
+            public string ConfigVersion
+            {
+                get { return configVersion; }
+                set { configVersion = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3566,6 +3609,12 @@ namespace System.Data.SQLite
 
         private static TraceCallback debugCallback = AppDebug;
         private static TraceCallback traceCallback = AppTrace;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static int filesCreated = 0;
+        private static int filesModified = 0;
+        private static int filesDeleted = 0;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -3990,6 +4039,7 @@ namespace System.Data.SQLite
             MockRegistry registry,
             FrameworkList frameworkList,
             FrameworkConfigCallback callback,
+            string version, /* NOTE: Optional. */
             string invariant,
             string name,
             string description,
@@ -4080,11 +4130,23 @@ namespace System.Data.SQLite
                 //
                 VersionList frameworkVersionList;
 
-                if (!frameworkList.Versions.TryGetValue(
-                        frameworkName, out frameworkVersionList) ||
-                    (frameworkVersionList == null))
+                if (version != null)
                 {
-                    continue;
+                    //
+                    // NOTE: Manual override of the *ONE* framework version
+                    //       to process.
+                    //
+                    frameworkVersionList = new VersionList();
+                    frameworkVersionList.Add(new Version(version));
+                }
+                else
+                {
+                    if (!frameworkList.Versions.TryGetValue(
+                            frameworkName, out frameworkVersionList) ||
+                        (frameworkVersionList == null))
+                    {
+                        continue;
+                    }
                 }
 
                 foreach (Version frameworkVersion in frameworkVersionList)
@@ -4185,6 +4247,7 @@ namespace System.Data.SQLite
             MockRegistry registry,
             FrameworkList frameworkList,
             FrameworkRegistryCallback callback,
+            string version, /* NOTE: Optional. */
             object clientData,
             bool wow64,
             bool throwOnMissing,
@@ -4262,11 +4325,23 @@ namespace System.Data.SQLite
                 //
                 VersionList frameworkVersionList;
 
-                if (!frameworkList.Versions.TryGetValue(
-                        frameworkName, out frameworkVersionList) ||
-                    (frameworkVersionList == null))
+                if (version != null)
                 {
-                    continue;
+                    //
+                    // NOTE: Manual override of the *ONE* framework version
+                    //       to process.
+                    //
+                    frameworkVersionList = new VersionList();
+                    frameworkVersionList.Add(new Version(version));
+                }
+                else
+                {
+                    if (!frameworkList.Versions.TryGetValue(
+                            frameworkName, out frameworkVersionList) ||
+                        (frameworkVersionList == null))
+                    {
+                        continue;
+                    }
                 }
 
                 foreach (Version frameworkVersion in frameworkVersionList)
@@ -4495,8 +4570,8 @@ namespace System.Data.SQLite
             if (addElement == null)
             {
                 string[] elementNames = {
-                        "system.data", "DbProviderFactories"
-                    };
+                    "system.data", "DbProviderFactories"
+                };
 
                 XmlElement previousElement =
                     document.DocumentElement; /* configuration */
@@ -4567,6 +4642,8 @@ namespace System.Data.SQLite
                 if (!whatIf)
                     document.Save(fileName);
 
+                filesModified++;
+
                 saved = true;
             }
 
@@ -4620,6 +4697,8 @@ namespace System.Data.SQLite
 
                 if (!whatIf)
                     document.Save(fileName);
+
+                filesModified++;
 
                 saved = true;
             }
@@ -5757,7 +5836,7 @@ namespace System.Data.SQLite
                     {
                         if (!ForEachFrameworkRegistry(registry,
                                 frameworkList, ProcessAssemblyFolders,
-                                directoryData,
+                                configuration.RegistryVersion, directoryData,
                                 NetFxIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
@@ -5787,8 +5866,9 @@ namespace System.Data.SQLite
 
                         if (!ForEachFrameworkConfig(registry,
                                 frameworkList, ProcessDbProviderFactory,
-                                InvariantName, ProviderName, Description,
-                                FactoryTypeName, assemblyName, directoryData,
+                                configuration.ConfigVersion, InvariantName,
+                                ProviderName, Description, FactoryTypeName,
+                                assemblyName, directoryData,
                                 NetFxIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
@@ -5903,6 +5983,13 @@ namespace System.Data.SQLite
                         ForDisplay(RegistryHelper.SubKeysDeleted),
                         ForDisplay(RegistryHelper.KeyValuesSet),
                         ForDisplay(RegistryHelper.KeyValuesDeleted)),
+                        traceCategory);
+
+                    TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                        debugCallback, traceCallback, String.Format(
+                        "filesCreated = {0}, filesModified = {1}, " +
+                        "filesDeleted = {2}", ForDisplay(filesCreated),
+                        ForDisplay(filesModified), ForDisplay(filesDeleted)),
                         traceCategory);
                     #endregion
 
