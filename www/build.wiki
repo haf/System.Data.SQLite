@@ -1,6 +1,5 @@
+<title>Build Procedures</title>
 <nowiki>
-  <title>Build Procedures</title>
-
   <a name="procedures"></a>
   <h2>Build Procedures</h2>
 
