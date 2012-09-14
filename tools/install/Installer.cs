@@ -1777,6 +1777,7 @@ namespace System.Data.SQLite
                 bool noCompact,
                 bool noNetFx20,
                 bool noNetFx40,
+                bool noNetFx45,
                 bool noVs2005,
                 bool noVs2008,
                 bool noVs2010,
@@ -1809,6 +1810,7 @@ namespace System.Data.SQLite
                 this.noCompact = noCompact;
                 this.noNetFx20 = noNetFx20;
                 this.noNetFx40 = noNetFx40;
+                this.noNetFx45 = noNetFx45;
                 this.noVs2005 = noVs2005;
                 this.noVs2008 = noVs2008;
                 this.noVs2010 = noVs2010;
@@ -1971,7 +1973,7 @@ namespace System.Data.SQLite
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, true, false, false, false, false,
                     false, false, false, false, false, false, false, false,
-                    false, true, true, false, false, false);
+                    false, false, true, true, false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2363,6 +2365,27 @@ namespace System.Data.SQLite
                             }
 
                             configuration.noNetFx40 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noNetFx45"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noNetFx45 = (bool)value;
                         }
                         else if (MatchOption(newArg, "noRuntimeVersion"))
                         {
@@ -2886,6 +2909,7 @@ namespace System.Data.SQLite
                         //       we currently disallow this mismatch.
                         //
                         configuration.noNetFx40 = true;
+                        configuration.noNetFx45 = true;
                         configuration.noVs2010 = true;
                         configuration.noVs2012 = true;
 
@@ -3035,6 +3059,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "NoNetFx40", ForDisplay(noNetFx40)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoNetFx45", ForDisplay(noNetFx45)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3264,6 +3292,15 @@ namespace System.Data.SQLite
             {
                 get { return noNetFx40; }
                 set { noNetFx40 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noNetFx45;
+            public bool NoNetFx45
+            {
+                get { return noNetFx45; }
+                set { noNetFx45 = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3834,6 +3871,9 @@ namespace System.Data.SQLite
 
                     if ((configuration == null) || !configuration.NoNetFx40)
                         desktopVersionList.Add(new Version(4, 0, 30319));
+
+                    if ((configuration == null) || !configuration.NoNetFx45)
+                        desktopVersionList.Add(new Version(4, 5, 50709));
 
                     frameworkList.Versions.Add(".NETFramework",
                         desktopVersionList);
