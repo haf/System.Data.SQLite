@@ -113,7 +113,30 @@
                      Exists('$(DirForMark32BitOnly)bin\CorFlags.exe')"
           Command="&quot;$(DirForMark32BitOnly)bin\CorFlags.exe&quot; &quot;$(TargetPath)&quot; /32BIT+ /Force" />
 
-    <Touch AlwaysCreate="true"
+    <Touch Condition="'$(DirForMark32BitOnly)' != '' And
+                      HasTrailingSlash('$(DirForMark32BitOnly)') And
+                      Exists('$(DirForMark32BitOnly)bin\CorFlags.exe')"
+           AlwaysCreate="true"
+           Files="$(TargetPath).Mark32BitOnly.done" />
+  </Target>
+
+  <!--
+  ******************************************************************************
+  -->
+
+  <Target Name="Mark32BitOnly2"
+          Condition="'$(Mark32BitOnly)' != 'false'"
+          Inputs="$(TargetPath)"
+          Outputs="$(TargetPath).Mark32BitOnly.done">
+    <Exec Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
+                     HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And
+                     Exists('$(TargetFrameworkSDKToolsDirectory)CorFlags.exe')"
+          Command="&quot;$(TargetFrameworkSDKToolsDirectory)CorFlags.exe&quot; &quot;$(TargetPath)&quot; /32BIT+ /Force" />
+
+    <Touch Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
+                      HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And
+                      Exists('$(TargetFrameworkSDKToolsDirectory)CorFlags.exe')"
+           AlwaysCreate="true"
            Files="$(TargetPath).Mark32BitOnly.done" />
   </Target>
 
