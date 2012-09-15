@@ -44,8 +44,8 @@ for {set i 1} {$i < 3} {incr i} {
     #       test.  If not, we will need to unset them after the test.
     #
     set hadTestYear {[info exists ::test_year]}
-    set hadTestYearNetFx20 {[info exists ::test_year_netFx20]}
-    set hadTestYearNetFx40 {[info exists ::test_year_netFx40]}
+    set hadTestYearClrV2 {[info exists ::test_year_clr_v2]}
+    set hadTestYearClrV4 {[info exists ::test_year_clr_v4]}
     set hadTestConfiguration {[info exists ::test_configuration]}
   }] -body {
     set appDomainId(3) [object invoke AppDomain.CurrentDomain Id]
@@ -69,12 +69,12 @@ for {set i 1} {$i < 3} {incr i} {
       unset -nocomplain ::test_configuration
     }
 
-    if {!$hadTestYearNetFx40} then {
-      unset -nocomplain ::test_year_netFx40
+    if {!$hadTestYearClrV4} then {
+      unset -nocomplain ::test_year_clr_v4
     }
 
-    if {!$hadTestYearNetFx20} then {
-      unset -nocomplain ::test_year_netFx20
+    if {!$hadTestYearClrV2} then {
+      unset -nocomplain ::test_year_clr_v2
     }
 
     if {!$hadTestYear} then {
