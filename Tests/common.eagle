@@ -20,8 +20,8 @@ namespace eval ::Eagle {
 
     proc getBuildYear {} {
       #
-      # NOTE: See if the "year" setting has been overridden by the user (e.g. on
-      #       the command line).  This helps control exactly which set of
+      # NOTE: See if the "year" setting has been overridden by the user (e.g.
+      #       on the command line).  This helps control exactly which set of
       #       binaries we are testing, those produced using the Visual Studio
       #       2005, 2008, 2010, or 2012 build systems.  To override this value
       #       via the command line, enter a command similar to one of the
@@ -128,7 +128,7 @@ namespace eval ::Eagle {
 
     proc getBuildDirectory {} {
       #
-      # NOTE: See if the "native" runtime option has been added.  If so, use the
+      # NOTE: See if the "native" runtime option has been set.  If so, use the
       #       directory for the mixed-mode assembly (a.k.a. the native interop
       #       assembly).  To enable this option via the command line, enter a
       #       command similar to one of the following (all on one line):
@@ -180,13 +180,52 @@ namespace eval ::Eagle {
           set path [file dirname $::path]
         }
 
+        #
+        # NOTE: If the "native" runtime option is set, the mixed-mode assembly
+        #       is being tested.  In that case, the path to the build directory
+        #       will contain the platform name and all the binaries under test
+        #       should be present in that directory.  If the "native" runtime
+        #       option is not set, the build directory will be considered to be
+        #       "platform-neutral", with the notable exception of any native
+        #       assembly (e.g. "SQLite.Interop.dll") copied there during the
+        #       build process itself.  If the build process somehow does not
+        #       copy the native assembly for this platform, most of the tests
+        #       in the suite will simply be skipped.  Generally speaking, there
+        #       are two ways to build the binaries when preparing to run the
+        #       test suite:
+        #
+        #       1. Build the separate managed and native assemblies using some
+        #          commands similar to:
+        #
+        #          build.bat ${Configuration}ManagedOnly ${Platform}
+        #          build.bat ${Configuration}NativeOnly ${Platform}
+        #
+        #          Where ${Configuration} is either "Debug" or "Release" and
+        #          ${Platform} is either "Win32" or "x64".
+        #
+        #       2. Build the mixed-mode assembly using a command similar to:
+        #
+        #          build.bat ${Configuration} ${Platform}
+        #
+        #          Where ${Configuration} is either "Debug" or "Release" and
+        #          ${Platform} is either "Win32" or "x64".  If this command is
+        #          used, various tests that require supplementary managed
+        #          assemblies (e.g. LINQ) may be skipped unless those binaries
+        #          are subsequently copied into the correct directory (i.e. by
+        #          "test_all.bat").
+        #
+        #       Note that all of the build commands above will default to using
+        #       the latest version of MSBuild available and the "test_year" may
+        #       need to be adjusted accordingly to actually run the test suite.
+        #       Refer to the comments in [getBuildYear] for more information on
+        #       how to set this variable.
+        #
         if {[hasRuntimeOption native]} then {
-          return [file join $path bin [getBuildYear] \
-              [machineToPlatform $::tcl_platform(machine)] \
-              [getBuildConfiguration]]
+          return [file join $path bin [getBuildYear] [machineToPlatform \
+              $::tcl_platform(machine)] [getBuildConfiguration]]
         } else {
-          return [file join $path bin [getBuildYear] \
-              [getBuildConfiguration] bin]
+          return [file join $path bin [getBuildYear] [getBuildConfiguration] \
+              bin]
         }
       }
     }
@@ -262,9 +301,9 @@ namespace eval ::Eagle {
       #       application domain, making it able to successfully run tests that
       #       require one or more of the files in the build directory.  Callers
       #       to this procedure should keep in mind that the test script being
-      #       returned cannot only rely on any script library procedures not
-      #       included in the Eagle.Library package (i.e. "init.eagle").  Also,
-      #       all variable references and all "nested" commands (i.e. those in
+      #       returned cannot rely on any script library procedures not defined
+      #       by the Eagle.Library package (i.e. "init.eagle").  Also, all
+      #       variable references and all "nested" commands (i.e. those in
       #       square brackets), unless they are specially quoted, will end up
       #       being evaluated in the context of the calling interpreter and not
       #       the test interpreter created in the isolated application domain.
