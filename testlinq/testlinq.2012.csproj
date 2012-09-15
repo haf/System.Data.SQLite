@@ -16,7 +16,6 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>testlinq</RootNamespace>
     <AssemblyName>testlinq</AssemblyName>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <ConfigurationYear>2012</ConfigurationYear>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>

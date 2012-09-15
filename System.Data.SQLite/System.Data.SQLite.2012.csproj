@@ -17,7 +17,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Data.SQLite</RootNamespace>
     <AssemblyName>System.Data.SQLite</AssemblyName>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <ConfigurationYear>2012</ConfigurationYear>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
