@@ -87,31 +87,46 @@ set sds_manifests(source) {
   Setup/release_all.bat
   Setup/release_ce.bat
   Setup/release_static.bat
+  Setup/set_2005.bat
   Setup/set_2008.bat
   Setup/set_2010.bat
+  Setup/set_2012.bat
   Setup/set_common.bat
   Setup/set_netFx20.bat
   Setup/set_netFx40.bat
+  Setup/set_netFx45.bat
   Setup/set_Release.bat
   Setup/set_ReleaseNativeOnly.bat
   "Setup/set_ReleaseNativeOnly_Pocket PC 2003 (ARMV4).bat"
   Setup/set_ReleaseNativeOnly_Win32.bat
   Setup/set_ReleaseNativeOnly_x64.bat
+  Setup/set_ReleaseNativeOnly_x64_2005.bat
   Setup/set_ReleaseNativeOnly_x64_2008.bat
   Setup/set_ReleaseNativeOnly_x64_2010.bat
+  Setup/set_ReleaseNativeOnly_x64_2012.bat
+  Setup/set_ReleaseNativeOnly_x86_2005.bat
   Setup/set_ReleaseNativeOnly_x86_2008.bat
   Setup/set_ReleaseNativeOnly_x86_2010.bat
+  Setup/set_ReleaseNativeOnly_x86_2012.bat
   "Setup/set_Release_Pocket PC 2003 (ARMV4).bat"
   Setup/set_Release_Win32.bat
   Setup/set_Release_x64.bat
+  Setup/set_Release_x64_2005.bat
   Setup/set_Release_x64_2008.bat
   Setup/set_Release_x64_2010.bat
+  Setup/set_Release_x64_2012.bat
+  Setup/set_Release_x86_2005.bat
   Setup/set_Release_x86_2008.bat
   Setup/set_Release_x86_2010.bat
+  Setup/set_Release_x86_2012.bat
+  Setup/set_x64_2005.bat
   Setup/set_x64_2008.bat
   Setup/set_x64_2010.bat
+  Setup/set_x64_2012.bat
+  Setup/set_x86_2005.bat
   Setup/set_x86_2008.bat
   Setup/set_x86_2010.bat
+  Setup/set_x86_2012.bat
   Setup/SQLite.iss
   Setup/test_all.bat
   Setup/updateFileInfo.tcl
