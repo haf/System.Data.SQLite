@@ -19,6 +19,7 @@
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <ConfigurationYear>2012</ConfigurationYear>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">

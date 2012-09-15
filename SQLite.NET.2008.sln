@@ -2,11 +2,20 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39A3B743-1EBD-4CC0-8E37-ACE3DD38B1C0}"
 	ProjectSection(SolutionItems) = preProject
+		exclude_bin.txt = exclude_bin.txt
+		exclude_src.txt = exclude_src.txt
+		install.ps1 = install.ps1
 		readme.htm = readme.htm
+		SQLite.MSIL.nuspec = SQLite.MSIL.nuspec
 		SQLite.NET.Settings.targets = SQLite.NET.Settings.targets
+		SQLite.nuspec = SQLite.nuspec
+		SQLite.x64.nuspec = SQLite.x64.nuspec
+		SQLite.x86.nuspec = SQLite.x86.nuspec
+		System.Data.SQLite\System.Data.SQLite.CF.snk = System.Data.SQLite\System.Data.SQLite.CF.snk
 		System.Data.SQLite\System.Data.SQLite.Files.targets = System.Data.SQLite\System.Data.SQLite.Files.targets
 		System.Data.SQLite\System.Data.SQLite.Properties.targets = System.Data.SQLite\System.Data.SQLite.Properties.targets
 		System.Data.SQLite\System.Data.SQLite.References.targets = System.Data.SQLite\System.Data.SQLite.References.targets
+		System.Data.SQLite\System.Data.SQLite.snk = System.Data.SQLite\System.Data.SQLite.snk
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite.2008", "System.Data.SQLite\System.Data.SQLite.2008.csproj", "{AC139952-261A-4463-B6FA-AEBC25283A66}"

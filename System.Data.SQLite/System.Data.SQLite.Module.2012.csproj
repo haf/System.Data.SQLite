@@ -21,6 +21,7 @@
     <SignAssembly>false</SignAssembly>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
     <ConfigurationYear>2012</ConfigurationYear>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <ConfigurationSuffix>Module</ConfigurationSuffix>
     <UseInteropDll>false</UseInteropDll>
     <UseSqliteStandard>false</UseSqliteStandard>
