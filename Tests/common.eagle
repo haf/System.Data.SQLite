@@ -46,30 +46,30 @@ namespace eval ::Eagle {
         #
         # NOTE: Use the specified test year.  If this variable is not set, the
         #       default value will be based on whether or not Eagle has been
-        #       compiled against the .NET Framework 2.0 or 4.0.
+        #       compiled against the CLR v2.0 or CLR v4.0.
         #
         return $::test_year
       } else {
         #
-        # NOTE: If Eagle has been compiled against the .NET Framework 4.0, use
-        #       "2010" by default (we could use "2012" in that case as well) as
-        #       the test year; otherwise, use "2008" by default (we could use
-        #       "2005" in that case as well).  If another major [incompatible]
-        #       version of the .NET Framework is released, this check will have
-        #       to be changed.  The default test year to use for a particular
-        #       CLR version may be overridden using another global variable
-        #       (i.e. test_year_clr_vX).
+        # NOTE: If Eagle has been compiled against the CLR v4.0, use "2010" by
+        #       default (we could use "2012" in that case as well) as the test
+        #       year; otherwise, use "2008" by default (we could use "2005" in
+        #       that case as well).  If another major [incompatible] version of
+        #       the CLR is released, this check will have to be changed.  The
+        #       default test year to use for a particular CLR version may be
+        #       overridden by setting the global variable "test_year_clr_v$X",
+        #       where "$X" may [currently] be either "2" or "4".
         #
         if {[haveConstraint imageRuntime40]} then {
           if {[info exists ::test_year_clr_v4] && \
               [string length $::test_year_clr_v4] > 0} then {
             #
-            # NOTE: Use the specified test year for the .NET Framework 4.0.
+            # NOTE: Use the specified test year for the CLR v4.0.
             #
             return $::test_year_clr_v4
           } else {
             #
-            # NOTE: Use the default test year for the .NET Framework 4.0.
+            # NOTE: Use the default test year for the CLR v4.0.
             #
             return 2010; # TODO: Good "fallback" default?
           }
@@ -77,12 +77,12 @@ namespace eval ::Eagle {
           if {[info exists ::test_year_clr_v2] && \
               [string length $::test_year_clr_v2] > 0} then {
             #
-            # NOTE: Use the specified test year for the .NET Framework 2.0.
+            # NOTE: Use the specified test year for the CLR v2.0.
             #
             return $::test_year_clr_v2
           } else {
             #
-            # NOTE: Use the default test year for the .NET Framework 2.0.
+            # NOTE: Use the default test year for the CLR v2.0.
             #
             return 2008; # TODO: Good "fallback" default?
           }
