@@ -109,7 +109,7 @@ Name: {app}\bin
 Name: {app}\doc
 
 #if Pos("NativeOnly", AppConfiguration) == 0
-Name: {app}\GAC
+Name: {app}\GAC; Tasks: gac
 #endif
 
 [Files]
