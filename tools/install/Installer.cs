@@ -5915,8 +5915,13 @@ namespace System.Data.SQLite
                     //       file name does not represent a valid managed
                     //       assembly.
                     //
-                    AssemblyName assemblyName = AssemblyName.GetAssemblyName(
-                        configuration.CoreFileName); /* throw */
+                    AssemblyName coreAssemblyName =
+                        AssemblyName.GetAssemblyName(
+                            configuration.CoreFileName); /* throw */
+
+                    AssemblyName designerAssemblyName =
+                        AssemblyName.GetAssemblyName(
+                            configuration.DesignerFileName); /* throw */
                     #endregion
 
                     ///////////////////////////////////////////////////////////
@@ -5941,7 +5946,7 @@ namespace System.Data.SQLite
                         debugCallback, traceCallback, String.Format(
                         "System directory is {0}.", ForDisplay(
                         GetSystemDirectory(configuration.Wow64))),
-                        traceCategory);
+                        traceCategory); /* throw */
                     #endregion
 
                     ///////////////////////////////////////////////////////////
@@ -5953,7 +5958,7 @@ namespace System.Data.SQLite
 
                     ///////////////////////////////////////////////////////////
 
-                    InitializeVsPackage(assemblyName, ref package);
+                    InitializeVsPackage(designerAssemblyName, ref package);
 
                     ///////////////////////////////////////////////////////////
 
@@ -6071,7 +6076,7 @@ namespace System.Data.SQLite
                                 frameworkList, ProcessDbProviderFactory,
                                 configuration.ConfigVersion, InvariantName,
                                 ProviderName, Description, FactoryTypeName,
-                                assemblyName, directoryData,
+                                coreAssemblyName, directoryData,
                                 NetFxIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
                                 configuration.WhatIf, configuration.Verbose,
