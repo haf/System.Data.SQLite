@@ -26,6 +26,7 @@ runSQLiteTestPrologue
 #
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
 set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
+set sqliteDesignerDllFile [getBuildFileName SQLite.Designer.dll]
 set installerExeFile [getBuildFileName Installer.exe]
 
 #
@@ -67,6 +68,11 @@ if {![haveConstraint [appendArgs file_ \
 if {![haveConstraint [appendArgs file_ \
     [file tail $systemDataSQLiteLinqDllFile]]]} then {
   checkForFile $test_channel $systemDataSQLiteLinqDllFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $sqliteDesignerDllFile]]]} then {
+  checkForFile $test_channel $sqliteDesignerDllFile
 }
 
 if {![haveConstraint [appendArgs file_ \
@@ -415,8 +421,8 @@ file_Uninstaller_Test_Vs2012.log} -result {0 True}}
 unset -nocomplain testUninstallVs2012LogFile testUninstallVs2010LogFile \
     testUninstallVs2008LogFile testUninstallVs2005LogFile \
     testInstallVs2012LogFile testInstallVs2010LogFile \
-    testInstallVs2008LogFile testInstallVs2005LogFile installerExeFile \
-    systemDataSQLiteLinqDllFile systemDataSQLiteDllFile
+    testInstallVs2008LogFile testInstallVs2005LogFile sqliteDesignerDllFile \
+    installerExeFile systemDataSQLiteLinqDllFile systemDataSQLiteDllFile
 
 ###############################################################################
 
