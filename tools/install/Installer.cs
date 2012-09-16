@@ -6084,12 +6084,12 @@ namespace System.Data.SQLite
 
                     ///////////////////////////////////////////////////////////
 
-                    InitializeFrameworkList(configuration.PerUser ?
-                        registry.CurrentUser : registry.LocalMachine,
+                    InitializeFrameworkList(registry.LocalMachine,
                         configuration, ref frameworkList);
 
-                    InitializeVsList(registry.LocalMachine, configuration,
-                        ref vsList);
+                    InitializeVsList(configuration.PerUser ?
+                        registry.CurrentUser : registry.LocalMachine,
+                        configuration, ref vsList);
                     #endregion
 
                     ///////////////////////////////////////////////////////////

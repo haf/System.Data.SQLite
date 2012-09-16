@@ -31,10 +31,14 @@ namespace SQLite.Designer
       {
         case 8:
           return "2005";
-		case 10:
-		  return "2010";
-        default:
+        case 9:
           return "2008";
+        case 10:
+          return "2010";
+        case 11:
+          return "2012";
+        default:
+          return null;
       }
     }
   }
