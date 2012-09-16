@@ -32,55 +32,56 @@ namespace System.Data.SQLite
 {
     #region Public Delegates
     internal delegate void TraceCallback(
-        string message,
-        string category
+        string message, /* in */
+        string category /* in */
     );
 
     ///////////////////////////////////////////////////////////////////////////
 
     internal delegate bool FrameworkConfigCallback(
-        string fileName,
-        string invariant,
-        string name,
-        string description,
-        string typeName,
-        AssemblyName assemblyName,
-        object clientData,
-        bool wow64,
-        bool throwOnMissing,
-        bool whatIf,
-        bool verbose,
-        ref bool saved,
-        ref string error
+        string fileName,           /* in */
+        string invariant,          /* in */
+        string name,               /* in */
+        string description,        /* in */
+        string typeName,           /* in */
+        AssemblyName assemblyName, /* in */
+        object clientData,         /* in */
+        bool wow64,                /* in */
+        bool throwOnMissing,       /* in */
+        bool whatIf,               /* in */
+        bool verbose,              /* in */
+        ref bool saved,            /* out */
+        ref string error           /* out */
     );
 
     ///////////////////////////////////////////////////////////////////////////
 
     internal delegate bool FrameworkRegistryCallback(
-        Installer.MockRegistryKey rootKey,
-        string frameworkName,
-        Version frameworkVersion,
-        string platformName,
-        object clientData,
-        bool wow64,
-        bool throwOnMissing,
-        bool whatIf,
-        bool verbose,
-        ref string error
+        Installer.MockRegistryKey rootKey, /* in */
+        string frameworkName,              /* in */
+        Version frameworkVersion,          /* in */
+        string platformName,               /* in */
+        object clientData,                 /* in */
+        bool wow64,                        /* in */
+        bool throwOnMissing,               /* in */
+        bool whatIf,                       /* in */
+        bool verbose,                      /* in */
+        ref string error                   /* out */
     );
 
     ///////////////////////////////////////////////////////////////////////////
 
     internal delegate bool VisualStudioRegistryCallback(
-        Installer.MockRegistryKey rootKey,
-        Version vsVersion,
-        Installer.Package package,
-        object clientData,
-        bool wow64,
-        bool throwOnMissing,
-        bool whatIf,
-        bool verbose,
-        ref string error
+        Installer.MockRegistryKey rootKey, /* in */
+        Version vsVersion,                 /* in */
+        string suffix,                     /* in, optional */
+        Installer.Package package,         /* in */
+        object clientData,                 /* in */
+        bool wow64,                        /* in */
+        bool throwOnMissing,               /* in */
+        bool whatIf,                       /* in */
+        bool verbose,                      /* in */
+        ref string error                   /* out */
     );
     #endregion
 
@@ -1910,6 +1911,7 @@ namespace System.Data.SQLite
                 string designerFileName,
                 string registryVersion,
                 string configVersion,
+                string vsVersionSuffix,
                 string debugFormat,
                 string traceFormat,
                 InstallFlags installFlags,
@@ -1946,6 +1948,7 @@ namespace System.Data.SQLite
                 this.designerFileName = designerFileName;
                 this.registryVersion = registryVersion;
                 this.configVersion = configVersion;
+                this.vsVersionSuffix = vsVersionSuffix;
                 this.debugFormat = debugFormat;
                 this.traceFormat = traceFormat;
                 this.installFlags = installFlags;
@@ -2118,7 +2121,7 @@ namespace System.Data.SQLite
 
                 return new Configuration(thisAssembly, null, directory,
                     coreFileName, linqFileName, designerFileName, null, null,
-                    TraceOps.DebugFormat, TraceOps.TraceFormat,
+                    null, TraceOps.DebugFormat, TraceOps.TraceFormat,
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, false, true, false, false, false,
                     false, false, false, false, false, false, false, false,
@@ -2787,6 +2790,10 @@ namespace System.Data.SQLite
 
                             configuration.verbose = (bool)value;
                         }
+                        else if (MatchOption(newArg, "vsVersionSuffix"))
+                        {
+                            configuration.vsVersionSuffix = text;
+                        }
                         else if (MatchOption(newArg, "whatIf"))
                         {
                             bool? value = ParseBoolean(text);
@@ -3205,6 +3212,10 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "VsVersionSuffix", ForDisplay(vsVersionSuffix)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "DebugFormat", ForDisplay(debugFormat)),
                         traceCategory);
 
@@ -3397,6 +3408,15 @@ namespace System.Data.SQLite
             {
                 get { return configVersion; }
                 set { configVersion = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string vsVersionSuffix;
+            public string VsVersionSuffix
+            {
+                get { return vsVersionSuffix; }
+                set { vsVersionSuffix = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -4643,6 +4663,7 @@ namespace System.Data.SQLite
         private static bool HaveVsVersion(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             bool wow64,
             bool whatIf,
             bool verbose
@@ -4651,7 +4672,7 @@ namespace System.Data.SQLite
             if (vsVersion == null)
                 return false;
 
-            string keyName = GetVsKeyName(vsVersion, wow64);
+            string keyName = GetVsKeyName(vsVersion, suffix, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -4690,6 +4711,7 @@ namespace System.Data.SQLite
             MockRegistry registry,
             VsList vsList,
             VisualStudioRegistryCallback callback,
+            string suffix,
             Package package,
             object clientData,
             bool wow64,
@@ -4738,7 +4760,8 @@ namespace System.Data.SQLite
                     "vsVersion = {0}", ForDisplay(vsVersion)),
                     traceCategory);
 
-                if (!HaveVsVersion(rootKey, vsVersion, wow64, whatIf, verbose))
+                if (!HaveVsVersion(
+                        rootKey, vsVersion, suffix, wow64, whatIf, verbose))
                 {
                     TraceOps.DebugAndTrace(TracePriority.Low,
                         debugCallback, traceCallback,
@@ -4752,8 +4775,8 @@ namespace System.Data.SQLite
                     continue;
 
                 if (!callback(
-                        rootKey, vsVersion, package, clientData, wow64,
-                        throwOnMissing, whatIf, verbose, ref error))
+                        rootKey, vsVersion, suffix, package, clientData,
+                        wow64, throwOnMissing, whatIf, verbose, ref error))
                 {
                     return false;
                 }
@@ -5140,6 +5163,7 @@ namespace System.Data.SQLite
 
         private static string GetVsKeyName(
             Version vsVersion,
+            string suffix,
             bool wow64
             )
         {
@@ -5147,7 +5171,7 @@ namespace System.Data.SQLite
                 return null;
 
             return String.Format(
-                "{0}\\{1}", GetVsRootKeyName(wow64), vsVersion);
+                "{0}\\{1}{2}", GetVsRootKeyName(wow64), vsVersion, suffix);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -5156,6 +5180,7 @@ namespace System.Data.SQLite
         private static bool AddVsDataSource(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             bool wow64,
             bool whatIf,
@@ -5175,7 +5200,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion, wow64);
+            string keyName = GetVsKeyName(vsVersion, suffix, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -5244,6 +5269,7 @@ namespace System.Data.SQLite
         private static bool RemoveVsDataSource(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             bool wow64,
             bool whatIf,
@@ -5263,7 +5289,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion, wow64);
+            string keyName = GetVsKeyName(vsVersion, suffix, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -5303,6 +5329,7 @@ namespace System.Data.SQLite
         private static bool ProcessVsDataSource(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             object clientData,
             bool wow64,
@@ -5329,14 +5356,14 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsDataSource(
-                    rootKey, vsVersion, package, wow64, whatIf, verbose,
-                    ref error);
+                    rootKey, vsVersion, suffix, package, wow64, whatIf,
+                    verbose, ref error);
             }
             else
             {
                 return RemoveVsDataSource(
-                    rootKey, vsVersion, package, wow64, whatIf, verbose,
-                    ref error);
+                    rootKey, vsVersion, suffix, package, wow64, whatIf,
+                    verbose, ref error);
             }
         }
         #endregion
@@ -5347,6 +5374,7 @@ namespace System.Data.SQLite
         private static bool AddVsDataProvider(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             string fileName,
             bool wow64,
@@ -5367,7 +5395,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion, wow64);
+            string keyName = GetVsKeyName(vsVersion, suffix, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -5482,6 +5510,7 @@ namespace System.Data.SQLite
         private static bool RemoveVsDataProvider(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             bool wow64,
             bool whatIf,
@@ -5495,7 +5524,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion, wow64);
+            string keyName = GetVsKeyName(vsVersion, suffix, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -5535,6 +5564,7 @@ namespace System.Data.SQLite
         private static bool ProcessVsDataProvider(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             object clientData,
             bool wow64,
@@ -5555,14 +5585,14 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsDataProvider(
-                    rootKey, vsVersion, package, pair.X, wow64, whatIf,
-                    verbose, ref error);
+                    rootKey, vsVersion, suffix, package, pair.X, wow64,
+                    whatIf, verbose, ref error);
             }
             else
             {
                 return RemoveVsDataProvider(
-                    rootKey, vsVersion, package, wow64, whatIf, verbose,
-                    ref error);
+                    rootKey, vsVersion, suffix, package, wow64, whatIf,
+                    verbose, ref error);
             }
         }
         #endregion
@@ -5605,6 +5635,7 @@ namespace System.Data.SQLite
         private static bool AddVsPackage(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             string fileName,
             bool wow64,
@@ -5625,7 +5656,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion, wow64);
+            string keyName = GetVsKeyName(vsVersion, suffix, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -5801,6 +5832,7 @@ namespace System.Data.SQLite
         private static bool RemoveVsPackage(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             bool wow64,
             bool throwOnMissing,
@@ -5821,7 +5853,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            string keyName = GetVsKeyName(vsVersion, wow64);
+            string keyName = GetVsKeyName(vsVersion, suffix, wow64);
 
             using (MockRegistryKey key = RegistryHelper.OpenSubKey(
                     rootKey, keyName, false, whatIf, verbose))
@@ -5895,6 +5927,7 @@ namespace System.Data.SQLite
         private static bool ProcessVsPackage(
             MockRegistryKey rootKey,
             Version vsVersion,
+            string suffix,
             Package package,
             object clientData,
             bool wow64,
@@ -5915,14 +5948,14 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return AddVsPackage(
-                    rootKey, vsVersion, package, pair.X, wow64, whatIf,
-                    verbose, ref error);
+                    rootKey, vsVersion, suffix, package, pair.X, wow64,
+                    whatIf, verbose, ref error);
             }
             else
             {
                 return RemoveVsPackage(
-                    rootKey, vsVersion, package, wow64, throwOnMissing,
-                    whatIf, verbose, ref error);
+                    rootKey, vsVersion, suffix, package, wow64,
+                    throwOnMissing, whatIf, verbose, ref error);
             }
         }
         #endregion
@@ -6222,7 +6255,8 @@ namespace System.Data.SQLite
                             InstallFlags.VsPackage, true))
                     {
                         if (!ForEachVsVersionRegistry(registry,
-                                vsList, ProcessVsPackage, package,
+                                vsList, ProcessVsPackage,
+                                configuration.VsVersionSuffix, package,
                                 fileNameData,
                                 VsIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
@@ -6250,7 +6284,8 @@ namespace System.Data.SQLite
                             InstallFlags.VsDataSource, true))
                     {
                         if (!ForEachVsVersionRegistry(registry,
-                                vsList, ProcessVsDataSource, package,
+                                vsList, ProcessVsDataSource,
+                                configuration.VsVersionSuffix, package,
                                 fileNameData,
                                 VsIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
@@ -6278,7 +6313,8 @@ namespace System.Data.SQLite
                             InstallFlags.VsDataProvider, true))
                     {
                         if (!ForEachVsVersionRegistry(registry,
-                                vsList, ProcessVsDataProvider, package,
+                                vsList, ProcessVsDataProvider,
+                                configuration.VsVersionSuffix, package,
                                 fileNameData,
                                 VsIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
