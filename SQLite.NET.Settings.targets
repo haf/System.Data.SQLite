@@ -165,6 +165,13 @@
               both for the corresponding version(s) of Visual Studio.
     -->
     <InteropCodec Condition="'$(InteropCodec)' == ''">true</InteropCodec>
+
+    <!--
+        NOTE: Enable the use of native Windows APIs, when available?  By
+              default, this is enabled.  If this is disabled, all features
+              that require the use of native Windows APIs will be unavailable.
+    -->
+    <UseWindows Condition="'$(UseWindows)' == ''">true</UseWindows>
   </PropertyGroup>
 
   <!--

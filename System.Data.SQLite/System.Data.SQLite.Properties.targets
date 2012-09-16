@@ -124,4 +124,11 @@
   <PropertyGroup Condition="'$(TraceWarning)' != 'false'">
     <DefineConstants>$(DefineConstants);TRACE_WARNING</DefineConstants>
   </PropertyGroup>
+
+  <!--
+      NOTE: Enable the use of native Windows APIs, when available?
+  -->
+  <PropertyGroup Condition="'$(UseWindows)' != 'false'">
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+  </PropertyGroup>
 </Project>

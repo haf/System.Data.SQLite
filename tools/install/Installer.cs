@@ -12,6 +12,17 @@ using System.EnterpriseServices.Internal;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+
+#if WINDOWS
+using System.Runtime.InteropServices;
+#endif
+
+using System.Security;
+
+#if NET_20
+using System.Security.Permissions;
+#endif
+
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
@@ -115,8 +126,99 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region Installer Class
+#if !NET_20
+    [SecurityCritical()]
+#else
+    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+#endif
     internal static class Installer
     {
+        #region Unsafe Native Methods Class
+        [SuppressUnmanagedCodeSecurity()]
+        private sealed class UnsafeNativeMethods
+        {
+#if WINDOWS
+            #region Native Win32 Constants
+            private const int MAX_PATH = 260;
+
+            ///////////////////////////////////////////////////////////////////
+
+            private const int CSIDL_SYSTEMX86 = 0x0029;
+
+            ///////////////////////////////////////////////////////////////////
+
+            private const int SHGFP_TYPE_CURRENT = 0;
+
+            ///////////////////////////////////////////////////////////////////
+
+            private const int S_OK = 0; /* HRESULT */
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Native Windows Methods
+            [DllImport("shfolder.dll",
+                CallingConvention = CallingConvention.Winapi,
+                CharSet = CharSet.Auto, BestFitMapping = false,
+                ThrowOnUnmappableChar = true, SetLastError = true)]
+            private static extern int SHGetFolderPath(
+                IntPtr hWndOwner, int nFolder, IntPtr hToken, uint flags,
+                IntPtr buffer /* >= MAX_PATH */);
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Wrapper Methods
+            public static string GetSystemDirectory()
+            {
+                IntPtr buffer = IntPtr.Zero;
+
+                try
+                {
+                    buffer = Marshal.AllocCoTaskMem(
+                        sizeof(char) * (MAX_PATH + 1));
+
+                    if (buffer != IntPtr.Zero)
+                    {
+                        if (SHGetFolderPath(IntPtr.Zero,
+                                CSIDL_SYSTEMX86, IntPtr.Zero,
+                                SHGFP_TYPE_CURRENT, buffer) == S_OK)
+                        {
+                            return Marshal.PtrToStringAuto(buffer);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    //
+                    // TODO: Is this the right error handling solution
+                    //       to use at this point?
+                    //
+                    TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                        debugCallback, traceCallback, String.Format(
+                        "Could not get system directory: {0}", e),
+                        traceCategory);
+
+                    throw;
+                }
+                finally
+                {
+                    if (buffer != IntPtr.Zero)
+                    {
+                        Marshal.FreeCoTaskMem(buffer);
+                        buffer = IntPtr.Zero;
+                    }
+                }
+
+                return null;
+            }
+            #endregion
+#endif
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Private Helper Classes
         #region AnyPair Class
         private sealed class AnyPair<T1, T2>
@@ -1693,6 +1795,15 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Properties
+            private AssemblyName assemblyName;
+            public AssemblyName AssemblyName
+            {
+                get { return assemblyName; }
+                set { assemblyName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             private Guid packageId;
             public Guid PackageId
             {
@@ -3612,6 +3723,14 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        private static string systemDirectory = null;
+
+#if WINDOWS
+        private static string systemDirectoryWow64 = null;
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static int filesCreated = 0;
         private static int filesModified = 0;
         private static int filesDeleted = 0;
@@ -3687,6 +3806,33 @@ namespace System.Data.SQLite
             return String.Format("{0}{1}", RootKeyName,
                 wow64 && Is64BitProcess() ?
                     "\\" + Wow64SubKeyName : String.Empty);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static string GetSystemDirectory(
+            bool wow64
+            )
+        {
+#if WINDOWS
+            if (wow64)
+            {
+                if (systemDirectoryWow64 == null)
+                {
+                    systemDirectoryWow64 =
+                        UnsafeNativeMethods.GetSystemDirectory();
+                }
+
+                return systemDirectoryWow64;
+            }
+            else
+#endif
+            {
+                if (systemDirectory == null)
+                    systemDirectory = Environment.SystemDirectory;
+
+                return systemDirectory;
+            }
         }
         #endregion
 
@@ -4998,6 +5144,14 @@ namespace System.Data.SQLite
                             "{0} Database File", ProjectName), whatIf,
                             verbose);
 
+                        //
+                        // NOTE: This value is new as of 1.0.83.0.
+                        //
+                        RegistryHelper.SetValue(
+                            dataSourceKey, "DefaultProvider",
+                            package.DataProviderId.ToString(VsIdFormat),
+                            whatIf, verbose);
+
                         RegistryHelper.CreateSubKey(dataSourceKey,
                             String.Format("SupportingProviders\\{0}",
                             package.DataProviderId.ToString(VsIdFormat)),
@@ -5181,6 +5335,22 @@ namespace System.Data.SQLite
                             dataProviderKey, null, Description, whatIf,
                             verbose);
 
+                        //
+                        // NOTE: This value is new as of 1.0.83.0.
+                        //
+                        RegistryHelper.SetValue(
+                            dataProviderKey, "Assembly",
+                            package.AssemblyName.ToString(),
+                            whatIf, verbose);
+
+                        //
+                        // NOTE: This value is new as of 1.0.83.0.
+                        //
+                        RegistryHelper.SetValue(
+                            dataProviderKey, "AssociatedSource",
+                            package.DataSourceId.ToString(VsIdFormat),
+                            whatIf, verbose);
+
                         RegistryHelper.SetValue(
                             dataProviderKey, "InvariantName", InvariantName,
                             whatIf, verbose);
@@ -5319,12 +5489,15 @@ namespace System.Data.SQLite
 
         #region Visual Studio Package Handling
         private static void InitializeVsPackage(
+            AssemblyName assemblyName,
             ref Package package
             )
         {
             if (package == null)
             {
                 package = new Package();
+
+                package.AssemblyName = assemblyName;
 
                 package.AdoNetTechnologyId = new Guid(
                     "77AB9A9D-78B9-4BA7-91AC-873F5338F1D2");
@@ -5440,9 +5613,14 @@ namespace System.Data.SQLite
                         RegistryHelper.SetValue(packageKey, "ID", 400, whatIf,
                             verbose);
 
+                        string directory = GetSystemDirectory(wow64);
+
+                        if (directory == null)
+                            directory = String.Empty;
+
                         RegistryHelper.SetValue(packageKey, "InprocServer32",
-                            Path.Combine(Environment.SystemDirectory,
-                                "mscoree.dll"), whatIf, verbose);
+                            Path.Combine(directory, "mscoree.dll"),
+                            whatIf, verbose);
 
                         RegistryHelper.SetValue(packageKey, "CompanyName",
                             "http://system.data.sqlite.org/", whatIf, verbose);
@@ -5730,26 +5908,6 @@ namespace System.Data.SQLite
                 using (MockRegistry registry = new MockRegistry(
                         configuration.WhatIf, false, false))
                 {
-                    #region .NET Framework / Visual Studio Data
-                    Package package = null;
-                    FrameworkList frameworkList = null;
-                    VsList vsList = null;
-
-                    ///////////////////////////////////////////////////////////
-
-                    InitializeVsPackage(ref package);
-
-                    ///////////////////////////////////////////////////////////
-
-                    InitializeFrameworkList(registry.LocalMachine,
-                        configuration, ref frameworkList);
-
-                    InitializeVsList(registry.LocalMachine, configuration,
-                        ref vsList);
-                    #endregion
-
-                    ///////////////////////////////////////////////////////////
-
                     #region Core Assembly Name Check
                     //
                     // NOTE: Do this first, before making any changes to the
@@ -5759,6 +5917,51 @@ namespace System.Data.SQLite
                     //
                     AssemblyName assemblyName = AssemblyName.GetAssemblyName(
                         configuration.CoreFileName); /* throw */
+                    #endregion
+
+                    ///////////////////////////////////////////////////////////
+
+                    #region System Directory Check
+                    //
+                    // NOTE: Getting the system directory value here serves
+                    //       two purposes:
+                    //
+                    //       1. It enables us to log the system directory
+                    //          value very early in the installation process
+                    //          (i.e. even though the value itself is not
+                    //          needed until much later).
+                    //
+                    //       2. Since the value is cached, it prevents an
+                    //          exception from being thrown much later during
+                    //          the install when the value is queried again
+                    //          (i.e. with the same value for the "wow64"
+                    //          parameter).
+                    //
+                    TraceOps.DebugAndTrace(TracePriority.MediumLow,
+                        debugCallback, traceCallback, String.Format(
+                        "System directory is {0}.", ForDisplay(
+                        GetSystemDirectory(configuration.Wow64))),
+                        traceCategory);
+                    #endregion
+
+                    ///////////////////////////////////////////////////////////
+
+                    #region .NET Framework / Visual Studio Data
+                    Package package = null;
+                    FrameworkList frameworkList = null;
+                    VsList vsList = null;
+
+                    ///////////////////////////////////////////////////////////
+
+                    InitializeVsPackage(assemblyName, ref package);
+
+                    ///////////////////////////////////////////////////////////
+
+                    InitializeFrameworkList(registry.LocalMachine,
+                        configuration, ref frameworkList);
+
+                    InitializeVsList(registry.LocalMachine, configuration,
+                        ref vsList);
                     #endregion
 
                     ///////////////////////////////////////////////////////////
