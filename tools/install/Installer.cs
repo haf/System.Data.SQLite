@@ -90,17 +90,40 @@ namespace System.Data.SQLite
     [Flags()]
     public enum InstallFlags
     {
+        #region Normal Flags
         None = 0x0,
-        GAC = 0x1,
+        GlobalAssemblyCache = 0x1,
         AssemblyFolders = 0x2,
         DbProviderFactory = 0x4,
         VsPackage = 0x8,
-        VsDataSource = 0x10,
-        VsDataProvider = 0x20,
-        Framework = GAC | AssemblyFolders | DbProviderFactory,
-        Vs = VsPackage | VsDataSource | VsDataProvider,
+        VsPackageGlobalAssemblyCache = 0x10,
+        VsDataSource = 0x20,
+        VsDataProvider = 0x40,
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Composite Flags
+        Framework = GlobalAssemblyCache | AssemblyFolders |
+                    DbProviderFactory,
+
+        ///////////////////////////////////////////////////////////////////////
+
+        Vs = VsPackage | VsPackageGlobalAssemblyCache | VsDataSource |
+             VsDataProvider,
+
+        ///////////////////////////////////////////////////////////////////////
+
         All = Framework | Vs,
-        AllExceptGAC = All & ~GAC,
+
+        ///////////////////////////////////////////////////////////////////////
+
+        AllExceptGlobalAssemblyCache = All & ~(GlobalAssemblyCache |
+                                       VsPackageGlobalAssemblyCache),
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         Default = All
     }
 
@@ -1800,6 +1823,15 @@ namespace System.Data.SQLite
             {
                 get { return assemblyName; }
                 set { assemblyName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool globalAssemblyCache;
+            public bool GlobalAssemblyCache
+            {
+                get { return globalAssemblyCache; }
+                set { globalAssemblyCache = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -5336,12 +5368,18 @@ namespace System.Data.SQLite
                             verbose);
 
                         //
-                        // NOTE: This value is new as of 1.0.83.0.
+                        // NOTE: This value is new as of 1.0.83.0.  However,
+                        //       it should only be set if the package assembly
+                        //       and all the assemblies it refers to are being
+                        //       placed into the global assembly cache.
                         //
-                        RegistryHelper.SetValue(
-                            dataProviderKey, "Assembly",
-                            package.AssemblyName.ToString(),
-                            whatIf, verbose);
+                        if (package.GlobalAssemblyCache)
+                        {
+                            RegistryHelper.SetValue(
+                                dataProviderKey, "Assembly",
+                                package.AssemblyName.ToString(),
+                                whatIf, verbose);
+                        }
 
                         //
                         // NOTE: This value is new as of 1.0.83.0.
@@ -5490,6 +5528,7 @@ namespace System.Data.SQLite
         #region Visual Studio Package Handling
         private static void InitializeVsPackage(
             AssemblyName assemblyName,
+            bool globalAssemblyCache,
             ref Package package
             )
         {
@@ -5498,6 +5537,7 @@ namespace System.Data.SQLite
                 package = new Package();
 
                 package.AssemblyName = assemblyName;
+                package.GlobalAssemblyCache = globalAssemblyCache;
 
                 package.AdoNetTechnologyId = new Guid(
                     "77AB9A9D-78B9-4BA7-91AC-873F5338F1D2");
@@ -5958,7 +5998,12 @@ namespace System.Data.SQLite
 
                     ///////////////////////////////////////////////////////////
 
-                    InitializeVsPackage(designerAssemblyName, ref package);
+                    InitializeVsPackage(designerAssemblyName,
+                        configuration.HasFlags(
+                            InstallFlags.GlobalAssemblyCache, true) &&
+                        configuration.HasFlags(
+                            InstallFlags.VsPackageGlobalAssemblyCache, true),
+                        ref package);
 
                     ///////////////////////////////////////////////////////////
 
@@ -5982,7 +6027,8 @@ namespace System.Data.SQLite
                     ///////////////////////////////////////////////////////////
 
                     #region .NET GAC Install/Remove
-                    if (configuration.HasFlags(InstallFlags.GAC, true))
+                    if (configuration.HasFlags(
+                            InstallFlags.GlobalAssemblyCache, true))
                     {
                         Publish publish = null;
 
@@ -6010,9 +6056,37 @@ namespace System.Data.SQLite
                                 "GacInstall: assemblyPath = {0}",
                                 ForDisplay(configuration.LinqFileName)),
                                 traceCategory);
+
+                            if (configuration.HasFlags(
+                                    InstallFlags.VsPackageGlobalAssemblyCache, true))
+                            {
+                                if (!configuration.WhatIf)
+                                    /* throw */
+                                    publish.GacInstall(configuration.DesignerFileName);
+
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacInstall: assemblyPath = {0}",
+                                    ForDisplay(configuration.DesignerFileName)),
+                                    traceCategory);
+                            }
                         }
                         else
                         {
+                            if (configuration.HasFlags(
+                                    InstallFlags.VsPackageGlobalAssemblyCache, true))
+                            {
+                                if (!configuration.WhatIf)
+                                    /* throw */
+                                    publish.GacRemove(configuration.DesignerFileName);
+
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacRemove: assemblyPath = {0}",
+                                    ForDisplay(configuration.DesignerFileName)),
+                                    traceCategory);
+                            }
+
                             if (!configuration.WhatIf)
                                 /* throw */
                                 publish.GacRemove(configuration.LinqFileName);
