@@ -1791,6 +1791,80 @@ this is a test} True True}]}
 
 ###############################################################################
 
+runTest {test data-1.35 {open unencrypted database, with password} -setup {
+  setupDb [set fileName data-1.35.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=12345;" true false
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "" true false
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain error result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-match regexp -result {^1 \{System\.Data\.SQLite\.SQLiteException\
+\(0x80004005\): file is encrypted or is not a database.*?\} 1\
+\{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted or is\
+not a database.*?\} 0 1$}}
+
+###############################################################################
+
+runTest {test data-1.36 {open encrypted database, wrong password} -setup {
+  setupDb [set fileName data-1.36.db] "" "" "" "" "Password=12345;"
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=12346;" true false
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=12345;" true false
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain error result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-match regexp -result {^1 \{System\.Data\.SQLite\.SQLiteException\
+\(0x80004005\): file is encrypted or is not a database.*?\} 1\
+\{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted or is\
+not a database.*?\} 0 1$}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
