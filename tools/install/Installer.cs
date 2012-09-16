@@ -1915,6 +1915,7 @@ namespace System.Data.SQLite
                 InstallFlags installFlags,
                 TracePriority debugPriority,
                 TracePriority tracePriority,
+                bool perUser,
                 bool install,
                 bool wow64,
                 bool noRuntimeVersion,
@@ -1950,6 +1951,7 @@ namespace System.Data.SQLite
                 this.installFlags = installFlags;
                 this.debugPriority = debugPriority;
                 this.tracePriority = tracePriority;
+                this.perUser = perUser;
                 this.install = install;
                 this.wow64 = wow64;
                 this.noRuntimeVersion = noRuntimeVersion;
@@ -2118,9 +2120,9 @@ namespace System.Data.SQLite
                     coreFileName, linqFileName, designerFileName, null, null,
                     TraceOps.DebugFormat, TraceOps.TraceFormat,
                     InstallFlags.Default, TracePriority.Default,
-                    TracePriority.Default, true, false, false, false, false,
+                    TracePriority.Default, false, true, false, false, false,
                     false, false, false, false, false, false, false, false,
-                    false, false, true, true, false, false, false);
+                    false, false, false, true, true, false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2664,6 +2666,27 @@ namespace System.Data.SQLite
 
                             configuration.noVs2012 = (bool)value;
                         }
+                        else if (MatchOption(newArg, "perUser"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.perUser = (bool)value;
+                        }
                         else if (MatchOption(newArg, "registryVersion"))
                         {
                             configuration.registryVersion = text;
@@ -3202,6 +3225,10 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "PerUser", ForDisplay(perUser)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "Install", ForDisplay(install)),
                         traceCategory);
 
@@ -3415,6 +3442,15 @@ namespace System.Data.SQLite
             {
                 get { return tracePriority; }
                 set { tracePriority = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool perUser;
+            public bool PerUser
+            {
+                get { return perUser; }
+                set { perUser = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3827,6 +3863,17 @@ namespace System.Data.SQLite
             //       operating system, due to WoW64 (Win32-on-Win64), etc.
             //
             return (IntPtr.Size == sizeof(long)); // NOTE: Pointer is 64-bits?
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static bool IsSupportedRootKey(
+            MockRegistry registry,
+            MockRegistryKey rootKey
+            )
+        {
+            return Object.ReferenceEquals(rootKey, registry.CurrentUser) ||
+                Object.ReferenceEquals(rootKey, registry.LocalMachine);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -4252,8 +4299,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (!Object.ReferenceEquals(rootKey, registry.CurrentUser) &&
-                !Object.ReferenceEquals(rootKey, registry.LocalMachine))
+            if (!IsSupportedRootKey(registry, rootKey))
             {
                 error = "root key must be per-user or per-machine";
                 return false;
@@ -4454,8 +4500,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (!Object.ReferenceEquals(rootKey, registry.CurrentUser) &&
-                !Object.ReferenceEquals(rootKey, registry.LocalMachine))
+            if (!IsSupportedRootKey(registry, rootKey))
             {
                 error = "root key must be per-user or per-machine";
                 return false;
@@ -4674,8 +4719,7 @@ namespace System.Data.SQLite
                 return false;
             }
 
-            if (!Object.ReferenceEquals(rootKey, registry.CurrentUser) &&
-                !Object.ReferenceEquals(rootKey, registry.LocalMachine))
+            if (!IsSupportedRootKey(registry, rootKey))
             {
                 error = "root key must be per-user or per-machine";
                 return false;
@@ -6007,7 +6051,8 @@ namespace System.Data.SQLite
 
                     ///////////////////////////////////////////////////////////
 
-                    InitializeFrameworkList(registry.LocalMachine,
+                    InitializeFrameworkList(configuration.PerUser ?
+                        registry.CurrentUser : registry.LocalMachine,
                         configuration, ref frameworkList);
 
                     InitializeVsList(registry.LocalMachine, configuration,
