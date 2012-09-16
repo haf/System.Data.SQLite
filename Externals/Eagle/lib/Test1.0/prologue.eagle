@@ -1451,6 +1451,16 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has .NET Framework 4.5 testing support been disabled?
+    #
+    if {![info exists no(netFx45)]} then {
+      #
+      # NOTE: For test "object-12.1.*".
+      #
+      checkForNetFx45 $test_channel
+    }
+
+    #
     # NOTE: Has Visual Studio testing support been disabled?
     #
     if {![info exists no(visualStudio)]} then {

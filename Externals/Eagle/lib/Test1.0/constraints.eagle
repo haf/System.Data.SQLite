@@ -1939,6 +1939,54 @@ namespace eval ::Eagle {
       tputs $channel no\n
     }
 
+    proc checkForNetFx45 { channel } {
+      tputs $channel "---- checking for .NET Framework 4.5... "
+
+      #
+      # NOTE: Platform must be Windows for this constraint to even be
+      #       checked (i.e. we require the registry).
+      #
+      if {[info exists ::tcl_platform(platform)] && \
+          $::tcl_platform(platform) eq "windows"} then {
+        #
+        # NOTE: Registry hive where the .NET Framework 4.0 setup and
+        #       servicing information is stored.  No need to look in
+        #       the WoW64 registry because the .NET Framework should
+        #       be installed natively as well.
+        #
+        set key [appendArgs HKEY_LOCAL_MACHINE\\ \
+            {Software\Microsoft\NET Framework Setup\NDP\v4\Full}]
+
+        #
+        # NOTE: Attempt to fetch the .NET Framework 4.0 "release" value from
+        #       the servicing registry hive.  If this value does not exist
+        #       -OR- is less than 378389, then the .NET Framework 4.5 is not
+        #       installed.
+        #
+        set release [object invoke Microsoft.Win32.Registry GetValue $key \
+            Release null]
+
+        if {[string is integer -strict $release] && $release >= 378389} then {
+          #
+          # NOTE: Yes, it appears that it is available.
+          #
+          addConstraint dotNet45
+
+          #
+          # NOTE: Show the "release" value we found in the registry.
+          #
+          tputs $channel [appendArgs "yes (" $release ")\n"]
+
+          #
+          # NOTE: We are done here, return now.
+          #
+          return
+        }
+      }
+
+      tputs $channel no\n
+    }
+
     proc checkForVisualStudio { channel } {
       tputs $channel "---- checking for Visual Studio... "
 
