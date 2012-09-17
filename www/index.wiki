@@ -21,17 +21,22 @@
 
 <p>
   This is a fork of the popular ADO.NET adapter for
-  <a href="http://www.sqlite.org/">SQLite</a> known as System.Data.SQLite. The
-  originator of System.Data.SQLite, Robert Simpson, is aware of this fork, has
-  expressed his approval, and has commit privileges on the new Fossil
-  repository.  The SQLite development team intends to maintain
-  System.Data.SQLite moving forward.
+  [http://www.sqlite.org/ | SQLite] known as System.Data.SQLite.  The originator
+  of System.Data.SQLite, Robert Simpson, is aware of this fork, has expressed
+  his approval, and has commit privileges on the new Fossil repository.  The
+  SQLite Development Team intends to maintain the System.Data.SQLite project
+  moving forward.
 </p>
 
 <p>
   Historical versions, as well as the original support forums, may still be
-  found at <a href="http://sqlite.phxsoftware.com/">http://sqlite.phxsoftware.com/</a>,
-  though there have been no updates to this version since April of 2010.
+  found at [http://sqlite.phxsoftware.com/], though there have been no updates
+  to this version since April of 2010.
+</p>
+
+<p>
+  Please refer to the [./downloads.wiki | download page] for a complete list
+  of downloadable packages and information on their use.
 </p>
 
 <p>
