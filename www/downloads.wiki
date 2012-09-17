@@ -49,7 +49,8 @@
             particular release version.  The source packages contain no
             binaries.  Those interested in studying the latest source code
             and/or tracking the unreleased changes should consider accessing the
-            <a href="/timeline?n=20&y=ci">Fossil repository</a> instead.
+            <a href="/index.html/timeline?n=20&y=ci">Fossil repository</a>
+            instead.
           </li>
           <br />
           <li>
@@ -953,7 +954,8 @@
   </p>
 
   <p>
-    The complete source tree for any <a href="/timeline?n=20&y=ci">check-in</a>
+    The complete source tree for any
+    <a href="/index.html/timeline?n=20&y=ci">check-in</a>
     may always be downloaded using the &quot;Tarball&quot; or &quot;ZIP
     archive&quot; links available from the check-in detail page.
   </p>
