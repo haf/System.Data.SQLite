@@ -166,8 +166,8 @@
       <td colspan="3">
         With the native library pre-loading feature enabled and the application
         deployment shown above, the System.Data.SQLite managed-only assembly
-        will automatically detect the processor architecture of the current
-        process and attempt to pre-load the appropriate native library.
+        will attempt to automatically detect the processor architecture of the
+        current process and pre-load the appropriate native library.
         <br /><br />
         If this feature does not work properly in your environment, it may be
         disabled by setting the &quot;No_PreLoadSQLite&quot; environment
@@ -210,7 +210,8 @@
           <li>
             Choosing the package matching the target processor architecture (for
             both development and customer machines) is almost certainly required
-            for proper operation.
+            for proper operation.  Using the native library pre-loading feature
+            should help with this.
           </li>
         </ul>
       </td>
