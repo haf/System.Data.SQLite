@@ -1,10 +1,10 @@
 <title>System.Data.SQLite Download Page</title>
 <nowiki>
-  <h3>System.Data.SQLite Download Page</h3>
+  <h1>System.Data.SQLite Download Page</h1>
 
   <table width="100%" cellpadding="5">
     <tr>
-      <td colspan="3">
+      <td colspan="3" class="importantHeader">
         <b>Support Notes</b>
       </td>
     </tr>
@@ -38,7 +38,7 @@
     </tr>
 
     <tr>
-      <td colspan="3">
+      <td colspan="3" class="importantHeader">
         <b>Package Types</b>
       </td>
     </tr>
@@ -134,11 +134,13 @@
         <a href="faq.wiki#q12">BadImageFormatException</a> being thrown.
         <br /><br />
         If the development and customer machines may have different processor
-        architectures, more than one binary package may be required.  In this
-        case, using the native library pre-loading feature is recommended.  It
-        is available as of version 1.0.80.0 and enabled by default.  In order to
-        take advantage of this feature, the separate native and managed
-        assemblies must be used with XCOPY deployment, resulting in an
+        architectures, more than one binary package may be required.  For this
+        situation, using the <b>native library pre-loading feature</b> is highly
+        recommended.  It is available as of version 1.0.80.0 and enabled by
+        default.  In order to take advantage of this feature, the separate
+        managed and interop assemblies <b>must</b> be used with XCOPY deployment
+        (i.e. this feature is not supported by the mixed-mode assembly, nor when
+        the assembly is deployed to the global assembly cache), resulting in an
         application deployment that looks something like this:
       </td>
     </tr>
@@ -179,15 +181,21 @@
       </td>
     </tr>
     <tr>
-      <td colspan="3">
+      <td colspan="3" class="importantNotes">
+        The string &quot;<b>&lt;bin&gt;</b>&quot; above represents the directory
+        where the application binaries are to be deployed on the target machine.
         With the native library pre-loading feature enabled and the application
         deployment shown above, the System.Data.SQLite managed-only assembly
         will attempt to automatically detect the processor architecture of the
         current process and pre-load the appropriate native library.
         <br /><br />
-        If this feature does not work properly in your environment, it may be
-        disabled by setting the &quot;No_PreLoadSQLite&quot; environment
-        variable prior to loading and/or using the System.Data.SQLite assembly.
+        If native library pre-loading feature does not work properly in your
+        environment, it can be disabled by setting the
+        &quot;No_PreLoadSQLite&quot; environment variable (i.e. to anything)
+        prior to loading and/or using the System.Data.SQLite assembly.  There
+        are several more environment variables that can be used to influence the
+        behavior of the native library pre-loading feature, documented
+        <a href="/index.html/artifact?ci=trunk&filename=Doc/Extra/environment.html">here</a>.
         <br /><br />
         To summarize the above:
       </td>
