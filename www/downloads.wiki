@@ -45,10 +45,10 @@
         <ul>
           <li>
             The source packages are intended primarily for people interested in
-            studying the source code for the project that corresponds to a
-            particular release version.  The source packages contain no
-            binaries.  Those interested in studying the latest source code
-            and/or tracking the unreleased changes should consider accessing the
+            studying the source code that corresponds to a particular release
+            version of the project.  The source packages contain no binaries.
+            Those interested in studying the latest source code and/or tracking
+            the unreleased changes should consider accessing the
             <a href="/index.html/timeline?n=20&y=ci">Fossil repository</a>
             instead.
           </li>
