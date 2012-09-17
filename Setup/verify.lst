@@ -535,9 +535,13 @@ set sds_manifests(compact) {
 #       $result == $eagle_manifests(core) UNION $eagle_manifests(library)
 #
 ###############################################################################
+################################# Source Code #################################
+###############################################################################
 
 set manifests(sqlite-netFx-source-.zip) [list sds source]
 
+###############################################################################
+################### Visual Studio 2005 / .NET Framework 2.0 ###################
 ###############################################################################
 
 set manifests(sqlite-netFx20-binary-Win32-2005-.zip) \
@@ -576,6 +580,8 @@ set manifests(sqlite-netFx20-static-binary-bundle-Win32-2005-.zip) \
 set manifests(sqlite-netFx20-static-binary-bundle-x64-2005-.zip) \
     [list sds core extra]
 
+###############################################################################
+################### Visual Studio 2008 / .NET Framework 3.5 ###################
 ###############################################################################
 
 set manifests(sqlite-netFx35-binary-Win32-2008-.zip) \
@@ -617,10 +623,14 @@ set manifests(sqlite-netFx35-static-binary-bundle-x64-2008-.zip) \
     [list sds core linq extra]
 
 ###############################################################################
+################# Visual Studio 2008 / .NET Compact Framework #################
+###############################################################################
 
 set manifests(sqlite-netFx35-binary-PocketPC-2008-.zip) [list sds core compact]
 set manifests(sqlite-netFx35-binary-PocketPC-2008-.zip,subst) ""; # dynamic
 
+###############################################################################
+################### Visual Studio 2010 / .NET Framework 4.0 ###################
 ###############################################################################
 
 set manifests(sqlite-netFx40-binary-Win32-2010-.zip) \
@@ -661,6 +671,8 @@ set manifests(sqlite-netFx40-static-binary-bundle-Win32-2010-.zip) \
 set manifests(sqlite-netFx40-static-binary-bundle-x64-2010-.zip) \
     [list sds core linq extra]
 
+###############################################################################
+################### Visual Studio 2012 / .NET Framework 4.5 ###################
 ###############################################################################
 
 set manifests(sqlite-netFx45-binary-Win32-2012-.zip) \
