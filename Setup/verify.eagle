@@ -34,6 +34,16 @@ if {$argc == 1} then {
     set path [file dirname $script]
     set rootName [file rootname [file tail $script]]
 
+    if {![info exists innounp]} then {
+      if {[info exists env(InnoUnpackTool)]} then {
+        set innounp $env(InnoUnpackTool)
+      }
+
+      if {![info exists innounp] || ![file exists $innounp]} then {
+        set innounp [file join $path innounp.exe]
+      }
+    }
+
     if {![info exists rar]} then {
       if {[info exists env(UnRARTool)]} then {
         set rar $env(UnRARTool)
@@ -69,14 +79,6 @@ if {$argc == 1} then {
 
     foreach archiveFileName $archiveFileNames {
       set manifest [file tail $archiveFileName]
-
-      #
-      # HACK: Skip all the Inno Setup files because we cannot
-      #       easily validate them from this tool.
-      #
-      if {[string match -nocase *Setup*.exe $manifest]} then {
-        continue
-      }
 
       #
       # NOTE: Attempt to extract the version and/or date/time
@@ -133,6 +135,13 @@ if {$argc == 1} then {
         }
 
         lappend listCommand $zip -Z -1 $archiveFileName
+      } elseif {[file extension $archiveFileName] eq ".exe" && \
+          [string match -nocase *Setup*.exe $manifest]} then {
+        #
+        # HACK: Assume this is an Inno Setup package and process
+        #       it using the necessary external tool.
+        #
+        lappend listCommand $innounp -v $archiveFileName
       } else {
         if {![file exists $rar]} then {
           usage [appendArgs "tool \"" $rar "\" is missing"]
@@ -142,8 +151,26 @@ if {$argc == 1} then {
       }
 
       if {[catch {eval $listCommand} result] == 0} then {
-        set containedFileNames [split [string map [list \\ /] \
-            [string trim $result]] \n]
+        #
+        # HACK: The Inno Setup unpacking tool requires some extra
+        #       parsing logic to handle the output.
+        #
+        if {[string first [file tail $innounp] $listCommand] != -1} then {
+          set containedFileNames [list]
+
+          foreach {dummy matchFileName} [regexp -line -all -inline -- \
+              {^[ 0-9]{10}  \d{4}\.\d{2}\.\d{2} \d{2}:\d{2}  (.*)$} $result] {
+            #
+            # NOTE: Add the file name extracted from the output
+            #       line to the list of file names contained in
+            #       this archive.
+            #
+            lappend containedFileNames $matchFileName
+          }
+        } else {
+          set containedFileNames [split [string map [list \\ /] \
+              [string trim $result]] \n]
+        }
 
         foreach manifestFileName $manifestFileNames {
           #

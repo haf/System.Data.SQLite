@@ -446,10 +446,10 @@ set sds_manifests(source) {
 
 ###############################################################################
 #
-# NOTE: This is the list of core files that should be present in all standard
-#       binary archives supporting the desktop versions of the .NET Framework.
+# NOTE: This is the list of core files that should be present in all binary
+#       archives that support the desktop versions of the .NET Framework.
 #
-set sds_manifests(core) {
+set sds_manifests(binaryCore) {
   System.Data.SQLite.dll
   System.Data.SQLite.pdb
   System.Data.SQLite.xml
@@ -457,11 +457,11 @@ set sds_manifests(core) {
 
 ###############################################################################
 #
-# NOTE: This is the list of extra files that should be present in the standard
-#       binary archives supporting LINQ (i.e. available with the .NET Framework
-#       3.5 and later).
+# NOTE: This is the list of extra files that should be present in all binary
+#       archives that support LINQ (i.e. available with the desktop .NET
+#       Framework 3.5 and later).
 #
-set sds_manifests(linq) {
+set sds_manifests(binaryLinq) {
   System.Data.SQLite.Linq.dll
   System.Data.SQLite.Linq.pdb
   System.Data.SQLite.Linq.xml
@@ -473,10 +473,10 @@ set sds_manifests(linq) {
 
 ###############################################################################
 #
-# NOTE: This is the list of extra files that should be present in the standard
-#       binary archives supporting the desktop versions of the .NET Framework.
+# NOTE: This is the list of extra files that should be present in all binary
+#       archives that support the desktop versions of the .NET Framework.
 #
-set sds_manifests(extra) {
+set sds_manifests(binaryExtra) {
   Installer.exe
   Installer.pdb
   SQLite.Designer.dll
@@ -489,25 +489,176 @@ set sds_manifests(extra) {
 
 ###############################################################################
 #
-# NOTE: This is the list of extra files that should be present in the standard
-#       binary archives (i.e. those not containing the mixed-mode assembly).
+# NOTE: This is the list of core interop files that should be present in the
+#       standard binary archives (i.e. those not containing the mixed-mode
+#       assembly).
 #
-set sds_manifests(interop) {
+set sds_manifests(binaryInterop) {
   SQLite.Interop.dll
   SQLite.Interop.pdb
 }
 
 ###############################################################################
 #
-# NOTE: This is the list of extra files that should be present in the standard
-#       "PocketPC" binary archives (i.e. for the .NET Compact Framework).
+# NOTE: This is the list of interop and other files that should be present in
+#       the standard "PocketPC" binary archives (i.e. for the .NET Compact
+#       Framework).
 #
-set sds_manifests(compact) {
+set sds_manifests(binaryCompact) {
   "SQLite.Interop.[format %03d $build].dll"
   "SQLite.Interop.[format %03d $build].pdb"
   test.cfg
   testce.exe
   testce.pdb
+}
+
+###############################################################################
+#
+# NOTE: This is the list of core files that should be present in all setup
+#       archives supporting the desktop versions of the .NET Framework.
+#
+set sds_manifests(setupCore) {
+  {{app}\readme.htm}
+  {{app}\bin\System.Data.SQLite.pdb}
+  {{app}\doc\SQLite.NET.chm}
+  {{app}\bin\SQLite.Designer.dll}
+  {{app}\bin\SQLite.Designer.pdb}
+  {{app}\bin\Installer.exe}
+  {{app}\bin\Installer.pdb}
+  {{app}\bin\test.exe}
+  {{app}\bin\test.pdb}
+  {{app}\bin\test.exe.config}
+  install_script.iss
+}
+
+###############################################################################
+#
+# NOTE: This is the list of core files that should be present in all setup
+#       archives that support LINQ (i.e. available with the desktop .NET
+#       Framework 3.5 and later).
+#
+set sds_manifests(setupLinqCore) {
+  {{app}\bin\System.Data.SQLite.Linq.pdb}
+  {{app}\bin\testlinq.exe}
+  {{app}\bin\testlinq.pdb}
+  {{app}\bin\testlinq.exe.config}
+  {{app}\bin\northwindEF.db}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of core interop files that should be present in the
+#       standard setup archives (i.e. those not containing the mixed-mode
+#       assembly) that support the desktop versions of the .NET Framework.
+#
+set sds_manifests(setupInterop) {
+  {{app}\bin\System.Data.SQLite.dll}
+  {{app}\bin\SQLite.Interop.dll}
+  {{app}\bin\SQLite.Interop.pdb}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of core files that should be present in the bundled
+#       setup archives (i.e. those containing the mixed-mode assembly) that
+#       support the desktop versions of the .NET Framework.
+#
+set sds_manifests(setupBundle) {
+  {{app}\GAC\System.Data.SQLite.dll}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of core interop files that should be present in the
+#       standard setup archives (i.e. those not containing the mixed-mode
+#       assembly) that support LINQ (i.e. available with the desktop .NET
+#       Framework 3.5 and later).
+#
+set sds_manifests(setupLinqInterop) {
+  {{app}\bin\System.Data.SQLite.Linq.dll}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of core files that should be present in the bundled
+#       setup archives (i.e. those containing the mixed-mode assembly) that
+#       support LINQ (i.e. available with the desktop .NET Framework 3.5 and
+#       later).
+#
+set sds_manifests(setupLinqBundle) {
+  {{app}\GAC\System.Data.SQLite.Linq.dll}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 2.0 for x86.
+#
+set sds_manifests(setupX86Vs2005) {
+  {{tmp}\vcredist_x86_2005_SP1.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 2.0 for x64.
+#
+set sds_manifests(setupX64Vs2005) {
+  {{tmp}\vcredist_x64_2005_SP1.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 3.5 for x86.
+#
+set sds_manifests(setupX86Vs2008) {
+  {{tmp}\vcredist_x86_2008_SP1.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 3.5 for x64.
+#
+set sds_manifests(setupX64Vs2008) {
+  {{tmp}\vcredist_x64_2008_SP1.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 4.0 for x86.
+#
+set sds_manifests(setupX86Vs2010) {
+  {{tmp}\vcredist_x86_2010_SP1.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 4.0 for x64.
+#
+set sds_manifests(setupX64Vs2010) {
+  {{tmp}\vcredist_x64_2010_SP1.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 4.5 for x86.
+#
+set sds_manifests(setupX86Vs2012) {
+  {{tmp}\vcredist_x86_2012_RTM.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 4.5 for x64.
+#
+set sds_manifests(setupX64Vs2012) {
+  {{tmp}\vcredist_x64_2012_RTM.exe}
 }
 
 ###############################################################################
@@ -538,180 +689,265 @@ set sds_manifests(compact) {
 ################################# Source Code #################################
 ###############################################################################
 
-set manifests(sqlite-netFx-source-.zip) [list sds source]
+set manifests(sqlite-netFx-source-.zip) [list sds \
+    source]
 
 ###############################################################################
 ################### Visual Studio 2005 / .NET Framework 2.0 ###################
 ###############################################################################
 
-set manifests(sqlite-netFx20-binary-Win32-2005-.zip) \
-    [list sds core extra interop]
+set manifests(sqlite-netFx20-binary-Win32-2005-.zip) [list sds \
+    binaryCore binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx20-binary-x64-2005-.zip) [list sds core extra interop]
+set manifests(sqlite-netFx20-binary-x64-2005-.zip) [list sds \
+    binaryCore binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx20-binary-bundle-Win32-2005-.zip) \
-    [list sds core extra]
+set manifests(sqlite-netFx20-binary-bundle-Win32-2005-.zip) [list sds \
+    binaryCore binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx20-binary-bundle-x64-2005-.zip) [list sds core extra]
+set manifests(sqlite-netFx20-binary-bundle-x64-2005-.zip) [list sds \
+    binaryCore binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx20-static-binary-Win32-2005-.zip) \
-    [list sds core extra interop]
+set manifests(sqlite-netFx20-static-binary-Win32-2005-.zip) [list sds \
+    binaryCore binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx20-static-binary-x64-2005-.zip) \
-    [list sds core extra interop]
+set manifests(sqlite-netFx20-static-binary-x64-2005-.zip) [list sds \
+    binaryCore binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx20-static-binary-bundle-Win32-2005-.zip) \
-    [list sds core extra]
+set manifests(sqlite-netFx20-static-binary-bundle-Win32-2005-.zip) [list sds \
+    binaryCore binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx20-static-binary-bundle-x64-2005-.zip) \
-    [list sds core extra]
+set manifests(sqlite-netFx20-static-binary-bundle-x64-2005-.zip) [list sds \
+    binaryCore binaryExtra]
+
+###############################################################################
+
+set manifests(sqlite-netFx20-setup-x86-2005-.exe) [list sds \
+    setupCore setupInterop setupX86Vs2005]
+
+###############################################################################
+
+set manifests(sqlite-netFx20-setup-x64-2005-.exe) [list sds \
+    setupCore setupInterop setupX64Vs2005]
+
+###############################################################################
+
+set manifests(sqlite-netFx20-setup-bundle-x86-2005-.exe) [list sds \
+    setupCore setupBundle setupX86Vs2005]
+
+###############################################################################
+
+set manifests(sqlite-netFx20-setup-bundle-x64-2005-.exe) [list sds \
+    setupCore setupBundle setupX64Vs2005]
 
 ###############################################################################
 ################### Visual Studio 2008 / .NET Framework 3.5 ###################
 ###############################################################################
 
-set manifests(sqlite-netFx35-binary-Win32-2008-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx35-binary-Win32-2008-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx35-binary-x64-2008-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx35-binary-x64-2008-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx35-binary-bundle-Win32-2008-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx35-binary-bundle-Win32-2008-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx35-binary-bundle-x64-2008-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx35-binary-bundle-x64-2008-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx35-static-binary-Win32-2008-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx35-static-binary-Win32-2008-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx35-static-binary-x64-2008-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx35-static-binary-x64-2008-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx35-static-binary-bundle-Win32-2008-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx35-static-binary-bundle-Win32-2008-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx35-static-binary-bundle-x64-2008-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx35-static-binary-bundle-x64-2008-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
+
+###############################################################################
+
+set manifests(sqlite-netFx35-setup-x86-2008-.exe) [list sds \
+    setupCore setupLinqCore setupInterop setupLinqInterop setupX86Vs2008]
+
+###############################################################################
+
+set manifests(sqlite-netFx35-setup-x64-2008-.exe) [list sds \
+    setupCore setupLinqCore setupInterop setupLinqInterop setupX64Vs2008]
+
+###############################################################################
+
+set manifests(sqlite-netFx35-setup-bundle-x86-2008-.exe) [list sds \
+    setupCore setupLinqCore setupBundle setupLinqBundle setupX86Vs2008]
+
+###############################################################################
+
+set manifests(sqlite-netFx35-setup-bundle-x64-2008-.exe) [list sds \
+    setupCore setupLinqCore setupBundle setupLinqBundle setupX64Vs2008]
 
 ###############################################################################
 ################# Visual Studio 2008 / .NET Compact Framework #################
 ###############################################################################
 
-set manifests(sqlite-netFx35-binary-PocketPC-2008-.zip) [list sds core compact]
+set manifests(sqlite-netFx35-binary-PocketPC-2008-.zip) [list sds \
+    binaryCore binaryCompact]
+
 set manifests(sqlite-netFx35-binary-PocketPC-2008-.zip,subst) ""; # dynamic
 
 ###############################################################################
 ################### Visual Studio 2010 / .NET Framework 4.0 ###################
 ###############################################################################
 
-set manifests(sqlite-netFx40-binary-Win32-2010-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx40-binary-Win32-2010-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx40-binary-x64-2010-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx40-binary-x64-2010-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx40-binary-bundle-Win32-2010-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx40-binary-bundle-Win32-2010-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx40-binary-bundle-x64-2010-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx40-binary-bundle-x64-2010-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx40-static-binary-Win32-2010-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx40-static-binary-Win32-2010-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx40-static-binary-x64-2010-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx40-static-binary-x64-2010-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx40-static-binary-bundle-Win32-2010-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx40-static-binary-bundle-Win32-2010-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx40-static-binary-bundle-x64-2010-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx40-static-binary-bundle-x64-2010-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
+
+###############################################################################
+
+set manifests(sqlite-netFx40-setup-x86-2010-.exe) [list sds \
+    setupCore setupInterop setupLinqCore setupLinqInterop setupX86Vs2010]
+
+###############################################################################
+
+set manifests(sqlite-netFx40-setup-x64-2010-.exe) [list sds \
+    setupCore setupInterop setupLinqCore setupLinqInterop setupX64Vs2010]
+
+###############################################################################
+
+set manifests(sqlite-netFx40-setup-bundle-x86-2010-.exe) [list sds \
+    setupCore setupBundle setupLinqCore setupLinqBundle setupX86Vs2010]
+
+###############################################################################
+
+set manifests(sqlite-netFx40-setup-bundle-x64-2010-.exe) [list sds \
+    setupCore setupBundle setupLinqCore setupLinqBundle setupX64Vs2010]
 
 ###############################################################################
 ################### Visual Studio 2012 / .NET Framework 4.5 ###################
 ###############################################################################
 
-set manifests(sqlite-netFx45-binary-Win32-2012-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx45-binary-Win32-2012-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx45-binary-x64-2012-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx45-binary-x64-2012-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx45-binary-bundle-Win32-2012-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx45-binary-bundle-Win32-2012-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx45-binary-bundle-x64-2012-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx45-binary-bundle-x64-2012-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx45-static-binary-Win32-2012-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx45-static-binary-Win32-2012-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx45-static-binary-x64-2012-.zip) \
-    [list sds core linq extra interop]
+set manifests(sqlite-netFx45-static-binary-x64-2012-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
 
 ###############################################################################
 
-set manifests(sqlite-netFx45-static-binary-bundle-Win32-2012-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx45-static-binary-bundle-Win32-2012-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
 
-set manifests(sqlite-netFx45-static-binary-bundle-x64-2012-.zip) \
-    [list sds core linq extra]
+set manifests(sqlite-netFx45-static-binary-bundle-x64-2012-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
+
+###############################################################################
+
+set manifests(sqlite-netFx45-setup-x86-2012-.exe) [list sds \
+    setupCore setupInterop setupLinqCore setupLinqInterop setupX86Vs2012]
+
+###############################################################################
+
+set manifests(sqlite-netFx45-setup-x64-2012-.exe) [list sds \
+    setupCore setupInterop setupLinqCore setupLinqInterop setupX64Vs2012]
+
+###############################################################################
+
+set manifests(sqlite-netFx45-setup-bundle-x86-2012-.exe) [list sds \
+    setupCore setupBundle setupLinqCore setupLinqBundle setupX86Vs2012]
+
+###############################################################################
+
+set manifests(sqlite-netFx45-setup-bundle-x64-2012-.exe) [list sds \
+    setupCore setupBundle setupLinqCore setupLinqBundle setupX64Vs2012]
 
 ###############################################################################
 # end of file
