@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: set_netFx20.bat --
+:: set_netFx35.bat --
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!
@@ -12,7 +12,7 @@ IF NOT DEFINED ISNETFX2 (
 )
 
 IF NOT DEFINED VCRUNTIME (
-  SET VCRUNTIME=2005_SP1
+  SET VCRUNTIME=2008_SP1
 )
 
 IF NOT DEFINED CONFIGURATION (
@@ -28,11 +28,11 @@ IF NOT DEFINED PROCESSOR (
 )
 
 IF NOT DEFINED YEAR (
-  SET YEAR=2005
+  SET YEAR=2008
 )
 
 IF NOT DEFINED FRAMEWORK (
-  SET FRAMEWORK=netFx20
+  SET FRAMEWORK=netFx35
 )
 
 :end_of_file

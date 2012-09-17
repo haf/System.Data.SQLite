@@ -918,7 +918,7 @@
 
   <p>
     The <b>framework</b> in templates (3), (4), (5), (6), (7), and (8) will be
-    one of netFx35, netFx40, netFx45.
+    one of netFx20, netFx35, netFx40, netFx45.
   </p>
 
   <p>

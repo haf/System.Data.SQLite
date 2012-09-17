@@ -93,6 +93,7 @@ set sds_manifests(source) {
   Setup/set_2012.bat
   Setup/set_common.bat
   Setup/set_netFx20.bat
+  Setup/set_netFx35.bat
   Setup/set_netFx40.bat
   Setup/set_netFx45.bat
   Setup/set_Release.bat
