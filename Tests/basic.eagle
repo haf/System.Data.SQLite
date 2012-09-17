@@ -1865,6 +1865,36 @@ not a database.*?\} 0 1$}}
 
 ###############################################################################
 
+runTest {test data-1.37 {rollback to nested savepoint} -setup {
+  setupDb [set fileName data-1.37.db]
+} -body {
+  sql execute $db "BEGIN IMMEDIATE TRANSACTION;"
+  sql execute $db "SAVEPOINT one;"
+
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "SAVEPOINT two;"
+
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+  lappend result [sql execute -execute scalar $db "SELECT COUNT(*) FROM t1;"]
+  sql execute $db "SAVEPOINT three;"
+
+  sql execute $db "INSERT INTO t1 (x) VALUES(2);"
+  lappend result [sql execute -execute scalar $db "SELECT COUNT(*) FROM t1;"]
+
+  sql execute $db "ROLLBACK TRANSACTION TO SAVEPOINT three;"
+  lappend result [sql execute -execute scalar $db "SELECT COUNT(*) FROM t1;"]
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{1 2 1}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
