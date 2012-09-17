@@ -1,3 +1,10 @@
+/********************************************************
+ * ADO.NET 2.0 Data Provider for SQLite Version 3.X
+ * Written by Robert Simpson (robert@blackcastlesoft.com)
+ * 
+ * Released to the public domain, use at your own risk!
+ ********************************************************/
+
 #ifndef SQLITE_OMIT_DISKIO
 #ifdef SQLITE_HAS_CODEC
 

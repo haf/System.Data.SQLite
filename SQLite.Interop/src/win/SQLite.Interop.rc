@@ -1,6 +1,9 @@
-//
-// Microsoft Visual C++ generated resource script.
-//
+/*
+ * SQLite.Interop.rc -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ */
 
 #if !defined(_WIN32_WCE)
 #include "winresrc.h"

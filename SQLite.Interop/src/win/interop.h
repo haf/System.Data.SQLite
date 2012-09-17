@@ -1,10 +1,8 @@
 /*
- *
  * interop.h -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
- *
  */
 
 #ifndef INTEROP_VERSION

@@ -1,3 +1,10 @@
+/*
+ * AssemblyInfo.cpp -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ */
+
 using namespace System::Reflection;
 using namespace System::Resources;
 using namespace System::Runtime::InteropServices;
