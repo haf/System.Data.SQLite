@@ -20,6 +20,22 @@
         contained files are the same.
       </td>
     </tr>
+    <tr>
+      <td colspan="3" class="importantNotes">
+        There are several other projects, with widely varying levels of support
+        and compatibility, known to use the similar names.  At least one of
+        those projects is an unofficial fork of the legacy 1.0.66.0 release,
+        modified (by a third-party) to work with Visual Studio 2010.  Only the
+        software contained on this page is directly
+        <a href="support.wiki">supported</a> by the maintainers of this project
+        (i.e. the <a href="http://www.sqlite.org">SQLite Development Team</a>)
+        as we do not necessarily have any knowledge of the other projects that
+        use the same (or a similar) name.  That being said, if a particular
+        question is related to the core SQLite native library itself, one of the
+        <a href="http://www.sqlite.org/support.html">SQLite support options</a>
+        is probably the best way to get an answer.
+      </td>
+    </tr>
 
     <tr>
       <td colspan="3">
