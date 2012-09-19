@@ -24,14 +24,13 @@
         </p>
         <p>
           There is no forum on this web site; however, the
-          <a href="/index.html/support.wiki">support page</a> has an updated
-          list of support options.
+          <a href="support.wiki">support page</a> has an updated list of support
+          options.
         </p>
         <p>
           Please refer to the
-          <a href="/index.html/downloads.wiki">download page</a>
-          for a complete list of downloadable packages and information on their
-          use.
+          <a href="downloads.wiki">download page</a> for a complete list of
+          downloadable packages and information on their use.
         </p>
       </td>
       <td width="30%">
@@ -39,16 +38,16 @@
           <tr>
             <td>
               <ul>
-                <li><a href="/index.html/features.wiki">Features</a></li>
-                <li><a href="/index.html/faq.wiki">Frequently Asked Questions</a></li>
-                <li><a href="/index.html/news.wiki">News</a></li>
-                <li><a href="/index.html/support.wiki">Support</a></li>
-                <li><a href="/index.html/downloads.wiki">Downloads</a></li>
-                <li><a href="/index.html/contribute.wiki">Contributing</a></li>
-                <li><a href="/index.html/source.wiki">Source Code</a></li>
-                <li><a href="/index.html/build.wiki">Build Procedures</a></li>
-                <li><a href="/index.html/test.wiki">Test Procedures</a></li>
-                <li><a href="/index.html/release.wiki">Release Procedures</a></li>
+                <li><a href="features.wiki">Features</a></li>
+                <li><a href="faq.wiki">Frequently Asked Questions</a></li>
+                <li><a href="news.wiki">News</a></li>
+                <li><a href="support.wiki">Support</a></li>
+                <li><a href="downloads.wiki">Downloads</a></li>
+                <li><a href="contribute.wiki">Contributing</a></li>
+                <li><a href="source.wiki">Source Code</a></li>
+                <li><a href="build.wiki">Build Procedures</a></li>
+                <li><a href="test.wiki">Test Procedures</a></li>
+                <li><a href="release.wiki">Release Procedures</a></li>
               </ul>
             </td>
           </tr>
