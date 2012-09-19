@@ -8,13 +8,14 @@
       </td>
       <td>
         <p>
-          This is a fork of the popular ADO.NET adapter for
-          <a href="http://www.sqlite.org/">SQLite</a>
-          known as System.Data.SQLite.  The originator of System.Data.SQLite,
-          Robert Simpson, is aware of this fork, has expressed his approval, and
-          has commit privileges on this Fossil repository.  The SQLite
-          Development Team intends to maintain the System.Data.SQLite project
-          moving forward.
+          System.Data.SQLite is an ADO.NET adapter for
+          <a href="http://www.sqlite.org/">SQLite</a>.
+        </p>
+        <p>System.Data.SQLite was started by Robert Simpson.  Robert still
+          has commit privileges on this repository but is no longer an
+          active contributor.  Development and maintenance work is now
+          mostly performed by the SQLite Development Team.  The SQLite team
+          is committed to supporting System.Data.SQLite long-term.
         </p>
         <p>
           Historical versions, as well as the original support forums, may still
@@ -33,7 +34,7 @@
           downloadable packages and information on their use.
         </p>
       </td>
-      <td width="30%">
+      <td width="30%" valign="top">
         <table align="right" border="1" cellpadding="10" hspace="10" cellspacing="0">
           <tr>
             <td>
