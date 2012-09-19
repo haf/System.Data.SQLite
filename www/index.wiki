@@ -11,11 +11,12 @@
           System.Data.SQLite is an ADO.NET adapter for
           <a href="http://www.sqlite.org/">SQLite</a>.
         </p>
-        <p>System.Data.SQLite was started by Robert Simpson.  Robert still
-          has commit privileges on this repository but is no longer an
-          active contributor.  Development and maintenance work is now
-          mostly performed by the SQLite Development Team.  The SQLite team
-          is committed to supporting System.Data.SQLite long-term.
+        <p>
+          System.Data.SQLite was started by Robert Simpson.  Robert still has
+          commit privileges on this repository but is no longer an active
+          contributor.  Development and maintenance work is now mostly performed
+          by the SQLite Development Team.  The SQLite team is committed to
+          supporting System.Data.SQLite long-term.
         </p>
         <p>
           Historical versions, as well as the original support forums, may still
