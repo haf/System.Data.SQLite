@@ -10,7 +10,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Collections;
 
-#if !NET_20
+#if NET_40
 using System.Runtime;
 #endif
 
@@ -119,7 +119,7 @@ namespace System.Data.SQLite
 
 		internal IEnumerable<KeyValuePair<TKey, List<TValue>>> KeyValuePairs
 		{
-#if !NET_20
+#if NET_40
 			[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
 #endif
 			get

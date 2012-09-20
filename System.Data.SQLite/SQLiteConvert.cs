@@ -1015,14 +1015,35 @@ namespace System.Data.SQLite
       Opened = 2,
 
       /// <summary>
+      /// The <see cref="ChangeDatabase" /> method was called on the
+      /// connection.
+      /// </summary>
+      ChangeDatabase = 3,
+
+      /// <summary>
+      /// A transaction was created using the connection.
+      /// </summary>
+      NewTransaction = 4,
+
+      /// <summary>
+      /// The connection was enlisted into a transaction.
+      /// </summary>
+      EnlistTransaction = 5,
+
+      /// <summary>
+      /// A command was created using the connection.
+      /// </summary>
+      NewCommand = 6,
+
+      /// <summary>
       /// The connection is being closed.
       /// </summary>
-      Closing = 3,
+      Closing = 7,
 
       /// <summary>
       /// The connection was closed.
       /// </summary>
-      Closed = 4
+      Closed = 8
   }
 
   /// <summary>

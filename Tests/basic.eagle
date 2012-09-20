@@ -1028,7 +1028,7 @@ Size=4096\} 0 \{1024, Max Page Count=1024\} 0 \{8192, Cache Size=8192\} 0\
 \{UnixEpoch, DateTimeFormat=UnixEpoch\} 0 \{Utc, DateTimeKind=Utc\} 0\
 \{sqlite_schema, BaseSchemaName=sqlite_schema\} 0 \{Memory, Journal\
 Mode=Memory\} 0 \{Serializable, Default IsolationLevel=Serializable\} 0\
-\{False, Foreign Keys=False\} 0 \{LogCallbackException,\
+\{False, Foreign Keys=False\} 0 \{(?:Default|LogCallbackException),\
 Flags=(?:Default|LogCallbackException)\} 0 \{False, SetDefaults=False\} 0\
 \{False, ToFullPath=False\}$}}
 
@@ -1892,6 +1892,38 @@ runTest {test data-1.37 {rollback to nested savepoint} -setup {
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
 {1 2 1}}
+
+###############################################################################
+
+runTest {test data-1.38 {NoExtensionFunctions connection flag} -setup {
+  setupDb [set fileName data-1.38.db]
+} -body {
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT replicate('1234', 2);"} output] $output
+
+  cleanupDb $fileName
+  setupDb $fileName "" "" "" NoExtensionFunctions
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT replicate('1234', 3);"} output] $output
+
+  cleanupDb $fileName
+  setupDb $fileName
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT replicate('1234', 4);"} output] $output
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^0 12341234 1 \{System\.Data\.SQLite\.SQLiteException\
+\(0x80004005\): SQL logic error or missing database.*?\} 0 1234123412341234$}}
 
 ###############################################################################
 

@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 
 using System.Security;
 
-#if NET_20
+#if NET_20 || NET_35
 using System.Security.Permissions;
 #endif
 
@@ -150,7 +150,7 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region Installer Class
-#if !NET_20
+#if NET_40
     [SecurityCritical()]
 #else
     [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]

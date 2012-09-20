@@ -12,7 +12,7 @@ namespace System.Data.SQLite
   public sealed partial class SQLiteConnection
   {
     /// <summary>
-    /// Returns a SQLiteProviderFactory object.
+    /// Returns the <see cref="SQLiteFactory" /> instance.
     /// </summary>
     protected override DbProviderFactory DbProviderFactory
     {

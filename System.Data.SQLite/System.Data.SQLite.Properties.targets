@@ -10,14 +10,34 @@
   <!--
       NOTE: Only use functionality available in the .NET Framework 2.0?  By
             default, this is disabled.  This must be enabled to successfully
-            build the project using Visual Studio 2008 and/or the .NET
+            build the project using Visual Studio 2005 and/or the .NET
             Framework 2.0 (if necessary, it will typically be enabled from
             within the project file itself).
   -->
-  <PropertyGroup Condition="'$(NetFx20)' != 'false' Or
-                            '$(TargetFrameworkVersion)' == 'v2.0' Or
-                            '$(TargetFrameworkVersion)' == 'v3.5'">
+  <PropertyGroup Condition="'$(NetFx20)' != 'false'">
     <DefineConstants>$(DefineConstants);NET_20</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+      NOTE: Only use functionality available in the .NET Framework 3.5?  By
+            default, this is disabled.  This must be enabled to successfully
+            build the project using Visual Studio 2008 and/or the .NET
+            Framework 3.5 (if necessary, it will typically be enabled from
+            within the project file itself).
+  -->
+  <PropertyGroup Condition="'$(NetFx35)' != 'false'">
+    <DefineConstants>$(DefineConstants);NET_35</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+      NOTE: Only use functionality available in the .NET Framework 4.0?  By
+            default, this is disabled.  This must be enabled to successfully
+            build the project using Visual Studio 2010 and/or the .NET
+            Framework 4.0 (if necessary, it will typically be enabled from
+            within the project file itself).
+  -->
+  <PropertyGroup Condition="'$(NetFx40)' != 'false'">
+    <DefineConstants>$(DefineConstants);NET_40</DefineConstants>
   </PropertyGroup>
 
   <!--
@@ -90,6 +110,13 @@
   -->
   <PropertyGroup Condition="'$(InteropExtensionFunctions)' != 'false'">
     <DefineConstants>$(DefineConstants);INTEROP_EXTENSION_FUNCTIONS</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+      NOTE: Enable support (in the managed assemblies) for the test extension?
+  -->
+  <PropertyGroup Condition="'$(InteropTestExtension)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_TEST_EXTENSION</DefineConstants>
   </PropertyGroup>
 
   <!--

@@ -18,6 +18,12 @@ IF NOT DEFINED _VECHO (SET _VECHO=REM)
 
 %_AECHO% Running %0 %*
 
+SET DUMMY2=%1
+
+IF DEFINED DUMMY2 (
+  GOTO usage
+)
+
 SET TOOLS=%~dp0
 SET TOOLS=%TOOLS:~0,-1%
 
@@ -69,6 +75,12 @@ GOTO no_errors
 :fn_SetErrorLevel
   VERIFY MAYBE 2> NUL
   GOTO :EOF
+
+:usage
+  ECHO.
+  ECHO Usage: %~nx0
+  ECHO.
+  GOTO errors
 
 :errors
   CALL :fn_SetErrorLevel

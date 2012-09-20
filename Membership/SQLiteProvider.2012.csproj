@@ -18,6 +18,7 @@
     <RootNamespace>SQLiteProvider</RootNamespace>
     <AssemblyName>SQLiteProvider</AssemblyName>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+    <NetFx40>true</NetFx40>
     <ConfigurationYear>2012</ConfigurationYear>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>

@@ -20,6 +20,7 @@
     <AssemblyName>SQLite.Designer</AssemblyName>
     <OldToolsVersion>3.5</OldToolsVersion>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+    <NetFx40>true</NetFx40>
     <ConfigurationYear>2010</ConfigurationYear>
   </PropertyGroup>
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />

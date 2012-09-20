@@ -1,0 +1,72 @@
+###############################################################################
+#
+# tkt-17045010df.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-17045010df-1.1 {EnableExtensions & LoadExtension} -setup {
+  setupDb [set fileName tkt-17045010df-1.1.db]
+} -body {
+  set connection [object invoke -flags +NonPublic -objectflags +NoDispose \
+      -alias Interpreter.GetActive.connections get_Item $db]
+
+  lappend result [catchAndReturn {$connection EnableExtensions false}]
+  lappend result [catchAndReturn {$connection LoadExtension [file join \
+      [getBinaryDirectory] SQLite.Interop.dll] interop_test_extension_init}]
+
+  lappend result [catchAndReturn {sql execute -execute scalar $db \
+      "SELECT interopTest('test1');"}]
+  lappend result [catchAndReturn {sql execute -execute scalar $db \
+      "SELECT interopTest('test1', '1234');"}]
+
+  lappend result [catchAndReturn {$connection EnableExtensions true}]
+  lappend result [catchAndReturn {$connection LoadExtension [file join \
+      [getBinaryDirectory] SQLite.Interop.dll] interop_test_extension_init}]
+
+  lappend result [catchAndReturn {sql execute -execute scalar $db \
+      "SELECT interopTest('test2');"}]
+  lappend result [catchAndReturn {sql execute -execute scalar $db \
+      "SELECT interopTest('test2', '5678');"}]
+
+  string map [list \r\n ", "] $result
+} -cleanup {
+  unset -nocomplain result connection
+
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 defineConstant.System.Data.SQLite.INTEROP_TEST_EXTENSION\
+command.sql compile.DATA SQLite System.Data.SQLite} -result {{0 {}} {1\
+{EXCEPTION System.Data.SQLite.SQLiteException}\
+{System.Reflection.TargetInvocationException: Exception has been thrown by the\
+target of an invocation. ---> System.Data.SQLite.SQLiteException: SQL logic\
+error or missing database, not authorized}} {1 {EXCEPTION\
+System.Data.SQLite.SQLiteException} {System.Data.SQLite.SQLiteException\
+(0x80004005): SQL logic error or missing database, no such function:\
+interopTest}} {1 {EXCEPTION System.Data.SQLite.SQLiteException}\
+{System.Data.SQLite.SQLiteException (0x80004005): SQL logic error or missing\
+database, no such function: interopTest}} {0 {}} {0 {}} {0 test2} {1 {EXCEPTION\
+System.Data.SQLite.SQLiteException} {System.Data.SQLite.SQLiteException\
+(0x80004005): SQL logic error or missing database, need exactly one argument}}}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

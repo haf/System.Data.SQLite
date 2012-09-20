@@ -14,14 +14,10 @@
 extern int RegisterExtensionFunctions(sqlite3 *db);
 #endif
 
+#ifdef SQLITE_OS_WIN
 #if defined(INTEROP_CODEC)
 #include "crypt.c"
 #endif
-
-#ifdef SQLITE_OS_WIN
-
-// Additional open flags, we use this one privately
-//#define SQLITE_OPEN_SHAREDCACHE      0x01000000
 
 typedef void (*SQLITEUSERFUNC)(sqlite3_context *, int, sqlite3_value **);
 typedef void (*SQLITEFUNCFINAL)(sqlite3_context *);
@@ -87,7 +83,7 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 
     while (db->pVdbe)
     {
-      // Make a copy of the first prepared statement
+      /* Make a copy of the first prepared statement */
       Vdbe *p = (Vdbe *)sqlite3DbMallocZero_interop(db, sizeof(Vdbe));
       Vdbe *po = db->pVdbe;
 
@@ -99,19 +95,19 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 
       CopyMemory(p, po, sizeof(Vdbe));
 
-      // Put it on the chain so we can free it
+      /* Put it on the chain so we can free it */
       db->pVdbe = p;
-      ret = sqlite3_finalize((sqlite3_stmt *)p); // This will also free the copy's memory
+      ret = sqlite3_finalize((sqlite3_stmt *)p); /* This will also free the copy's memory */
       if (ret)
       {
-        // finalize failed -- so we must put back anything we munged
+        /* finalize failed -- so we must put back anything we munged */
         CopyMemory(po, p, sizeof(Vdbe));
         db->pVdbe = po;
 
-        //
-        // NOTE: Ok, we must free this block that *we* allocated (above) since
-        //       finalize did not do so.
-        //
+        /*
+        ** NOTE: Ok, we must free this block that *we* allocated (above) since
+        **       finalize did not do so.
+        */
         sqlite3DbFree_interop(db, p);
         break;
       }
@@ -131,12 +127,8 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 SQLITE_API int WINAPI sqlite3_open_interop(const char*filename, int flags, sqlite3 **ppdb)
 {
   int ret;
-  //int sharedcache = ((flags & SQLITE_OPEN_SHAREDCACHE) != 0);
-  //flags &= ~SQLITE_OPEN_SHAREDCACHE;
 
-  //sqlite3_enable_shared_cache(sharedcache);
   ret = sqlite3_open_v2(filename, ppdb, flags, NULL);
-  //sqlite3_enable_shared_cache(0);
 
 #if defined(INTEROP_EXTENSION_FUNCTIONS)
   if (ret == 0)
@@ -550,5 +542,55 @@ SQLITE_API int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int cursor, sqli
 
   return ret;
 }
+#endif /* SQLITE_OS_WIN */
 
-#endif // SQLITE_OS_WIN
+/*****************************************************************************/
+
+/*
+** The INTEROP_TEST_EXTENSION block must be at the end of this source file
+** because it includes the "sqlite3ext.h" file, which defines the sqlite3
+** public API function names to be macros and that would cause the code
+** above this point to malfunction.
+*/
+#if defined(INTEROP_TEST_EXTENSION)
+#include "../core/sqlite3ext.h"
+SQLITE_EXTENSION_INIT1
+
+/*
+** The interopTest() SQL function returns its first argument or raises an
+** error if there are not enough arguments.
+*/
+static void interopTestFunc(
+  sqlite3_context *context,
+  int argc,
+  sqlite3_value **argv
+){
+  const unsigned char *z;
+  if( argc!=1 ){
+    sqlite3_result_error(context, "need exactly one argument", -1);
+    return;
+  }
+  z = sqlite3_value_text(argv[0]);
+  if( z ){
+    sqlite3_result_text(context, (char*)z, -1, SQLITE_STATIC);
+  }else{
+    sqlite3_result_null(context);
+  }
+}
+
+/* SQLite invokes this routine once when it loads the extension.
+** Create new functions, collating sequences, and virtual table
+** modules here.  This is usually the only exported symbol in
+** the shared library.
+*/
+SQLITE_API int interop_test_extension_init(
+  sqlite3 *db,
+  char **pzErrMsg,
+  const sqlite3_api_routines *pApi
+){
+  SQLITE_EXTENSION_INIT2(pApi)
+  sqlite3_create_function(db, "interopTest", -1, SQLITE_ANY, 0,
+      interopTestFunc, 0, 0);
+  return 0;
+}
+#endif

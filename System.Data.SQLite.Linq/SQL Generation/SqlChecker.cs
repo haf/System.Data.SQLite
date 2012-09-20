@@ -19,10 +19,10 @@ namespace System.Data.SQLite
     static SqlChecker()
     {
         string version =
-#if NET_20
-            "3.5.0.0";
-#else
+#if NET_40
             "4.0.0.0";
+#else
+            "3.5.0.0";
 #endif
 
         sql8rewriter = Type.GetType(String.Format("System.Data.SqlClient.SqlGen.Sql8ExpressionRewriter, System.Data.Entity, Version={0}, Culture=neutral, PublicKeyToken=b77a5c561934e089", version), false);

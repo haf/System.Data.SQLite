@@ -13,7 +13,7 @@ namespace System.Data.SQLite
   using System.Security.Permissions;
 
   /// <summary>
-  /// SQLite implementation of DbProviderFactory.
+  /// SQLite implementation of <see cref="IServiceProvider" />.
   /// </summary>
   public sealed partial class SQLiteFactory : IServiceProvider
   {
@@ -31,19 +31,19 @@ namespace System.Data.SQLite
 #endif
 
         string version =
-#if NET_20
-            "3.5.0.0";
-#else
+#if NET_40
             "4.0.0.0";
+#else
+            "3.5.0.0";
 #endif
 
         _dbProviderServicesType = Type.GetType(String.Format(CultureInfo.InvariantCulture, "System.Data.Common.DbProviderServices, System.Data.Entity, Version={0}, Culture=neutral, PublicKeyToken=b77a5c561934e089", version), false);
     }
 
     /// <summary>
-    /// Will provide a DbProviderServices object in .NET 3.5
+    /// Will provide a <see cref="IServiceProvider" /> object in .NET 3.5.
     /// </summary>
-    /// <param name="serviceType">The class or interface type to query for</param>
+    /// <param name="serviceType">The class or interface type to query for.</param>
     /// <returns></returns>
     object IServiceProvider.GetService(Type serviceType)
     {

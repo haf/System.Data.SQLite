@@ -581,10 +581,10 @@ namespace System.Data.SQLite
     internal static extern SQLiteErrorCode sqlite3_finalize_interop(IntPtr stmt);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern SQLiteErrorCode sqlite3_open_interop(byte[] utf8Filename, int flags, out IntPtr db);
+    internal static extern SQLiteErrorCode sqlite3_open_interop(byte[] utf8Filename, SQLiteOpenFlagsEnum flags, out IntPtr db);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern SQLiteErrorCode sqlite3_open16_interop(byte[] utf8Filename, int flags, out IntPtr db);
+    internal static extern SQLiteErrorCode sqlite3_open16_interop(byte[] utf8Filename, SQLiteOpenFlagsEnum flags, out IntPtr db);
 
     [DllImport(SQLITE_DLL)]
     internal static extern SQLiteErrorCode sqlite3_reset_interop(IntPtr stmt);
@@ -626,20 +626,6 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern SQLiteErrorCode sqlite3_finalize(IntPtr stmt);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
-    internal static extern SQLiteErrorCode sqlite3_open_v2(byte[] utf8Filename, out IntPtr db, int flags, IntPtr vfs);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-#else
-    [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
-#endif
-    internal static extern SQLiteErrorCode sqlite3_open16(string fileName, out IntPtr db);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -812,6 +798,22 @@ namespace System.Data.SQLite
     // scattered in here, but they are only active when PLATFORM_COMPACTFRAMEWORK is declared.
     #region standard sqlite api calls
 #if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_enable_load_extension(
+        IntPtr db, int enable);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_load_extension(
+        IntPtr db, byte[] fileName, byte[] procName, ref IntPtr pError);
+
+#if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
 #else
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
@@ -852,6 +854,20 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern void sqlite3_free(IntPtr p);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_open_v2(byte[] utf8Filename, out IntPtr db, SQLiteOpenFlagsEnum flags, IntPtr vfs);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+#else
+    [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_open16(string fileName, out IntPtr db);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

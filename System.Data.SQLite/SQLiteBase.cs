@@ -191,6 +191,24 @@ namespace System.Data.SQLite
     internal abstract void ReturnText(IntPtr context, string value);
 
     /// <summary>
+    /// Enables or disabled extension loading by SQLite.
+    /// </summary>
+    /// <param name="bOnOff">
+    /// True to enable loading of extensions, false to disable.
+    /// </param>
+    internal abstract void SetLoadExtension(bool bOnOff);
+    /// <summary>
+    /// Loads a SQLite extension library from the named file.
+    /// </summary>
+    /// <param name="fileName">
+    /// The name of the dynamic link library file containing the extension.
+    /// </param>
+    /// <param name="procName">
+    /// The name of the exported function used to initialize the extension.
+    /// If null, the default "sqlite3_extension_init" will be used.
+    /// </param>
+    internal abstract void LoadExtension(string fileName, string procName);
+    /// <summary>
     /// Enables or disabled extened result codes returned by SQLite
     /// </summary>
     /// <param name="bOnOff">true to enable extended result codes, false to disable.</param>
@@ -618,6 +636,12 @@ namespace System.Data.SQLite
       /// Enable logging of backup API errors.
       /// </summary>
       LogBackup = 0x10,
+
+      /// <summary>
+      /// Skip adding the extension functions provided by the native
+      /// interop assembly.
+      /// </summary>
+      NoExtensionFunctions = 0x20,
 
       /// <summary>
       /// Enable all logging.

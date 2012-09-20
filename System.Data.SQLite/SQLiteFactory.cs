@@ -12,15 +12,12 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
   /// <summary>
-  /// SQLite implementation of DbProviderFactory.
+  /// SQLite implementation of <see cref="DbProviderFactory" />.
   /// </summary>
   public sealed partial class SQLiteFactory : DbProviderFactory, IDisposable
   {
-    /// <overloads>
-    /// Constructs a new SQLiteFactory object
-    /// </overloads>
     /// <summary>
-    /// Default constructor
+    /// Constructs a new instance.
     /// </summary>
     public SQLiteFactory()
     {
@@ -89,7 +86,7 @@ namespace System.Data.SQLite
     /// This event is raised whenever SQLite raises a logging event.
     /// Note that this should be set as one of the first things in the
     /// application.  This event is provided for backward compatibility only.
-    /// New code should use the SQLiteLog class instead.
+    /// New code should use the <see cref="SQLiteLog" /> class instead.
     /// </summary>
     public event SQLiteLogEventHandler Log
     {
@@ -98,14 +95,14 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Static instance member which returns an instanced SQLiteFactory class.
+    /// Static instance member which returns an instanced <see cref="SQLiteFactory" /> class.
     /// </summary>
     public static readonly SQLiteFactory Instance = new SQLiteFactory();
 
     /// <summary>
-    /// Returns a new SQLiteCommand object.
+    /// Creates and returns a new <see cref="SQLiteCommand" /> object.
     /// </summary>
-    /// <returns>A SQLiteCommand object.</returns>
+    /// <returns>The new object.</returns>
     public override DbCommand CreateCommand()
     {
       CheckDisposed();
@@ -113,9 +110,9 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns a new SQLiteCommandBuilder object.
+    /// Creates and returns a new <see cref="SQLiteCommandBuilder" /> object.
     /// </summary>
-    /// <returns>A SQLiteCommandBuilder object.</returns>
+    /// <returns>The new object.</returns>
     public override DbCommandBuilder CreateCommandBuilder()
     {
       CheckDisposed();
@@ -123,9 +120,9 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Creates a new SQLiteConnection.
+    /// Creates and returns a new <see cref="SQLiteConnection" /> object.
     /// </summary>
-    /// <returns>A SQLiteConnection object.</returns>
+    /// <returns>The new object.</returns>
     public override DbConnection CreateConnection()
     {
       CheckDisposed();
@@ -133,9 +130,9 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Creates a new SQLiteConnectionStringBuilder.
+    /// Creates and returns a new <see cref="SQLiteConnectionStringBuilder" /> object.
     /// </summary>
-    /// <returns>A SQLiteConnectionStringBuilder object.</returns>
+    /// <returns>The new object.</returns>
     public override DbConnectionStringBuilder CreateConnectionStringBuilder()
     {
       CheckDisposed();
@@ -143,9 +140,9 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Creates a new SQLiteDataAdapter.
+    /// Creates and returns a new <see cref="SQLiteDataAdapter" /> object.
     /// </summary>
-    /// <returns>A SQLiteDataAdapter object.</returns>
+    /// <returns>The new object.</returns>
     public override DbDataAdapter CreateDataAdapter()
     {
       CheckDisposed();
@@ -153,9 +150,9 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Creates a new SQLiteParameter.
+    /// Creates and returns a new <see cref="SQLiteParameter" /> object.
     /// </summary>
-    /// <returns>A SQLiteParameter object.</returns>
+    /// <returns>The new object.</returns>
     public override DbParameter CreateParameter()
     {
       CheckDisposed();

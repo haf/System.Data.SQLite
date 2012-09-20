@@ -22,6 +22,7 @@
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <SignAssembly>false</SignAssembly>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+    <NetFx40>true</NetFx40>
     <ConfigurationYear>2010</ConfigurationYear>
     <ConfigurationSuffix>Module</ConfigurationSuffix>
     <UseInteropDll>false</UseInteropDll>

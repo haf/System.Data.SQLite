@@ -47,7 +47,7 @@ using System.Runtime.ConstrainedExecution;
 [assembly: AllowPartiallyTrustedCallers]
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 
-#if !NET_20
+#if NET_40
 //
 // NOTE: This attribute is only available in .NET Framework 4.0 or higher.
 //

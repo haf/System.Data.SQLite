@@ -35,6 +35,16 @@ namespace System.Data.SQLite
       public readonly StateChangeEventArgs EventArgs;
 
       /// <summary>
+      /// The transaction associated with this event, if any.
+      /// </summary>
+      public readonly IDbTransaction Transaction;
+
+      /// <summary>
+      /// The command associated with this event, if any.
+      /// </summary>
+      public readonly IDbCommand Command;
+
+      /// <summary>
       /// Command or message text associated with this event, if any.
       /// </summary>
       public readonly string Text;
@@ -50,17 +60,23 @@ namespace System.Data.SQLite
       /// <param name="eventType">The type of event being raised.</param>
       /// <param name="eventArgs">The base <see cref="EventArgs" /> associated
       /// with this event, if any.</param>
+      /// <param name="transaction">The transaction associated with this event, if any.</param>
+      /// <param name="command">The command associated with this event, if any.</param>
       /// <param name="text">The command or message text, if any.</param>
       /// <param name="data">The extra data, if any.</param>
       internal ConnectionEventArgs(
           SQLiteConnectionEventType eventType,
           StateChangeEventArgs eventArgs,
+          IDbTransaction transaction,
+          IDbCommand command,
           string text,
           object data
           )
       {
           EventType = eventType;
           EventArgs = eventArgs;
+          Transaction = transaction;
+          Command = command;
           Text = text;
           Data = data;
       }
@@ -485,7 +501,7 @@ namespace System.Data.SQLite
     /// <param name="e">
     /// A <see cref="ConnectionEventArgs" /> that contains the event data.
     /// </param>
-    public static void OnChanged(
+    internal static void OnChanged(
         SQLiteConnection connection,
         ConnectionEventArgs e
         )
@@ -502,7 +518,10 @@ namespace System.Data.SQLite
 
         lock (_syncRoot)
         {
-            handlers = _handlers;
+            if (_handlers != null)
+                handlers = _handlers.Clone() as SQLiteConnectionEventHandler;
+            else
+                handlers = null;
         }
 
         if (handlers != null) handlers(connection, e);
@@ -825,7 +844,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Creates a new SQLiteTransaction if one isn't already active on the connection.
+    /// Creates a new <see cref="SQLiteTransaction" /> if one isn't already active on the connection.
     /// </summary>
     /// <param name="isolationLevel">Supported isolation levels are Serializable, ReadCommitted and Unspecified.</param>
     /// <remarks>
@@ -845,9 +864,10 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Creates a new SQLiteTransaction if one isn't already active on the connection.
+    /// Creates a new <see cref="SQLiteTransaction" /> if one isn't already
+    /// active on the connection.
     /// </summary>
-    /// <returns>Returns a SQLiteTransaction object.</returns>
+    /// <returns>Returns the new transaction object.</returns>
     public new SQLiteTransaction BeginTransaction()
     {
       CheckDisposed();
@@ -855,7 +875,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Forwards to the local BeginTransaction() function
+    /// Forwards to the local <see cref="BeginTransaction(IsolationLevel)" /> function
     /// </summary>
     /// <param name="isolationLevel">Supported isolation levels are Unspecified, Serializable, and ReadCommitted</param>
     /// <returns></returns>
@@ -869,17 +889,28 @@ namespace System.Data.SQLite
       if (isolationLevel != IsolationLevel.Serializable && isolationLevel != IsolationLevel.ReadCommitted)
         throw new ArgumentException("isolationLevel");
 
-      return new SQLiteTransaction(this, isolationLevel != IsolationLevel.Serializable);
+      SQLiteTransaction transaction =
+          new SQLiteTransaction(this, isolationLevel != IsolationLevel.Serializable);
+
+      OnChanged(this, new ConnectionEventArgs(
+          SQLiteConnectionEventType.NewTransaction, null, transaction, null, null, null));
+
+      return transaction;
     }
 
     /// <summary>
-    /// Not implemented
+    /// This method is not implemented; however, the <see cref="Changed" />
+    /// event will still be raised.
     /// </summary>
     /// <param name="databaseName"></param>
     public override void ChangeDatabase(string databaseName)
     {
       CheckDisposed();
-      throw new NotImplementedException();
+
+      OnChanged(this, new ConnectionEventArgs(
+          SQLiteConnectionEventType.ChangeDatabase, null, null, null, databaseName, null));
+
+      throw new NotImplementedException(); // NOTE: For legacy compatibility.
     }
 
     /// <summary>
@@ -890,7 +921,7 @@ namespace System.Data.SQLite
       CheckDisposed();
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.Closing, null, null, null));
+          SQLiteConnectionEventType.Closing, null, null, null, null, null));
 
       if (_sql != null)
       {
@@ -926,7 +957,7 @@ namespace System.Data.SQLite
       OnStateChange(ConnectionState.Closed, ref eventArgs);
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.Closed, eventArgs, null, null));
+          SQLiteConnectionEventType.Closed, eventArgs, null, null, null, null));
     }
 
     /// <summary>
@@ -1165,9 +1196,9 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Create a new SQLiteCommand and associate it with this connection.
+    /// Create a new <see cref="SQLiteCommand" /> and associate it with this connection.
     /// </summary>
-    /// <returns>Returns an instantiated SQLiteCommand object already assigned to this connection.</returns>
+    /// <returns>Returns a new command object already assigned to this connection.</returns>
     public new SQLiteCommand CreateCommand()
     {
       CheckDisposed();
@@ -1175,7 +1206,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Forwards to the local CreateCommand() function
+    /// Forwards to the local <see cref="CreateCommand" /> function.
     /// </summary>
     /// <returns></returns>
     protected override DbCommand CreateDbCommand()
@@ -1184,7 +1215,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns the filename without extension or path
+    /// Returns the data source file name without extension or path.
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -1274,6 +1305,9 @@ namespace System.Data.SQLite
         throw new ArgumentNullException("Unable to enlist in transaction, it is null");
 
       _enlistment = new SQLiteEnlistment(this, transaction);
+
+      OnChanged(this, new ConnectionEventArgs(
+          SQLiteConnectionEventType.EnlistTransaction, null, null, null, null, _enlistment));
     }
 #endif
 
@@ -1319,6 +1353,65 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Enables or disabled extension loading.
+    /// </summary>
+    /// <param name="enable">
+    /// True to enable loading of extensions, false to disable.
+    /// </param>
+    public void EnableExtensions(
+        bool enable
+        )
+    {
+        CheckDisposed();
+
+        if (_sql == null)
+            throw new InvalidOperationException(String.Format(
+                "Database connection not valid for {0} extensions.",
+                enable ? "enabling" : "disabling"));
+
+        _sql.SetLoadExtension(enable);
+    }
+
+    /// <summary>
+    /// Loads a SQLite extension library from the named dynamic link library file.
+    /// </summary>
+    /// <param name="fileName">
+    /// The name of the dynamic link library file containing the extension.
+    /// </param>
+    public void LoadExtension(
+        string fileName
+        )
+    {
+        CheckDisposed();
+
+        LoadExtension(fileName, null);
+    }
+
+    /// <summary>
+    /// Loads a SQLite extension library from the named dynamic link library file.
+    /// </summary>
+    /// <param name="fileName">
+    /// The name of the dynamic link library file containing the extension.
+    /// </param>
+    /// <param name="procName">
+    /// The name of the exported function used to initialize the extension.
+    /// If null, the default "sqlite3_extension_init" will be used.
+    /// </param>
+    public void LoadExtension(
+        string fileName,
+        string procName
+        )
+    {
+        CheckDisposed();
+
+        if (_sql == null)
+            throw new InvalidOperationException(
+                "Database connection not valid for loading extensions.");
+
+        _sql.LoadExtension(fileName, procName);
+    }
+
+    /// <summary>
     /// Opens the connection using the parameters found in the <see cref="ConnectionString" />.
     /// </summary>
     public override void Open()
@@ -1326,7 +1419,7 @@ namespace System.Data.SQLite
       CheckDisposed();
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.Opening, null, null, null));
+          SQLiteConnectionEventType.Opening, null, null, null, null, null));
 
       if (_connectionState != ConnectionState.Closed)
         throw new InvalidOperationException();
@@ -1569,7 +1662,7 @@ namespace System.Data.SQLite
           OnStateChange(ConnectionState.Open, ref eventArgs);
 
           OnChanged(this, new ConnectionEventArgs(
-              SQLiteConnectionEventType.Opened, eventArgs, null, null));
+              SQLiteConnectionEventType.Opened, eventArgs, null, null, null, null));
         }
         catch
         {
@@ -3172,7 +3265,7 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// This event is raised whenever SQLite is committing a transaction.
-    /// Return non-zero to trigger a rollback
+    /// Return non-zero to trigger a rollback.
     /// </summary>
     public event SQLiteCommitHandler Commit
     {
@@ -3237,8 +3330,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// This event is raised whenever SQLite is committing a transaction.
-    /// Return non-zero to trigger a rollback
+    /// This event is raised whenever SQLite is rolling back a transaction.
     /// </summary>
     public event EventHandler RollBack
     {

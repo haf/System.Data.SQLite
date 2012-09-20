@@ -13,6 +13,7 @@ namespace System.Data.SQLite
   using System.Diagnostics;
 #endif
 
+  using System.IO;
   using System.Runtime.InteropServices;
 
   /// <summary>
@@ -109,15 +110,27 @@ namespace System.Data.SQLite
       if (_sql == null)
       {
         IntPtr db;
+        SQLiteErrorCode n;
 
 #if !SQLITE_STANDARD
-        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), (int)openFlags, out db);
-#else
-        if ((openFlags & SQLiteOpenFlagsEnum.Create) == 0 && System.IO.File.Exists(strFilename) == false)
-          throw new SQLiteException((int)SQLiteErrorCode.CantOpen, strFilename);
-
-        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
+        if ((connectionFlags & SQLiteConnectionFlags.NoExtensionFunctions) != SQLiteConnectionFlags.NoExtensionFunctions)
+        {
+          n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), openFlags, out db);
+        }
+        else
 #endif
+        {
+          //
+          // NOTE: This flag check is designed to enforce the constraint that opening
+          //       a database file that does not already exist requires specifying the
+          //       "Create" flag, even when a native API is used that does not accept
+          //       a flags parameter.
+          //
+          if (((openFlags & SQLiteOpenFlagsEnum.Create) != SQLiteOpenFlagsEnum.Create) && !File.Exists(strFilename))
+            throw new SQLiteException(SQLiteErrorCode.CantOpen, strFilename);
+
+          n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
+        }
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
         Trace.WriteLine(String.Format("Open: {0}", db));

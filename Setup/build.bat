@@ -20,6 +20,12 @@ IF NOT DEFINED _VECHO (SET _VECHO=REM)
 
 %_AECHO% Running %0 %*
 
+SET DUMMY2=%3
+
+IF DEFINED DUMMY2 (
+  GOTO usage
+)
+
 SET ROOT=%~dp0\..
 SET ROOT=%ROOT:\\=\%
 
@@ -290,7 +296,7 @@ GOTO no_errors
 
 :usage
   ECHO.
-  ECHO Usage: %~nx0 [configuration] [platform] [...]
+  ECHO Usage: %~nx0 [configuration] [platform]
   ECHO.
   GOTO errors
 

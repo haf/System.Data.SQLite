@@ -148,6 +148,22 @@
     <InteropExtensionFunctions Condition="'$(InteropExtensionFunctions)' == ''">true</InteropExtensionFunctions>
 
     <!--
+        NOTE: Enable the test extension from the custom built interop DLL (i.e.
+              "SQLite.Interop.dll")?  By default, this is enabled only in the
+              Debug build configuration.  If this is disabled, the test
+              extension will be unavailable.  If this is enabled, it must also
+              be enabled via the "INTEROP_TEST_EXTENSION=1" preprocessor define
+              being present in the "INTEROP_DEBUG_DEFINES" macro in the build
+              properties file:
+
+                  "SQLite.Interop\props\SQLite.Interop.20XX.[vs]props"
+
+              for the corresponding version(s) of Visual Studio.
+    -->
+    <InteropTestExtension Condition="'$(InteropTestExtension)' == '' And '$(Configuration)' == 'Debug'">true</InteropTestExtension>
+    <InteropTestExtension Condition="'$(InteropTestExtension)' == '' And '$(Configuration)' != 'Debug'">false</InteropTestExtension>
+
+    <!--
         NOTE: Enable exposing the CryptoAPI based codec from the custom built
               interop DLL (i.e. "SQLite.Interop.dll")?  By default, this is
               enabled.  If this is disabled, support for encrypted databases

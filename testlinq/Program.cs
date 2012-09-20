@@ -255,10 +255,10 @@ namespace testlinq
 
                       try
                       {
-#if NET_20
-                          db.SaveChanges(false);
-#else
+#if NET_40
                           db.SaveChanges(SaveOptions.None);
+#else
+                          db.SaveChanges(false);
 #endif
                       }
                       catch (Exception e)
@@ -278,7 +278,22 @@ namespace testlinq
               using (northwindEFEntities db = new northwindEFEntities())
               {
                   bool once = false;
-#if NET_20
+#if NET_40
+                  var query = from t in db.Territories
+                    where territoryIds.AsQueryable<long>().Contains<long>(t.TerritoryID)
+                    orderby t.TerritoryID
+                    select t;
+
+                  foreach (Territories territories in query)
+                  {
+                      if (once)
+                          Console.Write(' ');
+
+                      Console.Write(territories.TerritoryID);
+
+                      once = true;
+                  }
+#else
                   //
                   // HACK: We cannot use the Contains extension method within a
                   //       LINQ query with the .NET Framework 3.5.
@@ -292,21 +307,6 @@ namespace testlinq
                       if (Array.IndexOf(territoryIds, territories.TerritoryID) == -1)
                           continue;
 
-                      if (once)
-                          Console.Write(' ');
-
-                      Console.Write(territories.TerritoryID);
-
-                      once = true;
-                  }
-#else
-                  var query = from t in db.Territories
-                    where territoryIds.AsQueryable<long>().Contains<long>(t.TerritoryID)
-                    orderby t.TerritoryID
-                    select t;
-
-                  foreach (Territories territories in query)
-                  {
                       if (once)
                           Console.Write(' ');
 

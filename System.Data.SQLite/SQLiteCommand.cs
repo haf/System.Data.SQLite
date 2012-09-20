@@ -142,6 +142,9 @@ namespace System.Data.SQLite
 
       if (transaction != null)
         Transaction = transaction;
+
+      SQLiteConnection.OnChanged(connection, new ConnectionEventArgs(
+          SQLiteConnectionEventType.NewCommand, null, transaction, this, null, null));
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

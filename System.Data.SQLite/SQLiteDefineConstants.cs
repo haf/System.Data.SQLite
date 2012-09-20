@@ -28,8 +28,20 @@ namespace System.Data.SQLite
             "INTEROP_EXTENSION_FUNCTIONS",
 #endif
 
+#if INTEROP_TEST_EXTENSION
+            "INTEROP_TEST_EXTENSION",
+#endif
+
 #if NET_20
             "NET_20",
+#endif
+
+#if NET_35
+            "NET_35",
+#endif
+
+#if NET_40
+            "NET_40",
 #endif
 
 #if NET_COMPACT_20

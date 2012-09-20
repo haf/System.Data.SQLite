@@ -498,6 +498,41 @@ namespace eval ::Eagle {
       return $result
     }
 
+    proc catchAndReturn { script {stackTrace false} {strict true} } {
+      #
+      # NOTE: Evaluate the script provided by the caller in their context,
+      #       capturing both the result and the return code.
+      #
+      set code [catch {uplevel 1 $script} result]
+
+      #
+      # NOTE: Did the script provided by the caller NOT raise an error?
+      #
+      if {$strict && $code == 0 || !$strict && $code != 1} then {
+        #
+        # NOTE: Success.  Return a list with the return code and the result.
+        #
+        return [list $code $result]
+      } elseif {$stackTrace} then {
+        #
+        # NOTE: Failure.  The caller wants a full stack trace (if applicable),
+        #       return a list with the return code and the result verbatim.
+        #
+        return [list $code $result]
+      } else {
+        #
+        # NOTE: Failure.  The caller does not want a full stack trace (if
+        #       applicable), return a list with the return code, the error
+        #       code for the interpreter, and the error message up to the
+        #       point where the stack trace should start.
+        #
+        set index [string first "   at " $result]; # HACK: Reliable?
+
+        return [list $code $::errorCode [expr {$index != -1 ? \
+            [string trim [string range $result 0 $index]] : $result}]]
+      }
+    }
+
     proc compileCSharpWith {
             text memory symbols strict resultsVarName errorsVarName fileNames
             args } {
@@ -1033,6 +1068,9 @@ namespace eval ::Eagle {
 
         checkForSQLiteDefineConstant $::test_channel \
             INTEROP_EXTENSION_FUNCTIONS
+
+        checkForSQLiteDefineConstant $::test_channel \
+            INTEROP_TEST_EXTENSION
 
         #
         # NOTE: Report the resource usage prior to running any tests.

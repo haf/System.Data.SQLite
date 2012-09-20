@@ -68,9 +68,10 @@ namespace System.Data.SQLite
     protected bool _usePool;
     protected int _poolVersion;
 
-#if !PLATFORM_COMPACTFRAMEWORK
+#if (NET_35 || NET_40) && !PLATFORM_COMPACTFRAMEWORK
     private bool _buildingSchema;
 #endif
+
     /// <summary>
     /// The user-defined functions registered on this connection
     /// </summary>
@@ -295,12 +296,18 @@ namespace System.Data.SQLite
       if (_sql == null)
       {
         IntPtr db;
+        SQLiteErrorCode n;
 
 #if !SQLITE_STANDARD
-        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), (int)openFlags, out db);
-#else
-        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, (int)openFlags, IntPtr.Zero);
+        if ((connectionFlags & SQLiteConnectionFlags.NoExtensionFunctions) != SQLiteConnectionFlags.NoExtensionFunctions)
+        {
+          n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), openFlags, out db);
+        }
+        else
 #endif
+        {
+          n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, openFlags, IntPtr.Zero);
+        }
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
         Trace.WriteLine(String.Format("Open: {0}", db));
@@ -523,7 +530,7 @@ namespace System.Data.SQLite
 
               return cmd;
             }
-#if !PLATFORM_COMPACTFRAMEWORK
+#if (NET_35 || NET_40) && !PLATFORM_COMPACTFRAMEWORK
             else if (_buildingSchema == false && String.Compare(GetLastError(), 0, "no such table: TEMP.SCHEMA", 0, 26, StringComparison.OrdinalIgnoreCase) == 0)
             {
               strRemain = "";
@@ -1387,10 +1394,68 @@ namespace System.Data.SQLite
       return UnsafeNativeMethods.sqlite3_aggregate_context(context, 1);
     }
 
+    /// <summary>
+    /// Enables or disabled extension loading by SQLite.
+    /// </summary>
+    /// <param name="bOnOff">
+    /// True to enable loading of extensions, false to disable.
+    /// </param>
+    internal override void SetLoadExtension(bool bOnOff)
+    {
+        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_enable_load_extension(
+            _sql, (bOnOff ? -1 : 0));
+
+        if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
+    }
+
+    /// <summary>
+    /// Loads a SQLite extension library from the named file.
+    /// </summary>
+    /// <param name="fileName">
+    /// The name of the dynamic link library file containing the extension.
+    /// </param>
+    /// <param name="procName">
+    /// The name of the exported function used to initialize the extension.
+    /// If null, the default "sqlite3_extension_init" will be used.
+    /// </param>
+    internal override void LoadExtension(string fileName, string procName)
+    {
+        if (fileName == null)
+            throw new ArgumentNullException("fileName");
+
+        IntPtr pError = IntPtr.Zero;
+
+        try
+        {
+            byte[] utf8FileName = UTF8Encoding.UTF8.GetBytes(fileName + '\0');
+            byte[] utf8ProcName = null;
+
+            if (procName != null)
+                utf8ProcName = UTF8Encoding.UTF8.GetBytes(procName + '\0');
+
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_load_extension(
+                _sql, utf8FileName, utf8ProcName, ref pError);
+
+            if (n != SQLiteErrorCode.Ok)
+                throw new SQLiteException(n, UTF8ToString(pError, -1));
+        }
+        finally
+        {
+            if (pError != IntPtr.Zero)
+            {
+                UnsafeNativeMethods.sqlite3_free(pError);
+                pError = IntPtr.Zero;
+            }
+        }
+    }
+
     /// Enables or disabled extended result codes returned by SQLite
     internal override void SetExtendedResultCodes(bool bOnOff)
     {
-      UnsafeNativeMethods.sqlite3_extended_result_codes(_sql, (bOnOff ? -1 : 0));
+      SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_extended_result_codes(
+          _sql, (bOnOff ? -1 : 0));
+
+      if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
     /// Gets the last SQLite error code
     internal override SQLiteErrorCode ResultCode()
