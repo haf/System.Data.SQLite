@@ -18,7 +18,7 @@ namespace System.Data.SQLite
     {
         /// <summary>
         /// The error code.  The type of this object value should be
-        /// System.Int32 or SQLiteErrorCode.
+        /// <see cref="Int32" /> or <see cref="SQLiteErrorCode" />.
         /// </summary>
         public readonly object ErrorCode;
 
@@ -33,12 +33,12 @@ namespace System.Data.SQLite
         public readonly object Data;
 
         /// <summary>
-        /// Constructs the LogEventArgs object.
+        /// Constructs the object.
         /// </summary>
         /// <param name="pUserData">Should be null.</param>
         /// <param name="errorCode">
         /// The error code.  The type of this object value should be
-        /// System.Int32 or SQLiteErrorCode.
+        /// <see cref="Int32" /> or <see cref="SQLiteErrorCode" />.
         /// </param>
         /// <param name="message">The error message, if any.</param>
         /// <param name="data">The extra data, if any.</param>

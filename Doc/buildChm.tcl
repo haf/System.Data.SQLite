@@ -38,13 +38,57 @@ set path [file dirname [info script]]
 set nDocPath [file join $env(ProgramFiles) NDoc3]
 
 if {![file isdirectory $nDocPath]} then {
-  puts stdout "NDoc3 must be installed to: $nDocPath"; exit 1
+  puts stdout "NDoc3 must be installed to: $nDocPath"
+  exit 1
 }
 
 set hhcPath [file join $env(ProgramFiles) "HTML Help Workshop"]
 
 if {![file isdirectory $hhcPath]} then {
-  puts stdout "HTML Help Workshop must be installed to: $hhcPath"; exit 1
+  puts stdout "HTML Help Workshop must be installed to: $hhcPath"
+  exit 1
+}
+
+#
+# NOTE: Build the name of the NDoc project file.
+#
+set projectFile [file join $path SQLite.NET.ndoc]
+
+if {![file exists $projectFile]} then {
+  puts stdout "Cannot find NDoc3 project file: $projectFile"
+  exit 1
+}
+
+#
+# NOTE: Extract the name of the XML doc file that will be used to build
+#       the final CHM file from the NDoc project file.
+#
+set data [readFile $projectFile]
+
+if {[string length $data] == 0} then {
+  puts stdout "NDoc3 project file contains no data: $projectFile"
+  exit 1
+}
+
+if {![regexp -- { documentation="(.*?)" } $data dummy xmlDocFile]} then {
+  puts stdout "Cannot find XML doc file name in NDoc3 project file:\
+               $projectFile"
+  exit 1
+}
+
+if {[string length $xmlDocFile] == 0 || ![file exists $xmlDocFile]} then {
+  puts stdout "Cannot find XML doc file: $xmlDocFile"
+  exit 1
+}
+
+set data [readFile $xmlDocFile]
+set pattern { cref="([A-Z]):System\.Data\.SQLite\.}
+set count [regsub -all -- $pattern $data { cref="\1:system.Data.SQLite.} data]
+
+if {$count > 0} then {
+  writeFile $xmlDocFile $data
+} else {
+  puts stdout "*WARNING* File \"$xmlDocFile\" does not match: $pattern"
 }
 
 #
@@ -54,7 +98,7 @@ if {![file isdirectory $hhcPath]} then {
 set outputPath [file join Output ndoc3_msdn_temp]
 
 set code [catch {exec [file join $nDocPath bin NDoc3Console.exe] \
-    "-project=[file nativename [file join $path SQLite.NET.ndoc]]"} result]
+    "-project=[file nativename $projectFile]"} result]
 
 puts stdout $result; if {$code != 0} then {exit $code}
 
@@ -77,7 +121,8 @@ foreach fileName $fileNames {
   # NOTE: Make sure the file we need actually exists.
   #
   if {![file isfile $fileName]} then {
-    puts stdout "Cannot find file: $fileName"; exit 1
+    puts stdout "Cannot find file: $fileName"
+    exit 1
   }
 
   #
@@ -126,4 +171,5 @@ puts stdout $result; if {$code == 0} then {exit 1}
 file copy -force [file join $path $outputPath SQLite.NET.chm] \
     [file join $path SQLite.NET.chm]
 
-puts stdout SUCCESS; exit 0
+puts stdout SUCCESS
+exit 0

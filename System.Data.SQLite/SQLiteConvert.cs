@@ -987,6 +987,45 @@ namespace System.Data.SQLite
   }
 
   /// <summary>
+  /// These are the event types associated with the
+  /// <see cref="SQLiteConnectionEventHandler" />
+  /// delegate (and its corresponding event) and the
+  /// <see cref="ConnectionEventArgs" /> class.
+  /// </summary>
+  public enum SQLiteConnectionEventType
+  {
+      /// <summary>
+      /// Not used.
+      /// </summary>
+      Invalid = -1,
+
+      /// <summary>
+      /// Not used.
+      /// </summary>
+      Unknown = 0,
+
+      /// <summary>
+      /// The connection is being opened.
+      /// </summary>
+      Opening = 1,
+
+      /// <summary>
+      /// The connection was opened.
+      /// </summary>
+      Opened = 2,
+
+      /// <summary>
+      /// The connection is being closed.
+      /// </summary>
+      Closing = 3,
+
+      /// <summary>
+      /// The connection was closed.
+      /// </summary>
+      Closed = 4
+  }
+
+  /// <summary>
   /// This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of three formats.  Ticks, ISO8601
   /// and JulianDay.
   /// </summary>

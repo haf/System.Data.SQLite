@@ -17,11 +17,71 @@ namespace System.Data.SQLite
   using System.Runtime.InteropServices;
   using System.IO;
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /// <summary>
+  /// Event data for connection event handlers.
+  /// </summary>
+  public class ConnectionEventArgs : EventArgs
+  {
+      /// <summary>
+      /// The type of event being raised.
+      /// </summary>
+      public readonly SQLiteConnectionEventType EventType;
+
+      /// <summary>
+      /// The <see cref="StateChangeEventArgs" /> associated with this event, if any.
+      /// </summary>
+      public readonly StateChangeEventArgs EventArgs;
+
+      /// <summary>
+      /// Command or message text associated with this event, if any.
+      /// </summary>
+      public readonly string Text;
+
+      /// <summary>
+      /// Extra data associated with this event, if any.
+      /// </summary>
+      public readonly object Data;
+
+      /// <summary>
+      /// Constructs the object.
+      /// </summary>
+      /// <param name="eventType">The type of event being raised.</param>
+      /// <param name="eventArgs">The base <see cref="EventArgs" /> associated
+      /// with this event, if any.</param>
+      /// <param name="text">The command or message text, if any.</param>
+      /// <param name="data">The extra data, if any.</param>
+      internal ConnectionEventArgs(
+          SQLiteConnectionEventType eventType,
+          StateChangeEventArgs eventArgs,
+          string text,
+          object data
+          )
+      {
+          EventType = eventType;
+          EventArgs = eventArgs;
+          Text = text;
+          Data = data;
+      }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /// <summary>
+  /// Raised when an event pertaining to a connection occurs.
+  /// </summary>
+  /// <param name="sender">The connection involved.</param>
+  /// <param name="e">Extra information about the event.</param>
+  public delegate void SQLiteConnectionEventHandler(object sender, ConnectionEventArgs e);
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+
   /// <summary>
   /// SQLite implentation of DbConnection.
   /// </summary>
   /// <remarks>
-  /// The <see cref="ConnectionString">ConnectionString</see> property of the SQLiteConnection class can contain the following parameter(s), delimited with a semi-colon:
+  /// The <see cref="ConnectionString" /> property can contain the following parameter(s), delimited with a semi-colon:
   /// <list type="table">
   /// <listheader>
   /// <term>Parameter</term>
@@ -173,7 +233,7 @@ namespace System.Data.SQLite
   /// </item>
   /// <item>
   /// <description>Flags</description>
-  /// <description>Extra behavioral flags for the connection.  See the SQLiteConnectionFlags enumeration for possible values.</description>
+  /// <description>Extra behavioral flags for the connection.  See the <see cref="SQLiteConnectionFlags" /> enumeration for possible values.</description>
   /// <description>N</description>
   /// <description>Default</description>
   /// </item>
@@ -199,6 +259,7 @@ namespace System.Data.SQLite
   /// </remarks>
   public sealed partial class SQLiteConnection : DbConnection, ICloneable
   {
+    #region Private Constants
     /// <summary>
     /// The default "stub" (i.e. placeholder) base schema name to use when
     /// returning column schema information.  Used as the initial value of
@@ -242,7 +303,26 @@ namespace System.Data.SQLite
     private const string _dataDirectory = "|DataDirectory|";
     private const string _masterdb = "sqlite_master";
     private const string _tempmasterdb = "sqlite_temp_master";
+    #endregion
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Private Static Data
+    /// <summary>
+    /// Object used to synchronize access to the static instance data
+    /// for this class.
+    /// </summary>
+    private static object _syncRoot = new object();
+
+    /// <summary>
+    /// Static variable to store the connection event handlers to call.
+    /// </summary>
+    private static event SQLiteConnectionEventHandler _handlers;
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Private Data
     /// <summary>
     /// State of the current connection
     /// </summary>
@@ -291,7 +371,8 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// The extra behavioral flags for this connection, if any.  See the
-    /// SQLiteConnectionFlags enumeration for a list of possible values.
+    /// <see cref="SQLiteConnectionFlags" /> enumeration for a list of
+    /// possible values.
     /// </summary>
     private SQLiteConnectionFlags _flags;
 
@@ -313,11 +394,16 @@ namespace System.Data.SQLite
     private SQLiteCommitCallback _commitCallback;
     private SQLiteTraceCallback _traceCallback;
     private SQLiteRollbackCallback _rollbackCallback;
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// This event is raised whenever the database is opened or closed.
     /// </summary>
     public override event StateChangeEventHandler StateChange;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     ///<overloads>
     /// Constructs a new SQLiteConnection object
@@ -386,6 +472,70 @@ namespace System.Data.SQLite
           }
         }
       }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Raises the <see cref="Changed" /> event.
+    /// </summary>
+    /// <param name="connection">
+    /// The connection associated with this event.
+    /// </param>
+    /// <param name="e">
+    /// A <see cref="ConnectionEventArgs" /> that contains the event data.
+    /// </param>
+    public static void OnChanged(
+        SQLiteConnection connection,
+        ConnectionEventArgs e
+        )
+    {
+        if (connection == null)
+            return;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+        if (!connection.CanRaiseEvents)
+            return;
+#endif
+
+        SQLiteConnectionEventHandler handlers;
+
+        lock (_syncRoot)
+        {
+            handlers = _handlers;
+        }
+
+        if (handlers != null) handlers(connection, e);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// This event is raised when events related to the lifecycle of a
+    /// SQLiteConnection object occur.
+    /// </summary>
+    public static event SQLiteConnectionEventHandler Changed
+    {
+        add
+        {
+            lock (_syncRoot)
+            {
+                // Remove any copies of this event handler from registered
+                // list.  This essentially means that a handler will be
+                // called only once no matter how many times it is added.
+                _handlers -= value;
+
+                // Add this to the list of event handlers.
+                _handlers += value;
+            }
+        }
+        remove
+        {
+            lock (_syncRoot)
+            {
+                _handlers -= value;
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -620,17 +770,29 @@ namespace System.Data.SQLite
     /// <summary>
     /// Raises the state change event when the state of the connection changes
     /// </summary>
-    /// <param name="newState">The new state.  If it is different from the previous state, an event is raised.</param>
-    internal void OnStateChange(ConnectionState newState)
+    /// <param name="newState">The new connection state.  If this is different
+    /// from the previous state, the <see cref="StateChange" /> event is
+    /// raised.</param>
+    /// <param name="eventArgs">The event data created for the raised event, if
+    /// it was actually raised.</param>
+    internal void OnStateChange(
+        ConnectionState newState,
+        ref StateChangeEventArgs eventArgs
+        )
     {
-      ConnectionState oldState = _connectionState;
-      _connectionState = newState;
+        ConnectionState oldState = _connectionState;
 
-      if (StateChange != null && oldState != newState)
-      {
-        StateChangeEventArgs e = new StateChangeEventArgs(oldState, newState);
-        StateChange(this, e);
-      }
+        _connectionState = newState;
+
+        if ((StateChange != null) && (newState != oldState))
+        {
+            StateChangeEventArgs localEventArgs =
+                new StateChangeEventArgs(oldState, newState);
+
+            StateChange(this, localEventArgs);
+
+            eventArgs = localEventArgs;
+        }
     }
 
     /// <summary>
@@ -727,6 +889,9 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
 
+      OnChanged(this, new ConnectionEventArgs(
+          SQLiteConnectionEventType.Closing, null, null, null));
+
       if (_sql != null)
       {
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -756,7 +921,12 @@ namespace System.Data.SQLite
         }
         _transactionLevel = 0;
       }
-      OnStateChange(ConnectionState.Closed);
+
+      StateChangeEventArgs eventArgs = null;
+      OnStateChange(ConnectionState.Closed, ref eventArgs);
+
+      OnChanged(this, new ConnectionEventArgs(
+          SQLiteConnectionEventType.Closed, eventArgs, null, null));
     }
 
     /// <summary>
@@ -945,7 +1115,7 @@ namespace System.Data.SQLite
     /// </item>
     /// <item>
     /// <description>Flags</description>
-    /// <description>Extra behavioral flags for the connection.  See the SQLiteConnectionFlags enumeration for possible values.</description>
+    /// <description>Extra behavioral flags for the connection.  See the <see cref="SQLiteConnectionFlags" /> enumeration for possible values.</description>
     /// <description>N</description>
     /// <description>Default</description>
     /// </item>
@@ -1149,11 +1319,14 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Opens the connection using the parameters found in the <see cref="ConnectionString">ConnectionString</see>
+    /// Opens the connection using the parameters found in the <see cref="ConnectionString" />.
     /// </summary>
     public override void Open()
     {
       CheckDisposed();
+
+      OnChanged(this, new ConnectionEventArgs(
+          SQLiteConnectionEventType.Opening, null, null, null));
 
       if (_connectionState != ConnectionState.Closed)
         throw new InvalidOperationException();
@@ -1391,7 +1564,12 @@ namespace System.Data.SQLite
 #endif
 
           _connectionState = oldstate;
-          OnStateChange(ConnectionState.Open);
+
+          StateChangeEventArgs eventArgs = null;
+          OnStateChange(ConnectionState.Open, ref eventArgs);
+
+          OnChanged(this, new ConnectionEventArgs(
+              SQLiteConnectionEventType.Opened, eventArgs, null, null));
         }
         catch
         {
@@ -1407,7 +1585,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Opens the connection using the parameters found in the <see cref="ConnectionString">ConnectionString</see> and then returns it.
+    /// Opens the connection using the parameters found in the <see cref="ConnectionString" /> and then returns it.
     /// </summary>
     /// <returns>The current connection object.</returns>
     public SQLiteConnection OpenAndReturn()
@@ -1428,7 +1606,8 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Gets/sets the extra behavioral flags for this connection.  See the
-    /// SQLiteConnectionFlags enumeration for a list of possible values.
+    /// <see cref="SQLiteConnectionFlags" /> enumeration for a list of
+    /// possible values.
     /// </summary>
     public SQLiteConnectionFlags Flags
     {
