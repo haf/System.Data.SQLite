@@ -41,6 +41,17 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Only use functionality available in the .NET Framework 4.5?  By
+            default, this is disabled.  This must be enabled to successfully
+            build the project using Visual Studio 2012 and/or the .NET
+            Framework 4.5 (if necessary, it will typically be enabled from
+            within the project file itself).
+  -->
+  <PropertyGroup Condition="'$(NetFx45)' != 'false'">
+    <DefineConstants>$(DefineConstants);NET_45</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: Only use functionality available in the .NET Compact Framework 2.0?
             By default, this is disabled.  This must be enabled to successfully
             build the project using Visual Studio 2005 and/or the .NET Compact

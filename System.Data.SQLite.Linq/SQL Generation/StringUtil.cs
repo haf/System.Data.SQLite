@@ -10,7 +10,7 @@ using System.Text;
 using System.Globalization;
 using System.Collections;
 
-#if NET_40
+#if NET_40 || NET_45
 using System.Runtime;
 #endif
 
@@ -85,7 +85,7 @@ namespace System.Data.SQLite
 			return string.Format(CultureInfo.InvariantCulture, "{0}", new object[] { value });
 		}
 
-#if NET_40
+#if NET_40 || NET_45
 		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
 #endif
 		internal static bool IsNullOrEmptyOrWhiteSpace(string value)
@@ -165,7 +165,7 @@ namespace System.Data.SQLite
 			ToSeparatedStringPrivate(builder, list, separator, string.Empty, false);
 		}
 
-#if NET_40
+#if NET_40 || NET_45
 		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
 #endif
 		internal static void ToSeparatedString(StringBuilder stringBuilder, IEnumerable list, string separator, string nullValue)

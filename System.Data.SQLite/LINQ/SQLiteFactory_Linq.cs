@@ -31,7 +31,7 @@ namespace System.Data.SQLite
 #endif
 
         string version =
-#if NET_40
+#if NET_40 || NET_45
             "4.0.0.0";
 #else
             "3.5.0.0";

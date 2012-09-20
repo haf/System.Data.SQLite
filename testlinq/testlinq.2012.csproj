@@ -17,7 +17,7 @@
     <RootNamespace>testlinq</RootNamespace>
     <AssemblyName>testlinq</AssemblyName>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
-    <NetFx40>true</NetFx40>
+    <NetFx45>true</NetFx45>
     <ConfigurationYear>2012</ConfigurationYear>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>

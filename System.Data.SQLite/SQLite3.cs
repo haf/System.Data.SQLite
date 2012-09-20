@@ -68,7 +68,7 @@ namespace System.Data.SQLite
     protected bool _usePool;
     protected int _poolVersion;
 
-#if (NET_35 || NET_40) && !PLATFORM_COMPACTFRAMEWORK
+#if (NET_35 || NET_40 || NET_45) && !PLATFORM_COMPACTFRAMEWORK
     private bool _buildingSchema;
 #endif
 
@@ -530,7 +530,7 @@ namespace System.Data.SQLite
 
               return cmd;
             }
-#if (NET_35 || NET_40) && !PLATFORM_COMPACTFRAMEWORK
+#if (NET_35 || NET_40 || NET_45) && !PLATFORM_COMPACTFRAMEWORK
             else if (_buildingSchema == false && String.Compare(GetLastError(), 0, "no such table: TEMP.SCHEMA", 0, 26, StringComparison.OrdinalIgnoreCase) == 0)
             {
               strRemain = "";
