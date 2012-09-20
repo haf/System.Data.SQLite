@@ -68,11 +68,15 @@
 
   <ItemGroup Condition="'$(IsCompactFramework)' == 'false'">
     <Compile Include="SQLiteEnlistment.cs" />
-    <Compile Condition="'$(NetFx35)' != 'false' Or '$(NetFx40)' != 'false'"
+    <Compile Condition="'$(NetFx35)' != 'false' Or
+                        '$(NetFx40)' != 'false' Or
+                        '$(NetFx45)' != 'false'"
              Include="LINQ\SQLiteConnection_Linq.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Condition="'$(NetFx35)' != 'false' Or '$(NetFx40)' != 'false'"
+    <Compile Condition="'$(NetFx35)' != 'false' Or
+                        '$(NetFx40)' != 'false' Or
+                        '$(NetFx45)' != 'false'"
              Include="LINQ\SQLiteFactory_Linq.cs">
       <SubType>Code</SubType>
     </Compile>
