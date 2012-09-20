@@ -7,9 +7,7 @@
 
 #define SQLITE_API __declspec(dllexport)
 
-#pragma warning(disable: 4703)
 #include "../core/sqlite3.c"
-#pragma warning(default: 4703)
 
 #if defined(INTEROP_EXTENSION_FUNCTIONS)
 #include "../contrib/extension-functions.c"
