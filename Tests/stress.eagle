@@ -21,8 +21,8 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
-  unset -nocomplain thread index workload srcDb db fileName compiled options \
-      count
+  unset -nocomplain result thread index workload srcDb db fileName compiled \
+      options count
 
   #############################################################################
 
@@ -35,7 +35,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   proc showTest { indicator } {
     tputs $::test_channel $indicator
-    after [expr {int(rand() * 1000)}]
+    after [expr {int(rand() * 1000 + $::count(2))}]
   }
 
   #############################################################################
@@ -53,15 +53,18 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   set count(0) 1
   set count(1) 5
+  set count(2) 300
 
   if {[info exists argv] && [llength $argv] > 0} then {
     parse options -flags \
         {-StopOnUnknown +IgnoreOnUnknown SkipOnUnknown} -- [list \
         [list null MustHaveIntegerValue -1 -1 -count0 $count(0)] \
-        [list null MustHaveIntegerValue -1 -1 -count1 $count(1)]] $argv
+        [list null MustHaveIntegerValue -1 -1 -count1 $count(1)] \
+        [list null MustHaveIntegerValue -1 -1 -count2 $count(2)]] $argv
 
     set count(0) $options(-count0,value)
     set count(1) $options(-count1,value)
+    set count(2) $options(-count2,value)
   }
 
   #############################################################################
@@ -71,6 +74,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   tputs $test_channel [appendArgs \
       "---- workloads will have " $count(1) " iteration(s)...\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- workloads will wait at least " $count(2) " millisecond(s)...\n"]
 
   #############################################################################
 
