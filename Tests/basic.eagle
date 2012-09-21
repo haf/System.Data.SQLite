@@ -1919,7 +1919,7 @@ runTest {test data-1.38 {NoExtensionFunctions connection flag} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result db fileName
+  unset -nocomplain output result db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 regexp -result {^0 12341234 1 \{System\.Data\.SQLite\.SQLiteException\

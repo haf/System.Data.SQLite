@@ -27,8 +27,8 @@ runTest {test tkt-17045010df-1.1 {EnableExtensions & LoadExtension} -setup {
       -alias Interpreter.GetActive.connections get_Item $db]
 
   lappend result [catchAndReturn {$connection EnableExtensions false}]
-  lappend result [catchAndReturn {$connection LoadExtension [file join \
-      [getBinaryDirectory] SQLite.Interop.dll] interop_test_extension_init}]
+  lappend result [catchAndReturn {$connection LoadExtension \
+      [getCoreBinaryFileName] interop_test_extension_init}]
 
   lappend result [catchAndReturn {sql execute -execute scalar $db \
       "SELECT interopTest('test1');"}]
@@ -36,8 +36,8 @@ runTest {test tkt-17045010df-1.1 {EnableExtensions & LoadExtension} -setup {
       "SELECT interopTest('test1', '1234');"}]
 
   lappend result [catchAndReturn {$connection EnableExtensions true}]
-  lappend result [catchAndReturn {$connection LoadExtension [file join \
-      [getBinaryDirectory] SQLite.Interop.dll] interop_test_extension_init}]
+  lappend result [catchAndReturn {$connection LoadExtension \
+      [getCoreBinaryFileName] interop_test_extension_init}]
 
   lappend result [catchAndReturn {sql execute -execute scalar $db \
       "SELECT interopTest('test2');"}]

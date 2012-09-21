@@ -115,15 +115,30 @@ namespace System.Data.SQLite
 #endif
 
     /// <summary>
-    /// Gets the underlying SQLite return code for this exception.
+    /// Gets the associated SQLite return code for this exception as a
+    /// <see cref="SQLiteErrorCode" />.  This property returns the same
+    /// underlying value as the <see cref="ErrorCode" /> property.
     /// </summary>
-#if !PLATFORM_COMPACTFRAMEWORK
-    public new SQLiteErrorCode ErrorCode
-#else
-    public SQLiteErrorCode ErrorCode
-#endif
+    public SQLiteErrorCode ReturnCode
     {
       get { return _errorCode; }
+    }
+
+    /// <summary>
+    /// Gets the associated SQLite return code for this exception as an
+    /// <see cref="Int32" />.  For desktop versions of the .NET Framework,
+    /// this property overrides the property of the same name within the
+    /// <see cref="System.Runtime.InteropServices.ExternalException" />
+    /// class.  This property returns the same underlying value as the
+    /// <see cref="ReturnCode" /> property.
+    /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    public override int ErrorCode
+#else
+    public int ErrorCode
+#endif
+    {
+      get { return (int)_errorCode; }
     }
 
     /// <summary>

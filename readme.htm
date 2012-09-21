@@ -194,7 +194,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Add Visual Studio 2012 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
     <li>Add Visual Studio 2012 support to the redesigned designer support installer.</li>
     <li>Allow opened connections to skip adding the extension functions included in the interop assembly via the new NoExtensionFunctions connection flag.</li>
-    <li>Support loading of SQLite extensions via the new EnableExtensions and LoadExtension methods of the SQLiteConnection class.</li>
+    <li>Support loading of SQLite extensions via the new EnableExtensions and LoadExtension methods of the SQLiteConnection class. Pursuant to [17045010df].</li>
     <li>Add notifications before and after any connection is opened and closed, as well as other related notifications, via the new static Changed event.</li>
     <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string argument.</li>
     <li>All applicable calls into the SQLite core library now return a SQLiteErrorCode instead of an integer error code.</li>
@@ -203,6 +203,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>When available, the new sqlite3_errstr function from the core library is used to get the error message for a specific return code.</li>
     <li>The SetMemoryStatus, Shutdown, ResultCode, ExtendedResultCode, and SetAvRetry methods of the SQLiteConnection class now return a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>The public constructor for the SQLiteException now takes a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>The ErrorCode property of the SQLiteException is now an Int32, to allow the property inherited from the base class to be properly overridden.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>The ErrorCode field of the LogEventArgs is now an object instead of an integer.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>The names and messages associated with the SQLiteErrorCode enumeration values have been normalized to match those in the SQLite core library.&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
@@ -252,7 +253,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>In the SQLiteFunction class, when calling user-provided methods from a delegate called by native code, avoid throwing exceptions, optionally tracing the caught exceptions. Fix for [8a426d12eb].</li>
     <li>Add Visual Studio 2005 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
     <li>Add Visual Studio 2005 support to the redesigned designer support installer.</li>
-    <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process.  This feature is now enabled by default at compile-time.</li>
+    <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process. This feature is now enabled by default at compile-time.</li>
     <li>Add support for the native <a href="http://www.sqlite.org/backup.html">SQLite Online Backup API</a>. Fix for [c71846ed57].</li>
     <li>Acquire and hold a static data lock while checking if the native SQLite library has been initialized to prevent a subtle race condition that can result in superfluous error messages. Fix for [72905c9a77].</li>
     <li>Support tracing of all parameter binding activity and use the connection flags to control what is traced.</li>
@@ -337,7 +338,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Add unit testing infrastructure using <a href="http://eagle.to/">Eagle</a>.</li>
     <li>Integrate all legacy unit tests, including the &quot;testlinq&quot; project, into the new test suite.</li>
     <li>Add projects to build the interop assembly statically linked to the Visual C++ runtime. Fix for [53f0c5cbf6].</li>
-    <li>Add SQLITE_ENABLE_STAT2 compile-time option to the interop assembly.  Fix for [74807fbf27].</li>
+    <li>Add SQLITE_ENABLE_STAT2 compile-time option to the interop assembly. Fix for [74807fbf27].</li>
     <li>Fix mutex issues exposed when running the test suite with the debug version of SQLite.</li>
     <li>Fix transaction enlistment when repeated attempts are made to enlist in the same transaction. Fix for [ccfa69fc32].</li>
     <li>Support the SQLITE_FCNTL_WIN32_AV_RETRY file control to mitigate the impact of file sharing violations caused by external processes.</li>

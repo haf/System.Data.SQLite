@@ -10,7 +10,7 @@
     <li>Add Visual Studio 2012 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
     <li>Add Visual Studio 2012 support to the redesigned designer support installer.</li>
     <li>Allow opened connections to skip adding the extension functions included in the interop assembly via the new NoExtensionFunctions connection flag.</li>
-    <li>Support loading of SQLite extensions via the new EnableExtensions and LoadExtension methods of the SQLiteConnection class.</li>
+    <li>Support loading of SQLite extensions via the new EnableExtensions and LoadExtension methods of the SQLiteConnection class. Pursuant to [17045010df].</li>
     <li>Add notifications before and after any connection is opened and closed, as well as other related notifications, via the new static Changed event.</li>
     <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string argument.</li>
     <li>All applicable calls into the SQLite core library now return a SQLiteErrorCode instead of an integer error code.</li>
@@ -19,6 +19,7 @@
     <li>When available, the new sqlite3_errstr function from the core library is used to get the error message for a specific return code.</li>
     <li>The SetMemoryStatus, Shutdown, ResultCode, ExtendedResultCode, and SetAvRetry methods of the SQLiteConnection class now return a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>The public constructor for the SQLiteException now takes a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>The ErrorCode property of the SQLiteException is now an Int32, to allow the property inherited from the base class to be properly overridden.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>The ErrorCode field of the LogEventArgs is now an object instead of an integer.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>The names and messages associated with the SQLiteErrorCode enumeration values have been normalized to match those in the SQLite core library.&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
@@ -68,7 +69,7 @@
     <li>In the SQLiteFunction class, when calling user-provided methods from a delegate called by native code, avoid throwing exceptions, optionally tracing the caught exceptions. Fix for [8a426d12eb].</li>
     <li>Add Visual Studio 2005 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
     <li>Add Visual Studio 2005 support to the redesigned designer support installer.</li>
-    <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process.  This feature is now enabled by default at compile-time.</li>
+    <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process. This feature is now enabled by default at compile-time.</li>
     <li>Add support for the native [http://www.sqlite.org/backup.html|SQLite Online Backup API]. Fix for [c71846ed57].</li>
     <li>Acquire and hold a static data lock while checking if the native SQLite library has been initialized to prevent a subtle race condition that can result in superfluous error messages. Fix for [72905c9a77].</li>
     <li>Support tracing of all parameter binding activity and use the connection flags to control what is traced.</li>

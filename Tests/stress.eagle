@@ -487,6 +487,31 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       showTest D
     }] 0]
   }]
+
+  #############################################################################
+
+  set workload(14) [list [list srcFileName dstFileName table count] {
+    #
+    # NOTE: Workload #14, PRAGMA integrity check statement.
+    #
+    lappend ::times(14) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" true false
+      if {[catch {
+        set result [sql execute -execute scalar $db "PRAGMA integrity_check;"]
+        if {$result ne "ok"} then {
+          error [appendArgs "integrity check failed: " $result]
+        }
+        showTest E
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
+      }
+      cleanupDb $dstFileName db false true false
+    }] 0]
+  }]
 } -body {
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"

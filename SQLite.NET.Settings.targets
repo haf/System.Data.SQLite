@@ -58,7 +58,7 @@
 
   <!--
   ******************************************************************************
-  **                            Common Properties                             **
+  **                       Framework Version Properties                       **
   ******************************************************************************
   -->
 
@@ -66,18 +66,47 @@
     <!--
         NOTE: Only use functionality available in the .NET Framework 2.0?  By
               default, this is disabled.  This must be enabled to successfully
-              build the project using Visual Studio 2008 and/or the .NET
+              build the project using Visual Studio 2005 and/or the .NET
               Framework 2.0 (if necessary, it will typically be enabled from
               within the project file itself).
     -->
     <NetFx20 Condition="'$(NetFx20)' == ''">false</NetFx20>
 
     <!--
-        NOTE: The suffix for the name of the build configuration directory .  By
-              default, this is an empty string.
+        NOTE: Only use functionality available in the .NET Framework 3.5?  By
+              default, this is disabled.  This must be enabled to successfully
+              build the project using Visual Studio 2008 and/or the .NET
+              Framework 3.5 (if necessary, it will typically be enabled from
+              within the project file itself).
     -->
-    <ConfigurationSuffix Condition="'$(ConfigurationSuffix)' == ''"></ConfigurationSuffix>
+    <NetFx35 Condition="'$(NetFx35)' == ''">false</NetFx35>
 
+    <!--
+        NOTE: Only use functionality available in the .NET Framework 4.0?  By
+              default, this is disabled.  This must be enabled to successfully
+              build the project using Visual Studio 2010 and/or the .NET
+              Framework 4.0 (if necessary, it will typically be enabled from
+              within the project file itself).
+    -->
+    <NetFx40 Condition="'$(NetFx40)' == ''">false</NetFx40>
+
+    <!--
+        NOTE: Only use functionality available in the .NET Framework 4.5?  By
+              default, this is disabled.  This must be enabled to successfully
+              build the project using Visual Studio 2012 and/or the .NET
+              Framework 4.5 (if necessary, it will typically be enabled from
+              within the project file itself).
+    -->
+    <NetFx45 Condition="'$(NetFx45)' == ''">false</NetFx45>
+  </PropertyGroup>
+
+  <!--
+  ******************************************************************************
+  **                            Feature Properties                            **
+  ******************************************************************************
+  -->
+
+  <PropertyGroup>
     <!--
         NOTE: Enable extra internal state checking for the public members of
               several key classes that use a connection.  By default, this is
@@ -251,6 +280,20 @@
     -->
     <WarningLevel>4</WarningLevel>
     <NoWarn>618,1591;3001</NoWarn>
+  </PropertyGroup>
+
+  <!--
+  ******************************************************************************
+  **                      Build Configuration Properties                      **
+  ******************************************************************************
+  -->
+
+  <PropertyGroup>
+    <!--
+        NOTE: The suffix for the name of the build configuration directory .  By
+              default, this is an empty string.
+    -->
+    <ConfigurationSuffix Condition="'$(ConfigurationSuffix)' == ''"></ConfigurationSuffix>
   </PropertyGroup>
 
   <!--

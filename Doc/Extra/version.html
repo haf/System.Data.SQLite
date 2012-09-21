@@ -49,7 +49,7 @@
       <li>Add Visual Studio 2012 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
       <li>Add Visual Studio 2012 support to the redesigned designer support installer.</li>
       <li>Allow opened connections to skip adding the extension functions included in the interop assembly via the new NoExtensionFunctions connection flag.</li>
-      <li>Support loading of SQLite extensions via the new EnableExtensions and LoadExtension methods of the SQLiteConnection class.</li>
+      <li>Support loading of SQLite extensions via the new EnableExtensions and LoadExtension methods of the SQLiteConnection class. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/17045010df">[17045010df]</a>.</li>
       <li>Add notifications before and after any connection is opened and closed, as well as other related notifications, via the new static Changed event.</li>
       <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string argument.</li>
       <li>All applicable calls into the SQLite core library now return a SQLiteErrorCode instead of an integer error code.</li>
@@ -58,6 +58,7 @@
       <li>When available, the new sqlite3_errstr function from the core library is used to get the error message for a specific return code.</li>
       <li>The SetMemoryStatus, Shutdown, ResultCode, ExtendedResultCode, and SetAvRetry methods of the SQLiteConnection class now return a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>The public constructor for the SQLiteException now takes a SQLiteErrorCode instead of an integer error code.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>The ErrorCode property of the SQLiteException is now an Int32, to allow the property inherited from the base class to be properly overridden.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>The ErrorCode field of the LogEventArgs is now an object instead of an integer.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>The names and messages associated with the SQLiteErrorCode enumeration values have been normalized to match those in the SQLite core library.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     </ul>
@@ -101,7 +102,7 @@
       <li>In the SQLiteFunction class, when calling user-provided methods from a delegate called by native code, avoid throwing exceptions, optionally tracing the caught exceptions. Fix for <a href="http://system.data.sqlite.org/index.html/info/8a426d12eb">[8a426d12eb]</a>.</li>
       <li>Add Visual Studio 2005 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
       <li>Add Visual Studio 2005 support to the redesigned designer support installer.</li>
-      <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process.  This feature is now enabled by default at compile-time.</li>
+      <li>Add experimental support for &quot;pre-loading&quot; the native SQLite library based on the processor architecture of the current process. This feature is now enabled by default at compile-time.</li>
       <li>Add support for the native <a href="http://www.sqlite.org/backup.html">SQLite Online Backup API</a>. Fix for <a href="http://system.data.sqlite.org/index.html/info/c71846ed57">[c71846ed57]</a>.</li>
       <li>Acquire and hold a static data lock while checking if the native SQLite library has been initialized to prevent a subtle race condition that can result in superfluous error messages. Fix for <a href="http://system.data.sqlite.org/index.html/info/72905c9a77">[72905c9a77]</a>.</li>
       <li>Support tracing of all parameter binding activity and use the connection flags to control what is traced.</li>
@@ -176,7 +177,7 @@
       <li>Add unit testing infrastructure using <a href="http://eagle.to/">Eagle</a>.</li>
       <li>Integrate all legacy unit tests, including the &quot;testlinq&quot; project, into the new test suite.</li>
       <li>Add projects to build the interop assembly statically linked to the Visual C++ runtime. Fix for <a href="http://system.data.sqlite.org/index.html/info/53f0c5cbf6">[53f0c5cbf6]</a>.</li>
-      <li>Add SQLITE_ENABLE_STAT2 compile-time option to the interop assembly.  Fix for <a href="http://system.data.sqlite.org/index.html/info/74807fbf27">[74807fbf27]</a>.</li>
+      <li>Add SQLITE_ENABLE_STAT2 compile-time option to the interop assembly. Fix for <a href="http://system.data.sqlite.org/index.html/info/74807fbf27">[74807fbf27]</a>.</li>
       <li>Fix mutex issues exposed when running the test suite with the debug version of SQLite.</li>
       <li>Fix transaction enlistment when repeated attempts are made to enlist in the same transaction. Fix for <a href="http://system.data.sqlite.org/index.html/info/ccfa69fc32">[ccfa69fc32]</a>.</li>
       <li>Support the SQLITE_FCNTL_WIN32_AV_RETRY file control to mitigate the impact of file sharing violations caused by external processes.</li>
@@ -314,7 +315,7 @@
     </ul>
     <p><b>1.0.61.0 - April 28, 2009</b></p>
     <ul>
-      <li>Code merge with SQLite 3.6.13.  The new backup features are as yet unimplemented in the provider, but will be forthcoming in a subsequent release</li>
+      <li>Code merge with SQLite 3.6.13. The new backup features are as yet unimplemented in the provider, but will be forthcoming in a subsequent release</li>
       <li>Fixed the default-value lookups in SQLiteConnectionStringBuilder when accessing properties</li>
       <li>Lock the SQLiteTransaction object during dispose to avoid potential race condition during cleanup</li>
       <li>Fixed SQLiteDataReader.GetDecimal() processing and parsing of decimal values for cases when SQLite returns things like "1.0e-05" instead of "0.0001"</li>
@@ -740,14 +741,14 @@
       <li>Allow integers to implicitly convert to double/decimal/single.</li></ul>
     <p><b>1.0.36.1 - October 25, 2006</b></p>
     <ul>
-    <li>Added support for LONGVARCHAR, SMALLDATE and SMALLDATETIME.  These were actually added in 1.0.36.0 but were undocumented.</li>
+    <li>Added support for LONGVARCHAR, SMALLDATE and SMALLDATETIME. These were actually added in 1.0.36.0 but were undocumented.</li>
     <li>Fixed the embedded helpfile which was accidentally built from old sources. </li>
     <li>Fixed an unfortunate re-entry of a bug in the .36 codebase that caused the provider to "forget" about commands on a connection under certain circumstances.</li>
     </ul>
     <p><b>1.0.36.0 - October 23, 2006</b></p>
     <ul>
     <li>Code merge with SQLite 3.3.8, including support for full-text search via the FTS1
-      extension.&nbsp;</li><li>Fixed a bug retrieving data types when UseUtf16Encoding is true.  Side-effect of further merging the common code between the two base classes.</li>
+      extension.&nbsp;</li><li>Fixed a bug retrieving data types when UseUtf16Encoding is true. Side-effect of further merging the common code between the two base classes.</li>
       <li>Fixed a bug with System.Transactions whereby a connection closed/disposed within
         a transaction scope is rolled back and cannot be committed.</li>
       <li>Added more error checking and reporting to transactions to help user's isolate
@@ -1035,7 +1036,7 @@
       <P><STRONG>1.0.20 - October 19, 2005</STRONG></P>
       <UL>
         <LI>
-        Fixed a shortcut in SQLiteBase.GetValue which was insufficient for international environments.  The shortcut was removed and the "proper" procedure put in.
+        Fixed a shortcut in SQLiteBase.GetValue which was insufficient for international environments. The shortcut was removed and the "proper" procedure put in.
         </UL>
       <P><STRONG>1.0.19 - October 5, 2005</STRONG></P>
       <UL>

@@ -60,11 +60,11 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
-IF NOT DEFINED YEARS (
-  SET YEARS=2008
+IF NOT DEFINED TEST_CONFIGURATIONS (
+  SET TEST_CONFIGURATIONS=Release
 )
 
-%_VECHO% Years = '%YEARS%'
+%_VECHO% TestConfigurations = '%TEST_CONFIGURATIONS%'
 
 IF /I "%PROCESSOR_ARCHITECTURE%" == "x86" (
   SET PLATFORM=Win32
@@ -81,6 +81,18 @@ IF NOT DEFINED PLATFORM (
 
 %_VECHO% Platform = '%PLATFORM%'
 
+IF NOT DEFINED YEARS (
+  SET YEARS=2008
+)
+
+%_VECHO% Years = '%YEARS%'
+
+IF NOT DEFINED TEST_FILE (
+  SET TEST_FILE=Tests\all.eagle
+)
+
+%_VECHO% TestFile = '%TEST_FILE%'
+
 %__ECHO2% PUSHD "%ROOT%"
 
 IF ERRORLEVEL 1 (
@@ -88,66 +100,72 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
-FOR %%Y IN (%YEARS%) DO (
-  IF NOT DEFINED NOMANAGEDONLY (
-    %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}" -file Tests\all.eagle
-
-    IF ERRORLEVEL 1 (
-      ECHO Testing of "%%Y" managed-only assembly failed.
-      GOTO errors
-    )
-  )
-
-  IF NOT DEFINED NOMIXEDMODE (
-    IF NOT DEFINED NOXCOPY (
-      %__ECHO% XCOPY "bin\%%Y\Release\bin\test.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
+FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
+  FOR %%Y IN (%YEARS%) DO (
+    IF NOT DEFINED NOMANAGEDONLY (
+      %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}; set test_configuration {%%C}" -file "%TEST_FILE%"
 
       IF ERRORLEVEL 1 (
-        ECHO Failed to copy "bin\%%Y\Release\bin\test.*" to "bin\%%Y\%PLATFORM%\Release".
-        GOTO errors
-      )
-
-      %__ECHO% XCOPY "bin\%%Y\Release\bin\System.Data.SQLite.Linq.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
-
-      IF ERRORLEVEL 1 (
-        ECHO Failed to copy "bin\%%Y\Release\bin\System.Data.SQLite.Linq.*" to "bin\%%Y\%PLATFORM%\Release".
-        GOTO errors
-      )
-
-      %__ECHO% XCOPY "bin\%%Y\Release\bin\testlinq.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
-
-      IF ERRORLEVEL 1 (
-        ECHO Failed to copy "bin\%%Y\Release\bin\testlinq.*" to "bin\%%Y\%PLATFORM%\Release".
-        GOTO errors
-      )
-
-      %__ECHO% XCOPY "bin\%%Y\Release\bin\northwindEF.db" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
-
-      IF ERRORLEVEL 1 (
-        ECHO Failed to copy "bin\%%Y\Release\bin\northwindEF.db" to "bin\%%Y\%PLATFORM%\Release".
-        GOTO errors
-      )
-
-      %__ECHO% XCOPY "bin\%%Y\Release\bin\SQLite.Designer.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
-
-      IF ERRORLEVEL 1 (
-        ECHO Failed to copy "bin\%%Y\Release\bin\SQLite.Designer.*" to "bin\%%Y\%PLATFORM%\Release".
-        GOTO errors
-      )
-
-      %__ECHO% XCOPY "bin\%%Y\Release\bin\Installer.*" "bin\%%Y\%PLATFORM%\Release" %FFLAGS% %DFLAGS%
-
-      IF ERRORLEVEL 1 (
-        ECHO Failed to copy "bin\%%Y\Release\bin\Installer.*" to "bin\%%Y\%PLATFORM%\Release".
+        ECHO Testing of "%%Y" managed-only assembly failed.
         GOTO errors
       )
     )
 
-    %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}" -initialize -runtimeOption native -file Tests\all.eagle
+    IF NOT DEFINED NOMIXEDMODE (
+      IF NOT DEFINED NOXCOPY (
+        CALL :fn_CheckForLinq %%Y
 
-    IF ERRORLEVEL 1 (
-      ECHO Testing of "%%Y" mixed-mode assembly failed.
-      GOTO errors
+        %__ECHO% XCOPY "bin\%%Y\%%C\bin\test.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+        IF ERRORLEVEL 1 (
+          ECHO Failed to copy "bin\%%Y\%%C\bin\test.*" to "bin\%%Y\%PLATFORM%\%%C".
+          GOTO errors
+        )
+
+        IF DEFINED HAVE_LINQ (
+          %__ECHO% XCOPY "bin\%%Y\%%C\bin\System.Data.SQLite.Linq.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+          IF ERRORLEVEL 1 (
+            ECHO Failed to copy "bin\%%Y\%%C\bin\System.Data.SQLite.Linq.*" to "bin\%%Y\%PLATFORM%\%%C".
+            GOTO errors
+          )
+
+          %__ECHO% XCOPY "bin\%%Y\%%C\bin\testlinq.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+          IF ERRORLEVEL 1 (
+            ECHO Failed to copy "bin\%%Y\%%C\bin\testlinq.*" to "bin\%%Y\%PLATFORM%\%%C".
+            GOTO errors
+          )
+
+          %__ECHO% XCOPY "bin\%%Y\%%C\bin\northwindEF.db" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+          IF ERRORLEVEL 1 (
+            ECHO Failed to copy "bin\%%Y\%%C\bin\northwindEF.db" to "bin\%%Y\%PLATFORM%\%%C".
+            GOTO errors
+          )
+        )
+
+        %__ECHO% XCOPY "bin\%%Y\%%C\bin\SQLite.Designer.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+        IF ERRORLEVEL 1 (
+          ECHO Failed to copy "bin\%%Y\%%C\bin\SQLite.Designer.*" to "bin\%%Y\%PLATFORM%\%%C".
+          GOTO errors
+        )
+
+        %__ECHO% XCOPY "bin\%%Y\%%C\bin\Installer.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+        IF ERRORLEVEL 1 (
+          ECHO Failed to copy "bin\%%Y\%%C\bin\Installer.*" to "bin\%%Y\%PLATFORM%\%%C".
+          GOTO errors
+        )
+      )
+
+      %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}; set test_configuration {%%C}" -initialize -runtimeOption native -file "%TEST_FILE%"
+
+      IF ERRORLEVEL 1 (
+        ECHO Testing of "%%Y" mixed-mode assembly failed.
+        GOTO errors
+      )
     )
   )
 )
@@ -160,6 +178,26 @@ IF ERRORLEVEL 1 (
 )
 
 GOTO no_errors
+
+:fn_CheckForLinq
+  CALL :fn_UnsetVariable HAVE_LINQ
+  IF /I "%1" == "2008" (
+    SET HAVE_LINQ=1
+  )
+  IF /I "%1" == "2010" (
+    SET HAVE_LINQ=1
+  )
+  IF /I "%1" == "2012" (
+    SET HAVE_LINQ=1
+  )
+  GOTO :EOF
+
+:fn_UnsetVariable
+  IF NOT "%1" == "" (
+    SET %1=
+    CALL :fn_ResetErrorLevel
+  )
+  GOTO :EOF
 
 :fn_ResetErrorLevel
   VERIFY > NUL

@@ -270,6 +270,32 @@ namespace eval ::Eagle {
           [file join [getBinaryDirectory] [file tail $fileName]]]
     }
 
+    proc getCoreBinaryFileName { {standard false} } {
+      #
+      # NOTE: Returns the full path for the file containing the core SQLite
+      #       library code for this platform.
+      #
+      if {[hasRuntimeOption native]} then {
+        #
+        # NOTE: Return the mixed-mode assembly file name.
+        #
+        return [file nativename \
+            [file join [getBinaryDirectory] System.Data.SQLite.dll]]
+      } elseif {$standard} then {
+        #
+        # NOTE: Return the native-only standard SQLite library file name.
+        #
+        return [file nativename \
+            [file join [getBinaryDirectory] sqlite3.dll]]
+      } else {
+        #
+        # NOTE: Return the native-only interop assembly file name.
+        #
+        return [file nativename \
+            [file join [getBinaryDirectory] SQLite.Interop.dll]]
+      }
+    }
+
     proc getDatabaseDirectory {} {
       #
       # NOTE: This procedure returns the directory where the test databases
@@ -986,6 +1012,12 @@ namespace eval ::Eagle {
 
         catch {
           tputs $::test_channel [appendArgs \
+              "---- file version of \"sqlite3.dll\"... " \
+              [file version [getBinaryFileName sqlite3.dll]] \n]
+        }
+
+        catch {
+          tputs $::test_channel [appendArgs \
               "---- file version of \"SQLite.Interop.dll\"... " \
               [file version [getBinaryFileName SQLite.Interop.dll]] \n]
         }
@@ -1071,6 +1103,38 @@ namespace eval ::Eagle {
 
         checkForSQLiteDefineConstant $::test_channel \
             INTEROP_TEST_EXTENSION
+
+        checkForSQLiteDefineConstant $::test_channel \
+            SQLITE_STANDARD
+
+        #
+        # NOTE: Check the current build year.  Basically, this indicates
+        #       which version of MSBuild and/or Visual Studio was used to
+        #       compile the assembly binaries under test.
+        #
+        tputs $::test_channel \
+            "---- checking for System.Data.SQLite build year... "
+
+        set year [getBuildYear]
+        addConstraint [appendArgs buildYear $year]
+        tputs $::test_channel [appendArgs \" $year \"\n]
+
+        #
+        # NOTE: Check the current build configuration.  This should normally
+        #       be either "Debug" or "Release".
+        #
+        tputs $::test_channel \
+            "---- checking for System.Data.SQLite build configuration... "
+
+        set configuration [getBuildConfiguration]
+        addConstraint [appendArgs buildConfiguration $configuration]
+        tputs $::test_channel [appendArgs \" $configuration \"\n]
+
+        #
+        # NOTE: Check for the native runtime option, which would mean we are
+        #       using the mixed-mode assembly.
+        #
+        checkForRuntimeOption $::test_channel native
 
         #
         # NOTE: Report the resource usage prior to running any tests.

@@ -1924,6 +1924,7 @@ namespace System.Data.SQLite
                 bool noDesktop,
                 bool noCompact,
                 bool noNetFx20,
+                bool noNetFx35,
                 bool noNetFx40,
                 bool noNetFx45,
                 bool noVs2005,
@@ -1961,6 +1962,7 @@ namespace System.Data.SQLite
                 this.noDesktop = noDesktop;
                 this.noCompact = noCompact;
                 this.noNetFx20 = noNetFx20;
+                this.noNetFx35 = noNetFx35;
                 this.noNetFx40 = noNetFx40;
                 this.noNetFx45 = noNetFx45;
                 this.noVs2005 = noVs2005;
@@ -2125,7 +2127,8 @@ namespace System.Data.SQLite
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, false, true, false, false, false,
                     false, false, false, false, false, false, false, false,
-                    false, false, false, true, true, false, false, false);
+                    false, false, false, false, true, true, false, false,
+                    false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2500,6 +2503,27 @@ namespace System.Data.SQLite
                             }
 
                             configuration.noNetFx20 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noNetFx35"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noNetFx35 = (bool)value;
                         }
                         else if (MatchOption(newArg, "noNetFx40"))
                         {
@@ -3120,6 +3144,7 @@ namespace System.Data.SQLite
                         //       an assembly compiled for the CLR v2.0.
                         //
                         configuration.noNetFx20 = true;
+                        configuration.noNetFx35 = true;
                         configuration.noVs2005 = true;
                         configuration.noVs2008 = true;
 
@@ -3169,6 +3194,18 @@ namespace System.Data.SQLite
                     return ((installFlags & hasFlags) == hasFlags);
                 else
                     return ((installFlags & hasFlags) != InstallFlags.None);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public bool IsLinqSupported()
+            {
+                //
+                // NOTE: Return non-zero if the LINQ assembly should be
+                //       processed during the install.  If the target is
+                //       Visual Studio 2005, this should return zero.
+                //
+                return !noNetFx35 || !noNetFx40 || !noNetFx45;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3261,6 +3298,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "NoNetFx20", ForDisplay(noNetFx20)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoNetFx35", ForDisplay(noNetFx35)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3525,6 +3566,15 @@ namespace System.Data.SQLite
             {
                 get { return noNetFx20; }
                 set { noNetFx20 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noNetFx35;
+            public bool NoNetFx35
+            {
+                get { return noNetFx35; }
+                set { noNetFx35 = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -6125,15 +6175,18 @@ namespace System.Data.SQLite
                                 ForDisplay(configuration.CoreFileName)),
                                 traceCategory);
 
-                            if (!configuration.WhatIf)
-                                /* throw */
-                                publish.GacInstall(configuration.LinqFileName);
+                            if (configuration.IsLinqSupported())
+                            {
+                                if (!configuration.WhatIf)
+                                    /* throw */
+                                    publish.GacInstall(configuration.LinqFileName);
 
-                            TraceOps.DebugAndTrace(TracePriority.Highest,
-                                debugCallback, traceCallback, String.Format(
-                                "GacInstall: assemblyPath = {0}",
-                                ForDisplay(configuration.LinqFileName)),
-                                traceCategory);
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacInstall: assemblyPath = {0}",
+                                    ForDisplay(configuration.LinqFileName)),
+                                    traceCategory);
+                            }
 
                             if (configuration.HasFlags(
                                     InstallFlags.VsPackageGlobalAssemblyCache, true))
@@ -6165,15 +6218,18 @@ namespace System.Data.SQLite
                                     traceCategory);
                             }
 
-                            if (!configuration.WhatIf)
-                                /* throw */
-                                publish.GacRemove(configuration.LinqFileName);
+                            if (configuration.IsLinqSupported())
+                            {
+                                if (!configuration.WhatIf)
+                                    /* throw */
+                                    publish.GacRemove(configuration.LinqFileName);
 
-                            TraceOps.DebugAndTrace(TracePriority.Highest,
-                                debugCallback, traceCallback, String.Format(
-                                "GacRemove: assemblyPath = {0}",
-                                ForDisplay(configuration.LinqFileName)),
-                                traceCategory);
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacRemove: assemblyPath = {0}",
+                                    ForDisplay(configuration.LinqFileName)),
+                                    traceCategory);
+                            }
 
                             if (!configuration.WhatIf)
                                 /* throw */
