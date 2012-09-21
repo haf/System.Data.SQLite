@@ -149,7 +149,7 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2005} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2005LogFile]]] : $error}]
 } -cleanup {
-  # cleanupFile $fileName
+  cleanupFile $fileName
 
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator buildYear2005 visualStudio2005\
@@ -185,7 +185,7 @@ runTest {test installer-1.2 {uninstaller tool / Visual Studio 2005} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2005LogFile]]] : $error}]
 } -cleanup {
-  # cleanupFile $fileName
+  cleanupFile $fileName
 
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator buildYear2005 visualStudio2005\
@@ -221,7 +221,7 @@ runTest {test installer-1.3 {installer tool / Visual Studio 2008} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2008LogFile]]] : $error}]
 } -cleanup {
-  # cleanupFile $fileName
+  cleanupFile $fileName
 
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator buildYear2008 visualStudio2008\
@@ -258,7 +258,7 @@ runTest {test installer-1.4 {uninstaller tool / Visual Studio 2008} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2008LogFile]]] : $error}]
 } -cleanup {
-  # cleanupFile $fileName
+  cleanupFile $fileName
 
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator buildYear2008 visualStudio2008\
@@ -295,7 +295,7 @@ runTest {test installer-1.5 {installer tool / Visual Studio 2010} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2010LogFile]]] : $error}]
 } -cleanup {
-  # cleanupFile $fileName
+  cleanupFile $fileName
 
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator buildYear2010 visualStudio2010\
@@ -332,7 +332,7 @@ runTest {test installer-1.6 {uninstaller tool / Visual Studio 2010} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2010LogFile]]] : $error}]
 } -cleanup {
-  # cleanupFile $fileName
+  cleanupFile $fileName
 
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator buildYear2010 visualStudio2010\
@@ -369,7 +369,7 @@ runTest {test installer-1.7 {installer tool / Visual Studio 2012} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2012LogFile]]] : $error}]
 } -cleanup {
-  # cleanupFile $fileName
+  cleanupFile $fileName
 
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator buildYear2012 visualStudio2012\
@@ -406,7 +406,7 @@ runTest {test installer-1.8 {uninstaller tool / Visual Studio 2012} -setup {
   list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2012LogFile]]] : $error}]
 } -cleanup {
-  # cleanupFile $fileName
+  cleanupFile $fileName
 
   unset -nocomplain wow64 code output error fileName
 } -constraints {eagle administrator buildYear2012 visualStudio2012\

@@ -55,7 +55,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   set count(1) 5
 
   if {[info exists argv] && [llength $argv] > 0} then {
-    parse options [list \
+    parse options -flags \
+        {-StopOnUnknown +IgnoreOnUnknown SkipOnUnknown} -- [list \
         [list null MustHaveIntegerValue -1 -1 -count0 $count(0)] \
         [list null MustHaveIntegerValue -1 -1 -count1 $count(1)]] $argv
 
@@ -497,11 +498,15 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     lappend ::times(14) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
       if {[catch {
-        set result [sql execute -execute scalar $db "PRAGMA integrity_check;"]
-        if {$result ne "ok"} then {
-          error [appendArgs "integrity check failed: " $result]
+        for {set index 1} {$index <= $count} {incr index} {
+          set result [sql execute -execute scalar $db \
+              "PRAGMA integrity_check;"]
+          if {$result eq "ok"} then {
+            showTest E
+          } else {
+            error [appendArgs "integrity check failed: " $result]
+          }
         }
-        showTest E
       } error]} then {
         if {[expectedError $error]} then {
           showTest *
@@ -548,6 +553,22 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           "---- no times for workload (" $index(0) ")\n"]
     }
   }
+
+  set result [sql execute -execute scalar $srcDb "PRAGMA integrity_check;"]
+
+  if {$result eq "ok"} then {
+    tputs $test_channel "---- integrity check ok (srcDb)\n"
+  } else {
+    error [appendArgs "integrity check failed (srcDb): " $result]
+  }
+
+  set result [sql execute -execute scalar $db "PRAGMA integrity_check;"]
+
+  if {$result eq "ok"} then {
+    tputs $test_channel "---- integrity check ok (db)\n"
+  } else {
+    error [appendArgs "integrity check failed (db): " $result]
+  }
 } -cleanup {
   rename failTest ""
   rename showTest ""
@@ -563,8 +584,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }
   }
 
-  unset -nocomplain thread index workload srcDb db fileName compiled options \
-      count times
+  unset -nocomplain result thread index workload srcDb db fileName compiled \
+      options count times
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
 
