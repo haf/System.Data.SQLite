@@ -98,8 +98,7 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
       }]
     }
 
-    set memSource [object invoke -flags +NonPublic -objectflags +NoDispose \
-        Interpreter.GetActive.connections get_Item $memDb]
+    set memSource [getDbConnection memDb]
 
     unset -nocomplain results errors
 
@@ -211,6 +210,8 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
   } -cleanup {
     cleanupDb $fileName(2)
     cleanupDb $fileName(1) memDb
+
+    freeDbConnection memSource
 
     unset -nocomplain result results errors code index memSource dataSource \
         id memDb db fileName callbackResults

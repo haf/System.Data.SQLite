@@ -234,7 +234,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Returns the specified file name as if it were located in the
       #       build directory, discarding any directory information present
-      #       in the file name as provided by the caller.
+      #       in the file name as provided by our caller.
       #
       return [file nativename \
           [file join [getBuildDirectory] [file tail $fileName]]]
@@ -264,7 +264,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Returns the specified file name as if it were located in the
       #       binary directory, discarding any directory information present
-      #       in the file name as provided by the caller.
+      #       in the file name as provided by our caller.
       #
       return [file nativename \
           [file join [getBinaryDirectory] [file tail $fileName]]]
@@ -319,9 +319,9 @@ namespace eval ::Eagle {
       # NOTE: This procedure returns a test setup script suitable for evaluation
       #       by a test interpreter created in an isolated application domain.
       #       The script being returned will be surrounded by the prefix and
-      #       suffix "script fragments" specified by the caller, if any.  The
+      #       suffix "script fragments" specified by our caller, if any.  The
       #       entire script being returned will be substituted via [subst], in
-      #       the context of the caller.  This step is necessary so that some
+      #       the context of our caller.  This step is necessary so that some
       #       limited context information, primarily related to the test build
       #       directory, can be transferred to the interpreter in the isolated
       #       application domain, making it able to successfully run tests that
@@ -362,7 +362,7 @@ namespace eval ::Eagle {
       set targetFileName [getBinaryFileName $fileName]
 
       if {[catch {
-          file copy -force $sourceFileName $targetFileName}] == 0} then {
+              file copy -force $sourceFileName $targetFileName}] == 0} then {
         tputs $::test_channel [appendArgs \
             "---- copied build file from \"" $sourceFileName "\" to \"" \
             $targetFileName \"\n]
@@ -438,13 +438,15 @@ namespace eval ::Eagle {
     proc checkForSQLite { channel } {
       tputs $channel "---- checking for core SQLite library... "
 
-      if {[catch {object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
+      if {[catch {
+              object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
               SQLiteVersion} version] == 0} then {
         #
         # NOTE: Attempt to query the Fossil source identifier for the SQLite
         #       core library.
         #
-        if {[catch {object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
+        if {[catch {
+                object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
                 SQLiteSourceId} sourceId]} then {
           #
           # NOTE: We failed to query the Fossil source identifier.
@@ -468,7 +470,8 @@ namespace eval ::Eagle {
           "---- checking for System.Data.SQLite define constant \"" $name \
           "\"... "]
 
-      if {[catch {object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
+      if {[catch {
+              object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
               DefineConstants} defineConstants] == 0} then {
         if {[lsearch -exact -nocase $defineConstants $name] != -1} then {
           #
@@ -526,13 +529,13 @@ namespace eval ::Eagle {
 
     proc catchAndReturn { script {stackTrace false} {strict true} } {
       #
-      # NOTE: Evaluate the script provided by the caller in their context,
+      # NOTE: Evaluate the script provided by our caller in their context,
       #       capturing both the result and the return code.
       #
       set code [catch {uplevel 1 $script} result]
 
       #
-      # NOTE: Did the script provided by the caller NOT raise an error?
+      # NOTE: Did the script provided by our caller NOT raise an error?
       #
       if {$strict && $code == 0 || !$strict && $code != 1} then {
         #
@@ -541,13 +544,13 @@ namespace eval ::Eagle {
         return [list $code $result]
       } elseif {$stackTrace} then {
         #
-        # NOTE: Failure.  The caller wants a full stack trace (if applicable),
+        # NOTE: Failure.  Our caller wants a full stack trace (if applicable),
         #       return a list with the return code and the result verbatim.
         #
         return [list $code $result]
       } else {
         #
-        # NOTE: Failure.  The caller does not want a full stack trace (if
+        # NOTE: Failure.  Our caller does not want a full stack trace (if
         #       applicable), return a list with the return code, the error
         #       code for the interpreter, and the error message up to the
         #       point where the stack trace should start.
@@ -614,7 +617,7 @@ namespace eval ::Eagle {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
             {extra ""} {qualify true} {delete true} {uri false} {varName db} } {
       #
-      # NOTE: First, see if the caller has requested an in-memory database.
+      # NOTE: First, see if our caller has requested an in-memory database.
       #
       set isMemory [isMemoryDb $fileName]
 
@@ -647,7 +650,7 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: Refer to the specified variable (e.g. "db") in the context of the
+      # NOTE: Refer to the specified variable (e.g. "db") in the context of our
       #       caller.  The handle to the opened database will be stored there.
       #
       upvar 1 $varName db
@@ -655,7 +658,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Start building the connection string.  The only required portion
       #       of the connection string is the data source, which contains the
-      #       database file name itself.  If the caller wants to use a URI as
+      #       database file name itself.  If our caller wants to use a URI as
       #       the data source, use the FullUri connection string property to
       #       prevent the data source string from being mangled.
       #
@@ -673,7 +676,7 @@ namespace eval ::Eagle {
       append connection {;ToFullPath=${qualify}}
 
       #
-      # NOTE: If the caller specified a journal mode, add the necessary portion
+      # NOTE: If our caller specified a journal mode, add the necessary portion
       #       of the connection string now.
       #
       if {[string length $mode] > 0} then {
@@ -681,7 +684,7 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If the caller specified a DateTime format, add the necessary
+      # NOTE: If our caller specified a DateTime format, add the necessary
       #       portion of the connection string now.
       #
       if {[string length $dateTimeFormat] > 0} then {
@@ -689,7 +692,7 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If the caller specified a DateTimeKind, add the necessary portion
+      # NOTE: If our caller specified a DateTimeKind, add the necessary portion
       #       of the connection string now.
       #
       if {[string length $dateTimeKind] > 0} then {
@@ -720,7 +723,7 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If the caller specified a SQLiteConnectionFlags, add the necessary
+      # NOTE: If our caller specified a SQLiteConnectionFlags, add the necessary
       #       portion of the connection string now.
       #
       if {[string length $flags] > 0} then {
@@ -728,7 +731,7 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If the caller specified an extra payload to the connection string,
+      # NOTE: If our caller specified an extra payload to the connection string,
       #       append it now.
       #
       if {[string length $extra] > 0} then {
@@ -737,9 +740,68 @@ namespace eval ::Eagle {
 
       #
       # NOTE: Open the database connection now, placing the opaque handle value
-      #       into the variable specified by the caller.
+      #       into the variable specified by our caller.
       #
       set db [sql open -type SQLite [subst $connection]]
+    }
+
+    proc getDbConnection { {varName db} } {
+      #
+      # NOTE: Refer to the specified variable (e.g. "db") in the context of our
+      #       caller.  The handle to the database previously opened by [setupDb]
+      #       should be stored there.
+      #
+      upvar 1 $varName db
+
+      #
+      # NOTE: This returns the ADO.NET IDbConnection object instance for the
+      #       specified databse handle.  Since getting this object relies upon
+      #       Eagle internals, great care should be taken to avoid disposing of
+      #       this object or otherwise putting it into an invalid state.
+      #
+      if {[info exists db]} then {
+        if {[catch {
+                object invoke -flags +NonPublic -objectflags +NoDispose \
+                -alias Interpreter.GetActive.connections Item $db} \
+                connection] == 0} then {
+          #
+          # NOTE: Success, return the opaque object handle.
+          #
+          return $connection
+        } else {
+          #
+          # NOTE: Failure, report why.
+          #
+          tputs $::test_channel [appendArgs \
+              "==== WARNING: failed to get connection handle for database \"" \
+              $db "\", error: " \n\t $error \n]
+        }
+      }
+    }
+
+    proc freeDbConnection { {varName connection} } {
+      #
+      # NOTE: Refer to the specified variable (e.g. "connection") in the context
+      #       of our caller.  The opaque object handle for an ADO.NET connection
+      #       previously returned by [getDbConnection] should be stored there.
+      #
+      upvar 1 $varName connection
+
+      #
+      # NOTE: Attempt to remove the opaque object handle from the interpreter
+      #       now.  This [object dispose] call will not actually dispose of the
+      #       underlying object because the +NoDispose flag was set on it during
+      #       creation of the opaque object handle.
+      #
+      if {[info exists connection] && \
+          [catch {object dispose $connection} error]} then {
+        #
+        # NOTE: We somehow failed to remove the handle, report why.
+        #
+        tputs $::test_channel [appendArgs \
+            "==== WARNING: failed to remove connection handle \"" $connection \
+            "\", error: " \n\t $error \n]
+      }
     }
 
     proc cleanupDb { fileName {varName db} {collect true} {qualify true}
@@ -757,8 +819,9 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: Refer to the specified variable (e.g. "db") in the context of the
-      #       caller.  The handle to the opened database is stored there.
+      # NOTE: Refer to the specified variable (e.g. "db") in the context of our
+      #       caller.  The handle to the database previously opened by [setupDb]
+      #       should be stored there.
       #
       upvar 1 $varName db
 
@@ -776,7 +839,7 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: First, see if the caller has requested an in-memory database.
+      # NOTE: First, see if our caller has requested an in-memory database.
       #
       set isMemory [isMemoryDb $fileName]
 
@@ -906,7 +969,7 @@ namespace eval ::Eagle {
         }
       }
 
-      set result $memory; # NOTE: Return memory in-use to caller.
+      set result $memory; # NOTE: Return memory in-use to our caller.
 
       if {!$quiet} then {
         tputs $channel "---- maximum memory in use by SQLite... "
@@ -1072,7 +1135,8 @@ namespace eval ::Eagle {
         tputs $::test_channel \
             "---- checking for function sqlite3_win32_set_directory... "
 
-        if {[catch {object invoke -flags +NonPublic \
+        if {[catch {
+                object invoke -flags +NonPublic \
                 System.Data.SQLite.UnsafeNativeMethods \
                 sqlite3_win32_set_directory 0 null}] == 0} then {
           #

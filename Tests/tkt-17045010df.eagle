@@ -23,8 +23,7 @@ runSQLiteTestPrologue
 runTest {test tkt-17045010df-1.1 {EnableExtensions & LoadExtension} -setup {
   setupDb [set fileName tkt-17045010df-1.1.db]
 } -body {
-  set connection [object invoke -flags +NonPublic -objectflags +NoDispose \
-      -alias Interpreter.GetActive.connections get_Item $db]
+  set connection [getDbConnection]
 
   lappend result [catchAndReturn {$connection EnableExtensions false}]
   lappend result [catchAndReturn {$connection LoadExtension \
@@ -46,6 +45,8 @@ runTest {test tkt-17045010df-1.1 {EnableExtensions & LoadExtension} -setup {
 
   string map [list \r\n ", "] $result
 } -cleanup {
+  freeDbConnection
+
   unset -nocomplain result connection
 
   cleanupDb $fileName
