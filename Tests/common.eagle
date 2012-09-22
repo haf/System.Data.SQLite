@@ -763,18 +763,18 @@ namespace eval ::Eagle {
         if {[catch {
                 object invoke -flags +NonPublic -objectflags +NoDispose \
                 -alias Interpreter.GetActive.connections Item $db} \
-                connection] == 0} then {
+                result] == 0} then {
           #
           # NOTE: Success, return the opaque object handle.
           #
-          return $connection
+          return $result
         } else {
           #
           # NOTE: Failure, report why.
           #
           tputs $::test_channel [appendArgs \
               "==== WARNING: failed to get connection handle for database \"" \
-              $db "\", error: " \n\t $error \n]
+              $db "\", error: " \n\t $result \n]
         }
       }
     }
