@@ -366,8 +366,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     lappend ::times(11) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
       if {[catch {
-        sql execute $db "VACUUM;"
-        showTest B
+        for {set index 1} {$index <= $count} {incr index} {
+          sql execute $db "VACUUM;"
+          showTest B
+        }
       } error]} then {
         if {[expectedError $error]} then {
           showTest *
@@ -386,54 +388,56 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #12, backup to in-memory database.
     #
     lappend ::times(12) [lindex [time {
-      if {[string is integer -strict $::compiled(12)]} then {
-        set id $::compiled(12); # NOTE: Already compiled.
-        object invoke _Dynamic${id}.Test${id} BackupAndGetData
-      } else {
-        set id [object invoke Interpreter.GetActive NextId]
-        set code [compileCSharpWith [subst {
-          using System;
-          using System.Data.SQLite;
-          using System.Text;
-
-          namespace _Dynamic${id}
-          {
-            public static class Test${id}
-            {
-              public static void BackupAndGetData()
-              {
-                using (SQLiteConnection source = new SQLiteConnection(
-                    "FullUri=${dstFileName};"))
-                {
-                  source.Open();
-                  using (SQLiteConnection destination = new SQLiteConnection(
-                      "FullUri=${srcFileName};"))
-                  {
-                    destination.Open();
-
-                    source.BackupDatabase(
-                        destination, "main", "main", -1, null, 0);
-                  }
-                }
-              }
-
-              /////////////////////////////////////////////////////////////////
-
-              public static void Main()
-              {
-                // do nothing.
-              }
-            }
-          }
-        }] true true true results errors System.Data.SQLite.dll]
-        if {$code eq "Ok"} then {
-          set ::compiled(12) $id; # NOTE: Compiled OK.
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[string is integer -strict $::compiled(12)]} then {
+          set id $::compiled(12); # NOTE: Already compiled.
           object invoke _Dynamic${id}.Test${id} BackupAndGetData
         } else {
-          error $errors
+          set id [object invoke Interpreter.GetActive NextId]
+          set code [compileCSharpWith [subst {
+            using System;
+            using System.Data.SQLite;
+            using System.Text;
+
+            namespace _Dynamic${id}
+            {
+              public static class Test${id}
+              {
+                public static void BackupAndGetData()
+                {
+                  using (SQLiteConnection source = new SQLiteConnection(
+                      "FullUri=${dstFileName};"))
+                  {
+                    source.Open();
+                    using (SQLiteConnection destination = new SQLiteConnection(
+                        "FullUri=${srcFileName};"))
+                    {
+                      destination.Open();
+
+                      source.BackupDatabase(
+                          destination, "main", "main", -1, null, 0);
+                    }
+                  }
+                }
+
+                ///////////////////////////////////////////////////////////////
+
+                public static void Main()
+                {
+                  // do nothing.
+                }
+              }
+            }
+          }] true true true results errors System.Data.SQLite.dll]
+          if {$code eq "Ok"} then {
+            set ::compiled(12) $id; # NOTE: Compiled OK.
+            object invoke _Dynamic${id}.Test${id} BackupAndGetData
+          } else {
+            error $errors
+          }
         }
+        showTest C
       }
-      showTest C
     }] 0]
   }]
 
@@ -444,54 +448,56 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #13, backup from an in-memory database.
     #
     lappend ::times(13) [lindex [time {
-      if {[string is integer -strict $::compiled(13)]} then {
-        set id $::compiled(13); # NOTE: Already compiled.
-        object invoke _Dynamic${id}.Test${id} BackupAndGetData
-      } else {
-        set id [object invoke Interpreter.GetActive NextId]
-        set code [compileCSharpWith [subst {
-          using System;
-          using System.Data.SQLite;
-          using System.Text;
-
-          namespace _Dynamic${id}
-          {
-            public static class Test${id}
-            {
-              public static void BackupAndGetData()
-              {
-                using (SQLiteConnection source = new SQLiteConnection(
-                    "FullUri=${srcFileName};"))
-                {
-                  source.Open();
-                  using (SQLiteConnection destination = new SQLiteConnection(
-                      "FullUri=${dstFileName};"))
-                  {
-                    destination.Open();
-
-                    source.BackupDatabase(
-                        destination, "main", "main", -1, null, 0);
-                  }
-                }
-              }
-
-              /////////////////////////////////////////////////////////////////
-
-              public static void Main()
-              {
-                // do nothing.
-              }
-            }
-          }
-        }] true true true results errors System.Data.SQLite.dll]
-        if {$code eq "Ok"} then {
-          set ::compiled(13) $id; # NOTE: Compiled OK.
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[string is integer -strict $::compiled(13)]} then {
+          set id $::compiled(13); # NOTE: Already compiled.
           object invoke _Dynamic${id}.Test${id} BackupAndGetData
         } else {
-          error $errors
+          set id [object invoke Interpreter.GetActive NextId]
+          set code [compileCSharpWith [subst {
+            using System;
+            using System.Data.SQLite;
+            using System.Text;
+
+            namespace _Dynamic${id}
+            {
+              public static class Test${id}
+              {
+                public static void BackupAndGetData()
+                {
+                  using (SQLiteConnection source = new SQLiteConnection(
+                      "FullUri=${srcFileName};"))
+                  {
+                    source.Open();
+                    using (SQLiteConnection destination = new SQLiteConnection(
+                        "FullUri=${dstFileName};"))
+                    {
+                      destination.Open();
+
+                      source.BackupDatabase(
+                          destination, "main", "main", -1, null, 0);
+                    }
+                  }
+                }
+
+                ///////////////////////////////////////////////////////////////
+
+                public static void Main()
+                {
+                  // do nothing.
+                }
+              }
+            }
+          }] true true true results errors System.Data.SQLite.dll]
+          if {$code eq "Ok"} then {
+            set ::compiled(13) $id; # NOTE: Compiled OK.
+            object invoke _Dynamic${id}.Test${id} BackupAndGetData
+          } else {
+            error $errors
+          }
         }
+        showTest D
       }
-      showTest D
     }] 0]
   }]
 
