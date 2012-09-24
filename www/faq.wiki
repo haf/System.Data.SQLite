@@ -173,6 +173,10 @@
     <li>
       All sub-projects are fully supported with the .NET Framework 4.0.
     </li>
+
+    <li>
+      All sub-projects are fully supported with the .NET Framework 4.5.
+    </li>
   </ul>
 </p>
 
@@ -183,12 +187,12 @@
 </p>
 
 <p>
-  Currently, Visual Studio 2005, 2008, and 2010 are supported, including the
-  &quot;Express&quot; editions; however, in order to build the entire solution,
-  including the necessary native code, the &quot;Professional&quot; edition (or
-  higher) is required.  It may be possible to install both Visual C# Express
-  and Visual C++ Express and then build the corresponding sub-projects via their
-  respective integrated development environments (IDE); however, this
+  Currently, Visual Studio 2005, 2008, 2010, and 2012 are supported, including
+  the &quot;Express&quot; editions; however, in order to build the entire
+  solution, including the necessary native code, the &quot;Professional&quot;
+  edition (or higher) is required.  It may be possible to install both Visual C#
+  Express and Visual C++ Express and then build the corresponding sub-projects
+  via their respective integrated development environments (IDE); however, this
   configuration has <b>not</b> been tested.  The design-time components are
   <b>no longer</b> supported for the Express editions due to licensing
   restrictions.
@@ -288,10 +292,10 @@
 </p>
 
 <p>
-  Alternatively, when using Visual Studio 2010, you can simply use the NuGet
-  package that corresponds to your target processor architecture.  Installing
-  the assemblies into the Global Assembly Cache is not recommended as it may
-  cause conflicts with other applications installed on the machine.
+  Alternatively, when using Visual Studio 2010 or later, you can simply use the
+  NuGet package that corresponds to your target processor architecture.
+  Installing the assemblies into the Global Assembly Cache is not recommended as
+  it may cause conflicts with other applications installed on the machine.
 </p>
 
 <hr>

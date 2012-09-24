@@ -34,9 +34,9 @@
 
   <li>
     Visual Studio design-time Support, works with all versions of Visual Studio
-    2005/2008/2010.  You can add a SQLite database to the Servers list, design
-    queries with the Query Designer, drag-and-drop tables onto a Typed DataSet,
-    etc.
+    2005/2008/2010/2012.  You can add a SQLite database to the Servers list,
+    design queries with the Query Designer, drag-and-drop tables onto a Typed
+    DataSet, etc.
     <br />
     <font color="red">
       Due to Visual Studio licensing restrictions, the Express Editions can no
