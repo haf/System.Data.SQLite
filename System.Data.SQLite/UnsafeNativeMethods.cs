@@ -1443,291 +1443,458 @@ namespace System.Data.SQLite
 
 #endif
 
-  // Handles the unmanaged database pointer, and provides finalization support for it.
-  internal class SQLiteConnectionHandle : CriticalHandle
-  {
-    public static implicit operator IntPtr(SQLiteConnectionHandle db)
-    {
-      return (db != null) ? db.handle : IntPtr.Zero;
-    }
+    ///////////////////////////////////////////////////////////////////////////
 
-    internal SQLiteConnectionHandle(IntPtr db)
-      : this()
+    #region SQLiteConnectionHandle Class
+    // Handles the unmanaged database pointer, and provides finalization
+    // support for it.
+    internal class SQLiteConnectionHandle : CriticalHandle
     {
-      SetHandle(db);
-    }
+#if PLATFORM_COMPACTFRAMEWORK
+        private readonly object syncRoot = new object();
+#endif
 
-    private SQLiteConnectionHandle()
-      : base(IntPtr.Zero)
-    {
-    }
+        ///////////////////////////////////////////////////////////////////////
 
-    protected override bool ReleaseHandle()
-    {
-      try
-      {
+        public static implicit operator IntPtr(SQLiteConnectionHandle db)
+        {
+            if (db != null)
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (db.syncRoot)
+#endif
+                {
+                    return db.handle;
+                }
+            }
+            return IntPtr.Zero;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        internal SQLiteConnectionHandle(IntPtr db)
+            : this()
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (syncRoot)
+#endif
+            {
+                SetHandle(db);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteConnectionHandle()
+            : base(IntPtr.Zero)
+        {
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected override bool ReleaseHandle()
+        {
+            try
+            {
 #if !PLATFORM_COMPACTFRAMEWORK
-        IntPtr localHandle = Interlocked.Exchange(
-          ref handle, IntPtr.Zero);
+                IntPtr localHandle = Interlocked.Exchange(
+                    ref handle, IntPtr.Zero);
 
-        if (localHandle != IntPtr.Zero)
-          SQLiteBase.CloseConnection(this, localHandle);
+                if (localHandle != IntPtr.Zero)
+                    SQLiteBase.CloseConnection(this, localHandle);
 
 #if !NET_COMPACT_20 && TRACE_HANDLE
-        try
-        {
-          Trace.WriteLine(String.Format(
-              "CloseConnection: {0}", localHandle));
-        }
-        catch
-        {
-        }
+                try
+                {
+                    Trace.WriteLine(String.Format(
+                        "CloseConnection: {0}", localHandle));
+                }
+                catch
+                {
+                }
 #endif
 #else
-        if (handle != IntPtr.Zero)
-        {
-          SQLiteBase.CloseConnection(this, handle);
-          SetHandle(IntPtr.Zero);
-        }
+                lock (syncRoot)
+                {
+                    if (handle != IntPtr.Zero)
+                    {
+                        SQLiteBase.CloseConnection(this, handle);
+                        SetHandle(IntPtr.Zero);
+                    }
+                }
 #endif
-
 #if DEBUG
-        return true;
+                return true;
 #endif
-      }
+            }
 #if !NET_COMPACT_20 && TRACE_HANDLE
-      catch (SQLiteException e)
+            catch (SQLiteException e)
 #else
-      catch (SQLiteException)
+            catch (SQLiteException)
 #endif
-      {
+            {
 #if !NET_COMPACT_20 && TRACE_HANDLE
-        try
-        {
-          Trace.WriteLine(String.Format(
-              "CloseConnection: {0}, exception: {1}",
-              handle, e));
-        }
-        catch
-        {
-        }
+                try
+                {
+                    Trace.WriteLine(String.Format(
+                        "CloseConnection: {0}, exception: {1}",
+                        handle, e));
+                }
+                catch
+                {
+                }
 #endif
-      }
-      finally
-      {
-        SetHandleAsInvalid();
-      }
+            }
+            finally
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (syncRoot)
+#endif
+                {
+                    SetHandleAsInvalid();
+                }
+            }
 #if DEBUG
-      return false;
+            return false;
 #else
-      return true;
+            return true;
 #endif
-    }
+        }
 
-    public override bool IsInvalid
-    {
-      get { return (handle == IntPtr.Zero); }
-    }
+        ///////////////////////////////////////////////////////////////////////
+
+        public override bool IsInvalid
+        {
+            get
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (syncRoot)
+#endif
+                {
+                    return (handle == IntPtr.Zero);
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
 
 #if DEBUG
-    public override string ToString()
-    {
-        return handle.ToString();
-    }
+        public override string ToString()
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (syncRoot)
 #endif
-  }
-
-  // Provides finalization support for unmanaged SQLite statements.
-  internal class SQLiteStatementHandle : CriticalHandle
-  {
-    private SQLiteConnectionHandle cnn;
-
-    public static implicit operator IntPtr(SQLiteStatementHandle stmt)
-    {
-      return (stmt != null) ? stmt.handle : IntPtr.Zero;
+            {
+                return handle.ToString();
+            }
+        }
+#endif
     }
+    #endregion
 
-    internal SQLiteStatementHandle(SQLiteConnectionHandle cnn, IntPtr stmt)
-      : this()
-    {
-      this.cnn = cnn;
-      SetHandle(stmt);
-    }
+    ///////////////////////////////////////////////////////////////////////////
 
-    private SQLiteStatementHandle()
-      : base(IntPtr.Zero)
+    #region SQLiteStatementHandle Class
+    // Provides finalization support for unmanaged SQLite statements.
+    internal class SQLiteStatementHandle : CriticalHandle
     {
-    }
+#if PLATFORM_COMPACTFRAMEWORK
+        private readonly object syncRoot = new object();
+#endif
 
-    protected override bool ReleaseHandle()
-    {
-      try
-      {
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteConnectionHandle cnn;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static implicit operator IntPtr(SQLiteStatementHandle stmt)
+        {
+            if (stmt != null)
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (stmt.syncRoot)
+#endif
+                {
+                    return stmt.handle;
+                }
+            }
+            return IntPtr.Zero;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        internal SQLiteStatementHandle(SQLiteConnectionHandle cnn, IntPtr stmt)
+            : this()
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (syncRoot)
+#endif
+            {
+                this.cnn = cnn;
+                SetHandle(stmt);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteStatementHandle()
+            : base(IntPtr.Zero)
+        {
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected override bool ReleaseHandle()
+        {
+            try
+            {
 #if !PLATFORM_COMPACTFRAMEWORK
-        IntPtr localHandle = Interlocked.Exchange(
-          ref handle, IntPtr.Zero);
+                IntPtr localHandle = Interlocked.Exchange(
+                    ref handle, IntPtr.Zero);
 
-        if (localHandle != IntPtr.Zero)
-          SQLiteBase.FinalizeStatement(cnn, localHandle);
+                if (localHandle != IntPtr.Zero)
+                    SQLiteBase.FinalizeStatement(cnn, localHandle);
 
 #if !NET_COMPACT_20 && TRACE_HANDLE
-        try
-        {
-          Trace.WriteLine(String.Format(
-              "FinalizeStatement: {0}", localHandle));
-        }
-        catch
-        {
-        }
+                try
+                {
+                    Trace.WriteLine(String.Format(
+                        "FinalizeStatement: {0}", localHandle));
+                }
+                catch
+                {
+                }
 #endif
 #else
-        if (handle != IntPtr.Zero)
-        {
-          SQLiteBase.FinalizeStatement(cnn, handle);
-          SetHandle(IntPtr.Zero);
-        }
+                lock (syncRoot)
+                {
+                    if (handle != IntPtr.Zero)
+                    {
+                        SQLiteBase.FinalizeStatement(cnn, handle);
+                        SetHandle(IntPtr.Zero);
+                    }
+                }
 #endif
+#if DEBUG
+                return true;
+#endif
+            }
+#if !NET_COMPACT_20 && TRACE_HANDLE
+            catch (SQLiteException e)
+#else
+            catch (SQLiteException)
+#endif
+            {
+#if !NET_COMPACT_20 && TRACE_HANDLE
+                try
+                {
+                    Trace.WriteLine(String.Format(
+                        "FinalizeStatement: {0}, exception: {1}",
+                        handle, e));
+                }
+                catch
+                {
+                }
+#endif
+            }
+            finally
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (syncRoot)
+#endif
+                {
+                    SetHandleAsInvalid();
+                }
+            }
+#if DEBUG
+            return false;
+#else
+            return true;
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override bool IsInvalid
+        {
+            get
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (syncRoot)
+#endif
+                {
+                    return (handle == IntPtr.Zero);
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
 
 #if DEBUG
-        return true;
-#endif
-      }
-#if !NET_COMPACT_20 && TRACE_HANDLE
-      catch (SQLiteException e)
-#else
-      catch (SQLiteException)
-#endif
-      {
-#if !NET_COMPACT_20 && TRACE_HANDLE
-        try
+        public override string ToString()
         {
-          Trace.WriteLine(String.Format(
-              "FinalizeStatement: {0}, exception: {1}",
-              handle, e));
-        }
-        catch
-        {
-        }
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (syncRoot)
 #endif
-      }
-      finally
-      {
-        SetHandleAsInvalid();
-      }
-#if DEBUG
-      return false;
-#else
-      return true;
+            {
+                return handle.ToString();
+            }
+        }
 #endif
     }
+    #endregion
 
-    public override bool IsInvalid
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region SQLiteBackupHandle Class
+    // Provides finalization support for unmanaged SQLite backup objects.
+    internal class SQLiteBackupHandle : CriticalHandle
     {
-      get { return (handle == IntPtr.Zero); }
-    }
-
-#if DEBUG
-    public override string ToString()
-    {
-        return handle.ToString();
-    }
+#if PLATFORM_COMPACTFRAMEWORK
+        private readonly object syncRoot = new object();
 #endif
-  }
 
-  // Provides finalization support for unmanaged SQLite backup objects.
-  internal class SQLiteBackupHandle : CriticalHandle
-  {
-      private SQLiteConnectionHandle cnn;
+        ///////////////////////////////////////////////////////////////////////
 
-      public static implicit operator IntPtr(SQLiteBackupHandle backup)
-      {
-          return (backup != null) ? backup.handle : IntPtr.Zero;
-      }
+        private SQLiteConnectionHandle cnn;
 
-      internal SQLiteBackupHandle(SQLiteConnectionHandle cnn, IntPtr backup)
-          : this()
-      {
-          this.cnn = cnn;
-          SetHandle(backup);
-      }
+        ///////////////////////////////////////////////////////////////////////
 
-      private SQLiteBackupHandle()
-          : base(IntPtr.Zero)
-      {
-      }
+        public static implicit operator IntPtr(SQLiteBackupHandle backup)
+        {
+            if (backup != null)
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (backup.syncRoot)
+#endif
+                {
+                    return backup.handle;
+                }
+            }
+            return IntPtr.Zero;
+        }
 
-      protected override bool ReleaseHandle()
-      {
-          try
-          {
+        ///////////////////////////////////////////////////////////////////////
+
+        internal SQLiteBackupHandle(SQLiteConnectionHandle cnn, IntPtr backup)
+            : this()
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (syncRoot)
+#endif
+            {
+                this.cnn = cnn;
+                SetHandle(backup);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteBackupHandle()
+            : base(IntPtr.Zero)
+        {
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected override bool ReleaseHandle()
+        {
+            try
+            {
 #if !PLATFORM_COMPACTFRAMEWORK
-              IntPtr localHandle = Interlocked.Exchange(
-                  ref handle, IntPtr.Zero);
+                IntPtr localHandle = Interlocked.Exchange(
+                    ref handle, IntPtr.Zero);
 
-              if (localHandle != IntPtr.Zero)
-                  SQLiteBase.FinishBackup(cnn, localHandle);
+                if (localHandle != IntPtr.Zero)
+                    SQLiteBase.FinishBackup(cnn, localHandle);
 
 #if !NET_COMPACT_20 && TRACE_HANDLE
-              try
-              {
-                  Trace.WriteLine(String.Format(
-                      "FinishBackup: {0}", localHandle));
-              }
-              catch
-              {
-              }
+                try
+                {
+                    Trace.WriteLine(String.Format(
+                        "FinishBackup: {0}", localHandle));
+                }
+                catch
+                {
+                }
 #endif
 #else
-              if (handle != IntPtr.Zero)
-              {
-                SQLiteBase.FinishBackup(cnn, handle);
-                SetHandle(IntPtr.Zero);
-              }
+                lock (syncRoot)
+                {
+                    if (handle != IntPtr.Zero)
+                    {
+                        SQLiteBase.FinishBackup(cnn, handle);
+                        SetHandle(IntPtr.Zero);
+                    }
+                }
 #endif
-
 #if DEBUG
-              return true;
+                return true;
 #endif
-          }
+            }
 #if !NET_COMPACT_20 && TRACE_HANDLE
-          catch (SQLiteException e)
+            catch (SQLiteException e)
 #else
-          catch (SQLiteException)
+            catch (SQLiteException)
 #endif
-          {
+            {
 #if !NET_COMPACT_20 && TRACE_HANDLE
-              try
-              {
-                  Trace.WriteLine(String.Format(
-                      "FinishBackup: {0}, exception: {1}",
-                      handle, e));
-              }
-              catch
-              {
-              }
+                try
+                {
+                    Trace.WriteLine(String.Format(
+                        "FinishBackup: {0}, exception: {1}",
+                        handle, e));
+                }
+                catch
+                {
+                }
 #endif
-          }
-          finally
-          {
-              SetHandleAsInvalid();
-          }
+            }
+            finally
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (syncRoot)
+#endif
+                {
+                    SetHandleAsInvalid();
+                }
+            }
 #if DEBUG
-          return false;
+            return false;
 #else
-          return true;
+            return true;
 #endif
-      }
+        }
 
-      public override bool IsInvalid
-      {
-          get { return (handle == IntPtr.Zero); }
-      }
+        ///////////////////////////////////////////////////////////////////////
+
+        public override bool IsInvalid
+        {
+            get
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (syncRoot)
+#endif
+                {
+                    return (handle == IntPtr.Zero);
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
 
 #if DEBUG
-      public override string ToString()
-      {
-          return handle.ToString();
-      }
+        public override string ToString()
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (syncRoot)
 #endif
-  }
+            {
+                return handle.ToString();
+            }
+        }
+#endif
+    }
+    #endregion
 }
