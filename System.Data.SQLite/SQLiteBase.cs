@@ -472,7 +472,11 @@ namespace System.Data.SQLite
         if ((hdl == null) || (db == IntPtr.Zero))
             return "null connection or database handle";
 
+#if PLATFORM_COMPACTFRAMEWORK
+        lock (hdl.syncRoot)
+#else
         lock (hdl)
+#endif
         {
             if (hdl.IsClosed || hdl.IsInvalid)
                 return "closed or invalid connection handle";
@@ -493,7 +497,11 @@ namespace System.Data.SQLite
     internal static void FinishBackup(SQLiteConnectionHandle hdl, IntPtr backup)
     {
         if ((hdl == null) || (backup == IntPtr.Zero)) return;
+#if PLATFORM_COMPACTFRAMEWORK
+        lock (hdl.syncRoot)
+#else
         lock (hdl)
+#endif
         {
             SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
             if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
@@ -503,7 +511,11 @@ namespace System.Data.SQLite
     internal static void FinalizeStatement(SQLiteConnectionHandle hdl, IntPtr stmt)
     {
         if ((hdl == null) || (stmt == IntPtr.Zero)) return;
+#if PLATFORM_COMPACTFRAMEWORK
+        lock (hdl.syncRoot)
+#else
         lock (hdl)
+#endif
         {
 #if !SQLITE_STANDARD
             SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
@@ -517,7 +529,11 @@ namespace System.Data.SQLite
     internal static void CloseConnection(SQLiteConnectionHandle hdl, IntPtr db)
     {
         if ((hdl == null) || (db == IntPtr.Zero)) return;
+#if PLATFORM_COMPACTFRAMEWORK
+        lock (hdl.syncRoot)
+#else
         lock (hdl)
+#endif
         {
 #if !SQLITE_STANDARD
             SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_close_interop(db);
@@ -543,7 +559,11 @@ namespace System.Data.SQLite
     {
         if ((hdl == null) || (db == IntPtr.Zero)) return;
         if (hdl.IsClosed || hdl.IsInvalid) return;
+#if PLATFORM_COMPACTFRAMEWORK
+        lock (hdl.syncRoot)
+#else
         lock (hdl)
+#endif
         {
             IntPtr stmt = IntPtr.Zero;
             SQLiteErrorCode n;
@@ -573,7 +593,11 @@ namespace System.Data.SQLite
     {
       if (db == IntPtr.Zero) return false;
       if (hdl.IsClosed || hdl.IsInvalid) return false;
+#if PLATFORM_COMPACTFRAMEWORK
+      lock (hdl.syncRoot)
+#else
       lock (hdl)
+#endif
       {
           return (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
       }

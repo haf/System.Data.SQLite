@@ -1451,7 +1451,7 @@ namespace System.Data.SQLite
     internal class SQLiteConnectionHandle : CriticalHandle
     {
 #if PLATFORM_COMPACTFRAMEWORK
-        private readonly object syncRoot = new object();
+        internal readonly object syncRoot = new object();
 #endif
 
         ///////////////////////////////////////////////////////////////////////
@@ -1599,7 +1599,7 @@ namespace System.Data.SQLite
     internal class SQLiteStatementHandle : CriticalHandle
     {
 #if PLATFORM_COMPACTFRAMEWORK
-        private readonly object syncRoot = new object();
+        internal readonly object syncRoot = new object();
 #endif
 
         ///////////////////////////////////////////////////////////////////////
@@ -1752,7 +1752,7 @@ namespace System.Data.SQLite
     internal class SQLiteBackupHandle : CriticalHandle
     {
 #if PLATFORM_COMPACTFRAMEWORK
-        private readonly object syncRoot = new object();
+        internal readonly object syncRoot = new object();
 #endif
 
         ///////////////////////////////////////////////////////////////////////
