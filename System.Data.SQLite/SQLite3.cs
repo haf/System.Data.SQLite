@@ -113,7 +113,7 @@ namespace System.Data.SQLite
                 // release unmanaged resources here...
                 //////////////////////////////////////
 
-                Close();
+                Close(false); /* Disposing, cannot throw. */
 
                 disposed = true;
             }
@@ -131,17 +131,25 @@ namespace System.Data.SQLite
     // goes to the pool and is resurrected later, re-registered functions will overwrite the
     // previous functions.  The SQLiteFunctionCookieHandle will take care of freeing unmanaged
     // resources belonging to the previously-registered functions.
-    internal override void Close()
+    internal override void Close(bool canThrow)
     {
       if (_sql != null)
       {
           if (_usePool)
           {
-              SQLiteBase.ResetConnection(_sql, _sql);
-              SQLiteConnectionPool.Add(_fileName, _sql, _poolVersion);
+              if (SQLiteBase.ResetConnection(_sql, _sql, canThrow))
+              {
+                  SQLiteConnectionPool.Add(_fileName, _sql, _poolVersion);
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
-              Trace.WriteLine(String.Format("Close (Pool): {0}", _sql));
+                  Trace.WriteLine(String.Format("Close (Pool) Success: {0}", _sql));
+#endif
+              }
+#if !NET_COMPACT_20 && TRACE_CONNECTION
+              else
+              {
+                  Trace.WriteLine(String.Format("Close (Pool) Failure: {0}", _sql));
+              }
 #endif
           }
           else

@@ -82,7 +82,8 @@ namespace System.Data.SQLite
     /// After the database has been closed implemeters should call SQLiteFunction.UnbindFunctions() to deallocate all interop allocated
     /// memory associated with the user-defined functions and collating sequences tied to the closed connection.
     /// </remarks>
-    internal abstract void Close();
+    /// <param name="canThrow">Non-zero if the operation is allowed to throw exceptions, zero otherwise.</param>
+    internal abstract void Close(bool canThrow);
     /// <summary>
     /// Sets the busy timeout on the connection.  SQLiteCommand will call this before executing any command.
     /// </summary>
@@ -478,7 +479,7 @@ namespace System.Data.SQLite
         lock (hdl)
 #endif
         {
-            if (hdl.IsClosed || hdl.IsInvalid)
+            if (hdl.IsInvalid || hdl.IsClosed)
                 return "closed or invalid connection handle";
 
 #if !SQLITE_STANDARD
@@ -555,20 +556,23 @@ namespace System.Data.SQLite
         }
     }
 
-    internal static void ResetConnection(SQLiteConnectionHandle hdl, IntPtr db)
+    internal static bool ResetConnection(SQLiteConnectionHandle hdl, IntPtr db, bool canThrow)
     {
-        if ((hdl == null) || (db == IntPtr.Zero)) return;
+        if ((hdl == null) || (db == IntPtr.Zero)) return false;
 #if PLATFORM_COMPACTFRAMEWORK
         lock (hdl.syncRoot)
 #else
         lock (hdl)
 #endif
         {
-            if (hdl.IsInvalid)
+            if (canThrow && hdl.IsInvalid)
                 throw new InvalidOperationException("The connection handle is invalid.");
 
-            if (hdl.IsClosed)
+            if (canThrow && hdl.IsClosed)
                 throw new InvalidOperationException("The connection handle is closed.");
+
+            if (!canThrow && (hdl.IsInvalid || hdl.IsClosed))
+                return false;
 
             IntPtr stmt = IntPtr.Zero;
             SQLiteErrorCode n;
@@ -588,22 +592,29 @@ namespace System.Data.SQLite
             if (IsAutocommit(hdl, db) == false) // a transaction is pending on the connection
             {
                 n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
-                if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError(hdl, db));
+                if (n != SQLiteErrorCode.Ok)
+                {
+                    if (canThrow)
+                        throw new SQLiteException(n, GetLastError(hdl, db));
+                    else
+                        return false;
+                }
             }
         }
         GC.KeepAlive(hdl);
+        return true;
     }
 
     internal static bool IsAutocommit(SQLiteConnectionHandle hdl, IntPtr db)
     {
       if (db == IntPtr.Zero) return false;
-      if (hdl.IsClosed || hdl.IsInvalid) return false;
 #if PLATFORM_COMPACTFRAMEWORK
       lock (hdl.syncRoot)
 #else
       lock (hdl)
 #endif
       {
+          if (hdl.IsInvalid || hdl.IsClosed) return false;
           return (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
       }
 #pragma warning disable 162

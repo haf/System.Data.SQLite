@@ -353,6 +353,11 @@ namespace System.Data.SQLite
     internal int _transactionLevel;
 
     /// <summary>
+    /// If set, then the connection is currently being disposed.
+    /// </summary>
+    private bool _disposing;
+
+    /// <summary>
     /// The default isolation level for new transactions
     /// </summary>
     private IsolationLevel _defaultIsolation;
@@ -721,6 +726,8 @@ namespace System.Data.SQLite
 
     protected override void Dispose(bool disposing)
     {
+        _disposing = true;
+
         try
         {
             if (!disposed)
@@ -947,7 +954,7 @@ namespace System.Data.SQLite
 #endif
         if (_sql != null)
         {
-          _sql.Close();
+          _sql.Close(!_disposing);
           _sql = null;
         }
         _transactionLevel = 0;

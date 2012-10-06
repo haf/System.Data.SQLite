@@ -21,8 +21,8 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
-  unset -nocomplain result thread index workload srcDb db fileName compiled \
-      options count
+  unset -nocomplain result thread index workload noWorkload srcDb db \
+      fileName compiled options count
 
   #############################################################################
 
@@ -54,17 +54,20 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   set count(0) 1
   set count(1) 5
   set count(2) 300
+  set noWorkload [list]
 
   if {[info exists argv] && [llength $argv] > 0} then {
     parse options -flags \
         {-StopOnUnknown +IgnoreOnUnknown SkipOnUnknown} -- [list \
         [list null MustHaveIntegerValue -1 -1 -count0 $count(0)] \
         [list null MustHaveIntegerValue -1 -1 -count1 $count(1)] \
-        [list null MustHaveIntegerValue -1 -1 -count2 $count(2)]] $argv
+        [list null MustHaveIntegerValue -1 -1 -count2 $count(2)] \
+        [list null MustHaveListValue -1 -1 -noWorkload $noWorkload]] $argv
 
     set count(0) $options(-count0,value)
     set count(1) $options(-count1,value)
     set count(2) $options(-count2,value)
+    set noWorkload $options(-noWorkload,value)
   }
 
   #############################################################################
@@ -77,6 +80,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   tputs $test_channel [appendArgs \
       "---- workloads will wait at least " $count(2) " millisecond(s)...\n"]
+
+  if {[llength $noWorkload] > 0} then {
+    tputs $test_channel [appendArgs \
+        "---- workloads to be skipped... " $noWorkload \n]
+  }
 
   #############################################################################
 
@@ -536,9 +544,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     unset -nocomplain thread
 
     foreach index(1) [lsort -integer [array names workload]] {
-      set thread($index(1)) [object create -alias System.Threading.Thread \
-          [list apply $workload($index(1)) $fileName(1) $fileName(2) t1 \
-          $count(1)]]
+      if {[lsearch -exact $noWorkload $index(1)] == -1} then {
+        set thread($index(1)) [object create -alias System.Threading.Thread \
+            [list apply $workload($index(1)) $fileName(1) $fileName(2) t1 \
+            $count(1)]]
+      }
     }
 
     foreach index(1) [list Start Join] {
@@ -596,8 +606,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }
   }
 
-  unset -nocomplain result thread index workload srcDb db fileName compiled \
-      options count times
+  unset -nocomplain result thread index workload noWorkload srcDb db \
+      fileName compiled options count times
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
 

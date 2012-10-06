@@ -211,7 +211,7 @@ namespace System.Data.SQLite
                     //         not closed prior to actually returning it to our
                     //         caller.
                     //
-                    if (!hdl.IsClosed && !hdl.IsInvalid)
+                    if (!hdl.IsInvalid && !hdl.IsClosed)
                     {
                         Interlocked.Increment(ref _poolOpened);
                         return hdl;
