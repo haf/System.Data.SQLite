@@ -558,13 +558,18 @@ namespace System.Data.SQLite
     internal static void ResetConnection(SQLiteConnectionHandle hdl, IntPtr db)
     {
         if ((hdl == null) || (db == IntPtr.Zero)) return;
-        if (hdl.IsClosed || hdl.IsInvalid) return;
 #if PLATFORM_COMPACTFRAMEWORK
         lock (hdl.syncRoot)
 #else
         lock (hdl)
 #endif
         {
+            if (hdl.IsInvalid)
+                throw new InvalidOperationException("The connection handle is invalid.");
+
+            if (hdl.IsClosed)
+                throw new InvalidOperationException("The connection handle is closed.");
+
             IntPtr stmt = IntPtr.Zero;
             SQLiteErrorCode n;
             do
