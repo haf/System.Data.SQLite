@@ -405,6 +405,7 @@ set sds_manifests(source) {
   Tests/testlinq.out
   Tests/tkt-00f86f9739.eagle
   Tests/tkt-0d5b1ef362.eagle
+  Tests/tkt-17045010df.eagle
   Tests/tkt-201128cc88.eagle
   Tests/tkt-2c630bffa7.eagle
   Tests/tkt-2ce0870fad.eagle
