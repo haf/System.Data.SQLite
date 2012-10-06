@@ -48,6 +48,10 @@ namespace System.Data.SQLite
     /// </summary>
     private int _fieldCount;
     /// <summary>
+    /// Maps the field (column) names to their corresponding indexes within the results.
+    /// </summary>
+    private Dictionary<string, int> _fieldIndexes;
+    /// <summary>
     /// Datatypes of active fields (columns) in the current statement, used for type-restricting data
     /// </summary>
     private SQLiteType[] _fieldTypeArray;
@@ -207,6 +211,7 @@ namespace System.Data.SQLite
 
         _command = null;
         _activeStatement = null;
+        _fieldIndexes = null;
         _fieldTypeArray = null;
       }
       finally
@@ -643,11 +648,31 @@ namespace System.Data.SQLite
       CheckClosed();
       SQLiteCommand.Check(_command);
 
-      int r = _activeStatement._sql.ColumnIndex(_activeStatement, name);
-      if (r == -1 && _keyInfo != null)
+      //
+      // NOTE: First, check if the column name cache has been initialized yet.
+      //       If not, do it now.
+      //
+      if (_fieldIndexes == null)
+          _fieldIndexes = new Dictionary<string, int>(new ColumnNameComparer());
+
+      //
+      // NOTE: Next, see if the index for the requested column name has been
+      //       cached already.  If so, return the cached value.  Otherwise,
+      //       lookup the value and then cache the result for future use.
+      //
+      int r;
+
+      if (!_fieldIndexes.TryGetValue(name, out r))
       {
-        r = _keyInfo.GetOrdinal(name);
-        if (r > -1) r += VisibleFieldCount;
+          r = _activeStatement._sql.ColumnIndex(_activeStatement, name);
+
+          if (r == -1 && _keyInfo != null)
+          {
+              r = _keyInfo.GetOrdinal(name);
+              if (r > -1) r += VisibleFieldCount;
+          }
+
+          _fieldIndexes.Add(name, r);
       }
 
       return r;
@@ -664,16 +689,61 @@ namespace System.Data.SQLite
       return GetSchemaTable(true, false);
     }
 
-    private class ColumnParent : IEqualityComparer<ColumnParent>
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region ColumnNameComparer Class
+    private sealed class ColumnNameComparer : IEqualityComparer<string>
     {
+        #region IEqualityComparer<string> Members
+        public bool Equals(string x, string y)
+        {
+            if ((x == null) && (y == null))
+            {
+                return true;
+            }
+            else if ((x == null) || (y == null))
+            {
+                return false;
+            }
+            else
+            {
+                return String.Equals(x, y, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public int GetHashCode(string obj)
+        {
+            if (obj == null)
+                return 0;
+
+            return obj.GetHashCode();
+        }
+        #endregion
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region ColumnParent Class
+    private sealed class ColumnParent : IEqualityComparer<ColumnParent>
+    {
+        #region Public Fields
         public string DatabaseName;
         public string TableName;
         public string ColumnName;
+        #endregion
 
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Constructors
         public ColumnParent()
         {
             // do nothing.
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         public ColumnParent(
             string databaseName,
@@ -686,6 +756,9 @@ namespace System.Data.SQLite
             this.TableName = tableName;
             this.ColumnName = columnName;
         }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
 
         #region IEqualityComparer<ColumnParent> Members
         public bool Equals(ColumnParent x, ColumnParent y)
@@ -722,6 +795,8 @@ namespace System.Data.SQLite
             }
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         public int GetHashCode(ColumnParent obj)
         {
             int result = 0;
@@ -739,6 +814,9 @@ namespace System.Data.SQLite
         }
         #endregion
     }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
 
     private static void GetStatementColumnParents(
         SQLiteBase sql,
@@ -1215,6 +1293,7 @@ namespace System.Data.SQLite
         // Ahh, we found a row-returning resultset eligible to be returned!
         _activeStatement = stmt;
         _fieldCount = fieldCount;
+        _fieldIndexes = null;
         _fieldTypeArray = null;
 
         if ((_commandBehavior & CommandBehavior.KeyInfo) != 0)

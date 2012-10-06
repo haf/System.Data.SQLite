@@ -1931,6 +1931,42 @@ regexp -result {^0 12341234 1 \{System\.Data\.SQLite\.SQLiteException\
 
 ###############################################################################
 
+runTest {test data-1.39 {column name and index lookup} -setup {
+  setupDb [set fileName data-1.39.db]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x, y, z);
+    INSERT INTO t1 (x, y, z) VALUES(1, 'foo', 1234);
+  }
+
+  set dataReader [sql execute -execute reader -format datareader \
+      -alias $db "SELECT x, y, z FROM t1;"]
+
+  set result [list]
+
+  while {[$dataReader Read]} {
+    lappend result \
+        [list [$dataReader GetName 0] [$dataReader GetOrdinal x] \
+            [$dataReader Item x]] \
+        [list [$dataReader GetName 1] [$dataReader GetOrdinal y] \
+            [$dataReader Item y]] \
+        [list [$dataReader GetName 2] [$dataReader GetOrdinal z] \
+            [$dataReader Item z]]
+  }
+
+  set result
+} -cleanup {
+  unset -nocomplain dataReader
+
+  cleanupDb $fileName
+
+  unset -nocomplain result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{{x 0 1} {y 1 foo} {z 2 1234}}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
