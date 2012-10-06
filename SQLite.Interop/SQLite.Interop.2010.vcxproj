@@ -135,7 +135,7 @@
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
@@ -177,7 +177,7 @@
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);$(SQLITE_DISABLE_X64_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
@@ -219,7 +219,7 @@
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
@@ -254,7 +254,7 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);$(SQLITE_DISABLE_X64_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
@@ -292,7 +292,7 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
@@ -336,7 +336,7 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);$(SQLITE_DISABLE_X64_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
@@ -380,7 +380,7 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
@@ -418,7 +418,7 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Comman
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);$(SQLITE_DISABLE_X64_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;_UNICODE;UNICODE;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <Version>$(INTEROP_LINKER_VERSION)</Version>

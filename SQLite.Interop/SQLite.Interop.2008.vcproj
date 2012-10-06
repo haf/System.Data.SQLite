@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG;_UNICODE;UNICODE;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
+				PreprocessorDefinitions="_DEBUG;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -166,7 +166,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG;_UNICODE;UNICODE;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
+				PreprocessorDefinitions="_DEBUG;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -262,7 +262,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG;_UNICODE;UNICODE;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
+				PreprocessorDefinitions="_DEBUG;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -353,7 +353,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG;_UNICODE;UNICODE;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
+				PreprocessorDefinitions="_DEBUG;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -445,7 +445,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;_UNICODE;UNICODE;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
+				PreprocessorDefinitions="NDEBUG;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -544,7 +544,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;_UNICODE;UNICODE;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
+				PreprocessorDefinitions="NDEBUG;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -642,7 +642,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;_UNICODE;UNICODE;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
+				PreprocessorDefinitions="NDEBUG;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -735,7 +735,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;_UNICODE;UNICODE;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
+				PreprocessorDefinitions="NDEBUG;&quot;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION)&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
