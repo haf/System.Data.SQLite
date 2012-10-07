@@ -314,6 +314,24 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getTemporaryDirectory {} {
+      #
+      # NOTE: This procedure returns the directory where the temporary files
+      #       should be located.  By default, this just uses the temporary
+      #       directory configured for this system.
+      #
+      if {[info exists ::temporary_directory] && \
+          [string length $::temporary_directory] > 0} then {
+        #
+        # NOTE: The location of the temporary directory has been overridden;
+        #       therefore, use it.
+        #
+        return [file normalize $::temporary_directory]
+      } else {
+        return [getTemporaryPath]
+      }
+    }
+
     proc getAppDomainPreamble { {prefix ""} {suffix ""} } {
       #
       # NOTE: This procedure returns a test setup script suitable for evaluation
@@ -743,6 +761,13 @@ namespace eval ::Eagle {
       #       into the variable specified by our caller.
       #
       set db [sql open -type SQLite [subst $connection]]
+
+      #
+      # NOTE: Configure the temporary directory for the newly opened database
+      #       connection now.
+      #
+      sql execute $db [appendArgs \
+          "PRAGMA temp_store_directory = \"" [getTemporaryDirectory] "\";"]
     }
 
     proc getDbConnection { {varName db} } {

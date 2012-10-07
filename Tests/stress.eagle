@@ -58,8 +58,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   if {[info exists argv] && [llength $argv] > 0} then {
     parse options -flags \
-        {-StopOnUnknown +IgnoreOnUnknown SkipOnUnknown} -- [list \
-        [list null MustHaveIntegerValue -1 -1 -count0 $count(0)] \
+        {-StopOnUnknownOption +IgnoreOnUnknownOption SkipOnUnknownOption} -- \
+        [list [list null MustHaveIntegerValue -1 -1 -count0 $count(0)] \
         [list null MustHaveIntegerValue -1 -1 -count1 $count(1)] \
         [list null MustHaveIntegerValue -1 -1 -count2 $count(2)] \
         [list null MustHaveListValue -1 -1 -noWorkload $noWorkload]] $argv
@@ -93,8 +93,18 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
+  #
+  # NOTE: This is an in-memory database with shared cache enabled.
+  #
   set fileName(1) "file::memory:?cache=shared"
-  set fileName(2) [file join [getDatabaseDirectory] stress.db]
+
+  #############################################################################
+
+  #
+  # NOTE: This is a normal on-disk database.
+  #
+  set fileName(2) [file join [getDatabaseDirectory] [appendArgs \
+      stress- [pid] - [string trim [clock seconds] -] .db]]
 
   #############################################################################
 
@@ -569,7 +579,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[lsearch -exact $noWorkload $index(1)] == -1} then {
         set thread($index(1)) [object create -alias System.Threading.Thread \
             [list apply $workload($index(1)) $fileName(1) $fileName(2) t1 \
-            $count(1)]]
+            $count(1)] 1048576]
       }
     }
 

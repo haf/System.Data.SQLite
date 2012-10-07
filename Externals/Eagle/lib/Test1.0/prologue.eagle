@@ -80,8 +80,9 @@ if {![info exists no([file tail [info script]])]} then {
   #############################################################################
 
   #
-  # NOTE: Set the local root directory of the source checkout (i.e. of Eagle or
-  #       whatever project the Eagle binaries are being used by).
+  # NOTE: Set the local root directory of the source checkout (i.e. of Eagle
+  #       or whatever project the Eagle binaries are being used by) using a
+  #       Fossil binary in the PATH, if available.
   #
   if {![info exists root_path] && ![info exists no(fossil)]} then {
     set pattern {^local-root:\s+(.*?)\s+$}
@@ -93,7 +94,7 @@ if {![info exists no([file tail [info script]])]} then {
       #       from Fossil; therefore, attempt to make an educated guess.  This
       #       value will probably be wrong for any project(s) other than Eagle.
       #       In that case, this value should be overridden by that project to
-      #       relfect the actual local root directory of the source checkout
+      #       reflect the actual local root directory of the source checkout
       #       for that project.
       #
       set root_path $base_path
@@ -213,6 +214,25 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {[catch {package present Eagle.Test.Constraints}]} then {
     package require Eagle.Test.Constraints
+  }
+
+  #############################################################################
+
+  #
+  # NOTE: Verify that the current call frame is correct and that the
+  #       interpreter call stack has not been imbalanced by previous
+  #       tests or other errors.  This check only applies to Eagle.
+  #
+  if {[isEagle]} then {
+    #
+    # NOTE: Check the name of the current call frame against the one
+    #       that should be used for evaluating this script file.
+    #
+    if {[object invoke -flags +NonPublic \
+            Interpreter.GetActive.CurrentFrame Name] ne \
+        [appendArgs source " " [file normalize [info script]]]} then {
+      error "cannot run, current frame is not for this script"
+    }
   }
 
   #############################################################################
@@ -1131,6 +1151,12 @@ if {![info exists no([file tail [info script]])]} then {
 
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestRemoveNamedFunction*
+
+        #
+        # NOTE: For test "interp-1.18".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestAddNamedFunction2*
       }
 
       #
@@ -2010,18 +2036,35 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {[isEagle]} then {
     #
-    # NOTE: Get the source checkout (i.e. of Eagle or whatever project the
-    #       Eagle binaries are being used by).
+    # NOTE: Get the source checkout and tags (i.e. of Eagle or whatever
+    #       project the Eagle binaries are being used by) using a Fossil
+    #       binary in the PATH, if available.
     #
     if {![info exists no(fossil)]} then {
-      set pattern {^checkout:\s+(.*?)\s+$}
+      if {[catch {set exec [exec -- fossil info]}] == 0} then {
+        set pattern {^checkout:\s+(.*?)\s+$}
 
-      if {[catch {set exec [exec -- fossil info]}] || \
-          [regexp -line -- $pattern $exec dummy checkout] == 0} then {
+        if {[regexp -line -- $pattern $exec dummy checkout] == 0} then {
+          #
+          # NOTE: We could not query the source checkout from Fossil.
+          #
+          set checkout <none>
+        }
+
+        set pattern {^tags:\s+(.*?)\s+$}
+
+        if {[regexp -line -- $pattern $exec dummy tags] == 0} then {
+          #
+          # NOTE: We could not query the tags from Fossil.
+          #
+          set tags <none>
+        }
+      } else {
         #
-        # NOTE: We could not query the source checkout from Fossil.
+        # NOTE: We could not query information from Fossil.
         #
         set checkout <none>
+        set tags <none>
       }
 
       unset -nocomplain dummy exec pattern
@@ -2030,12 +2073,16 @@ if {![info exists no([file tail [info script]])]} then {
       # NOTE: Querying the source checkout from Fossil was disabled.
       #
       set checkout <none>
+      set tags <none>
     }
 
     tputs $test_channel [appendArgs "---- checkout: " \
         $checkout \n]
 
-    unset checkout
+    tputs $test_channel [appendArgs "---- tags: " \
+        $tags \n]
+
+    unset tags checkout
 
     ###########################################################################
 

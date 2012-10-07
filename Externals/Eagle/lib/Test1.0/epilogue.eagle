@@ -20,6 +20,23 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: Verify that the current call frame is correct and that the
+  #       interpreter call stack has not been imbalanced by previous
+  #       tests or other errors.  This check only applies to Eagle.
+  #
+  if {[isEagle]} then {
+    #
+    # NOTE: Check the name of the current call frame against the one
+    #       that should be used for evaluating this script file.
+    #
+    if {[object invoke -flags +NonPublic \
+            Interpreter.GetActive.CurrentFrame Name] ne \
+        [appendArgs source " " [file normalize [info script]]]} then {
+      error "cannot run, current frame is not for this script"
+    }
+  }
+
+  #
   # NOTE: Make sure all the variables used by this epilogue are unset.
   #
   unset -nocomplain memory stack name count passedOrSkipped percent \

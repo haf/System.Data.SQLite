@@ -38,7 +38,7 @@ runTest {test tkt-84718e79fa-1.1 {SQLiteConvert thread safety} -setup {
   sql execute $db "INSERT INTO t1 (x) VALUES(1);"
 
   for {set i 0} {$i < $c} {incr i} {
-    set t($i) [object create -alias Thread threadStart]
+    set t($i) [object create -alias Thread threadStart 1048576]
   }
 
   set ::results [list]
