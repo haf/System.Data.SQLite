@@ -537,6 +537,28 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       cleanupDb $dstFileName db false true false
     }] 0]
   }]
+
+  #############################################################################
+
+  set workload(15) [list [list srcFileName dstFileName table count] {
+    #
+    # NOTE: Workload #15, force managed garbage collection
+    #
+    lappend ::times(15) [lindex [time {
+      if {[catch {
+        for {set index 1} {$index <= $count} {incr index} {
+          collectGarbage $::test_channel
+          showTest F
+        }
+      } error]} then {
+        if {[expectedError $error]} then {
+          showTest *
+        } else {
+          failTest $error
+        }
+      }
+    }] 0]
+  }]
 } -body {
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"

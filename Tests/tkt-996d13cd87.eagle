@@ -276,7 +276,7 @@ for {set i 1} {$i < 11} {incr i} {
             $poolCounts(closed) == 0} : True]
   } -cleanup {
     object invoke System.Data.SQLite.SQLiteConnection ClearAllPools
-    object invoke GC GetTotalMemory true
+    collectGarbage $test_channel
 
     cleanupDb $fileName
 
