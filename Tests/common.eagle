@@ -357,6 +357,7 @@ namespace eval ::Eagle {
           object invoke Interpreter.GetActive AddRuntimeOption native
         }
 
+        set ::test_channel {$::test_channel}
         set ::path {$::path}
         set ::test_year {[getBuildYear]}
         set ::test_configuration {[getBuildConfiguration]}
@@ -633,7 +634,8 @@ namespace eval ::Eagle {
 
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
-            {extra ""} {qualify true} {delete true} {uri false} {varName db} } {
+            {extra ""} {qualify true} {delete true} {uri false}
+            {temporary true} {varName db} } {
       #
       # NOTE: First, see if our caller has requested an in-memory database.
       #
@@ -764,10 +766,17 @@ namespace eval ::Eagle {
 
       #
       # NOTE: Configure the temporary directory for the newly opened database
-      #       connection now.
+      #       connection now unless the caller forbids it.
       #
-      sql execute $db [appendArgs \
-          "PRAGMA temp_store_directory = \"" [getTemporaryDirectory] "\";"]
+      if {$temporary} then {
+        sql execute $db [appendArgs \
+            "PRAGMA temp_store_directory = \"" [getTemporaryDirectory] "\";"]
+      }
+
+      #
+      # NOTE: Always return the connection handle upon success.
+      #
+      return $db
     }
 
     proc getDbConnection { {varName db} } {

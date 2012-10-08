@@ -170,7 +170,7 @@
               define being present in the "INTEROP_EXTRA_DEFINES" macro in the
               build properties file:
 
-                  "SQLite.Interop\props\SQLite.Interop.20XX.[vs]props"
+                  "SQLite.Interop\props\SQLite.Interop.20YY.[vs]props"
 
               for the corresponding version(s) of Visual Studio.
     -->
@@ -185,7 +185,7 @@
               being present in the "INTEROP_DEBUG_DEFINES" macro in the build
               properties file:
 
-                  "SQLite.Interop\props\SQLite.Interop.20XX.[vs]props"
+                  "SQLite.Interop\props\SQLite.Interop.20YY.[vs]props"
 
               for the corresponding version(s) of Visual Studio.
     -->
@@ -205,11 +205,37 @@
               AND via the "INTEROP_CODEC=1" preprocessor define being present in
               the "INTEROP_EXTRA_DEFINES" macro in the build properties file:
 
-                  "SQLite.Interop\props\SQLite.Interop.20XX.[vs]props"
+                  "SQLite.Interop\props\SQLite.Interop.20YY.[vs]props"
 
               both for the corresponding version(s) of Visual Studio.
     -->
     <InteropCodec Condition="'$(InteropCodec)' == ''">true</InteropCodec>
+
+    <!--
+        NOTE: Enable extra diagnostics from the custom built interop DLL (i.e.
+              "SQLite.Interop.dll")?  By default, this is enabled in the Debug
+              build configuration.  If this is disabled, no extra diagnostics
+              will be emitted.  If this is enabled, it must also be enabled via
+              the "INTEROP_DEBUG=XX" preprocessor define being present in the
+              "INTEROP_DEBUG_DEFINES" macro in the build properties file:
+
+                  "SQLite.Interop\props\SQLite.Interop.20YY.[vs]props"
+
+              for the corresponding version(s) of Visual Studio where the XX is
+              an integer value that represents a combination of one or more of
+              the following bit flags values (i.e. to enable extra diagnostics
+              for a particular native function call):
+
+                  INTEROP_DEBUG_CLOSE      (0x01)
+                  INTEROP_DEBUG_FINALIZE   (0x02)
+                  INTEROP_DEBUG_OPEN       (0x04)
+                  INTEROP_DEBUG_OPEN16     (0x08)
+                  INTEROP_DEBUG_PREPARE    (0x10)
+                  INTEROP_DEBUG_PREPARE16  (0x20)
+                  INTEROP_DEBUG_RESET      (0x40)
+    -->
+    <InteropDebug Condition="'$(InteropDebug)' == '' And '$(Configuration)' == 'Debug'">true</InteropDebug>
+    <InteropDebug Condition="'$(InteropDebug)' == '' And '$(Configuration)' != 'Debug'">false</InteropDebug>
 
     <!--
         NOTE: Enable the use of native Windows APIs, when available?  By

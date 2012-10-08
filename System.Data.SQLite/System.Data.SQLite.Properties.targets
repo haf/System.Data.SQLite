@@ -139,9 +139,17 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Enable extra diagnostics from the custom built interop DLL (see the
+            "SQLite.NET.Settings.targets" file for more information)?
+  -->
+  <PropertyGroup Condition="'$(InteropDebug)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: Enable various Trace.WriteLine statements included in the code,
             based on several criteria (see the "SQLite.NET.Settings.targets"
-            file for more information).
+            file for more information)?
   -->
   <PropertyGroup Condition="'$(TraceConnection)' != 'false'">
     <DefineConstants>$(DefineConstants);TRACE_CONNECTION</DefineConstants>

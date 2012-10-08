@@ -24,6 +24,10 @@ namespace System.Data.SQLite
             "INTEROP_CODEC",
 #endif
 
+#if INTEROP_DEBUG
+            "INTEROP_DEBUG",
+#endif
+
 #if INTEROP_EXTENSION_FUNCTIONS
             "INTEROP_EXTENSION_FUNCTIONS",
 #endif

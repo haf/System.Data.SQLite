@@ -82,7 +82,9 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
   set callback [lindex $params(callbacks) $i]
 
   runTest {test [appendArgs backup-1. $i] {BackupDatabase method} -setup {
-    setupDb [set fileName(1) :memory:] "" "" "" "" "" false false false memDb
+    setupDb [set fileName(1) :memory:] "" "" "" "" "" \
+        false false false true memDb
+
     setupDb [set fileName(2) [appendArgs backup-1. $i .db]]
   } -body {
     set id [object invoke Interpreter.GetActive NextId]

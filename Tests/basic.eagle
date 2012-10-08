@@ -1680,7 +1680,7 @@ runTest {test data-1.33 {sqlite3_win32_set_directory function} -setup {
       System.Data.SQLite.UnsafeNativeMethods sqlite3_win32_set_directory 2 \
       $directory(temp)]
 
-  setupDb [set fileName data-1.33.db] "" "" "" "" "" false false
+  setupDb [set fileName data-1.33.db] "" "" "" "" "" false false false false
 
   sql execute $db "CREATE TABLE t1(x NOT NULL);"
 
