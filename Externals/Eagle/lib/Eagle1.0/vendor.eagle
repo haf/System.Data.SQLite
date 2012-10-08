@@ -37,14 +37,26 @@ namespace eval ::Eagle {
       set result 0
 
       foreach varName $varNames {
-        if {[uplevel 1 [list info exists $varName]]} then {
-          incr result
-
-          if {!$quiet} then {
-            tqputs $channel [appendArgs \
-                "---- found vendor-specific test override \"" $varName "\".\n"]
-          }
+        if {![uplevel 1 [list info exists $varName]]} then {
+          continue
         }
+
+        incr result
+
+        if {!$quiet} then {
+          tqputs $channel [appendArgs \
+              "---- found vendor-specific test override \"" $varName "\".\n"]
+        }
+      }
+
+      #
+      # NOTE: Keep track of the list of test override variables, for later
+      #       use by the test suite.  This needs to be done after the loop
+      #       above because the variable used to keep track is listed with
+      #       the other possible test override variables.
+      #
+      if {![uplevel 1 [list info exists test_overrides]]} then {
+        uplevel 1 [list set test_overrides $varNames]
       }
 
       return $result
@@ -160,10 +172,11 @@ namespace eval ::Eagle {
     # NOTE: Check for any overridden settings that may have been specified via
     #       the command line, etc.
     #
-    checkForTestOverrides stdout [list binary_directory build_base_directory \
+    checkForTestOverrides stdout [expr {[info exists test_overrides] ? \
+        $test_overrides : [list binary_directory build_base_directory \
         build_directory common_directory connection_flags database_directory \
-        datetime_format test_configuration test_year test_year_clr_v2 \
-        temporary_directory test_year_clr_v4 vendor_directory] false
+        datetime_format temporary_directory test_configuration test_overrides \
+        test_year test_year_clr_v2 test_year_clr_v4 vendor_directory]}] false
 
     #
     # NOTE: This variable will contain the name of the directory containing the

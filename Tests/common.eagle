@@ -332,6 +332,62 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getTestOverridesPreamble { {extraVarNames ""} } {
+      set varNames [list]
+
+      #
+      # NOTE: If available, start with the master list of test override
+      #       variables.
+      #
+      if {[info exists ::test_overrides] && \
+          [llength $::test_overrides] > 0} then {
+        eval lappend varNames $::test_overrides
+      }
+
+      #
+      # NOTE: If requested by the caller, add any additional variable
+      #       names to copy now.
+      #
+      if {[llength $extraVarNames] > 0} then {
+        eval lappend varNames $extraVarNames
+      }
+
+      #
+      # NOTE: Build the script fragment to be returned by processing each
+      #       variable name and adding the nececessary script fragments for
+      #       each one.
+      #
+      set result ""
+
+      foreach varName $varNames {
+        #
+        # NOTE: Build the qualified global variable name.
+        #
+        set fullVarName [appendArgs :: $varName]
+
+        #
+        # NOTE: Does the variable exist in this interpreter context?
+        #
+        if {[info exists $fullVarName]} then {
+          #
+          # NOTE: Append a script fragment to the result that will correctly
+          #       copy any contained value to another interpreter context.
+          #
+          append result \n "set " $fullVarName " \{" [set $fullVarName] \}
+        }
+      }
+
+      #
+      # NOTE: If the result contains one or more script fragments, append a
+      #       newline.
+      #
+      if {[string length $result] > 0} then {
+        append result \n
+      }
+
+      return $result
+    }
+
     proc getAppDomainPreamble { {prefix ""} {suffix ""} } {
       #
       # NOTE: This procedure returns a test setup script suitable for evaluation
@@ -356,12 +412,7 @@ namespace eval ::Eagle {
         if {[hasRuntimeOption native]} then {
           object invoke Interpreter.GetActive AddRuntimeOption native
         }
-
-        set ::test_channel {$::test_channel}
-        set ::path {$::path}
-        set ::test_year {[getBuildYear]}
-        set ::test_configuration {[getBuildConfiguration]}
-      } $suffix]]]
+      } [getTestOverridesPreamble [list path test_channel]] $suffix]]]
     }
 
     proc tryCopyBuildFile { fileName } {

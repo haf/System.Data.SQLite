@@ -37,17 +37,6 @@ for {set i 1} {$i < 3} {incr i} {
     set i {$i}
     set appDomainId($i) {[object invoke AppDomain.CurrentDomain Id]}
     set fileName {[appendArgs tkt-2ce0870fad-1. $i .db]}
-
-    #
-    # NOTE: Keep track of whether or not the global test year and configuration
-    #       variables already exist in the primary application domain before the
-    #       test.  If not, we will need to unset them after the test.
-    #
-    set hadTestChannel {[info exists ::test_channel]}
-    set hadTestYear {[info exists ::test_year]}
-    set hadTestYearClrV2 {[info exists ::test_year_clr_v2]}
-    set hadTestYearClrV4 {[info exists ::test_year_clr_v4]}
-    set hadTestConfiguration {[info exists ::test_configuration]}
   }] -body {
     set appDomainId(3) [object invoke AppDomain.CurrentDomain Id]
 
@@ -66,26 +55,6 @@ for {set i 1} {$i < 3} {incr i} {
   } -cleanup {
     cleanupDb $fileName
 
-    if {!$hadTestConfiguration} then {
-      unset -nocomplain ::test_configuration
-    }
-
-    if {!$hadTestYearClrV4} then {
-      unset -nocomplain ::test_year_clr_v4
-    }
-
-    if {!$hadTestYearClrV2} then {
-      unset -nocomplain ::test_year_clr_v2
-    }
-
-    if {!$hadTestYear} then {
-      unset -nocomplain ::test_year
-    }
-
-    if {!$hadTestChannel} then {
-      unset -nocomplain ::test_channel
-    }
-
     #
     # NOTE: If this is the primary application domain, skip unsetting the
     #       loop variable because the surrounding [for] command still needs
@@ -95,8 +64,7 @@ for {set i 1} {$i < 3} {incr i} {
       unset -nocomplain i
     }
 
-    unset -nocomplain assembly appDomainId db fileName hadTestConfiguration \
-        hadTestYearClrV4 hadTestYearClrV2 hadTestYear hadTestChannel
+    unset -nocomplain assembly appDomainId db fileName
   } -constraints {eagle monoBug28 command.sql compile.DATA\
 compile.ISOLATED_INTERPRETERS SQLite System.Data.SQLite} -isolationLevel \
 [expr {$i == 1 ? "AppDomain" : "Default"}] -match regexp -result \
