@@ -83,7 +83,7 @@ namespace eval ::Eagle {
             [file exists [file join $dir Tests pkgIndex.eagle]] && \
             [file isfile [file join $dir Tests pkgIndex.eagle]]} then {
           #
-          # NOTE: If requested, give the caller access to the name of the
+          # NOTE: If requested, give our caller access to the name of the
           #       directory we just found.
           #
           if {[string length $varName] > 0} then {
@@ -184,10 +184,10 @@ namespace eval ::Eagle {
     #       already exist, create it; otherwise, it has been overridden and the
     #       existing value should be left intact.
     #
-    set have_vendor_directory [info exists ::vendor_directory]
+    set have_vendor_directory [info exists vendor_directory]
 
     if {!$have_vendor_directory} then {
-      set ::vendor_directory ""
+      set vendor_directory ""
     }
 
     #
@@ -199,7 +199,7 @@ namespace eval ::Eagle {
     #       by us.
     #
     addTestSuiteToAutoPath stdout [expr {$have_vendor_directory ? "" : \
-        "::vendor_directory"}] false
+        "vendor_directory"}] false
 
     unset have_vendor_directory
 
@@ -208,8 +208,8 @@ namespace eval ::Eagle {
     #       directory then modify the TestPath property of the current
     #       interpreter to point directly to it.
     #
-    if {[string length $::vendor_directory] > 0} then {
-      setupInterpreterTestPath stdout $::vendor_directory false
+    if {[string length $vendor_directory] > 0} then {
+      setupInterpreterTestPath stdout $vendor_directory false
     }
   }
 }

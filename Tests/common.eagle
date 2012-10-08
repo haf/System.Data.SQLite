@@ -345,7 +345,7 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If requested by the caller, add any additional variable
+      # NOTE: If requested by our caller, add any additional variable
       #       names to copy now.
       #
       if {[llength $extraVarNames] > 0} then {
@@ -390,23 +390,29 @@ namespace eval ::Eagle {
 
     proc getAppDomainPreamble { {prefix ""} {suffix ""} } {
       #
-      # NOTE: This procedure returns a test setup script suitable for evaluation
-      #       by a test interpreter created in an isolated application domain.
-      #       The script being returned will be surrounded by the prefix and
-      #       suffix "script fragments" specified by our caller, if any.  The
-      #       entire script being returned will be substituted via [subst], in
-      #       the context of our caller.  This step is necessary so that some
-      #       limited context information, primarily related to the test build
-      #       directory, can be transferred to the interpreter in the isolated
-      #       application domain, making it able to successfully run tests that
-      #       require one or more of the files in the build directory.  Callers
-      #       to this procedure should keep in mind that the test script being
-      #       returned cannot rely on any script library procedures not defined
-      #       by the Eagle.Library package (i.e. "init.eagle").  Also, all
-      #       variable references and all "nested" commands (i.e. those in
-      #       square brackets), unless they are specially quoted, will end up
-      #       being evaluated in the context of the calling interpreter and not
-      #       the test interpreter created in the isolated application domain.
+      # NOTE: This procedure returns a test setup script fragment suitable for
+      #       evaluation by an interpreter created in an isolated application
+      #       domain.  The script fragment being returned will be surrounded by
+      #       the prefix and suffix "script fragments" specified by our caller,
+      #       if any.  The entire script being returned will be substituted via
+      #       [subst], in the context of our caller, before being returned.
+      #       This step is necessary so that some limited context information,
+      #       primarily related to the testing directories, can be transferred
+      #       to the interpreter in the isolated application domain, making it
+      #       able to successfully run tests that require one or more of the
+      #       files in one of the testing directories.  Callers should keep in
+      #       mind that the test script fragment being returned cannot rely on
+      #       any script library procedures that are not provided by the Eagle
+      #       library package (i.e. "init.eagle"), including those provided by
+      #       the Eagle test package, unless the file containing them is loaded
+      #       manually via some other mechanism (e.g. by including appropriate
+      #       [package require] or [source] commands in the prefix or suffix
+      #       script fragments).  Also, all variable references and all nested
+      #       commands (i.e. those in square brackets) contained in the final
+      #       script fragment will end up being evaluated in the context of the
+      #       calling interpreter and not the target interpreter created in the
+      #       isolated application domain unless the dollar signs and/or square
+      #       brackets are specially quoted with backslashes.
       #
       return [uplevel 1 [list subst [appendArgs $prefix {
         if {[hasRuntimeOption native]} then {
@@ -817,7 +823,7 @@ namespace eval ::Eagle {
 
       #
       # NOTE: Configure the temporary directory for the newly opened database
-      #       connection now unless the caller forbids it.
+      #       connection now unless our caller forbids it.
       #
       if {$temporary} then {
         sql execute $db [appendArgs \
