@@ -507,8 +507,8 @@ set sds_manifests(binaryInterop) {
 #       Framework).
 #
 set sds_manifests(binaryCompact) {
-  "SQLite.Interop.[format %03d $build].dll"
-  "SQLite.Interop.[format %03d $build].pdb"
+  [appendArgs SQLite.Interop. [format %03d $build] .dll]
+  [appendArgs SQLite.Interop. [format %03d $build] .pdb]
   test.cfg
   testce.exe
   testce.pdb

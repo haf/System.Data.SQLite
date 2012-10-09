@@ -71,11 +71,12 @@ namespace test
 
   internal class TestCases
   {
-    private bool autoClose;
     internal Form1 frm;
-    internal int total;
-    internal int passed;
-    internal int failed;
+
+    private bool autoClose;
+    private int total;
+    private int passed;
+    private int failed;
 
     internal TestCases(bool autoExit)
     {

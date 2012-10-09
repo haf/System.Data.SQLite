@@ -1,0 +1,354 @@
+###############################################################################
+#
+# deployAndTestCe.eagle -- Windows CE Deployment & Testing Tool
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+
+proc usage { error } {
+  if {[string length $error] > 0} then {puts stdout $error}
+
+  puts stdout "usage:\
+[file tail [info nameofexecutable]]\
+[file tail [info script]] \[year\] \[platform\] \[configuration\]\
+\[culture\] \[platformId\] \[deviceId\] \[quiet\]"
+
+  #
+  # NOTE: Indicate to the caller, if any, that we have failed.
+  #
+  exit 1
+}
+
+#
+# NOTE: This procedure will output a diagnostic message, typically to the
+#       standard output channel, using the [puts] command unless the global
+#       variable "quiet" is non-zero.
+#
+proc qputs { args } {
+  if {!$::quiet} then {
+    eval puts $args; flush stdout
+  }
+}
+
+#
+# NOTE: This procedure looks up and returns the target device based on the
+#       locale, platform Id, and device Id.
+#
+proc getDevice { cultureInfo platformId deviceId } {
+  set datastoreManager [object create -alias \
+      Microsoft.SmartDevice.Connectivity.DatastoreManager \
+      [$cultureInfo LCID]]
+
+  set platform [$datastoreManager -alias GetPlatform [object create \
+      Microsoft.SmartDevice.Connectivity.ObjectId $platformId]]
+
+  if {[string length $deviceId] == 0} then {
+    set deviceId [$platform GetDefaultDeviceId]
+  }
+
+  set device [$platform -alias GetDevice $deviceId]
+
+  qputs stdout [appendArgs \
+      "returning device \"" [$device Name] "\" of platform \"" \
+      [$device Platform.ToString] "\" with Id \"" [$device Id.ToString] \
+      \"...]
+
+  return $device
+}
+
+#
+# NOTE: This procedure starts a process on the target device and optionally
+#       waits for it to complete.
+#
+proc startRemoteProcess { device fileName arguments {wait true} } {
+  set remoteProcess [$device -alias GetRemoteProcess]
+
+  if {![$remoteProcess Start $fileName $arguments]} then {
+    error [appendArgs "could not start remote process \"" $fileName \"]
+  }
+
+  if {$wait} then {
+    qputs stdout [appendArgs \
+        "waiting for remote process " [$remoteProcess GetId] ...]
+
+    while {![$remoteProcess HasExited]} {
+      qputs -nonewline stdout .
+      after 1000
+    }
+
+    qputs stdout ""
+    return [$remoteProcess GetExitCode]
+  }
+
+  return -1
+}
+
+set argc [llength $argv]
+
+if {$argc >= 0 && $argc <= 7} then {
+  #
+  # NOTE: Setup the default values for all command line options.
+  #
+  array set default {
+            year 2008
+        platform {Pocket PC 2003 (ARMV4)}
+   configuration Release
+         culture en-US
+      platformId 3c41c503-53ef-4c2a-8dd4-a8217cad115e
+        deviceId {}
+           quiet false
+  }
+
+  #
+  # NOTE: Process all the command line options.  If a command line option
+  #       is not present, use the default value.
+  #
+  set names [list \
+      year platform configuration culture platformId deviceId quiet]
+
+  for {set index 0} {$index < [llength $names]} {incr index} {
+    set name [lindex $names $index]; set value ""
+
+    if {$argc > $index} then {
+      set value [string trim [lindex $argv $index]]
+    }
+
+    if {[string length $value] > 0} then {
+      set $name $value
+    } else {
+      set $name $default($name)
+    }
+  }
+
+  #
+  # NOTE: Grab the culture instance based on the configured culture name.
+  #
+  set cultureInfo [object invoke -alias System.Globalization.CultureInfo \
+      GetCultureInfo $culture]
+
+  #
+  # NOTE: Build the list of .NET Compact Framework packages that need to be
+  #       deployed to the target device.
+  #
+  if {![info exists packages]} then {
+    #
+    # NOTE: The two letter ISO language name is needed when building the
+    #       default list of .NET Compact Framework packages because one of
+    #       them is a localized resource package.
+    #
+    set language [string toupper [$cultureInfo TwoLetterISOLanguageName]]
+
+    #
+    # NOTE: The default list of .NET Compact Framework packages contains the
+    #       .NET Compact Framework 3.5 installation CAB file for ARMV4 on the
+    #       Pocket PC and its associated resource installation CAB file.
+    #
+    set packages [list abd785f0-cda7-41c5-8375-2451a7cbff37 \
+        \\windows\\NETCFv35.ppc.armv4.cab c0ccf48e-4bfb-4d84-827c-981a595e40c5 \
+        [appendArgs \\windows\\NETCFv35.Messages. $language .cab]]
+  }
+
+  #
+  # NOTE: Save the path where this script is running from.
+  #
+  set path [file dirname [info script]]
+
+  #
+  # NOTE: The base path should be the project root directory, which should
+  #       be one level above the one containing this script.
+  #
+  set base_path [file dirname $path]
+
+  #
+  # NOTE: The managed binaries to be deployed to the target device should
+  #       be located in the "<base>\bin\<year>\<configuration>Compact\bin"
+  #       directory.
+  #
+  set managed_directory [file join \
+      $base_path bin $year [appendArgs $configuration Compact] bin]
+
+  #
+  # NOTE: The native binaries to be deployed to the target device should
+  #       be located in the "<base>\bin\<year>\<platform>\<configuration>"
+  #       directory.
+  #
+  set native_directory [file join \
+      $base_path bin $year $platform $configuration]
+
+  #
+  # NOTE: Build the list of all application files that need to be deployed to
+  #       the target device, including all the native and managed binaries.
+  #
+  if {![info exists fileNames]} then {
+    #
+    # NOTE: Grab the assembly name instance based on the primary managed
+    #       assembly file name.  This is needed because the build portion of
+    #       the assembly version is used when building the default list of
+    #       application files to be deployed to the target device.
+    #
+    set assemblyName [object invoke -alias System.Reflection.AssemblyName \
+        GetAssemblyName [file join $managed_directory System.Data.SQLite.dll]]
+
+    #
+    # NOTE: The default list of application files includes the test application
+    #       itself, the System.Data.SQLite managed assembly, the SQLite interop
+    #       assembly, and the test application configuration file.
+    #
+    set fileNames [list [file join $managed_directory testce.exe] [file \
+        join $managed_directory System.Data.SQLite.dll] [file join \
+        $native_directory [appendArgs SQLite.Interop. [format %03d \
+        [$assemblyName Version.Build]] .dll]] [file join $managed_directory \
+        test.cfg]]
+  }
+
+  #
+  # NOTE: Setup the directory on the target device where the application files
+  #       should be deployed to.
+  #
+  if {![info exists device_directory]} then {
+    set device_directory "\\Program Files\\testce\\"
+  }
+
+  #
+  # NOTE: Load the managed assembly that allows us to communicate with the
+  #       target device.  If this fails, the necessary SDK components are
+  #       probably not available on this system.
+  #
+  object load Microsoft.Smartdevice.Connectivity
+
+  #
+  # NOTE: Lookup the necessary device based on the platform and device Ids.
+  #
+  set device [getDevice $cultureInfo $platformId $deviceId]
+
+  #
+  # NOTE: Attempt to connect to the target device, which may be an emulator.
+  #       By default, we attempt to connect to the "Pocket PC 2003 SE Emulator"
+  #       device of the "Pocket PC 2003" platform (English).  If this fails,
+  #       the target device is probably unavailable, either because it is not
+  #       connected or some SDK components are missing.
+  #
+  $device Connect
+
+  #
+  # NOTE: Grab the file deployer instance for the target device.  This will
+  #       be used to download packages and send files to the target device.
+  #
+  set fileDeployer [$device -alias GetFileDeployer]
+
+  #
+  # NOTE: Process each entry in the list of packages to be downloaded to the
+  #       target device.  The package list must contain the package Id and the
+  #       file name (relative to the target device), in that order, for each
+  #       package to be downloaded to the target device.
+  #
+  foreach {packageId packageFileName} $packages {
+    qputs stdout [appendArgs \
+        "downloading package \"" $packageId "\" to device..."]
+
+    $fileDeployer DownloadPackage [object create \
+        Microsoft.SmartDevice.Connectivity.ObjectId $packageId]
+
+    qputs stdout [appendArgs \
+        "installing package file \"" $packageFileName "\" on device..."]
+
+    startRemoteProcess $device wceload.exe [appendArgs "/noui " \
+        $packageFileName]
+  }
+
+  #
+  # NOTE: Process each application file to be sent to the target device.
+  #
+  foreach fileName $fileNames {
+    qputs stdout [appendArgs \
+        "sending file \"" $fileName "\" to device..."]
+
+    #
+    # NOTE: All the application files are sent to the same directory on the
+    #       target device and the SendFile method requires a fully qualified
+    #       file name; therefore, grab the file name only from the source file
+    #       name and append that to the directory name on the target device.
+    #       Using [file join] and/or [file normalize] should be avoided here
+    #       because the directory name on the target device is not necessarily
+    #       valid a file name on this system and vice versa.
+    #
+    $fileDeployer SendFile $fileName [appendArgs $device_directory \
+        [file tail $fileName]] true false
+  }
+
+  #
+  # NOTE: Run the test application on the target device in "automatic" mode
+  #       (i.e. no user interaction is required) and capture the exit code.
+  #       The exit code will be zero upon success (i.e. all tests passed) or
+  #       non-zero otherwise.
+  #
+  set testFileName [file nativename [file join $device_directory testce.exe]]
+  set exitCode [startRemoteProcess $device $testFileName true]
+
+  #
+  # NOTE: Is the target device actually an emulator running on this system?
+  #
+  set isEmulator [$device IsEmulator]
+
+  #
+  # NOTE: We no longer need to be connected to the target device.
+  #
+  $device Disconnect
+
+  #
+  # NOTE: Also, if the device is an emulator, attempt to shutdown the process
+  #       containing it now (since we probably caused it to start).
+  #
+  if {$isEmulator} then {
+    #
+    # NOTE: Try to find the top-level window for the device emulator process
+    #       based on the "LCDDisplay" window class name.  Using this method
+    #       of finding the target window is somewhat fragile and may not work
+    #       reliably in the future.
+    #
+    set hWnd [lindex [lindex [info windows LCDDisplay] 0] 0]; # FIXME: ???
+
+    #
+    # NOTE: Make sure we found it before trying to lookup the parent process.
+    #
+    if {[string is integer -strict $hWnd] && $hWnd != 0} then {
+      #
+      # NOTE: Attempt to lookup the parent process for the target window.
+      #
+      qputs stdout [appendArgs "found device emulator window handle " $hWnd \
+          ", looking up the process Id..."]
+
+      set processId 0; set threadId 0; set error null
+
+      if {[object invoke -flags +NonPublic \
+          Eagle._Components.Private.WindowOps GetWindowThreadProcessId \
+          [object create IntPtr $hWnd] processId threadId error] eq "Ok" && \
+          [string is integer -strict $processId] && $processId != 0} then {
+        #
+        # NOTE: This is not ideal; however, if we simply try to close the
+        #       target window, it will prompt to save state changes and that
+        #       requires user interaction.  We never want to save the state;
+        #       therefore, just forcibly kill the process containing the
+        #       emulator.
+        #
+        qputs stdout [appendArgs "found device emulator process Id " \
+            $processId ", killing..."]
+
+        kill -force $processId
+      }
+    }
+  }
+
+  #
+  # NOTE: Print the overall result of running the test application and exit
+  #       using the exit code from the test application on the target device.
+  #
+  qputs stdout [expr {$exitCode == 0 ? "SUCCESS" : "FAILURE"}]
+  exit $exitCode
+} else {
+  usage ""
+}
