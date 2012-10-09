@@ -118,6 +118,7 @@ Components: {#InstallerCondition}; Tasks: gac\vs2008; Filename: {app}\bin\Instal
 Components: {#InstallerCondition}; Tasks: gac\vs2010; Filename: {app}\bin\Installer.exe; Parameters: "-install true -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noNetFx45 true -noVs2005 true -noVs2008 true -noVs2012 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 #endif
 #if Year == "2012"
+Components: {#InstallerCondition}; Tasks: gac\vs2012; Filename: {app}\bin\Installer.exe; Parameters: "-install true -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noNetFx40 true -noVs2005 true -noVs2008 true -noVs2010 true -configVersion 4.0.30319 -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 Components: {#InstallerCondition}; Tasks: gac\vs2012; Filename: {app}\bin\Installer.exe; Parameters: "-perUser true -install true -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noNetFx40 true -noVs2005 true -noVs2008 true -noVs2010 true -configVersion 4.0.30319 -vsVersionSuffix _Config -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 #endif
 #endif
@@ -126,6 +127,7 @@ Components: {#InstallerCondition}; Tasks: gac\vs2012; Filename: {app}\bin\Instal
 #if Pos("NativeOnly", AppConfiguration) == 0 && AppProcessor == "x86"
 #if Year == "2012"
 Components: {#InstallerCondition}; Tasks: gac\vs2012; Filename: {app}\bin\Installer.exe; Parameters: "-perUser true -install false -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noNetFx40 true -noVs2005 true -noVs2008 true -noVs2010 true -configVersion 4.0.30319 -vsVersionSuffix _Config -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
+Components: {#InstallerCondition}; Tasks: gac\vs2012; Filename: {app}\bin\Installer.exe; Parameters: "-install false -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noNetFx40 true -noVs2005 true -noVs2008 true -noVs2010 true -configVersion 4.0.30319 -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 #endif
 #if Year == "2010"
 Components: {#InstallerCondition}; Tasks: gac\vs2010; Filename: {app}\bin\Installer.exe; Parameters: "-install false -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx20 true -noNetFx45 true -noVs2005 true -noVs2008 true -noVs2012 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
