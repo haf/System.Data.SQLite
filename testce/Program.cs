@@ -20,11 +20,16 @@ namespace test
         "Data Source={DataDirectory}\\test.db;Password=yVXL39etehPX;";
 
     [MTAThread]
-    static void Main()
+    static int Main(string[] args)
     {
+      bool autoClose = false;
+      int exitCode = 2; /* INCOMPLETE */
       Assembly assembly = Assembly.GetExecutingAssembly();
       AssemblyName assemblyName = assembly.GetName();
       string directory = Path.GetDirectoryName(assemblyName.CodeBase);
+
+      if (args.Length > 0)
+          autoClose = bool.Parse(args[0]);
 
       try { File.Delete(directory + "\\test.db"); } catch { }
 
@@ -72,13 +77,20 @@ namespace test
           cnn.ConnectionString = connectionString;
           cnn.Open();
 
-          TestCases tests = new TestCases();
+          TestCases tests = new TestCases(autoClose);
 
           tests.Run(cnn);
 
           Application.Run(tests.frm);
+
+          if (tests.Succeeded())
+              exitCode = 0; /* SUCCESS */
+          else
+              exitCode = 1; /* FAILURE */
         }
       }
+
+      return exitCode;
     }
   }
 }

@@ -71,7 +71,21 @@ namespace test
 
   internal class TestCases
   {
+    private bool autoClose;
     internal Form1 frm;
+    internal int total;
+    internal int passed;
+    internal int failed;
+
+    internal TestCases(bool autoExit)
+    {
+        this.autoClose = autoExit;
+    }
+
+    internal bool Succeeded()
+    {
+        return (failed == 0) && (passed == total);
+    }
 
     internal void Run(DbConnection cnn)
     {
@@ -90,67 +104,92 @@ namespace test
               " [" + SQLiteConnection.SQLiteSourceId + "]");
       }
 
-      try { CreateTable(cnn); frm.WriteLine("SUCCESS - CreateTable"); }
-      catch (Exception) { frm.WriteLine("FAIL - CreateTable"); }
+      total++;
+      try { CreateTable(cnn); frm.WriteLine("SUCCESS - CreateTable"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - CreateTable"); failed++; }
 
-      try { DataTypeTest(cnn); frm.WriteLine("SUCCESS - DataType Test"); }
-      catch (Exception) { frm.WriteLine("FAIL - DataType Test"); }
+      total++;
+      try { DataTypeTest(cnn); frm.WriteLine("SUCCESS - DataType Test"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - DataType Test"); failed++; }
 
-      try { FullTextTest(cnn); frm.WriteLine("SUCCESS - Full Text Search"); }
-      catch (Exception) { frm.WriteLine("FAIL - Full Text Search"); }
+      total++;
+      try { FullTextTest(cnn); frm.WriteLine("SUCCESS - Full Text Search"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - Full Text Search"); failed++; }
 
-      try { KeyInfoTest(cnn); frm.WriteLine("SUCCESS - KeyInfo Fetch"); }
-      catch (Exception) { frm.WriteLine("FAIL - KeyInfo Fetch"); }
+      total++;
+      try { KeyInfoTest(cnn); frm.WriteLine("SUCCESS - KeyInfo Fetch"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - KeyInfo Fetch"); failed++; }
 
-      try { InsertTable(cnn); frm.WriteLine("SUCCESS - InsertTable"); }
-      catch (Exception) { frm.WriteLine("FAIL - InsertTable"); }
+      total++;
+      try { InsertTable(cnn); frm.WriteLine("SUCCESS - InsertTable"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - InsertTable"); failed++; }
 
-      try { VerifyInsert(cnn); frm.WriteLine("SUCCESS - VerifyInsert"); }
-      catch (Exception) { frm.WriteLine("FAIL - VerifyInsert"); }
+      total++;
+      try { VerifyInsert(cnn); frm.WriteLine("SUCCESS - VerifyInsert"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - VerifyInsert"); failed++; }
 
-      try { CoersionTest(cnn); frm.WriteLine("FAIL - CoersionTest"); }
-      catch (Exception) { frm.WriteLine("SUCCESS - CoersionTest"); }
+      total++;
+      try { CoersionTest(cnn); frm.WriteLine("FAIL - CoersionTest"); failed++; }
+      catch (Exception) { frm.WriteLine("SUCCESS - CoersionTest"); passed++; }
 
-      try { ParameterizedInsert(cnn); frm.WriteLine("SUCCESS - ParameterizedInsert"); }
-      catch (Exception) { frm.WriteLine("FAIL - ParameterizedInsert"); }
+      total++;
+      try { ParameterizedInsert(cnn); frm.WriteLine("SUCCESS - ParameterizedInsert"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - ParameterizedInsert"); failed++; }
 
-      try { BinaryInsert(cnn); frm.WriteLine("SUCCESS - BinaryInsert"); }
-      catch (Exception) { frm.WriteLine("FAIL - BinaryInsert"); }
+      total++;
+      try { BinaryInsert(cnn); frm.WriteLine("SUCCESS - BinaryInsert"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - BinaryInsert"); failed++; }
 
-      try { VerifyBinaryData(cnn); frm.WriteLine("SUCCESS - VerifyBinaryData"); }
-      catch (Exception) { frm.WriteLine("FAIL - VerifyBinaryData"); }
+      total++;
+      try { VerifyBinaryData(cnn); frm.WriteLine("SUCCESS - VerifyBinaryData"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - VerifyBinaryData"); failed++; }
 
-      try { LockTest(cnn); frm.WriteLine("SUCCESS - LockTest"); }
-      catch (Exception) { frm.WriteLine("FAIL - LockTest"); }
+      total++;
+      try { LockTest(cnn); frm.WriteLine("SUCCESS - LockTest"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - LockTest"); failed++; }
 
-      try { ParameterizedInsertMissingParams(cnn); frm.WriteLine("FAIL - ParameterizedInsertMissingParams"); }
-      catch (Exception) { frm.WriteLine("SUCCESS - ParameterizedInsertMissingParams"); }
+      total++;
+      try { ParameterizedInsertMissingParams(cnn); frm.WriteLine("FAIL - ParameterizedInsertMissingParams"); failed++; }
+      catch (Exception) { frm.WriteLine("SUCCESS - ParameterizedInsertMissingParams"); passed++; }
 
-      try { InsertMany(cnn, false); frm.WriteLine("SUCCESS - InsertMany"); }
-      catch (Exception) { frm.WriteLine("FAIL - InsertMany"); }
+      total++;
+      try { InsertMany(cnn, false); frm.WriteLine("SUCCESS - InsertMany"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - InsertMany"); failed++; }
 
-      try { InsertMany(cnn, true); frm.WriteLine("SUCCESS - InsertManyWithIdentityFetch"); }
-      catch (Exception) { frm.WriteLine("FAIL - InsertManyWithIdentityFetch"); }
+      total++;
+      try { InsertMany(cnn, true); frm.WriteLine("SUCCESS - InsertManyWithIdentityFetch"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - InsertManyWithIdentityFetch"); failed++; }
 
-      try { FastInsertMany(cnn); frm.WriteLine("SUCCESS - FastInsertMany"); }
-      catch (Exception) { frm.WriteLine("FAIL - FastInsertMany"); }
+      total++;
+      try { FastInsertMany(cnn); frm.WriteLine("SUCCESS - FastInsertMany"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - FastInsertMany"); failed++; }
 
-      try { IterationTest(cnn); frm.WriteLine("SUCCESS - Iteration Test"); }
-      catch (Exception) { frm.WriteLine("FAIL - Iteration Test"); }
+      total++;
+      try { IterationTest(cnn); frm.WriteLine("SUCCESS - Iteration Test"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - Iteration Test"); failed++; }
 
-      try { UserFunction(cnn); frm.WriteLine("SUCCESS - UserFunction"); }
-      catch (Exception) { frm.WriteLine("FAIL - UserFunction"); }
+      total++;
+      try { UserFunction(cnn); frm.WriteLine("SUCCESS - UserFunction"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - UserFunction"); failed++; }
 
-      try { UserAggregate(cnn); frm.WriteLine("SUCCESS - UserAggregate"); }
-      catch (Exception) { frm.WriteLine("FAIL - UserAggregate"); }
+      total++;
+      try { UserAggregate(cnn); frm.WriteLine("SUCCESS - UserAggregate"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - UserAggregate"); failed++; }
 
-      try { UserCollation(cnn); frm.WriteLine("SUCCESS - UserCollation"); }
-      catch (Exception) { frm.WriteLine("FAIL - UserCollation"); }
+      total++;
+      try { UserCollation(cnn); frm.WriteLine("SUCCESS - UserCollation"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - UserCollation"); failed++; }
 
-      try { DropTable(cnn); frm.WriteLine("SUCCESS - DropTable"); }
-      catch (Exception) { frm.WriteLine("FAIL - DropTable"); }
+      total++;
+      try { DropTable(cnn); frm.WriteLine("SUCCESS - DropTable"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - DropTable"); failed++; }
 
       frm.WriteLine("\r\nTests Finished.");
+      frm.WriteLine(String.Format("\r\nCounts: {0} total, {1} passed, {2} failed", total, passed, failed));
+      frm.WriteLine(String.Format("Result: {0}", Succeeded() ? "SUCCESS" : "FAILURE"));
+
+      if (autoClose)
+          frm.Close();
     }
 
     internal static void KeyInfoTest(DbConnection cnn)
