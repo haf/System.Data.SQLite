@@ -68,10 +68,36 @@
   </li>
 </ol>
 
-<a name="testCeBinaries"></a>
-<h2>Test Windows CE Binaries</h2>
+<a name="testCeBinariesAutomated"></a>
+<h2>Test Windows CE Binaries via Automation</h2>
 
 <ol>
+  <li>
+    Intead of testing the Windows CE binaries
+    <a href="#testCeBinariesManually">manually</a> as described in the next
+    section, the following steps may be used.
+  </li>
+
+  <li>Open a normal command prompt window with &quot;cmd.exe&quot;.</li>
+
+  <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
+
+  <li>
+    Enter the following command to test all the binaries available for Windows
+    CE:&nbsp;<b>test_ce.bat</b><br />
+  </li>
+</ol>
+
+<a name="testCeBinariesManually"></a>
+<h2>Test Windows CE Binaries Manually</h2>
+
+<ol>
+  <li>
+    If the Windows CE binaries were already tested using the
+    <a href="#testCeBinariesAutomated">automation</a> described in the previous
+    section, skip this section.
+  </li>
+
   <li>
     Launch <b>Visual Studio 2008</b>, &quot;<b>Professional</b>&quot; edition or
     &quot;better&quot;. As of this writing, in January 2012, <b>Visual Studio

@@ -106,7 +106,7 @@ FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
       %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}; set test_configuration {%%C}" -file "%TEST_FILE%"
 
       IF ERRORLEVEL 1 (
-        ECHO Testing of "%%Y" managed-only assembly failed.
+        ECHO Testing of "%%Y/%%C" managed-only assembly failed.
         GOTO errors
       )
     )
@@ -163,7 +163,7 @@ FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
       %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}; set test_configuration {%%C}" -initialize -runtimeOption native -file "%TEST_FILE%"
 
       IF ERRORLEVEL 1 (
-        ECHO Testing of "%%Y" mixed-mode assembly failed.
+        ECHO Testing of "%%Y/%%C" mixed-mode assembly failed.
         GOTO errors
       )
     )
