@@ -19,6 +19,11 @@ namespace test
     private static readonly string DefaultConnectionString =
         "Data Source={DataDirectory}\\test.db;Password=yVXL39etehPX;";
 
+    internal static DbConnection NewConnection()
+    {
+        return new SQLiteConnection();
+    }
+
     [MTAThread]
     static int Main(string[] args)
     {
@@ -37,7 +42,7 @@ namespace test
       SQLiteFunction.RegisterFunction(typeof(MyCount));
       SQLiteFunction.RegisterFunction(typeof(MySequence));
 
-      using (DbConnection cnn = new SQLiteConnection())
+      using (DbConnection cnn = NewConnection())
       {
         string connectionString = DefaultConnectionString;
 
@@ -77,9 +82,9 @@ namespace test
           cnn.ConnectionString = connectionString;
           cnn.Open();
 
-          TestCases tests = new TestCases(autoClose);
+          TestCases tests = new TestCases(connectionString, cnn, autoClose);
 
-          tests.Run(cnn);
+          tests.Run();
 
           Application.Run(tests.frm);
 

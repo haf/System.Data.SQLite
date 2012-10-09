@@ -9,6 +9,7 @@ using System;
 using System.Data.Common;
 using System.Data;
 using System.Data.SQLite;
+using System.Threading;
 
 namespace test
 {
@@ -73,13 +74,21 @@ namespace test
   {
     internal Form1 frm;
 
+    private string connectionString;
+    private DbConnection cnn;
     private bool autoClose;
     private int total;
     private int passed;
     private int failed;
 
-    internal TestCases(bool autoExit)
+    internal TestCases(
+        string connectionString,
+        DbConnection cnn,
+        bool autoExit
+        )
     {
+        this.connectionString = connectionString;
+        this.cnn = cnn;
         this.autoClose = autoExit;
     }
 
@@ -88,10 +97,9 @@ namespace test
         return (failed == 0) && (passed == total);
     }
 
-    internal void Run(DbConnection cnn)
+    internal void Run()
     {
       frm = new Form1();
-
       frm.Show();
 
       Type type = cnn.GetType();
@@ -180,6 +188,10 @@ namespace test
       total++;
       try { UserCollation(cnn); frm.WriteLine("SUCCESS - UserCollation"); passed++; }
       catch (Exception) { frm.WriteLine("FAIL - UserCollation"); failed++; }
+
+      total++;
+      try { MultipleThreadStress(cnn); frm.WriteLine("SUCCESS - MultipleThreadStress"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - MultipleThreadStress"); failed++; }
 
       total++;
       try { DropTable(cnn); frm.WriteLine("SUCCESS - DropTable"); passed++; }
@@ -408,10 +420,16 @@ namespace test
 
     internal void DropTable(DbConnection cnn)
     {
-      using (DbCommand cmd = cnn.CreateCommand())
+      string[] tables = {
+        "TestCase", "keyinfotest", "datatypetest", "TestThreads"
+      };
+      foreach (string table in tables)
       {
-        cmd.CommandText = "DROP TABLE TestCase";
-        cmd.ExecuteNonQuery();
+        using (DbCommand cmd = cnn.CreateCommand())
+        {
+          cmd.CommandText = String.Format("DROP TABLE {0};", table);
+          cmd.ExecuteNonQuery();
+        }
       }
     }
 
@@ -879,6 +897,110 @@ namespace test
         string s = (string)cmd.ExecuteScalar();
         if (s != "Field3") throw new ArgumentOutOfRangeException("MySequence didn't sort properly");
       }
+    }
+
+    private int nextId = 0;
+    private const int MAX_THREADS = 3;
+    private const int MAX_ITERATIONS = 100;
+    private ManualResetEvent goEvent = new ManualResetEvent(false);
+
+    private static int GetThreadId()
+    {
+        return Thread.CurrentThread.ManagedThreadId;
+    }
+
+    // Mutli-threading test.
+    internal void MultipleThreadStress(DbConnection cnn)
+    {
+        string[] commands = {
+            "CREATE TABLE TestThreads(Id INTEGER PRIMARY KEY, Data INTEGER);",
+            "INSERT INTO TestThreads (Id, Data) VALUES (" +
+                Interlocked.Increment(ref nextId).ToString() + ", " +
+                GetThreadId().ToString() + ");"
+        };
+
+        foreach (string command in commands)
+        {
+            using (DbCommand cmd = cnn.CreateCommand())
+            {
+                cmd.CommandText = command;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        Thread[] threads = new Thread[MAX_THREADS];
+
+        for (int index = 0; index < threads.Length; index++)
+            threads[index] = new Thread(TestThreadStart);
+
+        for (int index = 0; index < threads.Length; index++)
+            threads[index].Start();
+
+        goEvent.Set(); /* GO */
+
+        for (int index = 0; index < threads.Length; index++)
+            threads[index].Join();
+
+        int count;
+
+        using (DbCommand cmd = cnn.CreateCommand())
+        {
+            cmd.CommandText = "SELECT COUNT(*) FROM TestThreads;";
+            object value = cmd.ExecuteScalar();
+            count = (value is int) ? (int)value : 0;
+        }
+
+        if ((count >= MAX_THREADS) &&
+            (count <= (MAX_THREADS * MAX_ITERATIONS)))
+        {
+            throw new ArgumentOutOfRangeException("Unexpected thread count");
+        }
+    }
+
+    private void TestThreadStart()
+    {
+        goEvent.WaitOne();
+
+        using (DbConnection cnn = Program.NewConnection())
+        {
+            Random random = new Random();
+
+            cnn.ConnectionString = this.connectionString;
+            cnn.Open();
+
+            for (int index = 0; index < MAX_ITERATIONS; index++)
+            {
+                try
+                {
+                    using (DbTransaction trans = cnn.BeginTransaction())
+                    {
+                        string[] commands = {
+                            "INSERT INTO TestThreads (Id, Data) VALUES (" +
+                                Interlocked.Increment(ref nextId).ToString() + ", " +
+                                GetThreadId().ToString() + ");"
+                        };
+
+                        foreach (string command in commands)
+                        {
+                            using (DbCommand cmd = cnn.CreateCommand())
+                            {
+                                cmd.CommandText = command;
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        if ((index > 0) && (random.Next() % 2 == 0))
+                            throw new Exception("test exception");
+
+                        trans.Commit();
+                    }
+                }
+                catch
+                {
+                    // do nothing.
+                }
+            }
+        }
     }
   }
 }
