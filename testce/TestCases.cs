@@ -190,6 +190,10 @@ namespace test
       catch (Exception) { frm.WriteLine("FAIL - UserCollation"); failed++; }
 
       total++;
+      try { Int64Properties(cnn); frm.WriteLine("SUCCESS - Int64Properties"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - Int64Properties"); failed++; }
+
+      total++;
       try { MultipleThreadStress(cnn); frm.WriteLine("SUCCESS - MultipleThreadStress"); passed++; }
       catch (Exception) { frm.WriteLine("FAIL - MultipleThreadStress"); failed++; }
 
@@ -897,6 +901,25 @@ namespace test
         string s = (string)cmd.ExecuteScalar();
         if (s != "Field3") throw new ArgumentOutOfRangeException("MySequence didn't sort properly");
       }
+    }
+
+    // Make sure that Int64 property values can be used on the .NET Compact Framework.
+    internal void Int64Properties(DbConnection cnn)
+    {
+        SQLiteConnection cnn2 = cnn as SQLiteConnection;
+
+        if (cnn2 != null)
+        {
+            foreach (long value in new long[] {
+                    cnn2.LastInsertRowId, cnn2.MemoryUsed,
+                    cnn2.MemoryHighwater
+                })
+            {
+                // do nothing.
+            }
+        }
+
+        throw new NotSupportedException("not a SQLite connection");
     }
 
     private int nextId = 0;

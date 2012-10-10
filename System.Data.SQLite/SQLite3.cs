@@ -228,7 +228,13 @@ namespace System.Data.SQLite
     {
       get
       {
+#if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_last_insert_rowid(_sql);
+#else
+        long rowId = 0;
+        UnsafeNativeMethods.sqlite3_last_insert_rowid_interop(_sql, ref rowId);
+        return rowId;
+#endif
       }
     }
 
@@ -244,7 +250,13 @@ namespace System.Data.SQLite
     {
       get
       {
+#if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_memory_used();
+#else
+        long bytes = 0;
+        UnsafeNativeMethods.sqlite3_memory_used_interop(ref bytes);
+        return bytes;
+#endif
       }
     }
 
@@ -252,7 +264,13 @@ namespace System.Data.SQLite
     {
       get
       {
+#if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_memory_highwater(0);
+#else
+        long bytes = 0;
+        UnsafeNativeMethods.sqlite3_memory_highwater_interop(0, ref bytes);
+        return bytes;
+#endif
       }
     }
 

@@ -315,6 +315,21 @@ SQLITE_API void WINAPI sqlite3_column_int64_interop(sqlite3_stmt *stmt, int iCol
 	*val = sqlite3_column_int64(stmt,iCol);
 }
 
+SQLITE_API void WINAPI sqlite3_last_insert_rowid_interop(sqlite3 *db, sqlite_int64 *rowId)
+{
+	*rowId = sqlite3_last_insert_rowid(db);
+}
+
+SQLITE_API void WINAPI sqlite3_memory_used_interop(sqlite_int64 *nBytes)
+{
+	*nBytes = sqlite3_memory_used();
+}
+
+SQLITE_API void WINAPI sqlite3_memory_highwater_interop(int resetFlag, sqlite_int64 *nBytes)
+{
+	*nBytes = sqlite3_memory_highwater(resetFlag);
+}
+
 SQLITE_API const unsigned char * WINAPI sqlite3_column_text_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const unsigned char *pval = sqlite3_column_text(stmt, iCol);

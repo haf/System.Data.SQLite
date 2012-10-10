@@ -878,10 +878,11 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern long sqlite3_last_insert_rowid(IntPtr db);
 #else
     [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_last_insert_rowid_interop(IntPtr db, ref long rowId);
 #endif
-    internal static extern long sqlite3_last_insert_rowid(IntPtr db);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -892,17 +893,19 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern long sqlite3_memory_used();
 #else
     [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_memory_used_interop(ref long bytes);
 #endif
-    internal static extern long sqlite3_memory_used();
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern long sqlite3_memory_highwater(int resetFlag);
 #else
     [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_memory_highwater_interop(int resetFlag, ref long bytes);
 #endif
-    internal static extern long sqlite3_memory_highwater(int resetFlag);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
