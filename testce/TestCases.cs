@@ -917,6 +917,8 @@ namespace test
             {
                 // do nothing.
             }
+
+            return;
         }
 
         throw new NotSupportedException("not a SQLite connection");

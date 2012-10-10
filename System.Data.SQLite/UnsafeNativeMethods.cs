@@ -481,22 +481,31 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
 
-#if !SQLITE_STANDARD
-
-#if !USE_INTEROP_DLL
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    private const string SQLITE_DLL = "System.Data.SQLite.dll";
-#else
+#if PLATFORM_COMPACTFRAMEWORK
+    //
+    // NOTE: On the .NET Compact Framework, the native interop assembly must
+    //       be used because it provides several workarounds to .NET Compact
+    //       Framework limitations important for proper operation of the core
+    //       System.Data.SQLite functionality (e.g. being able to bind
+    //       parameters and handle column values of types Int64 and Double).
+    //
     internal const string SQLITE_DLL = "SQLite.Interop.083.dll";
-#endif // PLATFORM_COMPACTFRAMEWORK
-
-#else
-    private const string SQLITE_DLL = "SQLite.Interop.dll";
-#endif // USE_INTEROP_DLL
-
-#else
+#elif SQLITE_STANDARD
+    //
+    // NOTE: Otherwise, if the standard SQLite library is enabled, use it.
+    //
     private const string SQLITE_DLL = "sqlite3";
+#elif USE_INTEROP_DLL
+    //
+    // NOTE: Otherwise, if the native SQLite interop assembly is enabled,
+    //       use it.
+    //
+    private const string SQLITE_DLL = "SQLite.Interop.dll";
+#else
+    //
+    // NOTE: Finally, assume that the mixed-mode assembly is being used.
+    //
+    private const string SQLITE_DLL = "System.Data.SQLite.dll";
 #endif
 
     // This section uses interop calls that also fetch text length to optimize conversion.  
