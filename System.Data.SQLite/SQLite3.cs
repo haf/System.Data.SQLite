@@ -1248,7 +1248,7 @@ namespace System.Data.SQLite
       b1 = converter.GetBytes(s1);
       b2 = converter.GetBytes(s2);
 
-      return UnsafeNativeMethods.sqlite3_context_collcompare(context, b1, b1.Length, b2, b2.Length);
+      return UnsafeNativeMethods.sqlite3_context_collcompare_interop(context, b1, b1.Length, b2, b2.Length);
 #else
       throw new NotImplementedException();
 #endif
@@ -1277,7 +1277,7 @@ namespace System.Data.SQLite
       b1 = converter.GetBytes(c1);
       b2 = converter.GetBytes(c2);
 
-      return UnsafeNativeMethods.sqlite3_context_collcompare(context, b1, b1.Length, b2, b2.Length);
+      return UnsafeNativeMethods.sqlite3_context_collcompare_interop(context, b1, b1.Length, b2, b2.Length);
 #else
       throw new NotImplementedException();
 #endif
@@ -1290,7 +1290,7 @@ namespace System.Data.SQLite
       int len;
       int type;
       int enc;
-      IntPtr p = UnsafeNativeMethods.sqlite3_context_collseq(context, out type, out enc, out len);
+      IntPtr p = UnsafeNativeMethods.sqlite3_context_collseq_interop(context, out type, out enc, out len);
 
       if (p != null) seq.Name = UTF8ToString(p, len);
       seq.Type = (CollationTypeEnum)type;
@@ -1876,7 +1876,7 @@ namespace System.Data.SQLite
     internal override int GetCursorForTable(SQLiteStatement stmt, int db, int rootPage)
     {
 #if !SQLITE_STANDARD
-      return UnsafeNativeMethods.sqlite3_table_cursor(stmt._sqlite_stmt, db, rootPage);
+      return UnsafeNativeMethods.sqlite3_table_cursor_interop(stmt._sqlite_stmt, db, rootPage);
 #else
       return -1;
 #endif
@@ -1886,7 +1886,7 @@ namespace System.Data.SQLite
     {
 #if !SQLITE_STANDARD
       long rowid;
-      SQLiteErrorCode rc = UnsafeNativeMethods.sqlite3_cursor_rowid(stmt._sqlite_stmt, cursor, out rowid);
+      SQLiteErrorCode rc = UnsafeNativeMethods.sqlite3_cursor_rowid_interop(stmt._sqlite_stmt, cursor, out rowid);
       if (rc == SQLiteErrorCode.Ok) return rowid;
 
       return 0;

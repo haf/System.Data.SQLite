@@ -590,6 +590,9 @@ namespace System.Data.SQLite
     internal static extern SQLiteErrorCode sqlite3_finalize_interop(IntPtr stmt);
 
     [DllImport(SQLITE_DLL)]
+    internal static extern SQLiteErrorCode sqlite3_backup_finish_interop(IntPtr backup);
+
+    [DllImport(SQLITE_DLL)]
     internal static extern SQLiteErrorCode sqlite3_open_interop(byte[] utf8Filename, SQLiteOpenFlagsEnum flags, out IntPtr db);
 
     [DllImport(SQLITE_DLL)]
@@ -781,13 +784,13 @@ namespace System.Data.SQLite
 #if !SQLITE_STANDARD
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_context_collseq(IntPtr context, out int type, out int enc, out int len);
+    internal static extern IntPtr sqlite3_context_collseq_interop(IntPtr context, out int type, out int enc, out int len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_context_collcompare(IntPtr context, byte[] p1, int p1len, byte[] p2, int p2len);
+    internal static extern int sqlite3_context_collcompare_interop(IntPtr context, byte[] p1, int p1len, byte[] p2, int p2len);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern SQLiteErrorCode sqlite3_cursor_rowid(IntPtr stmt, int cursor, out long rowid);
+    internal static extern SQLiteErrorCode sqlite3_cursor_rowid_interop(IntPtr stmt, int cursor, out long rowid);
 
     [DllImport(SQLITE_DLL)]
     internal static extern SQLiteErrorCode sqlite3_index_column_info_interop(IntPtr db, byte[] catalog, byte[] IndexName, byte[] ColumnName, out int sortOrder, out int onError, out IntPtr Collation, out int colllen);
@@ -796,7 +799,7 @@ namespace System.Data.SQLite
     internal static extern void sqlite3_resetall_interop(IntPtr db);
 
     [DllImport(SQLITE_DLL)]
-    internal static extern int sqlite3_table_cursor(IntPtr stmt, int db, int tableRootPage);
+    internal static extern int sqlite3_table_cursor_interop(IntPtr stmt, int db, int tableRootPage);
 
 #endif
 // !SQLITE_STANDARD

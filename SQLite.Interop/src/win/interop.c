@@ -19,14 +19,15 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 #include "crypt.c"
 #endif
 
-#define INTEROP_DEBUG_NONE       (0x00)
-#define INTEROP_DEBUG_CLOSE      (0x01)
-#define INTEROP_DEBUG_FINALIZE   (0x02)
-#define INTEROP_DEBUG_OPEN       (0x04)
-#define INTEROP_DEBUG_OPEN16     (0x08)
-#define INTEROP_DEBUG_PREPARE    (0x10)
-#define INTEROP_DEBUG_PREPARE16  (0x20)
-#define INTEROP_DEBUG_RESET      (0x40)
+#define INTEROP_DEBUG_NONE           (0x00)
+#define INTEROP_DEBUG_CLOSE          (0x01)
+#define INTEROP_DEBUG_FINALIZE       (0x02)
+#define INTEROP_DEBUG_BACKUP_FINISH  (0x04)
+#define INTEROP_DEBUG_OPEN           (0x08)
+#define INTEROP_DEBUG_OPEN16         (0x10)
+#define INTEROP_DEBUG_PREPARE        (0x20)
+#define INTEROP_DEBUG_PREPARE16      (0x40)
+#define INTEROP_DEBUG_RESET          (0x80)
 
 typedef void (*SQLITEUSERFUNC)(sqlite3_context *, int, sqlite3_value **);
 typedef void (*SQLITEFUNCFINAL)(sqlite3_context *);
@@ -350,13 +351,15 @@ SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 #if SQLITE_VERSION_NUMBER >= 3007014
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_FINALIZE)
-  sqlite3InteropDebug("sqlite3_finalize_interop(): calling sqlite3_finalize(%p)...\n", stmt);
+  Vdbe *p = (Vdbe *)stmt;
+  sqlite3 *db = p->db;
+  sqlite3InteropDebug("sqlite3_finalize_interop(): calling sqlite3_finalize(%p, %p)...\n", db, stmt);
 #endif
 
   ret = sqlite3_finalize(stmt);
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_FINALIZE)
-  sqlite3InteropDebug("sqlite3_finalize_interop(): sqlite3_finalize(%p) returned %d.\n", stmt, ret);
+  sqlite3InteropDebug("sqlite3_finalize_interop(): sqlite3_finalize(%p, %p) returned %d.\n", db, stmt, ret);
 #endif
 
   return ret;
@@ -387,6 +390,25 @@ SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 
   return ret;
 #endif
+}
+
+SQLITE_API int WINAPI sqlite3_backup_finish_interop(sqlite3_backup *p)
+{
+  int ret;
+
+#if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_BACKUP_FINISH)
+  sqlite3* pDestDb = p->pDestDb;
+  sqlite3* pSrcDb = p->pSrcDb;
+  sqlite3InteropDebug("sqlite3_backup_finish_interop(): calling sqlite3_backup_finish(%p, %p, %p)...\n", pDestDb, pSrcDb, p);
+#endif
+
+  ret = sqlite3_backup_finish(p);
+
+#if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_BACKUP_FINISH)
+  sqlite3InteropDebug("sqlite3_backup_finish_interop(): sqlite3_backup_finish(%p, %p, %p) returned %d.\n", pDestDb, pSrcDb, p, ret);
+#endif
+
+  return ret;
 }
 
 SQLITE_API int WINAPI sqlite3_reset_interop(sqlite3_stmt *stmt)
@@ -469,13 +491,13 @@ SQLITE_API void WINAPI sqlite3_result_int64_interop(sqlite3_context *pctx, sqlit
   sqlite3_result_int64(pctx, *val);
 }
 
-SQLITE_API int WINAPI sqlite3_context_collcompare(sqlite3_context *ctx, const void *p1, int p1len, const void *p2, int p2len)
+SQLITE_API int WINAPI sqlite3_context_collcompare_interop(sqlite3_context *ctx, const void *p1, int p1len, const void *p2, int p2len)
 {
   if ((ctx->pFunc->flags & SQLITE_FUNC_NEEDCOLL) == 0) return 2;
   return ctx->pColl->xCmp(ctx->pColl->pUser, p1len, p1, p2len, p2);
 }
 
-SQLITE_API const char * WINAPI sqlite3_context_collseq(sqlite3_context *ctx, int *ptype, int *enc, int *plen)
+SQLITE_API const char * WINAPI sqlite3_context_collseq_interop(sqlite3_context *ctx, int *ptype, int *enc, int *plen)
 {
   CollSeq *pColl = ctx->pColl;
   *ptype = 0;
@@ -583,7 +605,7 @@ SQLITE_API int WINAPI sqlite3_index_column_info_interop(sqlite3 *db, const char 
   return SQLITE_ERROR;
 }
 
-SQLITE_API int WINAPI sqlite3_table_cursor(sqlite3_stmt *pstmt, int iDb, Pgno tableRootPage)
+SQLITE_API int WINAPI sqlite3_table_cursor_interop(sqlite3_stmt *pstmt, int iDb, Pgno tableRootPage)
 {
   Vdbe *p = (Vdbe *)pstmt;
   sqlite3 *db = (p == NULL) ? NULL : p->db;
@@ -606,7 +628,7 @@ SQLITE_API int WINAPI sqlite3_table_cursor(sqlite3_stmt *pstmt, int iDb, Pgno ta
   return ret;
 }
 
-SQLITE_API int WINAPI sqlite3_cursor_rowid(sqlite3_stmt *pstmt, int cursor, sqlite_int64 *prowid)
+SQLITE_API int WINAPI sqlite3_cursor_rowid_interop(sqlite3_stmt *pstmt, int cursor, sqlite_int64 *prowid)
 {
   Vdbe *p = (Vdbe *)pstmt;
   sqlite3 *db = (p == NULL) ? NULL : p->db;

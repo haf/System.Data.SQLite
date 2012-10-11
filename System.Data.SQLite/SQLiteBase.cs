@@ -504,7 +504,11 @@ namespace System.Data.SQLite
         lock (hdl)
 #endif
         {
+#if !SQLITE_STANDARD
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish_interop(backup);
+#else
             SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+#endif
             if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
         }
     }
