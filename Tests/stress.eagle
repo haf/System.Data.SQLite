@@ -22,7 +22,7 @@ runSQLiteTestPrologue
 
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload noWorkload srcDb db \
-      fileName compiled options count
+      fileName compiled options count loggingLambda
 
   #############################################################################
 
@@ -48,6 +48,30 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
     exit Failure; # halt all testing now.
   }
+
+  #############################################################################
+
+  proc setupLogging {} {
+    if {[info exists ::loggingLambda]} then return
+    set ::loggingLambda [list apply [list [list sender e] {
+      tputs $::test_channel [appendArgs \
+          "---- SQLiteLog.Log (" [$e ErrorCode] "): " [$e Message] \n]
+    }]]
+    object invoke System.Data.SQLite.SQLiteLog add_Log $::loggingLambda
+    tputs $::test_channel "---- setupLogging: SQLite logging enabled.\n"
+  }
+
+  #############################################################################
+
+  proc cleanupLogging {} {
+    if {![info exists ::loggingLambda]} then return
+    object invoke System.Data.SQLite.SQLiteLog remove_Log $::loggingLambda
+    tputs $::test_channel "---- cleanupLogging: SQLite logging disabled.\n"
+  }
+
+  #############################################################################
+
+  setupLogging
 
   #############################################################################
 
@@ -638,8 +662,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }
   }
 
+  cleanupLogging
+  catch {object removecallback $loggingLambda}
+
+  rename cleanupLogging ""
+  rename setupLogging ""
+
   unset -nocomplain result thread index workload noWorkload srcDb db \
-      fileName compiled options count times
+      fileName compiled options count times loggingLambda
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
 
