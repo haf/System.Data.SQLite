@@ -20,9 +20,21 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
+#
+# NOTE: Make sure that SQLite core library is completely shutdown prior to
+#       starting any of the tests in this file.
+#
+if {[haveConstraint SQLite]} then {
+  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
+      sqlite3_shutdown
+}
+
+###############################################################################
+
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload noWorkload srcDb db \
-      fileName compiled options count loggingLambda
+      fileName compiled options count times logFileName logListener \
+      connection
 
   #############################################################################
 
@@ -51,33 +63,64 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  proc setupLogging {} {
-    if {[info exists ::loggingLambda]} then return
-    set ::loggingLambda [list apply [list [list sender e] {
-      tputs $::test_channel [appendArgs \
-          "---- SQLiteLog.Log (" [$e ErrorCode] "): " [$e Message] \n]
-    }]]
-    object invoke System.Data.SQLite.SQLiteLog add_Log $::loggingLambda
-    tputs $::test_channel "---- setupLogging: SQLite logging enabled.\n"
+  proc setupLogging { fileName } {
+    if {![info exists ::logListener]} then {
+      set ::logListener [object create -alias \
+          System.Diagnostics.TextWriterTraceListener $fileName]
+    }
+
+    object invoke System.Diagnostics.Trace.Listeners Add $::logListener
+    object invoke System.Data.SQLite.SQLiteLog Initialize
+
+    tputs $::test_channel [appendArgs \
+        "---- enabled SQLite trace logging to file \"" $fileName \"\n]
   }
 
   #############################################################################
 
-  proc cleanupLogging {} {
-    if {![info exists ::loggingLambda]} then return
-    object invoke System.Data.SQLite.SQLiteLog remove_Log $::loggingLambda
-    tputs $::test_channel "---- cleanupLogging: SQLite logging disabled.\n"
+  proc cleanupLogging { fileName } {
+    if {[info exists ::logListener]} then {
+      object invoke System.Diagnostics.Trace.Listeners Remove $::logListener
+      $::logListener Close
+    }
+
+    #
+    # NOTE: Copy the trace listener log file to the main test log file.
+    #
+    tlog "---- BEGIN TRACE LISTENER OUTPUT\n"
+    tlog [readFile $fileName]
+    tlog "\n---- END TRACE LISTENER OUTPUT\n"
+
+    #
+    # NOTE: Delete the trace listener log file because its contents have
+    #       been copied to the main test log file.
+    #
+    cleanupFile $fileName
+
+    tputs $::test_channel [appendArgs \
+        "---- disabled SQLite trace logging to file \"" $fileName \"\n]
   }
 
   #############################################################################
 
-  setupLogging
+  #
+  # NOTE: The trace listener used with the SQLiteLog class to capture output
+  #       from the core SQLite library requires its own log file because the
+  #       TextWriterTraceListener class opens and locks the log file it uses
+  #       as the basis of the output stream.  Before this test is complete,
+  #       the entire contents of this trace log file will be copied into the
+  #       main test log file and then deleted.
+  #
+  set logFileName [appendArgs $test_log .trace]
+  setupLogging $logFileName
 
   #############################################################################
 
   set count(0) 1
   set count(1) 5
   set count(2) 300
+  set count(3) 57
+  set count(4) 10000000
   set noWorkload [list]
 
   if {[info exists argv] && [llength $argv] > 0} then {
@@ -86,11 +129,15 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         [list [list null MustHaveIntegerValue -1 -1 -count0 $count(0)] \
         [list null MustHaveIntegerValue -1 -1 -count1 $count(1)] \
         [list null MustHaveIntegerValue -1 -1 -count2 $count(2)] \
+        [list null MustHaveIntegerValue -1 -1 -count3 $count(3)] \
+        [list null MustHaveIntegerValue -1 -1 -count4 $count(4)] \
         [list null MustHaveListValue -1 -1 -noWorkload $noWorkload]] $argv
 
     set count(0) $options(-count0,value)
     set count(1) $options(-count1,value)
     set count(2) $options(-count2,value)
+    set count(3) $options(-count3,value)
+    set count(4) $options(-count4,value)
     set noWorkload $options(-noWorkload,value)
   }
 
@@ -104,6 +151,12 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   tputs $test_channel [appendArgs \
       "---- workloads will wait at least " $count(2) " millisecond(s)...\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- workload \"small\" chunk size is " $count(3) " byte(s)...\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- workload \"big\" chunk size is " $count(4) " byte(s)...\n"]
 
   if {[llength $noWorkload] > 0} then {
     tputs $test_channel [appendArgs \
@@ -144,23 +197,30 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
+  set connection [getDbConnection]
+
+  $connection LogMessage Ok [appendArgs \
+      "starting stress test using database \"" $fileName(2) "\"..."]
+
+  #############################################################################
+
   set workload(1) [list [list srcFileName dstFileName table count] {
     #
     # NOTE: Workload #1, CREATE TABLE statements.
     #
     lappend ::times(1) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 2} {$index <= $count} {incr index} {
+      for {set index 2} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db [appendArgs \
               "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
           showTest A
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest a
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest a
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -175,17 +235,17 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(2) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 2} {$index <= $count} {incr index} {
+      for {set index 2} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db [appendArgs \
               "DROP TABLE IF EXISTS t" $index \;]
           showTest B
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest b
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest b
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -200,17 +260,17 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(3) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute -execute reader $db [appendArgs \
               "SELECT x, y FROM " $table " WHERE z = 'small';"]
           showTest C
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest c
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest c
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -225,17 +285,17 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(4) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute -execute reader $db [appendArgs \
               "SELECT x, y FROM " $table " WHERE z = 'big';"]
           showTest D
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest d
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest d
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -250,20 +310,20 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(5) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db [appendArgs \
               "INSERT INTO " $table "(x, y, z) VALUES('" \
               [format %lX [expr {random()}]] "', '" \
-              [base64 encode -- [expr {randstr(10000)}]] \
+              [base64 encode -- [expr {randstr($::count(3))}]] \
               "', 'small');"]
           showTest E
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest e
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest e
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -278,19 +338,19 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(6) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db [appendArgs \
               "INSERT INTO " $table "(x, y, z) VALUES('" \
               [format %lX [expr {random()}]] \
-              "', RANDOMBLOB(10000000), 'big');"]
+              "', RANDOMBLOB(" $::count(4) "), 'big');"]
           showTest F
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest f
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest f
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -305,18 +365,18 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(7) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db [appendArgs "UPDATE " $table \
-              " SET y = '" [base64 encode -- [expr {randstr(10000)}]] \
+              " SET y = '" [base64 encode -- [expr {randstr($::count(3))}]] \
               "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
           showTest G
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest g
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest g
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -331,18 +391,19 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(8) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db [appendArgs "UPDATE " $table \
-              " SET y = RANDOMBLOB(10000000) WHERE x LIKE '" \
-              [format %X $index] "%' AND z = 'big';"]
+              " SET y = RANDOMBLOB(" $::count(4) \
+              ") WHERE x LIKE '" [format %X $index] \
+              "%' AND z = 'big';"]
           showTest H
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest h
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest h
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -357,17 +418,17 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(9) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db [appendArgs "DELETE FROM " $table \
               " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
           showTest I
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest i
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest i
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -382,17 +443,17 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(10) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db [appendArgs "DELETE FROM " $table \
               " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
           showTest J
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest j
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest j
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -407,16 +468,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(11) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           sql execute $db "VACUUM;"
           showTest K
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest k
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest k
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -585,8 +646,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     lappend ::times(14) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           set result [sql execute -execute scalar $db \
               "PRAGMA integrity_check;"]
           if {$result eq "ok"} then {
@@ -594,12 +655,12 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           } else {
             error [appendArgs "integrity check failed: " $result]
           }
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest n
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest n
+          } else {
+            failTest $error
+          }
         }
       }
       cleanupDb $dstFileName db false true false
@@ -613,16 +674,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #15, force managed garbage collection
     #
     lappend ::times(15) [lindex [time {
-      if {[catch {
-        for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count} {incr index} {
+        if {[catch {
           collectGarbage $::test_channel
           showTest O
-        }
-      } error]} then {
-        if {[expectedError $error]} then {
-          showTest o
-        } else {
-          failTest $error
+        } error]} then {
+          if {[expectedError $error]} then {
+            showTest o
+          } else {
+            failTest $error
+          }
         }
       }
     }] 0]
@@ -696,14 +757,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }
   }
 
-  cleanupLogging
-  catch {object removecallback $loggingLambda}
+  freeDbConnection
+
+  cleanupLogging $logFileName
 
   rename cleanupLogging ""
   rename setupLogging ""
 
   unset -nocomplain result thread index workload noWorkload srcDb db \
-      fileName compiled options count times loggingLambda
+      fileName compiled options count times logFileName logListener \
+      connection
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
 
