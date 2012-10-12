@@ -1657,7 +1657,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
 
             logevents = 0;
 
-            cnn.LogMessage(1, "test log event");
+            cnn.LogMessage(SQLiteErrorCode.Error, "test log event");
 
             if (logevents != 1)
                 throw new Exception(String.Format(

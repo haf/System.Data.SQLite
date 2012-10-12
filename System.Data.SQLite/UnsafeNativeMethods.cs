@@ -1340,7 +1340,7 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
-    internal static extern void sqlite3_log(int iErrCode, byte[] zFormat);
+    internal static extern void sqlite3_log(SQLiteErrorCode iErrCode, byte[] zFormat);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

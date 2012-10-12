@@ -236,7 +236,7 @@ namespace System.Data.SQLite
     /// interface, this should be pre-formatted.  Consider using the 
     /// String.Format() function.</param>
     /// <returns></returns>
-    internal abstract void LogMessage(int iErrCode, string zMessage);
+    internal abstract void LogMessage(SQLiteErrorCode iErrCode, string zMessage);
 
 #if INTEROP_CODEC
     internal abstract void SetPassword(byte[] passwordBytes);
