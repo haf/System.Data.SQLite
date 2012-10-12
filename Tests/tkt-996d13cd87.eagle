@@ -126,9 +126,10 @@ for {set i 1} {$i < 11} {incr i} {
             {
               //
               // NOTE: Create a (reusable) delegate that will contain the code
-              //       that half the created threads are to execute.  This code
-              //       will repeatedly create, open, and close a single database
-              //       connection with (or without) pooling enabled.
+              //       that most of the created test threads are going to
+              //       execute.  The code in this delegate will create, open,
+              //       use, and close a single database connection with (or
+              //       without) pooling enabled.
               //
               ThreadStart threadStart1 = delegate()
               {
@@ -141,9 +142,9 @@ for {set i 1} {$i < 11} {incr i} {
                   goEvent.WaitOne();
 
                   //
-                  // NOTE: Repeatedly try to create, open, and close a pooled
-                  //       database connection and then wait a random number of
-                  //       milliseconds before doing it again.
+                  // NOTE: Try to create, open, and close a database connection
+                  //       and then wait a random number of milliseconds before
+                  //       doing it again.
                   //
                   Thread.Sleep(random.Next(0, 500));
 
@@ -170,8 +171,9 @@ for {set i 1} {$i < 11} {incr i} {
 
               //
               // NOTE: Create a (reusable) delegate that will contain the code
-              //       that half the created threads are to execute.  This code
-              //       will repeatedly force a full garbage collection.
+              //       that the garbage collection thread is to execute.  The
+              //       code in this delegate will attempt to force a full round
+              //       of garbage collection several times.
               //
               ThreadStart threadStart2 = delegate()
               {

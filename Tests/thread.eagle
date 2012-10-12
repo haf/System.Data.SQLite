@@ -1,0 +1,435 @@
+###############################################################################
+#
+# thread.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+checkForSQLiteDirectories $test_channel true
+set memory_used [reportSQLiteResources $test_channel true]
+
+###############################################################################
+
+#
+# NOTE: How many test threads should be created and used for these tests?  This
+#       value must be at least two.  The first test thread (at index 0) just
+#       repeatedly calls the Thread.Abort() method on the other test threads
+#       that appear to be alive until all test threads appear to be dead.  All
+#       other threads will attempt to open a connection, execute one or more
+#       queries against it, and then close it.
+#
+set count 10
+
+###############################################################################
+
+runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
+  setupDb [set fileName thread-1.1.db]
+
+  tputs $test_channel [appendArgs \
+      "---- using a total of " $count " threads...\n"]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x INTEGER PRIMARY KEY, y BLOB);
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
+  }
+
+  #
+  # NOTE: The temporary directory must be reset here because it allocates
+  #       some SQLite memory and this test requires an extremely accurate
+  #       reading.
+  #
+  sql execute $db {
+    PRAGMA temp_store_directory = "";
+  }
+
+  #
+  # NOTE: Close the database now, freeing any native SQLite memory and/or
+  #       resources that it may be using at this point; however, do not
+  #       actually delete the database file because it is needed in the C#
+  #       code for this test.
+  #
+  cleanupDb $fileName db true false false
+
+  #
+  # NOTE: Setup the variables used in the dynamically substituted C# code
+  #       for the main body of this test (below).
+  #
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql { \
+    SELECT x, y FROM t1 ORDER BY x; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Collections.Generic;
+    using System.Data.SQLite;
+    using System.Diagnostics;
+    using System.Threading;
+    using Eagle._Containers.Public;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static IntList RunTestThreads()
+        {
+          //
+          // NOTE: This is the total number of data bytes seen in the second
+          //       column of the query result rows seen by all test threads.
+          //       This value will vary greatly based upon how many loop
+          //       iterations are performed prior to each test thread being
+          //       aborted.
+          //
+          int sum = 0;
+
+          //
+          // NOTE: This is the total number of query result rows seen by all
+          //       the test threads.
+          //
+          int rows = 0;
+
+          //
+          // NOTE: This is the total number of exceptions caught by all the
+          //       test threads.
+          //
+          int errors = 0;
+
+          //
+          // NOTE: This is the total number of test threads to create.
+          //
+          int count = ${count};
+
+          //
+          // NOTE: Create the array of thread objects.
+          //
+          Thread\[\] thread = new Thread\[count\];
+
+          //
+          // NOTE: Create a random number generator suitable for waiting a
+          //       random number of milliseconds between each loop iteration
+          //       and then selecting a random thread index.
+          //
+          Random random = new Random();
+
+          //
+          // NOTE: Create the event that will be used to synchronize all the
+          //       created threads so that they start doing their actual test
+          //       "work" at approximately the same time.  This is also used
+          //       to make sure that all test threads are inside of a try
+          //       block before attempting to abort them.
+          //
+          using (ManualResetEvent goEvent = new ManualResetEvent(false))
+          {
+            //
+            // NOTE: Create a (reusable) delegate that will contain the code
+            //       that most of the created test threads are to execute.
+            //       This code will open, use, and close a single database
+            //       connection.  Multiple commands and data readers will also
+            //       be used.
+            //
+            ThreadStart threadStart1 = delegate()
+            {
+              try
+              {
+                //
+                // NOTE: Wait forever for the "GO" signal so that all threads
+                //       can start working at approximately the same time.
+                //       This is also used to make sure that all test threads
+                //       are inside of a try block before attempting to abort
+                //       them.
+                //
+                goEvent.WaitOne();
+
+                //
+                // NOTE: Create a new connection object.  We purposely avoid
+                //       putting this inside a "using" block to help test our
+                //       cleanup via the garbage collector.
+                //
+                SQLiteConnection connection = new SQLiteConnection(
+                    "Data Source=${dataSource};");
+
+                //
+                // NOTE: Open the connection.  After this point, native memory
+                //       and resources have been allocated by this thread.
+                //
+                connection.Open();
+
+                //
+                // NOTE: Loop forever until the first thread signals us to stop
+                //       via calling Thread.Abort() method on our associated
+                //       thread object.
+                //
+                while (true)
+                {
+                  //
+                  // NOTE: Create a dictionary to temporarily hold the values
+                  //       from the data reader for this loop iteration.
+                  //
+                  Dictionary<long, byte\[\]> results =
+                      new Dictionary<long, byte\[\]>();
+
+                  //
+                  // NOTE: Create a new command object using the connection
+                  //       object for this thread.  Again, avoid putting this
+                  //       inside a "using" block to help test our cleanup via
+                  //       the garbage collector.
+                  //
+                  SQLiteCommand command = new SQLiteCommand("${sql}",
+                      connection);
+
+                  //
+                  // NOTE: Execute the query and get the resulting data reader
+                  //       object.  Again, avoid putting this inside a "using"
+                  //       block to help test our cleanup via the garbage
+                  //       collector.
+                  //
+                  SQLiteDataReader reader = command.ExecuteReader();
+
+                  //
+                  // NOTE: Start processing each available query result row.
+                  //       This processing (or any of the above processing)
+                  //       may be stopped at any time due to this test thread
+                  //       being aborted.
+                  //
+                  while (reader.Read())
+                  {
+                    results.Add((long)reader\["x"\],
+                        reader\["y"\] as byte\[\]);
+
+                    Interlocked.Add(ref sum,
+                        results\[(long)reader\["x"\]\].Length);
+
+                    Interlocked.Increment(ref rows);
+                  }
+
+                  //
+                  // NOTE: Close the data reader for this loop iteration as we
+                  //       are done with it.
+                  //
+                  reader.Close();
+                  reader = null;
+
+                  //
+                  // NOTE: Dispose the command for this loop iteration as we
+                  //       are done with it.
+                  //
+                  command.Dispose();
+                  command = null;
+                }
+
+                //
+                // NOTE: Close the connection for this test thread as we are
+                //       done with it.  Since the above loop is infinite, it
+                //       should only be exited via this test thread being
+                //       aborted; therefore, execution should never reach this
+                //       point.
+                //
+                connection.Close();
+                connection = null;
+              }
+              catch (Exception e)
+              {
+                Interlocked.Increment(ref errors);
+                Trace.WriteLine(e);
+              }
+            };
+
+            //
+            // NOTE: Create a (reusable) delegate that will contain the code
+            //       that half the created threads are to execute.  This code
+            //       will repeatedly call the Thread.Abort() method on all the
+            //       other test threads until they all appear to be dead.
+            //
+            ThreadStart threadStart2 = delegate()
+            {
+              try
+              {
+                //
+                // NOTE: Wait forever for the "GO" signal so that all threads
+                //       can start working at approximately the same time.
+                //       This is also used to make sure that all test threads
+                //       are inside of a try block before attempting to abort
+                //       them.
+                //
+                goEvent.WaitOne();
+
+                //
+                // NOTE: Give the other test threads a slight head start to
+                //       make sure that they are fully alive prior to trying
+                //       to abort any of them.
+                //
+                Thread.Sleep(1000);
+
+                //
+                // NOTE: Loop forever until all test threads appear to be dead.
+                //
+                while (true)
+                {
+                  //
+                  // NOTE: Wait a random number of milliseconds, up to a full
+                  //       second.
+                  //
+                  Thread.Sleep(random.Next(0, 1000));
+
+                  //
+                  // NOTE: Select a random thread to abort.
+                  //
+                  int index = random.Next(1, count);
+
+                  //
+                  // NOTE: If the thread appears to be alive, try to abort
+                  //       it.
+                  //
+                  try
+                  {
+                    if (thread\[index\].IsAlive)
+                      thread\[index\].Abort();
+                  }
+                  catch (Exception e)
+                  {
+                    Trace.WriteLine(e);
+                  }
+
+                  //
+                  // NOTE: If all the other threads are dead, presumably due
+                  //       to being aborted, stop now.  This check is simpler,
+                  //       and possibly more reliable, than checking if any of
+                  //       the test threads are still alive via their IsAlive
+                  //       property.
+                  //
+                  if (Interlocked.Increment(ref errors) == count)
+                    break;
+                  else
+                    Interlocked.Decrement(ref errors);
+                }
+              }
+              catch (Exception e)
+              {
+                Interlocked.Increment(ref errors);
+                Trace.WriteLine(e);
+              }
+            };
+
+            //
+            // NOTE: Create each of the test threads with a suitable stack
+            //       size.  We must specify a stack size here because the
+            //       default one for the process would be the same as the
+            //       parent executable (the Eagle shell), which is 16MB,
+            //       too large to be useful.
+            //
+            for (int index = 0; index < count; index++)
+            {
+              //
+              // NOTE: Figure out what kind of thread to create (i.e. one
+              //       that uses a connection or one that calls the GC).
+              //
+              ThreadStart threadStart;
+
+              if (index == 0)
+                threadStart = threadStart2;
+              else
+                threadStart = threadStart1;
+
+              thread\[index\] = new Thread(threadStart, 1048576);
+
+              //
+              // NOTE: Name each thread for a better debugging experience.
+              //
+              thread\[index\].Name = String.Format(
+                  "[file rootname ${fileName}] #{0}", index);
+            }
+
+            //
+            // NOTE: Start all the threads now.  They should not actually do
+            //       any of the test "work" until we signal the event.
+            //
+            for (int index = 0; index < count; index++)
+              thread\[index\].Start();
+
+            //
+            // NOTE: Send the signal that all threads should start doing
+            //       their test "work" now.
+            //
+            goEvent.Set(); /* GO */
+
+            //
+            // NOTE: Wait forever for each thread to finish its test "work"
+            //       and then die.
+            //
+            for (int index = 0; index < count; index++)
+              thread\[index\].Join();
+          }
+
+          //
+          // NOTE: Return a list of integers with total number of data bytes
+          //       seen, total number of query result rows seen, and the total
+          //       number of exceptions caught by all the test threads.
+          //
+          IntList counts = new IntList();
+
+          counts.Add(sum);
+          counts.Add(rows);
+          counts.Add(errors);
+
+          return counts;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors [list System.Data.SQLite.dll Eagle.dll]]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} RunTestThreads
+      } result] : [set result ""]}] $result \
+      [collectGarbage $test_channel] \
+      [reportSQLiteResources $test_channel true]
+} -cleanup {
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result [appendArgs "^Ok System#CodeDom#Compiler#CompilerResults#\\d+\
+\\{\\} 0 \\{\\d+ \\d+ " $count "\\} \\{\\} " $memory_used \$]}
+
+###############################################################################
+
+unset -nocomplain count
+
+###############################################################################
+
+unset -nocomplain memory_used
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
