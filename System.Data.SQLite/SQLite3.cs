@@ -321,27 +321,33 @@ namespace System.Data.SQLite
 
       if (_sql == null)
       {
-        IntPtr db;
-        SQLiteErrorCode n;
+        try
+        {
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+          IntPtr db;
+          SQLiteErrorCode n;
 
 #if !SQLITE_STANDARD
-        if ((connectionFlags & SQLiteConnectionFlags.NoExtensionFunctions) != SQLiteConnectionFlags.NoExtensionFunctions)
-        {
-          n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), openFlags, out db);
-        }
-        else
+          if ((connectionFlags & SQLiteConnectionFlags.NoExtensionFunctions) != SQLiteConnectionFlags.NoExtensionFunctions)
+          {
+            n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), openFlags, out db);
+          }
+          else
 #endif
-        {
-          n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, openFlags, IntPtr.Zero);
-        }
+          {
+            n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, openFlags, IntPtr.Zero);
+          }
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
-        Trace.WriteLine(String.Format("Open: {0}", db));
+          Trace.WriteLine(String.Format("Open: {0}", db));
 #endif
 
-        if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
-
-        _sql = new SQLiteConnectionHandle(db);
+          if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
+          _sql = new SQLiteConnectionHandle(db);
+        }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }
       // Bind functions to this connection.  If any previous functions of the same name
@@ -516,20 +522,31 @@ namespace System.Data.SQLite
 
       GCHandle handle = GCHandle.Alloc(b, GCHandleType.Pinned);
       IntPtr psql = handle.AddrOfPinnedObject();
+      SQLiteStatementHandle statementHandle = null;
       try
       {
         while ((n == SQLiteErrorCode.Schema || n == SQLiteErrorCode.Locked || n == SQLiteErrorCode.Busy) && retries < 3)
         {
+          try
+          {
+            // do nothing.
+          }
+          finally /* NOTE: Thread.Abort() protection. */
+          {
 #if !SQLITE_STANDARD
-          n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, psql, b.Length - 1, out stmt, out ptr, out len);
+            n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, psql, b.Length - 1, out stmt, out ptr, out len);
 #else
-          n = UnsafeNativeMethods.sqlite3_prepare(_sql, psql, b.Length - 1, out stmt, out ptr);
-          len = -1;
+            n = UnsafeNativeMethods.sqlite3_prepare(_sql, psql, b.Length - 1, out stmt, out ptr);
+            len = -1;
 #endif
 
 #if !NET_COMPACT_20 && TRACE_STATEMENT
-          Trace.WriteLine(String.Format("Prepare ({0}): {1}", n, stmt));
+            Trace.WriteLine(String.Format("Prepare ({0}): {1}", n, stmt));
 #endif
+
+            if ((n == SQLiteErrorCode.Ok) && (stmt != IntPtr.Zero))
+              statementHandle = new SQLiteStatementHandle(_sql, stmt);
+          }
 
           if (n == SQLiteErrorCode.Schema)
             retries++;
@@ -606,7 +623,7 @@ namespace System.Data.SQLite
 
         strRemain = UTF8ToString(ptr, len);
 
-        if (stmt != IntPtr.Zero) cmd = new SQLiteStatement(this, flags, new SQLiteStatementHandle(_sql, stmt), strSql.Substring(0, strSql.Length - strRemain.Length), previous);
+        if (statementHandle != null) cmd = new SQLiteStatement(this, flags, statementHandle, strSql.Substring(0, strSql.Length - strRemain.Length), previous);
 
         return cmd;
       }
@@ -1599,15 +1616,26 @@ namespace System.Data.SQLite
         byte[] zDestName = ToUTF8(destName);
         byte[] zSourceName = ToUTF8(sourceName);
 
-        IntPtr backup = UnsafeNativeMethods.sqlite3_backup_init(
-            destHandle, zDestName, sourceHandle, zSourceName);
+        SQLiteBackupHandle backupHandle = null;
 
-        if (backup == IntPtr.Zero)
-            throw new SQLiteException(ResultCode(), GetLastError());
+        try
+        {
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+            IntPtr backup = UnsafeNativeMethods.sqlite3_backup_init(
+                destHandle, zDestName, sourceHandle, zSourceName);
+
+            if (backup == IntPtr.Zero)
+                throw new SQLiteException(ResultCode(), GetLastError());
+
+            backupHandle = new SQLiteBackupHandle(destHandle, backup);
+        }
 
         return new SQLiteBackup(
-            this, new SQLiteBackupHandle(destHandle, backup),
-            destHandle, zDestName, sourceHandle, zSourceName);
+            this, backupHandle, destHandle, zDestName, sourceHandle,
+            zSourceName);
     }
 
     /// <summary>

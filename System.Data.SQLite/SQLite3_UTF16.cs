@@ -103,42 +103,48 @@ namespace System.Data.SQLite
         _sql = SQLiteConnectionPool.Remove(strFilename, maxPoolSize, out _poolVersion);
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
-        Trace.WriteLine(String.Format("Open (Pool): {0}", (_sql != null) ? _sql.ToString() : "<null>"));
+        Trace.WriteLine(String.Format("Open16 (Pool): {0}", (_sql != null) ? _sql.ToString() : "<null>"));
 #endif
       }
 
       if (_sql == null)
       {
-        IntPtr db;
-        SQLiteErrorCode n;
+        try
+        {
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+          IntPtr db;
+          SQLiteErrorCode n;
 
 #if !SQLITE_STANDARD
-        if ((connectionFlags & SQLiteConnectionFlags.NoExtensionFunctions) != SQLiteConnectionFlags.NoExtensionFunctions)
-        {
-          n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), openFlags, out db);
-        }
-        else
+          if ((connectionFlags & SQLiteConnectionFlags.NoExtensionFunctions) != SQLiteConnectionFlags.NoExtensionFunctions)
+          {
+            n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), openFlags, out db);
+          }
+          else
 #endif
-        {
-          //
-          // NOTE: This flag check is designed to enforce the constraint that opening
-          //       a database file that does not already exist requires specifying the
-          //       "Create" flag, even when a native API is used that does not accept
-          //       a flags parameter.
-          //
-          if (((openFlags & SQLiteOpenFlagsEnum.Create) != SQLiteOpenFlagsEnum.Create) && !File.Exists(strFilename))
-            throw new SQLiteException(SQLiteErrorCode.CantOpen, strFilename);
+          {
+            //
+            // NOTE: This flag check is designed to enforce the constraint that opening
+            //       a database file that does not already exist requires specifying the
+            //       "Create" flag, even when a native API is used that does not accept
+            //       a flags parameter.
+            //
+            if (((openFlags & SQLiteOpenFlagsEnum.Create) != SQLiteOpenFlagsEnum.Create) && !File.Exists(strFilename))
+              throw new SQLiteException(SQLiteErrorCode.CantOpen, strFilename);
 
-          n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
-        }
+            n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
+          }
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
-        Trace.WriteLine(String.Format("Open: {0}", db));
+          Trace.WriteLine(String.Format("Open16: {0}", db));
 #endif
 
-        if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
-
-        _sql = new SQLiteConnectionHandle(db);
+          if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
+          _sql = new SQLiteConnectionHandle(db);
+        }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }
       _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
