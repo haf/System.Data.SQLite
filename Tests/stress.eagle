@@ -154,11 +154,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         for {set index 2} {$index <= $count} {incr index} {
           sql execute $db [appendArgs \
               "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
-          showTest 1
+          showTest A
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest a
         } else {
           failTest $error
         }
@@ -179,11 +179,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         for {set index 2} {$index <= $count} {incr index} {
           sql execute $db [appendArgs \
               "DROP TABLE IF EXISTS t" $index \;]
-          showTest 2
+          showTest B
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest b
         } else {
           failTest $error
         }
@@ -204,11 +204,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         for {set index 1} {$index <= $count} {incr index} {
           sql execute -execute reader $db [appendArgs \
               "SELECT x, y FROM " $table " WHERE z = 'small';"]
-          showTest 3
+          showTest C
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest c
         } else {
           failTest $error
         }
@@ -229,11 +229,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         for {set index 1} {$index <= $count} {incr index} {
           sql execute -execute reader $db [appendArgs \
               "SELECT x, y FROM " $table " WHERE z = 'big';"]
-          showTest 4
+          showTest D
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest d
         } else {
           failTest $error
         }
@@ -257,11 +257,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               [format %lX [expr {random()}]] "', '" \
               [base64 encode -- [expr {randstr(10000)}]] \
               "', 'small');"]
-          showTest 5
+          showTest E
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest e
         } else {
           failTest $error
         }
@@ -284,11 +284,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               "INSERT INTO " $table "(x, y, z) VALUES('" \
               [format %lX [expr {random()}]] \
               "', RANDOMBLOB(10000000), 'big');"]
-          showTest 6
+          showTest F
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest f
         } else {
           failTest $error
         }
@@ -310,11 +310,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           sql execute $db [appendArgs "UPDATE " $table \
               " SET y = '" [base64 encode -- [expr {randstr(10000)}]] \
               "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
-          showTest 7
+          showTest G
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest g
         } else {
           failTest $error
         }
@@ -336,11 +336,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           sql execute $db [appendArgs "UPDATE " $table \
               " SET y = RANDOMBLOB(10000000) WHERE x LIKE '" \
               [format %X $index] "%' AND z = 'big';"]
-          showTest 8
+          showTest H
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest h
         } else {
           failTest $error
         }
@@ -361,11 +361,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         for {set index 1} {$index <= $count} {incr index} {
           sql execute $db [appendArgs "DELETE FROM " $table \
               " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
-          showTest 9
+          showTest I
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest i
         } else {
           failTest $error
         }
@@ -386,11 +386,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         for {set index 1} {$index <= $count} {incr index} {
           sql execute $db [appendArgs "DELETE FROM " $table \
               " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
-          showTest A
+          showTest J
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest j
         } else {
           failTest $error
         }
@@ -410,11 +410,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[catch {
         for {set index 1} {$index <= $count} {incr index} {
           sql execute $db "VACUUM;"
-          showTest B
+          showTest K
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest k
         } else {
           failTest $error
         }
@@ -433,7 +433,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       for {set index 1} {$index <= $count} {incr index} {
         if {[string is integer -strict $::compiled(12)]} then {
           set id $::compiled(12); # NOTE: Already compiled.
-          object invoke _Dynamic${id}.Test${id} BackupAndGetData
+          if {[catch {
+            object invoke _Dynamic${id}.Test${id} BackupAndGetData
+            showTest L
+          } error]} then {
+            if {[expectedError $error]} then {
+              showTest l
+            } else {
+              failTest $error
+            }
+          }
         } else {
           set id [object invoke Interpreter.GetActive NextId]
           set code [compileCSharpWith [subst {
@@ -473,12 +482,20 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           }] true true true results errors System.Data.SQLite.dll]
           if {$code eq "Ok"} then {
             set ::compiled(12) $id; # NOTE: Compiled OK.
-            object invoke _Dynamic${id}.Test${id} BackupAndGetData
+            if {[catch {
+              object invoke _Dynamic${id}.Test${id} BackupAndGetData
+              showTest L
+            } error]} then {
+              if {[expectedError $error]} then {
+                showTest l
+              } else {
+                failTest $error
+              }
+            }
           } else {
             error $errors
           }
         }
-        showTest C
       }
     }] 0]
   }]
@@ -493,7 +510,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       for {set index 1} {$index <= $count} {incr index} {
         if {[string is integer -strict $::compiled(13)]} then {
           set id $::compiled(13); # NOTE: Already compiled.
-          object invoke _Dynamic${id}.Test${id} BackupAndGetData
+          if {[catch {
+            object invoke _Dynamic${id}.Test${id} BackupAndGetData
+            showTest M
+          } error]} then {
+            if {[expectedError $error]} then {
+              showTest m
+            } else {
+              failTest $error
+            }
+          }
         } else {
           set id [object invoke Interpreter.GetActive NextId]
           set code [compileCSharpWith [subst {
@@ -533,12 +559,20 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           }] true true true results errors System.Data.SQLite.dll]
           if {$code eq "Ok"} then {
             set ::compiled(13) $id; # NOTE: Compiled OK.
-            object invoke _Dynamic${id}.Test${id} BackupAndGetData
+            if {[catch {
+              object invoke _Dynamic${id}.Test${id} BackupAndGetData
+              showTest M
+            } error]} then {
+              if {[expectedError $error]} then {
+                showTest m
+              } else {
+                failTest $error
+              }
+            }
           } else {
             error $errors
           }
         }
-        showTest D
       }
     }] 0]
   }]
@@ -556,14 +590,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           set result [sql execute -execute scalar $db \
               "PRAGMA integrity_check;"]
           if {$result eq "ok"} then {
-            showTest E
+            showTest N
           } else {
             error [appendArgs "integrity check failed: " $result]
           }
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest n
         } else {
           failTest $error
         }
@@ -582,11 +616,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[catch {
         for {set index 1} {$index <= $count} {incr index} {
           collectGarbage $::test_channel
-          showTest F
+          showTest O
         }
       } error]} then {
         if {[expectedError $error]} then {
-          showTest *
+          showTest o
         } else {
           failTest $error
         }
