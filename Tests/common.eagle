@@ -309,6 +309,13 @@ namespace eval ::Eagle {
         #       therefore, use it.
         #
         return [file normalize $::database_directory]
+      } elseif {[info exists ::scratch_directory] && \
+          [string length $::scratch_directory] > 0} then {
+        #
+        # NOTE: The location of the scratch directory has been overridden;
+        #       therefore, use it.
+        #
+        return [file normalize $::scratch_directory]
       } else {
         return [getTemporaryPath]
       }
@@ -327,6 +334,13 @@ namespace eval ::Eagle {
         #       therefore, use it.
         #
         return [file normalize $::temporary_directory]
+      } elseif {[info exists ::scratch_directory] && \
+          [string length $::scratch_directory] > 0} then {
+        #
+        # NOTE: The location of the scratch directory has been overridden;
+        #       therefore, use it.
+        #
+        return [file normalize $::scratch_directory]
       } else {
         return [getTemporaryPath]
       }
