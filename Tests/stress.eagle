@@ -195,13 +195,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(1) [list [list srcFileName dstFileName table count] {
+  set workload(1) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #1, CREATE TABLE statements.
     #
     lappend ::times(1) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 2} {$index <= $count} {incr index} {
+      for {set index 2} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs \
               "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
@@ -220,13 +221,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(2) [list [list srcFileName dstFileName table count] {
+  set workload(2) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #2, DROP TABLE statements.
     #
     lappend ::times(2) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 2} {$index <= $count} {incr index} {
+      for {set index 2} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs \
               "DROP TABLE IF EXISTS t" $index \;]
@@ -245,13 +247,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(3) [list [list srcFileName dstFileName table count] {
+  set workload(3) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #3, "small" SELECT statements.
     #
     lappend ::times(3) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute -execute reader $db [appendArgs \
               "SELECT x, y FROM " $table " WHERE z = 'small';"]
@@ -270,13 +273,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(4) [list [list srcFileName dstFileName table count] {
+  set workload(4) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #4, "big" SELECT statements.
     #
     lappend ::times(4) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute -execute reader $db [appendArgs \
               "SELECT x, y FROM " $table " WHERE z = 'big';"]
@@ -295,18 +299,19 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(5) [list [list srcFileName dstFileName table count] {
+  set workload(5) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #5, "small" INSERT statements.
     #
     lappend ::times(5) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs \
               "INSERT INTO " $table "(x, y, z) VALUES('" \
               [format %lX [expr {random()}]] "', '" \
-              [base64 encode -- [expr {randstr($::count(3))}]] \
+              [base64 encode -- [expr {randstr($count2)}]] \
               "', 'small');"]
           showTest E
         } error]} then {
@@ -323,18 +328,19 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(6) [list [list srcFileName dstFileName table count] {
+  set workload(6) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #6, "big" INSERT statements.
     #
     lappend ::times(6) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs \
               "INSERT INTO " $table "(x, y, z) VALUES('" \
               [format %lX [expr {random()}]] \
-              "', RANDOMBLOB(" $::count(4) "), 'big');"]
+              "', RANDOMBLOB(" $count3 "), 'big');"]
           showTest F
         } error]} then {
           if {[expectedError $error]} then {
@@ -350,16 +356,17 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(7) [list [list srcFileName dstFileName table count] {
+  set workload(7) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #7, "small" UPDATE statements.
     #
     lappend ::times(7) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "UPDATE " $table \
-              " SET y = '" [base64 encode -- [expr {randstr($::count(3))}]] \
+              " SET y = '" [base64 encode -- [expr {randstr($count2)}]] \
               "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
           showTest G
         } error]} then {
@@ -376,16 +383,17 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(8) [list [list srcFileName dstFileName table count] {
+  set workload(8) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #8, "big" UPDATE statements.
     #
     lappend ::times(8) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "UPDATE " $table \
-              " SET y = RANDOMBLOB(" $::count(4) \
+              " SET y = RANDOMBLOB(" $count3 \
               ") WHERE x LIKE '" [format %X $index] \
               "%' AND z = 'big';"]
           showTest H
@@ -403,13 +411,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(9) [list [list srcFileName dstFileName table count] {
+  set workload(9) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #9, "small" DELETE statements.
     #
     lappend ::times(9) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "DELETE FROM " $table \
               " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
@@ -428,13 +437,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(10) [list [list srcFileName dstFileName table count] {
+  set workload(10) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #10, "big" DELETE statements.
     #
     lappend ::times(10) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "DELETE FROM " $table \
               " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
@@ -453,13 +463,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(11) [list [list srcFileName dstFileName table count] {
+  set workload(11) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #11, VACUUM statement.
     #
     lappend ::times(11) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db "VACUUM;"
           showTest K
@@ -477,12 +488,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(12) [list [list srcFileName dstFileName table count] {
+  set workload(12) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #12, backup to in-memory database.
     #
     lappend ::times(12) [lindex [time {
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[string is integer -strict $::compiled(12)]} then {
           set id $::compiled(12); # NOTE: Already compiled.
           if {[catch {
@@ -554,12 +566,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(13) [list [list srcFileName dstFileName table count] {
+  set workload(13) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #13, backup from an in-memory database.
     #
     lappend ::times(13) [lindex [time {
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[string is integer -strict $::compiled(13)]} then {
           set id $::compiled(13); # NOTE: Already compiled.
           if {[catch {
@@ -631,13 +644,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(14) [list [list srcFileName dstFileName table count] {
+  set workload(14) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #14, PRAGMA integrity check statement.
     #
     lappend ::times(14) [lindex [time {
       setupDb $dstFileName "" "" "" "" "" true false
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           set result [sql execute -execute scalar $db \
               "PRAGMA integrity_check;"]
@@ -660,12 +674,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set workload(15) [list [list srcFileName dstFileName table count] {
+  set workload(15) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
     #
     # NOTE: Workload #15, force managed garbage collection
     #
     lappend ::times(15) [lindex [time {
-      for {set index 1} {$index <= $count} {incr index} {
+      for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           collectGarbage $::test_channel
           showTest O
@@ -689,7 +704,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       if {[lsearch -exact $noWorkload $index(1)] == -1} then {
         set thread($index(1)) [object create -alias System.Threading.Thread \
             [list apply $workload($index(1)) $fileName(1) $fileName(2) t1 \
-            $count(1)] 1048576]
+            $count(1) $count(3) $count(4)] 1048576]
       }
     }
 
@@ -804,7 +819,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   foreach index(0) [array names workload] {
     catch {
       object removecallback [list apply $workload($index(0)) $fileName(1) \
-          $fileName(2) t1 $count(1)]
+          $fileName(2) t1 $count(1) $count(3) $count(4)]
     }
   }
 
