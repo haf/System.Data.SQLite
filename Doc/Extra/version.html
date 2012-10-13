@@ -51,7 +51,8 @@
       <li>Allow opened connections to skip adding the extension functions included in the interop assembly via the new NoExtensionFunctions connection flag.</li>
       <li>Support loading of SQLite extensions via the new EnableExtensions and LoadExtension methods of the SQLiteConnection class. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/17045010df">[17045010df]</a>.</li>
       <li>Add notifications before and after any connection is opened and closed, as well as other related notifications, via the new static Changed event.</li>
-      <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string argument.</li>
+      <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string parameter.</li>
+      <li>Add an overload of the SQLiteConnection.LogMessage method that takes a SQLiteErrorCode parameter.</li>
       <li>All applicable calls into the SQLite core library now return a SQLiteErrorCode instead of an integer error code.</li>
       <li>Make sure the error code of the SQLiteException class gets serialized.</li>
       <li>Make the test project for the .NET Compact Framework more flexible.</li>
@@ -66,6 +67,7 @@
       <li>Prevent the SQLiteConnection.Close method from throwing non-fatal exceptions during its disposal.</li>
       <li>Rename the interop assembly functions sqlite3_cursor_rowid, sqlite3_context_collcompare, sqlite3_context_collseq, sqlite3_cursor_rowid, and sqlite3_table_cursor to include an &quot;_interop&quot; suffix.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Prevent the LastInsertRowId, MemoryUsed, and MemoryHighwater connection properties from throwing NotSupportedException when running on the .NET Compact Framework. Fix for <a href="http://system.data.sqlite.org/index.html/info/dd45aba387">[dd45aba387]</a>.</li>
+      <li>Add protection against ThreadAbortException asynchronously interrupting native resource initialization and finalization.</li>
       <li>Add test automation for the Windows CE binaries.</li>
     </ul>
     <p><b>1.0.82.0 - September 3, 2012</b></p>
