@@ -24,10 +24,7 @@ runSQLiteTestPrologue
 # NOTE: Make sure that SQLite core library is completely shutdown prior to
 #       starting any of the tests in this file.
 #
-if {[haveConstraint SQLite]} then {
-  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
-      sqlite3_shutdown
-}
+shutdownSQLite $test_channel
 
 ###############################################################################
 

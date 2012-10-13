@@ -1052,6 +1052,31 @@ namespace eval ::Eagle {
       }
     }
 
+    proc shutdownSQLite { channel {force false} {quiet false} } {
+      #
+      # NOTE: Make sure that SQLite core library is completely shutdown.  This
+      #       is used by tests that change configuration options and/or those
+      #       that need to make sure logging is initialized (i.e. just in case
+      #       the SQLite core library was initialized in the process prior to
+      #       the SQLiteLog class being able to setup its logging callback).
+      #
+      if {$force || [haveConstraint SQLite]} then {
+        if {[catch {object invoke -flags +NonPublic \
+              System.Data.SQLite.UnsafeNativeMethods \
+              sqlite3_shutdown} result] == 0} then {
+          if {!$quiet} then {
+            tputs $channel [appendArgs \
+                "---- call sqlite3_shutdown()... ok: " $result \n]
+          }
+        } else {
+          if {!$quiet} then {
+            tputs $channel [appendArgs \
+                "---- call sqlite3_shutdown()... error: " \n\t $result \n]
+          }
+        }
+      }
+    }
+
     proc reportSQLiteResources { channel {quiet false} {collect true} } {
       #
       # NOTE: Skip all output if we are running in "quiet" mode.
@@ -1068,7 +1093,7 @@ namespace eval ::Eagle {
         }
       } else {
         #
-        # NOTE: Maybe the SQLite native library is unavailable?
+        # NOTE: Maybe the SQLite core library is unavailable?
         #
         set memory unknown
 
@@ -1091,7 +1116,7 @@ namespace eval ::Eagle {
         }
       } else {
         #
-        # NOTE: Maybe the SQLite native library is unavailable?
+        # NOTE: Maybe the SQLite core library is unavailable?
         #
         set memory unknown
 

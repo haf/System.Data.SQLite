@@ -67,7 +67,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
   #       actually delete the database file because it is needed in the C#
   #       code for this test.
   #
-  cleanupDb $fileName db true false false
+  cleanupDb $fileName db true false false; unset -nocomplain db
 
   #
   # NOTE: Setup the variables used in the dynamically substituted C# code
@@ -415,6 +415,8 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
       [collectGarbage $test_channel] \
       [reportSQLiteResources $test_channel true]
 } -cleanup {
+  cleanupDb $fileName
+
   unset -nocomplain result results errors code sql dataSource id db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
