@@ -1247,7 +1247,11 @@ namespace System.Data.SQLite
               if (stmt._sql.ColumnCount(stmt) == 0)
               {
                 if (_rowsAffected == -1) _rowsAffected = 0;
-                _rowsAffected += stmt._sql.Changes;
+                int changes = 0;
+                if (stmt.TryGetChanges(ref changes))
+                    _rowsAffected += changes;
+                else
+                    return false;
               }
               stmt._sql.Reset(stmt); // Gotta reset after every step to release any locks and such!
             }
@@ -1280,7 +1284,11 @@ namespace System.Data.SQLite
           else if (fieldCount == 0) // No rows returned, if fieldCount is zero, skip to the next statement
           {
             if (_rowsAffected == -1) _rowsAffected = 0;
-            _rowsAffected += stmt._sql.Changes;
+            int changes = 0;
+            if (stmt.TryGetChanges(ref changes))
+                _rowsAffected += changes;
+            else
+                return false;
             stmt._sql.Reset(stmt);
             continue; // Skip this command and move to the next, it was not a row-returning resultset
           }

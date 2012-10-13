@@ -304,7 +304,7 @@ namespace System.Data.SQLite
 
     internal override bool IsOpen()
     {
-        return (_sql != null);
+        return (_sql != null) && !_sql.IsInvalid && !_sql.IsClosed;
     }
 
     internal override void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool)

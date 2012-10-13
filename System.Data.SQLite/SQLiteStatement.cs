@@ -165,6 +165,28 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     /// <summary>
+    /// If the underlying database connection is open, fetches the number of changed rows
+    /// resulting from the most recent query; otherwise, does nothing.
+    /// </summary>
+    /// <param name="changes">
+    /// The number of changes when true is returned.
+    /// Undefined if false is returned.
+    /// </param>
+    /// <returns>Non-zero if the number of changed rows was fetched.</returns>
+    internal bool TryGetChanges(ref int changes)
+    {
+        if ((_sql != null) && _sql.IsOpen())
+        {
+            changes = _sql.Changes;
+            return true;
+        }
+
+        return false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
     /// Called by SQLiteParameterCollection, this function determines if the specified parameter name belongs to
     /// this statement, and if so, keeps a reference to the parameter so it can be bound later.
     /// </summary>
