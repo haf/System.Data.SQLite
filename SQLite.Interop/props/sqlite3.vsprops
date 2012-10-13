@@ -39,7 +39,7 @@
 	/>
 	<UserMacro
 		Name="SQLITE_DEBUG_DEFINES"
-		Value="SQLITE_DEBUG=1;SQLITE_MEMDEBUG=1"
+		Value="SQLITE_DEBUG=1;SQLITE_MEMDEBUG=1;SQLITE_ENABLE_EXPENSIVE_ASSERT=1"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro
