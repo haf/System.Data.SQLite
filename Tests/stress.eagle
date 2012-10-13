@@ -115,9 +115,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   set count(0) 1
-  set count(1) 5
-  set count(2) 300
-  set count(3) 57
+  set count(1) 100
+  set count(2) 200
+  set count(3) 2000
   set count(4) 10000000
   set noWorkload [list]
 
@@ -205,7 +205,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       for {set index 2} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs \
-              "CREATE TABLE IF NOT EXISTS t" $index "(x PRIMARY KEY, y, z);"]
+              "CREATE TABLE IF NOT EXISTS t" \
+              $index "(x PRIMARY KEY, y, z);"]
           showTest A
         } error]} then {
           if {[expectedError $error]} then {
@@ -256,8 +257,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       setupDb $dstFileName "" "" "" "" "" true false
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
-          sql execute -execute reader $db [appendArgs \
+          set sql [appendArgs \
               "SELECT x, y FROM " $table " WHERE z = 'small';"]
+          set reader [sql execute -execute reader \
+              -format dataReader -alias $db $sql]
+          while {[$reader Read]} {
+            #
+            # NOTE: Do nothing.
+            #
+          }
+          unset -nocomplain reader
           showTest C
         } error]} then {
           if {[expectedError $error]} then {
@@ -282,8 +291,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       setupDb $dstFileName "" "" "" "" "" true false
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
-          sql execute -execute reader $db [appendArgs \
+          set sql [appendArgs \
               "SELECT x, y FROM " $table " WHERE z = 'big';"]
+          set reader [sql execute -execute reader \
+              -format dataReader -alias $db $sql]
+          while {[$reader Read]} {
+            #
+            # NOTE: Do nothing.
+            #
+          }
+          unset -nocomplain reader
           showTest D
         } error]} then {
           if {[expectedError $error]} then {
