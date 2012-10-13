@@ -35,6 +35,30 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
+  proc formatWorkloadResult { index } {
+    set result [appendArgs "---- iterations for workload (" $index "): "]
+
+    append result [expr {[info exists ::iterations($index,ok)] ? \
+        $::iterations($index,ok) : 0}] " ok, "
+
+    append result [expr {[info exists ::iterations($index,error)] ? \
+        $::iterations($index,error) : 0}] " error, "
+
+    #
+    # NOTE: Translate the workload index to the corresponding iteration
+    #       error indicator so that we can easily lookup the number of
+    #       failures (i.e. "unexpected errors") for the workload.
+    #
+    set indicator [string character [expr {[string ordinal a 0] + $index - 1}]]
+
+    append result [expr {[info exists ::failures($indicator)] ? \
+        $::failures($indicator) : 0}] " failed\n"
+
+    return $result
+  }
+
+  #############################################################################
+
   proc isExpectedError { error } {
     return [expr {[regexp -- {\sno such table: t1\s} $error] || \
         [regexp -- {\sdatabase is locked\s} $error]}]
@@ -50,19 +74,27 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  proc failTest { error } {
-    set level [expr {[info level] - 1}]
-
-    tputs $::test_channel [appendArgs \
-        \n [info level $level] ": " $error \n]
-
+  proc failTest { indicator error } {
     #
-    # NOTE: Halt all testing now -OR- just record the failure and continue?
+    # NOTE: Halt all testing and exit the process now
+    #       -OR- just record the failure and continue?
     #
     if {$::exitOnFail} then {
+      set level [expr {[info level] - 1}]
+
+      tputs $::test_channel [appendArgs \
+          \n [info level $level] ": " \n\t $error \n]
+
       exit Failure
     } else {
-      incr ::failures
+      tputs $::test_channel $indicator
+
+      if {![info exists ::failures($indicator)]} then {
+        set ::failures($indicator) 0
+      }
+
+      incr ::failures($indicator)
+      after [expr {int(rand() * 1000 + $::count(2))}]
     }
   }
 
@@ -116,7 +148,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #       the entire contents of this trace log file will be copied into the
   #       main test log file and then deleted.
   #
-  set logFileName [appendArgs $test_log .trace]
+  set logFileName [appendArgs [file rootname $test_log] .trace.log]
   setupLogging $logFileName
 
   #############################################################################
@@ -127,7 +159,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #
   set count(0) 1;        # Workload repeat count (i.e. total full runs).
   set count(1) 20;       # Workload iteration count (i.e. within a run).
-  set count(2) 200;      # Workload iteration delay, in milliseconds.
+  set count(2) 500;      # Workload iteration delay, in milliseconds.
   set count(3) 2000;     # Workload "small" data chunk size, in bytes.
   set count(4) 10000000; # Workload "big" data chunk size, in bytes.
   set noWorkload [list]; # Workloads to be omitted from the run, by index.
@@ -183,8 +215,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   }
 
   tputs $test_channel [appendArgs \
-      "---- workload iteration failures " [expr {$exitOnFail ? "will" : \
-      "will not"}] " halt testing and exit the process...\n"]
+      "---- workload failures " [expr {$exitOnFail ? "will" : "will not"}] \
+      " halt testing and exit the process...\n"]
 
   #############################################################################
 
@@ -205,7 +237,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #
   # NOTE: This is an in-memory database with shared cache enabled.
   #
-  set fileName(1) "file::memory:?cache=shared"
+  set fileName(1) file::memory:?cache=shared
 
   #############################################################################
 
@@ -230,7 +262,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   set connection [getDbConnection]
 
   $connection LogMessage 0 [appendArgs \
-      "starting stress test using database \"" $fileName(2) "\"..."]
+      "starting stress test using database \"" $fileName(2) \"...]
 
   #############################################################################
   #                              WORKLOAD #1 (A)                              #
@@ -253,7 +285,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest a
           } else {
-            failTest $error
+            failTest a $error
           }
         }
       }
@@ -281,7 +313,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest b
           } else {
-            failTest $error
+            failTest b $error
           }
         }
       }
@@ -317,7 +349,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest c
           } else {
-            failTest $error
+            failTest c $error
           }
         }
       }
@@ -353,7 +385,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest d
           } else {
-            failTest $error
+            failTest d $error
           }
         }
       }
@@ -384,7 +416,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest e
           } else {
-            failTest $error
+            failTest e $error
           }
         }
       }
@@ -414,7 +446,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest f
           } else {
-            failTest $error
+            failTest f $error
           }
         }
       }
@@ -443,7 +475,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest g
           } else {
-            failTest $error
+            failTest g $error
           }
         }
       }
@@ -473,7 +505,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest h
           } else {
-            failTest $error
+            failTest h $error
           }
         }
       }
@@ -501,7 +533,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest i
           } else {
-            failTest $error
+            failTest i $error
           }
         }
       }
@@ -529,7 +561,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest j
           } else {
-            failTest $error
+            failTest j $error
           }
         }
       }
@@ -556,7 +588,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest k
           } else {
-            failTest $error
+            failTest k $error
           }
         }
       }
@@ -584,7 +616,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             if {[isExpectedError $error]} then {
               showTest l
             } else {
-              failTest $error
+              failTest l $error
             }
           }
         } else {
@@ -633,7 +665,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               if {[isExpectedError $error]} then {
                 showTest l
               } else {
-                failTest $error
+                failTest l $error
               }
             }
           } else {
@@ -664,7 +696,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             if {[isExpectedError $error]} then {
               showTest m
             } else {
-              failTest $error
+              failTest m $error
             }
           }
         } else {
@@ -713,7 +745,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               if {[isExpectedError $error]} then {
                 showTest m
               } else {
-                failTest $error
+                failTest m $error
               }
             }
           } else {
@@ -748,7 +780,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest n
           } else {
-            failTest $error
+            failTest n $error
           }
         }
       }
@@ -774,17 +806,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           if {[isExpectedError $error]} then {
             showTest o
           } else {
-            failTest $error
+            failTest o $error
           }
         }
       }
     }] 0]
   }]
 } -body {
-  set failures 0
-
-  #############################################################################
-
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
 
@@ -856,27 +884,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   foreach index(0) [lsort -integer [array names workload]] {
-    if {[info exists iterations($index(0),ok)]} then {
-      tputs $test_channel [appendArgs \
-          "---- workload (" $index(0) ") had " \
-          $iterations($index(0),ok) \
-          " iterations that returned \"ok\"\n"]
-    } else {
-      tputs $test_channel [appendArgs \
-          "---- workload (" $index(0) \
-          ") had no iterations that returned \"ok\"\n"]
-    }
-
-    if {[info exists iterations($index(0),error)]} then {
-      tputs $test_channel [appendArgs \
-          "---- workload (" $index(0) ") had " \
-          $iterations($index(0),error) \
-          " iterations that returned \"error\"\n"]
-    } else {
-      tputs $test_channel [appendArgs \
-          "---- workload (" $index(0) \
-          ") had no iterations that returned \"error\"\n"]
-    }
+    tputs $test_channel [formatWorkloadResult $index(0)]
   }
 
   #############################################################################
@@ -902,14 +910,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   #
-  # NOTE: The overall test result is the total number of failures encountered
-  #       during all the workload iterations.
+  # NOTE: The overall test result is the total number of failures (i.e.
+  #       "unexpected errors") encountered during a workload iteration.
   #
-  set failures
+  expr {[array size failures] > 0 ? \
+      [expr [join [array values failures] +]] : 0}
 } -cleanup {
   rename failTest ""
   rename showTest ""
   rename isExpectedError ""
+  rename formatWorkloadResult ""
 
   cleanupDb $fileName(2)
   cleanupDb $fileName(1) srcDb
