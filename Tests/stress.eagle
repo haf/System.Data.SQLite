@@ -31,11 +31,11 @@ shutdownSQLite $test_channel
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload noWorkload srcDb db \
       fileName compiled options count times logFileName logListener \
-      connection indicators iterations
+      connection indicators iterations exitOnFail failures
 
   #############################################################################
 
-  proc expectedError { error } {
+  proc isExpectedError { error } {
     return [expr {[regexp -- {\sno such table: t1\s} $error] || \
         [regexp -- {\sdatabase is locked\s} $error]}]
   }
@@ -56,7 +56,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     tputs $::test_channel [appendArgs \
         \n [info level $level] ": " $error \n]
 
-    exit Failure; # halt all testing now.
+    #
+    # NOTE: Halt all testing now -OR- just record the failure and continue?
+    #
+    if {$::exitOnFail} then {
+      exit Failure
+    } else {
+      incr ::failures
+    }
   }
 
   #############################################################################
@@ -114,13 +121,25 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  set count(0) 1
-  set count(1) 100
-  set count(2) 200
-  set count(3) 2000
-  set count(4) 10000000
-  set noWorkload [list]
+  #
+  # NOTE: Setup the default values for the tunable workload parameters.  Any,
+  #       all, or none of these may be overriden via the command line.
+  #
+  set count(0) 1;        # Workload repeat count (i.e. total full runs).
+  set count(1) 20;       # Workload iteration count (i.e. within a run).
+  set count(2) 200;      # Workload iteration delay, in milliseconds.
+  set count(3) 2000;     # Workload "small" data chunk size, in bytes.
+  set count(4) 10000000; # Workload "big" data chunk size, in bytes.
+  set noWorkload [list]; # Workloads to be omitted from the run, by index.
+  set exitOnFail true;   # Halt testing and exit process on test failure?
 
+  #############################################################################
+
+  #
+  # NOTE: If command line arguments to the test suite are available, process
+  #       them for any options that are applicable to this test (i.e. any of
+  #       the tunable workload parameters listed above).
+  #
   if {[info exists argv] && [llength $argv] > 0} then {
     parse options -flags \
         {-StopOnUnknownOption +IgnoreOnUnknownOption SkipOnUnknownOption} -- \
@@ -129,7 +148,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         [list null MustHaveIntegerValue -1 -1 -count2 $count(2)] \
         [list null MustHaveIntegerValue -1 -1 -count3 $count(3)] \
         [list null MustHaveIntegerValue -1 -1 -count4 $count(4)] \
-        [list null MustHaveListValue -1 -1 -noWorkload $noWorkload]] $argv
+        [list null MustHaveListValue -1 -1 -noWorkload $noWorkload] \
+        [list null MustHaveBooleanValue -1 -1 -exitOnFail $exitOnFail]] $argv
 
     set count(0) $options(-count0,value)
     set count(1) $options(-count1,value)
@@ -137,6 +157,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     set count(3) $options(-count3,value)
     set count(4) $options(-count4,value)
     set noWorkload $options(-noWorkload,value)
+    set exitOnFail $options(-exitOnFail,value)
   }
 
   #############################################################################
@@ -161,8 +182,21 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         "---- workloads to be skipped... " $noWorkload \n]
   }
 
+  tputs $test_channel [appendArgs \
+      "---- workload iteration failures " [expr {$exitOnFail ? "will" : \
+      "will not"}] " halt testing and exit the process...\n"]
+
   #############################################################################
 
+  #
+  # NOTE: Workloads #12 and #13 contain C# code that should be compiled, but
+  #       only once.  These variables keep track of that state information.
+  #       An integer value in one of these variables means the compilation was
+  #       completed and the resulting compiled method may be invoked using the
+  #       following command (where ${id} is the value of the variable):
+  #
+  #           object invoke _Dynamic${id}.Test${id} BackupAndGetData
+  #
   set compiled(12) ""
   set compiled(13) ""
 
@@ -188,11 +222,18 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
+  #
+  # NOTE: This serves two purposes.  First, it allows us to verify the trace
+  #       logging subsystem is working properly.  Second, it places the file
+  #       name for the associated database file into the trace log file.
+  #
   set connection [getDbConnection]
 
-  $connection LogMessage Ok [appendArgs \
+  $connection LogMessage 0 [appendArgs \
       "starting stress test using database \"" $fileName(2) "\"..."]
 
+  #############################################################################
+  #                              WORKLOAD #1 (A)                              #
   #############################################################################
 
   set workload(1) [list \
@@ -209,7 +250,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               $index "(x PRIMARY KEY, y, z);"]
           showTest A
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest a
           } else {
             failTest $error
@@ -220,6 +261,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #2 (B)                              #
   #############################################################################
 
   set workload(2) [list \
@@ -235,7 +278,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               "DROP TABLE IF EXISTS t" $index \;]
           showTest B
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest b
           } else {
             failTest $error
@@ -246,6 +289,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #3 (C)                              #
   #############################################################################
 
   set workload(3) [list \
@@ -269,7 +314,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           unset -nocomplain reader
           showTest C
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest c
           } else {
             failTest $error
@@ -280,6 +325,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #4 (D)                              #
   #############################################################################
 
   set workload(4) [list \
@@ -303,7 +350,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           unset -nocomplain reader
           showTest D
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest d
           } else {
             failTest $error
@@ -314,6 +361,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #5 (E)                              #
   #############################################################################
 
   set workload(5) [list \
@@ -332,7 +381,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               "', 'small');"]
           showTest E
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest e
           } else {
             failTest $error
@@ -343,6 +392,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #6 (F)                              #
   #############################################################################
 
   set workload(6) [list \
@@ -360,7 +411,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               "', RANDOMBLOB(" $count3 "), 'big');"]
           showTest F
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest f
           } else {
             failTest $error
@@ -371,6 +422,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #7 (G)                              #
   #############################################################################
 
   set workload(7) [list \
@@ -387,7 +440,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
           showTest G
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest g
           } else {
             failTest $error
@@ -398,6 +451,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #8 (H)                              #
   #############################################################################
 
   set workload(8) [list \
@@ -415,7 +470,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               "%' AND z = 'big';"]
           showTest H
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest h
           } else {
             failTest $error
@@ -426,6 +481,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #9 (I)                              #
   #############################################################################
 
   set workload(9) [list \
@@ -441,7 +498,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
           showTest I
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest i
           } else {
             failTest $error
@@ -452,6 +509,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #10 (J)                             #
   #############################################################################
 
   set workload(10) [list \
@@ -467,7 +526,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
           showTest J
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest j
           } else {
             failTest $error
@@ -478,6 +537,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #11 (K)                             #
   #############################################################################
 
   set workload(11) [list \
@@ -492,7 +553,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           sql execute $db "VACUUM;"
           showTest K
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest k
           } else {
             failTest $error
@@ -503,6 +564,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #12 (L)                             #
   #############################################################################
 
   set workload(12) [list \
@@ -518,7 +581,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             object invoke _Dynamic${id}.Test${id} BackupAndGetData
             showTest L
           } error]} then {
-            if {[expectedError $error]} then {
+            if {[isExpectedError $error]} then {
               showTest l
             } else {
               failTest $error
@@ -567,7 +630,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               object invoke _Dynamic${id}.Test${id} BackupAndGetData
               showTest L
             } error]} then {
-              if {[expectedError $error]} then {
+              if {[isExpectedError $error]} then {
                 showTest l
               } else {
                 failTest $error
@@ -581,6 +644,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #13 (M)                             #
   #############################################################################
 
   set workload(13) [list \
@@ -596,7 +661,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             object invoke _Dynamic${id}.Test${id} BackupAndGetData
             showTest M
           } error]} then {
-            if {[expectedError $error]} then {
+            if {[isExpectedError $error]} then {
               showTest m
             } else {
               failTest $error
@@ -645,7 +710,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
               object invoke _Dynamic${id}.Test${id} BackupAndGetData
               showTest M
             } error]} then {
-              if {[expectedError $error]} then {
+              if {[isExpectedError $error]} then {
                 showTest m
               } else {
                 failTest $error
@@ -659,6 +724,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #14 (N)                             #
   #############################################################################
 
   set workload(14) [list \
@@ -678,7 +745,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             error [appendArgs "integrity check failed: " $result]
           }
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest n
           } else {
             failTest $error
@@ -689,6 +756,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 
+  #############################################################################
+  #                              WORKLOAD #15 (O)                             #
   #############################################################################
 
   set workload(15) [list \
@@ -702,7 +771,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           collectGarbage $::test_channel
           showTest O
         } error]} then {
-          if {[expectedError $error]} then {
+          if {[isExpectedError $error]} then {
             showTest o
           } else {
             failTest $error
@@ -712,6 +781,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }] 0]
   }]
 } -body {
+  set failures 0
+
+  #############################################################################
+
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
 
@@ -825,10 +898,18 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   } else {
     error [appendArgs "integrity check failed (db): " $result]
   }
+
+  #############################################################################
+
+  #
+  # NOTE: The overall test result is the total number of failures encountered
+  #       during all the workload iterations.
+  #
+  set failures
 } -cleanup {
   rename failTest ""
   rename showTest ""
-  rename expectedError ""
+  rename isExpectedError ""
 
   cleanupDb $fileName(2)
   cleanupDb $fileName(1) srcDb
@@ -849,9 +930,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   unset -nocomplain result thread index workload noWorkload srcDb db \
       fileName compiled options count times logFileName logListener \
-      connection indicators iterations
+      connection indicators iterations exitOnFail failures
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-result {0}}
 
 ###############################################################################
 
