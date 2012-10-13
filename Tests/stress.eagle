@@ -183,13 +183,6 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  #
-  # NOTE: Make sure to remove any stale database from previous test runs.
-  #
-  cleanupFile $fileName(2)
-
-  #############################################################################
-
   setupDb $fileName(1) "" "" "" "" "" false false true true srcDb
   setupDb $fileName(2)
 
