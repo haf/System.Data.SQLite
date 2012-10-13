@@ -242,7 +242,11 @@ namespace System.Data.SQLite
     {
       get
       {
+#if !SQLITE_STANDARD
+        return UnsafeNativeMethods.sqlite3_changes_interop(_sql);
+#else
         return UnsafeNativeMethods.sqlite3_changes(_sql);
+#endif
       }
     }
 

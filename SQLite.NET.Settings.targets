@@ -226,13 +226,16 @@
               the following bit flags values (i.e. to enable extra diagnostics
               for a particular native function call):
 
-                  INTEROP_DEBUG_CLOSE      (0x01)
-                  INTEROP_DEBUG_FINALIZE   (0x02)
-                  INTEROP_DEBUG_OPEN       (0x04)
-                  INTEROP_DEBUG_OPEN16     (0x08)
-                  INTEROP_DEBUG_PREPARE    (0x10)
-                  INTEROP_DEBUG_PREPARE16  (0x20)
-                  INTEROP_DEBUG_RESET      (0x40)
+                  INTEROP_DEBUG_CLOSE          (0x0001)
+                  INTEROP_DEBUG_FINALIZE       (0x0002)
+                  INTEROP_DEBUG_BACKUP_FINISH  (0x0004)
+                  INTEROP_DEBUG_OPEN           (0x0008)
+                  INTEROP_DEBUG_OPEN16         (0x0010)
+                  INTEROP_DEBUG_PREPARE        (0x0020)
+                  INTEROP_DEBUG_PREPARE16      (0x0040)
+                  INTEROP_DEBUG_RESET          (0x0080)
+                  INTEROP_DEBUG_CHANGES        (0x0100)
+                  INTEROP_DEBUG_BREAK          (0x0200)
     -->
     <InteropDebug Condition="'$(InteropDebug)' == '' And '$(Configuration)' == 'Debug'">true</InteropDebug>
     <InteropDebug Condition="'$(InteropDebug)' == '' And '$(Configuration)' != 'Debug'">false</InteropDebug>

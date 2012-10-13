@@ -601,6 +601,8 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
     internal static extern SQLiteErrorCode sqlite3_reset_interop(IntPtr stmt);
 
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_changes_interop(IntPtr db);
 #endif
 // !SQLITE_STANDARD
 

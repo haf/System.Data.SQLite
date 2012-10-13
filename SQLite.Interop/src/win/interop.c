@@ -19,15 +19,24 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 #include "crypt.c"
 #endif
 
-#define INTEROP_DEBUG_NONE           (0x00)
-#define INTEROP_DEBUG_CLOSE          (0x01)
-#define INTEROP_DEBUG_FINALIZE       (0x02)
-#define INTEROP_DEBUG_BACKUP_FINISH  (0x04)
-#define INTEROP_DEBUG_OPEN           (0x08)
-#define INTEROP_DEBUG_OPEN16         (0x10)
-#define INTEROP_DEBUG_PREPARE        (0x20)
-#define INTEROP_DEBUG_PREPARE16      (0x40)
-#define INTEROP_DEBUG_RESET          (0x80)
+#define INTEROP_DEBUG_NONE           (0x0000)
+#define INTEROP_DEBUG_CLOSE          (0x0001)
+#define INTEROP_DEBUG_FINALIZE       (0x0002)
+#define INTEROP_DEBUG_BACKUP_FINISH  (0x0004)
+#define INTEROP_DEBUG_OPEN           (0x0008)
+#define INTEROP_DEBUG_OPEN16         (0x0010)
+#define INTEROP_DEBUG_PREPARE        (0x0020)
+#define INTEROP_DEBUG_PREPARE16      (0x0040)
+#define INTEROP_DEBUG_RESET          (0x0080)
+#define INTEROP_DEBUG_CHANGES        (0x0100)
+#define INTEROP_DEBUG_BREAK          (0x0200)
+
+#if defined(_MSC_VER) && defined(INTEROP_DEBUG) && \
+    (INTEROP_DEBUG & INTEROP_DEBUG_BREAK)
+#define sqlite3InteropBreak(a) { sqlite3InteropDebug("%s\n", (a)); __debugbreak(); }
+#else
+#define sqlite3InteropBreak(a)
+#endif
 
 typedef void (*SQLITEUSERFUNC)(sqlite3_context *, int, sqlite3_value **);
 typedef void (*SQLITEFUNCFINAL)(sqlite3_context *);
@@ -221,6 +230,31 @@ SQLITE_API const char * WINAPI sqlite3_errmsg_interop(sqlite3 *db, int *plen)
   const char *pval = sqlite3_errmsg(db);
   *plen = (pval != 0) ? strlen(pval) : 0;
   return pval;
+}
+
+SQLITE_API int WINAPI sqlite3_changes_interop(sqlite3 *db)
+{
+  int result;
+
+#if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_CHANGES)
+  sqlite3InteropDebug("sqlite3_changes_interop(): calling sqlite3_changes(%p)...\n", db);
+#endif
+
+#ifndef NDEBUG
+  if (!db)
+      sqlite3InteropBreak("null database handle for sqlite3_changes()");
+
+  if (!sqlite3SafetyCheckOk(db))
+      sqlite3InteropBreak("bad database handle for sqlite3_changes()");
+#endif
+
+  result = sqlite3_changes(db);
+
+#if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_CHANGES)
+  sqlite3InteropDebug("sqlite3_changes_interop(): sqlite3_changes(%p) returned %d.\n", db, result);
+#endif
+
+  return result;
 }
 
 SQLITE_API int WINAPI sqlite3_prepare_interop(sqlite3 *db, const char *sql, int nbytes, sqlite3_stmt **ppstmt, const char **pztail, int *plen)
