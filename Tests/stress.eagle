@@ -31,7 +31,7 @@ shutdownSQLite $test_channel
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload noWorkload srcDb db \
       fileName compiled options count times logFileName logListener \
-      connection
+      connection indicators iterations
 
   #############################################################################
 
@@ -44,6 +44,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   proc showTest { indicator } {
     tputs $::test_channel $indicator
+    append ::indicators $indicator
     after [expr {int(rand() * 1000 + $::count(2))}]
   }
 
@@ -708,7 +709,37 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     unset -nocomplain thread
   }
 
+  #############################################################################
+
+  foreach index(0) [split $indicators ""] {
+    #
+    # NOTE: See if this workload iteration raised an error.  If so, the
+    #       indicator letter will be in lower case; otherwise, it will
+    #       be in upper case.
+    #
+    set index(1) [string is upper -strict $index(0)]
+
+    set index(2) [expr {[string ordinal $index(0) 0] - \
+        [string ordinal [expr {$index(1) ? "A" : "a"}] 0] + 1}]
+
+    set index(3) [expr {$index(1) ? "ok" : "error"}]
+
+    if {![info exists iterations($index(2),$index(3))]} then {
+      set iterations($index(2),$index(3)) 0
+    }
+
+    incr iterations($index(2),$index(3))
+  }
+
+  #############################################################################
+
+  #
+  # NOTE: Advance output to the next line due to the workload iteration
+  #       progress indicators.
+  #
   tputs $test_channel \n
+
+  #############################################################################
 
   foreach index(0) [lsort -integer [array names times]] {
     set times(length) [llength $times($index(0))]
@@ -724,6 +755,34 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     }
   }
 
+  #############################################################################
+
+  foreach index(0) [lsort -integer [array names workload]] {
+    if {[info exists iterations($index(0),ok)]} then {
+      tputs $test_channel [appendArgs \
+          "---- workload (" $index(0) ") had " \
+          $iterations($index(0),ok) \
+          " iterations that returned \"ok\"\n"]
+    } else {
+      tputs $test_channel [appendArgs \
+          "---- workload (" $index(0) \
+          ") had no iterations that returned \"ok\"\n"]
+    }
+
+    if {[info exists iterations($index(0),error)]} then {
+      tputs $test_channel [appendArgs \
+          "---- workload (" $index(0) ") had " \
+          $iterations($index(0),error) \
+          " iterations that returned \"error\"\n"]
+    } else {
+      tputs $test_channel [appendArgs \
+          "---- workload (" $index(0) \
+          ") had no iterations that returned \"error\"\n"]
+    }
+  }
+
+  #############################################################################
+
   set result [sql execute -execute scalar $srcDb "PRAGMA integrity_check;"]
 
   if {$result eq "ok"} then {
@@ -731,6 +790,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   } else {
     error [appendArgs "integrity check failed (srcDb): " $result]
   }
+
+  #############################################################################
 
   set result [sql execute -execute scalar $db "PRAGMA integrity_check;"]
 
@@ -763,7 +824,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   unset -nocomplain result thread index workload noWorkload srcDb db \
       fileName compiled options count times logFileName logListener \
-      connection
+      connection indicators iterations
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result {}}
 
