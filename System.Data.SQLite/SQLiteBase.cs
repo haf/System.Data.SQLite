@@ -236,7 +236,7 @@ namespace System.Data.SQLite
     /// interface, this should be pre-formatted.  Consider using the 
     /// String.Format() function.</param>
     /// <returns></returns>
-    internal abstract void LogMessage(int iErrCode, string zMessage);
+    internal abstract void LogMessage(SQLiteErrorCode iErrCode, string zMessage);
 
 #if INTEROP_CODEC
     internal abstract void SetPassword(byte[] passwordBytes);
@@ -473,157 +473,223 @@ namespace System.Data.SQLite
         if ((hdl == null) || (db == IntPtr.Zero))
             return "null connection or database handle";
 
-#if PLATFORM_COMPACTFRAMEWORK
-        lock (hdl.syncRoot)
-#else
-        lock (hdl)
-#endif
+        string result = null;
+
+        try
         {
-            if (hdl.IsInvalid || hdl.IsClosed)
-                return "closed or invalid connection handle";
-
-#if !SQLITE_STANDARD
-            int len;
-            return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
-#else
-            return UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
-#endif
+            // do nothing.
         }
-
-#pragma warning disable 162
-        GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
-#pragma warning restore 162
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (hdl.syncRoot)
+#else
+            lock (hdl)
+#endif
+            {
+                if (!hdl.IsInvalid && !hdl.IsClosed)
+                {
+#if !SQLITE_STANDARD
+                    int len;
+                    result = UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
+#else
+                    result = UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
+#endif
+                }
+                else
+                {
+                    result = "closed or invalid connection handle";
+                }
+            }
+        }
+        GC.KeepAlive(hdl);
+        return result;
     }
 
     internal static void FinishBackup(SQLiteConnectionHandle hdl, IntPtr backup)
     {
         if ((hdl == null) || (backup == IntPtr.Zero)) return;
-#if PLATFORM_COMPACTFRAMEWORK
-        lock (hdl.syncRoot)
-#else
-        lock (hdl)
-#endif
+
+        try
         {
-#if !SQLITE_STANDARD
-            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish_interop(backup);
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (hdl.syncRoot)
 #else
-            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+            lock (hdl)
 #endif
-            if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
+            {
+#if !SQLITE_STANDARD
+                SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish_interop(backup);
+#else
+                SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish(backup);
+#endif
+                if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
+            }
         }
     }
 
     internal static void FinalizeStatement(SQLiteConnectionHandle hdl, IntPtr stmt)
     {
         if ((hdl == null) || (stmt == IntPtr.Zero)) return;
-#if PLATFORM_COMPACTFRAMEWORK
-        lock (hdl.syncRoot)
-#else
-        lock (hdl)
-#endif
+
+        try
         {
-#if !SQLITE_STANDARD
-            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (hdl.syncRoot)
 #else
-            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_finalize(stmt);
+            lock (hdl)
 #endif
-            if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
+            {
+#if !SQLITE_STANDARD
+                SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_finalize_interop(stmt);
+#else
+                SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_finalize(stmt);
+#endif
+                if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
+            }
         }
     }
 
     internal static void CloseConnection(SQLiteConnectionHandle hdl, IntPtr db)
     {
         if ((hdl == null) || (db == IntPtr.Zero)) return;
-#if PLATFORM_COMPACTFRAMEWORK
-        lock (hdl.syncRoot)
-#else
-        lock (hdl)
-#endif
+
+        try
         {
-#if !SQLITE_STANDARD
-            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_close_interop(db);
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (hdl.syncRoot)
 #else
-            ResetConnection(hdl, db);
-
-            SQLiteErrorCode n;
-
-            try
-            {
-                n = UnsafeNativeMethods.sqlite3_close_v2(db);
-            }
-            catch (EntryPointNotFoundException)
-            {
-                n = UnsafeNativeMethods.sqlite3_close(db);
-            }
+            lock (hdl)
 #endif
-            if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError(hdl, db));
+            {
+#if !SQLITE_STANDARD
+                SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_close_interop(db);
+#else
+                ResetConnection(hdl, db);
+
+                SQLiteErrorCode n;
+
+                try
+                {
+                    n = UnsafeNativeMethods.sqlite3_close_v2(db);
+                }
+                catch (EntryPointNotFoundException)
+                {
+                    n = UnsafeNativeMethods.sqlite3_close(db);
+                }
+#endif
+                if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError(hdl, db));
+            }
         }
     }
 
     internal static bool ResetConnection(SQLiteConnectionHandle hdl, IntPtr db, bool canThrow)
     {
         if ((hdl == null) || (db == IntPtr.Zero)) return false;
-#if PLATFORM_COMPACTFRAMEWORK
-        lock (hdl.syncRoot)
-#else
-        lock (hdl)
-#endif
+
+        bool result = false;
+
+        try
         {
-            if (canThrow && hdl.IsInvalid)
-                throw new InvalidOperationException("The connection handle is invalid.");
-
-            if (canThrow && hdl.IsClosed)
-                throw new InvalidOperationException("The connection handle is closed.");
-
-            if (!canThrow && (hdl.IsInvalid || hdl.IsClosed))
-                return false;
-
-            IntPtr stmt = IntPtr.Zero;
-            SQLiteErrorCode n;
-            do
-            {
-                stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
-                if (stmt != IntPtr.Zero)
-                {
-#if !SQLITE_STANDARD
-                    n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (hdl.syncRoot)
 #else
-                    n = UnsafeNativeMethods.sqlite3_reset(stmt);
+            lock (hdl)
 #endif
-                }
-            } while (stmt != IntPtr.Zero);
-
-            if (IsAutocommit(hdl, db) == false) // a transaction is pending on the connection
             {
-                n = UnsafeNativeMethods.sqlite3_exec(db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero, out stmt);
-                if (n != SQLiteErrorCode.Ok)
+                if (canThrow && hdl.IsInvalid)
+                    throw new InvalidOperationException("The connection handle is invalid.");
+
+                if (canThrow && hdl.IsClosed)
+                    throw new InvalidOperationException("The connection handle is closed.");
+
+                if (!hdl.IsInvalid && !hdl.IsClosed)
                 {
-                    if (canThrow)
-                        throw new SQLiteException(n, GetLastError(hdl, db));
+                    IntPtr stmt = IntPtr.Zero;
+                    SQLiteErrorCode n;
+
+                    do
+                    {
+                        stmt = UnsafeNativeMethods.sqlite3_next_stmt(db, stmt);
+                        if (stmt != IntPtr.Zero)
+                        {
+#if !SQLITE_STANDARD
+                            n = UnsafeNativeMethods.sqlite3_reset_interop(stmt);
+#else
+                            n = UnsafeNativeMethods.sqlite3_reset(stmt);
+#endif
+                        }
+                    } while (stmt != IntPtr.Zero);
+
+                    //
+                    // NOTE: Is a transaction NOT pending on the connection?
+                    //
+                    if (IsAutocommit(hdl, db))
+                    {
+                        result = true;
+                    }
                     else
-                        return false;
+                    {
+                        n = UnsafeNativeMethods.sqlite3_exec(
+                            db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero,
+                            out stmt);
+
+                        if (n == SQLiteErrorCode.Ok)
+                        {
+                            result = true;
+                        }
+                        else if (canThrow)
+                        {
+                            throw new SQLiteException(n, GetLastError(hdl, db));
+                        }
+                    }
                 }
             }
         }
         GC.KeepAlive(hdl);
-        return true;
+        return result;
     }
 
     internal static bool IsAutocommit(SQLiteConnectionHandle hdl, IntPtr db)
     {
-      if (db == IntPtr.Zero) return false;
+        if ((hdl == null) || (db == IntPtr.Zero)) return false;
+
+        bool result = false;
+
+        try
+        {
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
 #if PLATFORM_COMPACTFRAMEWORK
-      lock (hdl.syncRoot)
+            lock (hdl.syncRoot)
 #else
-      lock (hdl)
+            lock (hdl)
 #endif
-      {
-          if (hdl.IsInvalid || hdl.IsClosed) return false;
-          return (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
-      }
-#pragma warning disable 162
-      GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
-#pragma warning restore 162
+            {
+                if (!hdl.IsInvalid && !hdl.IsClosed)
+                    result = (UnsafeNativeMethods.sqlite3_get_autocommit(db) == 1);
+            }
+        }
+        GC.KeepAlive(hdl); /* NOTE: Unreachable code. */
+        return result;
     }
   }
 

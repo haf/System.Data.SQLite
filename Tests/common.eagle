@@ -689,6 +689,17 @@ namespace eval ::Eagle {
           [string range $fileName 0 12] eq "file::memory:"}]
     }
 
+    proc executeSql { sql {execute none} {fileName ""} } {
+      if {[string length $fileName] == 0} then {set fileName :memory:}
+      setupDb $fileName "" "" "" "" "" false false false false memDb
+
+      try {
+        return [sql execute -execute $execute $memDb $sql]
+      } finally {
+        cleanupDb $fileName memDb false false
+      }
+    }
+
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
             {extra ""} {qualify true} {delete true} {uri false}
@@ -825,9 +836,9 @@ namespace eval ::Eagle {
       # NOTE: Configure the temporary directory for the newly opened database
       #       connection now unless our caller forbids it.
       #
-      if {$temporary} then {
+      if {$temporary && ![info exists ::no(setTemporaryDirectory)]} then {
         sql execute $db [appendArgs \
-            "PRAGMA temp_store_directory = \"" [getTemporaryDirectory] "\";"]
+            "PRAGMA temp_store_directory = \"" [getTemporaryDirectory] \"\;]
       }
 
       #
@@ -1041,6 +1052,31 @@ namespace eval ::Eagle {
       }
     }
 
+    proc shutdownSQLite { channel {force false} {quiet false} } {
+      #
+      # NOTE: Make sure that SQLite core library is completely shutdown.  This
+      #       is used by tests that change configuration options and/or those
+      #       that need to make sure logging is initialized (i.e. just in case
+      #       the SQLite core library was initialized in the process prior to
+      #       the SQLiteLog class being able to setup its logging callback).
+      #
+      if {$force || [haveConstraint SQLite]} then {
+        if {[catch {object invoke -flags +NonPublic \
+              System.Data.SQLite.UnsafeNativeMethods \
+              sqlite3_shutdown} result] == 0} then {
+          if {!$quiet} then {
+            tputs $channel [appendArgs \
+                "---- call sqlite3_shutdown()... ok: " $result \n]
+          }
+        } else {
+          if {!$quiet} then {
+            tputs $channel [appendArgs \
+                "---- call sqlite3_shutdown()... error: " \n\t $result \n]
+          }
+        }
+      }
+    }
+
     proc reportSQLiteResources { channel {quiet false} {collect true} } {
       #
       # NOTE: Skip all output if we are running in "quiet" mode.
@@ -1057,7 +1093,7 @@ namespace eval ::Eagle {
         }
       } else {
         #
-        # NOTE: Maybe the SQLite native library is unavailable?
+        # NOTE: Maybe the SQLite core library is unavailable?
         #
         set memory unknown
 
@@ -1080,7 +1116,7 @@ namespace eval ::Eagle {
         }
       } else {
         #
-        # NOTE: Maybe the SQLite native library is unavailable?
+        # NOTE: Maybe the SQLite core library is unavailable?
         #
         set memory unknown
 
@@ -1118,6 +1154,107 @@ namespace eval ::Eagle {
       }
 
       return $result
+    }
+
+    proc checkForSQLiteDirectories { channel {reset false} } {
+      #
+      # NOTE: Check if the sqlite3_win32_set_directory function is available.
+      #
+      tputs $channel \
+          "---- checking for function sqlite3_win32_set_directory... "
+
+      #
+      # NOTE: This call to the sqlite3_win32_set_directory function uses the
+      #       invalid value 0 for the first argument.  This code is designed
+      #       to check if calling the function will raise an exception (i.e.
+      #       the actual result of the function does not matter as long as no
+      #       directory is changed).
+      #
+      if {[catch {
+              object invoke -flags +NonPublic \
+              System.Data.SQLite.UnsafeNativeMethods \
+              sqlite3_win32_set_directory 0 null}] == 0} then {
+        #
+        # NOTE: Calling the sqlite3_win32_set_directory function does not
+        #       cause an exception; therefore, it must be available (i.e.
+        #       even though it should return a failure return code in this
+        #       case).
+        #
+        addConstraint sqlite3_win32_set_directory
+
+        tputs $channel yes\n
+
+        #
+        # NOTE: Does our caller want to reset the directories?
+        #
+        if {$reset} then {
+          #
+          # NOTE: Now make sure the database and temporary directories are
+          #       reset their default values, which should be null for both.
+          #       Since the sqlite3_win32_set_directory function is available,
+          #       use it.
+          #
+          for {set index 1} {$index < 3} {incr index} {
+            if {[catch {
+                    object invoke -flags +NonPublic \
+                    System.Data.SQLite.UnsafeNativeMethods \
+                    sqlite3_win32_set_directory $index null} \
+                    result] == 0} then {
+              tputs $channel [appendArgs \
+                  "---- call sqlite3_win32_set_directory(" $index \
+                  ", null)... ok: " $result \n]
+            } else {
+              tputs $channel [appendArgs \
+                  "---- call sqlite3_win32_set_directory(" $index \
+                  ", null)... error: " \n\t $result \n]
+            }
+          }
+        }
+      } else {
+        tputs $channel no\n
+
+        #
+        # NOTE: Does our caller want to reset the directories?
+        #
+        if {$reset} then {
+          #
+          # NOTE: Now make sure the database and temporary directories are
+          #       reset their default values, which should be null for both.
+          #       Since the sqlite3_win32_set_directory function does not
+          #       appear to be available, use the associated PRAGMA commands
+          #       instead.
+          #
+          foreach directory [list data_store_directory temp_store_directory] {
+            set sql [appendArgs "PRAGMA " $directory " = \"\";"]
+
+            if {[catch {executeSql $sql} result] == 0} then {
+              tputs $channel [appendArgs \
+                  "---- execute PRAGMA " $directory "... ok: " \
+                  $result \n]
+            } else {
+              tputs $channel [appendArgs \
+                  "---- execute PRAGMA " $directory "... error: " \
+                  \n\t $result \n]
+            }
+          }
+        }
+      }
+
+      #
+      # NOTE: Finally, show the current value of the database and temporary
+      #       directories.
+      #
+      foreach directory [list data_store_directory temp_store_directory] {
+        tputs $channel [appendArgs "---- checking " $directory "... "]
+
+        set sql [appendArgs "PRAGMA " $directory \;]
+
+        if {[catch {executeSql $sql scalar} result] == 0} then {
+          tputs $channel [appendArgs "ok: \"" $result \"\n]
+        } else {
+          tputs $channel [appendArgs "error: " \n\t $result \n]
+        }
+      }
     }
 
     proc runSQLiteTestPrologue {} {
@@ -1223,27 +1360,9 @@ namespace eval ::Eagle {
         checkForSQLite $::test_channel
 
         #
-        # NOTE: Check if the sqlite3_win32_set_directory function is available.
+        # NOTE: Check the SQLite database and temporary directories.
         #
-        tputs $::test_channel \
-            "---- checking for function sqlite3_win32_set_directory... "
-
-        if {[catch {
-                object invoke -flags +NonPublic \
-                System.Data.SQLite.UnsafeNativeMethods \
-                sqlite3_win32_set_directory 0 null}] == 0} then {
-          #
-          # NOTE: Calling the sqlite3_win32_set_directory function does not
-          #       cause an exception; therefore, it must be available (i.e.
-          #       even though it should return a failure return code in this
-          #       case).
-          #
-          addConstraint sqlite3_win32_set_directory
-
-          tputs $::test_channel yes\n
-        } else {
-          tputs $::test_channel no\n
-        }
+        checkForSQLiteDirectories $::test_channel
 
         #
         # NOTE: Attempt to determine if the custom extension functions were

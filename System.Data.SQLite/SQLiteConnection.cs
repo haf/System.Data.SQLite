@@ -1934,7 +1934,7 @@ namespace System.Data.SQLite
     }
 
     /// Add a log message via the SQLite sqlite3_log interface.
-    public void LogMessage(int iErrCode, string zMessage)
+    public void LogMessage(SQLiteErrorCode iErrCode, string zMessage)
     {
       CheckDisposed();
 
@@ -1942,6 +1942,17 @@ namespace System.Data.SQLite
           throw new InvalidOperationException("Database connection not valid for logging message.");
 
       _sql.LogMessage(iErrCode, zMessage);
+    }
+
+    /// Add a log message via the SQLite sqlite3_log interface.
+    public void LogMessage(int iErrCode, string zMessage)
+    {
+      CheckDisposed();
+
+      if (_sql == null)
+          throw new InvalidOperationException("Database connection not valid for logging message.");
+
+      _sql.LogMessage((SQLiteErrorCode)iErrCode, zMessage);
     }
 
 #if INTEROP_CODEC

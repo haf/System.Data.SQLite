@@ -1445,8 +1445,7 @@ runTest {test data-1.28 {SetMemoryStatus method} -setup {
   # NOTE: Make sure that SQLite core library is completely shutdown prior to
   #       starting this test.
   #
-  object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
-      sqlite3_shutdown
+  shutdownSQLite $test_channel
 
   #
   # NOTE: Create an instance of the core SQLite library interop wrapper class.
@@ -1503,8 +1502,7 @@ runTest {test data-1.28 {SetMemoryStatus method} -setup {
     # NOTE: Make sure that SQLite core library is completely shutdown prior
     #       to attempting to reconfigure the memory status setting.
     #
-    object invoke -flags +NonPublic System.Data.SQLite.UnsafeNativeMethods \
-        sqlite3_shutdown
+    shutdownSQLite $test_channel
 
     #
     # NOTE: Attempt to make sure the default value for the process-wide
@@ -1520,8 +1518,8 @@ runTest {test data-1.28 {SetMemoryStatus method} -setup {
   unset -nocomplain result sqlite3
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok Misuse Ok Ok System#IntPtr#\d+ System#IntPtr#\d+ \d+ \d+ \d+\
-\d+ \d+ True True True True True True$}}
+regexp -result {^Ok Misuse Ok Ok System#IntPtr#\d+ System#IntPtr#\d+ \d+ \d+\
+\d+ \d+ \d+ True True True True True True$}}
 
 ###############################################################################
 
