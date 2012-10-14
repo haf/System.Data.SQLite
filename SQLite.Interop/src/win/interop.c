@@ -243,9 +243,6 @@ SQLITE_API int WINAPI sqlite3_changes_interop(sqlite3 *db)
 #ifndef NDEBUG
   if (!db)
       sqlite3InteropBreak("null database handle for sqlite3_changes()");
-
-  if (!sqlite3SafetyCheckOk(db))
-      sqlite3InteropBreak("bad database handle for sqlite3_changes()");
 #endif
 
   result = sqlite3_changes(db);

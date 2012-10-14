@@ -891,7 +891,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       try {
         for {set index 1} {$index <= $count1} {incr index} {
           if {[catch {
-            set size [expr {min($maxSize, $count3 * $index * 5)}]
+            set size [expr {int(min($maxSize, abs($count3 * $index * 5.0)))}]
             set ptr [allocMem $size]; # throw
             useMem $ptr $size; waitForTest $count2
             freeMem $ptr; unset -nocomplain ptr
