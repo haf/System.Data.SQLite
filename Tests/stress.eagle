@@ -31,7 +31,7 @@ shutdownSQLite $test_channel
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload noWorkload srcDb db \
       fileName compiled options count times logFileName logListener \
-      connection indicators iterations exitOnFail failures
+      connection indicators iterations exitOnFail coTaskMem failures
 
   #############################################################################
 
@@ -66,10 +66,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
+  proc waitForTest { {extra 0} } {
+    after [expr {int((rand() * 1000) + $extra)}]
+  }
+
+  #############################################################################
+
   proc showTest { indicator } {
     tputs $::test_channel $indicator
     append ::indicators $indicator
-    after [expr {int(rand() * 1000 + $::count(2))}]
+    waitForTest $::count(2)
   }
 
   #############################################################################
@@ -94,7 +100,50 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       }
 
       incr ::failures($indicator)
-      after [expr {int(rand() * 1000 + $::count(2))}]
+      waitForTest $::count(2)
+    }
+  }
+
+  #############################################################################
+
+  proc allocMem { size } {
+    if {$::coTaskMem} then {
+      return [object invoke -create \
+          System.Runtime.InteropServices.Marshal \
+          AllocCoTaskMem $size]; # throw
+    } else {
+      set ptr [object invoke -create -flags +NonPublic \
+          System.Data.SQLite.UnsafeNativeMethods \
+          sqlite3_malloc $size]
+
+      if {[object invoke $ptr ToInt64] != 0} then {
+        return $ptr
+      } else {
+        error [appendArgs "sqlite3_malloc(" $size ") failed"]
+      }
+    }
+  }
+
+  #############################################################################
+
+  proc useMem { ptr size } {
+    if {![isMono]} then {
+      object invoke -flags +NonPublic \
+          Microsoft.Win32.Win32Native ZeroMemory \
+          $ptr $size
+    }
+  }
+
+  #############################################################################
+
+  proc freeMem { ptr } {
+    if {$::coTaskMem} then {
+      object invoke System.Runtime.InteropServices.Marshal \
+          FreeCoTaskMem $ptr
+    } else {
+      object invoke -flags +NonPublic \
+          System.Data.SQLite.UnsafeNativeMethods \
+          sqlite3_free $ptr
     }
   }
 
@@ -157,13 +206,15 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   # NOTE: Setup the default values for the tunable workload parameters.  Any,
   #       all, or none of these may be overriden via the command line.
   #
-  set count(0) 1;        # Workload repeat count (i.e. total full runs).
-  set count(1) 20;       # Workload iteration count (i.e. within a run).
-  set count(2) 500;      # Workload iteration delay, in milliseconds.
-  set count(3) 2000;     # Workload "small" data chunk size, in bytes.
-  set count(4) 10000000; # Workload "big" data chunk size, in bytes.
-  set noWorkload [list]; # Workloads to be omitted from the run, by index.
-  set exitOnFail true;   # Halt testing and exit process on test failure?
+  set count(0) 1;         # Workload repeat count (i.e. total full runs).
+  set count(1) 20;        # Workload iteration count (i.e. within a run).
+  set count(2) 500;       # Workload iteration delay, in milliseconds.
+  set count(3) 2000;      # Workload "small" data chunk size, in bytes.
+  set count(4) 10000000;  # Workload "big" data chunk size, in bytes.
+  set count(5) 314572800; # Maximum heap memory to exclude at one time.
+  set noWorkload [list];  # Workloads to be omitted from the run, by index.
+  set exitOnFail true;    # Halt testing and exit process on test failure?
+  set coTaskMem true;     # Use AllocCoTaskMem/FreeCoTaskMem for memory?
 
   #############################################################################
 
@@ -180,43 +231,55 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         [list null MustHaveIntegerValue -1 -1 -count2 $count(2)] \
         [list null MustHaveIntegerValue -1 -1 -count3 $count(3)] \
         [list null MustHaveIntegerValue -1 -1 -count4 $count(4)] \
+        [list null MustHaveIntegerValue -1 -1 -count5 $count(5)] \
         [list null MustHaveListValue -1 -1 -noWorkload $noWorkload] \
-        [list null MustHaveBooleanValue -1 -1 -exitOnFail $exitOnFail]] $argv
+        [list null MustHaveBooleanValue -1 -1 -exitOnFail $exitOnFail] \
+        [list null MustHaveBooleanValue -1 -1 -coTaskMem $coTaskMem]] $argv
 
     set count(0) $options(-count0,value)
     set count(1) $options(-count1,value)
     set count(2) $options(-count2,value)
     set count(3) $options(-count3,value)
     set count(4) $options(-count4,value)
+    set count(5) $options(-count5,value)
     set noWorkload $options(-noWorkload,value)
     set exitOnFail $options(-exitOnFail,value)
+    set coTaskMem $options(-coTaskMem,value)
   }
 
   #############################################################################
 
   tputs $test_channel [appendArgs \
-      "---- workloads will repeat " $count(0) " time(s)...\n"]
+      "---- workloads will repeat " $count(0) " time(s)\n"]
 
   tputs $test_channel [appendArgs \
-      "---- workloads will have " $count(1) " iteration(s)...\n"]
+      "---- workloads will have " $count(1) " iteration(s)\n"]
 
   tputs $test_channel [appendArgs \
-      "---- workloads will wait at least " $count(2) " millisecond(s)...\n"]
+      "---- workloads will wait at least " $count(2) \
+      " millisecond(s) after each iteration\n"]
 
   tputs $test_channel [appendArgs \
-      "---- workload \"small\" chunk size is " $count(3) " byte(s)...\n"]
+      "---- small chunk size is " $count(3) " byte(s)\n"]
 
   tputs $test_channel [appendArgs \
-      "---- workload \"big\" chunk size is " $count(4) " byte(s)...\n"]
-
-  if {[llength $noWorkload] > 0} then {
-    tputs $test_channel [appendArgs \
-        "---- workloads to be skipped... " $noWorkload \n]
-  }
+      "---- big chunk size is " $count(4) " byte(s)\n"]
 
   tputs $test_channel [appendArgs \
-      "---- workload failures " [expr {$exitOnFail ? "will" : "will not"}] \
-      " halt testing and exit the process...\n"]
+      "---- maximum excluded heap memory is " $count(5) " byte(s)\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- workloads to be skipped... " \
+      [expr {[llength $noWorkload] > 0 ? $noWorkload : "none"}] \n]
+
+  tputs $test_channel [appendArgs \
+      "---- unexpected errors " \
+      [expr {$exitOnFail ? "will" : "will not"}] \
+      " halt testing and exit the process\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- the " [expr {$coTaskMem ? "CoTaskMem" : "SQLite"}] \
+      " allocator will be used to exclude heap memory\n"]
 
   #############################################################################
 
@@ -812,6 +875,41 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       }
     }] 0]
   }]
+
+  #############################################################################
+  #                              WORKLOAD #16 (P)                             #
+  #############################################################################
+
+  set workload(16) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
+    #
+    # NOTE: Workload #16, allocate (exclude) some native heap memory
+    #
+    lappend ::times(16) [lindex [time {
+      set maxSize $::count(5)
+      object invoke GC AddMemoryPressure $maxSize
+      try {
+        for {set index 1} {$index <= $count1} {incr index} {
+          if {[catch {
+            set size [expr {min($maxSize, $count3 * $index * 5)}]
+            set ptr [allocMem $size]; # throw
+            useMem $ptr $size; waitForTest $count2
+            freeMem $ptr; unset -nocomplain ptr
+            showTest P
+          } error]} then {
+            if {[isExpectedError $error]} then {
+              showTest p
+            } else {
+              failTest p $error
+            }
+          }
+        }
+      } finally {
+        if {[info exists ptr]} then {freeMem $ptr}
+        object invoke GC RemoveMemoryPressure $maxSize
+      }
+    }] 0]
+  }]
 } -body {
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
@@ -916,8 +1014,12 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   expr {[array size failures] > 0 ? \
       [expr [join [array values failures] +]] : 0}
 } -cleanup {
+  rename freeMem ""
+  rename useMem ""
+  rename allocMem ""
   rename failTest ""
   rename showTest ""
+  rename waitForTest ""
   rename isExpectedError ""
   rename formatWorkloadResult ""
 
@@ -940,7 +1042,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   unset -nocomplain result thread index workload noWorkload srcDb db \
       fileName compiled options count times logFileName logListener \
-      connection indicators iterations exitOnFail failures
+      connection indicators iterations exitOnFail coTaskMem failures
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -result {0}}
