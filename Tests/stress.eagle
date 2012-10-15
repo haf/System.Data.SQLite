@@ -32,7 +32,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload priority noWorkload \
       priorities srcDb db fileName compiled options count times logFileName \
       logListener connection indicators iterations exitOnFail coTaskMem \
-      failures
+      noTrace failures
 
   #############################################################################
 
@@ -191,19 +191,6 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   #
-  # NOTE: The trace listener used with the SQLiteLog class to capture output
-  #       from the core SQLite library requires its own log file because the
-  #       TextWriterTraceListener class opens and locks the log file it uses
-  #       as the basis of the output stream.  Before this test is complete,
-  #       the entire contents of this trace log file will be copied into the
-  #       main test log file and then deleted.
-  #
-  set logFileName [appendArgs [file rootname $test_log] .trace.log]
-  setupLogging $logFileName
-
-  #############################################################################
-
-  #
   # NOTE: Setup the default values for the tunable workload parameters.  Any,
   #       all, or none of these may be overriden via the command line.
   #
@@ -217,6 +204,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   set priorities [list];  # Dictionary of workload thread priorities.
   set exitOnFail true;    # Halt testing and exit process on test failure?
   set coTaskMem true;     # Use AllocCoTaskMem/FreeCoTaskMem for memory?
+  set noTrace false;      # Disable SQLite trace logging to a file?
 
   #############################################################################
 
@@ -237,7 +225,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         [list null MustHaveListValue -1 -1 -noWorkload $noWorkload] \
         [list null MustHaveListValue -1 -1 -priorities $priorities] \
         [list null MustHaveBooleanValue -1 -1 -exitOnFail $exitOnFail] \
-        [list null MustHaveBooleanValue -1 -1 -coTaskMem $coTaskMem]] $argv
+        [list null MustHaveBooleanValue -1 -1 -coTaskMem $coTaskMem] \
+        [list null MustHaveBooleanValue -1 -1 -noTrace $noTrace]] $argv
 
     set count(0) $options(-count0,value)
     set count(1) $options(-count1,value)
@@ -249,6 +238,22 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     set priorities $options(-priorities,value)
     set exitOnFail $options(-exitOnFail,value)
     set coTaskMem $options(-coTaskMem,value)
+    set noTrace $options(-noTrace,value)
+  }
+
+  #############################################################################
+
+  #
+  # NOTE: The trace listener used with the SQLiteLog class to capture output
+  #       from the core SQLite library requires its own log file because the
+  #       TextWriterTraceListener class opens and locks the log file it uses
+  #       as the basis of the output stream.  Before this test is complete,
+  #       the entire contents of this trace log file will be copied into the
+  #       main test log file and then deleted.
+  #
+  if {!$noTrace} then {
+    set logFileName [appendArgs [file rootname $test_log] .trace.log]
+    setupLogging $logFileName
   }
 
   #############################################################################
@@ -288,6 +293,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   tputs $test_channel [appendArgs \
       "---- the " [expr {$coTaskMem ? "CoTaskMem" : "SQLite"}] \
       " allocator will be used to exclude heap memory\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- trace logging to a file is " \
+      [expr {$noTrace ? "disabled" : "enabled"}] \n]
 
   #############################################################################
 
@@ -1033,7 +1042,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   foreach index(0) [lsort -integer [array names workload]] {
-    tputs $test_channel [formatWorkloadResult $index(0)]
+    if {[lsearch -exact $noWorkload $index(0)] == -1} then {
+      tputs $test_channel [formatWorkloadResult $index(0)]
+    }
   }
 
   #############################################################################
@@ -1086,7 +1097,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   freeDbConnection
 
-  cleanupLogging $logFileName
+  if {!$noTrace} then {
+    cleanupLogging $logFileName
+  }
 
   rename cleanupLogging ""
   rename setupLogging ""
@@ -1094,7 +1107,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload priority noWorkload \
       priorities srcDb db fileName compiled options count times logFileName \
       logListener connection indicators iterations exitOnFail coTaskMem \
-      failures
+      noTrace failures
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -result {0}}
