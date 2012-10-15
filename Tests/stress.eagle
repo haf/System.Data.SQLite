@@ -32,7 +32,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload priority noWorkload \
       priorities srcDb db fileName compiled options count times logFileName \
       logListener connection indicators iterations exitOnFail coTaskMem \
-      noTrace failures
+      noTrace failures status
 
   #############################################################################
 
@@ -78,6 +78,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     tputs $::test_channel $indicator
     append ::indicators $indicator
     waitForTest $::count(2)
+  }
+
+  #############################################################################
+
+  proc doneTest { indicator } {
+    lappend ::status(done) $indicator
+    host title $::status(done)
   }
 
   #############################################################################
@@ -389,6 +396,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest A
     }] 0]
   }]
 
@@ -417,6 +425,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest B
     }] 0]
   }]
 
@@ -452,6 +461,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest C
     }] 0]
   }]
 
@@ -487,6 +497,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest D
     }] 0]
   }]
 
@@ -517,6 +528,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest E
     }] 0]
   }]
 
@@ -546,6 +558,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest F
     }] 0]
   }]
 
@@ -575,6 +588,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest G
     }] 0]
   }]
 
@@ -604,6 +618,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest H
     }] 0]
   }]
 
@@ -632,6 +647,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest I
     }] 0]
   }]
 
@@ -660,6 +676,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest J
     }] 0]
   }]
 
@@ -687,6 +704,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest K
     }] 0]
   }]
 
@@ -767,6 +785,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           }
         }
       }
+      doneTest L
     }] 0]
   }]
 
@@ -847,6 +866,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           }
         }
       }
+      doneTest M
     }] 0]
   }]
 
@@ -865,11 +885,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         if {[catch {
           set result [sql execute -execute scalar $db \
               "PRAGMA integrity_check;"]
-          if {$result eq "ok"} then {
-            showTest N
-          } else {
+          if {$result ne "ok"} then {
             error [appendArgs "integrity check failed: " $result]
           }
+          showTest N
         } error]} then {
           if {[isExpectedError $error]} then {
             showTest n
@@ -879,6 +898,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest N
     }] 0]
   }]
 
@@ -904,6 +924,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
           }
         }
       }
+      doneTest O
     }] 0]
   }]
 
@@ -939,6 +960,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         if {[info exists ptr]} then {freeMem $ptr}
         object invoke GC RemoveMemoryPressure $maxSize
       }
+      doneTest P
     }] 0]
   }]
 
@@ -955,8 +977,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       setupDb $dstFileName "" "" "" "" "" true false
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
-          set mode [expr {$index % 2 == 0 ? "delete" : "wal"}]
-          sql execute $db [appendArgs "PRAGMA journal_mode = \"" $mode \"\;]
+          sql execute $db [appendArgs "PRAGMA journal_mode = \"" \
+              [expr {$index % 2 == 0 ? "delete" : "wal"}] \"\;]
           showTest Q
         } error]} then {
           if {[isExpectedError $error]} then {
@@ -967,6 +989,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $dstFileName db false true false
+      doneTest Q
     }] 0]
   }]
 
@@ -1064,6 +1087,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         }
       }
       cleanupDb $srcFileName db false true false
+      doneTest R
     }] 0]
   }]
 } -body {
@@ -1184,6 +1208,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   rename useMem ""
   rename allocMem ""
   rename failTest ""
+  rename doneTest ""
   rename showTest ""
   rename waitForTest ""
   rename isExpectedError ""
@@ -1211,7 +1236,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload priority noWorkload \
       priorities srcDb db fileName compiled options count times logFileName \
       logListener connection indicators iterations exitOnFail coTaskMem \
-      noTrace failures
+      noTrace failures status
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -result {0}}
