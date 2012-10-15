@@ -62,7 +62,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   proc isExpectedError { error } {
     return [expr {[regexp -- {\sno such table: t1\s} $error] || \
-        [regexp -- {\sdatabase is locked\s} $error]}]
+        [regexp -- {\sdatabase is locked\s} $error] || \
+        [regexp -- {\sdatabase table is locked\s} $error]}]
   }
 
   #############################################################################
@@ -432,10 +433,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       setupDb $dstFileName "" "" "" "" "" true false
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
-          set sql [appendArgs \
-              "SELECT x, y FROM " $table " WHERE z = 'small';"]
           set reader [sql execute -execute reader \
-              -format dataReader -alias $db $sql]
+              -format dataReader -alias $db [appendArgs \
+              "SELECT x, y FROM " $table " WHERE z = 'small';"]]
           while {[$reader Read]} {
             #
             # NOTE: Do nothing.
@@ -468,10 +468,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       setupDb $dstFileName "" "" "" "" "" true false
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
-          set sql [appendArgs \
-              "SELECT x, y FROM " $table " WHERE z = 'big';"]
           set reader [sql execute -execute reader \
-              -format dataReader -alias $db $sql]
+              -format dataReader -alias $db [appendArgs \
+              "SELECT x, y FROM " $table " WHERE z = 'big';"]]
           while {[$reader Read]} {
             #
             # NOTE: Do nothing.
@@ -504,10 +503,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       setupDb $dstFileName "" "" "" "" "" true false
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
-          sql execute $db [appendArgs \
-              "INSERT INTO " $table "(x, y, z) VALUES('" \
-              [format %lX [expr {random()}]] "', '" \
-              [base64 encode -- [expr {randstr($count2)}]] \
+          sql execute $db [appendArgs "INSERT INTO " $table \
+              "(x, y, z) VALUES('" [format %lX [expr {random()}]] \
+              "', '" [base64 encode -- [expr {randstr($count2)}]] \
               "', 'small');"]
           showTest E
         } error]} then {
@@ -535,9 +533,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       setupDb $dstFileName "" "" "" "" "" true false
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
-          sql execute $db [appendArgs \
-              "INSERT INTO " $table "(x, y, z) VALUES('" \
-              [format %lX [expr {random()}]] \
+          sql execute $db [appendArgs "INSERT INTO " $table \
+              "(x, y, z) VALUES('" [format %lX [expr {random()}]] \
               "', RANDOMBLOB(" $count3 "), 'big');"]
           showTest F
         } error]} then {
@@ -595,9 +592,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "UPDATE " $table \
-              " SET y = RANDOMBLOB(" $count3 \
-              ") WHERE x LIKE '" [format %X $index] \
-              "%' AND z = 'big';"]
+              " SET y = RANDOMBLOB(" $count3 ") WHERE x LIKE '" \
+              [format %X $index] "%' AND z = 'big';"]
           showTest H
         } error]} then {
           if {[isExpectedError $error]} then {
@@ -973,8 +969,106 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       cleanupDb $dstFileName db false true false
     }] 0]
   }]
+
+  #############################################################################
+  #                              WORKLOAD #18 (R)                             #
+  #############################################################################
+
+  set workload(18) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
+    #
+    # NOTE: Workload #18, execute queries against the in-memory database
+    #
+    lappend ::times(18) [lindex [time {
+      setupDb $srcFileName "" "" "" "" "" false false true true
+      for {set index 1} {$index <= $count1} {incr index} {
+        if {[catch {
+          #
+          # NOTE: Workload #18.3, "small" SELECT statements.
+          #
+          set reader [sql execute -execute reader \
+              -format dataReader -alias $db [appendArgs \
+              "SELECT x, y FROM " $table " WHERE z = 'small';"]]
+          while {[$reader Read]} {
+            #
+            # NOTE: Do nothing.
+            #
+          }
+          unset -nocomplain reader
+          #
+          # NOTE: Workload #18.4, "big" SELECT statements.
+          #
+          set reader [sql execute -execute reader \
+              -format dataReader -alias $db [appendArgs \
+              "SELECT x, y FROM " $table " WHERE z = 'big';"]]
+          while {[$reader Read]} {
+            #
+            # NOTE: Do nothing.
+            #
+          }
+          unset -nocomplain reader
+          #
+          # NOTE: Workload #18.5, "small" INSERT statements.
+          #
+          sql execute $db [appendArgs "INSERT INTO " $table \
+              "(x, y, z) VALUES('" [format %lX [expr {random()}]] \
+              "', '" [base64 encode -- [expr {randstr($count2)}]] \
+              "', 'small');"]
+          #
+          # NOTE: Workload #18.6, "big" INSERT statements.
+          #
+          sql execute $db [appendArgs "INSERT INTO " $table \
+              "(x, y, z) VALUES('" [format %lX [expr {random()}]] \
+              "', RANDOMBLOB(" $count3 "), 'big');"]
+          #
+          # NOTE: Workload #18.7, "small" UPDATE statements.
+          #
+          sql execute $db [appendArgs "UPDATE " $table \
+              " SET y = '" [base64 encode -- [expr {randstr($count2)}]] \
+              "' WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
+          #
+          # NOTE: Workload #18.8, "big" UPDATE statements.
+          #
+          sql execute $db [appendArgs "UPDATE " $table \
+              " SET y = RANDOMBLOB(" $count3 ") WHERE x LIKE '" \
+              [format %X $index] "%' AND z = 'big';"]
+          #
+          # NOTE: Workload #18.9, "small" DELETE statements.
+          #
+          sql execute $db [appendArgs "DELETE FROM " $table \
+              " WHERE x LIKE '" [format %X $index] "%' AND z = 'small';"]
+          #
+          # NOTE: Workload #18.10, "big" DELETE statements.
+          #
+          sql execute $db [appendArgs "DELETE FROM " $table \
+              " WHERE x LIKE '" [format %X $index] "%' AND z = 'big';"]
+          #
+          # NOTE: Workload #18.11, VACUUM statement.
+          #
+          sql execute $db "VACUUM;"
+          #
+          # NOTE: Workload #18.14, PRAGMA integrity check statement.
+          #
+          set result [sql execute -execute scalar $db \
+              "PRAGMA integrity_check;"]
+          if {$result ne "ok"} then {
+            error [appendArgs "integrity check failed: " $result]
+          }
+          showTest R
+        } error]} then {
+          if {[isExpectedError $error]} then {
+            showTest r
+          } else {
+            failTest r $error
+          }
+        }
+      }
+      cleanupDb $srcFileName db false true false
+    }] 0]
+  }]
 } -body {
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
+    sql execute $srcDb "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
 
     unset -nocomplain thread
