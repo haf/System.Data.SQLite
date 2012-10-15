@@ -926,6 +926,34 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       }
     }] 0]
   }]
+
+  #############################################################################
+  #                              WORKLOAD #17 (Q)                             #
+  #############################################################################
+
+  set workload(17) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
+    #
+    # NOTE: Workload #17, change the database journal mode
+    #
+    lappend ::times(17) [lindex [time {
+      setupDb $dstFileName "" "" "" "" "" true false
+      for {set index 1} {$index <= $count1} {incr index} {
+        if {[catch {
+          set mode [expr {$index % 2 == 0 ? "delete" : "wal"}]
+          sql execute $db [appendArgs "PRAGMA journal_mode = \"" $mode \"\;]
+          showTest Q
+        } error]} then {
+          if {[isExpectedError $error]} then {
+            showTest q
+          } else {
+            failTest q $error
+          }
+        }
+      }
+      cleanupDb $dstFileName db false true false
+    }] 0]
+  }]
 } -body {
   for {set index(0) 0} {$index(0) < $count(0)} {incr index(0)} {
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
