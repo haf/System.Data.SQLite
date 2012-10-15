@@ -29,9 +29,10 @@ shutdownSQLite $test_channel
 ###############################################################################
 
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
-  unset -nocomplain result thread index workload noWorkload srcDb db \
-      fileName compiled options count times logFileName logListener \
-      connection indicators iterations exitOnFail coTaskMem failures
+  unset -nocomplain result thread index workload priority noWorkload \
+      priorities srcDb db fileName compiled options count times logFileName \
+      logListener connection indicators iterations exitOnFail coTaskMem \
+      failures
 
   #############################################################################
 
@@ -213,6 +214,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   set count(4) 10000000;  # Workload "big" data chunk size, in bytes.
   set count(5) 314572800; # Maximum heap memory to exclude at one time.
   set noWorkload [list];  # Workloads to be omitted from the run, by index.
+  set priorities [list];  # Dictionary of workload thread priorities.
   set exitOnFail true;    # Halt testing and exit process on test failure?
   set coTaskMem true;     # Use AllocCoTaskMem/FreeCoTaskMem for memory?
 
@@ -233,6 +235,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         [list null MustHaveIntegerValue -1 -1 -count4 $count(4)] \
         [list null MustHaveIntegerValue -1 -1 -count5 $count(5)] \
         [list null MustHaveListValue -1 -1 -noWorkload $noWorkload] \
+        [list null MustHaveListValue -1 -1 -priorities $priorities] \
         [list null MustHaveBooleanValue -1 -1 -exitOnFail $exitOnFail] \
         [list null MustHaveBooleanValue -1 -1 -coTaskMem $coTaskMem]] $argv
 
@@ -243,6 +246,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     set count(4) $options(-count4,value)
     set count(5) $options(-count5,value)
     set noWorkload $options(-noWorkload,value)
+    set priorities $options(-priorities,value)
     set exitOnFail $options(-exitOnFail,value)
     set coTaskMem $options(-coTaskMem,value)
   }
@@ -273,6 +277,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       [expr {[llength $noWorkload] > 0 ? $noWorkload : "none"}] \n]
 
   tputs $test_channel [appendArgs \
+      "---- workloads priority overrides... " \
+      [expr {[llength $priorities] > 0 ? $priorities : "none"}] \n]
+
+  tputs $test_channel [appendArgs \
       "---- unexpected errors " \
       [expr {$exitOnFail ? "will" : "will not"}] \
       " halt testing and exit the process\n"]
@@ -280,6 +288,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   tputs $test_channel [appendArgs \
       "---- the " [expr {$coTaskMem ? "CoTaskMem" : "SQLite"}] \
       " allocator will be used to exclude heap memory\n"]
+
+  #############################################################################
+
+  #
+  # NOTE: Create the workload priority array based on the priority list seen
+  #       on the command line, if any.
+  #
+  array set priority $priorities
 
   #############################################################################
 
@@ -921,6 +937,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         set thread($index(1)) [object create -alias System.Threading.Thread \
             [list apply $workload($index(1)) $fileName(1) $fileName(2) t1 \
             $count(1) $count(3) $count(4)] 1048576]
+
+        $thread($index(1)) Name [appendArgs \
+          [file rootname [file tail $fileName(2)]] " #" $index(1)]
+
+        if {[info exists priority($index(1))]} then {
+          $thread($index(1)) Priority $priority($index(1))
+        }
       }
     }
 
@@ -1040,9 +1063,10 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   rename cleanupLogging ""
   rename setupLogging ""
 
-  unset -nocomplain result thread index workload noWorkload srcDb db \
-      fileName compiled options count times logFileName logListener \
-      connection indicators iterations exitOnFail coTaskMem failures
+  unset -nocomplain result thread index workload priority noWorkload \
+      priorities srcDb db fileName compiled options count times logFileName \
+      logListener connection indicators iterations exitOnFail coTaskMem \
+      failures
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -result {0}}
