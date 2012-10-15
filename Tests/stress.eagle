@@ -244,6 +244,16 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   #
+  # NOTE: Load custom per-user and/or per-host test settings.  Currently, this
+  #       is done after processing the command line options.  The settings file
+  #       should take into account the existing workload parameters and avoid
+  #       changing any that may have already been overridden.
+  #
+  loadSQLiteTestSettings $test_channel
+
+  #############################################################################
+
+  #
   # NOTE: The trace listener used with the SQLiteLog class to capture output
   #       from the core SQLite library requires its own log file because the
   #       TextWriterTraceListener class opens and locks the log file it uses

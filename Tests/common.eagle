@@ -296,6 +296,43 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getCommonDirectory {} {
+      #
+      # NOTE: This procedure returns the directory where the test scripts
+      #       should be located.  By default, this just returns the Eagle
+      #       binary directory.
+      #
+      if {[info exists ::common_directory] && \
+          [string length $::common_directory] > 0} then {
+        #
+        # NOTE: The location of the common directory has been set;
+        #       therefore, use it.
+        #
+        return $::common_directory
+      } elseif {[info exists ::vendor_directory] && \
+          [string length $::vendor_directory] > 0} then {
+        #
+        # NOTE: The location of the vendor directory has been set;
+        #       therefore, use it.
+        #
+        return $::vendor_directory
+      } elseif {[info exists ::tcl_library] && \
+          [string length $::tcl_library] > 0 && \
+          [file isdirectory $::tcl_library]} then {
+        #
+        # NOTE: The variable with the location of the script library is
+        #       set and appears to be a real directory (i.e. not embedded
+        #       within a file); therefore, use it.
+        #
+        return $::tcl_library
+      } else {
+        #
+        # NOTE: Fallback to the directory containing the executable.
+        #
+        return [info binary]
+      }
+    }
+
     proc getDatabaseDirectory {} {
       #
       # NOTE: This procedure returns the directory where the test databases
@@ -308,14 +345,14 @@ namespace eval ::Eagle {
         # NOTE: The location of the database directory has been overridden;
         #       therefore, use it.
         #
-        return [file normalize $::database_directory]
+        return $::database_directory
       } elseif {[info exists ::scratch_directory] && \
           [string length $::scratch_directory] > 0} then {
         #
         # NOTE: The location of the scratch directory has been overridden;
         #       therefore, use it.
         #
-        return [file normalize $::scratch_directory]
+        return $::scratch_directory
       } else {
         return [getTemporaryPath]
       }
@@ -333,14 +370,14 @@ namespace eval ::Eagle {
         # NOTE: The location of the temporary directory has been overridden;
         #       therefore, use it.
         #
-        return [file normalize $::temporary_directory]
+        return $::temporary_directory
       } elseif {[info exists ::scratch_directory] && \
           [string length $::scratch_directory] > 0} then {
         #
         # NOTE: The location of the scratch directory has been overridden;
         #       therefore, use it.
         #
-        return [file normalize $::scratch_directory]
+        return $::scratch_directory
       } else {
         return [getTemporaryPath]
       }
@@ -1076,8 +1113,8 @@ namespace eval ::Eagle {
       #
       if {$force || [haveConstraint SQLite]} then {
         if {[catch {object invoke -flags +NonPublic \
-              System.Data.SQLite.UnsafeNativeMethods \
-              sqlite3_shutdown} result] == 0} then {
+                System.Data.SQLite.UnsafeNativeMethods \
+                sqlite3_shutdown} result] == 0} then {
           if {!$quiet} then {
             tputs $channel [appendArgs \
                 "---- call sqlite3_shutdown()... ok: " $result \n]
@@ -1271,9 +1308,66 @@ namespace eval ::Eagle {
       }
     }
 
+    proc loadSQLiteTestSettings { channel {quiet false} } {
+      #
+      # NOTE: Skip loading the settings if their usage has been disabled.
+      #
+      if {![info exists ::no(sqliteTestSettings)]} then {
+        #
+        # NOTE: Load custom per-user and/or per-host test settings now.
+        #
+        if {[info exists ::tcl_platform(user)]} then {
+          set userSettingsFileName [file join [getCommonDirectory] \
+              [appendArgs settings. $::tcl_platform(user) .eagle]]
+
+          if {[file exists $userSettingsFileName]} then {
+            if {!$quiet} then {
+              tputs $channel [appendArgs \
+                  "---- loading per-user test settings file \"" \
+                  $userSettingsFileName \"...\n]
+            }
+
+            if {[catch {uplevel 1 [list source $userSettingsFileName]} \
+                    error]} then {
+              if {!$quiet} then {
+                tputs $channel [appendArgs \
+                    "==== WARNING: failed to load per-user settings file \"" \
+                    $userSettingsFileName "\", error: " \n\t $error \n]
+              }
+            }
+          }
+        }
+
+        #######################################################################
+
+        if {[info exists ::tcl_platform(host)]} then {
+          set hostSettingsFileName [file join [getCommonDirectory] \
+              [appendArgs settings. $::tcl_platform(host) .eagle]]
+
+          if {[file exists $hostSettingsFileName]} then {
+            if {!$quiet} then {
+              tputs $channel [appendArgs \
+                  "---- loading per-host test settings file \"" \
+                  $hostSettingsFileName \"...\n]
+            }
+
+            if {[catch {uplevel 1 [list source $hostSettingsFileName]} \
+                    error]} then {
+              if {!$quiet} then {
+                tputs $channel [appendArgs \
+                    "==== WARNING: failed to load per-host settings file \"" \
+                    $hostSettingsFileName "\", error: " \n\t $error \n]
+              }
+            }
+          }
+        }
+      }
+    }
+
     proc runSQLiteTestPrologue {} {
       #
-      # NOTE: Skip running our custom prologue if the main one has been skipped.
+      # NOTE: Skip running our custom prologue if the main one has been
+      #       skipped.
       #
       if {![info exists ::no(prologue.eagle)]} then {
         #
@@ -1438,6 +1532,11 @@ namespace eval ::Eagle {
             [formatList [lsort [getConstraints]]] \n]
 
         #
+        # NOTE: Load custom per-user and/or per-host test settings now.
+        #
+        uplevel 1 [list loadSQLiteTestSettings $::test_channel]
+
+        #
         # NOTE: Show when our tests actually began (now).
         #
         tputs $::test_channel [appendArgs \
@@ -1448,7 +1547,8 @@ namespace eval ::Eagle {
 
     proc runSQLiteTestEpilogue {} {
       #
-      # NOTE: Skip running our custom epilogue if the main one has been skipped.
+      # NOTE: Skip running our custom epilogue if the main one has been
+      #       skipped.
       #
       if {![info exists ::no(epilogue.eagle)]} then {
         #
