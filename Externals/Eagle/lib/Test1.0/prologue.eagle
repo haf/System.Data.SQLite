@@ -1153,7 +1153,7 @@ if {![info exists no([file tail [info script]])]} then {
             *TestRemoveNamedFunction*
 
         #
-        # NOTE: For test "interp-1.18".
+        # NOTE: For test "interp-1.19".
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestAddNamedFunction2*
@@ -1835,6 +1835,10 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {![info exists no(platform)]} then {
     checkForPlatform $test_channel
+  }
+
+  if {![info exists no(scriptLibrary)]} then {
+    checkForScriptLibrary $test_channel
   }
 
   if {![info exists no(tclOptions)]} then {

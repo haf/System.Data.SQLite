@@ -122,7 +122,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  proc showTest { indicator {wait false} } {
+  proc showTest { indicator } {
     tputs $::test_channel $indicator
     append ::indicators $indicator
     delayTest $::count(2)
@@ -154,7 +154,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       tputs $::test_channel [appendArgs \
           \n [info level $level] ": " \n\t $error \n]
 
-      exit Failure
+      exit failure
     } else {
       tputs $::test_channel $indicator
 
@@ -1194,6 +1194,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       }
     }
 
+    foreach index(1) [array names thread] {
+      if {[info exists thread($index(1))] && \
+          [cleanupThread $thread($index(1))]} then {
+        unset -nocomplain thread($index(1))
+      }
+    }
+
     unset -nocomplain thread status; doneTest
   }
 
@@ -1275,6 +1282,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   expr {[array size failures] > 0 ? \
       [expr [join [array values failures] +]] : 0}
 } -cleanup {
+  foreach index(0) [array names thread] {
+    if {[info exists thread($index(0))] && \
+        [cleanupThread $thread($index(0))]} then {
+      unset -nocomplain thread($index(0))
+    }
+  }
+
   rename freeMem ""
   rename useMem ""
   rename allocMem ""

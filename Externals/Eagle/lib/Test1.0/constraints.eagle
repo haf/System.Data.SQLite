@@ -61,6 +61,52 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForScriptLibrary { channel } {
+    tputs $channel "---- checking for script library... "
+
+    #
+    # NOTE: See if the variable containing the script library location
+    #       exists.
+    #
+    if {[info exists ::tcl_library] && \
+        [string length $::tcl_library] > 0} then {
+      #
+      # NOTE: Now see if the script library is external or embedded.
+      #
+      if {[file isdirectory $::tcl_library]} then {
+        #
+        # NOTE: Yes, it appears to be a directory name, which should
+        #       mean that the necessary files are physically contained
+        #       within it.
+        #
+        addConstraint tcl_library_external
+
+        tputs $channel "yes (external)\n"
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
+      } elseif {[file isfile $::tcl_library]} then {
+        #
+        # NOTE: Yes, it appears to be a file name, which should mean
+        #       that the necessary files are physically embedded within
+        #       it.
+        #
+        addConstraint tcl_library_embedded
+
+        tputs $channel "yes (embedded)\n"
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
+      }
+    }
+
+    tputs $channel no\n
+  }
+
   proc checkForVariable { channel name {notEmpty true} {constraint ""} } {
     tputs $channel [appendArgs "---- checking for variable \"" $name \
         "\"... "]
@@ -2172,7 +2218,7 @@ namespace eval ::Eagle {
         checkForLogFile checkForNetwork checkForCompileOption \
         checkForWindowsCommandProcessor checkForUserInteraction \
         checkForTclOptions checkForTestConfiguration checkForVariable \
-        checkForFossil] false false
+        checkForScriptLibrary checkForFossil] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
