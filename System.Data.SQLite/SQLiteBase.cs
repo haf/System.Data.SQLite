@@ -27,6 +27,10 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract string Version { get; }
     /// <summary>
+    /// Returns an integer representing the active version of SQLite
+    /// </summary>
+    internal abstract int VersionNumber { get; }
+    /// <summary>
     /// Returns the rowid of the most recent successful INSERT into the database from this connection.
     /// </summary>
     internal abstract long LastInsertRowId { get; }
@@ -577,18 +581,37 @@ namespace System.Data.SQLite
 #if !SQLITE_STANDARD
                 SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_close_interop(db);
 #else
-                ResetConnection(hdl, db);
+                ResetConnection(hdl, db, false);
 
-                SQLiteErrorCode n;
+                SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_close(db);
+#endif
+                if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError(hdl, db));
+            }
+        }
+    }
 
-                try
-                {
-                    n = UnsafeNativeMethods.sqlite3_close_v2(db);
-                }
-                catch (EntryPointNotFoundException)
-                {
-                    n = UnsafeNativeMethods.sqlite3_close(db);
-                }
+    internal static void CloseConnectionV2(SQLiteConnectionHandle hdl, IntPtr db)
+    {
+        if ((hdl == null) || (db == IntPtr.Zero)) return;
+
+        try
+        {
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (hdl.syncRoot)
+#else
+            lock (hdl)
+#endif
+            {
+#if !SQLITE_STANDARD
+                SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_close_interop(db);
+#else
+                ResetConnection(hdl, db, false);
+
+                SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_close_v2(db);
 #endif
                 if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError(hdl, db));
             }

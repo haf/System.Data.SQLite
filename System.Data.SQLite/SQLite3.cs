@@ -175,6 +175,14 @@ namespace System.Data.SQLite
       }
     }
 
+    internal override int VersionNumber
+    {
+      get
+      {
+        return SQLite3.SQLiteVersionNumber;
+      }
+    }
+
     internal static string DefineConstants
     {
         get
@@ -205,6 +213,14 @@ namespace System.Data.SQLite
       get
       {
         return UTF8ToString(UnsafeNativeMethods.sqlite3_libversion(), -1);
+      }
+    }
+
+    internal static int SQLiteVersionNumber
+    {
+      get
+      {
+        return UnsafeNativeMethods.sqlite3_libversion_number();
       }
     }
 

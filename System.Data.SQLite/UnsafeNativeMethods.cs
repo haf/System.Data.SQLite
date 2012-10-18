@@ -846,6 +846,13 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
+    internal static extern int sqlite3_libversion_number();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
     internal static extern IntPtr sqlite3_sourceid();
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1467,6 +1474,16 @@ namespace System.Data.SQLite
     // support for it.
     internal class SQLiteConnectionHandle : CriticalHandle
     {
+#if SQLITE_STANDARD && !PLATFORM_COMPACTFRAMEWORK
+        internal delegate void CloseConnectionCallback(
+            SQLiteConnectionHandle hdl, IntPtr db);
+
+        internal static CloseConnectionCallback closeConnection =
+            SQLiteBase.CloseConnection;
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
+
 #if PLATFORM_COMPACTFRAMEWORK
         internal readonly object syncRoot = new object();
 #endif
@@ -1517,8 +1534,13 @@ namespace System.Data.SQLite
                 IntPtr localHandle = Interlocked.Exchange(
                     ref handle, IntPtr.Zero);
 
+#if SQLITE_STANDARD
+                if (localHandle != IntPtr.Zero)
+                    closeConnection(this, localHandle);
+#else
                 if (localHandle != IntPtr.Zero)
                     SQLiteBase.CloseConnection(this, localHandle);
+#endif
 
 #if !NET_COMPACT_20 && TRACE_HANDLE
                 try

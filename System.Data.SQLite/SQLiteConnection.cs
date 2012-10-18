@@ -334,6 +334,13 @@ namespace System.Data.SQLite
     /// Static variable to store the connection event handlers to call.
     /// </summary>
     private static event SQLiteConnectionEventHandler _handlers;
+
+#if SQLITE_STANDARD && !PLATFORM_COMPACTFRAMEWORK
+    /// <summary>
+    /// Used to hold the active library version number of SQLite.
+    /// </summary>
+    private static int _versionNumber;
+#endif
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -449,6 +456,30 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
       SQLiteLog.Initialize();
+
+#if SQLITE_STANDARD
+      //
+      // NOTE: Check if the sqlite3_close_v2() native API should be available
+      //       to use.  This must be done dynamically because the delegate set
+      //       here is used by the SQLiteConnectionHandle class, which is a
+      //       CriticalHandle derived class (i.e. protected by a constrainted
+      //       execution region).  Therefore, if the underlying native entry
+      //       point is unavailable, an exception will be raised even if it is
+      //       never actually called (i.e. because the runtime eagerly prepares
+      //       all the methods in the call graph of the constrainted execution
+      //       region).
+      //
+      lock (_syncRoot)
+      {
+          if (_versionNumber == 0)
+          {
+              _versionNumber = SQLite3.SQLiteVersionNumber;
+
+              if (_versionNumber >= 3007014)
+                  SQLiteConnectionHandle.closeConnection = SQLiteBase.CloseConnectionV2;
+          }
+      }
+#endif
 #endif
 
       _flags = SQLiteConnectionFlags.Default;
