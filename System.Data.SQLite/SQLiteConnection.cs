@@ -462,11 +462,11 @@ namespace System.Data.SQLite
       // NOTE: Check if the sqlite3_close_v2() native API should be available
       //       to use.  This must be done dynamically because the delegate set
       //       here is used by the SQLiteConnectionHandle class, which is a
-      //       CriticalHandle derived class (i.e. protected by a constrainted
+      //       CriticalHandle derived class (i.e. protected by a constrained
       //       execution region).  Therefore, if the underlying native entry
       //       point is unavailable, an exception will be raised even if it is
       //       never actually called (i.e. because the runtime eagerly prepares
-      //       all the methods in the call graph of the constrainted execution
+      //       all the methods in the call graph of the constrained execution
       //       region).
       //
       lock (_syncRoot)
