@@ -63,7 +63,7 @@
       <li>The ErrorCode field of the LogEventArgs is now an object instead of an integer.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>The names and messages associated with the SQLiteErrorCode enumeration values have been normalized to match those in the SQLite core library.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Implement more robust locking semantics for the CriticalHandle derived classes when compiled for the .NET Compact Framework.</li>
-      <li>Cache column indexes are they are looked up when using the SQLiteDataReader to improve performance.</li>
+      <li>Cache column indexes as they are looked up when using the SQLiteDataReader to improve performance.</li>
       <li>Prevent the SQLiteConnection.Close method from throwing non-fatal exceptions during its disposal.</li>
       <li>Rename the interop assembly functions sqlite3_cursor_rowid, sqlite3_context_collcompare, sqlite3_context_collseq, sqlite3_cursor_rowid, and sqlite3_table_cursor to include an &quot;_interop&quot; suffix.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Prevent the LastInsertRowId, MemoryUsed, and MemoryHighwater connection properties from throwing NotSupportedException when running on the .NET Compact Framework. Fix for <a href="http://system.data.sqlite.org/index.html/info/dd45aba387">[dd45aba387]</a>.</li>
