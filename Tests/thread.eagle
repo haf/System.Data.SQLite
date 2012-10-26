@@ -27,13 +27,40 @@ set memory_used [reportSQLiteResources $test_channel true]
 
 #
 # NOTE: How many test threads should be created and used for these tests?  This
-#       value must be at least two.  The first test thread (at index 0) just
-#       repeatedly calls the Thread.Abort() method on the other test threads
-#       that appear to be alive until all test threads appear to be dead.  All
-#       other threads will attempt to open a connection, execute one or more
-#       queries against it, and then close it.
+#       value must be at least two.  The first test thread (at index 0) is
+#       always the "master thread" and just repeatedly calls the Thread.Abort()
+#       method on other random test threads that appear to be alive until all
+#       test threads appear to have died.  All other test threads will attempt
+#       to open a connection, execute one or more queries against it, and then
+#       close it.
 #
-set count 10
+if {![info exists count(1)]} then {
+  set count(1) 10
+}
+
+#
+# NOTE: How many milliseconds should the master thread initially wait until it
+#       starts to abort the other test threads?
+#
+if {![info exists count(2)]} then {
+  set count(2) 1000
+}
+
+#
+# NOTE: How many milliseconds (maximum) should the master thread wait between
+#       aborting other random test threads?
+#
+if {![info exists count(3)]} then {
+  set count(3) 1000
+}
+
+#
+# NOTE: How many bytes should be used for the five random data blobs contained
+#       in the test database?
+#
+if {![info exists count(4)]} then {
+  set count(4) 1000
+}
 
 ###############################################################################
 
@@ -41,16 +68,25 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
   setupDb [set fileName thread-1.1.db]
 
   tputs $test_channel [appendArgs \
-      "---- using a total of " $count " threads...\n"]
+      "---- using " $count(1) " test threads (with one master thread)\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- initial wait will be " $count(2) " milliseconds\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- subsequent maximum wait will be " $count(3) " milliseconds\n"]
+
+  tputs $test_channel [appendArgs \
+      "---- random data blob size will be " $count(4) " bytes\n"]
 } -body {
-  sql execute $db {
+  sql execute $db [subst {
     CREATE TABLE t1(x INTEGER PRIMARY KEY, y BLOB);
-    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
-    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
-    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
-    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
-    INSERT INTO t1 (y) VALUES(RANDOMBLOB(1000));
-  }
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(${count(4)}));
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(${count(4)}));
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(${count(4)}));
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(${count(4)}));
+    INSERT INTO t1 (y) VALUES(RANDOMBLOB(${count(4)}));
+  }]
 
   #
   # NOTE: The temporary directory must be reset here because it allocates
@@ -94,7 +130,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
     {
       public static class Test${id}
       {
-        public static IntList RunTestThreads()
+        public static LongList RunTestThreads()
         {
           //
           // NOTE: This is the total number of data bytes seen in the second
@@ -103,24 +139,24 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
           //       iterations are performed prior to each test thread being
           //       aborted.
           //
-          int sum = 0;
+          long sum = 0;
 
           //
           // NOTE: This is the total number of query result rows seen by all
           //       the test threads.
           //
-          int rows = 0;
+          long rows = 0;
 
           //
           // NOTE: This is the total number of exceptions caught by all the
           //       test threads.
           //
-          int errors = 0;
+          long errors = 0;
 
           //
           // NOTE: This is the total number of test threads to create.
           //
-          int count = ${count};
+          int count = ${count(1)};
 
           //
           // NOTE: Create the array of thread objects.
@@ -281,7 +317,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
                 //       make sure that they are fully alive prior to trying
                 //       to abort any of them.
                 //
-                Thread.Sleep(1000);
+                Thread.Sleep(${count(2)});
 
                 //
                 // NOTE: Loop forever until all test threads appear to be dead.
@@ -292,7 +328,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
                   // NOTE: Wait a random number of milliseconds, up to a full
                   //       second.
                   //
-                  Thread.Sleep(random.Next(0, 1000));
+                  Thread.Sleep(random.Next(0, ${count(3)}));
 
                   //
                   // NOTE: Select a random thread to abort.
@@ -388,7 +424,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
           //       seen, total number of query result rows seen, and the total
           //       number of exceptions caught by all the test threads.
           //
-          IntList counts = new IntList();
+          LongList counts = new LongList();
 
           counts.Add(sum);
           counts.Add(rows);
@@ -420,7 +456,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
   unset -nocomplain result results errors code sql dataSource id db fileName
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -match regexp -result [appendArgs "^Ok\
-System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{\\d+ \\d+ " $count \
+System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{\\d+ \\d+ " $count(1) \
 "\\} \\{\\} " $memory_used \$]}
 
 ###############################################################################
