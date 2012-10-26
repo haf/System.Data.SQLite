@@ -53,6 +53,7 @@ runTest {test tkt-6c6ecccc5f-1.1 {CloseConnection with extensions} -setup {
             using (SQLiteCommand command = new SQLiteCommand("${sql}",
                 connection))
             {
+              /* IGNORED */
               command.ExecuteReader(CommandBehavior.CloseConnection);
             }
           }
