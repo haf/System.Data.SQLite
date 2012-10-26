@@ -1,0 +1,81 @@
+###############################################################################
+#
+# tkt-6c6ecccc5f.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-6c6ecccc5f-1.1 {CloseConnection with extensions} -setup {
+  setupDb [set fileName tkt-6c6ecccc5f-1.1.db]
+} -body {
+  sql execute $db {
+    CREATE VIRTUAL TABLE t1 USING fts4(x TEXT);
+    INSERT INTO t1 (x) VALUES('one');
+    INSERT INTO t1 (x) VALUES('two');
+  }
+
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+  set sql "SELECT x FROM t1 WHERE x MATCH 'one' ORDER BY x;"
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static void Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            using (SQLiteCommand command = new SQLiteCommand("${sql}",
+                connection))
+            {
+              command.ExecuteReader(CommandBehavior.CloseConnection);
+            }
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
+\{\}$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
