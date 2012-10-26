@@ -1103,7 +1103,7 @@ namespace eval ::Eagle {
       }
     }
 
-    proc getSQLiteHandleCounts { channel {zero false} {quiet false} } {
+    proc getSQLiteHandleCounts { channel {quiet false} } {
       set result [list]
 
       if {[haveConstraint \
@@ -1122,18 +1122,6 @@ namespace eval ::Eagle {
 
           lappend result $value
         }
-      } elseif {$zero} then {
-        #
-        # NOTE: The actual handle counts are not available; therefore, just
-        #       return all zeros because the caller appears to need it for
-        #       test result matching purposes.
-        #
-        if {!$quiet} then {
-          tputs $channel \
-              "---- critical handle counts unavailable, returning zeros...\n"
-        }
-
-        lappend result 0 0 0
       } elseif {!$quiet} then {
         #
         # NOTE: The actual handle counts are not available; therefore, just
@@ -1322,8 +1310,8 @@ namespace eval ::Eagle {
 
             if {[catch {executeSql $sql} result] == 0} then {
               tputs $channel [appendArgs \
-                  "---- execute PRAGMA " $directory "... ok: " \
-                  $result \n]
+                  "---- execute PRAGMA " $directory "... ok: \"" \
+                  $result \"\n]
             } else {
               tputs $channel [appendArgs \
                   "---- execute PRAGMA " $directory "... error: " \

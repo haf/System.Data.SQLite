@@ -21,7 +21,7 @@ runSQLiteTestPrologue
 ###############################################################################
 
 checkForSQLiteDirectories $test_channel true
-set handle_counts [getSQLiteHandleCounts $test_channel true]
+set handle_counts [getSQLiteHandleCounts $test_channel]
 set memory_used [reportSQLiteResources $test_channel]
 
 ###############################################################################
@@ -450,7 +450,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
         object invoke _Dynamic${id}.Test${id} RunTestThreads
       } result] : [set result ""]}] $result \
       [collectGarbage $test_channel] \
-      [getSQLiteHandleCounts $test_channel true] \
+      [getSQLiteHandleCounts $test_channel] \
       [reportSQLiteResources $test_channel]
 } -cleanup {
   cleanupDb $fileName
