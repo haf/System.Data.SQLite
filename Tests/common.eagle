@@ -562,6 +562,21 @@ namespace eval ::Eagle {
       return ""
     }
 
+    proc isSQLiteReady {} {
+      #
+      # NOTE: This procedure must return non-zero only if the SQLite native
+      #       library and the System.Data.SQLite managed assembly are loaded
+      #       and ready for use by the test suite.  Currently, this procedure
+      #       should be called only after the [tryLoadAssembly] procedure has
+      #       been called to probe for the System.Data.SQLite managed assembly
+      #       and the [checkForSQLite] procedure has been called to probe for
+      #       the SQLite native library; otherwise, this procedure will simply
+      #       always return zero.
+      #
+      return [expr {[haveConstraint System.Data.SQLite] && \
+          [haveConstraint SQLite]}]
+    }
+
     proc checkForSQLite { channel } {
       tputs $channel "---- checking for core SQLite library... "
 
@@ -1091,15 +1106,51 @@ namespace eval ::Eagle {
       return $code
     }
 
-    proc collectGarbage { channel } {
-      #
-      # NOTE: Attempt to force a full garbage collection now.  Report any
-      #       error that is encountered if we fail.
-      #
-      if {[catch {object invoke GC GetTotalMemory true} error]} then {
+    proc collectGarbage { channel {milliseconds 1000} } {
+      if {[catch {object invoke GC GetTotalMemory false} result] == 0} then {
+        tputs $channel [appendArgs \
+            "---- memory in use by the CLR before collection... " \
+            $result " bytes\n"]
+      } else {
         tputs $channel [appendArgs \
             "==== WARNING: failed full garbage collection, error: " \
-            \n\t $error \n]
+            \n\t $result \n]
+      }
+
+      #########################################################################
+
+      #
+      # NOTE: Repeatedly attempt to collect garbage until the allotted number
+      #       of milliseconds has elapsed.  Always attempt to collect garbage
+      #       at least once.
+      #
+      set start [clock seconds]
+      set stop [expr {$start + ($milliseconds / 1000)}]
+
+      do {
+        #
+        # NOTE: Attempt to force a full garbage collection now.  Report any
+        #       error that is encountered if we fail.
+        #
+        if {[catch {object invoke GC GetTotalMemory true} error]} then {
+          tputs $channel [appendArgs \
+              "==== WARNING: failed full garbage collection, error: " \
+              \n\t $error \n]
+        }
+
+        set now [clock seconds]
+      } while {$start <= $now && $now < $stop}
+
+      #########################################################################
+
+      if {[catch {object invoke GC GetTotalMemory false} result] == 0} then {
+        tputs $channel [appendArgs \
+            "---- memory in use by the CLR after collection... " \
+            $result " bytes\n"]
+      } else {
+        tputs $channel [appendArgs \
+            "==== WARNING: failed full garbage collection, error: " \
+            \n\t $result \n]
       }
     }
 
@@ -1140,8 +1191,10 @@ namespace eval ::Eagle {
       #       that need to make sure logging is initialized (i.e. just in case
       #       the SQLite core library was initialized in the process prior to
       #       the SQLiteLog class being able to setup its logging callback).
+      #       Normally, this should only be performed if SQLite is loaded and
+      #       ready for use by the test suite.
       #
-      if {$force || [haveConstraint SQLite]} then {
+      if {$force || [isSQLiteReady]} then {
         if {[catch {object invoke -flags +NonPublic \
                 System.Data.SQLite.UnsafeNativeMethods \
                 sqlite3_shutdown} result] == 0} then {
@@ -1295,9 +1348,11 @@ namespace eval ::Eagle {
         tputs $channel no\n
 
         #
-        # NOTE: Does our caller want to reset the directories?
+        # NOTE: Does our caller want to reset the directories?  This can only
+        #       be performed if SQLite is loaded and ready for use by the test
+        #       suite.
         #
-        if {$reset} then {
+        if {$reset && [isSQLiteReady]} then {
           #
           # NOTE: Now make sure the database and temporary directories are
           #       reset their default values, which should be null for both.
@@ -1323,17 +1378,20 @@ namespace eval ::Eagle {
 
       #
       # NOTE: Finally, show the current value of the database and temporary
-      #       directories.
+      #       directories.  This can only be performed if SQLite is loaded
+      #       and ready for use by the test suite.
       #
-      foreach directory [list data_store_directory temp_store_directory] {
-        tputs $channel [appendArgs "---- checking " $directory "... "]
+      if {[isSQLiteReady]} then {
+        foreach directory [list data_store_directory temp_store_directory] {
+          tputs $channel [appendArgs "---- checking " $directory "... "]
 
-        set sql [appendArgs "PRAGMA " $directory \;]
+          set sql [appendArgs "PRAGMA " $directory \;]
 
-        if {[catch {executeSql $sql scalar} result] == 0} then {
-          tputs $channel [appendArgs "ok: \"" $result \"\n]
-        } else {
-          tputs $channel [appendArgs "error: " \n\t $result \n]
+          if {[catch {executeSql $sql scalar} result] == 0} then {
+            tputs $channel [appendArgs "ok: \"" $result \"\n]
+          } else {
+            tputs $channel [appendArgs "error: " \n\t $result \n]
+          }
         }
       }
     }
