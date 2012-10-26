@@ -35,6 +35,25 @@ namespace System.Data.SQLite
 #endif
   internal static class UnsafeNativeMethods
   {
+      #region Critical Handle Counts (Debug Build Only)
+#if COUNT_HANDLE
+      //
+      // NOTE: These counts represent the total number of outstanding
+      //       (non-disposed) CriticalHandle derived object instances
+      //       created by this library and are primarily for use by
+      //       the test suite.  These counts are incremented by the
+      //       associated constructors and are decremented upon the
+      //       successful completion of the associated ReleaseHandle
+      //       methods.
+      //
+      internal static int connectionCount;
+      internal static int statementCount;
+      internal static int backupCount;
+#endif
+      #endregion
+
+      /////////////////////////////////////////////////////////////////////////
+
       #region Optional Native SQLite Library Pre-Loading Code
       //
       // NOTE: If we are looking for the standard SQLite DLL ("sqlite3.dll"),
@@ -1522,6 +1541,10 @@ namespace System.Data.SQLite
         private SQLiteConnectionHandle()
             : base(IntPtr.Zero)
         {
+#if COUNT_HANDLE
+            Interlocked.Increment(
+                ref UnsafeNativeMethods.connectionCount);
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1561,6 +1584,10 @@ namespace System.Data.SQLite
                         SetHandle(IntPtr.Zero);
                     }
                 }
+#endif
+#if COUNT_HANDLE
+                Interlocked.Decrement(
+                    ref UnsafeNativeMethods.connectionCount);
 #endif
 #if DEBUG
                 return true;
@@ -1680,6 +1707,10 @@ namespace System.Data.SQLite
         private SQLiteStatementHandle()
             : base(IntPtr.Zero)
         {
+#if COUNT_HANDLE
+            Interlocked.Increment(
+                ref UnsafeNativeMethods.statementCount);
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1714,6 +1745,10 @@ namespace System.Data.SQLite
                         SetHandle(IntPtr.Zero);
                     }
                 }
+#endif
+#if COUNT_HANDLE
+                Interlocked.Decrement(
+                    ref UnsafeNativeMethods.statementCount);
 #endif
 #if DEBUG
                 return true;
@@ -1833,6 +1868,10 @@ namespace System.Data.SQLite
         private SQLiteBackupHandle()
             : base(IntPtr.Zero)
         {
+#if COUNT_HANDLE
+            Interlocked.Increment(
+                ref UnsafeNativeMethods.backupCount);
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1867,6 +1906,10 @@ namespace System.Data.SQLite
                         SetHandle(IntPtr.Zero);
                     }
                 }
+#endif
+#if COUNT_HANDLE
+                Interlocked.Decrement(
+                    ref UnsafeNativeMethods.backupCount);
 #endif
 #if DEBUG
                 return true;

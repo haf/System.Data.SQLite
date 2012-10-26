@@ -31,7 +31,7 @@ runTest {test tkt-6c6ecccc5f-1.1 {CloseConnection with extensions} -setup {
 
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getDatabaseDirectory] $fileName]
-  set sql "SELECT x FROM t1 WHERE x MATCH 'one' ORDER BY x;"
+  set sql "SELECT x FROM t1 WHERE x MATCH 'one';"
 
   unset -nocomplain results errors
 

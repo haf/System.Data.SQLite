@@ -16,6 +16,10 @@ namespace System.Data.SQLite
             "CHECK_STATE",
 #endif
 
+#if COUNT_HANDLE
+            "COUNT_HANDLE",
+#endif
+
 #if DEBUG
             "DEBUG",
 #endif

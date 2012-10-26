@@ -1103,6 +1103,48 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getSQLiteHandleCounts { channel {zero false} {quiet false} } {
+      set result [list]
+
+      if {[haveConstraint \
+              defineConstant.System.Data.SQLite.COUNT_HANDLE]} then {
+        #
+        # NOTE: Add each critical handle count to the resulting list.
+        #
+        foreach name [list connectionCount statementCount backupCount] {
+          set value [object invoke -flags +NonPublic \
+              System.Data.SQLite.UnsafeNativeMethods $name]
+
+          if {!$quiet} then {
+            tputs $channel [appendArgs \
+                "---- critical handle count \"" $name "\" is " $value \n]
+          }
+
+          lappend result $value
+        }
+      } elseif {$zero} then {
+        #
+        # NOTE: The actual handle counts are not available; therefore, just
+        #       return all zeros because the caller appears to need it for
+        #       test result matching purposes.
+        #
+        if {!$quiet} then {
+          tputs $channel \
+              "---- critical handle counts unavailable, returning zeros...\n"
+        }
+
+        lappend result 0 0 0
+      } elseif {!$quiet} then {
+        #
+        # NOTE: The actual handle counts are not available; therefore, just
+        #       return an empty list.
+        #
+        tputs $channel "---- critical handle counts unavailable\n"
+      }
+
+      return $result
+    }
+
     proc shutdownSQLite { channel {force false} {quiet false} } {
       #
       # NOTE: Make sure that SQLite core library is completely shutdown.  This
@@ -1478,6 +1520,9 @@ namespace eval ::Eagle {
         #
         checkForSQLiteDefineConstant $::test_channel \
             CHECK_STATE
+
+        checkForSQLiteDefineConstant $::test_channel \
+            COUNT_HANDLE
 
         checkForSQLiteDefineConstant $::test_channel \
             USE_INTEROP_DLL

@@ -115,6 +115,19 @@
     <CheckState Condition="'$(CheckState)' == ''">false</CheckState>
 
     <!--
+        NOTE: Enable counting of all object instances for the CriticalHandle
+              derived classes?  By default, this is disabled.  If this is
+              enabled, this library will keep count of all non-disposed object
+              instances for all the CriticalHandle derived classes.  Each
+              counter will be incremented when an instance of the associated
+              critical handle class is constructed and decremented when the
+              ReleaseHandle method is completed successfully on an instance.
+              These counts are intended to be used by the test suite to detect
+              possible resource leaks.
+    -->
+    <CountHandle Condition="'$(CountHandle)' == ''">false</CountHandle>
+
+    <!--
         NOTE: For interaction with the native SQLite implementation, use the
               custom built interop DLL (i.e. "SQLite.Interop.dll")?  By default,
               this is enabled.  This property is mutually exclusive with the

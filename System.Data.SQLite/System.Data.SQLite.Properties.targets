@@ -71,6 +71,13 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Enable counting of the CriticalHandle derived object instances?
+  -->
+  <PropertyGroup Condition="'$(CountHandle)' != 'false'">
+    <DefineConstants>$(DefineConstants);COUNT_HANDLE</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: For interaction with the native SQLite implementation, use the
             custom build interop DLL (i.e. "SQLite.Interop.DLL")?
   -->
