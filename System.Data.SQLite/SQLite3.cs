@@ -1807,6 +1807,10 @@ namespace System.Data.SQLite
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish(handlePtr);
         handle.SetHandleAsInvalid();
 
+#if COUNT_HANDLE
+        if (n == SQLiteErrorCode.Ok) handle.WasReleasedOk();
+#endif
+
         if ((n != SQLiteErrorCode.Ok) && (n != backup._stepResult))
             throw new SQLiteException(n, GetLastError());
     }

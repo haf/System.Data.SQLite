@@ -1495,7 +1495,7 @@ namespace System.Data.SQLite
     #region SQLiteConnectionHandle Class
     // Handles the unmanaged database pointer, and provides finalization
     // support for it.
-    internal class SQLiteConnectionHandle : CriticalHandle
+    internal sealed class SQLiteConnectionHandle : CriticalHandle
     {
 #if SQLITE_STANDARD && !PLATFORM_COMPACTFRAMEWORK
         internal delegate void CloseConnectionCallback(
@@ -1633,6 +1633,16 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+#if COUNT_HANDLE
+        public int WasReleasedOk()
+        {
+            return Interlocked.Decrement(
+                ref UnsafeNativeMethods.connectionCount);
+        }
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
+
         public override bool IsInvalid
         {
             get
@@ -1666,7 +1676,7 @@ namespace System.Data.SQLite
 
     #region SQLiteStatementHandle Class
     // Provides finalization support for unmanaged SQLite statements.
-    internal class SQLiteStatementHandle : CriticalHandle
+    internal sealed class SQLiteStatementHandle : CriticalHandle
     {
 #if PLATFORM_COMPACTFRAMEWORK
         internal readonly object syncRoot = new object();
@@ -1794,6 +1804,16 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+#if COUNT_HANDLE
+        public int WasReleasedOk()
+        {
+            return Interlocked.Decrement(
+                ref UnsafeNativeMethods.statementCount);
+        }
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
+
         public override bool IsInvalid
         {
             get
@@ -1827,7 +1847,7 @@ namespace System.Data.SQLite
 
     #region SQLiteBackupHandle Class
     // Provides finalization support for unmanaged SQLite backup objects.
-    internal class SQLiteBackupHandle : CriticalHandle
+    internal sealed class SQLiteBackupHandle : CriticalHandle
     {
 #if PLATFORM_COMPACTFRAMEWORK
         internal readonly object syncRoot = new object();
@@ -1952,6 +1972,16 @@ namespace System.Data.SQLite
             return true;
 #endif
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+#if COUNT_HANDLE
+        public int WasReleasedOk()
+        {
+            return Interlocked.Decrement(
+                ref UnsafeNativeMethods.backupCount);
+        }
+#endif
 
         ///////////////////////////////////////////////////////////////////////
 

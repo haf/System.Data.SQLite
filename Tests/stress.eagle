@@ -21,10 +21,26 @@ runSQLiteTestPrologue
 ###############################################################################
 
 #
+# NOTE: Report before test, before shutdown.
+#
+getSQLiteHandleCounts $test_channel
+reportSQLiteResources $test_channel
+
+###############################################################################
+
+#
 # NOTE: Make sure that SQLite core library is completely shutdown prior to
 #       starting any of the tests in this file.
 #
 shutdownSQLite $test_channel
+
+###############################################################################
+
+#
+# NOTE: Report before test, after shutdown.
+#
+getSQLiteHandleCounts $test_channel
+reportSQLiteResources $test_channel
 
 ###############################################################################
 
@@ -1327,6 +1343,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       noTrace failures status
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -result {0}}
+
+###############################################################################
+
+#
+# NOTE: Report after test.
+#
+getSQLiteHandleCounts $test_channel
+reportSQLiteResources $test_channel
 
 ###############################################################################
 

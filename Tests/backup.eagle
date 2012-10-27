@@ -20,6 +20,11 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
+getSQLiteHandleCounts $test_channel
+reportSQLiteResources $test_channel
+
+###############################################################################
+
 set params(pages) [list -1 -1 0 0 1 1 2 2 1000 1000]
 
 set params(callbacks) [list null "new SQLiteBackupCallback(BackupCallback)" \
@@ -227,6 +232,11 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
 ###############################################################################
 
 unset -nocomplain i params pages callback
+
+###############################################################################
+
+getSQLiteHandleCounts $test_channel
+reportSQLiteResources $test_channel
 
 ###############################################################################
 
