@@ -234,7 +234,7 @@ SQLITE_API int WINAPI sqlite3_open16_interop(const char *filename, int flags, sq
     if( ret==SQLITE_OK ){
       logConfigured = 1;
     }else{
-      sqlite3InteropDebug("sqlite3_open_interop(): sqlite3_config(SQLITE_CONFIG_LOG) returned %d.\n", ret);
+      sqlite3InteropDebug("sqlite3_open16_interop(): sqlite3_config(SQLITE_CONFIG_LOG) returned %d.\n", ret);
     }
   }
 #endif

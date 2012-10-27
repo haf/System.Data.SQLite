@@ -30,6 +30,9 @@
     <li>Prevent the LastInsertRowId, MemoryUsed, and MemoryHighwater connection properties from throwing NotSupportedException when running on the .NET Compact Framework. Fix for [dd45aba387].</li>
     <li>Improve automatic detection of the sqlite3_close_v2 function when compiled to use the standard SQLite library.</li>
     <li>Add protection against ThreadAbortException asynchronously interrupting native resource initialization and finalization.</li>
+    <li>Add native logging callback for use with the sqlite3_log function to the interop assembly, enabled via the INTEROP_LOG preprocessor definition.</li>
+    <li>Add various diagnostic messages to the interop assembly, enabled via flags in the INTEROP_DEBUG preprocessor definition.</li>
+    <li>Further enhancements to the build and test automation.</li>
     <li>Add test automation for the Windows CE binaries.</li>
 </ul>
 <p>
