@@ -1106,14 +1106,16 @@ namespace eval ::Eagle {
       return $code
     }
 
-    proc collectGarbage { channel {milliseconds 1000} } {
+    proc collectGarbage { channel {milliseconds 1000} {quiet true} } {
       if {[catch {object invoke GC GetTotalMemory false} result] == 0} then {
-        tputs $channel [appendArgs \
-            "---- memory in use by the CLR before collection... " \
-            $result " bytes\n"]
+        if {!$quiet} then {
+          tputs $channel [appendArgs \
+              "---- memory in use by the CLR before collection... " \
+              $result " bytes\n"]
+        }
       } else {
         tputs $channel [appendArgs \
-            "==== WARNING: failed full garbage collection, error: " \
+            "==== WARNING: failed to get CLR memory usage, error: " \
             \n\t $result \n]
       }
 
@@ -1144,12 +1146,14 @@ namespace eval ::Eagle {
       #########################################################################
 
       if {[catch {object invoke GC GetTotalMemory false} result] == 0} then {
-        tputs $channel [appendArgs \
-            "---- memory in use by the CLR after collection... " \
-            $result " bytes\n"]
+        if {!$quiet} then {
+          tputs $channel [appendArgs \
+              "---- memory in use by the CLR after collection... " \
+              $result " bytes\n"]
+        }
       } else {
         tputs $channel [appendArgs \
-            "==== WARNING: failed full garbage collection, error: " \
+            "==== WARNING: failed to get CLR memory usage, error: " \
             \n\t $result \n]
       }
     }
@@ -1561,26 +1565,23 @@ namespace eval ::Eagle {
         checkForSQLiteDirectories $::test_channel
 
         #
-        # NOTE: Attempt to determine if the custom extension functions were
-        #       compiled into the SQLite interop assembly.
+        # NOTE: Attempt to determine if various compile-time options needed for
+        #       test constraints were enabled for the managed assembly.  There
+        #       are some compile-time options that must also have been enabled
+        #       for the interop assembly in order to be effective.  For those
+        #       options, it will be assumed that it was enabled for the interop
+        #       assembly if it was enabled for the managed assembly.
         #
-        checkForSQLiteDefineConstant $::test_channel \
-            CHECK_STATE
-
-        checkForSQLiteDefineConstant $::test_channel \
-            COUNT_HANDLE
-
-        checkForSQLiteDefineConstant $::test_channel \
-            USE_INTEROP_DLL
-
-        checkForSQLiteDefineConstant $::test_channel \
-            INTEROP_EXTENSION_FUNCTIONS
-
-        checkForSQLiteDefineConstant $::test_channel \
-            INTEROP_TEST_EXTENSION
-
-        checkForSQLiteDefineConstant $::test_channel \
-            SQLITE_STANDARD
+        foreach defineConstant [list CHECK_STATE COUNT_HANDLE INTEROP_DEBUG \
+                                     INTEROP_LOG INTEROP_EXTENSION_FUNCTIONS \
+                                     INTEROP_TEST_EXTENSION SQLITE_STANDARD \
+                                     USE_INTEROP_DLL] {
+          #
+          # NOTE: Check if the compile-time option is listed in the list of
+          #       "define constants" kept track of by the managed assembly.
+          #
+          checkForSQLiteDefineConstant $::test_channel $defineConstant
+        }
 
         #
         # NOTE: Check the current build year.  Basically, this indicates

@@ -154,6 +154,14 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Enable the logging callback in the custom built interop DLL (see
+            the "SQLite.NET.Settings.targets" file for more information)?
+  -->
+  <PropertyGroup Condition="'$(InteropLog)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_LOG</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: Enable various Trace.WriteLine statements included in the code,
             based on several criteria (see the "SQLite.NET.Settings.targets"
             file for more information)?

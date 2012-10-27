@@ -449,7 +449,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
       [expr {$code eq "Ok" ? [catch {
         object invoke _Dynamic${id}.Test${id} RunTestThreads
       } result] : [set result ""]}] $result \
-      [collectGarbage $test_channel [expr {$count(1) * 1000}]] \
+      [collectGarbage $test_channel [expr {$count(1) * 1000}] false] \
       [getSQLiteHandleCounts $test_channel] \
       [reportSQLiteResources $test_channel]
 } -cleanup {

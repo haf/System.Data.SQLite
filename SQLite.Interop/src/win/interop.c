@@ -41,7 +41,7 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 typedef void (*SQLITEUSERFUNC)(sqlite3_context *, int, sqlite3_value **);
 typedef void (*SQLITEFUNCFINAL)(sqlite3_context *);
 
-#if defined(INTEROP_DEBUG)
+#if defined(INTEROP_DEBUG) || defined(INTEROP_LOG)
 SQLITE_PRIVATE void sqlite3InteropDebug(const char *zFormat, ...){
   va_list ap;                         /* Vararg list */
   StrAccum acc;                       /* String accumulator */
@@ -66,6 +66,14 @@ SQLITE_PRIVATE void sqlite3InteropDebug(const char *zFormat, ...){
 #else
   fprintf(stderr, "%s", sqlite3StrAccumFinish(&acc));
 #endif
+}
+#endif
+
+#if defined(INTEROP_LOG)
+SQLITE_PRIVATE int logConfigured = 0;
+
+SQLITE_PRIVATE void sqlite3InteropLogCallback(void *pArg, int iCode, const char *zMsg){
+  sqlite3InteropDebug("INTEROP_LOG (%d) %s\n", iCode, zMsg);
 }
 #endif
 
@@ -183,9 +191,20 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 #endif
 }
 
-SQLITE_API int WINAPI sqlite3_open_interop(const char*filename, int flags, sqlite3 **ppdb)
+SQLITE_API int WINAPI sqlite3_open_interop(const char *filename, int flags, sqlite3 **ppdb)
 {
   int ret;
+
+#if defined(INTEROP_LOG)
+  if( !logConfigured ){
+    ret = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3InteropLogCallback, 0);
+    if( ret==SQLITE_OK ){
+      logConfigured = 1;
+    }else{
+      sqlite3InteropDebug("sqlite3_open_interop(): sqlite3_config(SQLITE_CONFIG_LOG) returned %d.\n", ret);
+    }
+  }
+#endif
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_OPEN)
   sqlite3InteropDebug("sqlite3_open_interop(): calling sqlite3_open_v2(\"%s\", %d, %p)...\n", filename, flags, ppdb);
@@ -208,6 +227,17 @@ SQLITE_API int WINAPI sqlite3_open_interop(const char*filename, int flags, sqlit
 SQLITE_API int WINAPI sqlite3_open16_interop(const char *filename, int flags, sqlite3 **ppdb)
 {
   int ret;
+
+#if defined(INTEROP_LOG)
+  if( !logConfigured ){
+    ret = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3InteropLogCallback, 0);
+    if( ret==SQLITE_OK ){
+      logConfigured = 1;
+    }else{
+      sqlite3InteropDebug("sqlite3_open_interop(): sqlite3_config(SQLITE_CONFIG_LOG) returned %d.\n", ret);
+    }
+  }
+#endif
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_OPEN16)
   sqlite3InteropDebug("sqlite3_open16_interop(): calling sqlite3_open_interop(\"%s\", %d, %p)...\n", filename, flags, ppdb);
@@ -734,7 +764,7 @@ SQLITE_EXTENSION_INIT1
 ** The interopTest() SQL function returns its first argument or raises an
 ** error if there are not enough arguments.
 */
-static void interopTestFunc(
+SQLITE_PRIVATE void interopTestFunc(
   sqlite3_context *context,
   int argc,
   sqlite3_value **argv

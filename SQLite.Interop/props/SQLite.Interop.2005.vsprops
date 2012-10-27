@@ -39,7 +39,7 @@
 	/>
 	<UserMacro
 		Name="INTEROP_DEBUG_DEFINES"
-		Value="INTEROP_DEBUG=0x307;INTEROP_TEST_EXTENSION=1"
+		Value="INTEROP_DEBUG=0x31F;INTEROP_LOG=1;INTEROP_TEST_EXTENSION=1"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro

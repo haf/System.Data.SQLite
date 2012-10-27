@@ -36,6 +36,10 @@ namespace System.Data.SQLite
             "INTEROP_EXTENSION_FUNCTIONS",
 #endif
 
+#if INTEROP_LOG
+            "INTEROP_LOG",
+#endif
+
 #if INTEROP_TEST_EXTENSION
             "INTEROP_TEST_EXTENSION",
 #endif

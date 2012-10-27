@@ -254,6 +254,23 @@
     <InteropDebug Condition="'$(InteropDebug)' == '' And '$(Configuration)' != 'Debug'">false</InteropDebug>
 
     <!--
+        NOTE: Enable the logging callback in the custom built interop DLL (i.e.
+              "SQLite.Interop.dll")?  By default, this is enabled in the Debug
+              build configuration.  If this is disabled, the logging callback
+              will be unavailable and diagnostic messages may not be seen if
+              another native logging callback is not configured.  If this is
+              enabled, it must also be enabled via the "INTEROP_LOG=1"
+              preprocessor define being present in the "INTEROP_DEBUG_DEFINES"
+              macro in the build properties file:
+
+                  "SQLite.Interop\props\SQLite.Interop.20YY.[vs]props"
+
+              for the corresponding version(s) of Visual Studio.
+    -->
+    <InteropLog Condition="'$(InteropLog)' == '' And '$(Configuration)' == 'Debug'">true</InteropLog>
+    <InteropLog Condition="'$(InteropLog)' == '' And '$(Configuration)' != 'Debug'">false</InteropLog>
+
+    <!--
         NOTE: Enable the use of native Windows APIs, when available?  By
               default, this is enabled.  If this is disabled, all features
               that require the use of native Windows APIs will be unavailable.
