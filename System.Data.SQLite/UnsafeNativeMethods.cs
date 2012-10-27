@@ -588,6 +588,10 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_value_text16_interop(IntPtr p, out int len);
 
+#if INTEROP_LOG
+    [DllImport(SQLITE_DLL)]
+    internal static extern SQLiteErrorCode sqlite3_config_log_interop();
+#endif
 #endif
 // !SQLITE_STANDARD
 

@@ -191,20 +191,27 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 #endif
 }
 
-SQLITE_API int WINAPI sqlite3_open_interop(const char *filename, int flags, sqlite3 **ppdb)
+#if defined(INTEROP_LOG)
+SQLITE_API int WINAPI sqlite3_config_log_interop()
 {
   int ret;
-
-#if defined(INTEROP_LOG)
   if( !logConfigured ){
     ret = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3InteropLogCallback, 0);
     if( ret==SQLITE_OK ){
       logConfigured = 1;
     }else{
-      sqlite3InteropDebug("sqlite3_open_interop(): sqlite3_config(SQLITE_CONFIG_LOG) returned %d.\n", ret);
+      sqlite3InteropDebug("sqlite3_config_log_interop(): sqlite3_config(SQLITE_CONFIG_LOG) returned %d.\n", ret);
     }
+  }else{
+    ret = SQLITE_OK;
   }
+  return ret;
+}
 #endif
+
+SQLITE_API int WINAPI sqlite3_open_interop(const char *filename, int flags, sqlite3 **ppdb)
+{
+  int ret;
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_OPEN)
   sqlite3InteropDebug("sqlite3_open_interop(): calling sqlite3_open_v2(\"%s\", %d, %p)...\n", filename, flags, ppdb);
@@ -227,17 +234,6 @@ SQLITE_API int WINAPI sqlite3_open_interop(const char *filename, int flags, sqli
 SQLITE_API int WINAPI sqlite3_open16_interop(const char *filename, int flags, sqlite3 **ppdb)
 {
   int ret;
-
-#if defined(INTEROP_LOG)
-  if( !logConfigured ){
-    ret = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3InteropLogCallback, 0);
-    if( ret==SQLITE_OK ){
-      logConfigured = 1;
-    }else{
-      sqlite3InteropDebug("sqlite3_open16_interop(): sqlite3_config(SQLITE_CONFIG_LOG) returned %d.\n", ret);
-    }
-  }
-#endif
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_OPEN16)
   sqlite3InteropDebug("sqlite3_open16_interop(): calling sqlite3_open_interop(\"%s\", %d, %p)...\n", filename, flags, ppdb);
