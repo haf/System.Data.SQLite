@@ -980,6 +980,11 @@ namespace eval ::Eagle {
       return $code
     }
 
+    proc matchEnginePublicKeyToken { publicKeyToken } {
+      return [expr {[string length $publicKeyToken] == 0 || \
+          $publicKeyToken eq [info engine PublicKeyToken]}]
+    }
+
     proc matchEngineName { name } {
       return [expr {[string length $name] == 0 || \
           $name eq [info engine Name]}]
@@ -1252,7 +1257,7 @@ namespace eval ::Eagle {
             #       builds, etc.
             #
             if {$protocolId eq "1" && \
-                $publicKeyToken eq [info engine PublicKeyToken] && \
+                [matchEnginePublicKeyToken $publicKeyToken] && \
                 [matchEngineName $name] && \
                 [matchEngineCulture $culture]} then {
               #
@@ -1441,11 +1446,11 @@ namespace eval ::Eagle {
         #       reflection (Mono bug #636939).
         #
         if {![isMono]} then {
-          set line [string format -verbatim -- "{0,-$maxLength} = {1}" \
-              $nameString $valueString]
+          set line [string format -verbatim -- [appendArgs "\{0,-" \
+              $maxLength "\} = {1}"] $nameString $valueString]
         } else {
-          set line [object invoke String Format "{0,-$maxLength} = {1}" \
-              $nameString $valueString]
+          set line [object invoke String Format [appendArgs "\{0,-" \
+              $maxLength "\} = {1}"] $nameString $valueString]
         }
 
         puts stdout $line

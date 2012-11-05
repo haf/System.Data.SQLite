@@ -299,14 +299,14 @@ namespace eval ::Eagle {
       set seconds [expr {$milliseconds / 1000}]
 
       #
-      # NOTE: Calculate the value of [clock seconds] now and at the stop time.
+      # NOTE: Calculate the starting and ending values of [clock seconds].
       #
-      set start [clock seconds]; set stop [expr {$start + $seconds}]
+      set now [clock seconds]; set start $now; set stop [expr {$now + $seconds}]
 
       #
       # NOTE: Do nothing for X seconds (i.e. except call [clock seconds]).
       #
-      while {$start <= [clock seconds] && [clock seconds] < $stop} {}
+      while {$start <= $now && $now < $stop} {set now [clock seconds]}
 
       #
       # NOTE: Record the final Tcl command count.
@@ -924,12 +924,12 @@ namespace eval ::Eagle {
 
         if {[info exists array($statistic,before,list)]} then {
           tputs $channel [appendArgs "---- " $statistic " BEFORE: " \
-              $array($statistic,before,list) \n]
+              [formatList $array($statistic,before,list)] \n]
         }
 
         if {[info exists array($statistic,after,list)]} then {
           tputs $channel [appendArgs "---- " $statistic " AFTER: " \
-              $array($statistic,after,list) \n]
+              [formatList $array($statistic,after,list)] \n]
         }
       }
     }
@@ -1091,10 +1091,10 @@ namespace eval ::Eagle {
     tputs $channel [appendArgs "---- test run path: \"" $path \"\n]
 
     tputs $channel [appendArgs "---- test run file names: " \
-        [list [removePathFromFileNames $path $fileNames]] \n]
+        [formatList [removePathFromFileNames $path $fileNames]] \n]
 
     tputs $channel [appendArgs "---- test run skip file names: " \
-        [list $skipFileNames] \n]
+        [formatList $skipFileNames] \n]
 
     #
     # NOTE: Keep going unless this becomes true (i.e. if one of the
@@ -1356,11 +1356,13 @@ namespace eval ::Eagle {
     # NOTE: Show the files that had failing and/or leaking tests.
     #
     if {[llength $failed] > 0} then {
-      tputs $channel [appendArgs "---- files with failing tests: " $failed \n]
+      tputs $channel [appendArgs "---- files with failing tests: " \
+          [formatList $failed] \n]
     }
 
     if {[llength $leaked] > 0} then {
-      tputs $channel [appendArgs "---- files with leaking tests: " $leaked \n]
+      tputs $channel [appendArgs "---- files with leaking tests: " \
+          [formatList $leaked] \n]
     }
   }
 
@@ -1717,6 +1719,12 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getCommandsForTclShell {} {
+      return [testExecTclScript {
+        puts -nonewline stdout [info commands]
+      }]
+    }
+
     proc getMachineForTclShell {} {
       return [testExecTclScript {
         puts -nonewline stdout $tcl_platform(machine)
@@ -1729,6 +1737,73 @@ namespace eval ::Eagle {
       }]
     }
 
+    proc getTestConfiguration {} {
+      #
+      # NOTE: Determine the effective test configuration and return it.  If
+      #       the test configuration cannot be determined, return an empty
+      #       string.
+      #
+      if {[info exists ::test_flags(-configuration)] && \
+          [string length $::test_flags(-configuration)] > 0} then {
+        #
+        # NOTE: The test configuration has been manually overridden via the
+        #       test flags; therefore, use it.
+        #
+        return $::test_flags(-configuration)
+      } elseif {[info exists ::test_configuration]} then {
+        #
+        # NOTE: Use the test configuration.  The default value is "Release",
+        #       as set by the test suite prologue; however, this may have
+        #       been overridden.
+        #
+        return $::test_configuration
+      } elseif {[info exists ::eagle_platform(configuration)]} then {
+        #
+        # NOTE: Use the build configuration of Eagle itself.  This value will
+        #       always be "Debug" or "Release".
+        #
+        return $::eagle_platform(configuration)
+      } else {
+        #
+        # NOTE: We are missing the configuration, return nothing.
+        #
+        return ""
+      }
+    }
+
+    proc getTestSuffix {} {
+      #
+      # NOTE: Determine the effective test suffix and return it.  If
+      #       the test suffix cannot be determined, return an empty
+      #       string.
+      #
+      if {[info exists ::test_flags(-suffix)] && \
+          [string length $::test_flags(-suffix)] > 0} then {
+        #
+        # NOTE: The test suffix has been manually overridden via the
+        #       test flags; therefore, use it.
+        #
+        return $::test_flags(-suffix)
+      } elseif {[info exists ::test_suffix]} then {
+        #
+        # NOTE: Use the test suffix.  There is no default value for
+        #       this variable (i.e. by default, it does not exist).
+        #
+        return $::test_suffix
+      } elseif {[info exists ::eagle_platform(text)]} then {
+        #
+        # NOTE: Use the build text of Eagle itself.  This value will
+        #       typically be "NetFx20" or "NetFx40".
+        #
+        return $::eagle_platform(text)
+      } else {
+        #
+        # NOTE: We are missing the suffix, return nothing.
+        #
+        return ""
+      }
+    }
+
     proc getGarudaDll {} {
       #
       # NOTE: Get the Garuda DLL of the same platform (i.e. machine type)
@@ -1736,26 +1811,15 @@ namespace eval ::Eagle {
       #
       if {[info exists ::base_path]} then {
         #
-        # NOTE: If the test configuration is available, use it.  Failing that,
-        #       use the build configuration of Eagle itself.
+        # NOTE: Get the effective test configuration.
         #
-        if {[info exists ::test_configuration]} then {
-          #
-          # NOTE: Use the test configuration.  The default value is "Release",
-          #       as set by the test suite prologue; however, this may have
-          #       been overridden.
-          #
-          set configuration $::test_configuration
-        } elseif {[info exists ::eagle_platform(configuration)]} then {
-          #
-          # NOTE: Use the build configuration of Eagle itself.  This value will
-          #       always be "Debug" or "Release".
-          #
-          set configuration $::eagle_platform(configuration)
-        } else {
-          #
-          # NOTE: We are missing the configuration, return nothing.
-          #
+        set configuration [getTestConfiguration]
+
+        #
+        # NOTE: If there is no effective test configuration available, we
+        #       cannot continue.
+        #
+        if {[string length $configuration] == 0} then {
           return ""
         }
 
@@ -1971,8 +2035,8 @@ namespace eval ::Eagle {
         runTestEpilogue runTest runAllTests fixConstraints sourceIfValid \
         isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
         returnInfoScript tputs formatDecimal formatList configureTcltest \
-        calculateBogoCops removeConstraint machineToPlatform tsource testShim] \
-        false false
+        calculateBogoCops removeConstraint machineToPlatform tsource testShim \
+        getTestConfiguration getTestSuffix] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

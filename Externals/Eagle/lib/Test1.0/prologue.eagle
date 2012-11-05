@@ -431,6 +431,10 @@ if {![info exists no([file tail [info script]])]} then {
       [expr {[info exists test_configuration] ? \
           $test_configuration : "<none>"}] \n]
 
+  tputs $test_channel [appendArgs "---- test suffix: " \
+      [expr {[info exists test_suffix] ? \
+          $test_suffix : "<none>"}] \n]
+
   if {[isEagle]} then {
     catch {info engine PublicKeyToken} publicKeyToken
 
@@ -1627,6 +1631,13 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: Has checking for the test suffix been disabled?
+  #
+  if {![info exists no(testSuffix)]} then {
+    checkForTestSuffix $test_channel
+  }
+
+  #
   # NOTE: Has checking for the extra files needed by various tests been
   #       disabled?
   #
@@ -1944,6 +1955,10 @@ if {![info exists no([file tail [info script]])]} then {
 
   if {![info exists no(tip285)]} then {
     checkForTip285 $test_channel
+  }
+
+  if {![info exists no(tip405)]} then {
+    checkForTip405 $test_channel
   }
 
   #

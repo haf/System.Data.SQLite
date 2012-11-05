@@ -28,7 +28,7 @@ namespace eval ::Eagle {
 
       tputs $channel [appendArgs $::tcl_platform(platform) \n]
     } else {
-      tputs $channel [appendArgs unknown \n]
+      tputs $channel unknown\n
     }
 
     ###########################################################################
@@ -598,7 +598,7 @@ namespace eval ::Eagle {
   }
 
   proc checkForTestConfiguration { channel } {
-    tputs $channel [appendArgs "---- checking for test configuration... "]
+    tputs $channel "---- checking for test configuration... "
 
     if {[info exists ::test_configuration] && \
         [string length $::test_configuration] > 0} then {
@@ -606,7 +606,20 @@ namespace eval ::Eagle {
 
       tputs $channel [appendArgs $::test_configuration \n]
     } else {
-      tputs $channel [appendArgs unknown \n]
+      tputs $channel unknown\n
+    }
+  }
+
+  proc checkForTestSuffix { channel } {
+    tputs $channel "---- checking for test suffix... "
+
+    if {[info exists ::test_suffix] && \
+        [string length $::test_suffix] > 0} then {
+      addConstraint [appendArgs suffix. $::test_suffix]
+
+      tputs $channel [appendArgs $::test_suffix \n]
+    } else {
+      tputs $channel unknown\n
     }
   }
 
@@ -815,6 +828,23 @@ namespace eval ::Eagle {
 
     if {$error eq "eval canceled"} then {
       addConstraint tip285
+
+      tputs $channel yes\n
+    } else {
+      tputs $channel no\n
+    }
+  }
+
+  proc checkForTip405 { channel } {
+    tputs $channel "---- checking for TIP #405... "
+
+    #
+    # NOTE: Does the interpreter have TIP #405 (i.e. [lmap])?
+    #
+    catch {lmap} error
+
+    if {$error ne "invalid command name \"lmap\""} then {
+      addConstraint tip405
 
       tputs $channel yes\n
     } else {
@@ -2214,11 +2244,11 @@ namespace eval ::Eagle {
         checkForEagle checkForGaruda checkForShell checkForDebug checkForTk \
         checkForVersion checkForCommand checkForFile checkForNativeCode \
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
-        checkForPerformance checkForTiming checkForInteractive checkForSymbols \
-        checkForLogFile checkForNetwork checkForCompileOption \
+        checkForTip405 checkForPerformance checkForTiming checkForInteractive \
+        checkForSymbols checkForLogFile checkForNetwork checkForCompileOption \
         checkForWindowsCommandProcessor checkForUserInteraction \
-        checkForTclOptions checkForTestConfiguration checkForVariable \
-        checkForScriptLibrary checkForFossil] false false
+        checkForTclOptions checkForTestConfiguration checkForTestSuffix \
+        checkForVariable checkForScriptLibrary checkForFossil] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
