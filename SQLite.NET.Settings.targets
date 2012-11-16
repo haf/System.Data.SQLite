@@ -22,6 +22,33 @@
 
   <!--
   ******************************************************************************
+  **                        Load Per-Framework Settings                       **
+  ******************************************************************************
+  -->
+
+  <!--
+      NOTE: If the per-framework settings files exist, import them now.  The
+            contained settings, if any, will override the default ones provided
+            below.
+  -->
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx20"
+          Condition="'$(NetFx20)' != '' And '$(NetFx20)' != 'false' And
+                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx20')" />
+
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx35"
+          Condition="'$(NetFx35)' != '' And '$(NetFx35)' != 'false' And
+                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx35')" />
+
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx40"
+          Condition="'$(NetFx40)' != '' And '$(NetFx40)' != 'false' And
+                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx40')" />
+
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx45"
+          Condition="'$(NetFx45)' != '' And '$(NetFx45)' != 'false' And
+                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx45')" />
+
+  <!--
+  ******************************************************************************
   **                       [Fairly] Generic Properties                        **
   ******************************************************************************
   -->

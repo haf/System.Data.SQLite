@@ -8,6 +8,10 @@
  *
 -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+  </PropertyGroup>
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugNativeOnly|x64">
       <Configuration>DebugNativeOnly</Configuration>
