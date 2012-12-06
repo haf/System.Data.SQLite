@@ -109,7 +109,7 @@ extern "C" {
 */
 #define SQLITE_VERSION        "3.7.15"
 #define SQLITE_VERSION_NUMBER 3007015
-#define SQLITE_SOURCE_ID      "2012-10-26 00:55:07 6d42d806adb833572a324d4141ab3b2c315617b2"
+#define SQLITE_SOURCE_ID      "2012-12-06 04:33:13 d507648d820cfea70e17f3d21c35c932a2d20367"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -474,6 +474,7 @@ SQLITE_API int sqlite3_exec(
 #define SQLITE_IOERR_SHMLOCK           (SQLITE_IOERR | (20<<8))
 #define SQLITE_IOERR_SHMMAP            (SQLITE_IOERR | (21<<8))
 #define SQLITE_IOERR_SEEK              (SQLITE_IOERR | (22<<8))
+#define SQLITE_IOERR_DELETE_NOENT      (SQLITE_IOERR | (23<<8))
 #define SQLITE_LOCKED_SHAREDCACHE      (SQLITE_LOCKED |  (1<<8))
 #define SQLITE_BUSY_RECOVERY           (SQLITE_BUSY   |  (1<<8))
 #define SQLITE_CANTOPEN_NOTEMPDIR      (SQLITE_CANTOPEN | (1<<8))
@@ -1597,6 +1598,22 @@ struct sqlite3_mem_methods {
 ** <dd> These options are obsolete and should not be used by new code.
 ** They are retained for backwards compatibility but are now no-ops.
 ** </dl>
+**
+** [[SQLITE_CONFIG_SQLLOG]]
+** <dt>SQLITE_CONFIG_SQLLOG
+** <dd>This option is only available if sqlite is compiled with the
+** SQLITE_ENABLE_SQLLOG pre-processor macro defined. The first argument should
+** be a pointer to a function of type void(*)(void*,sqlite3*,const char*, int).
+** The second should be of type (void*). The callback is invoked by the library
+** in three separate circumstances, identified by the value passed as the
+** fourth parameter. If the fourth parameter is 0, then the database connection
+** passed as the second argument has just been opened. The third argument
+** points to a buffer containing the name of the main database file. If the
+** fourth parameter is 1, then the SQL statement that the third parameter
+** points to has just been executed. Or, if the fourth parameter is 2, then
+** the connection being passed as the second parameter is being closed. The
+** third parameter is passed NULL In this case.
+** </dl>
 */
 #define SQLITE_CONFIG_SINGLETHREAD  1  /* nil */
 #define SQLITE_CONFIG_MULTITHREAD   2  /* nil */
@@ -1618,6 +1635,7 @@ struct sqlite3_mem_methods {
 #define SQLITE_CONFIG_PCACHE2      18  /* sqlite3_pcache_methods2* */
 #define SQLITE_CONFIG_GETPCACHE2   19  /* sqlite3_pcache_methods2* */
 #define SQLITE_CONFIG_COVERING_INDEX_SCAN 20  /* int */
+#define SQLITE_CONFIG_SQLLOG       21  /* xSqllog, void* */
 
 /*
 ** CAPI3REF: Database Connection Configuration Options

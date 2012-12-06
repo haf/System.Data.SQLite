@@ -326,7 +326,7 @@ namespace testlinq
       using (northwindEFEntities db = new northwindEFEntities())
       {
         {
-          string entitySQL = "SELECT VALUE o FROM Orders AS o WHERE SQLite.DatePart('yyyy', o.OrderDate) = 1997;";
+          string entitySQL = "SELECT VALUE o FROM Orders AS o WHERE SQLite.DatePart('yyyy', o.OrderDate) = 1997 ORDER BY o.OrderID;";
           ObjectQuery<Orders> query = db.CreateQuery<Orders>(entitySQL);
 
           foreach (Orders o in query)
@@ -359,6 +359,7 @@ namespace testlinq
           DateTime dt = new DateTime(1997, 1, 1);
           var query = from order in db.Orders
                       where order.OrderDate < dt
+                      orderby order.OrderID
                       select order;
 
           foreach (Orders o in query)
@@ -400,7 +401,8 @@ namespace testlinq
 
         {
           var query = db.Customers.Where(cust => cust.Country == "Denmark")
-                          .SelectMany(cust => cust.Orders.Where(o => o.Freight > 5));
+                          .SelectMany(cust => cust.Orders.Where(o => o.Freight > 5))
+                          .OrderBy(o => o.Customers.CustomerID);
 
           foreach (Orders c in query)
           {
@@ -411,6 +413,7 @@ namespace testlinq
         {
           var query = from c in db.Customers
                       where c.Orders.Any(o => o.OrderDate.HasValue == true && o.OrderDate.Value.Year == 1997)
+                      orderby c.CustomerID
                       select c;
 
           foreach (Customers c in query)
@@ -420,7 +423,7 @@ namespace testlinq
         }
 
         {
-          string entitySQL = "SELECT VALUE o FROM Orders AS o WHERE o.Customers.Country <> 'UK' AND o.Customers.Country <> 'Mexico' AND Year(o.OrderDate) = 1997;";
+          string entitySQL = "SELECT VALUE o FROM Orders AS o WHERE o.Customers.Country <> 'UK' AND o.Customers.Country <> 'Mexico' AND Year(o.OrderDate) = 1997 ORDER BY o.OrderID;";
           ObjectQuery<Orders> query = db.CreateQuery<Orders>(entitySQL);
 
           foreach (Orders o in query)
@@ -430,7 +433,7 @@ namespace testlinq
         }
 
         {
-          string entitySQL = "SELECT VALUE o FROM Orders AS o WHERE NewGuid() <> NewGuid();";
+          string entitySQL = "SELECT VALUE o FROM Orders AS o WHERE NewGuid() <> NewGuid() ORDER BY o.OrderID;";
           ObjectQuery<Orders> query = db.CreateQuery<Orders>(entitySQL);
 
           foreach (Orders o in query)
@@ -443,6 +446,7 @@ namespace testlinq
         {
           var query = from p in db.Products
                       where p.OrderDetails.Count(od => od.Orders.Customers.Country == p.Suppliers.Country) > 2
+                      orderby p.ProductID
                       select p;
 
           foreach (Products p in query)
