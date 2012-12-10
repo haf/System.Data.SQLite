@@ -7,7 +7,9 @@
  *
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(ConfigurationYear)' != '' And
+                            '$(ConfigurationYear)' != '2005' And
+                            '$(ConfigurationYear)' != '2008'">
     <NetFx20>true</NetFx20>
     <NetFx35>true</NetFx35>
     <NetFx40>false</NetFx40>
