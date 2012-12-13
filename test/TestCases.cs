@@ -1365,7 +1365,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
 
       for (int n = 0; n < arr.Length; n++)
       {
-        if (arr[n].t.Join(0) == false)
+        if (!arr[n].t.Join(ThreadTimeout / arr.Length))
         {
           failed = true;
           arr[n].t.Abort();
