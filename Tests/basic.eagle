@@ -1793,7 +1793,7 @@ this is a test} True True}]}
 
 ###############################################################################
 
-runTest {test data-1.35 {open unencrypted database, with password} -setup {
+runTest {test data-1.35 {unencrypted database, with password} -setup {
   setupDb [set fileName data-1.35.db]
 } -body {
   sql execute $db "CREATE TABLE t1(x);"
@@ -1813,6 +1813,9 @@ runTest {test data-1.35 {open unencrypted database, with password} -setup {
   cleanupDb $fileName db true false false
   setupDb $fileName "" "" "" "" "" true false
 
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
   lappend result [catch {sql execute -execute scalar $db \
       "SELECT COUNT(*) FROM t1;"} error] $error
 
@@ -1821,16 +1824,15 @@ runTest {test data-1.35 {open unencrypted database, with password} -setup {
   cleanupDb $fileName
 
   unset -nocomplain error result db fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
--match regexp -result {^1 \{System\.Data\.SQLite\.SQLiteException\
-\(0x80004005\): file is encrypted or is not a database.*?\} 1\
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -match regexp -result {^1\
 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted or is\
-not a database.*?\} 0 1$}}
+not a database.*?\} 1 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\):\
+file is encrypted or is not a database.*?\} 0 1 0 2$}}
 
 ###############################################################################
 
-runTest {test data-1.36 {open encrypted database, wrong password} -setup {
+runTest {test data-1.36 {encrypted database, wrong password} -setup {
   setupDb [set fileName data-1.36.db] "" "" "" "" "Password=12345;"
 } -body {
   sql execute $db "CREATE TABLE t1(x);"
@@ -1850,6 +1852,9 @@ runTest {test data-1.36 {open encrypted database, wrong password} -setup {
   cleanupDb $fileName db true false false
   setupDb $fileName "" "" "" "" "Password=12345;" true false
 
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
   lappend result [catch {sql execute -execute scalar $db \
       "SELECT COUNT(*) FROM t1;"} error] $error
 
@@ -1858,17 +1863,130 @@ runTest {test data-1.36 {open encrypted database, wrong password} -setup {
   cleanupDb $fileName
 
   unset -nocomplain error result db fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
--match regexp -result {^1 \{System\.Data\.SQLite\.SQLiteException\
-\(0x80004005\): file is encrypted or is not a database.*?\} 1\
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -match regexp -result {^1\
 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted or is\
-not a database.*?\} 0 1$}}
+not a database.*?\} 1 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\):\
+file is encrypted or is not a database.*?\} 0 1 0 2$}}
 
 ###############################################################################
 
-runTest {test data-1.37 {rollback to nested savepoint} -setup {
-  setupDb [set fileName data-1.37.db]
+runTest {test data-1.37 {encrypted database, password w/start-space} -setup {
+  setupDb [set fileName data-1.37.db] "" "" "" "" "Password= 1234;"
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=1234;" true false
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password= 1234;" true false
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain error result db fileName
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -match regexp -result {^1\
+\{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted or is\
+not a database.*?\} 1 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\):\
+file is encrypted or is not a database.*?\} 0 1 0 2$}}
+
+###############################################################################
+
+runTest {test data-1.38 {encrypted database, password w/mid-space} -setup {
+  setupDb [set fileName data-1.38.db] "" "" "" "" "Password=12 45;"
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=1245;" true false
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=12 45;" true false
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain error result db fileName
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -match regexp -result {^1\
+\{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted or is\
+not a database.*?\} 1 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\):\
+file is encrypted or is not a database.*?\} 0 1 0 2$}}
+
+###############################################################################
+
+runTest {test data-1.39 {encrypted database, password w/end-space} -setup {
+  setupDb [set fileName data-1.39.db] "" "" "" "" "Password=1234 ;"
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=1234;" true false
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=1234 ;" true false
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain error result db fileName
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -result {0 1 0 1 0 1 0 3}}
+
+###############################################################################
+
+runTest {test data-1.40 {rollback to nested savepoint} -setup {
+  setupDb [set fileName data-1.40.db]
 } -body {
   sql execute $db "BEGIN IMMEDIATE TRANSACTION;"
   sql execute $db "SAVEPOINT one;"
@@ -1897,8 +2015,8 @@ runTest {test data-1.37 {rollback to nested savepoint} -setup {
 
 ###############################################################################
 
-runTest {test data-1.38 {NoExtensionFunctions connection flag} -setup {
-  setupDb [set fileName data-1.38.db]
+runTest {test data-1.41 {NoExtensionFunctions connection flag} -setup {
+  setupDb [set fileName data-1.41.db]
 } -body {
   set result [list]
 
@@ -1929,8 +2047,8 @@ regexp -result {^0 12341234 1 \{System\.Data\.SQLite\.SQLiteException\
 
 ###############################################################################
 
-runTest {test data-1.39 {column name and index lookup} -setup {
-  setupDb [set fileName data-1.39.db]
+runTest {test data-1.42 {column name and index lookup} -setup {
+  setupDb [set fileName data-1.42.db]
 } -body {
   sql execute $db {
     CREATE TABLE t1(x, y, z);

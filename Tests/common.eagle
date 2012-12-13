@@ -1572,8 +1572,9 @@ namespace eval ::Eagle {
         #       options, it will be assumed that it was enabled for the interop
         #       assembly if it was enabled for the managed assembly.
         #
-        foreach defineConstant [list CHECK_STATE COUNT_HANDLE INTEROP_DEBUG \
-                                     INTEROP_LOG INTEROP_EXTENSION_FUNCTIONS \
+        foreach defineConstant [list CHECK_STATE COUNT_HANDLE INTEROP_CODEC \
+                                     INTEROP_DEBUG INTEROP_LOG \
+                                     INTEROP_EXTENSION_FUNCTIONS \
                                      INTEROP_TEST_EXTENSION SQLITE_STANDARD \
                                      USE_INTEROP_DLL] {
           #
