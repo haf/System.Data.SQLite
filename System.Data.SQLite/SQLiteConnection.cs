@@ -1345,7 +1345,7 @@ namespace System.Data.SQLite
         int indexOf = arParts[n].IndexOf('=');
 
         if (indexOf != -1)
-          ls.Add(arParts[n].Substring(0, indexOf), arParts[n].Substring(indexOf + 1));
+          ls.Add(UnwrapString(arParts[n].Substring(0, indexOf)), UnwrapString(arParts[n].Substring(indexOf + 1)));
         else
           throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, "Invalid ConnectionString format for part \"{0}\"", arParts[n]));
       }
@@ -1564,7 +1564,6 @@ namespace System.Data.SQLite
         throw new NotSupportedException(String.Format(CultureInfo.CurrentCulture, "Only SQLite Version {0} is supported at this time", DefaultVersion));
 
       fileName = FindKey(opts, "Data Source", DefaultDataSource);
-      fileName = UnwrapFileName(fileName);
 
       if (String.IsNullOrEmpty(fileName))
       {
@@ -2197,38 +2196,41 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Removes one set of surrounding single -OR- double quotes from the file
-    /// name and returns the resulting file name.  If the string is null, empty,
+    /// Removes one set of surrounding single -OR- double quotes from the string
+    /// value and returns the resulting string value.  If the string is null, empty,
     /// or contains quotes that are not balanced, nothing is done and the original
-    /// string will be returned.
+    /// string value will be returned.
     /// </summary>
-    /// <param name="sourceFile">The database file name to process.</param>
-    /// <returns>The modified database file name.</returns>
-    private string UnwrapFileName(string sourceFile)
+    /// <param name="value">The string value to process.</param>
+    /// <returns>
+    /// The string value, modified to remove one set of surrounding single -OR-
+    /// double quotes, if applicable.
+    /// </returns>
+    private static string UnwrapString(string value)
     {
-        if (String.IsNullOrEmpty(sourceFile))
+        if (String.IsNullOrEmpty(value))
         {
             //
             // NOTE: The string is null or empty, return it verbatim.
             //
-            return sourceFile;
+            return value;
         }
 
-        int length = sourceFile.Length;
+        int length = value.Length;
 
-        if (((sourceFile[0] == '\'') && (sourceFile[length - 1] == '\'')) ||
-            ((sourceFile[0] == '"') && (sourceFile[length - 1] == '"')))
+        if (((value[0] == '\'') && (value[length - 1] == '\'')) ||
+            ((value[0] == '"') && (value[length - 1] == '"')))
         {
             //
             // NOTE: Remove the first and last character.
             //
-            return sourceFile.Substring(1, length - 2);
+            return value.Substring(1, length - 2);
         }
 
         //
         // NOTE: No match, return the input string verbatim.
         //
-        return sourceFile;
+        return value;
     }
 
     /// <summary>

@@ -2032,10 +2032,7 @@ runTest {test data-1.40 {encrypted database, password via builder} -setup {
 
   unset -nocomplain connectionStringBuilder error result db fileName
 } -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
-command.sql compile.DATA SQLite System.Data.SQLite} -match regexp -result {^0 1\
-0 1 1 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted\
-or is not a database.*?\} 1 \{System\.Data\.SQLite\.SQLiteException\
-\(0x80004005\): file is encrypted or is not a database.*?\}$}}
+command.sql compile.DATA SQLite System.Data.SQLite} -result {0 1 0 1 0 1 0 3}}
 
 ###############################################################################
 
