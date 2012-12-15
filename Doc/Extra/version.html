@@ -50,6 +50,7 @@
       <li>Add Visual Studio 2012 support to the redesigned designer support installer.</li>
       <li>Allow opened connections to skip adding the extension functions included in the interop assembly via the new NoExtensionFunctions connection flag.</li>
       <li>Support loading of SQLite extensions via the new EnableExtensions and LoadExtension methods of the SQLiteConnection class. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/17045010df">[17045010df]</a>.</li>
+      <li>Add ParseViaFramework property to the SQLiteConnection class to allow the built-in (i.e. framework provided) connection string parser to be used when opening a connection. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/b4cc611998">[b4cc611998]</a>.</li>
       <li>Add notifications before and after any connection is opened and closed, as well as other related notifications, via the new static Changed event.</li>
       <li>Add an overload of the SQLiteLog.LogMessage method that takes a single string parameter.</li>
       <li>Add an overload of the SQLiteConnection.LogMessage method that takes a SQLiteErrorCode parameter.</li>

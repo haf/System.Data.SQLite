@@ -409,6 +409,12 @@ namespace System.Data.SQLite
     /// </summary>
     private int _defaultTimeout = 30;
 
+    /// <summary>
+    /// Non-zero if the built-in (i.e. framework provided) connection string
+    /// parser should be used when opening the connection.
+    /// </summary>
+    private bool _parseViaFramework;
+
     internal bool _binaryGuid;
 
     internal long _version;
@@ -445,10 +451,26 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Initializes the connection with the specified connection string
+    /// Initializes the connection with the specified connection string.
     /// </summary>
-    /// <param name="connectionString">The connection string to use on the connection</param>
+    /// <param name="connectionString">The connection string to use.</param>
     public SQLiteConnection(string connectionString)
+        : this(connectionString, false)
+    {
+        // do nothing.
+    }
+
+    /// <summary>
+    /// Initializes the connection with the specified connection string.
+    /// </summary>
+    /// <param name="connectionString">
+    /// The connection string to use on.
+    /// </param>
+    /// <param name="parseViaFramework">
+    /// Non-zero to parse the connection string using the built-in (i.e.
+    /// framework provided) parser when opening the connection.
+    /// </param>
+    public SQLiteConnection(string connectionString, bool parseViaFramework)
     {
 #if (SQLITE_STANDARD || USE_INTEROP_DLL || PLATFORM_COMPACTFRAMEWORK) && PRELOAD_NATIVE_LIBRARY
       UnsafeNativeMethods.Initialize();
@@ -488,6 +510,7 @@ namespace System.Data.SQLite
       }
 #endif
 
+      _parseViaFramework = parseViaFramework;
       _flags = SQLiteConnectionFlags.Default;
       _connectionState = ConnectionState.Closed;
       _connectionString = "";
@@ -502,7 +525,7 @@ namespace System.Data.SQLite
     /// function will open its own connection, enumerate any attached databases of the original connection, and automatically
     /// attach to them.
     /// </summary>
-    /// <param name="connection"></param>
+    /// <param name="connection">The connection to copy the settings from.</param>
     public SQLiteConnection(SQLiteConnection connection)
       : this(connection.ConnectionString)
     {
@@ -1329,6 +1352,58 @@ namespace System.Data.SQLite
       return ls;
     }
 
+    /// <summary>
+    /// Parses a connection string using the <see cref="DbConnectionStringBuilder" />
+    /// class and returns the key/value pairs.  An exception may be thrown if the
+    /// connection string is invalid or cannot be parsed.
+    /// </summary>
+    /// <param name="connectionString">
+    /// The connection string to parse.
+    /// </param>
+    /// <param name="strict">
+    /// Non-zero to throw an exception if any connection string values are not of
+    /// the <see cref="String" /> type.
+    /// </param>
+    /// <returns>The list of key/value pairs.</returns>
+    internal static SortedList<string, string> ParseConnectionStringViaFramework(
+        string connectionString,
+        bool strict
+        )
+    {
+        DbConnectionStringBuilder connectionStringBuilder
+            = new DbConnectionStringBuilder();
+
+        connectionStringBuilder.ConnectionString = connectionString; /* throw */
+
+        SortedList<string, string> result =
+            new SortedList<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (string keyName in connectionStringBuilder.Keys)
+        {
+            object value = connectionStringBuilder[keyName];
+            string keyValue = null;
+
+            if (value is string)
+            {
+                keyValue = (string)value;
+            }
+            else if (strict)
+            {
+                throw new ArgumentException(
+                    "connection property value is not a string",
+                    keyName);
+            }
+            else if (value != null)
+            {
+                keyValue = value.ToString();
+            }
+
+            result.Add(keyName, keyValue);
+        }
+
+        return result;
+    }
+
 #if !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
     /// Manual distributed transaction enlistment support
@@ -1470,7 +1545,12 @@ namespace System.Data.SQLite
 
       Close();
 
-      SortedList<string, string> opts = ParseConnectionString(_connectionString);
+      SortedList<string, string> opts = _parseViaFramework ?
+          ParseConnectionStringViaFramework(_connectionString, false) :
+          ParseConnectionString(_connectionString);
+
+      OnChanged(this, new ConnectionEventArgs(
+          SQLiteConnectionEventType.ConnectionString, null, null, null, _connectionString, opts));
 
       object enumValue;
 
@@ -1742,6 +1822,16 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Non-zero if the built-in (i.e. framework provided) connection string
+    /// parser should be used when opening the connection.
+    /// </summary>
+    public bool ParseViaFramework
+    {
+        get { CheckDisposed(); return _parseViaFramework; }
+        set { CheckDisposed(); _parseViaFramework = value; }
+    }
+
+    /// <summary>
     /// Gets/sets the extra behavioral flags for this connection.  See the
     /// <see cref="SQLiteConnectionFlags" /> enumeration for a list of
     /// possible values.
@@ -1911,7 +2001,10 @@ namespace System.Data.SQLite
         // make sure we have an instance of the base class
         if (_sql == null)
         {
-            SortedList<string, string> opts = ParseConnectionString(_connectionString);
+            SortedList<string, string> opts = _parseViaFramework ?
+                ParseConnectionStringViaFramework(_connectionString, false) :
+                ParseConnectionString(_connectionString);
+
             object enumValue;
 
             enumValue = TryParseEnum(typeof(SQLiteDateFormats), FindKey(opts,

@@ -102,7 +102,15 @@ namespace System.Data.SQLite
       if (String.IsNullOrEmpty(connection.ConnectionString))
         throw new ArgumentNullException("ConnectionString");
 
-      SortedList<string, string> opts = SQLiteConnection.ParseConnectionString(connection.ConnectionString);
+      bool parseViaFramework = false;
+
+      if (connection is SQLiteConnection)
+          parseViaFramework = ((SQLiteConnection)connection).ParseViaFramework;
+
+      SortedList<string, string> opts = parseViaFramework ?
+          SQLiteConnection.ParseConnectionStringViaFramework(connection.ConnectionString, false) :
+          SQLiteConnection.ParseConnectionString(connection.ConnectionString);
+
       return SQLiteConnection.FindKey(opts, "DateTimeFormat", "ISO8601");
     }
 

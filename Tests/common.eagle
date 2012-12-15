@@ -972,6 +972,29 @@ namespace eval ::Eagle {
       }
     }
 
+    proc addDbConnection { connection {varName db} } {
+      #
+      # NOTE: Refer to the specified variable (e.g. "db") in the context of our
+      #       caller.
+      #
+      upvar 1 $varName db
+
+      #
+      # NOTE: Create a correctly formatted name for the database connection to
+      #       be added to the list managed by the Eagle interpreter.
+      #
+      set db [object invoke -flags +NonPublic \
+          Eagle._Components.Private.FormatOps DatabaseObjectName $connection \
+          SQLiteConnection [object invoke Interpreter.GetActive NextId]]
+
+      #
+      # NOTE: Add the database connection provided by our caller to the list
+      #       of those known to the Eagle interpreter.
+      #
+      object invoke -flags +NonPublic Interpreter.GetActive.connections Add \
+          $db $connection
+    }
+
     proc cleanupDb { fileName {varName db} {collect true} {qualify true}
                      {delete true} } {
       #

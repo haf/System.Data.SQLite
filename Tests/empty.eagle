@@ -1,0 +1,38 @@
+###############################################################################
+#
+# empty.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+#
+# NOTE: There are no unit tests in this file.  This file exists to serve two
+#       purposes:
+#
+#       1. Provide a "template" script file that can be used when creating new
+#          unit test files.
+#
+#       2. Provide a script file that can be evaluated to setup an interactive
+#          environment for ad-hoc testing of System.Data.SQLite using the Eagle
+#          Shell.
+#
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

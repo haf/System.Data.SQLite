@@ -1985,8 +1985,62 @@ command.sql compile.DATA SQLite System.Data.SQLite} -result {0 1 0 1 0 1 0 3}}
 
 ###############################################################################
 
-runTest {test data-1.40 {rollback to nested savepoint} -setup {
-  setupDb [set fileName data-1.40.db]
+runTest {test data-1.40 {encrypted database, password via builder} -setup {
+  setupDb [set fileName data-1.40.db] "" "" "" "" "Password=67 89;"
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+
+  set connectionStringBuilder [object create -alias \
+      System.Data.SQLite.SQLiteConnectionStringBuilder]
+
+  $connectionStringBuilder DataSource \
+      [file join [getDatabaseDirectory] $fileName]
+
+  $connectionStringBuilder Password "67 89"
+
+  set connection [object create -alias \
+      System.Data.SQLite.SQLiteConnection \
+      [$connectionStringBuilder ToString] true]
+
+  $connection Open; addDbConnection $connection
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=\"67 89\";" true false
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  unset -nocomplain connection
+
+  cleanupDb $fileName; # NOTE: After object disposal.
+
+  unset -nocomplain connectionStringBuilder error result db fileName
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -match regexp -result {^0 1\
+0 1 1 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted\
+or is not a database.*?\} 1 \{System\.Data\.SQLite\.SQLiteException\
+\(0x80004005\): file is encrypted or is not a database.*?\}$}}
+
+###############################################################################
+
+runTest {test data-1.41 {rollback to nested savepoint} -setup {
+  setupDb [set fileName data-1.41.db]
 } -body {
   sql execute $db "BEGIN IMMEDIATE TRANSACTION;"
   sql execute $db "SAVEPOINT one;"
@@ -2015,8 +2069,8 @@ runTest {test data-1.40 {rollback to nested savepoint} -setup {
 
 ###############################################################################
 
-runTest {test data-1.41 {NoExtensionFunctions connection flag} -setup {
-  setupDb [set fileName data-1.41.db]
+runTest {test data-1.42 {NoExtensionFunctions connection flag} -setup {
+  setupDb [set fileName data-1.42.db]
 } -body {
   set result [list]
 
@@ -2047,8 +2101,8 @@ regexp -result {^0 12341234 1 \{System\.Data\.SQLite\.SQLiteException\
 
 ###############################################################################
 
-runTest {test data-1.42 {column name and index lookup} -setup {
-  setupDb [set fileName data-1.42.db]
+runTest {test data-1.43 {column name and index lookup} -setup {
+  setupDb [set fileName data-1.43.db]
 } -body {
   sql execute $db {
     CREATE TABLE t1(x, y, z);

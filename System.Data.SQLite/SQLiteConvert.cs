@@ -1010,40 +1010,45 @@ namespace System.Data.SQLite
       Opening = 1,
 
       /// <summary>
+      /// The connection string has been parsed.
+      /// </summary>
+      ConnectionString = 2,
+
+      /// <summary>
       /// The connection was opened.
       /// </summary>
-      Opened = 2,
+      Opened = 3,
 
       /// <summary>
       /// The <see cref="ChangeDatabase" /> method was called on the
       /// connection.
       /// </summary>
-      ChangeDatabase = 3,
+      ChangeDatabase = 4,
 
       /// <summary>
       /// A transaction was created using the connection.
       /// </summary>
-      NewTransaction = 4,
+      NewTransaction = 5,
 
       /// <summary>
       /// The connection was enlisted into a transaction.
       /// </summary>
-      EnlistTransaction = 5,
+      EnlistTransaction = 6,
 
       /// <summary>
       /// A command was created using the connection.
       /// </summary>
-      NewCommand = 6,
+      NewCommand = 7,
 
       /// <summary>
       /// The connection is being closed.
       /// </summary>
-      Closing = 7,
+      Closing = 8,
 
       /// <summary>
       /// The connection was closed.
       /// </summary>
-      Closed = 8
+      Closed = 9
   }
 
   /// <summary>
