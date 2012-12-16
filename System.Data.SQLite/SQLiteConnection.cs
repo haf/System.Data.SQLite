@@ -1324,7 +1324,8 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Parses the connection string into component parts
+    /// Parses the connection string into component parts using the custom
+    /// connection string parser.
     /// </summary>
     /// <param name="connectionString">The connection string to parse</param>
     /// <returns>An array of key-value pairs representing each parameter of the connection string</returns>
@@ -1353,9 +1354,12 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Parses a connection string using the <see cref="DbConnectionStringBuilder" />
-    /// class and returns the key/value pairs.  An exception may be thrown if the
-    /// connection string is invalid or cannot be parsed.
+    /// Parses a connection string using the built-in (i.e. framework provided)
+    /// connection string parser class and returns the key/value pairs.  An
+    /// exception may be thrown if the connection string is invalid or cannot be
+    /// parsed.  When compiled for the .NET Compact Framework, the custom
+    /// connection string parser is always used instead because the framework
+    /// provided on is unavailable there.
     /// </summary>
     /// <param name="connectionString">
     /// The connection string to parse.
@@ -1370,6 +1374,7 @@ namespace System.Data.SQLite
         bool strict
         )
     {
+#if !PLATFORM_COMPACTFRAMEWORK
         DbConnectionStringBuilder connectionStringBuilder
             = new DbConnectionStringBuilder();
 
@@ -1402,6 +1407,14 @@ namespace System.Data.SQLite
         }
 
         return result;
+#else
+        //
+        // NOTE: On the .NET Compact Framework, always use our custom connection
+        //       string parser as the built-in (i.e. framework provided) one is
+        //       unavailable.
+        //
+        return ParseConnectionString(connectionString);
+#endif
     }
 
 #if !PLATFORM_COMPACTFRAMEWORK
