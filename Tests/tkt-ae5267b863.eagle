@@ -1,0 +1,148 @@
+###############################################################################
+#
+# tkt-ae5267b863.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-ae5267b863-1.1 {segfault during command GC} -setup {
+  setupDb [set fileName tkt-ae5267b863-1.1.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql(1) { \
+    CREATE TABLE t1( \
+      __rowid INTEGER PRIMARY KEY AUTOINCREMENT, \
+      z STRING \
+    ); \
+  }
+
+  set sql(2) { \
+    CREATE VIRTUAL TABLE t2 USING RTREE( \
+      id, minx, maxx, miny, maxy \
+    ); \
+  }
+
+  set sql(3) { \
+    INSERT INTO t1 VALUES({0}, \"value {0}\"); \
+  }
+
+  set sql(4) { \
+    INSERT INTO t2 VALUES({0}, {0}, {0}, {0}, {0}); \
+  }
+
+  set sql(5) { \
+    SELECT COUNT(*) FROM t1, t2 \
+    WHERE t1.__rowid = t2.id AND \
+    (t2.minx <= :xmax and t2.miny <= :ymax and \
+     t2.maxx >= :xmin and t2.maxy >= :ymin); \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static void Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "${sql(1)}";
+              command.ExecuteNonQuery();
+
+              command.CommandText = "${sql(2)}";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              using (SQLiteTransaction transaction =
+                  connection.BeginTransaction())
+              {
+                for (int index = 0; index < 10; index++)
+                {
+                  command.CommandText = String.Format("${sql(3)}", index);
+                  command.ExecuteNonQuery();
+
+                  command.CommandText = String.Format("${sql(4)}", index);
+                  command.ExecuteNonQuery();
+                }
+
+                transaction.Commit();
+              }
+            }
+
+            for (int index = 0; index < 10000; index++)
+            {
+              //
+              // NOTE: Purposely omit the 'using' block here to test
+              //       command disposal via the garbage collector.
+              //
+              SQLiteCommand command = connection.CreateCommand();
+
+              command.CommandText = "${sql(5)}";
+              command.Parameters.Add(new SQLiteParameter(":xmin", 2));
+              command.Parameters.Add(new SQLiteParameter(":xmax", 8));
+              command.Parameters.Add(new SQLiteParameter(":ymin", 2));
+              command.Parameters.Add(new SQLiteParameter(":ymax", 8));
+
+              using (SQLiteDataReader reader = command.ExecuteReader())
+              {
+                while (reader.Read()) {
+                  //
+                  // do nothing.
+                  //
+                }
+              }
+            }
+
+            connection.Close();
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
