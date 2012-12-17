@@ -98,7 +98,11 @@ runTest {test tkt-ae5267b863-1.1 {segfault during command GC} -setup {
               }
             }
 
-            for (int index = 0; index < 10000; index++)
+            //
+            // NOTE: Perform a huge amount of command creation and execution
+            //       cycles for a better chance to trigger the bug.
+            //
+            for (int index = 0; index < 100000; index++)
             {
               //
               // NOTE: Purposely omit the 'using' block here to test
