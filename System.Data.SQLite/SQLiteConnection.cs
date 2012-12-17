@@ -1359,7 +1359,7 @@ namespace System.Data.SQLite
     /// exception may be thrown if the connection string is invalid or cannot be
     /// parsed.  When compiled for the .NET Compact Framework, the custom
     /// connection string parser is always used instead because the framework
-    /// provided on is unavailable there.
+    /// provided one is unavailable there.
     /// </summary>
     /// <param name="connectionString">
     /// The connection string to parse.
