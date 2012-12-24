@@ -34,6 +34,15 @@
           <a href="downloads.wiki">download page</a> for a complete list of
           downloadable packages and information on their use.
         </p>
+        <p>
+          The current documentation for all public types, methods, properties,
+          and events is checked into the repository, in
+          <a href="http://en.wikipedia.org/wiki/Microsoft_Compiled_HTML_Help">
+          <i>Microsoft Compiled HTML Help</i> (&quot;CHM&quot;) format</a>.  It
+          can also be
+          <a href="/index.html/raw/Doc/SQLite.NET.chm?name=trunk">downloaded
+          directly</a> via the web interface to the repository.
+        </p>
       </td>
       <td width="30%" valign="top">
         <table align="right" border="1" cellpadding="10" hspace="10" cellspacing="0">
