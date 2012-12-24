@@ -1337,18 +1337,26 @@ namespace System.Data.SQLite
 
       // First split into semi-colon delimited values.  The Split() function of SQLiteBase accounts for and properly
       // skips semi-colons in quoted strings
-      string[] arParts = SQLiteConvert.Split(s, ';');
+      string[] arParts = s.Split(';');
 
       int x = arParts.Length;
       // For each semi-colon piece, split into key and value pairs by the presence of the = sign
       for (n = 0; n < x; n++)
       {
+        if (arParts[n] == null)
+          continue;
+
+        arParts[n] = arParts[n].Trim();
+
+        if (arParts[n].Length == 0)
+          continue;
+
         int indexOf = arParts[n].IndexOf('=');
 
         if (indexOf != -1)
-          ls.Add(UnwrapString(arParts[n].Substring(0, indexOf)), UnwrapString(arParts[n].Substring(indexOf + 1)));
+          ls.Add(UnwrapString(arParts[n].Substring(0, indexOf).Trim()), UnwrapString(arParts[n].Substring(indexOf + 1).Trim()));
         else
-          throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, "Invalid ConnectionString format for part \"{0}\"", arParts[n]));
+          throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, "Invalid ConnectionString format for part \"{0}\", no equal sign found", arParts[n]));
       }
       return ls;
     }
