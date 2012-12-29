@@ -82,6 +82,7 @@ set sds_manifests(source) {
   Setup/build_ce.bat
   Setup/CheckForNetFx.pas
   Setup/clean.bat
+  Setup/deployAndTestCe.eagle
   Setup/InitializeSetup.pas
   Setup/release.bat
   Setup/release_all.bat
@@ -130,6 +131,7 @@ set sds_manifests(source) {
   Setup/set_x86_2012.bat
   Setup/SQLite.iss
   Setup/test_all.bat
+  Setup/test_ce.bat
   Setup/updateFileInfo.tcl
   Setup/verify.eagle
   Setup/verify.lst
@@ -247,6 +249,7 @@ set sds_manifests(source) {
   SQLite.NET.2012.MSBuild.sln
   SQLite.NET.2012.sln
   SQLite.NET.Settings.targets
+  SQLite.NET.Settings.targets.netFx35
   SQLite.NET.targets
   SQLite.nuspec
   SQLite.x64.nuspec
@@ -394,6 +397,7 @@ set sds_manifests(source) {
   Tests/backup.eagle
   Tests/basic.eagle
   Tests/common.eagle
+  Tests/empty.eagle
   Tests/installer.eagle
   Tests/Installer_Test_Vs2005.log
   Tests/Installer_Test_Vs2008.log
@@ -403,6 +407,7 @@ set sds_manifests(source) {
   Tests/pkgIndex.eagle
   Tests/stress.eagle
   Tests/testlinq.out
+  Tests/thread.eagle
   Tests/tkt-00f86f9739.eagle
   Tests/tkt-0d5b1ef362.eagle
   Tests/tkt-17045010df.eagle
@@ -414,6 +419,7 @@ set sds_manifests(source) {
   Tests/tkt-448d663d11.eagle
   Tests/tkt-544dba0a2f.eagle
   Tests/tkt-59edc1018b.eagle
+  Tests/tkt-6c6ecccc5f.eagle
   Tests/tkt-72905c9a77.eagle
   Tests/tkt-7e3fa93744.eagle
   Tests/tkt-84718e79fa.eagle
@@ -422,6 +428,7 @@ set sds_manifests(source) {
   Tests/tkt-8c3bee31c8.eagle
   Tests/tkt-996d13cd87.eagle
   Tests/tkt-ac47dd230a.eagle
+  Tests/tkt-ae5267b863.eagle
   Tests/tkt-b4a7ddc83f.eagle
   Tests/tkt-bb4b04d457.eagle
   Tests/tkt-ccfa69fc32.eagle

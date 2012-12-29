@@ -2,11 +2,14 @@
 *.chw
 *.docstates
 *.fossil
+*.mistachkin.eagle
 *.ncb
 *.nupkg
+*.pdb
 *.suo
 *.user
 *.zip
+.fossil-settings/*
 _FOSSIL_
 bin/*
 Doc/Output/*
@@ -35,8 +38,8 @@ Membership/obj/*
 Membership/Profile/*
 Membership/SiteMap/*
 obj/*
-Setup/set_user_*.bat
 Setup/Output/*
+Setup/set_user_*.bat
 SQLite.Designer/obj/*
 SQLite.Designer/Properties/*
 SQLite.Designer/VSDesign/*
