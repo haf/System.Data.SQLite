@@ -100,6 +100,12 @@ IF ERRORLEVEL 1 (
   GOTO errors
 )
 
+REM
+REM NOTE: Set an environment variable that can be used by the test suite to
+REM       determine that testing is being performed in batch mode.
+REM
+SET TEST_ALL=1
+
 FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
   FOR %%Y IN (%YEARS%) DO (
     IF NOT DEFINED NOMANAGEDONLY (

@@ -389,7 +389,7 @@ namespace eval ::Eagle {
     #
     set options [list -configuration -constraints -exitOnComplete -file \
         -logFile -match -no -notFile -postTest -preTest -skip -stopOnFailure \
-        -suffix -threshold]
+        -suffix -tclsh -threshold]
 
     foreach {name value} $args {
       #
@@ -416,6 +416,33 @@ namespace eval ::Eagle {
     # NOTE: Now, attempt to flush the test log queue, if available.
     #
     tlog ""
+  }
+
+  proc getTclShellFileName {} {
+    #
+    # NOTE: Check the environment variables we know about that
+    #       may contain the path where the Tcl shell is located.
+    #
+    foreach name [list Eagle_Tcl_Shell Tcl_Shell] {
+      set value [getEnvironmentVariable $name]
+
+      #
+      # TODO: Possibly add a check if the file actually exists
+      #       here.
+      #
+      if {[string length $value] > 0} then {
+        #
+        # NOTE: *EXTERNAL* Return verbatim, no normalization.
+        #
+        return $value
+      }
+    }
+
+    #
+    # NOTE: None of the environment variables returned anything
+    #       valid, return the fallback default.
+    #
+    return tclsh
   }
 
   proc getTemporaryPath {} {
@@ -679,7 +706,7 @@ namespace eval ::Eagle {
           #
           # NOTE: Only the string to be printed is specified (stdout).
           #
-          return [tputs $::test_channel [lindex $args 0]]
+          return [tputs $::test_channel [appendArgs [lindex $args 0] \n]]
         }
         2 {
           #
@@ -2036,7 +2063,7 @@ namespace eval ::Eagle {
         isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
         returnInfoScript tputs formatDecimal formatList configureTcltest \
         calculateBogoCops removeConstraint machineToPlatform tsource testShim \
-        getTestConfiguration getTestSuffix] false false
+        getTestConfiguration getTestSuffix getTclShellFileName] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

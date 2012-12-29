@@ -959,6 +959,37 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForInteractiveCommand { channel name } {
+    tputs $channel [appendArgs "---- checking for interactive command \"" \
+        $name "\"... "]
+
+    #
+    # NOTE: Currently, only Eagle has "interactive commands".
+    #
+    if {[isEagle]} then {
+      #
+      # NOTE: Attempt to query the interactive command names from Eagle.
+      #
+      if {[catch {object invoke Utility GetInteractiveCommandNames $name \
+              false} names] == 0 && \
+          [llength $names] > 0} then {
+        #
+        # NOTE: Yes, it appears that it is available.
+        #
+        addConstraint [appendArgs interactiveCommand. $name]
+
+        tputs $channel yes\n
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
+      }
+    }
+
+    tputs $channel no\n
+  }
+
   proc checkForUserInteraction { channel } {
     tputs $channel "---- checking for user interaction... "
 
@@ -2246,9 +2277,10 @@ namespace eval ::Eagle {
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
         checkForTip405 checkForPerformance checkForTiming checkForInteractive \
         checkForSymbols checkForLogFile checkForNetwork checkForCompileOption \
-        checkForWindowsCommandProcessor checkForUserInteraction \
-        checkForTclOptions checkForTestConfiguration checkForTestSuffix \
-        checkForVariable checkForScriptLibrary checkForFossil] false false
+        checkForInteractiveCommand checkForWindowsCommandProcessor \
+        checkForUserInteraction checkForTclOptions checkForTestConfiguration \
+        checkForTestSuffix checkForVariable checkForScriptLibrary \
+        checkForFossil] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

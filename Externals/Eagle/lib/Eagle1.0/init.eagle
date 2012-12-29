@@ -1563,8 +1563,8 @@ namespace eval ::Eagle {
       #
       set result [list]
 
-      foreach dir [split [exec $::env(ComSpec) /c dir /ad /b \
-          [appendArgs \" [file nativename $pattern] \"]] \n] {
+      foreach dir [split [exec -unicode $::env(ComSpec) /u /c dir \
+          /ad /b [appendArgs \" [file nativename $pattern] \"]] \n] {
         set dir [string trim $dir]
 
         if {[string length $dir] > 0} then {
@@ -1576,8 +1576,8 @@ namespace eval ::Eagle {
         }
       }
 
-      foreach dir [split [exec $::env(ComSpec) /c dir /ahd /b \
-          [appendArgs \" [file nativename $pattern] \"]] \n] {
+      foreach dir [split [exec -unicode $::env(ComSpec) /u /c dir \
+          /ahd /b [appendArgs \" [file nativename $pattern] \"]] \n] {
         set dir [string trim $dir]
 
         if {[string length $dir] > 0} then {
@@ -1598,8 +1598,8 @@ namespace eval ::Eagle {
       #
       set result [list]
 
-      foreach fileName [split [exec $::env(ComSpec) /c dir /a-d /b \
-          [appendArgs \" [file nativename $pattern] \"]] \n] {
+      foreach fileName [split [exec -unicode $::env(ComSpec) /u /c dir \
+          /a-d /b [appendArgs \" [file nativename $pattern] \"]] \n] {
         set fileName [string trim $fileName]
 
         if {[string length $fileName] > 0} then {
@@ -1611,8 +1611,8 @@ namespace eval ::Eagle {
         }
       }
 
-      foreach fileName [split [exec $::env(ComSpec) /c dir /ah-d /b \
-          [appendArgs \" [file nativename $pattern] \"]] \n] {
+      foreach fileName [split [exec -unicode $::env(ComSpec) /u /c dir \
+          /ah-d /b [appendArgs \" [file nativename $pattern] \"]] \n] {
         set fileName [string trim $fileName]
 
         if {[string length $fileName] > 0} then {
@@ -1633,8 +1633,8 @@ namespace eval ::Eagle {
       #
       set result [list]
 
-      foreach fileName [split [exec $::env(ComSpec) /c dir /a-d /s /b \
-          [appendArgs \" [file nativename $pattern] \"]] \n] {
+      foreach fileName [split [exec -unicode $::env(ComSpec) /u /c dir \
+          /a-d /s /b [appendArgs \" [file nativename $pattern] \"]] \n] {
         set fileName [string trim $fileName]
 
         if {[string length $fileName] > 0} then {
@@ -1646,8 +1646,8 @@ namespace eval ::Eagle {
         }
       }
 
-      foreach fileName [split [exec $::env(ComSpec) /c dir /ah-d /s /b \
-          [appendArgs \" [file nativename $pattern] \"]] \n] {
+      foreach fileName [split [exec -unicode $::env(ComSpec) /u /c dir \
+          /ah-d /s /b [appendArgs \" [file nativename $pattern] \"]] \n] {
         set fileName [string trim $fileName]
 
         if {[string length $fileName] > 0} then {
@@ -1800,8 +1800,8 @@ namespace eval ::Eagle {
     exportAndImportPackageCommands [namespace current] [list \
         exportAndImportPackageCommands isEagle isMono getEnvironmentVariable \
         getPluginPath getDictionaryValue getColumnValue getRowColumnValue \
-        appendArgs haveGaruda lappendArgs readFile filter map reduce \
-        getPlatformInfo execShell combineFlags tqputs tqlog] false false
+        appendArgs haveGaruda lappendArgs readFile writeFile filter map \
+        reduce getPlatformInfo execShell combineFlags tqputs tqlog] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

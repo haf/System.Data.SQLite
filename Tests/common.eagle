@@ -1423,7 +1423,7 @@ namespace eval ::Eagle {
       }
     }
 
-    proc loadSQLiteTestSettings { channel {quiet false} } {
+    proc loadSQLiteTestSettings { channel {suffix ""} {quiet false} } {
       #
       # NOTE: Skip loading the settings if their usage has been disabled.
       #
@@ -1433,7 +1433,7 @@ namespace eval ::Eagle {
         #
         if {[info exists ::tcl_platform(user)]} then {
           set userSettingsFileName [file join [getCommonDirectory] \
-              [appendArgs settings. $::tcl_platform(user) .eagle]]
+              [appendArgs settings $suffix . $::tcl_platform(user) .eagle]]
 
           if {[file exists $userSettingsFileName]} then {
             if {!$quiet} then {
@@ -1457,7 +1457,7 @@ namespace eval ::Eagle {
 
         if {[info exists ::tcl_platform(host)]} then {
           set hostSettingsFileName [file join [getCommonDirectory] \
-              [appendArgs settings. $::tcl_platform(host) .eagle]]
+              [appendArgs settings $suffix . $::tcl_platform(host) .eagle]]
 
           if {[file exists $hostSettingsFileName]} then {
             if {!$quiet} then {
@@ -1485,6 +1485,12 @@ namespace eval ::Eagle {
       #       skipped.
       #
       if {![info exists ::no(prologue.eagle)]} then {
+        #
+        # NOTE: Load the "before-constraints" custom per-user and/or per-host
+        #       test settings now.
+        #
+        uplevel 1 [list loadSQLiteTestSettings $::test_channel .before]
+
         #
         # NOTE: Skip all System.Data.SQLite related file handling (deleting,
         #       copying, and loading) if we are so instructed.
@@ -1637,6 +1643,18 @@ namespace eval ::Eagle {
         checkForRuntimeOption $::test_channel native
 
         #
+        # NOTE: Check if the test suite should count the number of connections
+        #       "opened" and "closed" from the pool when determining if a test
+        #       passed.  Disabling this behavior is sometimes necessary (e.g.
+        #       during the release testing process) because there are several
+        #       tests that rely on the "opened from pool" count being greater
+        #       than zero.  These tests may fail due to the non-deterministic
+        #       behavior of the CLR GC, even when there is no bug in the code
+        #       being tested.
+        #
+        checkForRuntimeOption $::test_channel noPoolCounts
+
+        #
         # NOTE: Report the resource usage prior to running any tests.
         #
         reportSQLiteResources $::test_channel
@@ -1648,9 +1666,10 @@ namespace eval ::Eagle {
             [formatList [lsort [getConstraints]]] \n]
 
         #
-        # NOTE: Load custom per-user and/or per-host test settings now.
+        # NOTE: Load the "after-constraints" custom per-user and/or per-host
+        #       test settings now.
         #
-        uplevel 1 [list loadSQLiteTestSettings $::test_channel]
+        uplevel 1 [list loadSQLiteTestSettings $::test_channel .after]
 
         #
         # NOTE: Show when our tests actually began (now).

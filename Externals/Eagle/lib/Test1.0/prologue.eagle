@@ -22,9 +22,9 @@ if {![info exists no([file tail [info script]])]} then {
   #
   # NOTE: Make sure all the variables used by this prologue are unset.
   #
-  unset -nocomplain pkg_dir pattern exec dummy directory name value \
-      expr publicKeyToken encoding memory stack drive server database \
-      timeout user password percent checkout timeStamp
+  unset -nocomplain pkg_dir pattern exec dummy directory name value expr \
+      publicKeyToken encoding memory stack drive server database timeout \
+      user password percent checkout timeStamp
 
   #
   # NOTE: Set the location of the test suite, if necessary.
@@ -253,6 +253,7 @@ if {![info exists no([file tail [info script]])]} then {
   set test_flags(-exitOnComplete) ""; # default to not exit after complete.
   set test_flags(-preTest) ""; # default to not evaluating anything.
   set test_flags(-postTest) ""; # default to not evaluating anything.
+  set test_flags(-tclsh) ""; # Tcl shell, default to empty.
 
   #
   # NOTE: Check for and process any command line arguments.
@@ -271,7 +272,7 @@ if {![info exists no([file tail [info script]])]} then {
         set no($name) $value
       }
 
-      unset name value
+      unset -nocomplain name value
     }
 
     if {[info exists test_flags(-logFile)] && \
@@ -335,12 +336,29 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Set the Tcl shell executable to use for those specialized
-  #       tests that may require it, if necessary.
+  # NOTE: Set the Tcl shell executable to use for those specialized tests that
+  #       may require it, if necessary.
   #
   if {![info exists test_tclsh]} then {
+    #
+    # NOTE: When running in Eagle, more complex logic is required to determine
+    #       the Tcl shell to use for the various tests that require it.  Also,
+    #       this same logic is used with Tcl when it is not running from an
+    #       instance of the Tcl shell executable.
+    #
     if {[isEagle] || ![string match tclsh* $bin_file]} then {
-      set test_tclsh tclsh
+      if {[info exists test_flags(-tclsh)] && \
+          [string length $test_flags(-tclsh)] > 0} then {
+        #
+        # NOTE: Use the Tcl shell specified via the command line.
+        #
+        set test_tclsh $test_flags(-tclsh)
+      } else {
+        #
+        # NOTE: Check for a Tcl shell specified via the environment.
+        #
+        set test_tclsh [getTclShellFileName]
+      }
     } else {
       set test_tclsh $bin_file
     }
@@ -864,6 +882,17 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       #
+      # NOTE: Has application domain management support been enabled (at
+      #       compile-time)?
+      #
+      if {![info exists no(compileAppDomains)]} then {
+        #
+        # NOTE: For test "interp-1.27".
+        #
+        checkForCompileOption $test_channel APPDOMAINS
+      }
+
+      #
       # NOTE: Has isolated interpreter support been enabled (at compile-time)?
       #
       if {![info exists no(compileIsolatedInterpreters)]} then {
@@ -1161,6 +1190,12 @@ if {![info exists no([file tail [info script]])]} then {
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestAddNamedFunction2*
+
+        #
+        # NOTE: For tests "function-5.*".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestAddNamedFunction3*
       }
 
       #
@@ -1756,6 +1791,13 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: For test "proc-1.9".
+    #
+    if {![info exists no(testProcs.tcl)]} then {
+      checkForFile $test_channel [file join $test_path testProcs.tcl]
+    }
+
+    #
     # NOTE: For test "interp-1.10".
     #
     if {![info exists no(settings.xml)]} then {
@@ -1987,6 +2029,21 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {![info exists no(interactive)]} then {
     checkForInteractive $test_channel
+  }
+
+  #
+  # NOTE: Has interactive command testing been disabled?
+  #
+  if {![info exists no(interactiveCommand)]} then {
+    #
+    # NOTE: For test "debug-1.8".
+    #
+    checkForInteractiveCommand $test_channel go
+
+    #
+    # NOTE: For test "debug-1.9".
+    #
+    checkForInteractiveCommand $test_channel done
   }
 
   if {![info exists no(userInteraction)]} then {
