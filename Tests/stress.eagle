@@ -132,6 +132,12 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
+  proc initTest { indicator } {
+    set ::eagle_tests(constraints) $::test_constraints
+  }
+
+  #############################################################################
+
   proc delayTest { {extra 0} } {
     after [expr {int((rand() * 1000) + $extra)}]
   }
@@ -164,14 +170,19 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Halt all testing and exit the process now
     #       -OR- just record the failure and continue?
     #
-    if {$::exitOnFail} then {
-      set level [expr {[info level] - 1}]
+    set level [expr {[info level] - 1}]
 
+    if {$::exitOnFail} then {
       tputs $::test_channel [appendArgs \
           \n [info level $level] ": " \n\t $error \n]
 
       exit failure
     } else {
+      tlog [appendArgs \
+          "\n---- BEGIN TEST FAILURE OUTPUT\n" \
+          \n [info level $level] ": " \n\t $error \n \
+          "\n---- END TEST FAILURE OUTPUT\n"]
+
       tputs $::test_channel $indicator
 
       if {![info exists ::failures($indicator)]} then {
@@ -207,9 +218,19 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   proc useMem { ptr size } {
     if {![isMono]} then {
-      object invoke -flags +NonPublic \
-          Microsoft.Win32.Win32Native ZeroMemory \
-          $ptr $size
+      #
+      # HACK: The type signature of the ZeroMemory method changed as of the
+      #       .NET Framework 4.5.  The second argument went from being of
+      #       type UInt to type UIntPtr.
+      #
+      if {[haveConstraint dotNet40] && [haveConstraint dotNet45]} then {
+        set newSize [object create UIntPtr $size]
+      } else {
+        set newSize $size
+      }
+
+      object invoke -flags +NonPublic Microsoft.Win32.Win32Native \
+          ZeroMemory $ptr $newSize
     }
   }
 
@@ -456,6 +477,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #1, CREATE TABLE statements.
     #
     lappend ::times(1) [lindex [time {
+      initTest A
       setupWorkloadFileDb $dstFileName
       for {set index 2} {$index <= $count1} {incr index} {
         if {[catch {
@@ -486,6 +508,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #2, DROP TABLE statements.
     #
     lappend ::times(2) [lindex [time {
+      initTest B
       setupWorkloadFileDb $dstFileName
       for {set index 2} {$index <= $count1} {incr index} {
         if {[catch {
@@ -515,6 +538,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #3, "small" SELECT statements.
     #
     lappend ::times(3) [lindex [time {
+      initTest C
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -551,6 +575,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #4, "big" SELECT statements.
     #
     lappend ::times(4) [lindex [time {
+      initTest D
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -587,6 +612,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #5, "small" INSERT statements.
     #
     lappend ::times(5) [lindex [time {
+      initTest E
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -618,6 +644,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #6, "big" INSERT statements.
     #
     lappend ::times(6) [lindex [time {
+      initTest F
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -648,6 +675,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #7, "small" UPDATE statements.
     #
     lappend ::times(7) [lindex [time {
+      initTest G
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -678,6 +706,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #8, "big" UPDATE statements.
     #
     lappend ::times(8) [lindex [time {
+      initTest H
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -708,6 +737,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #9, "small" DELETE statements.
     #
     lappend ::times(9) [lindex [time {
+      initTest I
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -737,6 +767,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #10, "big" DELETE statements.
     #
     lappend ::times(10) [lindex [time {
+      initTest J
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -766,6 +797,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #11, VACUUM statement.
     #
     lappend ::times(11) [lindex [time {
+      initTest K
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -794,6 +826,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #12, backup to in-memory database.
     #
     lappend ::times(12) [lindex [time {
+      initTest L
       for {set index 1} {$index <= $count1} {incr index} {
         if {[string is integer -strict $::compiled(12)]} then {
           set id $::compiled(12); # NOTE: Already compiled.
@@ -875,6 +908,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #13, backup from an in-memory database.
     #
     lappend ::times(13) [lindex [time {
+      initTest M
       for {set index 1} {$index <= $count1} {incr index} {
         if {[string is integer -strict $::compiled(13)]} then {
           set id $::compiled(13); # NOTE: Already compiled.
@@ -956,6 +990,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #14, PRAGMA integrity check statement.
     #
     lappend ::times(14) [lindex [time {
+      initTest N
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -988,6 +1023,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #15, force managed garbage collection
     #
     lappend ::times(15) [lindex [time {
+      initTest O
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           collectGarbage $::test_channel
@@ -1014,6 +1050,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #16, allocate (exclude) some native heap memory
     #
     lappend ::times(16) [lindex [time {
+      initTest P
       set maxSize $::count(5)
       object invoke GC AddMemoryPressure $maxSize
       try {
@@ -1052,6 +1089,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #17, change the database journal mode
     #
     lappend ::times(17) [lindex [time {
+      initTest Q
       setupWorkloadFileDb $dstFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -1081,6 +1119,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     # NOTE: Workload #18, execute queries against the in-memory database
     #
     lappend ::times(18) [lindex [time {
+      initTest R
       setupWorkloadMemDb $srcFileName
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
@@ -1312,6 +1351,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   rename doneTest ""
   rename showTest ""
   rename delayTest ""
+  rename initTest ""
   rename isExpectedError ""
   rename formatWorkloadTime ""
   rename formatWorkloadResult ""

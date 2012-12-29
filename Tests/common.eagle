@@ -1666,6 +1666,15 @@ namespace eval ::Eagle {
             [formatList [lsort [getConstraints]]] \n]
 
         #
+        # NOTE: Save the test constraints for use by threads created in this
+        #       application domain.  This is necessary because all the Eagle
+        #       "test context" information, is per-thread.
+        #
+        if {![info exists ::test_constraints]} then {
+          set ::test_constraints $::eagle_tests(constraints)
+        }
+
+        #
         # NOTE: Load the "after-constraints" custom per-user and/or per-host
         #       test settings now.
         #
