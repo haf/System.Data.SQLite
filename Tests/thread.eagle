@@ -90,11 +90,12 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
   }]
 
   #
-  # NOTE: The temporary directory must be reset here because it allocates
-  #       some SQLite memory and this test requires an extremely accurate
-  #       reading.
+  # NOTE: The data and temporary directories must be reset here (after the
+  #       setupDb call above) because they allocate some SQLite memory and
+  #       this test requires an extremely accurate reading.
   #
   sql execute $db {
+    PRAGMA data_store_directory = "";
     PRAGMA temp_store_directory = "";
   }
 

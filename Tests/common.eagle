@@ -1222,6 +1222,12 @@ namespace eval ::Eagle {
       #       ready for use by the test suite.
       #
       if {$force || [isSQLiteReady]} then {
+        #
+        # BUGFIX: Before calling the native shutdown function, make sure both
+        #         of the PRAGMA related directory names are freed.
+        #
+        checkForSQLiteDirectories $channel true
+
         if {[catch {object invoke -flags +NonPublic \
                 System.Data.SQLite.UnsafeNativeMethods \
                 sqlite3_shutdown} result] == 0} then {
@@ -1701,6 +1707,12 @@ namespace eval ::Eagle {
         tputs $::test_channel [appendArgs \
             "---- System.Data.SQLite tests ended at " \
             [clock format [clock seconds]] \n]
+
+        #
+        # BUGFIX: Before checking the final resources in use by SQLite, make
+        #         sure both of the PRAGMA related directory names are freed.
+        #
+        checkForSQLiteDirectories $::test_channel true
 
         #
         # NOTE: Also report the resource usage after running the tests.
