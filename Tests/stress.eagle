@@ -23,6 +23,7 @@ runSQLiteTestPrologue
 #
 # NOTE: Report before test, before shutdown.
 #
+checkForSQLiteDirectories $test_channel
 getSQLiteHandleCounts $test_channel
 reportSQLiteResources $test_channel
 
@@ -39,6 +40,7 @@ shutdownSQLite $test_channel
 #
 # NOTE: Report before test, after shutdown.
 #
+checkForSQLiteDirectories $test_channel
 getSQLiteHandleCounts $test_channel
 reportSQLiteResources $test_channel
 
@@ -1389,6 +1391,7 @@ System.Data.SQLite} -result {0}}
 #
 # NOTE: Report after test.
 #
+checkForSQLiteDirectories $test_channel
 getSQLiteHandleCounts $test_channel
 reportSQLiteResources $test_channel
 

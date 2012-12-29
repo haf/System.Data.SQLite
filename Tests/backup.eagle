@@ -20,6 +20,7 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
+checkForSQLiteDirectories $test_channel
 getSQLiteHandleCounts $test_channel
 reportSQLiteResources $test_channel
 
@@ -235,6 +236,7 @@ unset -nocomplain i params pages callback
 
 ###############################################################################
 
+checkForSQLiteDirectories $test_channel
 getSQLiteHandleCounts $test_channel
 reportSQLiteResources $test_channel
 
