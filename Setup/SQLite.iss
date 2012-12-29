@@ -83,7 +83,7 @@ Components: Application\Core\MSIL Or Application\LINQ; Name: gac; Description: I
 #endif
 
 #if AppProcessor == "x86"
-#if Year == "2005" || Year == "2008"
+#if Year == "2005"
 Components: {#InstallerCondition}; Name: gac\vs2005; Description: Install the designer components for Visual Studio 2005.; Flags: unchecked; Check: CheckIsNetFx2Setup()
 #endif
 #if Year == "2008"
@@ -108,7 +108,7 @@ Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|
 #endif
 
 #if Pos("NativeOnly", AppConfiguration) == 0 && AppProcessor == "x86"
-#if Year == "2005" || Year == "2008"
+#if Year == "2005"
 Components: {#InstallerCondition}; Tasks: gac\vs2005; Filename: {app}\bin\Installer.exe; Parameters: "-install true -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx35 true -noNetFx40 true -noNetFx45 true -noVs2008 true -noVs2010 true -noVs2012 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
 #endif
 #if Year == "2008"
@@ -135,7 +135,7 @@ Components: {#InstallerCondition}; Tasks: gac\vs2010; Filename: {app}\bin\Instal
 #if Year == "2008"
 Components: {#InstallerCondition}; Tasks: gac\vs2008; Filename: {app}\bin\Installer.exe; Parameters: "-install false -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx40 true -noNetFx45 true -noVs2005 true -noVs2010 true -noVs2012 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
 #endif
-#if Year == "2005" || Year == "2008"
+#if Year == "2005"
 Components: {#InstallerCondition}; Tasks: gac\vs2005; Filename: {app}\bin\Installer.exe; Parameters: "-install false -wow64 true -installFlags AllExceptGlobalAssemblyCache -tracePriority Lowest -verbose true -noCompact true -noNetFx35 true -noNetFx40 true -noNetFx45 true -noVs2008 true -noVs2010 true -noVs2012 true -whatIf false -confirm true"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup()
 #endif
 #endif
