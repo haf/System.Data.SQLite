@@ -1456,6 +1456,12 @@ namespace eval ::Eagle {
                     $userSettingsFileName "\", error: " \n\t $error \n]
               }
             }
+          } else {
+            if {!$quiet} then {
+              tputs $channel [appendArgs \
+                  "---- skipped loading per-user test settings file \"" \
+                  $userSettingsFileName "\", it does not exist\n"]
+            }
           }
         }
 
@@ -1479,6 +1485,12 @@ namespace eval ::Eagle {
                     "==== WARNING: failed to load per-host settings file \"" \
                     $hostSettingsFileName "\", error: " \n\t $error \n]
               }
+            }
+          } else {
+            if {!$quiet} then {
+              tputs $channel [appendArgs \
+                  "---- skipped loading per-host test settings file \"" \
+                  $hostSettingsFileName "\", it does not exist\n"]
             }
           }
         }

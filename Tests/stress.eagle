@@ -356,7 +356,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #       should take into account the existing workload parameters and avoid
   #       changing any that may have already been overridden.
   #
-  loadSQLiteTestSettings $test_channel
+  loadSQLiteTestSettings $test_channel .stress
 
   #############################################################################
 
