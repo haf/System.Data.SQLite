@@ -1901,6 +1901,25 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// This method causes any pending database operation to abort and return at
+    /// its earliest opportunity.  This routine is typically called in response
+    /// to a user action such as pressing "Cancel" or Ctrl-C where the user wants
+    /// a long query operation to halt immediately.  It is safe to call this
+    /// routine from any thread.  However, it is not safe to call this routine
+    /// with a database connection that is closed or might close before this method
+    /// returns.
+    /// </summary>
+    public void Cancel()
+    {
+        CheckDisposed();
+
+        if (_sql == null)
+            throw new InvalidOperationException("Database connection not valid for query cancellation.");
+
+        _sql.Cancel(); /* throw */
+    }
+
+    /// <summary>
     /// Returns the number of rows changed by the last INSERT, UPDATE, or DELETE statement executed on
     /// this connection.
     /// </summary>
