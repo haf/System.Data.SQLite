@@ -1079,6 +1079,68 @@ namespace eval ::Eagle {
       return $code
     }
 
+    proc setupDbInterruptCallback { channel log } {
+      tputs $channel "---- setting up debugger interrupt callback... "
+
+      if {[catch {
+        #
+        # NOTE: Make sure the script debugger and the isolated interpreter are
+        #       setup and ready for use.
+        #
+        debug setup true true
+
+        #
+        # NOTE: Load the necessary packages into the isolated interpreter.
+        #
+        debug eval {
+          package require Eagle
+          package require Eagle.Library
+          package require Eagle.Test
+        }
+
+        #
+        # NOTE: Copy the necessary variables into the isolated interpreter.
+        #
+        debug invoke 0 set ::test_channel $channel; # NOTE: For [tputs].
+        debug invoke 0 set ::test_log $log; # NOTE: For [tlog].
+
+        #
+        # NOTE: Install the callback script to be evaluated in the isolated
+        #       interpreter when this interpreter is interrupted by script
+        #       cancellation, etc.
+        #
+        debug callback apply {{sender e} {
+          #
+          # NOTE: Check if this callback is one that we care about.
+          #
+          if {"Canceled" in [split [$e InterruptType] ", "]} then {
+            #
+            # NOTE: Iterate through all database connections known to the
+            #       parent interpreter.
+            #
+            object foreach -alias pair \
+                [object invoke -flags +NonPublic $e Interpreter.connections] {
+              #
+              # NOTE: Attempt to cancel any SQL queries in progress on this
+              #       database connection.
+              #
+              if {[catch {$pair Value.Cancel} error] != 0} then {
+                tputs $::test_channel [appendArgs \n \
+                    "==== WARNING: failed to cancel query for connection \"" \
+                    [$pair Key] "\", error: " \n\t $error \n]
+              }
+            }
+          }
+        }}
+      } error] == 0} then {
+        addConstraint interruptCallback.sqlite3
+
+        tputs $channel yes\n
+      } else {
+        tputs $channel [appendArgs "no, error: " \n\t $error \n]
+      }
+    }
+
     proc cleanupFile { fileName {collect true} {force false} } {
       #
       # NOTE: Attempt to force all pending "garbage" objects to be collected,
@@ -1653,6 +1715,15 @@ namespace eval ::Eagle {
         set configuration [getBuildConfiguration]
         addConstraint [appendArgs buildConfiguration $configuration]
         tputs $::test_channel [appendArgs \" $configuration \"\n]
+
+        #
+        # NOTE: Try to setup an interrupt callback using the script debugger
+        #       that will cancel all SQL queries in progress for all database
+        #       connections known to this interpreter.
+        #
+        if {![info exists ::no(sqliteInterruptCallback)]} then {
+          setupDbInterruptCallback $::test_channel $::test_log
+        }
 
         #
         # NOTE: Check for the native runtime option, which would mean we are
