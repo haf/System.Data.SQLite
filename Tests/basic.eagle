@@ -1692,7 +1692,7 @@ runTest {test data-1.33 {sqlite3_win32_set_directory function} -setup {
   set t [object create -alias Thread threadStart]
   sql execute $db "BEGIN TRANSACTION;"; $t Start
 
-  for {set i 1} {$i < 100} {incr i} {
+  for {set i 1} {$i < 1000} {incr i} {
     #
     # NOTE: Execute a query that should force the creation of a temporary file
     #       for its statement journal.
@@ -1702,7 +1702,7 @@ runTest {test data-1.33 {sqlite3_win32_set_directory function} -setup {
     #
     # NOTE: Give the other thread some time to notice the temporary file.
     #
-    after 1000
+    after [expr {int(rand() * 1000)}]
 
     #
     # NOTE: Stop when the other thread confirms that the temporary file was
@@ -1714,7 +1714,9 @@ runTest {test data-1.33 {sqlite3_win32_set_directory function} -setup {
   }
 
   $t Join; sql execute $db "COMMIT TRANSACTION;"
-  lappend result $found(data) $found(temp); set result
+
+  lappend result $found(data) [expr {[info exists found(temp)] ? \
+      $found(temp) : False}]; set result
 } -cleanup {
   #
   # NOTE: Close the database; however, do not attempt to delete the file as
