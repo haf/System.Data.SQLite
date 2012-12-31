@@ -26,7 +26,7 @@ namespace System.Data.SQLite
 
   using System.Runtime.InteropServices;
 
-#if !PLATFORM_COMPACTFRAMEWORK
+#if !PLATFORM_COMPACTFRAMEWORK || COUNT_HANDLE
   using System.Threading;
 #endif
 
