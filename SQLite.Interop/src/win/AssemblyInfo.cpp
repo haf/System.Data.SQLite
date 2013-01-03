@@ -12,7 +12,7 @@ using namespace System::Runtime::InteropServices;
 #include "interop.h"
 
 [assembly:AssemblyTitleAttribute("SQLite.Interop")];
-[assembly:AssemblyCompanyAttribute("Robert Simpson, et al.")];
+[assembly:AssemblyCompanyAttribute("http://system.data.sqlite.org/")];
 [assembly:AssemblyDescriptionAttribute("System.Data.SQLite Interop Assembly")];
 [assembly:AssemblyProductAttribute("System.Data.SQLite")];
 [assembly:AssemblyCopyrightAttribute("Public Domain")];

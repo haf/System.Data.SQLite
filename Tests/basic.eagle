@@ -2240,6 +2240,48 @@ runTest {test data-1.46 {column name and index lookup} -setup {
 
 ###############################################################################
 
+runTest {test data-1.47 {nullable value types} -setup {
+  setupDb [set fileName data-1.47.db]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x INTEGER);
+    INSERT INTO t1 (x) VALUES(NULL);
+    INSERT INTO t1 (x) VALUES(1);
+  }
+
+  set dataReader [sql execute -execute reader -format datareader \
+      -alias $db "SELECT x FROM t1 ORDER BY x;"]
+
+  set result [list]
+
+  while {[$dataReader Read]} {
+    foreach {a b c d e} [list "" "" "" "" ""] break
+
+    set x [$dataReader GetOrdinal x]
+
+    foreach {a b c e} [list \
+        [$dataReader GetName $x] [$dataReader GetValue $x] \
+        [catch {$dataReader GetInt64 $x} d] [$dataReader Item x]] break
+
+    lappend result [list $x $a $b $c $d $e]
+  }
+
+  set result
+} -cleanup {
+  unset -nocomplain dataReader
+
+  cleanupDb $fileName
+
+  unset -nocomplain e d c b a x result db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^\{0 x System#DBNull#\d+ 1\
+\{System\.Reflection\.TargetInvocationException: Exception has been thrown by\
+the target of an invocation\. ---> System\.InvalidCastException:.*\}\
+System#DBNull#\d+\} \{0 x 1 0 1 1\}$}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
