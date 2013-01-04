@@ -40,8 +40,8 @@
           <a href="http://en.wikipedia.org/wiki/Microsoft_Compiled_HTML_Help">
           <i>Microsoft Compiled HTML Help</i> (&quot;CHM&quot;) format</a>.  It
           can also be
-          <a href="/index.html/raw/Doc/SQLite.NET.chm?name=trunk">downloaded
-          directly</a> via the web interface to the repository.
+          <a href="/index.html/doc/trunk/Doc/SQLite.NET.chm?mimetype=application/x-chm">
+          downloaded directly</a> via the web interface to the repository.
         </p>
       </td>
       <td width="30%" valign="top">
