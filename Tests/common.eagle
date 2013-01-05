@@ -472,10 +472,36 @@ namespace eval ::Eagle {
       } [getTestOverridesPreamble [list path test_channel]] $suffix]]]
     }
 
-    proc tryCopyBuildFile { fileName } {
-      #
-      # NOTE: If we cannot copy the assembly then it is probably already loaded.
-      #
+    proc tryCopyBinaryFile { fileName {newFileName ""} } {
+      set sourceFileName [getBinaryFileName $fileName]
+
+      if {![file exists $sourceFileName]} then {
+        tputs $::test_channel [appendArgs \
+            "---- skipped copying binary file \"" $sourceFileName \
+            "\", it does not exist\n"]
+
+        return
+      }
+
+      if {[string length $newFileName] > 0} then {
+        set targetFileName [getBuildFileName $newFileName]
+      } else {
+        set targetFileName [getBuildFileName $fileName]
+      }
+
+      if {[catch {
+              file copy -force $sourceFileName $targetFileName}] == 0} then {
+        tputs $::test_channel [appendArgs \
+            "---- copied binary file from \"" $sourceFileName "\" to \"" \
+            $targetFileName \"\n]
+      } else {
+        tputs $::test_channel [appendArgs \
+            "---- failed to copy binary file from \"" $sourceFileName \
+            "\" to \"" $targetFileName \"\n]
+      }
+    }
+
+    proc tryCopyBuildFile { fileName {newFileName ""} } {
       set sourceFileName [getBuildFileName $fileName]
 
       if {![file exists $sourceFileName]} then {
@@ -486,7 +512,11 @@ namespace eval ::Eagle {
         return
       }
 
-      set targetFileName [getBinaryFileName $fileName]
+      if {[string length $newFileName] > 0} then {
+        set targetFileName [getBinaryFileName $newFileName]
+      } else {
+        set targetFileName [getBinaryFileName $fileName]
+      }
 
       if {[catch {
               file copy -force $sourceFileName $targetFileName}] == 0} then {
@@ -517,6 +547,26 @@ namespace eval ::Eagle {
       } else {
         tputs $::test_channel [appendArgs \
             "---- failed to delete binary file \"" $fileName \"\n]
+      }
+    }
+
+    proc tryDeleteBuildFile { fileName } {
+      set fileName [getBuildFileName $fileName]
+
+      if {![file exists $fileName]} then {
+        tputs $::test_channel [appendArgs \
+            "---- skipped deleting build file \"" $fileName \
+            "\", it does not exist\n"]
+
+        return
+      }
+
+      if {[catch {file delete $fileName}] == 0} then {
+        tputs $::test_channel [appendArgs \
+            "---- deleted build file \"" $fileName \"\n]
+      } else {
+        tputs $::test_channel [appendArgs \
+            "---- failed to delete build file \"" $fileName \"\n]
       }
     }
 
@@ -1609,6 +1659,30 @@ namespace eval ::Eagle {
           if {![info exists ::no(loadSqliteFiles)]} then {
             tryLoadAssembly System.Data.SQLite.dll
             tryLoadAssembly System.Data.SQLite.Linq.dll
+          }
+
+          #
+          # NOTE: Skip trying to delete external files if we are so instructed.
+          #
+          if {![info exists ::no(deleteSqliteExternalFiles)]} then {
+            tryDeleteBuildFile Installer.exe.mda.config
+            tryDeleteBuildFile test.exe.mda.config
+            tryDeleteBuildFile testlinq.exe.mda.config
+          }
+
+          #
+          # NOTE: Skip trying to copy external files if we are so instructed.
+          #
+          if {![info exists ::no(copySqliteExternalFiles)]} then {
+            #
+            # NOTE: Copy the MDA configuration file for the Eagle shell to the
+            #       build output directory; however, use the name of the legacy
+            #       test executable.  This will make sure that the legacy tests
+            #       run with the same set of MDAs configured.
+            #
+            tryCopyBinaryFile EagleShell.exe.mda.config Installer.exe.mda.config
+            tryCopyBinaryFile EagleShell.exe.mda.config test.exe.mda.config
+            tryCopyBinaryFile EagleShell.exe.mda.config testlinq.exe.mda.config
           }
         }
 
