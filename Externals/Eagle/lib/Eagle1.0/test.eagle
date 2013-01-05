@@ -1350,6 +1350,12 @@ namespace eval ::Eagle {
         }
       } else {
         #
+        # NOTE: This entire test file has been skipped.  Record that fact in
+        #       the test suite log file.
+        #
+        tputs $channel [appendArgs "==== \"" $fileName "\" SKIPPED\n"]
+
+        #
         # NOTE: This file does not actually count towards the total (i.e.
         #       it is part of the test suite infrastructure).
         #

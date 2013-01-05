@@ -944,6 +944,21 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForStackIntensive { channel } {
+    tputs $channel "---- checking for stack intensive testing... "
+
+    #
+    # NOTE: Are we allowed to do stack intensive testing?
+    #
+    if {![info exists ::no(stackIntensive)]} then {
+      addConstraint stackIntensive
+
+      tputs $channel yes\n
+    } else {
+      tputs $channel no\n
+    }
+  }
+
   proc checkForInteractive { channel } {
     tputs $channel "---- checking for interactive user... "
 
@@ -1117,6 +1132,94 @@ namespace eval ::Eagle {
       } else {
         tputs $channel untrusted\n
       }
+    }
+
+    proc checkForManagedDebuggingAssistants { channel } {
+      set fileName [file normalize [appendArgs [info nameofexecutable] \
+          .mda.config]]
+
+      tputs $channel [appendArgs \
+          "---- checking for managed debugging assistants enabled via \"" \
+          $fileName "\"... "]
+
+      if {[file exists $fileName]} then {
+        #
+        # NOTE: Since the System.Xml assembly may not be loaded, wrap the
+        #       detection in a [catch] block.
+        #
+        if {[catch {
+          #
+          # NOTE: Create and load an XML document based on the data from the
+          #       MDA configuration file associated with the executable that
+          #       started this process.
+          #
+          set document [object create -alias System.Xml.XmlDocument]
+          $document LoadXml [readFile $fileName]
+
+          #
+          # NOTE: Setup the XML namespace manager for use when using XPath
+          #       to query the XML document.
+          #
+          set nameTable [$document NameTable]
+
+          set namespaceManager [object create \
+              -alias System.Xml.XmlNamespaceManager $nameTable]
+
+          $namespaceManager AddNamespace mda \
+              http://schemas.microsoft.com/CLR/2004/10/mda
+
+          #
+          # NOTE: Select all nodes underneath the location where they should
+          #       reside in the MDA configuration XML document.
+          #
+          set nodes [$document SelectNodes \
+              /mda:mdaConfig/mda:assistants/* $namespaceManager]
+
+          #
+          # NOTE: Populate the local result variable with the names of
+          #       all the XML nodes found.
+          #
+          set names [object lmap -alias node $nodes {
+            $node Name
+          }]
+        }] == 0} then {
+          #
+          # NOTE: Ok, the XML configuration file was loaded and parsed
+          #       correctly, see if any managed debugging assistants were
+          #       found enabled within it.
+          #
+          if {[info exists names] && [llength $names] > 0} then {
+            #
+            # NOTE: Add a test constraint for each managed debugging
+            #       assistant that appears to be enabled.
+            #
+            addConstraint mda
+
+            foreach name $names {
+              addConstraint [appendArgs mda. $name]
+            }
+
+            #
+            # NOTE: Save the list of managed debugging assistants for
+            #       later use by the test suite.
+            #
+            set ::test_mdas $names
+
+            #
+            # NOTE: Yes, it appears that at least one managed debugging
+            #       assistant is enabled.
+            #
+            tputs $channel [appendArgs "yes (" $names ")\n"]
+
+            #
+            # NOTE: We are done here, return now.
+            #
+            return
+          }
+        }
+      }
+
+      tputs $channel no\n
     }
 
     proc checkForStrongName { channel } {
@@ -2280,7 +2383,7 @@ namespace eval ::Eagle {
         checkForInteractiveCommand checkForWindowsCommandProcessor \
         checkForUserInteraction checkForTclOptions checkForTestConfiguration \
         checkForTestSuffix checkForVariable checkForScriptLibrary \
-        checkForFossil] false false
+        checkForStackIntensive checkForFossil] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

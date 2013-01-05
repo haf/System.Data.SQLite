@@ -20,6 +20,10 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
+#
+# NOTE: For some reason, this test does not play nicely when all the managed
+#       debugging assistants are enabled.
+#
 runTest {test tkt-ae5267b863-1.1 {segfault during command GC} -setup {
   setupDb [set fileName tkt-ae5267b863-1.1.db]
 } -body {
@@ -142,9 +146,9 @@ runTest {test tkt-ae5267b863-1.1 {segfault during command GC} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors sql dataSource id db fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+} -constraints [fixConstraints {eagle monoBug28 command.sql compile.DATA\
+SQLite System.Data.SQLite !mda}] -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
 
 ###############################################################################
 

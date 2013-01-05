@@ -1550,6 +1550,14 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has managed debugging assistants testing support been
+    #       disabled?
+    #
+    if {![info exists no(managedDebuggingAssistants)]} then {
+      checkForManagedDebuggingAssistants $test_channel
+    }
+
+    #
     # NOTE: Has script debugger testing support been disabled?
     #
     if {![info exists no(scriptDebugger)]} then {
@@ -1896,6 +1904,10 @@ if {![info exists no([file tail [info script]])]} then {
 
   if {![info exists no(tclOptions)]} then {
     checkForTclOptions $test_channel
+  }
+
+  if {![info exists no(stackIntensive)]} then {
+    checkForStackIntensive $test_channel
   }
 
   if {![info exists no(windowsCommandProcessor)]} then {
