@@ -239,6 +239,7 @@ set sds_manifests(source) {
   SQLite.Interop/src/win/interop.c
   SQLite.Interop/src/win/interop.h
   SQLite.Interop/src/win/SQLite.Interop.rc
+  SQLite.Beta.nuspec
   SQLite.MSIL.nuspec
   SQLite.NET.2005.MSBuild.sln
   SQLite.NET.2005.sln
@@ -419,6 +420,7 @@ set sds_manifests(source) {
   Tests/tkt-448d663d11.eagle
   Tests/tkt-544dba0a2f.eagle
   Tests/tkt-59edc1018b.eagle
+  Tests/tkt-6434e23a0f.eagle
   Tests/tkt-6c6ecccc5f.eagle
   Tests/tkt-72905c9a77.eagle
   Tests/tkt-7e3fa93744.eagle
