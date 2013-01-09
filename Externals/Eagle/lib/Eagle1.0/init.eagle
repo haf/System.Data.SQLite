@@ -143,7 +143,7 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    eval lappend result $args
+    set result [list]; eval lappend result $args
   }
 
   proc getDictionaryValue { dictionary name {default ""} {wrap ""} } {
@@ -1047,43 +1047,24 @@ namespace eval ::Eagle {
               #       requested.
               #
               switch -exact -nocase -- $type {
-                source {
-                  #
-                  # NOTE: Source code download.  This may be a RAR or an EXE
-                  #       file.  Append the appropriate file name and then
-                  #       join all the URI components to form the final URI.
-                  #
-                  set fileName [appendArgs EagleSource $patchLevel $extension]
-                  lappend components $fileName
-
-                  set result [list [eval uri join $components] \
-                      [file join $directory $fileName]]
-                }
-                setup {
-                  #
-                  # NOTE: Windows setup download.  Always append an ".exe"
-                  #       extension because we never distribute the setup as
-                  #       a RAR file.  Append the appropriate file name and
-                  #       then join all the URI components to form the final
-                  #       URI.
-                  #
-                  set fileName [appendArgs EagleSetup $patchLevel .exe]
-                  lappend components $fileName
-
-                  set result [list [eval uri join $components] \
-                      [file join $directory $fileName]]
-                }
+                source -
+                setup -
                 binary {
                   #
-                  # NOTE: Binary file download.  This may be a RAR or an EXE
-                  #       file.  Append the appropriate file name and then
-                  #       join all the URI components to form the final URI.
+                  # NOTE: Source code, setup, or binary download.  This may be
+                  #       a RAR or an EXE file.  Append the appropriate file
+                  #       name and then join all the URI components to form the
+                  #       final URI.
                   #
-                  set fileName [appendArgs EagleBinary $patchLevel $extension]
+                  set fileName [appendArgs \
+                      [info engine] [string totitle $type] $patchLevel \
+                      [expr {[string tolower $type] eq "setup" ? ".exe" : \
+                      $extension}]]
+
                   lappend components $fileName
 
-                  set result [list [eval uri join $components] \
-                      [file join $directory $fileName]]
+                  set result [list [eval uri join $components] [file join \
+                      $directory $fileName]]
                 }
               }
             }
@@ -1557,11 +1538,34 @@ namespace eval ::Eagle {
       catch {puts stderr $string}
     }
 
-    proc findDirectories { pattern } {
+    proc makeVariableFast { name fast } {
       #
       # NOTE: This should work properly in Eagle only.
       #
-      set result [list]
+      catch {
+        uplevel 1 [list object invoke -flags +NonPublic \
+            Interpreter.GetActive MakeVariableFast $name $fast]
+      }
+    }
+
+    proc findDirectories { pattern } {
+      #
+      # NOTE: Block non-Windows platforms since this is Windows specific.
+      #
+      if {$::tcl_platform(platform) ne "windows"} then {
+        error "not supported on this operating system"
+      }
+
+      #
+      # NOTE: This should work properly in Eagle only.
+      #
+      set dir ""; set result [list]
+
+      #
+      # HACK: Optimize the variable access in this procedure to be
+      #       as fast as possible.
+      #
+      makeVariableFast dir true; makeVariableFast result true
 
       foreach dir [split [exec -unicode $::env(ComSpec) /u /c dir \
           /ad /b [appendArgs \" [file nativename $pattern] \"]] \n] {
@@ -1570,7 +1574,7 @@ namespace eval ::Eagle {
         if {[string length $dir] > 0} then {
           set dir [getDirResultPath $pattern $dir]
 
-          if {[lsearch -exact -nocase $result $dir] == -1} then {
+          if {[lsearch -variable -exact -nocase result $dir] == -1} then {
             lappend result $dir
           }
         }
@@ -1583,7 +1587,7 @@ namespace eval ::Eagle {
         if {[string length $dir] > 0} then {
           set dir [getDirResultPath $pattern $dir]
 
-          if {[lsearch -exact -nocase $result $dir] == -1} then {
+          if {[lsearch -variable -exact -nocase result $dir] == -1} then {
             lappend result $dir
           }
         }
@@ -1594,9 +1598,22 @@ namespace eval ::Eagle {
 
     proc findFiles { pattern } {
       #
+      # NOTE: Block non-Windows platforms since this is Windows specific.
+      #
+      if {$::tcl_platform(platform) ne "windows"} then {
+        error "not supported on this operating system"
+      }
+
+      #
       # NOTE: This should work properly in Eagle only.
       #
-      set result [list]
+      set fileName ""; set result [list]
+
+      #
+      # HACK: Optimize the variable access in this procedure to be
+      #       as fast as possible.
+      #
+      makeVariableFast fileName true; makeVariableFast result true
 
       foreach fileName [split [exec -unicode $::env(ComSpec) /u /c dir \
           /a-d /b [appendArgs \" [file nativename $pattern] \"]] \n] {
@@ -1605,7 +1622,7 @@ namespace eval ::Eagle {
         if {[string length $fileName] > 0} then {
           set fileName [getDirResultPath $pattern $fileName]
 
-          if {[lsearch -exact -nocase $result $fileName] == -1} then {
+          if {[lsearch -variable -exact -nocase result $fileName] == -1} then {
             lappend result $fileName
           }
         }
@@ -1618,7 +1635,7 @@ namespace eval ::Eagle {
         if {[string length $fileName] > 0} then {
           set fileName [getDirResultPath $pattern $fileName]
 
-          if {[lsearch -exact -nocase $result $fileName] == -1} then {
+          if {[lsearch -variable -exact -nocase result $fileName] == -1} then {
             lappend result $fileName
           }
         }
@@ -1629,9 +1646,22 @@ namespace eval ::Eagle {
 
     proc findFilesRecursive { pattern } {
       #
+      # NOTE: Block non-Windows platforms since this is Windows specific.
+      #
+      if {$::tcl_platform(platform) ne "windows"} then {
+        error "not supported on this operating system"
+      }
+
+      #
       # NOTE: This should work properly in Eagle only.
       #
-      set result [list]
+      set fileName ""; set result [list]
+
+      #
+      # HACK: Optimize the variable access in this procedure to be
+      #       as fast as possible.
+      #
+      makeVariableFast fileName true; makeVariableFast result true
 
       foreach fileName [split [exec -unicode $::env(ComSpec) /u /c dir \
           /a-d /s /b [appendArgs \" [file nativename $pattern] \"]] \n] {
@@ -1640,7 +1670,7 @@ namespace eval ::Eagle {
         if {[string length $fileName] > 0} then {
           set fileName [getDirResultPath $pattern $fileName]
 
-          if {[lsearch -exact -nocase $result $fileName] == -1} then {
+          if {[lsearch -variable -exact -nocase result $fileName] == -1} then {
             lappend result $fileName
           }
         }
@@ -1653,7 +1683,7 @@ namespace eval ::Eagle {
         if {[string length $fileName] > 0} then {
           set fileName [getDirResultPath $pattern $fileName]
 
-          if {[lsearch -exact -nocase $result $fileName] == -1} then {
+          if {[lsearch -variable -exact -nocase result $fileName] == -1} then {
             lappend result $fileName
           }
         }
@@ -1711,6 +1741,13 @@ namespace eval ::Eagle {
     }
 
     proc findFilesRecursive { pattern } {
+      #
+      # NOTE: Block non-Windows platforms since this is Windows specific.
+      #
+      if {$::tcl_platform(platform) ne "windows"} then {
+        error "not supported on this operating system"
+      }
+
       #
       # NOTE: This should work properly in Tcl only.
       #
@@ -1798,10 +1835,15 @@ namespace eval ::Eagle {
     #       into the global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        exportAndImportPackageCommands isEagle isMono getEnvironmentVariable \
-        getPluginPath getDictionaryValue getColumnValue getRowColumnValue \
-        appendArgs haveGaruda lappendArgs readFile writeFile filter map \
-        reduce getPlatformInfo execShell combineFlags tqputs tqlog] false false
+        isEagle haveGaruda isMono getEnvironmentVariable combineFlags \
+        getCompileInfo getPlatformInfo getPluginPath appendArgs lappendArgs \
+        getDictionaryValue getColumnValue getRowColumnValue tqputs tqlog \
+        readFile readSharedFile writeFile appendFile appendLogFile \
+        appendSharedFile appendSharedLogFile readAsciiFile writeAsciiFile \
+        readUnicodeFile writeUnicodeFile getDirResultPath addToPath \
+        removeFromPath execShell ldifference filter map reduce \
+        getLengthModifier debug findDirectories findFiles findFilesRecursive \
+        exportAndImportPackageCommands] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

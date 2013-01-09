@@ -43,9 +43,10 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
-    <p><b>1.0.84.0 - March XX, 2013 <font color="red">(release scheduled)</font></p>
+    <p><b>1.0.84.0 - January 9, 2013</p>
     <ul>
-      <li>Updated to <a href="http://www.sqlite.org/src/info/trunk">SQLite 3.7.16</a>.</li>
+      <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_15_2.html">SQLite 3.7.15.2</a>.</li>
+      <li>Explicitly dispose of all SQLiteCommand objects managed by the DbDataAdapter class. Fix for <a href="http://system.data.sqlite.org/index.html/info/6434e23a0f">[6434e23a0f]</a>.</li>
       <li>Add Cancel method to the SQLiteConnection class to interrupt a long running query.</li>
       <li>Improve thread safety of the SQLiteLog.LogMessage method.</li>
     </ul>

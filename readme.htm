@@ -5,8 +5,8 @@
 </head>
 <body>
 ADO.NET SQLite Data Provider<br />
-Version 1.0.84.0 March XX, 2013 <font color="red">(release scheduled)</font><br />
-Using <a href="http://www.sqlite.org/src/info/trunk">SQLite 3.7.16</a><br />
+Version 1.0.84.0 January 9, 2013<br />
+Using <a href="http://www.sqlite.org/releaselog/3_7_15_2.html">SQLite 3.7.15.2</a><br />
 Originally written by Robert Simpson<br />
 Released to the public domain, use at your own risk!<br />
 Official provider website:&nbsp;<a href="http://system.data.sqlite.org/">http://system.data.sqlite.org/</a><br />
@@ -187,10 +187,11 @@ it to extend its functionality, but the core engine's source is not changed.</p>
 <h2><b>Version History</b></h2>
 
 <p>
-    <b>1.0.84.0 - March XX, 2013 <font color="red">(release scheduled)</font></b>
+    <b>1.0.84.0 - January 9, 2013</b>
 </p>
 <ul>
-    <li>Updated to <a href="http://www.sqlite.org/src/info/trunk">SQLite 3.7.16</a>.</li>
+    <li>Updated to <a href="http://www.sqlite.org/releaselog/3_7_15_2.html">SQLite 3.7.15.2</a>.</li>
+    <li>Explicitly dispose of all SQLiteCommand objects managed by the DbDataAdapter class. Fix for [6434e23a0f].</li>
     <li>Add Cancel method to the SQLiteConnection class to interrupt a long running query.</li>
     <li>Improve thread safety of the SQLiteLog.LogMessage method.</li>
 </ul>
