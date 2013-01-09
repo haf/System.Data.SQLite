@@ -84,12 +84,36 @@ namespace System.Data.SQLite
         {
             if (!disposed)
             {
-                //if (disposing)
-                //{
-                //    ////////////////////////////////////
-                //    // dispose managed resources here...
-                //    ////////////////////////////////////
-                //}
+                if (disposing)
+                {
+                    ////////////////////////////////////
+                    // dispose managed resources here...
+                    ////////////////////////////////////
+
+                    if (SelectCommand != null)
+                    {
+                        SelectCommand.Dispose();
+                        SelectCommand = null;
+                    }
+
+                    if (InsertCommand != null)
+                    {
+                        InsertCommand.Dispose();
+                        InsertCommand = null;
+                    }
+
+                    if (UpdateCommand != null)
+                    {
+                        UpdateCommand.Dispose();
+                        UpdateCommand = null;
+                    }
+
+                    if (DeleteCommand != null)
+                    {
+                        DeleteCommand.Dispose();
+                        DeleteCommand = null;
+                    }
+                }
 
                 //////////////////////////////////////
                 // release unmanaged resources here...
