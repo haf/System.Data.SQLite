@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -184,7 +184,11 @@ namespace System.Data.SQLite
     {
         return String.Format("{0}{1}{2}",
             GetErrorString(errorCode),
+#if !NET_COMPACT_20
             Environment.NewLine, message).Trim();
+#else
+            "\r\n", message).Trim();
+#endif
     }
   }
 
