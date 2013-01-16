@@ -778,6 +778,24 @@ SQLITE_PRIVATE void interopTestFunc(
   }
 }
 
+/*
+** The interopSleep() SQL function waits the specified number of milliseconds
+** or raises an error if there are not enough arguments.
+*/
+SQLITE_PRIVATE void interopSleepFunc(
+  sqlite3_context *context,
+  int argc,
+  sqlite3_value **argv
+){
+  int m;
+  if( argc!=1 ){
+    sqlite3_result_error(context, "need exactly one argument", -1);
+    return;
+  }
+  m = sqlite3_value_int(argv[0]);
+  sqlite3_result_int(context, SleepEx(m, TRUE));
+}
+
 /* SQLite invokes this routine once when it loads the extension.
 ** Create new functions, collating sequences, and virtual table
 ** modules here.  This is usually the only exported symbol in
@@ -788,8 +806,14 @@ SQLITE_API int interop_test_extension_init(
   char **pzErrMsg,
   const sqlite3_api_routines *pApi
 ){
+  int rc;
   SQLITE_EXTENSION_INIT2(pApi)
-  return sqlite3_create_function(db, "interopTest", -1, SQLITE_ANY, 0,
+  rc = sqlite3_create_function(db, "interopTest", -1, SQLITE_ANY, 0,
       interopTestFunc, 0, 0);
+  if( rc==SQLITE_OK ){
+    rc = sqlite3_create_function(db, "interopSleep", 1, SQLITE_ANY, 0,
+        interopSleepFunc, 0, 0);
+  }
+  return rc;
 }
 #endif
