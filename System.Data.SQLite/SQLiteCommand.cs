@@ -23,6 +23,13 @@ namespace System.Data.SQLite
   public sealed class SQLiteCommand : DbCommand, ICloneable
   {
     /// <summary>
+    /// The default connection string to be used when creating a temporary
+    /// connection to execute a command via the static <see cref="Execute" />
+    /// method.
+    /// </summary>
+    private static readonly string DefaultConnectionString = "Data Source=:memory:;";
+
+    /// <summary>
     /// The command text this command is based on
     /// </summary>
     private string _commandText;
@@ -594,6 +601,89 @@ namespace System.Data.SQLite
     protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
     {
       return ExecuteReader(behavior);
+    }
+
+    /// <summary>
+    /// This method creates a new connection, executes the query using the given
+    /// execution type, closes the connection, and returns the results.  If the
+    /// connection string is null, a temporary in-memory database connection will
+    /// be used.
+    /// </summary>
+    /// <param name="commandText">
+    /// The text of the command to be executed.
+    /// </param>
+    /// <param name="executeType">
+    /// The execution type for the command.  This is used to determine which method
+    /// of the command object to call, which then determines the type of results
+    /// returned, if any.
+    /// </param>
+    /// <param name="connectionString">
+    /// The connection string to the database to be opened, used, and closed.  If
+    /// this parameter is null, a temporary in-memory databse will be used.
+    /// </param>
+    /// <param name="args">
+    /// The SQL parameter values to be used when building the command object to be
+    /// executed, if any.
+    /// </param>
+    /// <returns>
+    /// The results of the query -OR- null if no results were produced from the
+    /// given execution type.
+    /// </returns>
+    public static object Execute(
+        string commandText,
+        SQLiteExecuteType executeType,
+        string connectionString,
+        params object[] args
+        )
+    {
+        if (connectionString == null)
+            connectionString = DefaultConnectionString;
+
+        using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+                command.CommandText = commandText;
+
+                if (args != null)
+                {
+                    foreach (object arg in args)
+                    {
+                        if (arg is SQLiteParameter)
+                            command.Parameters.Add((SQLiteParameter)arg);
+                        else
+                            command.Parameters.Add(new SQLiteParameter(DbType.Object, arg));
+                    }
+                }
+
+                switch (executeType)
+                {
+                    case SQLiteExecuteType.None:
+                        {
+                            //
+                            // NOTE: Do nothing.
+                            //
+                            break;
+                        }
+                    case SQLiteExecuteType.NonQuery:
+                        {
+                            return command.ExecuteNonQuery();
+                        }
+                    case SQLiteExecuteType.Scalar:
+                        {
+                            return command.ExecuteScalar();
+                        }
+                    case SQLiteExecuteType.Reader:
+                        {
+                            return command.ExecuteReader();
+                        }
+                }
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

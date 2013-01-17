@@ -136,6 +136,7 @@ set sds_manifests(source) {
   Setup/verify.eagle
   Setup/verify.lst
   Setup/vsSp.bat
+  SQLite.Beta.nuspec
   SQLite.Designer/
   SQLite.Designer/AssemblyInfo.cs
   SQLite.Designer/ChangePasswordDialog.cs
@@ -239,7 +240,6 @@ set sds_manifests(source) {
   SQLite.Interop/src/win/interop.c
   SQLite.Interop/src/win/interop.h
   SQLite.Interop/src/win/SQLite.Interop.rc
-  SQLite.Beta.nuspec
   SQLite.MSIL.nuspec
   SQLite.NET.2005.MSBuild.sln
   SQLite.NET.2005.sln

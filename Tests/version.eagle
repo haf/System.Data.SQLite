@@ -29,7 +29,7 @@ runSQLiteTestPrologue
 #
 set version(major)             1
 set version(minor)             0
-set version(build)            84; # NOTE: Incremented with each release.
+set version(build)            85; # NOTE: Incremented with each release.
 set version(revision)          0
 
 ###############################################################################
@@ -178,6 +178,8 @@ set patterns [list \
         </version>] \
     [appendArgs <version> [string map [list . \\.] $version(full)] \
         </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs &quot\; [format %03d $version(build)] &quot\;] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
@@ -243,6 +245,7 @@ set patterns [list \
 set fileNames [list \
     readme.htm \
     SQLite.nuspec \
+    SQLite.Beta.nuspec \
     SQLite.MSIL.nuspec \
     SQLite.x64.nuspec \
     SQLite.x86.nuspec \

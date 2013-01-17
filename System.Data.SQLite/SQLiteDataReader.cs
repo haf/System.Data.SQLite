@@ -646,7 +646,7 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
       CheckClosed();
-      SQLiteCommand.Check(_command);
+      if (_throwOnDisposed) SQLiteCommand.Check(_command);
 
       //
       // NOTE: First, check if the column name cache has been initialized yet.
@@ -854,7 +854,7 @@ namespace System.Data.SQLite
     internal DataTable GetSchemaTable(bool wantUniqueInfo, bool wantDefaultValue)
     {
       CheckClosed();
-      SQLiteCommand.Check(_command);
+      if (_throwOnDisposed) SQLiteCommand.Check(_command);
 
      //
      // BUGFIX: We need to quickly scan all the fields in the current
@@ -1221,7 +1221,7 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
       CheckClosed();
-      SQLiteCommand.Check(_command);
+      if (_throwOnDisposed) SQLiteCommand.Check(_command);
 
       SQLiteStatement stmt = null;
       int fieldCount;
@@ -1347,7 +1347,7 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
       CheckClosed();
-      SQLiteCommand.Check(_command);
+      if (_throwOnDisposed) SQLiteCommand.Check(_command);
 
       if (_readingState == -1) // First step was already done at the NextResult() level, so don't step again, just return true.
       {

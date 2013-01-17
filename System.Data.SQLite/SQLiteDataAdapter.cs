@@ -24,8 +24,12 @@ namespace System.Data.SQLite
     private static object _updatingEventPH = new object();
     private static object _updatedEventPH = new object();
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Public Constructors
     /// <overloads>
-    /// This class is just a shell around the DbDataAdapter.  Nothing from DbDataAdapter is overridden here, just a few constructors are defined.
+    /// This class is just a shell around the DbDataAdapter.  Nothing from
+    /// DbDataAdapter is overridden here, just a few constructors are defined.
     /// </overloads>
     /// <summary>
     /// Default constructor.
@@ -34,35 +38,87 @@ namespace System.Data.SQLite
     {
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Constructs a data adapter using the specified select command.
     /// </summary>
-    /// <param name="cmd">The select command to associate with the adapter.</param>
+    /// <param name="cmd">
+    /// The select command to associate with the adapter.
+    /// </param>
     public SQLiteDataAdapter(SQLiteCommand cmd)
     {
       SelectCommand = cmd;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
-    /// Constructs a data adapter with the supplied select command text and associated with the specified connection.
+    /// Constructs a data adapter with the supplied select command text and
+    /// associated with the specified connection.
     /// </summary>
-    /// <param name="commandText">The select command text to associate with the data adapter.</param>
-    /// <param name="connection">The connection to associate with the select command.</param>
+    /// <param name="commandText">
+    /// The select command text to associate with the data adapter.
+    /// </param>
+    /// <param name="connection">
+    /// The connection to associate with the select command.
+    /// </param>
     public SQLiteDataAdapter(string commandText, SQLiteConnection connection)
     {
       SelectCommand = new SQLiteCommand(commandText, connection);
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
-    /// Constructs a data adapter with the specified select command text, and using the specified database connection string.
+    /// Constructs a data adapter with the specified select command text,
+    /// and using the specified database connection string.
     /// </summary>
-    /// <param name="commandText">The select command text to use to construct a select command.</param>
-    /// <param name="connectionString">A connection string suitable for passing to a new SQLiteConnection, which is associated with the select command.</param>
-    public SQLiteDataAdapter(string commandText, string connectionString)
+    /// <param name="commandText">
+    /// The select command text to use to construct a select command.
+    /// </param>
+    /// <param name="connectionString">
+    /// A connection string suitable for passing to a new SQLiteConnection,
+    /// which is associated with the select command.
+    /// </param>
+    public SQLiteDataAdapter(
+        string commandText,
+        string connectionString
+        )
+        : this(commandText, connectionString, false)
     {
-      SQLiteConnection cnn = new SQLiteConnection(connectionString);
+        // do nothing.
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Constructs a data adapter with the specified select command text,
+    /// and using the specified database connection string.
+    /// </summary>
+    /// <param name="commandText">
+    /// The select command text to use to construct a select command.
+    /// </param>
+    /// <param name="connectionString">
+    /// A connection string suitable for passing to a new SQLiteConnection,
+    /// which is associated with the select command.
+    /// </param>
+    /// <param name="parseViaFramework">
+    /// Non-zero to parse the connection string using the built-in (i.e.
+    /// framework provided) parser when opening the connection.
+    /// </param>
+    public SQLiteDataAdapter(
+        string commandText,
+        string connectionString,
+        bool parseViaFramework
+        )
+    {
+      SQLiteConnection cnn = new SQLiteConnection(
+          connectionString, parseViaFramework);
+
       SelectCommand = new SQLiteCommand(commandText, cnn);
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 

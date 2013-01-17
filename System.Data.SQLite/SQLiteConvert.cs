@@ -1186,6 +1186,44 @@ namespace System.Data.SQLite
   }
 
   /// <summary>
+  /// The requested command execution type.  This controls which method of the
+  /// <see cref="SQLiteCommand" /> object will be called.
+  /// </summary>
+  public enum SQLiteExecuteType
+  {
+      /// <summary>
+      /// Do nothing.  No method will be called.
+      /// </summary>
+      None = 0,
+
+      /// <summary>
+      /// The command is not expected to return a result -OR- the result is not
+      /// needed.  The <see cref="SQLiteCommand.ExecuteNonQuery" /> method will
+      /// be called.
+      /// </summary>
+      NonQuery = 1,
+
+      /// <summary>
+      /// The command is expected to return a scalar result -OR- the result should
+      /// be limited to a scalar result.  The <see cref="SQLiteCommand.ExecuteScalar" />
+      /// method will be called.
+      /// </summary>
+      Scalar = 2,
+
+      /// <summary>
+      /// The command is expected to return <see cref="SQLiteDataReader"/> result.
+      /// The <see cref="SQLiteCommand.ExecuteReader()" /> method will be called.
+      /// </summary>
+      Reader = 3,
+
+      /// <summary>
+      /// Use the default command execution type.  Using this value is the same
+      /// as using the <see cref="SQLiteExecuteType.None" /> value.
+      /// </summary>
+      Default = NonQuery /* TODO: Good default? */
+  }
+
+  /// <summary>
   /// Struct used internally to determine the datatype of a column in a resultset
   /// </summary>
   internal class SQLiteType
