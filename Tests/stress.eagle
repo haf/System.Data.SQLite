@@ -1237,7 +1237,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
             $count(1) $count(3) $count(4)] 1048576]
 
         $thread($index(1)) Name [appendArgs \
-          [file rootname [file tail $fileName(2)]] " #" $index(1)]
+            [file rootname [file tail $fileName(2)]] " #" $index(1)]
 
         if {[info exists priority($index(1))]} then {
           $thread($index(1)) Priority $priority($index(1))
