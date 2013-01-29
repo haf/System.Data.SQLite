@@ -314,7 +314,6 @@ runTest {test data-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
-    using System.Data;
     using System.Data.SQLite;
 
     namespace _Dynamic${id}
@@ -423,7 +422,6 @@ runTest {test data-1.7 {properly closed database file (non-query)} -setup {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
-    using System.Data;
     using System.Data.SQLite;
 
     namespace _Dynamic${id}
@@ -481,7 +479,6 @@ runTest {test data-1.8 {properly closed database file (reader #1)} -setup {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
-    using System.Data;
     using System.Data.SQLite;
 
     namespace _Dynamic${id}
