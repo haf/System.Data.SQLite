@@ -7,6 +7,7 @@
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.7.16].</li>
+    <li>Skip checking loaded assemblies for classes tagged with the SQLiteFunction attribute when the No_SQLiteFunctions environment variable is set. Pursuant to [e4c8121f7b].</li>
     <li>Add static Execute method to the SQLiteCommand class.</li>
     <li>Add public constructor to the SQLiteDataAdapter class that allows passing the parseViaFramework parameter to the SQLiteConnection constructor.</li>
     <li>When built with the CHECK_STATE compile-time option, skip throwing exceptions from the SQLiteDataReader class when the object is being disposed.</li>

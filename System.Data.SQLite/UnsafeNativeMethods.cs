@@ -141,7 +141,7 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
           //
-          // NOTE: If the "NoPreLoadSQLite" environment variable is set, skip
+          // NOTE: If the "No_PreLoadSQLite" environment variable is set, skip
           //       all our special code and simply return.
           //
           if (Environment.GetEnvironmentVariable("No_PreLoadSQLite") != null)
