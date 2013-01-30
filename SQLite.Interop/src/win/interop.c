@@ -793,7 +793,12 @@ SQLITE_PRIVATE void interopSleepFunc(
     return;
   }
   m = sqlite3_value_int(argv[0]);
+#if SQLITE_OS_WINCE
+  Sleep(m);
+  sqlite3_result_int(context, WAIT_OBJECT_0);
+#else
   sqlite3_result_int(context, SleepEx(m, TRUE));
+#endif
 }
 
 /* SQLite invokes this routine once when it loads the extension.
