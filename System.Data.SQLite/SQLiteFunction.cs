@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -20,11 +20,11 @@ namespace System.Data.SQLite
   /// Although there is one instance of a class derived from SQLiteFunction per database connection, the derived class has no access
   /// to the underlying connection.  This is necessary to deter implementers from thinking it would be a good idea to make database
   /// calls during processing.
-  /// 
+  ///
   /// It is important to distinguish between a per-connection instance, and a per-SQL statement context.  One instance of this class
   /// services all SQL statements being stepped through on that connection, and there can be many.  One should never store per-statement
   /// information in member variables of user-defined function classes.
-  /// 
+  ///
   /// For aggregate functions, always create and store your per-statement data in the contextData object on the 1st step.  This data will
   /// be automatically freed for you (and Dispose() called if the item supports IDisposable) when the statement completes.
   /// </remarks>
@@ -664,6 +664,13 @@ namespace System.Data.SQLite
       try
       {
 #if !PLATFORM_COMPACTFRAMEWORK
+        //
+        // NOTE: If the "No_SQLiteFunctions" environment variable is set,
+        //       skip all our special code and simply return.
+        //
+        if (Environment.GetEnvironmentVariable("No_SQLiteFunctions") != null)
+          return;
+
         SQLiteFunctionAttribute at;
         System.Reflection.Assembly[] arAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
         int w = arAssemblies.Length;

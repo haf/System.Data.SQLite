@@ -75,6 +75,15 @@
           underneath the application base directory.</td>
         </tr>
         <tr valign="top">
+          <td>No_SQLiteFunctions</td>
+          <td>If this environment variable is set [to anything], the initial
+          search for types in all loaded assemblies that are tagged with the
+          SQLiteFunction attribute will be skipped.  Normally, this search is
+          conducted only once per application domain by the static constructor
+          of the SQLiteFunction class; however, these implementation details
+          are subject to change.</td>
+        </tr>
+        <tr valign="top">
           <td>PreLoadSQLite_BaseDirectory</td>
           <td>If this environment variable is set [to anything], it will be
           used instead of the application base directory by the native
