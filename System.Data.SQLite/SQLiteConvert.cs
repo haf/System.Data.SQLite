@@ -747,41 +747,8 @@ namespace System.Data.SQLite
       return defaultTypeName;
     }
 
-    private static SQLiteTypeNames[] _dbtypeNames = {
-      new SQLiteTypeNames("INTEGER", DbType.Int64),
-      new SQLiteTypeNames("INTEGER8", DbType.SByte),
-      new SQLiteTypeNames("INTEGER16", DbType.Int16),
-      new SQLiteTypeNames("INTEGER32", DbType.Int32),
-      new SQLiteTypeNames("INTEGER64", DbType.Int64),
-      new SQLiteTypeNames("UNSIGNEDINTEGER", DbType.UInt64),
-      new SQLiteTypeNames("UNSIGNEDINTEGER8", DbType.Byte),
-      new SQLiteTypeNames("UNSIGNEDINTEGER16", DbType.UInt16),
-      new SQLiteTypeNames("UNSIGNEDINTEGER32", DbType.UInt32),
-      new SQLiteTypeNames("UNSIGNEDINTEGER64", DbType.UInt64),
-      new SQLiteTypeNames("TINYINT", DbType.Byte),
-      new SQLiteTypeNames("INT", DbType.Int32),
-      new SQLiteTypeNames("INT8", DbType.SByte),
-      new SQLiteTypeNames("INT16", DbType.Int16),
-      new SQLiteTypeNames("INT32", DbType.Int32),
-      new SQLiteTypeNames("INT64", DbType.Int64),
-      new SQLiteTypeNames("UINT", DbType.UInt32),
-      new SQLiteTypeNames("UINT8", DbType.Byte),
-      new SQLiteTypeNames("UINT16", DbType.UInt16),
-      new SQLiteTypeNames("UINT32", DbType.UInt32),
-      new SQLiteTypeNames("UINT64", DbType.UInt64),
-      new SQLiteTypeNames("VARCHAR", DbType.AnsiString),
-      new SQLiteTypeNames("NVARCHAR", DbType.String),
-      new SQLiteTypeNames("CHAR", DbType.AnsiStringFixedLength),
-      new SQLiteTypeNames("NCHAR", DbType.StringFixedLength),
-      new SQLiteTypeNames("FLOAT", DbType.Double),
-      new SQLiteTypeNames("REAL", DbType.Double),
-      new SQLiteTypeNames("BIT", DbType.Boolean),
-      new SQLiteTypeNames("DECIMAL", DbType.Decimal),
-      new SQLiteTypeNames("DATETIME", DbType.DateTime),
-      new SQLiteTypeNames("BLOB", DbType.Binary),
-      new SQLiteTypeNames("UNIQUEIDENTIFIER", DbType.Guid),
-      new SQLiteTypeNames("SMALLINT", DbType.Int16),
-    };
+    private static SQLiteTypeNames[] _dbtypeNames = GetSQLiteTypeNames();
+
     /// <summary>
     /// Convert a DbType to a Type
     /// </summary>
@@ -862,6 +829,87 @@ namespace System.Data.SQLite
     };
 
     /// <summary>
+    /// Builds and returns an array containing the database column types
+    /// recognized by this provider.
+    /// </summary>
+    /// <returns>
+    /// An array containing the database column types recognized by this
+    /// provider.
+    /// </returns>
+    private static SQLiteTypeNames[] GetSQLiteTypeNames()
+    {
+        return new SQLiteTypeNames[] {
+            new SQLiteTypeNames("BIGINT", DbType.Int64),
+            new SQLiteTypeNames("BIGUINT", DbType.UInt64),
+            new SQLiteTypeNames("BINARY", DbType.Binary),
+            new SQLiteTypeNames("BIT", DbType.Boolean),
+            new SQLiteTypeNames("BLOB", DbType.Binary),
+            new SQLiteTypeNames("BOOL", DbType.Boolean),
+            new SQLiteTypeNames("BOOLEAN", DbType.Boolean),
+            new SQLiteTypeNames("CHAR", DbType.AnsiStringFixedLength),
+            new SQLiteTypeNames("COUNTER", DbType.Int64),
+            new SQLiteTypeNames("CURRENCY", DbType.Decimal),
+            new SQLiteTypeNames("DATE", DbType.DateTime),
+            new SQLiteTypeNames("DATETIME", DbType.DateTime),
+            new SQLiteTypeNames("DECIMAL", DbType.Decimal),
+            new SQLiteTypeNames("DOUBLE", DbType.Double),
+            new SQLiteTypeNames("FLOAT", DbType.Double),
+            new SQLiteTypeNames("GENERAL", DbType.Binary),
+            new SQLiteTypeNames("GUID", DbType.Guid),
+            new SQLiteTypeNames("IDENTITY", DbType.Int64),
+            new SQLiteTypeNames("IMAGE", DbType.Binary),
+            new SQLiteTypeNames("INT", DbType.Int32),
+            new SQLiteTypeNames("INT8", DbType.SByte),
+            new SQLiteTypeNames("INT16", DbType.Int16),
+            new SQLiteTypeNames("INT32", DbType.Int32),
+            new SQLiteTypeNames("INT64", DbType.Int64),
+            new SQLiteTypeNames("INTEGER", DbType.Int64),
+            new SQLiteTypeNames("INTEGER8", DbType.SByte),
+            new SQLiteTypeNames("INTEGER16", DbType.Int16),
+            new SQLiteTypeNames("INTEGER32", DbType.Int32),
+            new SQLiteTypeNames("INTEGER64", DbType.Int64),
+            new SQLiteTypeNames("LOGICAL", DbType.Boolean),
+            new SQLiteTypeNames("LONG", DbType.Int64),
+            new SQLiteTypeNames("LONGCHAR", DbType.String),
+            new SQLiteTypeNames("LONGTEXT", DbType.String),
+            new SQLiteTypeNames("LONGVARCHAR", DbType.String),
+            new SQLiteTypeNames("MEMO", DbType.String),
+            new SQLiteTypeNames("MONEY", DbType.Decimal),
+            new SQLiteTypeNames("NCHAR", DbType.StringFixedLength),
+            new SQLiteTypeNames("NOTE", DbType.String),
+            new SQLiteTypeNames("NTEXT", DbType.String),
+            new SQLiteTypeNames("NUMERIC", DbType.Decimal),
+            new SQLiteTypeNames("NVARCHAR", DbType.String),
+            new SQLiteTypeNames("OLEOBJECT", DbType.Binary),
+            new SQLiteTypeNames("REAL", DbType.Double),
+            new SQLiteTypeNames("SMALLDATE", DbType.DateTime),
+            new SQLiteTypeNames("SMALLINT", DbType.Int16),
+            new SQLiteTypeNames("SMALLUINT", DbType.UInt16),
+            new SQLiteTypeNames("STRING", DbType.String),
+            new SQLiteTypeNames("TEXT", DbType.String),
+            new SQLiteTypeNames("TIME", DbType.DateTime),
+            new SQLiteTypeNames("TIMESTAMP", DbType.DateTime),
+            new SQLiteTypeNames("TINYINT", DbType.Byte),
+            new SQLiteTypeNames("TINYSINT", DbType.SByte),
+            new SQLiteTypeNames("UINT", DbType.UInt32),
+            new SQLiteTypeNames("UINT8", DbType.Byte),
+            new SQLiteTypeNames("UINT16", DbType.UInt16),
+            new SQLiteTypeNames("UINT32", DbType.UInt32),
+            new SQLiteTypeNames("UINT64", DbType.UInt64),
+            new SQLiteTypeNames("ULONG", DbType.UInt64),
+            new SQLiteTypeNames("UNIQUEIDENTIFIER", DbType.Guid),
+            new SQLiteTypeNames("UNSIGNEDINTEGER", DbType.UInt64),
+            new SQLiteTypeNames("UNSIGNEDINTEGER8", DbType.Byte),
+            new SQLiteTypeNames("UNSIGNEDINTEGER16", DbType.UInt16),
+            new SQLiteTypeNames("UNSIGNEDINTEGER32", DbType.UInt32),
+            new SQLiteTypeNames("UNSIGNEDINTEGER64", DbType.UInt64),
+            new SQLiteTypeNames("VARBINARY", DbType.Binary),
+            new SQLiteTypeNames("VARCHAR", DbType.AnsiString),
+            new SQLiteTypeNames("YESNO", DbType.Boolean)
+        };
+    }
+
+    /// <summary>
     /// For a given type name, return a closest-match .NET type
     /// </summary>
     /// <param name="Name">The name of the type to match</param>
@@ -875,75 +923,8 @@ namespace System.Data.SQLite
           _typeNames = new Dictionary<string, SQLiteTypeNames>(
               new TypeNameStringComparer());
 
-          foreach (SQLiteTypeNames typeName in new SQLiteTypeNames[] {
-              new SQLiteTypeNames("COUNTER", DbType.Int64),
-              new SQLiteTypeNames("AUTOINCREMENT", DbType.Int64),
-              new SQLiteTypeNames("IDENTITY", DbType.Int64),
-              new SQLiteTypeNames("LONGTEXT", DbType.String),
-              new SQLiteTypeNames("LONGCHAR", DbType.String),
-              new SQLiteTypeNames("LONGVARCHAR", DbType.String),
-              new SQLiteTypeNames("LONG", DbType.Int64),
-              new SQLiteTypeNames("TINYINT", DbType.Byte),
-              new SQLiteTypeNames("INTEGER", DbType.Int64),
-              new SQLiteTypeNames("INTEGER8", DbType.SByte),
-              new SQLiteTypeNames("INTEGER16", DbType.Int16),
-              new SQLiteTypeNames("INTEGER32", DbType.Int32),
-              new SQLiteTypeNames("INTEGER64", DbType.Int64),
-              new SQLiteTypeNames("UNSIGNEDINTEGER", DbType.UInt64),
-              new SQLiteTypeNames("UNSIGNEDINTEGER8", DbType.Byte),
-              new SQLiteTypeNames("UNSIGNEDINTEGER16", DbType.UInt16),
-              new SQLiteTypeNames("UNSIGNEDINTEGER32", DbType.UInt32),
-              new SQLiteTypeNames("UNSIGNEDINTEGER64", DbType.UInt64),
-              new SQLiteTypeNames("INT", DbType.Int32),
-              new SQLiteTypeNames("INT8", DbType.SByte),
-              new SQLiteTypeNames("INT16", DbType.Int16),
-              new SQLiteTypeNames("INT32", DbType.Int32),
-              new SQLiteTypeNames("INT64", DbType.Int64),
-              new SQLiteTypeNames("UINT", DbType.UInt32),
-              new SQLiteTypeNames("UINT8", DbType.Byte),
-              new SQLiteTypeNames("UINT16", DbType.UInt16),
-              new SQLiteTypeNames("UINT32", DbType.UInt32),
-              new SQLiteTypeNames("UINT64", DbType.UInt64),
-              new SQLiteTypeNames("VARCHAR", DbType.String),
-              new SQLiteTypeNames("NVARCHAR", DbType.String),
-              new SQLiteTypeNames("CHAR", DbType.String),
-              new SQLiteTypeNames("NCHAR", DbType.String),
-              new SQLiteTypeNames("TEXT", DbType.String),
-              new SQLiteTypeNames("NTEXT", DbType.String),
-              new SQLiteTypeNames("STRING", DbType.String),
-              new SQLiteTypeNames("DOUBLE", DbType.Double),
-              new SQLiteTypeNames("FLOAT", DbType.Double),
-              new SQLiteTypeNames("REAL", DbType.Double),
-              new SQLiteTypeNames("BIT", DbType.Boolean),
-              new SQLiteTypeNames("YESNO", DbType.Boolean),
-              new SQLiteTypeNames("LOGICAL", DbType.Boolean),
-              new SQLiteTypeNames("BOOL", DbType.Boolean),
-              new SQLiteTypeNames("BOOLEAN", DbType.Boolean),
-              new SQLiteTypeNames("NUMERIC", DbType.Decimal),
-              new SQLiteTypeNames("DECIMAL", DbType.Decimal),
-              new SQLiteTypeNames("MONEY", DbType.Decimal),
-              new SQLiteTypeNames("CURRENCY", DbType.Decimal),
-              new SQLiteTypeNames("TIME", DbType.DateTime),
-              new SQLiteTypeNames("DATE", DbType.DateTime),
-              new SQLiteTypeNames("DATETIME", DbType.DateTime),
-              new SQLiteTypeNames("SMALLDATE", DbType.DateTime),
-              new SQLiteTypeNames("TIMESTAMP", DbType.DateTime),
-              new SQLiteTypeNames("BLOB", DbType.Binary),
-              new SQLiteTypeNames("BINARY", DbType.Binary),
-              new SQLiteTypeNames("VARBINARY", DbType.Binary),
-              new SQLiteTypeNames("IMAGE", DbType.Binary),
-              new SQLiteTypeNames("GENERAL", DbType.Binary),
-              new SQLiteTypeNames("OLEOBJECT", DbType.Binary),
-              new SQLiteTypeNames("GUID", DbType.Guid),
-              new SQLiteTypeNames("UNIQUEIDENTIFIER", DbType.Guid),
-              new SQLiteTypeNames("MEMO", DbType.String),
-              new SQLiteTypeNames("NOTE", DbType.String),
-              new SQLiteTypeNames("SMALLINT", DbType.Int16),
-              new SQLiteTypeNames("BIGINT", DbType.Int64)
-            })
-          {
+          foreach (SQLiteTypeNames typeName in GetSQLiteTypeNames())
             _typeNames.Add(typeName.typeName, typeName);
-          }
         }
       }
 
