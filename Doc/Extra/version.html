@@ -49,7 +49,8 @@
       <li>Add static Execute method to the SQLiteCommand class.</li>
       <li>Add public constructor to the SQLiteDataAdapter class that allows passing the parseViaFramework parameter to the SQLiteConnection constructor.</li>
       <li>When built with the CHECK_STATE compile-time option, skip throwing exceptions from the SQLiteDataReader class when the object is being disposed.</li>
-      <li>Support automatic value conversions for columns with a declared type of INTEGER8, INTEGER16, INTEGER32, INTEGER64, UNSIGNEDINTEGER, UNSIGNEDINTEGER8, UNSIGNEDINTEGER16, UNSIGNEDINTEGER32, UNSIGNEDINTEGER64, INT8, INT16, INT32, INT64, UINT, UINT8, UINT16, UINT32, or UINT64.</li>
+      <li>Support automatic value conversions for columns with a declared type of BIGUINT, INTEGER8, INTEGER16, INTEGER32, INTEGER64, SMALLUINT, TINYSINT, UNSIGNEDINTEGER, UNSIGNEDINTEGER8, UNSIGNEDINTEGER16, UNSIGNEDINTEGER32, UNSIGNEDINTEGER64, INT8, INT16, INT32, INT64, UINT, UINT8, UINT16, UINT32, UINT64, or ULONG.</li>
+      <li>Remove AUTOINCREMENT from the column type name map.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     </ul>
     <p><b>1.0.84.0 - January 9, 2013</b></p>
     <ul>

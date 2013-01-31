@@ -1433,7 +1433,7 @@ runTest {test data-1.27 {VARCHAR / NVARCHAR types with spaces} -body {
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
       TypeNameToDbType "NVARCHAR (1)"] \
 } -constraints {eagle System.Data.SQLite} -result \
-{String String String String String String}}
+{AnsiString String AnsiString String AnsiString String}}
 
 ###############################################################################
 
