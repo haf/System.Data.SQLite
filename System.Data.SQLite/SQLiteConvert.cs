@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -172,7 +172,7 @@ namespace System.Data.SQLite
       }
 
       byte[] byteArray = new byte[nativestringlen];
-      
+
       Marshal.Copy(nativestring, byteArray, 0, nativestringlen);
 
       return _utf8.GetString(byteArray, 0, nativestringlen);
@@ -574,14 +574,14 @@ namespace System.Data.SQLite
     }
 
     private static Type[] _affinitytotype = {
-      typeof(object),
-      typeof(Int64),
-      typeof(Double),
-      typeof(string),
-      typeof(byte[]),
-      typeof(object),
-      typeof(DateTime),
-      typeof(object)
+      typeof(object),   // Uninitialized (0)
+      typeof(Int64),    // Int64 (1)
+      typeof(Double),   // Double (2)
+      typeof(string),   // Text (3)
+      typeof(byte[]),   // Blob (4)
+      typeof(DBNull),   // Null (5)
+      typeof(DateTime), // DateTime (10)
+      typeof(object)    // None (11)
     };
 
     /// <summary>
@@ -602,25 +602,25 @@ namespace System.Data.SQLite
     }
 
     private static DbType[] _typetodbtype = {
-      DbType.Object,
-      DbType.Binary,
-      DbType.Object,
-      DbType.Boolean,
-      DbType.SByte,
-      DbType.SByte,
-      DbType.Byte,
-      DbType.Int16, // 7
-      DbType.UInt16,
-      DbType.Int32,
-      DbType.UInt32,
-      DbType.Int64, // 11
-      DbType.UInt64,
-      DbType.Single,
-      DbType.Double,
-      DbType.Decimal,
-      DbType.DateTime,
-      DbType.Object,
-      DbType.String,
+      DbType.Object,   // Empty (0)
+      DbType.Binary,   // Object (1)
+      DbType.Object,   // DBNull (2)
+      DbType.Boolean,  // Boolean (3)
+      DbType.SByte,    // Char (4)
+      DbType.SByte,    // SByte (5)
+      DbType.Byte,     // Byte (6)
+      DbType.Int16,    // Int16 (7)
+      DbType.UInt16,   // UInt16 (8)
+      DbType.Int32,    // Int32 (9)
+      DbType.UInt32,   // UInt32 (10)
+      DbType.Int64,    // Int64 (11)
+      DbType.UInt64,   // UInt64 (12)
+      DbType.Single,   // Single (13)
+      DbType.Double,   // Double (14)
+      DbType.Decimal,  // Decimal (15)
+      DbType.DateTime, // DateTime (16)
+      DbType.Object,   // ?? (17)
+      DbType.String    // String (18)
     };
 
     /// <summary>
@@ -634,32 +634,32 @@ namespace System.Data.SQLite
     }
 
     private static int[] _dbtypetocolumnsize = {
-      2147483647,   // 0
-      2147483647,   // 1
-      1,     // 2
-      1,     // 3
-      8,  // 4
-      8, // 5
-      8, // 6
-      8,  // 7
-      8,   // 8
-      16,     // 9
-      2,
-      4,
-      8,
-      2147483647,
-      1,
-      4,
-      2147483647,
-      8,
-      2,
-      4,
-      8,
-      8,
-      2147483647,
-      2147483647,
-      2147483647,
-      2147483647,   // 25 (Xml)
+      int.MaxValue, // AnsiString (0)
+      int.MaxValue, // Binary (1)
+      1,            // Byte (2)
+      1,            // Boolean (3)
+      8,            // Currency (4)
+      8,            // Date (5)
+      8,            // DateTime (6)
+      8,            // Decimal (7)
+      8,            // Double (8)
+      16,           // Guid (9)
+      2,            // Int16 (10)
+      4,            // Int32 (11)
+      8,            // Int64 (12)
+      int.MaxValue, // Object (13)
+      1,            // SByte (14)
+      4,            // Single (15)
+      int.MaxValue, // String (16)
+      8,            // Time (17)
+      2,            // UInt16 (18)
+      4,            // UInt32 (19)
+      8,            // UInt64 (20)
+      8,            // VarNumeric (21)
+      int.MaxValue, // AnsiStringFixedLength (22)
+      int.MaxValue, // StringFixedLength (23)
+      int.MaxValue, // ?? (24)
+      int.MaxValue  // Xml (25)
     };
 
     internal static object DbTypeToNumericPrecision(DbType typ)
@@ -668,31 +668,32 @@ namespace System.Data.SQLite
     }
 
     private static object[] _dbtypetonumericprecision = {
-      DBNull.Value, // 0
-      DBNull.Value, // 1
-      3,
-      DBNull.Value,
-      19,
-      DBNull.Value, // 5
-      DBNull.Value, // 6
-      53,
-      53,
-      DBNull.Value,
-      5,
-      10,
-      19,
-      DBNull.Value,
-      3,
-      24,
-      DBNull.Value,
-      DBNull.Value,
-      5,
-      10,
-      19,
-      53,
-      DBNull.Value,
-      DBNull.Value,
-      DBNull.Value
+      DBNull.Value, // AnsiString (0)
+      DBNull.Value, // Binary (1)
+      3,            // Byte (2)
+      DBNull.Value, // Boolean (3)
+      19,           // Currency (4)
+      DBNull.Value, // Date (5)
+      DBNull.Value, // DateTime (6)
+      53,           // Decimal (7)
+      53,           // Double (8)
+      DBNull.Value, // Guid (9)
+      5,            // Int16 (10)
+      10,           // Int32 (11)
+      19,           // Int64 (12)
+      DBNull.Value, // Object (13)
+      3,            // SByte (14)
+      24,           // Single (15)
+      DBNull.Value, // String (16)
+      DBNull.Value, // Time (17)
+      5,            // UInt16 (18)
+      10,           // UInt32 (19)
+      19,           // UInt64 (20)
+      53,           // VarNumeric (21)
+      DBNull.Value, // AnsiStringFixedLength (22)
+      DBNull.Value, // StringFixedLength (23)
+      DBNull.Value, // ?? (24)
+      DBNull.Value  // Xml (25)
     };
 
     internal static object DbTypeToNumericScale(DbType typ)
@@ -701,31 +702,32 @@ namespace System.Data.SQLite
     }
 
     private static object[] _dbtypetonumericscale = {
-      DBNull.Value, // 0
-      DBNull.Value, // 1
-      0,
-      DBNull.Value,
-      4,
-      DBNull.Value, // 5
-      DBNull.Value, // 6
-      DBNull.Value,
-      DBNull.Value,
-      DBNull.Value,
-      0,
-      0,
-      0,
-      DBNull.Value,
-      0,
-      DBNull.Value,
-      DBNull.Value,
-      DBNull.Value,
-      0,
-      0,
-      0,
-      0,
-      DBNull.Value,
-      DBNull.Value,
-      DBNull.Value
+      DBNull.Value, // AnsiString (0)
+      DBNull.Value, // Binary (1)
+      0,            // Byte (2)
+      DBNull.Value, // Boolean (3)
+      4,            // Currency (4)
+      DBNull.Value, // Date (5)
+      DBNull.Value, // DateTime (6)
+      DBNull.Value, // Decimal (7)
+      DBNull.Value, // Double (8)
+      DBNull.Value, // Guid (9)
+      0,            // Int16 (10)
+      0,            // Int32 (11)
+      0,            // Int64 (12)
+      DBNull.Value, // Object (13)
+      0,            // SByte (14)
+      DBNull.Value, // Single (15)
+      DBNull.Value, // String (16)
+      DBNull.Value, // Time (17)
+      0,            // UInt16 (18)
+      0,            // UInt32 (19)
+      0,            // UInt64 (20)
+      0,            // VarNumeric (21)
+      DBNull.Value, // AnsiStringFixedLength (22)
+      DBNull.Value, // StringFixedLength (23)
+      DBNull.Value, // ?? (24)
+      DBNull.Value  // Xml (25)
     };
 
     internal static string DbTypeToTypeName(DbType typ)
@@ -760,32 +762,32 @@ namespace System.Data.SQLite
     }
 
     private static Type[] _dbtypeToType = {
-      typeof(string),   // 0
-      typeof(byte[]),   // 1
-      typeof(byte),     // 2
-      typeof(bool),     // 3
-      typeof(decimal),  // 4
-      typeof(DateTime), // 5
-      typeof(DateTime), // 6
-      typeof(decimal),  // 7
-      typeof(double),   // 8
-      typeof(Guid),     // 9
-      typeof(Int16),
-      typeof(Int32),
-      typeof(Int64),
-      typeof(object),
-      typeof(sbyte),
-      typeof(float),
-      typeof(string),
-      typeof(DateTime),
-      typeof(UInt16),
-      typeof(UInt32),
-      typeof(UInt64),
-      typeof(double),
-      typeof(string),
-      typeof(string),
-      typeof(string),
-      typeof(string),   // 25 (Xml)
+      typeof(string),   // AnsiString (0)
+      typeof(byte[]),   // Binary (1)
+      typeof(byte),     // Byte (2)
+      typeof(bool),     // Boolean (3)
+      typeof(decimal),  // Currency (4)
+      typeof(DateTime), // Date (5)
+      typeof(DateTime), // DateTime (6)
+      typeof(decimal),  // Decimal (7)
+      typeof(double),   // Double (8)
+      typeof(Guid),     // Guid (9)
+      typeof(Int16),    // Int16 (10)
+      typeof(Int32),    // Int32 (11)
+      typeof(Int64),    // Int64 (12)
+      typeof(object),   // Object (13)
+      typeof(sbyte),    // SByte (14)
+      typeof(float),    // Single (15)
+      typeof(string),   // String (16)
+      typeof(DateTime), // Time (17)
+      typeof(UInt16),   // UInt16 (18)
+      typeof(UInt32),   // UInt32 (19)
+      typeof(UInt64),   // UInt64 (20)
+      typeof(double),   // VarNumeric (21)
+      typeof(string),   // AnsiStringFixedLength (22)
+      typeof(string),   // StringFixedLength (23)
+      typeof(string),   // ?? (24)
+      typeof(string),   // Xml (25)
     };
 
     /// <summary>
@@ -807,25 +809,25 @@ namespace System.Data.SQLite
     }
 
     private static TypeAffinity[] _typecodeAffinities = {
-      TypeAffinity.Null,
-      TypeAffinity.Blob,
-      TypeAffinity.Null,
-      TypeAffinity.Int64,
-      TypeAffinity.Int64,
-      TypeAffinity.Int64,
-      TypeAffinity.Int64,
-      TypeAffinity.Int64, // 7
-      TypeAffinity.Int64,
-      TypeAffinity.Int64,
-      TypeAffinity.Int64,
-      TypeAffinity.Int64, // 11
-      TypeAffinity.Int64,
-      TypeAffinity.Double,
-      TypeAffinity.Double,
-      TypeAffinity.Double,
-      TypeAffinity.DateTime,
-      TypeAffinity.Null,
-      TypeAffinity.Text,
+      TypeAffinity.Null,     // Empty (0)
+      TypeAffinity.Blob,     // Object (1)
+      TypeAffinity.Null,     // DBNull (2)
+      TypeAffinity.Int64,    // Boolean (3)
+      TypeAffinity.Int64,    // Char (4)
+      TypeAffinity.Int64,    // SByte (5)
+      TypeAffinity.Int64,    // Byte (6)
+      TypeAffinity.Int64,    // Int16 (7)
+      TypeAffinity.Int64,    // UInt16 (8)
+      TypeAffinity.Int64,    // Int32 (9)
+      TypeAffinity.Int64,    // UInt32 (10)
+      TypeAffinity.Int64,    // Int64 (11)
+      TypeAffinity.Int64,    // UInt64 (12)
+      TypeAffinity.Double,   // Single (13)
+      TypeAffinity.Double,   // Double (14)
+      TypeAffinity.Double,   // Decimal (15)
+      TypeAffinity.DateTime, // DateTime (16)
+      TypeAffinity.Null,     // ?? (17)
+      TypeAffinity.Text      // String (18)
     };
 
     /// <summary>
@@ -1077,8 +1079,8 @@ namespace System.Data.SQLite
   /// JulianDay is the numeric format the SQLite uses internally and is arguably the most compatible with 3rd party tools.  It is
   /// not readable as text without post-processing.
   /// Ticks less compatible with 3rd party tools that query the database, and renders the DateTime field unreadable as text without post-processing.
-  /// 
-  /// The preferred order of choosing a datetime format is JulianDay, ISO8601, and then Ticks.  Ticks is mainly present for legacy 
+  ///
+  /// The preferred order of choosing a datetime format is JulianDay, ISO8601, and then Ticks.  Ticks is mainly present for legacy
   /// code support.
   /// </remarks>
   public enum SQLiteDateFormats
@@ -1121,7 +1123,7 @@ namespace System.Data.SQLite
   /// By default SQLite will create and delete the journal file when needed during a transaction.
   /// However, for some computers running certain filesystem monitoring tools, the rapid
   /// creation and deletion of the journal file can cause those programs to fail, or to interfere with SQLite.
-  /// 
+  ///
   /// If a program or virus scanner is interfering with SQLite's journal file, you may receive errors like "unable to open database file"
   /// when starting a transaction.  If this is happening, you may want to change the default journal mode to Persist.
   /// </remarks>
@@ -1286,8 +1288,8 @@ namespace System.Data.SQLite
     {
       //
       // NOTE: The only thing that we must guarantee here, according
-      //       to the MSDN documentation for IEqualityComparer, is 
-      //       that for two given strings, if Equals return true then 
+      //       to the MSDN documentation for IEqualityComparer, is
+      //       that for two given strings, if Equals return true then
       //       the two strings must hash to the same value.
       //
       if (value != null)
