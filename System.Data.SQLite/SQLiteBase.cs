@@ -163,8 +163,14 @@ namespace System.Data.SQLite
     internal abstract void GetIndexColumnExtendedInfo(string database, string index, string column, out int sortMode, out int onError, out string collationSequence);
 
     internal abstract double GetDouble(SQLiteStatement stmt, int index);
+    internal abstract SByte GetSByte(SQLiteStatement stmt, int index);
+    internal abstract Byte GetByte(SQLiteStatement stmt, int index);
+    internal abstract Int16 GetInt16(SQLiteStatement stmt, int index);
+    internal abstract UInt16 GetUInt16(SQLiteStatement stmt, int index);
     internal abstract Int32 GetInt32(SQLiteStatement stmt, int index);
+    internal abstract UInt32 GetUInt32(SQLiteStatement stmt, int index);
     internal abstract Int64 GetInt64(SQLiteStatement stmt, int index);
+    internal abstract UInt64 GetUInt64(SQLiteStatement stmt, int index);
     internal abstract string GetText(SQLiteStatement stmt, int index);
     internal abstract long GetBytes(SQLiteStatement stmt, int index, int nDataoffset, byte[] bDest, int nStart, int nLength);
     internal abstract long GetChars(SQLiteStatement stmt, int index, int nDataoffset, char[] bDest, int nStart, int nLength);

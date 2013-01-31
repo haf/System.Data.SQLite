@@ -1149,9 +1149,34 @@ namespace System.Data.SQLite
       return value;
     }
 
+    internal override sbyte GetSByte(SQLiteStatement stmt, int index)
+    {
+      return unchecked((sbyte)(GetInt32(stmt, index) & byte.MaxValue));
+    }
+
+    internal override byte GetByte(SQLiteStatement stmt, int index)
+    {
+      return unchecked((byte)(GetInt32(stmt, index) & byte.MaxValue));
+    }
+
+    internal override short GetInt16(SQLiteStatement stmt, int index)
+    {
+      return unchecked((short)(GetInt32(stmt, index) & ushort.MaxValue));
+    }
+
+    internal override ushort GetUInt16(SQLiteStatement stmt, int index)
+    {
+      return unchecked((ushort)(GetInt32(stmt, index) & ushort.MaxValue));
+    }
+
     internal override int GetInt32(SQLiteStatement stmt, int index)
     {
       return UnsafeNativeMethods.sqlite3_column_int(stmt._sqlite_stmt, index);
+    }
+
+    internal override uint GetUInt32(SQLiteStatement stmt, int index)
+    {
+      return unchecked((uint)GetInt32(stmt, index));
     }
 
     internal override long GetInt64(SQLiteStatement stmt, int index)
@@ -1163,6 +1188,11 @@ namespace System.Data.SQLite
       UnsafeNativeMethods.sqlite3_column_int64_interop(stmt._sqlite_stmt, index, out value);
 #endif
       return value;
+    }
+
+    internal override ulong GetUInt64(SQLiteStatement stmt, int index)
+    {
+      return unchecked((ulong)GetInt64(stmt, index));
     }
 
     internal override string GetText(SQLiteStatement stmt, int index)
@@ -1914,12 +1944,17 @@ namespace System.Data.SQLite
           return GetDateTime(stmt, index);
         case TypeAffinity.Double:
           if (t == null) return GetDouble(stmt, index);
-          else
-            return Convert.ChangeType(GetDouble(stmt, index), t, null);
+          return Convert.ChangeType(GetDouble(stmt, index), t, null);
         case TypeAffinity.Int64:
           if (t == null) return GetInt64(stmt, index);
-          else
-            return Convert.ChangeType(GetInt64(stmt, index), t, null);
+          if (t == typeof(SByte)) return GetSByte(stmt, index);
+          if (t == typeof(Byte)) return GetByte(stmt, index);
+          if (t == typeof(Int16)) return GetInt16(stmt, index);
+          if (t == typeof(UInt16)) return GetUInt16(stmt, index);
+          if (t == typeof(Int32)) return GetInt32(stmt, index);
+          if (t == typeof(UInt32)) return GetUInt32(stmt, index);
+          if (t == typeof(UInt64)) return GetUInt64(stmt, index);
+          return Convert.ChangeType(GetInt64(stmt, index), t, null);
         default:
           return GetText(stmt, index);
       }
