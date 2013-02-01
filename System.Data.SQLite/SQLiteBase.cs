@@ -783,6 +783,13 @@ namespace System.Data.SQLite
       NoExtensionFunctions = 0x20,
 
       /// <summary>
+      /// When binding parameter values with the <see cref="UInt32" />
+      /// type, use the interop method that accepts an <see cref="Int64" />
+      /// value.
+      /// </summary>
+      BindUInt32AsInt64 = 0x40,
+
+      /// <summary>
       /// Enable all logging.
       /// </summary>
       LogAll = LogPrepare | LogPreBind | LogBind |

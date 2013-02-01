@@ -773,7 +773,22 @@ namespace System.Data.SQLite
         }
 #endif
 
-        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_uint(handle, index, value);
+        SQLiteErrorCode n;
+
+        if ((flags & SQLiteConnectionFlags.BindUInt32AsInt64) == SQLiteConnectionFlags.BindUInt32AsInt64)
+        {
+            long value2 = value;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+            n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value2);
+#else
+            n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value2);
+#endif
+        }
+        else
+        {
+            n = UnsafeNativeMethods.sqlite3_bind_uint(handle, index, value);
+        }
         if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
 
