@@ -348,6 +348,34 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Gets/sets the database encryption hexadecimal password
+    /// </summary>
+    [Browsable(true)]
+    [PasswordPropertyText(true)]
+    [DefaultValue(null)]
+    public byte[] HexPassword
+    {
+        get
+        {
+            object value;
+
+            if (TryGetValue("hexpassword", out value))
+            {
+                if (value is string)
+                    return SQLiteConnection.FromHexString((string)value);
+                else if (value != null)
+                    return (byte[])value;
+            }
+
+            return null;
+        }
+        set
+        {
+            this["hexpassword"] = SQLiteConnection.ToHexString(value);
+        }
+    }
+
+    /// <summary>
     /// Gets/Sets the page size for the connection.
     /// </summary>
     [DisplayName("Page Size")]
@@ -647,7 +675,7 @@ namespace System.Data.SQLite
       {
         if (pd.PropertyType == typeof(Boolean))
           value = SQLiteConvert.ToBoolean(value);
-        else
+        else if (pd.PropertyType != typeof(byte[]))
           value = TypeDescriptor.GetConverter(pd.PropertyType).ConvertFrom(value);
       }
       else

@@ -16,6 +16,7 @@ namespace System.Data.SQLite
   using System.ComponentModel;
   using System.Runtime.InteropServices;
   using System.IO;
+  using System.Text;
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -182,6 +183,12 @@ namespace System.Data.SQLite
   /// <description></description>
   /// </item>
   /// <item>
+  /// <description>HexPassword</description>
+  /// <description>{hexPassword} - Must contain a sequence of zero or more hexadecimal encoded byte values without a leading "0x" prefix.  Using this parameter requires that the CryptoAPI based codec be enabled at compile-time for both the native interop assembly and the core managed assemblies; otherwise, using this parameter may result in an exception being thrown when attempting to open the connection.</description>
+  /// <description>N</description>
+  /// <description></description>
+  /// </item>
+  /// <item>
   /// <description>Enlist</description>
   /// <description><b>Y</b> - Automatically enlist in distributed transactions<br/><b>N</b> - No automatic enlistment</description>
   /// <description>N</description>
@@ -296,6 +303,7 @@ namespace System.Data.SQLite
     private const string DefaultDataSource = null;
     private const string DefaultUri = null;
     private const string DefaultFullUri = null;
+    private const string DefaultHexPassword = null;
     private const string DefaultPassword = null;
     private const int DefaultVersion = 3;
     private const int DefaultPageSize = 1024;
@@ -1146,6 +1154,12 @@ namespace System.Data.SQLite
     /// <description></description>
     /// </item>
     /// <item>
+    /// <description>HexPassword</description>
+    /// <description>{hexPassword} - Must contain a sequence of zero or more hexadecimal encoded byte values without a leading "0x" prefix.  Using this parameter requires that the CryptoAPI based codec be enabled at compile-time for both the native interop assembly and the core managed assemblies; otherwise, using this parameter may result in an exception being thrown when attempting to open the connection.</description>
+    /// <description>N</description>
+    /// <description></description>
+    /// </item>
+    /// <item>
     /// <description>Enlist</description>
     /// <description><b>Y</b> - Automatically enlist in distributed transactions<br/><b>N</b> - No automatic enlistment</description>
     /// <description>N</description>
@@ -1335,8 +1349,7 @@ namespace System.Data.SQLite
       int n;
       SortedList<string, string> ls = new SortedList<string, string>(StringComparer.OrdinalIgnoreCase);
 
-      // First split into semi-colon delimited values.  The Split() function of SQLiteBase accounts for and properly
-      // skips semi-colons in quoted strings
+      // First split into semi-colon delimited values.
       string[] arParts = s.Split(';');
 
       int x = arParts.Length;
@@ -1493,6 +1506,44 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Attempts to convert an input string into a byte value.
+    /// </summary>
+    /// <param name="value">
+    /// The string value to be converted.
+    /// </param>
+    /// <param name="style">
+    /// The number styles to use for the conversion.
+    /// </param>
+    /// <param name="result">
+    /// Upon sucess, this will contain the parsed byte value.
+    /// Upon failure, the value of this parameter is undefined.
+    /// </param>
+    /// <returns>
+    /// Non-zero upon success; zero on failure.
+    /// </returns>
+    private static bool TryParseByte(
+        string value,
+        NumberStyles style,
+        out byte result
+        )
+    {
+#if !PLATFORM_COMPACTFRAMEWORK
+        return byte.TryParse(value, style, null, out result);
+#else
+        try
+        {
+            result = byte.Parse(value, style);
+            return true;
+        }
+        catch
+        {
+            result = 0;
+            return false;
+        }
+#endif
+    }
+
+    /// <summary>
     /// Enables or disabled extension loading.
     /// </summary>
     /// <param name="enable">
@@ -1549,6 +1600,108 @@ namespace System.Data.SQLite
                 "Database connection not valid for loading extensions.");
 
         _sql.LoadExtension(fileName, procName);
+    }
+
+    /// <summary>
+    /// Parses a string containing a sequence of zero or more hexadecimal
+    /// encoded byte values and returns the resulting byte array.  The
+    /// "0x" prefix is not allowed on the input string.
+    /// </summary>
+    /// <param name="text">
+    /// The input string containing zero or more hexadecimal encoded byte
+    /// values.
+    /// </param>
+    /// <returns>
+    /// A byte array containing the parsed byte values or null if an error
+    /// was encountered.
+    /// </returns>
+    internal static byte[] FromHexString(
+        string text
+        )
+    {
+        string error = null;
+
+        return FromHexString(text, ref error);
+    }
+
+    /// <summary>
+    /// Creates and returns a string containing the hexadecimal encoded byte
+    /// values from the input array.
+    /// </summary>
+    /// <param name="array">
+    /// The input array of bytes.
+    /// </param>
+    /// <returns>
+    /// The resulting string or null upon failure.
+    /// </returns>
+    internal static string ToHexString(
+        byte[] array
+        )
+    {
+        if (array == null)
+            return null;
+
+        StringBuilder result = new StringBuilder();
+
+        int length = array.Length;
+
+        for (int index = 0; index < length; index++)
+            result.AppendFormat("{0:x2}", array[index]);
+
+        return result.ToString();
+    }
+
+    /// <summary>
+    /// Parses a string containing a sequence of zero or more hexadecimal
+    /// encoded byte values and returns the resulting byte array.  The
+    /// "0x" prefix is not allowed on the input string.
+    /// </summary>
+    /// <param name="text">
+    /// The input string containing zero or more hexadecimal encoded byte
+    /// values.
+    /// </param>
+    /// <param name="error">
+    /// Upon failure, this will contain an appropriate error message.
+    /// </param>
+    /// <returns>
+    /// A byte array containing the parsed byte values or null if an error
+    /// was encountered.
+    /// </returns>
+    private static byte[] FromHexString(
+        string text,
+        ref string error
+        )
+    {
+        if (String.IsNullOrEmpty(text))
+        {
+            error = "string is null or empty";
+            return null;
+        }
+
+        if (text.Length % 2 != 0)
+        {
+            error = "string contains an odd number of characters";
+            return null;
+        }
+
+        byte[] result = new byte[text.Length / 2];
+
+        for (int index = 0; index < text.Length; index += 2)
+        {
+            string value = text.Substring(index, 2);
+
+            if (!TryParseByte(value,
+                    NumberStyles.HexNumber, out result[index / 2]))
+            {
+                error = String.Format(
+                    "string contains \"{0}\", which cannot be converted to a byte value",
+                    value);
+
+                return null;
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -1686,13 +1839,31 @@ namespace System.Data.SQLite
         _binaryGuid = SQLiteConvert.ToBoolean(FindKey(opts, "BinaryGUID", DefaultBinaryGUID.ToString()));
 
 #if INTEROP_CODEC
-        string password = FindKey(opts, "Password", DefaultPassword);
+        string hexPassword = FindKey(opts, "HexPassword", DefaultHexPassword);
 
-        if (!String.IsNullOrEmpty(password))
-          _sql.SetPassword(System.Text.UTF8Encoding.UTF8.GetBytes(password));
-        else if (_password != null)
-          _sql.SetPassword(_password);
+        if (!String.IsNullOrEmpty(hexPassword))
+        {
+            string error = null;
+            byte[] hexPasswordBytes = FromHexString(hexPassword, ref error);
 
+            if (hexPasswordBytes == null)
+            {
+                throw new FormatException(String.Format(
+                    "Cannot parse 'HexPassword' property value into byte values: {0}",
+                    error));
+            }
+
+            _sql.SetPassword(hexPasswordBytes);
+        }
+        else
+        {
+            string password = FindKey(opts, "Password", DefaultPassword);
+
+            if (!String.IsNullOrEmpty(password))
+                _sql.SetPassword(UTF8Encoding.UTF8.GetBytes(password));
+            else if (_password != null)
+                _sql.SetPassword(_password);
+        }
         _password = null;
 #endif
 
@@ -2137,7 +2308,7 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
 
-      ChangePassword(String.IsNullOrEmpty(newPassword) ? null : System.Text.UTF8Encoding.UTF8.GetBytes(newPassword));
+      ChangePassword(String.IsNullOrEmpty(newPassword) ? null : UTF8Encoding.UTF8.GetBytes(newPassword));
     }
 
     /// <summary>
@@ -2167,7 +2338,7 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
 
-      SetPassword(String.IsNullOrEmpty(databasePassword) ? null : System.Text.UTF8Encoding.UTF8.GetBytes(databasePassword));
+      SetPassword(String.IsNullOrEmpty(databasePassword) ? null : UTF8Encoding.UTF8.GetBytes(databasePassword));
     }
 
     /// <summary>

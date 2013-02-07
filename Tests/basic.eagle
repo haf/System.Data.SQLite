@@ -934,11 +934,31 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
     using System;
     using System.Data.SQLite;
     using System.Reflection;
+    using System.Text;
 
     namespace _Dynamic${id}
     {
       public static class Test${id}
       {
+        private static string ToHexString(
+          byte\[\] array
+          )
+        {
+          if (array == null)
+            return null;
+
+          StringBuilder result = new StringBuilder();
+
+          int length = array.Length;
+
+          for (int index = 0; index < length; index++)
+            result.AppendFormat("{0:x2}", array\[index\]);
+
+          return result.ToString();
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         public static string GetConnectionString(
           string key,
           string value,
@@ -960,7 +980,8 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                 BindingFlags.GetProperty, null, builder, null);
           }
 
-          return String.Format("{0}, {1}", propertyValue, builder);
+          return String.Format("{0}, {1}", (propertyValue is byte\[\]) ?
+              ToHexString((byte\[\])propertyValue) : propertyValue, builder);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -982,7 +1003,7 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                    Password "Page Size" "Max Page Count" "Cache Size" \
                    DateTimeFormat DateTimeKind BaseSchemaName \
                    "Journal Mode" "Default IsolationLevel" "Foreign Keys" \
-                   Flags SetDefaults ToFullPath]
+                   Flags SetDefaults ToFullPath HexPassword]
 
     set values [list null 3 Normal True False \
                      True test.db test.db file:test.db 60 \
@@ -990,7 +1011,7 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                      secret 4096 1024 8192 \
                      UnixEpoch Utc sqlite_schema \
                      Memory Serializable False \
-                     Default False False]
+                     Default False False 736563726574]
 
     set propertyNames [list null Version SyncMode UseUTF16Encoding Pooling \
                             BinaryGUID DataSource Uri FullUri DefaultTimeout \
@@ -998,7 +1019,7 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                             Password PageSize MaxPageCount CacheSize \
                             DateTimeFormat DateTimeKind BaseSchemaName \
                             JournalMode DefaultIsolationLevel ForeignKeys \
-                            Flags SetDefaults ToFullPath]
+                            Flags SetDefaults ToFullPath HexPassword]
 
     foreach key $keys value $values propertyName $propertyNames {
       set code [catch {
@@ -1029,7 +1050,7 @@ Size=4096\} 0 \{1024, Max Page Count=1024\} 0 \{8192, Cache Size=8192\} 0\
 Mode=Memory\} 0 \{Serializable, Default IsolationLevel=Serializable\} 0\
 \{False, Foreign Keys=False\} 0 \{(?:Default|LogCallbackException),\
 Flags=(?:Default|LogCallbackException)\} 0 \{False, SetDefaults=False\} 0\
-\{False, ToFullPath=False\}$}}
+\{False, ToFullPath=False\} 0 {736563726574, HexPassword=736563726574}$}}
 
 ###############################################################################
 

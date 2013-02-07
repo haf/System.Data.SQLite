@@ -1,0 +1,192 @@
+###############################################################################
+#
+# tkt-1c456ae75f.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-1c456ae75f-1.1 {unencrypted database, hex password} -setup {
+  setupDb [set fileName tkt-1c456ae75f-1.1.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "HexPassword=3132333435;" true false
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "" true false
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain error result db fileName
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -match regexp -result {^1\
+\{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted or is\
+not a database.*?\} 1 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\):\
+file is encrypted or is not a database.*?\} 0 1 0 2$}}
+
+###############################################################################
+
+runTest {test tkt-1c456ae75f-1.2 {database, hex password} -setup {
+  setupDb [set fileName tkt-1c456ae75f-1.2.db] "" "" "" "" \
+      "HexPassword=3132333435;"
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=12345;" true false
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "HexPassword=3132333435;" true false
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain error result db fileName
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -result {0 1 0 1 0 1 0 3}}
+
+###############################################################################
+
+runTest {test tkt-1c456ae75f-1.3 {database, wrong hex password} -setup {
+  setupDb [set fileName tkt-1c456ae75f-1.3.db] "" "" "" "" \
+      "HexPassword=3132333435;"
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "HexPassword=3132333436;" true false
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "HexPassword=3132333435;" true false
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain error result db fileName
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -match regexp -result {^1\
+\{System\.Data\.SQLite\.SQLiteException \(0x80004005\): file is encrypted or is\
+not a database.*?\} 1 \{System\.Data\.SQLite\.SQLiteException \(0x80004005\):\
+file is encrypted or is not a database.*?\} 0 1 0 2$}}
+
+###############################################################################
+
+runTest {test tkt-1c456ae75f-1.4 {database, hex password via builder} -setup {
+  setupDb [set fileName tkt-1c456ae75f-1.4.db] "" "" "" "" \
+      "HexPassword=3132333435;"
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+
+  cleanupDb $fileName db true false false
+
+  set connectionStringBuilder [object create -alias \
+      System.Data.SQLite.SQLiteConnectionStringBuilder]
+
+  $connectionStringBuilder DataSource \
+      [file join [getDatabaseDirectory] $fileName]
+
+  $connectionStringBuilder HexPassword [list 0x31 0x32 0x33 0x34 0x35]
+
+  set connection [object create -alias \
+      System.Data.SQLite.SQLiteConnection \
+      [$connectionStringBuilder ToString] true]
+
+  $connection Open; addDbConnection $connection
+
+  set result [list]
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  cleanupDb $fileName db true false false
+  setupDb $fileName "" "" "" "" "Password=\"12345\";" true false
+
+  lappend result [catch {sql execute $db \
+      "INSERT INTO t1 (x) VALUES(1);"} error] $error
+
+  lappend result [catch {sql execute -execute scalar $db \
+      "SELECT COUNT(*) FROM t1;"} error] $error
+
+  set result
+} -cleanup {
+  unset -nocomplain connection
+
+  cleanupDb $fileName; # NOTE: After object disposal.
+
+  unset -nocomplain connectionStringBuilder error result db fileName
+} -constraints {eagle defineConstant.System.Data.SQLite.INTEROP_CODEC monoBug28\
+command.sql compile.DATA SQLite System.Data.SQLite} -result {0 1 0 1 0 1 0 3}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
