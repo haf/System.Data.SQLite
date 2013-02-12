@@ -518,7 +518,6 @@ namespace System.Data.SQLite
       SQLiteConnectionFlags flags =
           (cnn != null) ? cnn.Flags : SQLiteConnectionFlags.Default;
 
-#if !PLATFORM_COMPACTFRAMEWORK
       if ((flags & SQLiteConnectionFlags.LogPrepare) == SQLiteConnectionFlags.LogPrepare)
       {
           if ((strSql == null) || (strSql.Length == 0) || (strSql.Trim().Length == 0))
@@ -527,7 +526,6 @@ namespace System.Data.SQLite
               SQLiteLog.LogMessage(String.Format(
                   CultureInfo.CurrentCulture, "Preparing {{{0}}}...", strSql));
       }
-#endif
 
       IntPtr stmt = IntPtr.Zero;
       IntPtr ptr = IntPtr.Zero;
@@ -653,7 +651,6 @@ namespace System.Data.SQLite
       }
     }
 
-#if !PLATFORM_COMPACTFRAMEWORK
     protected static void LogBind(SQLiteStatementHandle handle, int index)
     {
         IntPtr handleIntPtr = handle;
@@ -728,18 +725,17 @@ namespace System.Data.SQLite
             "Binding statement {0} paramter #{1} as type {2} with value {{{3}}}...",
             handleIntPtr, index, typeof(Byte[]), (value != null) ? ToHexadecimalString(value) : "<null>"));
     }
-#endif
 
     internal override void Bind_Double(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, double value)
     {
         SQLiteStatementHandle handle = stmt._sqlite_stmt;
 
-#if !PLATFORM_COMPACTFRAMEWORK
         if ((flags & SQLiteConnectionFlags.LogBind) == SQLiteConnectionFlags.LogBind)
         {
             LogBind(handle, index, value);
         }
 
+#if !PLATFORM_COMPACTFRAMEWORK
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double(handle, index, value);
 #else
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double_interop(handle, index, ref value);
@@ -751,12 +747,10 @@ namespace System.Data.SQLite
     {
         SQLiteStatementHandle handle = stmt._sqlite_stmt;
 
-#if !PLATFORM_COMPACTFRAMEWORK
         if ((flags & SQLiteConnectionFlags.LogBind) == SQLiteConnectionFlags.LogBind)
         {
             LogBind(handle, index, value);
         }
-#endif
 
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int(handle, index, value);
         if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
@@ -967,7 +961,6 @@ namespace System.Data.SQLite
         SQLiteStatementHandle handle = stmt._sqlite_stmt;
         int value = UnsafeNativeMethods.sqlite3_bind_parameter_count(handle);
 
-#if !PLATFORM_COMPACTFRAMEWORK
         if ((flags & SQLiteConnectionFlags.LogBind) == SQLiteConnectionFlags.LogBind)
         {
             IntPtr handleIntPtr = handle;
@@ -976,7 +969,6 @@ namespace System.Data.SQLite
                 "Statement {0} paramter count is {1}.",
                 handleIntPtr, value));
         }
-#endif
 
         return value;
     }
@@ -993,7 +985,6 @@ namespace System.Data.SQLite
         name = UTF8ToString(UnsafeNativeMethods.sqlite3_bind_parameter_name(handle, index), -1);
 #endif
 
-#if !PLATFORM_COMPACTFRAMEWORK
         if ((flags & SQLiteConnectionFlags.LogBind) == SQLiteConnectionFlags.LogBind)
         {
             IntPtr handleIntPtr = handle;
@@ -1002,7 +993,6 @@ namespace System.Data.SQLite
                 "Statement {0} paramter #{1} name is {{{2}}}.",
                 handleIntPtr, index, name));
         }
-#endif
 
         return name;
     }
@@ -1012,7 +1002,6 @@ namespace System.Data.SQLite
         SQLiteStatementHandle handle = stmt._sqlite_stmt;
         int index = UnsafeNativeMethods.sqlite3_bind_parameter_index(handle, ToUTF8(paramName));
 
-#if !PLATFORM_COMPACTFRAMEWORK
         if ((flags & SQLiteConnectionFlags.LogBind) == SQLiteConnectionFlags.LogBind)
         {
             IntPtr handleIntPtr = handle;
@@ -1021,7 +1010,6 @@ namespace System.Data.SQLite
                 "Statement {0} paramter index of name {{{1}}} is #{2}.",
                 handleIntPtr, paramName, index));
         }
-#endif
 
         return index;
     }
@@ -1891,7 +1879,6 @@ namespace System.Data.SQLite
         //
         lock (syncRoot)
         {
-#if !PLATFORM_COMPACTFRAMEWORK
             //
             // NOTE: Save the state of the logging class and then restore it
             //       after we are done to avoid logging too many false errors.
@@ -1901,7 +1888,6 @@ namespace System.Data.SQLite
 
             try
             {
-#endif
                 //
                 // NOTE: This method [ab]uses the fact that SQLite will always
                 //       return SQLITE_ERROR for any unknown configuration option
@@ -1912,13 +1898,11 @@ namespace System.Data.SQLite
                     SQLiteConfigOpsEnum.SQLITE_CONFIG_NONE);
 
                 return (rc == SQLiteErrorCode.Misuse);
-#if !PLATFORM_COMPACTFRAMEWORK
             }
             finally
             {
                 SQLiteLog.Enabled = savedEnabled;
             }
-#endif
         }
     }
 

@@ -66,7 +66,6 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-#if !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
     /// Manages the SQLite custom logging functionality and the associated
     /// callback for the whole process.
@@ -79,20 +78,31 @@ namespace System.Data.SQLite
         /// </summary>
         private static object syncRoot = new object();
 
+        ///////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
         /// <summary>
         /// Member variable to store the AppDomain.DomainUnload event handler.
         /// </summary>
         private static EventHandler _domainUnload;
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// Member variable to store the application log handler to call.
         /// </summary>
         private static event SQLiteLogEventHandler _handlers;
 
+
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// The default log event handler.
         /// </summary>
         private static SQLiteLogEventHandler _defaultHandler;
+
+        ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// The log callback passed to native SQLite engine.  This must live
@@ -100,15 +110,21 @@ namespace System.Data.SQLite
         /// </summary>
         private static SQLiteLogCallback _callback;
 
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// The base SQLite object to interop with.
         /// </summary>
         private static SQLiteBase _sql;
 
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// This will be non-zero if logging is currently enabled.
         /// </summary>
         private static bool _enabled;
+
+        ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// Initializes the SQLite logging facilities.
@@ -123,6 +139,7 @@ namespace System.Data.SQLite
             if (SQLite3.StaticIsInitialized())
                 return;
 
+#if !PLATFORM_COMPACTFRAMEWORK
             //
             // BUGFIX: To avoid nasty situations where multiple AppDomains are
             //         attempting to initialize and/or shutdown what is really
@@ -138,9 +155,11 @@ namespace System.Data.SQLite
             {
                 return;
             }
+#endif
 
             lock (syncRoot)
             {
+#if !PLATFORM_COMPACTFRAMEWORK
                 //
                 // NOTE: Add an event handler for the DomainUnload event so
                 //       that we can unhook our logging managed function
@@ -155,6 +174,7 @@ namespace System.Data.SQLite
                     _domainUnload = new EventHandler(DomainUnload);
                     AppDomain.CurrentDomain.DomainUnload += _domainUnload;
                 }
+#endif
 
                 //
                 // NOTE: Create an instance of the SQLite wrapper class.
@@ -192,6 +212,9 @@ namespace System.Data.SQLite
             }
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
         /// <summary>
         /// Handles the AppDomain being unloaded.
         /// </summary>
@@ -258,6 +281,9 @@ namespace System.Data.SQLite
                 }
             }
         }
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// This event is raised whenever SQLite raises a logging event.
@@ -288,6 +314,8 @@ namespace System.Data.SQLite
             }
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// If this property is true, logging is enabled; otherwise, logging is
         /// disabled.  When logging is disabled, no logging events will fire.
@@ -297,6 +325,8 @@ namespace System.Data.SQLite
             get { lock (syncRoot) { return _enabled; } }
             set { lock (syncRoot) { _enabled = value; } }
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// Log a message to all the registered log event handlers without going
@@ -309,6 +339,8 @@ namespace System.Data.SQLite
         {
             LogMessage(null, message);
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// Log a message to all the registered log event handlers without going
@@ -324,6 +356,8 @@ namespace System.Data.SQLite
             LogMessage((object)errorCode, message);
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// Log a message to all the registered log event handlers without going
         /// through the SQLite library.
@@ -337,6 +371,8 @@ namespace System.Data.SQLite
         {
             LogMessage((object)errorCode, message);
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// Log a message to all the registered log event handlers without going
@@ -370,6 +406,8 @@ namespace System.Data.SQLite
                     IntPtr.Zero, errorCode, message, null));
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// Creates and initializes the default log event handler.
         /// </summary>
@@ -382,6 +420,8 @@ namespace System.Data.SQLite
             }
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// Adds the default log event handler to the list of handlers.
         /// </summary>
@@ -391,6 +431,8 @@ namespace System.Data.SQLite
             Log += _defaultHandler;
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// Removes the default log event handler from the list of handlers.
         /// </summary>
@@ -399,6 +441,8 @@ namespace System.Data.SQLite
             InitializeDefaultHandler();
             Log -= _defaultHandler;
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// Internal proxy function that calls any registered application log
@@ -440,6 +484,8 @@ namespace System.Data.SQLite
                     SQLiteBase.UTF8ToString(pMessage, -1), null));
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// Default logger.  Currently, uses the Trace class (i.e. sends events
         /// to the current trace listeners, if any).
@@ -480,5 +526,4 @@ namespace System.Data.SQLite
                 success ? "message" : "error", errorCode, message));
         }
     }
-#endif
 }

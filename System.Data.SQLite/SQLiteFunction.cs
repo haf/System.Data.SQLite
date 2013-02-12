@@ -383,7 +383,6 @@ namespace System.Data.SQLite
             SetReturnValue(context,
                 Invoke(ConvertParams(nArgs, argsptr))); /* throw */
         }
-#if !PLATFORM_COMPACTFRAMEWORK
         catch (Exception e) /* NOTE: Must catch ALL. */
         {
             try
@@ -402,12 +401,6 @@ namespace System.Data.SQLite
                 // do nothing.
             }
         }
-#else
-        catch /* NOTE: Must catch ALL. */
-        {
-            // do nothing (Windows CE).
-        }
-#endif
     }
 
     /// <summary>
@@ -428,7 +421,6 @@ namespace System.Data.SQLite
             return Compare(SQLiteConvert.UTF8ToString(ptr1, len1),
                 SQLiteConvert.UTF8ToString(ptr2, len2)); /* throw */
         }
-#if !PLATFORM_COMPACTFRAMEWORK
         catch (Exception e) /* NOTE: Must catch ALL. */
         {
             try
@@ -447,12 +439,6 @@ namespace System.Data.SQLite
                 // do nothing.
             }
         }
-#else
-        catch /* NOTE: Must catch ALL. */
-        {
-            // do nothing (Windows CE).
-        }
-#endif
 
         //
         // NOTE: This must be done to prevent the core SQLite library from
@@ -482,7 +468,6 @@ namespace System.Data.SQLite
             return Compare(SQLite3_UTF16.UTF16ToString(ptr1, len1),
                 SQLite3_UTF16.UTF16ToString(ptr2, len2)); /* throw */
         }
-#if !PLATFORM_COMPACTFRAMEWORK
         catch (Exception e) /* NOTE: Must catch ALL. */
         {
             try
@@ -501,12 +486,6 @@ namespace System.Data.SQLite
                 // do nothing.
             }
         }
-#else
-        catch /* NOTE: Must catch ALL. */
-        {
-            // do nothing (Windows CE).
-        }
-#endif
 
         //
         // NOTE: This must be done to prevent the core SQLite library from
@@ -562,7 +541,6 @@ namespace System.Data.SQLite
                 data._count++;
             }
         }
-#if !PLATFORM_COMPACTFRAMEWORK
         catch (Exception e) /* NOTE: Must catch ALL. */
         {
             try
@@ -581,12 +559,6 @@ namespace System.Data.SQLite
                 // do nothing.
             }
         }
-#else
-        catch /* NOTE: Must catch ALL. */
-        {
-            // do nothing (Windows CE).
-        }
-#endif
     }
 
     /// <summary>
@@ -624,7 +596,6 @@ namespace System.Data.SQLite
                 if (disp != null) disp.Dispose(); /* throw */
             }
         }
-#if !PLATFORM_COMPACTFRAMEWORK
         catch (Exception e) /* NOTE: Must catch ALL. */
         {
             try
@@ -643,12 +614,6 @@ namespace System.Data.SQLite
                 // do nothing.
             }
         }
-#else
-        catch /* NOTE: Must catch ALL. */
-        {
-            // do nothing (Windows CE).
-        }
-#endif
     }
 
     /// <summary>

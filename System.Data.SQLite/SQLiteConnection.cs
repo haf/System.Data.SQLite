@@ -484,8 +484,9 @@ namespace System.Data.SQLite
       UnsafeNativeMethods.Initialize();
 #endif
 
-#if !PLATFORM_COMPACTFRAMEWORK
+#if !INTEROP_LOG
       SQLiteLog.Initialize();
+#endif
 
 #if SQLITE_STANDARD
       //
@@ -510,7 +511,8 @@ namespace System.Data.SQLite
           }
       }
 #endif
-#elif INTEROP_LOG
+
+#if INTEROP_LOG
       if (UnsafeNativeMethods.sqlite3_config_log_interop() == SQLiteErrorCode.Ok)
       {
           UnsafeNativeMethods.sqlite3_log(
@@ -727,7 +729,6 @@ namespace System.Data.SQLite
                     break;
             }
         }
-#if !PLATFORM_COMPACTFRAMEWORK
         catch (Exception e)
         {
             if ((_flags & SQLiteConnectionFlags.LogBackup) == SQLiteConnectionFlags.LogBackup)
@@ -739,7 +740,6 @@ namespace System.Data.SQLite
 
             throw;
         }
-#endif
         finally
         {
             if (backup != null)

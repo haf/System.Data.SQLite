@@ -26,14 +26,14 @@ namespace System.Data.SQLite
         UnsafeNativeMethods.Initialize();
 #endif
 
-#if !PLATFORM_COMPACTFRAMEWORK
-        SQLiteLog.Initialize();
-#elif INTEROP_LOG
+#if INTEROP_LOG
         if (UnsafeNativeMethods.sqlite3_config_log_interop() == SQLiteErrorCode.Ok)
         {
             UnsafeNativeMethods.sqlite3_log(
                 SQLiteErrorCode.Ok, SQLiteConvert.ToUTF8("logging initialized."));
         }
+#else
+        SQLiteLog.Initialize();
 #endif
 
         string version =

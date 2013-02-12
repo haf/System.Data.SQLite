@@ -300,7 +300,6 @@ namespace System.Data.SQLite
       if ((obj != null) && (objType == DbType.Object))
           objType = SQLiteConvert.TypeToDbType(obj.GetType());
 
-#if !PLATFORM_COMPACTFRAMEWORK
       if ((_flags & SQLiteConnectionFlags.LogPreBind) == SQLiteConnectionFlags.LogPreBind)
       {
           IntPtr handle = _sqlite_stmt;
@@ -309,7 +308,6 @@ namespace System.Data.SQLite
               "Binding statement {0} paramter #{1} with database type {2} and raw value {{{3}}}...",
               handle, index, objType, obj));
       }
-#endif
 
       if ((obj == null) || Convert.IsDBNull(obj))
       {
