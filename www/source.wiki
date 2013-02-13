@@ -4,27 +4,27 @@
   Follow these steps to obtain the latest (i.e. unreleased) source code for the
   System.Data.SQLite project.  To obtain the latest officially released source
   code instead, refer to the [./downloads.wiki | downloads page].  Unless
-  otherwise noted, all steps need to be done in the order specified.
+  otherwise noted, all steps need to be performed in the order specified.
 </p>
 
 <a name="assumptions"></a>
 <h2>Assumptions &amp; Prerequisites</h2>
 
 <p>
-  The string &quot;<b>&lt;root&gt;</b>&quot; represents the directory where you
-  would like a local working copy of source tree (a.k.a. the working check-out
-  directory) for the System.Data.SQLite project to reside (this should be a
-  completely empty directory).
+  The string &quot;<b>&lt;root&gt;</b>&quot; represents the directory where the
+  local working copy of source tree (a.k.a. the working check-out directory) for
+  the System.Data.SQLite project is to reside.  This should be a completely
+  empty directory.
 </p>
 
 <p>
   The string &quot;<b>&lt;repositories&gt;</b>&quot; represents the directory
-  where you would like the local clone of the repository for the
-  System.Data.SQLite project (and potentially other projects) to reside.
+  where the local clone of the repository for the System.Data.SQLite project
+  (and potentially other projects) is to reside.
 </p>
 
 <a name="fossil"></a>
-<h2>Obtain &amp; Install Fossil</h2>
+<h2>Obtain &amp; Install Fossil Itself</h2>
 
 <p>
   The [http://www.fossil-scm.org | Fossil] open-source
@@ -55,11 +55,11 @@
     Enter the following command to create a complete clone (i.e. local copy) of
     the entire source code repository for the System.Data.SQLite project,
     including the entire check-in history:&nbsp;
-    <b>fossil&nbsp;[http://www.fossil-scm.org/index.html/help/clone | clone]&nbsp;http://system.data.sqlite.org/&nbsp;&lt;repositories&gt;\sds.fossil</b>
+    <b>fossil&nbsp;[http://www.fossil-scm.org/index.html/help/clone | clone]&nbsp;http://system.data.sqlite.org/&nbsp;&lt;repositories&gt;/sds.fossil</b>
   </li>
 
   <li>
-    The repository itself uses an
+    Please note that the repository itself uses an
     [http://www.fossil-scm.org/index.html/doc/trunk/www/fileformat.wiki | enduring file format]
     stored in a single
     [http://www.fossil-scm.org/index.html/doc/trunk/www/tech_overview.wiki | SQLite database file]
@@ -88,7 +88,7 @@
   <li>
     Enter the following command to create a local working copy of all the files
     that are currently part of the System.Data.SQLite project:&nbsp;
-    <b>fossil&nbsp;[http://www.fossil-scm.org/index.html/help/open | open]&nbsp;&lt;repositories&gt;\sds.fossil</b>
+    <b>fossil&nbsp;[http://www.fossil-scm.org/index.html/help/open | open]&nbsp;&lt;repositories&gt;/sds.fossil</b>
   </li>
 
   <li>
@@ -100,7 +100,7 @@
     In the future, to update the local working copy with the latest changes from
     the official System.Data.SQLite repository (i.e. instead of having to
     re-clone the entire thing), enter the following command from the same
-    directory where a working copy is located:&nbsp;
+    directory where the working copy is located:&nbsp;
     <b>fossil&nbsp;[http://www.fossil-scm.org/index.html/help/update | update]</b>
   </li>
 </ol>
