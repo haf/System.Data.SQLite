@@ -196,7 +196,14 @@ namespace System.Data.SQLite
   /// </item>
   /// <item>
   /// <description>Pooling</description>
-  /// <description><b>True</b> - Use connection pooling<br/><b>False</b> - Do not use connection pooling</description>
+  /// <description>
+  /// <b>True</b> - Use connection pooling.<br/>
+  /// <b>False</b> - Do not use connection pooling.<br/><br/>
+  /// <b>WARNING:</b> Setting this property to True should be avoided by
+  /// applications that make use of WPF (either directly or indirectly) due
+  /// to possible deadlocks that can occur during the finalization of some
+  /// WPF objects.
+  /// </description>
   /// <description>N</description>
   /// <description>False</description>
   /// </item>
@@ -1167,7 +1174,14 @@ namespace System.Data.SQLite
     /// </item>
     /// <item>
     /// <description>Pooling</description>
-    /// <description><b>True</b> - Use connection pooling<br/><b>False</b> - Do not use connection pooling</description>
+    /// <description>
+    /// <b>True</b> - Use connection pooling.<br/>
+    /// <b>False</b> - Do not use connection pooling.<br/><br/>
+    /// <b>WARNING:</b> Setting this property to True should be avoided by
+    /// applications that make use of WPF (either directly or indirectly) due
+    /// to possible deadlocks that can occur during the finalization of some
+    /// WPF objects.
+    /// </description>
     /// <description>N</description>
     /// <description>False</description>
     /// </item>

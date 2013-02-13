@@ -11,6 +11,11 @@ namespace System.Data.SQLite
   using System.Collections.Generic;
   using System.Threading;
 
+  /// <summary>
+  /// This class should not be used by applications that make use of WPF
+  /// (either directly or indirectly) due to possible deadlocks that can occur
+  /// during finalization of some WPF objects.
+  /// </summary>
   internal static class SQLiteConnectionPool
   {
     /// <summary>
