@@ -422,7 +422,7 @@ SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
   return ret;
 #else
   Vdbe *p;
-  int ret = SQLITE_OK;
+  ret = SQLITE_OK;
 
   p = (Vdbe *)stmt;
   if (p)

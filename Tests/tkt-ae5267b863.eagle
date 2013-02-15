@@ -147,8 +147,9 @@ runTest {test tkt-ae5267b863-1.1 {segfault during command GC} -setup {
 
   unset -nocomplain result code results errors sql dataSource id db fileName
 } -constraints [fixConstraints {eagle monoBug28 command.sql compile.DATA\
-SQLite System.Data.SQLite !mda}] -match regexp -result {^Ok\
-System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+SQLite System.Data.SQLite !mda\
+!defineConstant.System.Data.SQLite.INTEROP_LEGACY_CLOSE}] -match regexp \
+-result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
 
 ###############################################################################
 
