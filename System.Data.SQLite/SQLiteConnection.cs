@@ -199,10 +199,10 @@ namespace System.Data.SQLite
   /// <description>
   /// <b>True</b> - Use connection pooling.<br/>
   /// <b>False</b> - Do not use connection pooling.<br/><br/>
-  /// <b>WARNING:</b> Setting this property to True should be avoided by
-  /// applications that make use of WPF (either directly or indirectly) due
-  /// to possible deadlocks that can occur during the finalization of some
-  /// WPF objects.
+  /// <b>WARNING:</b> When using the default connection pool implementation,
+  /// setting this property to True should be avoided by applications that make
+  /// use of COM (either directly or indirectly) due to possible deadlocks that
+  /// can occur during the finalization of some COM objects.
   /// </description>
   /// <description>N</description>
   /// <description>False</description>
@@ -637,6 +637,44 @@ namespace System.Data.SQLite
                 _handlers -= value;
             }
         }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// This property is used to obtain or set the custom connection pool
+    /// implementation to use, if any.  Setting this property to null will
+    /// cause the default connection pool implementation to be used.
+    /// </summary>
+    public static ISQLiteConnectionPool ConnectionPool
+    {
+        get { return SQLiteConnectionPool.GetConnectionPool(); }
+        set { SQLiteConnectionPool.SetConnectionPool(value); }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Creates and returns a new managed database connection handle.  This
+    /// method is intended to be used by implementations of the
+    /// <see cref="ISQLiteConnectionPool" /> interface only.  In theory, it
+    /// could be used by other classes; however, that usage is not supported.
+    /// </summary>
+    /// <param name="nativeHandle">
+    /// This must be a native database connection handle returned by the
+    /// SQLite core library and it must remain valid and open during the
+    /// entire duration of the calling method.
+    /// </param>
+    /// <returns>
+    /// The new managed database connection handle or null if it cannot be
+    /// created.
+    /// </returns>
+    public static object CreateHandle(
+        IntPtr nativeHandle
+        )
+    {
+        if (nativeHandle == IntPtr.Zero) return null;
+        return new SQLiteConnectionHandle(nativeHandle);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1177,10 +1215,10 @@ namespace System.Data.SQLite
     /// <description>
     /// <b>True</b> - Use connection pooling.<br/>
     /// <b>False</b> - Do not use connection pooling.<br/><br/>
-    /// <b>WARNING:</b> Setting this property to True should be avoided by
-    /// applications that make use of WPF (either directly or indirectly) due
-    /// to possible deadlocks that can occur during the finalization of some
-    /// WPF objects.
+    /// <b>WARNING:</b> When using the default connection pool implementation,
+    /// setting this property to True should be avoided by applications that
+    /// make use of COM (either directly or indirectly) due to possible
+    /// deadlocks that can occur during the finalization of some COM objects.
     /// </description>
     /// <description>N</description>
     /// <description>False</description>
