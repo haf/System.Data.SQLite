@@ -281,6 +281,20 @@
     <InteropDebug Condition="'$(InteropDebug)' == '' And '$(Configuration)' != 'Debug'">false</InteropDebug>
 
     <!--
+        NOTE: Disable all use of the sqlite3_close_v2() native API and use the
+              legacy System.Data.SQLite connection closing algorithm instead.
+              By default, this is disabled.  If this is enabled, it must also
+              be enabled via the "INTEROP_LEGACY_CLOSE=1" preprocessor define
+              being present in the "INTEROP_EXTRA_DEFINES" macro in the build
+              properties file:
+
+                  "SQLite.Interop\props\SQLite.Interop.20YY.[vs]props"
+
+              for the corresponding version(s) of Visual Studio.
+    -->
+    <InteropLegacyClose Condition="'$(InteropLegacyClose)' == ''">false</InteropLegacyClose>
+
+    <!--
         NOTE: Enable the logging callback in the custom built interop DLL (i.e.
               "SQLite.Interop.dll")?  By default, this is enabled in the Debug
               build configuration.  If this is disabled, the logging callback

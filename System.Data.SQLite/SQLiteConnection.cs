@@ -495,7 +495,7 @@ namespace System.Data.SQLite
       SQLiteLog.Initialize();
 #endif
 
-#if !PLATFORM_COMPACTFRAMEWORK && SQLITE_STANDARD
+#if !PLATFORM_COMPACTFRAMEWORK && !INTEROP_LEGACY_CLOSE && SQLITE_STANDARD
       //
       // NOTE: Check if the sqlite3_close_v2() native API should be available
       //       to use.  This must be done dynamically because the delegate set

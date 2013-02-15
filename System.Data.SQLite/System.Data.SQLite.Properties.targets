@@ -154,6 +154,14 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Disable all use of the sqlite3_close_v2() native API and use the
+            legacy System.Data.SQLite connection closing algorithm instead.
+  -->
+  <PropertyGroup Condition="'$(InteropLegacyClose)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_LEGACY_CLOSE</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: Enable the logging callback in the custom built interop DLL (see
             the "SQLite.NET.Settings.targets" file for more information)?
   -->

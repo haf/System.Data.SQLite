@@ -643,12 +643,14 @@ namespace System.Data.SQLite
 #endif
     internal static extern SQLiteErrorCode sqlite3_close(IntPtr db);
 
+#if !INTEROP_LEGACY_CLOSE
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 #else
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern SQLiteErrorCode sqlite3_close_v2(IntPtr db); /* 3.7.14+ */
+#endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
