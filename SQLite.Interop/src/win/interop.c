@@ -77,7 +77,7 @@ SQLITE_PRIVATE void sqlite3InteropLogCallback(void *pArg, int iCode, const char 
 }
 #endif
 
-#if SQLITE_VERSION_NUMBER < 3007014
+#if defined(INTEROP_LEGACY_CLOSE) || SQLITE_VERSION_NUMBER < 3007014
 SQLITE_PRIVATE void * sqlite3DbMallocZero_interop(sqlite3 *db, int n)
 {
   void *p;
@@ -122,7 +122,7 @@ SQLITE_PRIVATE void sqlite3DbFree_interop(sqlite3 *db, void *p)
 SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
 {
   int ret;
-#if SQLITE_VERSION_NUMBER >= 3007014
+#if !defined(INTEROP_LEGACY_CLOSE) && SQLITE_VERSION_NUMBER >= 3007014
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_CLOSE)
   sqlite3InteropDebug("sqlite3_close_interop(): calling sqlite3_close_v2(%p)...\n", db);
@@ -405,7 +405,7 @@ SQLITE_API const void * WINAPI sqlite3_column_text16_interop(sqlite3_stmt *stmt,
 SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 {
   int ret;
-#if SQLITE_VERSION_NUMBER >= 3007014
+#if !defined(INTEROP_LEGACY_CLOSE) && SQLITE_VERSION_NUMBER >= 3007014
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_FINALIZE)
   Vdbe *p = (Vdbe *)stmt;
@@ -422,7 +422,7 @@ SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
   return ret;
 #else
   Vdbe *p;
-  int ret = SQLITE_OK;
+  ret = SQLITE_OK;
 
   p = (Vdbe *)stmt;
   if (p)
@@ -471,7 +471,7 @@ SQLITE_API int WINAPI sqlite3_backup_finish_interop(sqlite3_backup *p)
 SQLITE_API int WINAPI sqlite3_reset_interop(sqlite3_stmt *stmt)
 {
   int ret;
-#if SQLITE_VERSION_NUMBER >= 3007014
+#if !defined(INTEROP_LEGACY_CLOSE) && SQLITE_VERSION_NUMBER >= 3007014
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_RESET)
   sqlite3InteropDebug("sqlite3_reset_interop(): calling sqlite3_reset(%p)...\n", stmt);

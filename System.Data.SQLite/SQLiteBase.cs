@@ -596,6 +596,7 @@ namespace System.Data.SQLite
         }
     }
 
+#if !INTEROP_LEGACY_CLOSE
     internal static void CloseConnectionV2(SQLiteConnectionHandle hdl, IntPtr db)
     {
         if ((hdl == null) || (db == IntPtr.Zero)) return;
@@ -623,6 +624,7 @@ namespace System.Data.SQLite
             }
         }
     }
+#endif
 
     internal static bool ResetConnection(SQLiteConnectionHandle hdl, IntPtr db, bool canThrow)
     {
