@@ -9,7 +9,254 @@ namespace System.Data.SQLite
 {
     using System;
     using System.Collections.Generic;
+
+#if !PLATFORM_COMPACTFRAMEWORK && DEBUG
+    using System.Text;
+#endif
+
     using System.Threading;
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region Null Connection Pool Class
+#if !PLATFORM_COMPACTFRAMEWORK && DEBUG
+    /// <summary>
+    /// This class implements a connection pool where all methods of the
+    /// <see cref="ISQLiteConnectionPool" /> interface are NOPs.  This class
+    /// is used for testing purposes only.
+    /// </summary>
+    internal sealed class NullConnectionPool : ISQLiteConnectionPool
+    {
+        #region Private Data
+        /// <summary>
+        /// This field keeps track of all method calls made into the
+        /// <see cref="ISQLiteConnectionPool" /> interface methods of this
+        /// class.
+        /// </summary>
+        private StringBuilder log;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Non-zero to dispose of database connection handles received via the
+        /// <see cref="Add" /> method.
+        /// </summary>
+        private bool dispose;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Private Constructors
+        /// <summary>
+        /// Constructs a connection pool object where all methods of the
+        /// <see cref="ISQLiteConnectionPool" /> interface are NOPs.  This
+        /// class is used for testing purposes only.
+        /// </summary>
+        private NullConnectionPool()
+        {
+            log = new StringBuilder();
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Constructors
+        /// <summary>
+        /// Constructs a connection pool object where all methods of the
+        /// <see cref="ISQLiteConnectionPool" /> interface are NOPs.  This
+        /// class is used for testing purposes only.
+        /// </summary>
+        /// <param name="dispose">
+        /// Non-zero to dispose of database connection handles received via the
+        /// <see cref="Add" /> method.
+        /// </param>
+        public NullConnectionPool(
+            bool dispose
+            )
+            : this()
+        {
+            this.dispose = dispose;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region ISQLiteConnectionPool Members
+        /// <summary>
+        /// Counts the number of pool entries matching the specified file name.
+        /// </summary>
+        /// <param name="fileName">
+        /// The file name to match or null to match all files.
+        /// </param>
+        /// <param name="counts">
+        /// The pool entry counts for each matching file.
+        /// </param>
+        /// <param name="openCount">
+        /// The total number of connections successfully opened from any pool.
+        /// </param>
+        /// <param name="closeCount">
+        /// The total number of connections successfully closed from any pool.
+        /// </param>
+        /// <param name="totalCount">
+        /// The total number of pool entries for all matching files.
+        /// </param>
+        public void GetCounts(
+            string fileName,
+            ref Dictionary<string, int> counts,
+            ref int openCount,
+            ref int closeCount,
+            ref int totalCount
+            )
+        {
+            if (log != null)
+            {
+                log.AppendFormat(
+                    "GetCounts(\"{0}\", {1}, {2}, {3}, {4}){5}", fileName,
+                    counts, openCount, closeCount, totalCount,
+                    Environment.NewLine);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Disposes of all pooled connections associated with the specified
+        /// database file name.
+        /// </summary>
+        /// <param name="fileName">
+        /// The database file name.
+        /// </param>
+        public void ClearPool(
+            string fileName
+            )
+        {
+            if (log != null)
+            {
+                log.AppendFormat(
+                    "ClearPool(\"{0}\"){1}", fileName, Environment.NewLine);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Disposes of all pooled connections.
+        /// </summary>
+        public void ClearAllPools()
+        {
+            if (log != null)
+            {
+                log.AppendFormat(
+                    "ClearAllPools(){0}", Environment.NewLine);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Adds a connection to the pool of those associated with the
+        /// specified database file name.
+        /// </summary>
+        /// <param name="fileName">
+        /// The database file name.
+        /// </param>
+        /// <param name="handle">
+        /// The database connection handle.
+        /// </param>
+        /// <param name="version">
+        /// The connection pool version at the point the database connection
+        /// handle was received from the connection pool.  This is also the
+        /// connection pool version that the database connection handle was
+        /// created under.
+        /// </param>
+        public void Add(
+            string fileName,
+            object handle,
+            int version
+            )
+        {
+            if (log != null)
+            {
+                log.AppendFormat(
+                    "Add(\"{0}\", {1}, {2}){3}", fileName, handle, version,
+                    Environment.NewLine);
+            }
+
+            //
+            // NOTE: If configured to do so, dispose of the received connection
+            //       handle now.
+            //
+            if (dispose)
+            {
+                IDisposable disposable = handle as IDisposable;
+
+                if (disposable != null)
+                    disposable.Dispose();
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Removes a connection from the pool of those associated with the
+        /// specified database file name with the intent of using it to
+        /// interact with the database.
+        /// </summary>
+        /// <param name="fileName">
+        /// The database file name.
+        /// </param>
+        /// <param name="maxPoolSize">
+        /// The new maximum size of the connection pool for the specified
+        /// database file name.
+        /// </param>
+        /// <param name="version">
+        /// The connection pool version associated with the returned database
+        /// connection handle, if any.
+        /// </param>
+        /// <returns>
+        /// The database connection handle associated with the specified
+        /// database file name or null if it cannot be obtained.
+        /// </returns>
+        public object Remove(
+            string fileName,
+            int maxPoolSize,
+            out int version
+            )
+        {
+            version = 0;
+
+            if (log != null)
+            {
+                log.AppendFormat(
+                    "Remove(\"{0}\", {1}, {2}){3}", fileName, maxPoolSize,
+                    version, Environment.NewLine);
+            }
+
+            return null;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region System.Object Overrides
+        /// <summary>
+        /// Overrides the default <see cref="System.Object.ToString" /> method
+        /// to provide a log of all methods called on the
+        /// <see cref="ISQLiteConnectionPool" /> interface.
+        /// </summary>
+        /// <returns>
+        /// A string containing a log of all method calls into the
+        /// <see cref="ISQLiteConnectionPool" /> interface, along with their
+        /// parameters, delimited by <see cref="Environment.NewLine" />.
+        /// </returns>
+        public override string ToString()
+        {
+            return (log != null) ? log.ToString() : String.Empty;
+        }
+        #endregion
+    }
+#endif
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -99,10 +346,12 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region Connection Pool Subsystem & Default Implementation
     /// <summary>
     /// This default method implementations in this class should not be used by
-    /// applications that make use of COM (either directly or indirectly) due to
-    /// possible deadlocks that can occur during finalization of some COM objects.
+    /// applications that make use of COM (either directly or indirectly) due
+    /// to possible deadlocks that can occur during finalization of some COM
+    /// objects.
     /// </summary>
     internal static class SQLiteConnectionPool
     {
@@ -775,4 +1024,5 @@ namespace System.Data.SQLite
         }
         #endregion
     }
+    #endregion
 }
