@@ -10,6 +10,7 @@
     <li>Skip checking loaded assemblies for types tagged with the SQLiteFunction attribute when the No_SQLiteFunctions environment variable is set. Pursuant to [e4c8121f7b].</li>
     <li>Add HexPassword connection string property to work around the inability to include a literal semicolon in a connection string property value. Pursuant to [1c456ae75f].</li>
     <li>Add static Execute method to the SQLiteCommand class.</li>
+    <li>Support custom connection pool implementations by adding the ISQLiteConnectionPool interface, the static SQLiteConnection.ConnectionPool property, and the static CreateHandle method in addition to modifying the SQLiteConnectionPool class. Pursuant to [393d954be0].</li>
     <li>Add public constructor to the SQLiteDataAdapter class that allows passing the parseViaFramework parameter to the SQLiteConnection constructor.</li>
     <li>When built with the CHECK_STATE compile-time option, skip throwing exceptions from the SQLiteDataReader class when the object is being disposed.</li>
     <li>Support automatic value conversions for columns with a declared type of BIGUINT, INTEGER8, INTEGER16, INTEGER32, INTEGER64, SMALLUINT, TINYSINT, UNSIGNEDINTEGER, UNSIGNEDINTEGER8, UNSIGNEDINTEGER16, UNSIGNEDINTEGER32, UNSIGNEDINTEGER64, INT8, INT16, INT32, INT64, UINT, UINT8, UINT16, UINT32, UINT64, or ULONG.</li>
