@@ -1787,7 +1787,7 @@ namespace eval ::Eagle {
             "---- checking for System.Data.SQLite build configuration... "
 
         set configuration [getBuildConfiguration]
-        addConstraint [appendArgs buildConfiguration $configuration]
+        addConstraint [appendArgs buildConfiguration. $configuration]
         tputs $::test_channel [appendArgs \" $configuration \"\n]
 
         #

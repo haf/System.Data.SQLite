@@ -1,0 +1,70 @@
+###############################################################################
+#
+# tkt-393d954be0.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-393d954be0-1.1 {custom connection pool} -body {
+  set nullPool [object create -flags +NonPublic -alias \
+      System.Data.SQLite.NullConnectionPool true]
+
+  object invoke System.Data.SQLite.SQLiteConnection ConnectionPool $nullPool
+
+  setupDb [set fileName tkt-393d954be0-1.1.db] "" "" "" "" "Pooling=True;"
+
+  set exists(0) [file exists [file join [getDatabaseDirectory] [file tail \
+      $fileName]]]
+
+  cleanupDb $fileName
+
+  set exists(1) [file exists [file join [getDatabaseDirectory] [file tail \
+      $fileName]]]
+
+  set counts null; set openCount 0; set closeCount 0; set totalCount 0
+  object invoke -flags +NonPublic System.Data.SQLite.SQLiteConnectionPool \
+      GetCounts $fileName counts openCount closeCount totalCount
+
+  object invoke -flags +NonPublic System.Data.SQLite.SQLiteConnectionPool \
+      ClearPool $fileName
+
+  object invoke -flags +NonPublic System.Data.SQLite.SQLiteConnectionPool \
+      ClearAllPools
+
+  list $exists(0) $exists(1) $counts $openCount $closeCount $totalCount \
+      [object invoke $nullPool ToString]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName exists counts openCount closeCount totalCount \
+      nullPool
+} -constraints {eagle monoBug28 buildConfiguration.Debug command.sql\
+compile.DATA SQLite System.Data.SQLite} -match regexp -result [string map \
+[list \n \r\n] {^True False \{\} 0 0 0\
+\{Remove\(".*?\\tkt-393d954be0-1\.1\.db",\
+100, 0\)
+Add\(".*?\\tkt-393d954be0-1\.1\.db", -?\d+, 0\)
+GetCounts\("tkt-393d954be0-1\.1\.db", , 0, 0, 0\)
+ClearPool\("tkt-393d954be0-1\.1\.db"\)
+ClearAllPools\(\)
+\}$}]}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
