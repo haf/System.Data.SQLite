@@ -792,6 +792,13 @@ namespace System.Data.SQLite
       BindUInt32AsInt64 = 0x40,
 
       /// <summary>
+      /// When binding parameter values, always bind them as though they were
+      /// plain text (i.e. no numeric, date/time, or other conversions should
+      /// be attempted).
+      /// </summary>
+      BindAllAsText = 0x80,
+
+      /// <summary>
       /// Enable all logging.
       /// </summary>
       LogAll = LogPrepare | LogPreBind | LogBind |

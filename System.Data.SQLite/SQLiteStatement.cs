@@ -315,6 +315,12 @@ namespace System.Data.SQLite
         return;
       }
 
+      if ((_flags & SQLiteConnectionFlags.BindAllAsText) == SQLiteConnectionFlags.BindAllAsText)
+      {
+          _sql.Bind_Text(this, _flags, index, obj.ToString());
+          return;
+      }
+
       switch (objType)
       {
         case DbType.Date:
