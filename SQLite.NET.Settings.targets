@@ -33,18 +33,22 @@
   -->
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx20"
           Condition="'$(NetFx20)' != '' And '$(NetFx20)' != 'false' And
+                     ('$(NetFx20Settings)' == '' Or '$(NetFx20Settings)' != 'false') And
                      Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx20')" />
 
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx35"
           Condition="'$(NetFx35)' != '' And '$(NetFx35)' != 'false' And
+                     ('$(NetFx35Settings)' == '' Or '$(NetFx35Settings)' != 'false') And
                      Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx35')" />
 
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx40"
           Condition="'$(NetFx40)' != '' And '$(NetFx40)' != 'false' And
+                     ('$(NetFx40Settings)' == '' Or '$(NetFx40Settings)' != 'false') And
                      Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx40')" />
 
   <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx45"
           Condition="'$(NetFx45)' != '' And '$(NetFx45)' != 'false' And
+                     ('$(NetFx45Settings)' == '' Or '$(NetFx45Settings)' != 'false') And
                      Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx45')" />
 
   <!--
@@ -125,6 +129,46 @@
               within the project file itself).
     -->
     <NetFx45 Condition="'$(NetFx45)' == ''">false</NetFx45>
+
+    <!--
+        NOTE: Load the version-specific settings for the .NET Framework 2.0?
+              By default, this is disabled.  If this is enabled when compiling
+              for the .NET Framework 2.0, the version-specific settings file
+              "SQLite.NET.Settings.targets.netFx20" will be loaded if it is
+              actually present, before any other settings in this file are
+              processed.
+    -->
+    <NetFx20Settings Condition="'$(NetFx20Settings)' == ''">false</NetFx20Settings>
+
+    <!--
+        NOTE: Load the version-specific settings for the .NET Framework 3.5?
+              By default, this is disabled.  If this is enabled when compiling
+              for the .NET Framework 3.5, the version-specific settings file
+              "SQLite.NET.Settings.targets.netFx35" will be loaded if it is
+              actually present, before any other settings in this file are
+              processed.
+    -->
+    <NetFx35Settings Condition="'$(NetFx35Settings)' == ''">false</NetFx35Settings>
+
+    <!--
+        NOTE: Load the version-specific settings for the .NET Framework 4.0?
+              By default, this is disabled.  If this is enabled when compiling
+              for the .NET Framework 4.0, the version-specific settings file
+              "SQLite.NET.Settings.targets.netFx40" will be loaded if it is
+              actually present, before any other settings in this file are
+              processed.
+    -->
+    <NetFx40Settings Condition="'$(NetFx40Settings)' == ''">false</NetFx40Settings>
+
+    <!--
+        NOTE: Load the version-specific settings for the .NET Framework 4.5?
+              By default, this is disabled.  If this is enabled when compiling
+              for the .NET Framework 4.5, the version-specific settings file
+              "SQLite.NET.Settings.targets.netFx45" will be loaded if it is
+              actually present, before any other settings in this file are
+              processed.
+    -->
+    <NetFx45Settings Condition="'$(NetFx45Settings)' == ''">false</NetFx45Settings>
   </PropertyGroup>
 
   <!--
