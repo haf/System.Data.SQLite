@@ -117,7 +117,7 @@ SQLITE_EXTENSION_INIT1
 #include <string.h>
 #include <stdio.h>
 
-#ifndef _WIN32_WCE
+#if !defined(_WIN32_WCE) || defined(HAVE_ERRNO_H)
 #include <errno.h>		/* LMH 2007-03-25 */
 #else
 int errno;
