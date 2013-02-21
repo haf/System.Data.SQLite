@@ -12,8 +12,8 @@
 
 <p>
   The string &quot;<b>&lt;root&gt;</b>&quot; represents the directory where the
-  local working copy of source tree (a.k.a. the working check-out directory) for
-  the System.Data.SQLite project is to reside.  This should be a completely
+  local working copy of the source tree (a.k.a. the working check-out directory)
+  for the System.Data.SQLite project is to reside.  This should be a completely
   empty directory.
 </p>
 
