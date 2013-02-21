@@ -34,7 +34,9 @@ namespace test
       string directory = Path.GetDirectoryName(assemblyName.CodeBase);
 
       if (args.Length > 0)
-          autoClose = bool.Parse(args[0]);
+      {
+          try { autoClose = bool.Parse(args[0]); } catch { }
+      }
 
       try { File.Delete(directory + "\\test.db"); } catch { }
 
