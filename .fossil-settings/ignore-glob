@@ -1,2 +1,7 @@
 *.mistachkin.eagle
+*.sln
 Externals/Eagle/bin/Eagle*.pdb
+SQLite.Interop/*.vcxproj
+SQLite.Interop/*.vcxproj.filters
+System.Data.SQLite/*.csproj
+testce/*.csproj
