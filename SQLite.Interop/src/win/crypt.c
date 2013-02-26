@@ -43,12 +43,21 @@ void sqlite3_activate_see(const char *info)
 */
 static BOOL InitializeProvider()
 {
-  if (g_hProvider) return TRUE;
+  MUTEX_LOGIC( sqlite3_mutex *pMaster = sqlite3_mutex_alloc(SQLITE_MUTEX_STATIC_MASTER); )
+  sqlite3_mutex_enter(pMaster);
+
+  if (g_hProvider) {
+    sqlite3_mutex_leave(pMaster);
+    return TRUE;
+  }
 
   if (!CryptAcquireContext(&g_hProvider, NULL, MS_ENHANCED_PROV, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
   {
+    sqlite3_mutex_leave(pMaster);
     return FALSE;
   }
+
+  sqlite3_mutex_leave(pMaster);
   return TRUE;
 }
 
@@ -228,14 +237,22 @@ static HCRYPTKEY DeriveKey(const void *pKey, int nKeyLen)
     return MAXDWORD;
   }
 
-  if (CryptCreateHash(g_hProvider, CALG_SHA1, 0, 0, &hHash))
   {
-    if (CryptHashData(hHash, (LPBYTE)pKey, nKeyLen, 0))
+    MUTEX_LOGIC( sqlite3_mutex *pMaster = sqlite3_mutex_alloc(SQLITE_MUTEX_STATIC_MASTER); )
+    sqlite3_mutex_enter(pMaster);
+
+    if (CryptCreateHash(g_hProvider, CALG_SHA1, 0, 0, &hHash))
     {
-      CryptDeriveKey(g_hProvider, CALG_RC4, hHash, 0, &hKey);
+      if (CryptHashData(hHash, (LPBYTE)pKey, nKeyLen, 0))
+      {
+        CryptDeriveKey(g_hProvider, CALG_RC4, hHash, 0, &hKey);
+      }
+      CryptDestroyHash(hHash);
     }
-    CryptDestroyHash(hHash);
+
+    sqlite3_mutex_leave(pMaster);
   }
+
   return hKey;
 }
 
