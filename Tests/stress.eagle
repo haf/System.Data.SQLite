@@ -49,8 +49,8 @@ reportSQLiteResources $test_channel
 runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload priority noWorkload \
       priorities srcDb db fileName compiled options count times logFileName \
-      logListener connection indicators iterations exitOnFail coTaskMem \
-      noTrace failures status
+      logListener event timeout connection indicators iterations exitOnFail \
+      coTaskMem noTrace failures status
 
   #############################################################################
 
@@ -142,6 +142,15 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   proc delayTest { {extra 0} } {
     after [expr {int((rand() * 1000) + $extra)}]
+  }
+
+  #############################################################################
+
+  proc waitTest { indicator } {
+    if {![$::event WaitOne $::timeout]} then {
+      error [appendArgs "timeout while starting workload #" \
+          [expr {[string ordinal $indicator 0] - [string ordinal A 0] + 1}]]
+    }
   }
 
   #############################################################################
@@ -470,6 +479,20 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       "starting stress test using database \"" $fileName(2) \"...]
 
   #############################################################################
+
+  set timeout [object invoke -flags +NonPublic \
+      Eagle._Components.Private.ThreadOps DefaultJoinTimeout]
+
+  tputs $test_channel [appendArgs \
+      "---- workloads will start before or timeout after " $timeout \
+      " millisecond(s)\n"]
+
+  #############################################################################
+
+  set event [object create -alias \
+      System.Threading.EventWaitHandle false ManualReset]
+
+  #############################################################################
   #                              WORKLOAD #1 (A)                              #
   #############################################################################
 
@@ -478,6 +501,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #1, CREATE TABLE statements.
     #
+    waitTest A
     lappend ::times(1) [lindex [time {
       initTest A
       setupWorkloadFileDb $dstFileName
@@ -509,6 +533,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #2, DROP TABLE statements.
     #
+    waitTest B
     lappend ::times(2) [lindex [time {
       initTest B
       setupWorkloadFileDb $dstFileName
@@ -539,6 +564,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #3, "small" SELECT statements.
     #
+    waitTest C
     lappend ::times(3) [lindex [time {
       initTest C
       setupWorkloadFileDb $dstFileName
@@ -576,6 +602,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #4, "big" SELECT statements.
     #
+    waitTest D
     lappend ::times(4) [lindex [time {
       initTest D
       setupWorkloadFileDb $dstFileName
@@ -613,6 +640,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #5, "small" INSERT statements.
     #
+    waitTest E
     lappend ::times(5) [lindex [time {
       initTest E
       setupWorkloadFileDb $dstFileName
@@ -645,6 +673,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #6, "big" INSERT statements.
     #
+    waitTest F
     lappend ::times(6) [lindex [time {
       initTest F
       setupWorkloadFileDb $dstFileName
@@ -676,6 +705,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #7, "small" UPDATE statements.
     #
+    waitTest G
     lappend ::times(7) [lindex [time {
       initTest G
       setupWorkloadFileDb $dstFileName
@@ -707,6 +737,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #8, "big" UPDATE statements.
     #
+    waitTest H
     lappend ::times(8) [lindex [time {
       initTest H
       setupWorkloadFileDb $dstFileName
@@ -738,6 +769,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #9, "small" DELETE statements.
     #
+    waitTest I
     lappend ::times(9) [lindex [time {
       initTest I
       setupWorkloadFileDb $dstFileName
@@ -768,6 +800,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #10, "big" DELETE statements.
     #
+    waitTest J
     lappend ::times(10) [lindex [time {
       initTest J
       setupWorkloadFileDb $dstFileName
@@ -798,6 +831,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #11, VACUUM statement.
     #
+    waitTest K
     lappend ::times(11) [lindex [time {
       initTest K
       setupWorkloadFileDb $dstFileName
@@ -827,6 +861,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #12, backup to in-memory database.
     #
+    waitTest L
     lappend ::times(12) [lindex [time {
       initTest L
       for {set index 1} {$index <= $count1} {incr index} {
@@ -909,6 +944,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #13, backup from an in-memory database.
     #
+    waitTest M
     lappend ::times(13) [lindex [time {
       initTest M
       for {set index 1} {$index <= $count1} {incr index} {
@@ -991,6 +1027,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #14, PRAGMA integrity check statement.
     #
+    waitTest N
     lappend ::times(14) [lindex [time {
       initTest N
       setupWorkloadFileDb $dstFileName
@@ -1024,6 +1061,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #15, force managed garbage collection
     #
+    waitTest O
     lappend ::times(15) [lindex [time {
       initTest O
       for {set index 1} {$index <= $count1} {incr index} {
@@ -1051,6 +1089,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #16, allocate (exclude) some native heap memory
     #
+    waitTest P
     lappend ::times(16) [lindex [time {
       initTest P
       set maxSize $::count(5)
@@ -1090,6 +1129,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #17, change the database journal mode
     #
+    waitTest Q
     lappend ::times(17) [lindex [time {
       initTest Q
       setupWorkloadFileDb $dstFileName
@@ -1120,6 +1160,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #
     # NOTE: Workload #18, execute queries against the in-memory database
     #
+    waitTest R
     lappend ::times(18) [lindex [time {
       initTest R
       setupWorkloadMemDb $srcFileName
@@ -1245,10 +1286,14 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       }
     }
 
-    foreach index(1) [list Start Join] {
-      foreach index(2) [array names thread] {
-        $thread($index(2)) $index(1)
-      }
+    foreach index(1) [array names thread] {
+      $thread($index(1)) Start
+    }
+
+    $event Set; # GO
+
+    foreach index(1) [array names thread] {
+      $thread($index(1)) Join
     }
 
     foreach index(1) [array names thread] {
@@ -1352,6 +1397,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   rename failTest ""
   rename doneTest ""
   rename showTest ""
+  rename waitTest ""
   rename delayTest ""
   rename initTest ""
   rename isExpectedError ""
@@ -1381,8 +1427,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   unset -nocomplain result thread index workload priority noWorkload \
       priorities srcDb db fileName compiled options count times logFileName \
-      logListener connection indicators iterations exitOnFail coTaskMem \
-      noTrace failures status
+      logListener event timeout connection indicators iterations exitOnFail \
+      coTaskMem noTrace failures status
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -result {0}}
 
