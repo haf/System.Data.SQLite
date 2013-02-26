@@ -46,7 +46,8 @@ static BOOL InitializeProvider()
   MUTEX_LOGIC( sqlite3_mutex *pMaster = sqlite3_mutex_alloc(SQLITE_MUTEX_STATIC_MASTER); )
   sqlite3_mutex_enter(pMaster);
 
-  if (g_hProvider) {
+  if (g_hProvider)
+  {
     sqlite3_mutex_leave(pMaster);
     return TRUE;
   }
