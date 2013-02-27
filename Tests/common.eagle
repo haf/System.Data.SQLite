@@ -206,22 +206,29 @@ namespace eval ::Eagle {
         # NOTE: The location of the build base directory has been overridden;
         #       therefore, use it verbatim.
         #
-        set path $::build_base_directory
+        return $::build_base_directory
       } elseif {[info exists ::common_directory] && \
           [string length $::common_directory] > 0} then {
         #
         # NOTE: Next, fallback to the parent directory of the one containing
         #       this file (i.e. "common.eagle"), if available.
         #
-        set path [file dirname $::common_directory]
-      } else {
+        return [file dirname $::common_directory]
+      } elseif {[info exists ::path] && \
+          [string length $::path] > 0} then {
         #
         # NOTE: Finally, fallback to the parent directory of the EagleTest
         #       path.  The EagleTest package guarantees that this variable
         #       will be set to the directory containing the first file to
         #       execute the [runTestPrologue] script library procedure.
         #
-        set path [file dirname $::path]
+        return [file dirname $::path]
+      } else {
+        #
+        # NOTE: No path is available, return an empty string.  This point
+        #       should not be reached.
+        #
+        return ""
       }
     }
 
