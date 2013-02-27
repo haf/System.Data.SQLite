@@ -20,14 +20,14 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test tkt-393d954be0-1.1 {custom connection pool} -body {
+runTest {test tkt-393d954be0-1.1 {custom connection pool} -setup {
   set nullPool [object create -flags +NonPublic -alias \
       System.Data.SQLite.NullConnectionPool true]
 
   object invoke System.Data.SQLite.SQLiteConnection ConnectionPool $nullPool
 
   setupDb [set fileName tkt-393d954be0-1.1.db] "" "" "" "" "Pooling=True;"
-
+} -body {
   set exists(0) [file exists [file join [getDatabaseDirectory] [file tail \
       $fileName]]]
 
@@ -50,6 +50,8 @@ runTest {test tkt-393d954be0-1.1 {custom connection pool} -body {
       [object invoke $nullPool ToString]
 } -cleanup {
   cleanupDb $fileName
+
+  catch {object invoke System.Data.SQLite.SQLiteConnection ConnectionPool null}
 
   unset -nocomplain db fileName exists counts openCount closeCount totalCount \
       nullPool
