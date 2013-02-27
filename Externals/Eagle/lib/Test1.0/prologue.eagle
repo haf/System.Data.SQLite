@@ -333,15 +333,14 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Set the default test machine (e.g. amd64, intel, etc), if necessary.
   #
   if {![info exists test_machine]} then {
-    set test_machine [expr {[info exists tcl_platform(machine)] ? \
-        $tcl_platform(machine) : ""}]
+    set test_machine [getTestMachine]
   }
 
   #
   # NOTE: Set the default test platform (e.g. x86, x64, etc), if necessary.
   #
   if {![info exists test_platform]} then {
-    set test_platform [machineToPlatform $test_machine true]
+    set test_platform [getTestPlatform true]
   }
 
   #
