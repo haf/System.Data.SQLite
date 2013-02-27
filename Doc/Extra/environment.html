@@ -100,6 +100,14 @@
           of the native library to pre-load.</td>
         </tr>
         <tr valign="top">
+          <td>PreLoadSQLite_UseAssemblyDirectory</td>
+          <td>If this environment variable is set [to anything], the location
+          of the currently executing assembly (i.e. the one containing all the
+          managed components for System.Data.SQLite) will be used as the basis
+          for locating the the native library to pre-load (i.e. instead of
+          using the application domain base directory).</td>
+        </tr>
+        <tr valign="top">
           <td>PROCESSOR_ARCHITECTURE</td>
           <td>This environment variable is normally set by the operating
           system itself and should reflect the native processor architecture

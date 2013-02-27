@@ -19,6 +19,7 @@
     <li>Remove AUTOINCREMENT from the column type name map.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Avoid throwing overflow exceptions from the SQLite3.GetValue method for integral column types. Partial fix for [c010fa6584].&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Use the legacy connection closing algorithm when built with the INTEROP_LEGACY_CLOSE compile-time option.</li>
+    <li>Support using the directory containing the primary managed-only assembly as the basis for native library pre-loading.</li>
 </ul>
 <p>
     <b>1.0.84.0 - January 9, 2013</b>

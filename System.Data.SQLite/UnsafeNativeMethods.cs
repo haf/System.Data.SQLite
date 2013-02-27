@@ -141,8 +141,8 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
           //
-          // NOTE: If the "No_PreLoadSQLite" environment variable is set, skip
-          //       all our special code and simply return.
+          // NOTE: If the "No_PreLoadSQLite" environment variable is set (to
+          //       anything), skip all our special code and simply return.
           //
           if (Environment.GetEnvironmentVariable("No_PreLoadSQLite") != null)
               return;
@@ -204,6 +204,34 @@ namespace System.Data.SQLite
 
           if (directory != null)
               return directory;
+
+          //
+          // NOTE: If the "PreLoadSQLite_UseAssemblyDirectory" environment
+          //       variable is set (to anything), attempt to use the directory
+          //       containing the currently executing assembly (i.e.
+          //       System.Data.SQLite) intsead of the application domain base
+          //       directory.
+          //
+          if (Environment.GetEnvironmentVariable(
+                "PreLoadSQLite_UseAssemblyDirectory") != null)
+          {
+              try
+              {
+                  Assembly assembly = Assembly.GetExecutingAssembly();
+
+                  if (assembly != null)
+                  {
+                      directory = Path.GetDirectoryName(assembly.Location);
+
+                      if (!String.IsNullOrEmpty(directory))
+                          return directory;
+                  }
+              }
+              catch
+              {
+                  // do nothing.
+              }
+          }
 
           //
           // NOTE: Otherwise, fallback on using the base directory of the
