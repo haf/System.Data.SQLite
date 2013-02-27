@@ -20,6 +20,17 @@
 #       namespace if this script actually ends up being evaluated in Tcl.
 #
 namespace eval ::Eagle {
+  proc getKnownMonoVersions {} {
+    #
+    # NOTE: This job of this procedure is to return the list of "known"
+    #       versions of Mono supported by the test suite infrastructure.
+    #
+    return [list \
+        [list 2 0] [list 2 2] [list 2 4] [list 2 6] [list 2 8] [list 2 10] \
+        [list 2 11] [list 2 12] [list 3 0] [list 3 1] [list 3 2] [list 3 3] \
+        [list 3 4] [list 3 5] [list 3 6]]
+  }
+
   proc checkForPlatform { channel } {
     tputs $channel "---- checking for platform... "
 
@@ -44,10 +55,12 @@ namespace eval ::Eagle {
         # NOTE: Add the necessary constraints for each version of Mono that
         #       we know about.
         #
-        foreach version [list 20 22 24 26 28 210 211 212 30] {
-          addConstraint [appendArgs monoToDo $version]
-          addConstraint [appendArgs monoBug $version]
-          addConstraint [appendArgs monoCrash $version]
+        foreach monoVersion [getKnownMonoVersions] {
+          set constraintVersion [join $monoVersion ""]
+
+          addConstraint [appendArgs monoToDo $constraintVersion]
+          addConstraint [appendArgs monoBug $constraintVersion]
+          addConstraint [appendArgs monoCrash $constraintVersion]
         }
 
         #
@@ -594,6 +607,32 @@ namespace eval ::Eagle {
       tputs $channel yes\n
     } else {
       tputs $channel no\n
+    }
+  }
+
+  proc checkForTestMachine { channel } {
+    tputs $channel "---- checking for test machine... "
+
+    if {[info exists ::test_machine] && \
+        [string length $::test_machine] > 0} then {
+      addConstraint [appendArgs machine. $::test_machine]
+
+      tputs $channel [appendArgs $::test_machine \n]
+    } else {
+      tputs $channel unknown\n
+    }
+  }
+
+  proc checkForTestPlatform { channel } {
+    tputs $channel "---- checking for test platform... "
+
+    if {[info exists ::test_platform] && \
+        [string length $::test_platform] > 0} then {
+      addConstraint [appendArgs platform. $::test_platform]
+
+      tputs $channel [appendArgs $::test_platform \n]
+    } else {
+      tputs $channel unknown\n
     }
   }
 
@@ -1203,7 +1242,9 @@ namespace eval ::Eagle {
             # NOTE: Save the list of managed debugging assistants for
             #       later use by the test suite.
             #
-            set ::test_mdas $names
+            if {![info exists ::no(setMdas)]} then {
+              set ::test_mdas $names
+            }
 
             #
             # NOTE: Yes, it appears that at least one managed debugging
@@ -1399,6 +1440,38 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForFrameworkVersion { channel } {
+      tputs $channel "---- checking for framework version... "
+
+      if {[info exists ::eagle_platform(frameworkVersion)] && \
+          [string length $::eagle_platform(frameworkVersion)] > 0} then {
+        #
+        # NOTE: Get the major and minor portions of the version only.
+        #
+        set dotVersion [join [lrange [split \
+            $::eagle_platform(frameworkVersion) .] 0 1] .]
+
+        #
+        # NOTE: Now create a version string for use in the constraint name
+        #       (remove the periods).
+        #
+        set version [string map [list . ""] $dotVersion]
+
+        #
+        # NOTE: If the framework version was found, add a test constraint
+        #       for it now.
+        #
+        if {[string length $version] > 0} then {
+          addConstraint [appendArgs framework $version]
+        }
+
+        tputs $channel [appendArgs $::eagle_platform(frameworkVersion) \
+            " " ( $dotVersion ) \n]
+      } else {
+        tputs $channel no\n
+      }
+    }
+
     proc checkForRuntimeVersion { channel } {
       tputs $channel "---- checking for runtime version... "
 
@@ -1417,109 +1490,78 @@ namespace eval ::Eagle {
         set version [string map [list . ""] $dotVersion]
 
         if {[isMono]} then {
+          #
+          # NOTE: If the runtime version was found, add a test constraint
+          #       for it now.
+          #
           if {[string length $version] > 0} then {
               #
               # NOTE: We are running on Mono.  Keep track of the specific
               #       version for usage in test constraints.
               #
               addConstraint [appendArgs mono $version]
+              addConstraint [appendArgs mono $version OrHigher]
           }
 
-          if {[string length $dotVersion] > 0 && \
-              [regexp -- {^(\d+)\.(\d+)$} $dotVersion dummy \
-                  majorVersion minorVersion]} then {
+          #
+          # NOTE: Attempt to parse the version into its major and minor
+          #       components.
+          #
+          if {[string length $dotVersion] > 0 && [regexp -- {^(\d+)\.(\d+)$} \
+              $dotVersion dummy majorVersion minorVersion]} then {
+            #
+            # NOTE: This is the list of Mono versions to add test
+            #       constraints for.
+            #
             set monoVersions [list]
 
             #
-            # NOTE: Check for any Mono version 2.x or higher.
+            # NOTE: Check each Mono version "known" to the test suite.
             #
-            if {$majorVersion >= 2} then {
+            foreach monoVersion [getKnownMonoVersions] {
               #
-              # NOTE: Check for any Mono version higher than 2.0.
+              # NOTE: Check for any Mono major version X or higher.
               #
-              if {$majorVersion > 2 || $minorVersion > 0} then {
-                lappend monoVersions 20
-              }
-
-              #
-              # NOTE: Check for any Mono version higher than 2.2.
-              #
-              if {$majorVersion > 2 || $minorVersion > 2} then {
-                lappend monoVersions 22
-              }
-
-              #
-              # NOTE: Check for any Mono version higher than 2.4.
-              #
-              if {$majorVersion > 2 || $minorVersion > 4} then {
-                lappend monoVersions 24
-              }
-
-              #
-              # NOTE: Check for any Mono version higher than 2.6.
-              #
-              if {$majorVersion > 2 || $minorVersion > 6} then {
-                lappend monoVersions 26
-              }
-
-              #
-              # NOTE: Check for any Mono version higher than 2.8.
-              #
-              if {$majorVersion > 2 || $minorVersion > 8} then {
-                lappend monoVersions 28
-              }
-
-              #
-              # NOTE: Check for any Mono version higher than 2.10.
-              #
-              if {$majorVersion > 2 || $minorVersion > 10} then {
-                lappend monoVersions 210
-              }
-
-              #
-              # NOTE: Check for any Mono version higher than 2.11.
-              #
-              if {$majorVersion > 2 || $minorVersion > 11} then {
-                lappend monoVersions 211
-              }
-
-              #
-              # NOTE: Check for any Mono version higher than 2.12.
-              #
-              if {$majorVersion > 2 || $minorVersion > 12} then {
-                lappend monoVersions 212
+              if {$majorVersion >= [lindex $monoVersion 0]} then {
+                #
+                # NOTE: Check for any Mono major/minor version higher
+                #       than X.Y.
+                #
+                if {$majorVersion > [lindex $monoVersion 0] || \
+                    $minorVersion > [lindex $monoVersion 1]} then {
+                  #
+                  # NOTE: Add this "known" version of Mono.
+                  #
+                  lappend monoVersions $monoVersion
+                }
               }
             }
 
             #
-            # NOTE: Check for any Mono version 3.x or higher.
-            #
-            if {$majorVersion >= 3} then {
-              #
-              # NOTE: Check for any Mono version higher than 3.0.
-              #
-              if {$majorVersion > 3 || $minorVersion > 0} then {
-                lappend monoVersions 30
-              }
-            }
-
-            #
-            # NOTE: Add the necessary constraints for each version of Mono we
-            #       should NOT skip bugs for.
+            # NOTE: Add the necessary constraints for each version of Mono
+            #       we should NOT skip bugs for.
             #
             foreach monoVersion $monoVersions {
-              addConstraint [appendArgs monoToDo $monoVersion]
-              addConstraint [appendArgs monoBug $monoVersion]
-              addConstraint [appendArgs monoCrash $monoVersion]
+              set constraintVersion [join $monoVersion ""]
+
+              addConstraint [appendArgs mono $constraintVersion OrHigher]
+              addConstraint [appendArgs monoToDo $constraintVersion]
+              addConstraint [appendArgs monoBug $constraintVersion]
+              addConstraint [appendArgs monoCrash $constraintVersion]
             }
           }
         } else {
+          #
+          # NOTE: If the runtime version was found, add a test constraint
+          #       for it now.
+          #
           if {[string length $version] > 0} then {
             #
             # NOTE: We are running on the .NET Framework.  Keep track of the
             #       specific version for usage in test constraints.
             #
             addConstraint [appendArgs dotNet $version]
+            addConstraint [appendArgs dotNet $version OrHigher]
           }
 
           #
@@ -1527,10 +1569,12 @@ namespace eval ::Eagle {
           #       necessary constraints for each version of Mono we know
           #       about.
           #
-          foreach monoVersion [list 20 22 24 26 28 210 211 212 30] {
-            addConstraint [appendArgs monoToDo $monoVersion]
-            addConstraint [appendArgs monoBug $monoVersion]
-            addConstraint [appendArgs monoCrash $monoVersion]
+          foreach monoVersion [getKnownMonoVersions] {
+            set constraintVersion [join $monoVersion ""]
+
+            addConstraint [appendArgs monoToDo $constraintVersion]
+            addConstraint [appendArgs monoBug $constraintVersion]
+            addConstraint [appendArgs monoCrash $constraintVersion]
           }
         }
 
@@ -2131,7 +2175,9 @@ namespace eval ::Eagle {
           # NOTE: Save the directory for later usage by
           #       the test itself.
           #
-          set ::test_wix $directory
+          if {![info exists ::no(setWix)]} then {
+            set ::test_wix $directory
+          }
 
           #
           # NOTE: Show where we found it.
@@ -2147,6 +2193,33 @@ namespace eval ::Eagle {
       }
 
       tputs $channel no\n
+    }
+
+    proc checkForTargetFramework { channel } {
+      tputs $channel "---- checking for target framework... "
+
+      if {[info exists ::eagle_platform(targetFramework)] && \
+          [string length $::eagle_platform(targetFramework)] > 0} then {
+        #
+        # NOTE: Now create a string for use in the constraint name (remove
+        #       the invalid characters).  For example:
+        #
+        #       ".NETFramework,Version=v2.0" --> "NETFramework.Version.v2.0"
+        #
+        set targetFramework [string trimleft [string map [list , . = .] \
+            $::eagle_platform(targetFramework)] .]
+
+        #
+        # NOTE: Keep track of the specific target framework for usage in test
+        #       constraints.
+        #
+        addConstraint [appendArgs targetFramework. $targetFramework]
+
+        tputs $channel [appendArgs $::eagle_platform(targetFramework) \
+            " " ( $targetFramework ) \n]
+      } else {
+        tputs $channel no\n
+      }
     }
 
     proc checkForNetFx45 { channel } {
@@ -2251,7 +2324,9 @@ namespace eval ::Eagle {
             # NOTE: Save the directory for later usage by
             #       the test itself.
             #
-            set ::test_visual_studio [file dirname $fileName]
+            if {![info exists ::no(setVisualStudio)]} then {
+              set ::test_visual_studio [file dirname $fileName]
+            }
           }
         }
       }
@@ -2374,16 +2449,18 @@ namespace eval ::Eagle {
     # NOTE: We need several of our test constraint related commands in the
     #       global namespace.
     #
-    exportAndImportPackageCommands [namespace current] [list checkForPlatform \
-        checkForEagle checkForGaruda checkForShell checkForDebug checkForTk \
-        checkForVersion checkForCommand checkForFile checkForNativeCode \
-        checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
-        checkForTip405 checkForPerformance checkForTiming checkForInteractive \
-        checkForSymbols checkForLogFile checkForNetwork checkForCompileOption \
-        checkForInteractiveCommand checkForWindowsCommandProcessor \
-        checkForUserInteraction checkForTclOptions checkForTestConfiguration \
-        checkForTestSuffix checkForVariable checkForScriptLibrary \
-        checkForStackIntensive checkForFossil] false false
+    exportAndImportPackageCommands [namespace current] [list \
+        getKnownMonoVersions checkForPlatform checkForScriptLibrary \
+        checkForVariable checkForTclOptions checkForWindowsCommandProcessor \
+        checkForFossil checkForEagle checkForSymbols checkForLogFile \
+        checkForGaruda checkForShell checkForDebug checkForTk checkForVersion \
+        checkForCommand checkForTestMachine checkForTestPlatform \
+        checkForTestConfiguration checkForTestSuffix checkForFile \
+        checkForPathFile checkForNativeCode checkForTip127 checkForTip194 \
+        checkForTip241 checkForTip285 checkForTip405 checkForTiming \
+        checkForPerformance checkForStackIntensive checkForInteractive \
+        checkForInteractiveCommand checkForUserInteraction checkForNetwork \
+        checkForCompileOption] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

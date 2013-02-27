@@ -240,6 +240,8 @@ if {![info exists no([file tail [info script]])]} then {
   #
   # NOTE: If command line arguments were supplied, process them now.
   #
+  set test_flags(-machine) ""; # machine architecture, default to empty.
+  set test_flags(-platform) ""; # build platform, default to empty.
   set test_flags(-configuration) ""; # build configuration, default to empty.
   set test_flags(-suffix) ""; # build suffix, default to empty.
   set test_flags(-file) [list *.eagle]; # default to running all test files.
@@ -325,6 +327,21 @@ if {![info exists no([file tail [info script]])]} then {
       #
       set test_script(post) $test_flags(-postTest)
     }
+  }
+
+  #
+  # NOTE: Set the default test machine (e.g. amd64, intel, etc), if necessary.
+  #
+  if {![info exists test_machine]} then {
+    set test_machine [expr {[info exists tcl_platform(machine)] ? \
+        $tcl_platform(machine) : ""}]
+  }
+
+  #
+  # NOTE: Set the default test platform (e.g. x86, x64, etc), if necessary.
+  #
+  if {![info exists test_platform]} then {
+    set test_platform [machineToPlatform $test_machine true]
   }
 
   #
@@ -444,6 +461,14 @@ if {![info exists no([file tail [info script]])]} then {
 
   tputs $test_channel [appendArgs "---- test channel: " \
       $test_channel \n]
+
+  tputs $test_channel [appendArgs "---- test machine: " \
+      [expr {[info exists test_machine] ? \
+          $test_machine : "<none>"}] \n]
+
+  tputs $test_channel [appendArgs "---- test platform: " \
+      [expr {[info exists test_platform] ? \
+          $test_platform : "<none>"}] \n]
 
   tputs $test_channel [appendArgs "---- test configuration: " \
       [expr {[info exists test_configuration] ? \
@@ -685,16 +710,24 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
-    # NOTE: Check the runtime version (i.e. what version of the runtime
-    #       are we currently running on?).
+    # NOTE: Check the variant and/or version of the CLR that we are
+    #       currently running on.
     #
     if {![info exists no(runtimeVersion)]} then {
       checkForRuntimeVersion $test_channel
     }
 
     #
-    # NOTE: Check the image runtime version (i.e. what version of the
-    #       runtime was this assembly compiled against?).
+    # NOTE: Check the framework version (i.e. regardless of runtime) that
+    #       we are currently running on.
+    #
+    if {![info exists no(frameworkVersion)]} then {
+      checkForFrameworkVersion $test_channel
+    }
+
+    #
+    # NOTE: Check the image runtime version (i.e. the runtime version that
+    #       this assembly compiled against).
     #
     if {![info exists no(imageRuntimeVersion)]} then {
       checkForImageRuntimeVersion $test_channel
@@ -1372,6 +1405,15 @@ if {![info exists no([file tail [info script]])]} then {
             *TestExpr*
 
         #
+        # NOTE: For test "array-4.1".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestTwoByteArrays*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestReturnByteArray*
+
+        #
         # NOTE: For test "object-7.1".
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
@@ -1526,6 +1568,13 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has target framework testing support been disabled?
+    #
+    if {![info exists no(targetFramework)]} then {
+      checkForTargetFramework $test_channel
+    }
+
+    #
     # NOTE: Has Visual Studio testing support been disabled?
     #
     if {![info exists no(visualStudio)]} then {
@@ -1665,6 +1714,20 @@ if {![info exists no([file tail [info script]])]} then {
 
   tputs $test_channel [appendArgs \
       "---- start of common (Tcl & Eagle) test constraints...\n"]
+
+  #
+  # NOTE: Has checking for the test machine been disabled?
+  #
+  if {![info exists no(testMachine)]} then {
+    checkForTestMachine $test_channel
+  }
+
+  #
+  # NOTE: Has checking for the test platform been disabled?
+  #
+  if {![info exists no(testPlatform)]} then {
+    checkForTestPlatform $test_channel
+  }
 
   #
   # NOTE: Has checking for the test configuration been disabled?
@@ -1858,14 +1921,13 @@ if {![info exists no([file tail [info script]])]} then {
       # NOTE: Did we manage to find the native SQLite library?  If not, do we
       #       at least know the machine type?
       #
-      if {![haveConstraint file_sqlite3.dll] && \
-          [info exists tcl_platform(machine)]} then {
+      if {![haveConstraint file_sqlite3.dll]} then {
         #
         # NOTE: Ok, now try to check for the machine specific native SQLite
         #       library.
         #
         checkForFile $test_channel [file join $bin_path [machineToPlatform \
-            $tcl_platform(machine) true] sqlite3.dll]
+            $test_machine true] sqlite3.dll]
 
         #
         # NOTE: Did we manage to find the native SQLite library yet?
@@ -1876,7 +1938,7 @@ if {![info exists no([file tail [info script]])]} then {
           #       library.
           #
           checkForFile $test_channel [file join $bin_path [machineToPlatform \
-              $tcl_platform(machine) false] sqlite3.dll]
+              $test_machine false] sqlite3.dll]
         }
       }
     }
@@ -2224,6 +2286,9 @@ if {![info exists no([file tail [info script]])]} then {
 
     tputs $test_channel [appendArgs "---- certificate: " \
         [getPlatformInfo certificate <none>] \n]
+
+    tputs $test_channel [appendArgs "---- targetFramework: " \
+        [getPlatformInfo targetFramework <none>] \n]
   }
 
   #

@@ -388,8 +388,8 @@ namespace eval ::Eagle {
     # TODO: Add more support for standard tcltest options here.
     #
     set options [list -configuration -constraints -exitOnComplete -file \
-        -logFile -match -no -notFile -postTest -preTest -skip -stopOnFailure \
-        -suffix -tclsh -threshold]
+        -logFile -machine -match -no -notFile -platform -postTest -preTest \
+        -skip -stopOnFailure -suffix -tclsh -threshold]
 
     foreach {name value} $args {
       #
@@ -490,10 +490,18 @@ namespace eval ::Eagle {
 
   proc getFiles { directory pattern } {
     if {[isEagle]} then {
-      return [lsort -dictionary [file list $directory $pattern]]
+      set result [list]
+
+      foreach fileName [lsort -dictionary [file list $directory $pattern]] {
+        if {[file isfile $fileName] && [file readable $fileName]} then {
+          lappend result $fileName
+        }
+      }
+
+      return $result
     } else {
       return [lsort -dictionary [glob -directory $directory -types \
-          {b c f p s} -nocomplain -- $pattern]]
+          {f r} -nocomplain -- $pattern]]
     }
   }
 
@@ -1270,19 +1278,6 @@ namespace eval ::Eagle {
           incr count
 
           #
-          # NOTE: In terms of files, not tests, what percent done are we now?
-          #
-          set percent [formatDecimal \
-              [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
-
-          if {$percent != $lastPercent} then {
-            reportTestPercent $channel $percent \
-                [llength $failed] [llength $leaked]
-
-            set lastPercent $percent
-          }
-
-          #
           # NOTE: Record failed test count after this file.
           #
           if {[isEagle]} then {
@@ -1296,6 +1291,19 @@ namespace eval ::Eagle {
           #
           if {$after > $before} then {
             lappend failed [file tail $fileName]
+          }
+
+          #
+          # NOTE: In terms of files, not tests, what percent done are we now?
+          #
+          set percent [formatDecimal \
+              [expr {$total != 0 ? 100.0 * ($count / double($total)) : 100}]]
+
+          if {$percent != $lastPercent} then {
+            reportTestPercent $channel $percent \
+                [llength $failed] [llength $leaked]
+
+            set lastPercent $percent
           }
 
           #
@@ -1776,6 +1784,74 @@ namespace eval ::Eagle {
       }]
     }
 
+    proc getTestMachine {} {
+      #
+      # NOTE: Determine the effective test machine and return it.  If the
+      #       test machine cannot be determined, return an empty string.
+      #
+      if {[info exists ::test_flags(-machine)] && \
+          [string length $::test_flags(-machine)] > 0} then {
+        #
+        # NOTE: The test machine has been manually overridden via the test
+        #       flags; therefore, use it.
+        #
+        return $::test_flags(-machine)
+      } elseif {[info exists ::test_machine]} then {
+        #
+        # NOTE: Use the test machine.  The default value is set by the test
+        #       suite prologue; however, this may have been overridden.
+        #
+        return $::test_machine
+      } elseif {[info exists ::tcl_platform(machine)]} then {
+        #
+        # NOTE: Use the build machine of Eagle itself.
+        #
+        return $::tcl_platform(machine)
+      } else {
+        #
+        # NOTE: We are missing the machine, return nothing.
+        #
+        return ""
+      }
+    }
+
+    proc getTestPlatform {} {
+      #
+      # NOTE: Determine the effective test platform and return it.  If the
+      #       test platform cannot be determined, return an empty string.
+      #
+      if {[info exists ::test_flags(-platform)] && \
+          [string length $::test_flags(-platform)] > 0} then {
+        #
+        # NOTE: The test platform has been manually overridden via the test
+        #       flags; therefore, use it.
+        #
+        return $::test_flags(-platform)
+      } elseif {[info exists ::test_platform]} then {
+        #
+        # NOTE: Use the test platform.  The default value is set by the test
+        #       suite prologue; however, this may have been overridden.
+        #
+        return $::test_platform
+      } else {
+        set machine [getTestMachine]
+
+        if {[string length $machine] > 0} then {
+          #
+          # NOTE: Use the machine architecture to figure out the platform
+          #       and then return it.
+          #
+          return [machineToPlatform $machine]
+        } else {
+          #
+          # NOTE: We are missing the machine and we cannot figure out the
+          #       platform without it; therefore, return nothing.
+          #
+          return ""
+        }
+      }
+    }
+
     proc getTestConfiguration {} {
       #
       # NOTE: Determine the effective test configuration and return it.  If
@@ -1791,15 +1867,14 @@ namespace eval ::Eagle {
         return $::test_flags(-configuration)
       } elseif {[info exists ::test_configuration]} then {
         #
-        # NOTE: Use the test configuration.  The default value is "Release",
-        #       as set by the test suite prologue; however, this may have
-        #       been overridden.
+        # NOTE: Use the test configuration.  The default value is set by the
+        #       test suite prologue; however, this may have been overridden.
         #
         return $::test_configuration
       } elseif {[info exists ::eagle_platform(configuration)]} then {
         #
         # NOTE: Use the build configuration of Eagle itself.  This value will
-        #       always be "Debug" or "Release".
+        #       most likely be either "Debug" or "Release".
         #
         return $::eagle_platform(configuration)
       } else {
@@ -2067,15 +2142,19 @@ namespace eval ::Eagle {
     # NOTE: We need several of our test related commands in the global
     #       namespace as well.
     #
-    exportAndImportPackageCommands [namespace current] [list addConstraint \
-        calculateRelativePerformance haveConstraint haveOrAddConstraint \
-        processTestArguments getTemporaryPath getTestLog getTestLogId getFiles \
-        getConstraints getTestFiles getTestRunId execTestShell runTestPrologue \
-        runTestEpilogue runTest runAllTests fixConstraints sourceIfValid \
-        isExitOnComplete getPassPercentage getSkipPercentage testExec tlog \
-        returnInfoScript tputs formatDecimal formatList configureTcltest \
-        calculateBogoCops removeConstraint machineToPlatform tsource testShim \
-        getTestConfiguration getTestSuffix getTclShellFileName] false false
+    exportAndImportPackageCommands [namespace current] [list \
+        tputs tlog getSoftwareRegistryKey haveConstraint addConstraint \
+        haveOrAddConstraint getConstraints removeConstraint fixConstraints \
+        calculateBogoCops calculateRelativePerformance sourceIfValid \
+        processTestArguments getTclShellFileName getTemporaryPath getFiles \
+        getTestFiles getTestRunId getTestLogId getTestLog testExec \
+        testClrExec execTestShell isStopOnFailure isExitOnComplete \
+        returnInfoScript runTestPrologue runTestEpilogue hookPuts unhookPuts \
+        runTest testShim tsource recordTestStatistics reportTestStatistics \
+        formatList formatListAsDict pathToRegexp inverseLsearchGlob \
+        removePathFromFileNames formatDecimal clearTestPercent \
+        reportTestPercent runAllTests configureTcltest machineToPlatform \
+        getPassPercentage getSkipPercentage] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

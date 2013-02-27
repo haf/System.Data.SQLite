@@ -90,6 +90,55 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getBuildYears {} {
+      #
+      # NOTE: See if the list of test years has been overridden by the user
+      #       (e.g. on the command line).
+      #
+      if {[info exists ::test_years] && [llength $::test_years] > 0} then {
+        #
+        # NOTE: Use the specified list of test years.
+        #
+        return $::test_years
+      } else {
+        #
+        # NOTE: Use the default list of test years.
+        #
+        return [list 2005 2008 2010 2012]
+      }
+    }
+
+    proc getBuildPlatform { native } {
+      if {[info exists ::test_platform] && \
+          [string length $::test_platform] > 0} then {
+        #
+        # NOTE: Use the specified test platform.  If this variable is not set,
+        #       the default value will be based on the machine architecture.
+        #
+        return [expr {$native ? $::test_platform : ""}]
+      } elseif {[info exists ::test_machine] && \
+          [string length $::test_machine] > 0} then {
+        #
+        # NOTE: For native builds, return the platform name corresponding to
+        #       the test machine architecture; otherwise, return an empty
+        #       string.
+        #
+        return [expr {$native ? [machineToPlatform $::test_machine] : ""}]
+      } elseif {[info exists ::tcl_platform(machine)]} then {
+        #
+        # NOTE: For native builds, return the platform name corresponding to
+        #       the machine architecture; otherwise, return an empty string.
+        #
+        return [expr {$native ? \
+            [machineToPlatform $::tcl_platform(machine)] : ""}]
+      } else {
+        #
+        # NOTE: No machine architecture is available, return an empty string.
+        #
+        return ""
+      }
+    }
+
     proc getBuildConfiguration {} {
       #
       # NOTE: See if the "configuration" setting has been overridden by the user
@@ -126,6 +175,68 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getBuildConfigurations {} {
+      #
+      # NOTE: See if the list of test configurations has been overridden by
+      #       the user (e.g. on the command line).
+      #
+      if {[info exists ::test_configurations] && \
+          [llength $::test_configurations] > 0} then {
+        #
+        # NOTE: Use the specified list of test configurations.
+        #
+        return $::test_configurations
+      } else {
+        #
+        # NOTE: Use the default list of test configurations.
+        #
+        return [list Debug Release]
+      }
+    }
+
+    proc getBuildBaseDirectory {} {
+      #
+      # NOTE: Figure out the base directory where all the builds should be
+      #       located.  This will be the directory that contains the actual
+      #       build output directory (e.g. parent of "bin").
+      #
+      if {[info exists ::build_base_directory] && \
+          [string length $::build_base_directory] > 0} then {
+        #
+        # NOTE: The location of the build base directory has been overridden;
+        #       therefore, use it verbatim.
+        #
+        set path $::build_base_directory
+      } elseif {[info exists ::common_directory] && \
+          [string length $::common_directory] > 0} then {
+        #
+        # NOTE: Next, fallback to the parent directory of the one containing
+        #       this file (i.e. "common.eagle"), if available.
+        #
+        set path [file dirname $::common_directory]
+      } else {
+        #
+        # NOTE: Finally, fallback to the parent directory of the EagleTest
+        #       path.  The EagleTest package guarantees that this variable
+        #       will be set to the directory containing the first file to
+        #       execute the [runTestPrologue] script library procedure.
+        #
+        set path [file dirname $::path]
+      }
+    }
+
+    proc joinBuildDirectory { path native year platform configuration } {
+      #
+      # NOTE: Figure out and then return the fully qualified path to the build
+      #       directory based on all the arguments provided by our caller.
+      #
+      if {$native} then {
+        return [file join $path bin $year $platform $configuration]
+      } else {
+        return [file join $path bin $year $configuration bin]
+      }
+    }
+
     proc getBuildDirectory {} {
       #
       # NOTE: See if the "native" runtime option has been set.  If so, use the
@@ -152,34 +263,6 @@ namespace eval ::Eagle {
         #
         return $::build_directory
       } else {
-        #
-        # NOTE: Figure out the build base directory.  This will be the directory
-        #       that contains the actual build output directory (e.g. "bin").
-        #
-        if {[info exists ::build_base_directory] && \
-            [string length $::build_base_directory] > 0} then {
-          #
-          # NOTE: The location of the build base directory has been overridden;
-          #       therefore, use it verbatim.
-          #
-          set path $::build_base_directory
-        } elseif {[info exists ::common_directory] && \
-            [string length $::common_directory] > 0} then {
-          #
-          # NOTE: Next, fallback to the parent directory of the one containing
-          #       this file (i.e. "common.eagle"), if available.
-          #
-          set path [file dirname $::common_directory]
-        } else {
-          #
-          # NOTE: Finally, fallback to the parent directory of the EagleTest
-          #       path.  The EagleTest package guarantees that this variable
-          #       will be set to the directory containing the first file to
-          #       execute the [runTestPrologue] script library procedure.
-          #
-          set path [file dirname $::path]
-        }
-
         #
         # NOTE: If the "native" runtime option is set, the mixed-mode assembly
         #       is being tested.  In that case, the path to the build directory
@@ -220,13 +303,10 @@ namespace eval ::Eagle {
         #       Refer to the comments in [getBuildYear] for more information on
         #       how to set this variable.
         #
-        if {[hasRuntimeOption native]} then {
-          return [file join $path bin [getBuildYear] [machineToPlatform \
-              $::tcl_platform(machine)] [getBuildConfiguration]]
-        } else {
-          return [file join $path bin [getBuildYear] [getBuildConfiguration] \
-              bin]
-        }
+        set native [hasRuntimeOption native]
+
+        return [joinBuildDirectory [getBuildBaseDirectory] $native \
+            [getBuildYear] [getBuildPlatform $native] [getBuildConfiguration]]
       }
     }
 
@@ -625,6 +705,33 @@ namespace eval ::Eagle {
       #
       return [expr {[haveConstraint System.Data.SQLite] && \
           [haveConstraint SQLite]}]
+    }
+
+    proc checkForSQLiteBuilds { channel } {
+      #
+      # NOTE: Check for every possible valid combination of values used when
+      #       locating out the build output directory, showing each available
+      #       build variation along the way.
+      #
+      foreach native [list false true] {
+        foreach year [getBuildYears] {
+          foreach configuration [getBuildConfigurations] {
+            tputs $channel [appendArgs \
+                "---- checking for System.Data.SQLite build \"" [expr \
+                {$native ? "native/" : ""}] $year / $configuration "\"... "]
+
+            set fileName [file nativename [file join [joinBuildDirectory \
+                [getBuildBaseDirectory] $native $year [getBuildPlatform \
+                $native] $configuration] System.Data.SQLite.dll]]
+
+            if {[file exists $fileName]} then {
+              tputs $channel yes\n
+            } else {
+              tputs $channel no\n
+            }
+          }
+        }
+      }
     }
 
     proc checkForSQLite { channel } {
@@ -1732,6 +1839,11 @@ namespace eval ::Eagle {
             tputs $::test_channel unknown\n
           }
         }
+
+        #
+        # NOTE: Check the available builds of SQLite and System.Data.SQLite.
+        #
+        checkForSQLiteBuilds $::test_channel
 
         #
         # NOTE: Now, we need to know if the SQLite core library is available
