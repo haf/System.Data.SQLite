@@ -1698,7 +1698,11 @@ namespace System.Data.SQLite
         int length = array.Length;
 
         for (int index = 0; index < length; index++)
+#if NET_COMPACT_20
+            result.Append(String.Format("{0:x2}", array[index]));
+#else
             result.AppendFormat("{0:x2}", array[index]);
+#endif
 
         return result.ToString();
     }

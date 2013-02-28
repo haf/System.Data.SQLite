@@ -497,6 +497,7 @@ namespace System.Data.SQLite
             LogEventArgs e
             )
         {
+#if !NET_COMPACT_20
             if (e == null)
                 return;
 
@@ -524,6 +525,7 @@ namespace System.Data.SQLite
 
             Trace.WriteLine(String.Format("SQLite {0} ({1}): {2}",
                 success ? "message" : "error", errorCode, message));
+#endif
         }
     }
 }
