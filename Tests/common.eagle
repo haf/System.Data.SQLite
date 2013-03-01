@@ -1895,7 +1895,7 @@ namespace eval ::Eagle {
             "---- checking for System.Data.SQLite build year... "
 
         set year [getBuildYear]
-        addConstraint [appendArgs buildYear $year]
+        addConstraint [appendArgs buildYear. $year]
         tputs $::test_channel [appendArgs \" $year \"\n]
 
         #

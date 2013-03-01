@@ -55,17 +55,20 @@ runTest {test tkt-17045010df-1.1 {EnableExtensions & LoadExtension} -setup {
 } -constraints \
 {eagle monoBug28 defineConstant.System.Data.SQLite.INTEROP_TEST_EXTENSION\
 command.sql compile.DATA SQLite System.Data.SQLite} -result {{0 {}} {1\
-{EXCEPTION System.Data.SQLite.SQLiteException}\
+{EXCEPTION System.Data.SQLite.SQLiteException\
+System.Data.SQLite.SQLite3.LoadExtension}\
 {System.Reflection.TargetInvocationException: Exception has been thrown by the\
 target of an invocation. ---> System.Data.SQLite.SQLiteException: SQL logic\
 error or missing database, not authorized}} {1 {EXCEPTION\
-System.Data.SQLite.SQLiteException} {System.Data.SQLite.SQLiteException\
-(0x80004005): SQL logic error or missing database, no such function:\
-interopTest}} {1 {EXCEPTION System.Data.SQLite.SQLiteException}\
+System.Data.SQLite.SQLiteException System.Data.SQLite.SQLite3.Prepare}\
+{System.Data.SQLite.SQLiteException (0x80004005): SQL logic error or missing\
+database, no such function: interopTest}} {1 {EXCEPTION\
+System.Data.SQLite.SQLiteException System.Data.SQLite.SQLite3.Prepare}\
 {System.Data.SQLite.SQLiteException (0x80004005): SQL logic error or missing\
 database, no such function: interopTest}} {0 {}} {0 {}} {0 test2} {1 {EXCEPTION\
-System.Data.SQLite.SQLiteException} {System.Data.SQLite.SQLiteException\
-(0x80004005): SQL logic error or missing database, need exactly one argument}}}}
+System.Data.SQLite.SQLiteException System.Data.SQLite.SQLite3.Reset}\
+{System.Data.SQLite.SQLiteException (0x80004005): SQL logic error or missing\
+database, need exactly one argument}}}}
 
 ###############################################################################
 

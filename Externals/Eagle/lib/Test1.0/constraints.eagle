@@ -2110,7 +2110,7 @@ namespace eval ::Eagle {
           #
           # NOTE: The versions of WiX that we support.
           #
-          set versions [list 3.6 3.5 3.0]
+          set versions [list 3.7 3.6 3.5 3.0]
 
           #
           # NOTE: Check each version, stopping when one is found.
