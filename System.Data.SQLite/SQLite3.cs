@@ -1204,7 +1204,8 @@ namespace System.Data.SQLite
       int len;
       return UTF8ToString(UnsafeNativeMethods.sqlite3_column_text_interop(stmt._sqlite_stmt, index, out len), len);
 #else
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_text(stmt._sqlite_stmt, index), -1);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_text(stmt._sqlite_stmt, index),
+        UnsafeNativeMethods.sqlite3_column_bytes(stmt._sqlite_stmt, index));
 #endif
     }
 
@@ -1214,7 +1215,8 @@ namespace System.Data.SQLite
       int len;
       return ToDateTime(UnsafeNativeMethods.sqlite3_column_text_interop(stmt._sqlite_stmt, index, out len), len);
 #else
-      return ToDateTime(UnsafeNativeMethods.sqlite3_column_text(stmt._sqlite_stmt, index), -1);
+      return ToDateTime(UnsafeNativeMethods.sqlite3_column_text(stmt._sqlite_stmt, index),
+        UnsafeNativeMethods.sqlite3_column_bytes(stmt._sqlite_stmt, index));
 #endif
     }
 
@@ -1432,7 +1434,8 @@ namespace System.Data.SQLite
       int len;
       return UTF8ToString(UnsafeNativeMethods.sqlite3_value_text_interop(ptr, out len), len);
 #else
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_value_text(ptr), -1);
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_value_text(ptr),
+        UnsafeNativeMethods.sqlite3_value_bytes(ptr));
 #endif
     }
 

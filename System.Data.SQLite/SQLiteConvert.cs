@@ -162,13 +162,15 @@ namespace System.Data.SQLite
     /// <returns>A string containing the translated character(s)</returns>
     public static string UTF8ToString(IntPtr nativestring, int nativestringlen)
     {
-      if (nativestringlen == 0 || nativestring == IntPtr.Zero) return "";
-      if (nativestringlen == -1)
+      if (nativestring == IntPtr.Zero || nativestringlen == 0) return String.Empty;
+      if (nativestringlen < 0)
       {
-        do
-        {
+        nativestringlen = 0;
+
+        while (Marshal.ReadByte(nativestring, nativestringlen) != 0)
           nativestringlen++;
-        } while (Marshal.ReadByte(nativestring, nativestringlen) != 0);
+
+        if (nativestringlen == 0) return String.Empty;
       }
 
       byte[] byteArray = new byte[nativestringlen];
