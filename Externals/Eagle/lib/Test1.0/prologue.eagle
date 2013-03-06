@@ -240,6 +240,7 @@ if {![info exists no([file tail [info script]])]} then {
   #
   # NOTE: If command line arguments were supplied, process them now.
   #
+  set test_flags(-suite) ""; # test suite name, default to empty.
   set test_flags(-machine) ""; # machine architecture, default to empty.
   set test_flags(-platform) ""; # build platform, default to empty.
   set test_flags(-configuration) ""; # build configuration, default to empty.
@@ -327,6 +328,13 @@ if {![info exists no([file tail [info script]])]} then {
       #
       set test_script(post) $test_flags(-postTest)
     }
+  }
+
+  #
+  # NOTE: Set the default test suite name, if necessary.
+  #
+  if {![info exists test_suite]} then {
+    set test_suite [getTestSuite]
   }
 
   #
@@ -457,6 +465,10 @@ if {![info exists no([file tail [info script]])]} then {
 
   tputs $test_channel [appendArgs "---- processId: " \
       [pid] \n]
+
+  tputs $test_channel [appendArgs "---- test suite: " \
+      [expr {[info exists test_suite] ? \
+          $test_suite : "<none>"}] \n]
 
   tputs $test_channel [appendArgs "---- test channel: " \
       $test_channel \n]

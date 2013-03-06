@@ -389,7 +389,7 @@ namespace eval ::Eagle {
     #
     set options [list -configuration -constraints -exitOnComplete -file \
         -logFile -machine -match -no -notFile -platform -postTest -preTest \
-        -skip -stopOnFailure -suffix -tclsh -threshold]
+        -skip -stopOnFailure -suffix -suite -tclsh -threshold]
 
     foreach {name value} $args {
       #
@@ -604,6 +604,38 @@ namespace eval ::Eagle {
 
   proc getTestLog {} {
     return [expr {[info exists ::test_log] ? $::test_log : ""}]
+  }
+
+  proc getTestSuite {} {
+    #
+    # NOTE: Determine the effective test suite name and return it.  If the
+    #       test suite name cannot be determined, return the default based
+    #       on whether we are running in Eagle or native Tcl.
+    #
+    if {[info exists ::test_flags(-suite)] && \
+        [string length $::test_flags(-suite)] > 0} then {
+      #
+      # NOTE: The test suite name has been manually overridden via the test
+      #       flags; therefore, use it.
+      #
+      return $::test_flags(-suite)
+    } elseif {[info exists ::test_suite]} then {
+      #
+      # NOTE: Use the test suite name.  The default value is set by the test
+      #       suite prologue; however, this may have been overridden.
+      #
+      return $::test_suite
+    } elseif {[isEagle]} then {
+      #
+      # NOTE: Use the default test suite name for Eagle.
+      #
+      return "Eagle Test Suite for Eagle"
+    } else {
+      #
+      # NOTE: Use the default test suite name for native Tcl.
+      #
+      return "Eagle Test Suite for Tcl"
+    }
   }
 
   proc getTestMachine {} {
@@ -2147,9 +2179,9 @@ namespace eval ::Eagle {
         haveOrAddConstraint getConstraints removeConstraint fixConstraints \
         calculateBogoCops calculateRelativePerformance sourceIfValid \
         processTestArguments getTclShellFileName getTemporaryPath getFiles \
-        getTestFiles getTestRunId getTestLogId getTestLog getTestMachine \
-        getTestPlatform getTestConfiguration getTestSuffix testExec \
-        testClrExec execTestShell isStopOnFailure isExitOnComplete \
+        getTestFiles getTestRunId getTestLogId getTestLog getTestSuite \
+        getTestMachine getTestPlatform getTestConfiguration getTestSuffix \
+        testExec testClrExec execTestShell isStopOnFailure isExitOnComplete \
         returnInfoScript runTestPrologue runTestEpilogue hookPuts unhookPuts \
         runTest testShim tsource recordTestStatistics reportTestStatistics \
         formatList formatListAsDict pathToRegexp inverseLsearchGlob \

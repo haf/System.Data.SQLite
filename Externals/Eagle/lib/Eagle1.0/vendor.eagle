@@ -186,8 +186,15 @@ namespace eval ::Eagle {
         build_directory common_directory connection_flags database_directory \
         datetime_format scratch_directory temporary_directory \
         test_configuration test_configurations test_constraints \
-        test_machine test_overrides test_platform test_year test_years \
-        test_year_clr_v2 test_year_clr_v4 vendor_directory]}] false
+        test_machine test_overrides test_platform test_suite test_year \
+        test_years test_year_clr_v2 test_year_clr_v4 vendor_directory]}] false
+
+    #
+    # NOTE: Set the name of the running test suite, if necessary.
+    #
+    if {![info exists ::test_suite]} then {
+      set ::test_suite "System.Data.SQLite Test Suite for Eagle"
+    }
 
     #
     # NOTE: This variable will contain the name of the directory containing the
