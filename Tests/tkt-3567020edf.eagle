@@ -1,0 +1,63 @@
+###############################################################################
+#
+# tkt-3567020edf.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-3567020edf-1.1 {embedded NUL characters (UTF-8)} -setup {
+  setupDb [set fileName tkt-3567020edf-1.1.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+
+  sql execute $db "INSERT INTO t1 (x) VALUES(?);" \
+      [list param1 String one\x00two]
+
+  sql execute -execute reader -format list $db "SELECT x FROM t1;"
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+"one\x00two"}
+
+###############################################################################
+
+runTest {test tkt-3567020edf-1.2 {embedded NUL characters (UTF-16)} -setup {
+  setupDb [set fileName tkt-3567020edf-1.2.db] "" "" "" "" \
+      UseUTF16Encoding=True
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+
+  sql execute $db "INSERT INTO t1 (x) VALUES(?);" \
+      [list param1 String one\x00two]
+
+  sql execute -execute reader -format list $db "SELECT x FROM t1;"
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+"one\x00two"}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

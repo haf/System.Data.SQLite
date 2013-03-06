@@ -7,6 +7,7 @@
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.7.16].</li>
+    <li>Properly handle embedded NUL characters in parameter and column values. Fix for [3567020edf].</li>
     <li>Skip checking loaded assemblies for types tagged with the SQLiteFunction attribute when the No_SQLiteFunctions environment variable is set. Pursuant to [e4c8121f7b].</li>
     <li>Add HexPassword connection string property to work around the inability to include a literal semicolon in a connection string property value. Pursuant to [1c456ae75f].</li>
     <li>Add static Execute method to the SQLiteCommand class.</li>

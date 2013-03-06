@@ -217,7 +217,8 @@ namespace System.Data.SQLite
       int len;
       return UTF16ToString(UnsafeNativeMethods.sqlite3_column_text16_interop(stmt._sqlite_stmt, index, out len), len);
 #else
-      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_text16(stmt._sqlite_stmt, index), -1);
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_text16(stmt._sqlite_stmt, index),
+        UnsafeNativeMethods.sqlite3_column_bytes16(stmt._sqlite_stmt, index));
 #endif
     }
 
@@ -257,7 +258,8 @@ namespace System.Data.SQLite
       int len;
       return UTF16ToString(UnsafeNativeMethods.sqlite3_value_text16_interop(ptr, out len), len);
 #else
-      return UTF16ToString(UnsafeNativeMethods.sqlite3_value_text16(ptr), -1);
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_value_text16(ptr),
+        UnsafeNativeMethods.sqlite3_value_bytes16(ptr));
 #endif
     }
 

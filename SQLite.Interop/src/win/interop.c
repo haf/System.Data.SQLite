@@ -391,14 +391,14 @@ SQLITE_API void WINAPI sqlite3_memory_highwater_interop(int resetFlag, sqlite_in
 SQLITE_API const unsigned char * WINAPI sqlite3_column_text_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const unsigned char *pval = sqlite3_column_text(stmt, iCol);
-  *plen = (pval != 0) ? strlen((char *)pval) : 0;
+  *plen = sqlite3_column_bytes(stmt, iCol);
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_column_text16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const void *pval = sqlite3_column_text16(stmt, iCol);
-  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t): 0;
+  *plen = sqlite3_column_bytes16(stmt, iCol);
   return pval;
 }
 
@@ -527,14 +527,14 @@ SQLITE_API void WINAPI sqlite3_value_int64_interop(sqlite3_value *pval, sqlite_i
 SQLITE_API const unsigned char * WINAPI sqlite3_value_text_interop(sqlite3_value *val, int *plen)
 {
   const unsigned char *pval = sqlite3_value_text(val);
-  *plen = (pval != 0) ? strlen((char *)pval) : 0;
+  *plen = sqlite3_value_bytes(val);
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_value_text16_interop(sqlite3_value *val, int *plen)
 {
   const void *pval = sqlite3_value_text16(val);
-  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  *plen = sqlite3_value_bytes16(val);
   return pval;
 }
 
