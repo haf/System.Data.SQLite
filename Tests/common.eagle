@@ -141,12 +141,12 @@ namespace eval ::Eagle {
 
     proc getBuildConfiguration {} {
       #
-      # NOTE: See if the "configuration" setting has been overridden by the user
-      #       (e.g. on the command line).  This helps control exactly which set
-      #       of binaries we are testing (i.e. those built in the "Debug" or
-      #       "Release" build configurations).  To override this value via the
-      #       command line, enter a command similar to one of the following (all
-      #       on one line):
+      # NOTE: See if the "configuration" setting has been overridden by the
+      #       user (e.g. on the command line).  This helps control exactly
+      #       which set of binaries we are testing (i.e. those built in the
+      #       "Debug" or "Release" build configurations).  To override this
+      #       value via the command line, enter a command similar to one of
+      #       the following (all on one line):
       #
       #       EagleShell.exe -preInitialize "set test_configuration Debug"
       #         -file .\path\to\all.eagle
@@ -161,7 +161,8 @@ namespace eval ::Eagle {
           [string length $::test_configuration] > 0} then {
         #
         # NOTE: Use the specified test configuration.  The default value used
-        #       for this variable is "Release", as set by the test suite itself.
+        #       for this variable is typically "Release", as set by the test
+        #       suite itself.
         #
         return $::test_configuration
       } else {
@@ -232,7 +233,7 @@ namespace eval ::Eagle {
       }
     }
 
-    proc joinBuildDirectory { path native year platform configuration } {
+    proc joinBuildDirectory { native path year platform configuration } {
       #
       # NOTE: Figure out and then return the fully qualified path to the build
       #       directory based on all the arguments provided by our caller.
@@ -312,7 +313,7 @@ namespace eval ::Eagle {
         #
         set native [hasRuntimeOption native]
 
-        return [joinBuildDirectory [getBuildBaseDirectory] $native \
+        return [joinBuildDirectory $native [getBuildBaseDirectory] \
             [getBuildYear] [getBuildPlatform $native] [getBuildConfiguration]]
       }
     }
@@ -728,7 +729,7 @@ namespace eval ::Eagle {
                 {$native ? "native/" : ""}] $year / $configuration "\"... "]
 
             set fileName [file nativename [file join [joinBuildDirectory \
-                [getBuildBaseDirectory] $native $year [getBuildPlatform \
+                $native [getBuildBaseDirectory] $year [getBuildPlatform \
                 $native] $configuration] System.Data.SQLite.dll]]
 
             if {[file exists $fileName]} then {
@@ -940,9 +941,10 @@ namespace eval ::Eagle {
       set isMemory [isMemoryDb $fileName]
 
       #
-      # NOTE: For now, all test databases used by the test suite are placed into
-      #       the temporary directory.  Each database used by a test should be
-      #       cleaned up by that test using the "cleanupDb" procedure, below.
+      # NOTE: For now, all test databases used by the test suite are placed
+      #       into the database directory.  Each database and related files
+      #       used by a test should be cleaned up by that test using the
+      #       "cleanupDb" procedure, below.
       #
       if {!$isMemory && $qualify} then {
         set fileName [file join [getDatabaseDirectory] [file tail $fileName]]
@@ -1041,16 +1043,16 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If our caller specified a SQLiteConnectionFlags, add the necessary
-      #       portion of the connection string now.
+      # NOTE: If our caller specified some SQLiteConnectionFlags, add the
+      #       necessary portion of the connection string now.
       #
       if {[string length $flags] > 0} then {
         append connection {;Flags=${flags}}
       }
 
       #
-      # NOTE: If our caller specified an extra payload to the connection string,
-      #       append it now.
+      # NOTE: If our caller specified an extra payload to the connection
+      #       string, append it now.
       #
       if {[string length $extra] > 0} then {
         append connection \; $extra
@@ -1080,8 +1082,8 @@ namespace eval ::Eagle {
     proc getDbConnection { {varName db} } {
       #
       # NOTE: Refer to the specified variable (e.g. "db") in the context of our
-      #       caller.  The handle to the database previously opened by [setupDb]
-      #       should be stored there.
+      #       caller.  The handle to the database previously opened via the
+      #       [setupDb] procedure should be stored there.
       #
       upvar 1 $varName db
 
@@ -1113,17 +1115,18 @@ namespace eval ::Eagle {
 
     proc freeDbConnection { {varName connection} } {
       #
-      # NOTE: Refer to the specified variable (e.g. "connection") in the context
-      #       of our caller.  The opaque object handle for an ADO.NET connection
-      #       previously returned by [getDbConnection] should be stored there.
+      # NOTE: Refer to the specified variable (e.g. "connection") in the
+      #       context of our caller.  The opaque object handle for an ADO.NET
+      #       connection previously returned by [getDbConnection] should be
+      #       stored there.
       #
       upvar 1 $varName connection
 
       #
       # NOTE: Attempt to remove the opaque object handle from the interpreter
       #       now.  This [object dispose] call will not actually dispose of the
-      #       underlying object because the +NoDispose flag was set on it during
-      #       creation of the opaque object handle.
+      #       underlying object because the +NoDispose flag was set on it
+      #       during creation of the opaque object handle.
       #
       if {[info exists connection] && \
           [catch {object dispose $connection} error]} then {
@@ -1172,14 +1175,14 @@ namespace eval ::Eagle {
 
       #
       # NOTE: Refer to the specified variable (e.g. "db") in the context of our
-      #       caller.  The handle to the database previously opened by [setupDb]
-      #       should be stored there.
+      #       caller.  The handle to the database previously opened via the
+      #       [setupDb] procedure should be stored there.
       #
       upvar 1 $varName db
 
       #
-      # NOTE: Close the connection to the database now.  This should allow us to
-      #       delete the underlying database file.
+      # NOTE: Close the connection to the database now.  This should allow us
+      #       to delete the underlying database file.
       #
       if {[info exists db] && [catch {sql close $db} error]} then {
         #
