@@ -41,7 +41,7 @@ runTest {test tkt-84718e79fa-1.1 {SQLiteConvert thread safety} -setup {
     set t($i) [object create -alias Thread threadStart 1048576]
   }
 
-  set ::results [list]
+  set results [list]
 
   for {set i 0} {$i < $c} {incr i} {
     $t($i) Start
@@ -53,7 +53,7 @@ runTest {test tkt-84718e79fa-1.1 {SQLiteConvert thread safety} -setup {
     $t($i) Join
   }
 
-  set ::results
+  set results
 } -cleanup {
   cleanupDb $fileName
 

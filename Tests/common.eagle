@@ -2005,8 +2005,8 @@ namespace eval ::Eagle {
   #
   # NOTE: Save the name of the directory containing this file.
   #
-  if {![info exists ::common_directory]} then {
-    set ::common_directory [file dirname [info script]]
+  if {![info exists common_directory]} then {
+    set common_directory [file dirname [info script]]
   }
 
   #

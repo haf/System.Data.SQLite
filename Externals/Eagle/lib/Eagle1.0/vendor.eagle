@@ -192,8 +192,8 @@ namespace eval ::Eagle {
     #
     # NOTE: Set the name of the running test suite, if necessary.
     #
-    if {![info exists ::test_suite]} then {
-      set ::test_suite "System.Data.SQLite Test Suite for Eagle"
+    if {![info exists test_suite]} then {
+      set test_suite "System.Data.SQLite Test Suite for Eagle"
     }
 
     #
