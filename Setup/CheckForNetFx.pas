@@ -33,6 +33,23 @@ var
 
   VcRuntimeRedistributable: String;
 
+function TrimSlash(const Path: String): String;
+var
+  LastCharacter: String;
+begin
+  Result := Path;
+
+  if Result <> '' then
+  begin
+    LastCharacter := Copy(Result, Length(Result), 1);
+
+    if (LastCharacter = '\') or (LastCharacter = '/') then
+    begin
+      Result := Copy(Result, 1, Length(Result) - 1);
+    end;
+  end;
+end;
+
 function CheckForNetFx2(const NeedServicePack: Integer): Boolean;
 var
   SubKeyName: String;
@@ -123,11 +140,14 @@ begin
   if RegQueryStringValue(HKEY_LOCAL_MACHINE, NetFxSubKeyName,
       NetFxInstallRoot, InstallRoot) then
   begin
-    Result := InstallRoot + '\' + NetFx2Version;
-
-    if FileName <> '' then
+    if InstallRoot <> '' then
     begin
-      Result := Result + '\' + FileName;
+      Result := TrimSlash(InstallRoot) + '\' + NetFx2Version;
+
+      if FileName <> '' then
+      begin
+        Result := TrimSlash(Result) + '\' + FileName;
+      end;
     end;
   end;
 end;
@@ -141,11 +161,14 @@ begin
   if RegQueryStringValue(HKEY_LOCAL_MACHINE, NetFxSubKeyName,
       NetFxInstallRoot, InstallRoot) then
   begin
-    Result := InstallRoot + '\' + NetFx4Version;
-
-    if FileName <> '' then
+    if InstallRoot <> '' then
     begin
-      Result := Result + '\' + FileName;
+      Result := TrimSlash(InstallRoot) + '\' + NetFx4Version;
+
+      if FileName <> '' then
+      begin
+        Result := TrimSlash(Result) + '\' + FileName;
+      end;
     end;
   end;
 end;
