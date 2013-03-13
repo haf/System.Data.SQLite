@@ -173,6 +173,7 @@ namespace System.Data.SQLite
                   processorArchitecturePlatforms.Add("x86", "Win32");
                   processorArchitecturePlatforms.Add("AMD64", "x64");
                   processorArchitecturePlatforms.Add("IA64", "Itanium");
+                  processorArchitecturePlatforms.Add("ARM", "WinCE");
               }
 
               //
