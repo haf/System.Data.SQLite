@@ -151,9 +151,9 @@ if {$argc >= 0 && $argc <= 7} then {
     #
     set packages(2005) [list \
         abd785f0-cda7-41c5-8375-2451a7cbff26 \
-        \\windows\\NETCFV2.ppc.armv4.cab \
+        \\Windows\\NETCFv2.ppc.armv4.cab \
         c0ccf48e-4bfb-4d84-827c-981a595e40b4 \
-        [appendArgs \\windows\\System_SR_ $language3 .cab]]
+        [appendArgs \\Windows\\System_SR_ $language3 .cab]]
   }
 
   #
@@ -177,9 +177,9 @@ if {$argc >= 0 && $argc <= 7} then {
     #
     set packages(2008) [list \
         abd785f0-cda7-41c5-8375-2451a7cbff37 \
-        \\windows\\NETCFv35.ppc.armv4.cab \
+        \\Windows\\NETCFv35.ppc.armv4.cab \
         c0ccf48e-4bfb-4d84-827c-981a595e40c5 \
-        [appendArgs \\windows\\NETCFv35.Messages. $language2 .cab]]
+        [appendArgs \\Windows\\NETCFv35.Messages. $language2 .cab]]
   }
 
   #
