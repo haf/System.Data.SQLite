@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -95,7 +95,11 @@ namespace System.Data.SQLite
       /// <returns>
       /// The native module handle upon success -OR- IntPtr.Zero on failure.
       /// </returns>
+#if !PLATFORM_COMPACTFRAMEWORK
       [DllImport("kernel32",
+#else
+      [DllImport("coredll",
+#endif
           CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto,
 #if !PLATFORM_COMPACTFRAMEWORK
           BestFitMapping = false, ThrowOnUnmappableChar = true,
@@ -103,6 +107,64 @@ namespace System.Data.SQLite
           SetLastError = true)]
       private static extern IntPtr LoadLibrary(string fileName);
 
+      /////////////////////////////////////////////////////////////////////////
+
+#if PLATFORM_COMPACTFRAMEWORK
+      /// <summary>
+      /// This is the P/Invoke method that wraps the native Win32 GetSystemInfo
+      /// function.  See the MSDN documentation for full details on what it
+      /// does.
+      /// </summary>
+      /// <param name="systemInfo">
+      /// The system information structure to be filled in by the function.
+      /// </param>
+      [DllImport("coredll", CallingConvention = CallingConvention.Winapi)]
+      private static extern void GetSystemInfo(out SYSTEM_INFO systemInfo);
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// This enumeration contains the possible values for the processor
+      /// architecture field of the system information structure.
+      /// </summary>
+      private enum ProcessorArchitecture : ushort /* COMPAT: Win32. */
+      {
+          Intel = 0,
+          MIPS = 1,
+          Alpha = 2,
+          PowerPC = 3,
+          SHx = 4,
+          ARM = 5,
+          IA64 = 6,
+          Alpha64 = 7,
+          MSIL = 8,
+          AMD64 = 9,
+          IA32_on_Win64 = 10,
+          Unknown = 0xFFFF
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// This structure contains information about the current computer. This
+      /// includes the processor type, page size, memory addresses, etc.
+      /// </summary>
+      [StructLayout(LayoutKind.Sequential)]
+      private struct SYSTEM_INFO
+      {
+          public ProcessorArchitecture wProcessorArchitecture;
+          public ushort wReserved; /* NOT USED */
+          public uint dwPageSize; /* NOT USED */
+          public IntPtr lpMinimumApplicationAddress; /* NOT USED */
+          public IntPtr lpMaximumApplicationAddress; /* NOT USED */
+          public uint dwActiveProcessorMask; /* NOT USED */
+          public uint dwNumberOfProcessors; /* NOT USED */
+          public uint dwProcessorType; /* NOT USED */
+          public uint dwAllocationGranularity; /* NOT USED */
+          public ushort wProcessorLevel; /* NOT USED */
+          public ushort wProcessorRevision; /* NOT USED */
+      }
+#endif
+
+      /////////////////////////////////////////////////////////////////////////
       /// <summary>
       /// This lock is used to protect the static _SQLiteModule and
       /// processorArchitecturePlatforms fields, below.
@@ -306,8 +368,7 @@ namespace System.Data.SQLite
       /// </summary>
       /// <returns>
       /// The processor architecture of the current process -OR- null if it
-      /// cannot be determined.  Always returns an empty string when running on
-      /// the .NET Compact Framework.
+      /// cannot be determined.
       /// </returns>
       private static string GetProcessorArchitecture()
       {
@@ -329,8 +390,37 @@ namespace System.Data.SQLite
           return Environment.GetEnvironmentVariable(PROCESSOR_ARCHITECTURE);
 #else
           //
-          // BUGBUG: No way to determine this value on the .NET Compact
-          //         Framework (running on Windows CE, etc).
+          // NOTE: On the .NET Compact Framework, attempt to use the native
+          //       Win32 API function (via P/Invoke) that can provide us with
+          //       the processor architecture.
+          //
+          try
+          {
+              //
+              // NOTE: The output of the GetSystemInfo function will be placed
+              //       here.  Only the processor architecture field is used by
+              //       this method.
+              //
+              SYSTEM_INFO systemInfo;
+
+              //
+              // NOTE: Query the system information via P/Invoke, thus filling
+              //       the structure.
+              //
+              GetSystemInfo(out systemInfo);
+
+              //
+              // NOTE: Return the processor architecture value as a string.
+              //
+              return systemInfo.wProcessorArchitecture.ToString();
+          }
+          catch
+          {
+              // do nothing.
+          }
+
+          //
+          // NOTE: Upon failure, return an empty string.
           //
           return String.Empty;
 #endif
@@ -556,8 +646,8 @@ namespace System.Data.SQLite
     private const string SQLITE_DLL = "System.Data.SQLite.dll";
 #endif
 
-    // This section uses interop calls that also fetch text length to optimize conversion.  
-    // When using the standard dll, we can replace these calls with normal sqlite calls and 
+    // This section uses interop calls that also fetch text length to optimize conversion.
+    // When using the standard dll, we can replace these calls with normal sqlite calls and
     // do unoptimized conversions instead afterwards
     #region interop added textlength calls
 
@@ -1410,7 +1500,7 @@ namespace System.Data.SQLite
     internal static extern IntPtr sqlite3_errstr(SQLiteErrorCode rc); /* 3.7.15+ */
 
     // Since sqlite3_log() takes a variable argument list, we have to overload declarations
-    // for all possible calls.  For now, we are only exposing a single string, and 
+    // for all possible calls.  For now, we are only exposing a single string, and
     // depend on the caller to format the string.
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -1468,7 +1558,7 @@ namespace System.Data.SQLite
   {
     private bool _isClosed;
     protected IntPtr handle;
-    
+
     protected CriticalHandle(IntPtr invalidHandleValue)
     {
       handle = invalidHandleValue;
