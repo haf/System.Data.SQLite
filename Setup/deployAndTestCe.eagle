@@ -131,25 +131,55 @@ if {$argc >= 0 && $argc <= 7} then {
       GetCultureInfo $culture]
 
   #
-  # NOTE: Build the list of .NET Compact Framework packages that need to be
-  #       deployed to the target device.
+  # NOTE: Build the list of .NET Compact Framework 2.0 packages that need to
+  #       be deployed to the target device, if necessary.
   #
-  if {![info exists packages]} then {
+  if {![info exists packages(2005)]} then {
+    #
+    # NOTE: The three letter Windows language name is needed when building
+    #       the default list of .NET Compact Framework packages because one
+    #       of them is a localized resource package.
+    #
+    set language3 [string toupper \
+        [$cultureInfo ThreeLetterWindowsLanguageName]]
+
+    #
+    # NOTE: The default list of .NET Compact Framework 2.0 packages contains
+    #       the .NET Compact Framework 2.0 installation CAB file for ARMV4
+    #       on the Pocket PC and its associated resource installation CAB
+    #       files.
+    #
+    set packages(2005) [list \
+        abd785f0-cda7-41c5-8375-2451a7cbff26 \
+        \\windows\\NETCFV2.ppc.armv4.cab \
+        c0ccf48e-4bfb-4d84-827c-981a595e40b4 \
+        [appendArgs \\windows\\System_SR_ $language3 .cab]]
+  }
+
+  #
+  # NOTE: Build the list of .NET Compact Framework 3.5 packages that need to
+  #       be deployed to the target device, if necessary.
+  #
+  if {![info exists packages(2008)]} then {
     #
     # NOTE: The two letter ISO language name is needed when building the
     #       default list of .NET Compact Framework packages because one of
     #       them is a localized resource package.
     #
-    set language [string toupper [$cultureInfo TwoLetterISOLanguageName]]
+    set language2 [string toupper \
+        [$cultureInfo TwoLetterISOLanguageName]]
 
     #
-    # NOTE: The default list of .NET Compact Framework packages contains the
-    #       .NET Compact Framework 3.5 installation CAB file for ARMV4 on the
-    #       Pocket PC and its associated resource installation CAB file.
+    # NOTE: The default list of .NET Compact Framework 3.5 packages contains
+    #       the .NET Compact Framework 3.5 installation CAB file for ARMV4
+    #       on the Pocket PC and its associated resource installation CAB
+    #       files.
     #
-    set packages [list abd785f0-cda7-41c5-8375-2451a7cbff37 \
-        \\windows\\NETCFv35.ppc.armv4.cab c0ccf48e-4bfb-4d84-827c-981a595e40c5 \
-        [appendArgs \\windows\\NETCFv35.Messages. $language .cab]]
+    set packages(2008) [list \
+        abd785f0-cda7-41c5-8375-2451a7cbff37 \
+        \\windows\\NETCFv35.ppc.armv4.cab \
+        c0ccf48e-4bfb-4d84-827c-981a595e40c5 \
+        [appendArgs \\windows\\NETCFv35.Messages. $language2 .cab]]
   }
 
   #
@@ -241,23 +271,29 @@ if {$argc >= 0 && $argc <= 7} then {
   set fileDeployer [$device -alias GetFileDeployer]
 
   #
-  # NOTE: Process each entry in the list of packages to be downloaded to the
-  #       target device.  The package list must contain the package Id and the
-  #       file name (relative to the target device), in that order, for each
-  #       package to be downloaded to the target device.
+  # NOTE: If the list of packages related to the configured build year do not
+  #       exist, skip this step.
   #
-  foreach {packageId packageFileName} $packages {
-    qputs stdout [appendArgs \
-        "downloading package \"" $packageId "\" to device..."]
+  if {[info exists packages($year)]} then {
+    #
+    # NOTE: Process each entry in the list of packages to be downloaded to the
+    #       target device.  The package list must contain the package Id and
+    #       the file name (relative to the target device), in that order, for
+    #       each package to be downloaded to the target device.
+    #
+    foreach {packageId packageFileName} $packages($year) {
+      qputs stdout [appendArgs \
+          "downloading package \"" $packageId "\" to device..."]
 
-    $fileDeployer DownloadPackage [object create \
-        Microsoft.SmartDevice.Connectivity.ObjectId $packageId]
+      $fileDeployer DownloadPackage [object create \
+          Microsoft.SmartDevice.Connectivity.ObjectId $packageId]
 
-    qputs stdout [appendArgs \
-        "installing package file \"" $packageFileName "\" on device..."]
+      qputs stdout [appendArgs \
+          "installing package file \"" $packageFileName "\" on device..."]
 
-    startRemoteProcess $device wceload.exe [appendArgs "/noui " \
-        $packageFileName]
+      startRemoteProcess $device wceload.exe [appendArgs "/noui " \
+          $packageFileName]
+    }
   }
 
   #
