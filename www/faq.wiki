@@ -104,6 +104,11 @@
     &quot;SQLite.Interop.dll&quot;) when trying to run or debug the application?
     </a>
   </li>
+  <li>
+    <a href="#q21">Is this behavior a bug? <b>-OR-</b> Is there a quick way to
+    view the various lists of tickets for the System.Data.SQLite project?
+    </a>
+  </li>
 </ol>
 
 <hr>
@@ -485,4 +490,34 @@
   Therefore, it is good practice to double-check the selected build platform
   against the operating system prior to attempting to run a managed project in
   the solution.
+</p>
+
+<hr>
+<a name="q21"></a>
+<p>
+  <b>(21) Is this behavior a bug? -OR- Is there a quick way to view the various
+  lists of tickets for the System.Data.SQLite project?</b>
+</p>
+
+<p>
+  If any behavior is observed that appears to be a bug, it may be reported via
+  the <a href="/index.html/doc/trunk/www/support.wiki">sqlite-users</a> public
+  mailing list or by filing a <a href="/index.html/tktnew">ticket</a>.  Prior
+  to taking one of these steps, it is always prudent to check the various lists
+  of previously filed tickets to see if the behavior being observed has already
+  been reported and possibly fixed in a subsequent release.
+  <ol>
+    <li><a href="/index.html/rptview?rn=6">
+      The list of tickets actively being worked on.
+    </a></li>
+    <li><a href="/index.html/rptview?rn=2">
+      The list of tickets currently open.
+    </a></li>
+    <li><a href="/index.html/rptview?rn=4">
+      The list of tickets fixed and then closed.
+    </a></li>
+    <li><a href="/index.html/rptview?rn=7">
+      The list of tickets closed without needing a fix.
+    </a></li>
+  </ol>
 </p>
