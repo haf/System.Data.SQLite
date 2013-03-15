@@ -104,6 +104,7 @@
     &quot;SQLite.Interop.dll&quot;) when trying to run or debug the application?
     </a>
   </li>
+  <br>
   <li>
     <a href="#q21">Is this behavior a bug? <b>-OR-</b> Is there a quick way to
     view the various lists of tickets for the System.Data.SQLite project?
