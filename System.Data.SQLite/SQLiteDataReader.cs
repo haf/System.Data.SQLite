@@ -1117,6 +1117,7 @@ namespace System.Data.SQLite
     public override object GetValue(int i)
     {
       CheckDisposed();
+      CheckValidRow();
 
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetValue(i - VisibleFieldCount);
