@@ -1877,11 +1877,14 @@ namespace eval ::Eagle {
         #       options, it will be assumed that it was enabled for the interop
         #       assembly if it was enabled for the managed assembly.
         #
-        foreach defineConstant [list CHECK_STATE COUNT_HANDLE INTEROP_CODEC \
-                                     INTEROP_DEBUG INTEROP_LEGACY_CLOSE \
-                                     INTEROP_LOG INTEROP_EXTENSION_FUNCTIONS \
-                                     INTEROP_TEST_EXTENSION SQLITE_STANDARD \
-                                     USE_INTEROP_DLL] {
+        foreach defineConstant [list \
+            CHECK_STATE COUNT_HANDLE DEBUG INTEROP_CODEC INTEROP_DEBUG \
+            INTEROP_EXTENSION_FUNCTIONS INTEROP_LEGACY_CLOSE INTEROP_LOG \
+            INTEROP_TEST_EXTENSION NET_20 NET_35 NET_40 NET_45 NET_COMPACT_20 \
+            PLATFORM_COMPACTFRAMEWORK PRELOAD_NATIVE_LIBRARY RETARGETABLE \
+            SQLITE_STANDARD THROW_ON_DISPOSED TRACE TRACE_CONNECTION \
+            TRACE_HANDLE TRACE_PRELOAD TRACE_STATEMENT TRACE_WARNING \
+            USE_INTEROP_DLL USE_PREPARE_V2 WINDOWS] {
           #
           # NOTE: Check if the compile-time option is listed in the list of
           #       "define constants" kept track of by the managed assembly.

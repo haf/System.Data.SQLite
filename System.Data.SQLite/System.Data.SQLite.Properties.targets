@@ -87,6 +87,14 @@
 
   <!--
       NOTE: For interaction with the native SQLite implementation, use the
+            sqlite3_prepare_v2() function when preparing queries?
+  -->
+  <PropertyGroup Condition="'$(UsePrepareV2)' != 'false'">
+    <DefineConstants>$(DefineConstants);USE_PREPARE_V2</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+      NOTE: For interaction with the native SQLite implementation, use the
             standard DLL (i.e. "sqlite3.dll")?
   -->
   <PropertyGroup Condition="'$(UseSqliteStandard)' != 'false'">

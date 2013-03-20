@@ -288,7 +288,11 @@ SQLITE_API int WINAPI sqlite3_prepare_interop(sqlite3 *db, const char *sql, int 
   sqlite3InteropDebug("sqlite3_prepare_interop(): calling sqlite3_prepare(%p, \"%s\", %d, %p)...\n", db, sql, nbytes, ppstmt);
 #endif
 
+#if SQLITE_VERSION_NUMBER >= 3003009
+  n = sqlite3_prepare_v2(db, sql, nbytes, ppstmt, pztail);
+#else
   n = sqlite3_prepare(db, sql, nbytes, ppstmt, pztail);
+#endif
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_PREPARE)
   sqlite3InteropDebug("sqlite3_prepare_interop(): sqlite3_prepare(%p, \"%s\", %d, %p) returned %d.\n", db, sql, nbytes, ppstmt, n);
@@ -307,7 +311,11 @@ SQLITE_API int WINAPI sqlite3_prepare16_interop(sqlite3 *db, const void *sql, in
   sqlite3InteropDebug("sqlite3_prepare_interop(): calling sqlite3_prepare16(%p, \"%s\", %d, %p)...\n", db, sql, nchars, ppstmt);
 #endif
 
+#if SQLITE_VERSION_NUMBER >= 3003009
+  n = sqlite3_prepare16_v2(db, sql, nchars * sizeof(wchar_t), ppstmt, pztail);
+#else
   n = sqlite3_prepare16(db, sql, nchars * sizeof(wchar_t), ppstmt, pztail);
+#endif
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_PREPARE16)
   sqlite3InteropDebug("sqlite3_prepare_interop(): sqlite3_prepare16(%p, \"%s\", %d, %p) returned %d.\n", db, sql, nchars, ppstmt, n);

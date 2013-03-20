@@ -554,7 +554,11 @@ namespace System.Data.SQLite
 #if !SQLITE_STANDARD
             n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, psql, b.Length - 1, out stmt, out ptr, out len);
 #else
+#if USE_PREPARE_V2
+            n = UnsafeNativeMethods.sqlite3_prepare_v2(_sql, psql, b.Length - 1, out stmt, out ptr);
+#else
             n = UnsafeNativeMethods.sqlite3_prepare(_sql, psql, b.Length - 1, out stmt, out ptr);
+#endif
             len = -1;
 #endif
 

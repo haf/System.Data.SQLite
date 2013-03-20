@@ -8,6 +8,7 @@
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/66d5f2b767|SQLite 3.7.16].</li>
     <li>Properly handle embedded NUL characters in parameter and column values. Fix for [3567020edf].</li>
+    <li>Make use of the sqlite3_prepare_v2 function when applicable.</li>
     <li>Check for a valid row in the SQLiteDataReader.GetValue method.</li>
     <li>Implement processor architecture detection when running on the .NET Compact Framework (via P/Invoke).</li>
     <li>Support automated testing when running on the .NET Compact Framework 2.0.</li>

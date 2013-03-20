@@ -209,6 +209,14 @@
 
     <!--
         NOTE: For interaction with the native SQLite implementation, use the
+              sqlite3_prepare_v2() function when preparing queries?  By default,
+              this is enabled.  When using a native SQLite implementation prior
+              to version 3.3.9, this must be disabled.
+    -->
+    <UsePrepareV2 Condition="'$(UsePrepareV2)' == ''">true</UsePrepareV2>
+
+    <!--
+        NOTE: For interaction with the native SQLite implementation, use the
               standard DLL (i.e. "sqlite3.dll")?  By default, this is disabled.
               This property is mutually exclusive with the "UseInteropDll" one,
               above.  This should always be disabled in the project file that

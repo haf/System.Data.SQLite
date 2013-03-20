@@ -897,6 +897,15 @@ namespace System.Data.SQLite
 #endif
     internal static extern SQLiteErrorCode sqlite3_prepare(IntPtr db, IntPtr pSql, int nBytes, out IntPtr stmt, out IntPtr ptrRemain);
 
+#if USE_PREPARE_V2
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_prepare_v2(IntPtr db, IntPtr pSql, int nBytes, out IntPtr stmt, out IntPtr ptrRemain);
+#endif
+
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 #else
@@ -919,7 +928,7 @@ namespace System.Data.SQLite
     internal static extern IntPtr sqlite3_value_text16(IntPtr p);
 
 #endif
-// SQLITE_STANDARD
+    // SQLITE_STANDARD
 
     #endregion
 

@@ -116,6 +116,14 @@ namespace System.Data.SQLite
             "USE_INTEROP_DLL",
 #endif
 
+#if USE_PREPARE_V2
+            "USE_PREPARE_V2",
+#endif
+
+#if WINDOWS
+            "WINDOWS",
+#endif
+
             null
         });
     }
