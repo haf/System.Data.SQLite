@@ -238,6 +238,41 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     /// <summary>
+    /// This method attempts to query the flags associated with the database
+    /// connection in use.  If the database connection is disposed or any other
+    /// error occurs, the default flags will be returned.
+    /// </summary>
+    /// <param name="command">
+    /// The command containing the databse connection to query the flags from.
+    /// </param>
+    /// <returns>
+    /// The connection flags value.
+    /// </returns>
+    internal static SQLiteConnectionFlags GetFlags(
+        SQLiteCommand command
+        )
+    {
+        try
+        {
+            if (command != null)
+            {
+                SQLiteConnection cnn = command._cnn;
+
+                if (cnn != null)
+                    return cnn.Flags;
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // do nothing.
+        }
+
+        return SQLiteConnectionFlags.Default;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
     /// Clears and destroys all statements currently prepared
     /// </summary>
     internal void ClearCommands()

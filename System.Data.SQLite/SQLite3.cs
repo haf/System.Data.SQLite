@@ -1917,10 +1917,11 @@ namespace System.Data.SQLite
     /// Helper function to retrieve a column of data from an active statement.
     /// </summary>
     /// <param name="stmt">The statement being step()'d through</param>
+    /// <param name="flags">The flags associated with the connection.</param>
     /// <param name="index">The column index to retrieve</param>
     /// <param name="typ">The type of data contained in the column.  If Uninitialized, this function will retrieve the datatype information.</param>
     /// <returns>Returns the data in the column</returns>
-    internal override object GetValue(SQLiteStatement stmt, int index, SQLiteType typ)
+    internal override object GetValue(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, SQLiteType typ)
     {
       if (IsNull(stmt, index)) return DBNull.Value;
       TypeAffinity aff = typ.Affinity;
@@ -1931,6 +1932,9 @@ namespace System.Data.SQLite
         t = SQLiteConvert.SQLiteTypeToType(typ);
         aff = TypeToAffinity(t);
       }
+
+      if ((flags & SQLiteConnectionFlags.GetAllAsText) == SQLiteConnectionFlags.GetAllAsText)
+          return GetText(stmt, index);
 
       switch (aff)
       {

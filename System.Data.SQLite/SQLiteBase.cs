@@ -271,7 +271,7 @@ namespace System.Data.SQLite
     internal abstract int GetCursorForTable(SQLiteStatement stmt, int database, int rootPage);
     internal abstract long GetRowIdForCursor(SQLiteStatement stmt, int cursor);
 
-    internal abstract object GetValue(SQLiteStatement stmt, int index, SQLiteType typ);
+    internal abstract object GetValue(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, SQLiteType typ);
 
     internal abstract bool AutoCommit
     {
@@ -797,6 +797,20 @@ namespace System.Data.SQLite
       /// be attempted).
       /// </summary>
       BindAllAsText = 0x80,
+
+      /// <summary>
+      /// When returning column values, always return them as though they were
+      /// plain text (i.e. no numeric, date/time, or other conversions should
+      /// be attempted).
+      /// </summary>
+      GetAllAsText = 0x100,
+
+      /// <summary>
+      /// When binding and returning column values, always treat them as though
+      /// they were plain text (i.e. no numeric, date/time, or other conversions
+      /// should be attempted).
+      /// </summary>
+      BindAndGetAllAsText = BindAllAsText | GetAllAsText,
 
       /// <summary>
       /// Enable all logging.

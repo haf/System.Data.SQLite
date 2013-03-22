@@ -1124,7 +1124,8 @@ namespace System.Data.SQLite
 
       SQLiteType typ = GetSQLiteType(i);
 
-      return _activeStatement._sql.GetValue(_activeStatement, i, typ);
+      return _activeStatement._sql.GetValue(
+          _activeStatement, SQLiteCommand.GetFlags(_command), i, typ);
     }
 
     /// <summary>
