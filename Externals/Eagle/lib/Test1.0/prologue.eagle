@@ -252,6 +252,7 @@ if {![info exists no([file tail [info script]])]} then {
   set test_flags(-constraints) [list]; # default to no manual constraints.
   set test_flags(-logFile) ""; # default to using standard log file naming.
   set test_flags(-threshold) ""; # default to requiring all tests to pass.
+  set test_flags(-randomOrder) ""; # default to deterministic order.
   set test_flags(-stopOnFailure) ""; # default to continue on failure.
   set test_flags(-exitOnComplete) ""; # default to not exit after complete.
   set test_flags(-preTest) ""; # default to not evaluating anything.
@@ -293,6 +294,15 @@ if {![info exists no([file tail [info script]])]} then {
       #       line.
       #
       set test_threshold $test_flags(-threshold)
+    }
+
+    if {[info exists test_flags(-randomOrder)] && \
+        [string is boolean -strict $test_flags(-randomOrder)]} then {
+      #
+      # NOTE: Set the test random-order flag to the one provided by the
+      #       command line.
+      #
+      set test_random_order $test_flags(-randomOrder)
     }
 
     if {[info exists test_flags(-stopOnFailure)] && \
@@ -581,6 +591,11 @@ if {![info exists no([file tail [info script]])]} then {
       [expr {[info exists test_threshold] && \
           [string is integer -strict $test_threshold] ? \
               [appendArgs $test_threshold %] : "<none>"}] \n]
+
+  tputs $test_channel [appendArgs "---- random order: " \
+      [expr {[info exists test_random_order] && \
+          [string is boolean -strict $test_random_order] ? \
+              $test_random_order : "<none>"}] \n]
 
   tputs $test_channel [appendArgs "---- stop on failure: " \
       [expr {[info exists test_stop_on_failure] && \

@@ -160,7 +160,11 @@ if {![info exists no([file tail [info script]])]} then {
       if {$passedOrSkipped == $eagle_tests(total)} then {
         set exitCode Success
 
-        tresult Ok "OVERALL RESULT: SUCCESS\n"
+        if {$eagle_tests(total) > 0} then {
+          tresult Ok "OVERALL RESULT: SUCCESS\n"
+        } else {
+          tresult Ok "OVERALL RESULT: NONE\n"
+        }
       } else {
         set exitCode Failure
 
@@ -177,8 +181,13 @@ if {![info exists no([file tail [info script]])]} then {
       if {$percent >= $test_threshold} then {
         set exitCode Success
 
-        tresult Ok [appendArgs \
-            "OVERALL RESULT: SUCCESS (" $percent "% >= " $test_threshold %)\n]
+        if {$eagle_tests(total) > 0} then {
+          tresult Ok [appendArgs \
+              "OVERALL RESULT: SUCCESS (" $percent "% >= " $test_threshold %)\n]
+        } else {
+          tresult Ok [appendArgs \
+              "OVERALL RESULT: NONE (" $percent "% >= " $test_threshold %)\n]
+        }
       } else {
         set exitCode Failure
 
@@ -251,7 +260,11 @@ if {![info exists no([file tail [info script]])]} then {
       if {$passedOrSkipped == $::tcltest::numTests(Total)} then {
         set exitCode 0; # Success.
 
-        tputs $test_channel "OVERALL RESULT: SUCCESS\n"
+        if {$::tcltest::numTests(Total) > 0} then {
+          tputs $test_channel "OVERALL RESULT: SUCCESS\n"
+        } else {
+          tputs $test_channel "OVERALL RESULT: NONE\n"
+        }
       } else {
         set exitCode 1; # Failure.
 
@@ -268,8 +281,13 @@ if {![info exists no([file tail [info script]])]} then {
       if {$percent >= $test_threshold} then {
         set exitCode 0; # Success.
 
-        tputs $test_channel [appendArgs \
-            "OVERALL RESULT: SUCCESS (" $percent "% >= " $test_threshold %)\n]
+        if {$::tcltest::numTests(Total) > 0} then {
+          tputs $test_channel [appendArgs \
+              "OVERALL RESULT: SUCCESS (" $percent "% >= " $test_threshold %)\n]
+        } else {
+          tputs $test_channel [appendArgs \
+              "OVERALL RESULT: NONE (" $percent "% >= " $test_threshold %)\n]
+        }
       } else {
         set exitCode 1; # Failure.
 

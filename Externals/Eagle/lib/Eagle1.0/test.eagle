@@ -389,7 +389,7 @@ namespace eval ::Eagle {
     #
     set options [list -configuration -constraints -exitOnComplete -file \
         -logFile -machine -match -no -notFile -platform -postTest -preTest \
-        -skip -stopOnFailure -suffix -suite -tclsh -threshold]
+        -randomOrder -skip -stopOnFailure -suffix -suite -tclsh -threshold]
 
     foreach {name value} $args {
       #
@@ -817,6 +817,12 @@ namespace eval ::Eagle {
         [info nameofexecutable] "\" " $args]] \n]
 
     return [uplevel 1 execShell [list $options] $args]
+  }
+
+  proc isRandomOrder {} {
+    return [expr {[info exists ::test_random_order] && \
+                  [string is boolean -strict $::test_random_order] && \
+                  $::test_random_order}]
   }
 
   proc isStopOnFailure {} {
@@ -1285,6 +1291,13 @@ namespace eval ::Eagle {
   }
 
   proc runAllTests { channel path fileNames skipFileNames } {
+    #
+    # NOTE: Are we configured to run the test files in random order?
+    #
+    if {[isRandomOrder]} then {
+      set fileNames [lshuffle $fileNames]
+    }
+
     #
     # NOTE: Show the exact arguments we received since they may not
     #       have been displayed by the caller (or anybody else).
@@ -2181,13 +2194,13 @@ namespace eval ::Eagle {
         processTestArguments getTclShellFileName getTemporaryPath getFiles \
         getTestFiles getTestRunId getTestLogId getTestLog getTestSuite \
         getTestMachine getTestPlatform getTestConfiguration getTestSuffix \
-        testExec testClrExec execTestShell isStopOnFailure isExitOnComplete \
-        returnInfoScript runTestPrologue runTestEpilogue hookPuts unhookPuts \
-        runTest testShim tsource recordTestStatistics reportTestStatistics \
-        formatList formatListAsDict pathToRegexp inverseLsearchGlob \
-        removePathFromFileNames formatDecimal clearTestPercent \
-        reportTestPercent runAllTests configureTcltest machineToPlatform \
-        getPassPercentage getSkipPercentage] false false
+        testExec testClrExec execTestShell isRandomOrder isStopOnFailure \
+        isExitOnComplete returnInfoScript runTestPrologue runTestEpilogue \
+        hookPuts unhookPuts runTest testShim tsource recordTestStatistics \
+        reportTestStatistics formatList formatListAsDict pathToRegexp \
+        inverseLsearchGlob removePathFromFileNames formatDecimal \
+        clearTestPercent reportTestPercent runAllTests configureTcltest \
+        machineToPlatform getPassPercentage getSkipPercentage] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

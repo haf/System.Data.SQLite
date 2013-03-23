@@ -639,6 +639,24 @@ namespace eval ::Eagle {
     return [uplevel 1 $command]
   }
 
+  proc lshuffle { list } {
+    #
+    # NOTE: This code for this algorithm was stolen from the Tcl library
+    #       struct package and modified to conform with the Eagle style
+    #       guide.
+    #
+    set result $list
+
+    for {set length [llength $result]} \
+        {$length > 1} {lset result $index $element} {
+      set index [expr {int(rand() * $length)}]
+      set element [lindex $result [incr length -1]]
+      lset result $length [lindex $result $index]
+    }
+
+    return $result
+  }
+
   proc ldifference { list1 list2 } {
     set result [list]
 
@@ -1841,7 +1859,7 @@ namespace eval ::Eagle {
         readFile readSharedFile writeFile appendFile appendLogFile \
         appendSharedFile appendSharedLogFile readAsciiFile writeAsciiFile \
         readUnicodeFile writeUnicodeFile getDirResultPath addToPath \
-        removeFromPath execShell ldifference filter map reduce \
+        removeFromPath execShell lshuffle ldifference filter map reduce \
         getLengthModifier debug findDirectories findFiles findFilesRecursive \
         exportAndImportPackageCommands] false false
 
