@@ -836,10 +836,10 @@ set manifests(sqlite-netFx35-setup-bundle-x64-2008-.exe) [list sds \
 ################# Visual Studio 2008 / .NET Compact Framework #################
 ###############################################################################
 
-set manifests(sqlite-netFx35-binary-PocketPC-2008-.zip) [list sds \
+set manifests(sqlite-netFx35-binary-PocketPC-ARM-2008-.zip) [list sds \
     binaryCore binaryCompact]
 
-set manifests(sqlite-netFx35-binary-PocketPC-2008-.zip,subst) ""; # dynamic
+set manifests(sqlite-netFx35-binary-PocketPC-ARM-2008-.zip,subst) ""; # dynamic
 
 ###############################################################################
 ################### Visual Studio 2010 / .NET Framework 4.0 ###################
