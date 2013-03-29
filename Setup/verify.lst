@@ -611,7 +611,7 @@ set sds_manifests(setupLinqBundle) {
 #       supporting the .NET Framework 2.0 for x86.
 #
 set sds_manifests(setupX86Vs2005) {
-  {{tmp}\vcredist_x86_2005_SP1.exe}
+  {{tmp}\vcredist_x86_2005_SP1_MFC.exe}
 }
 
 ###############################################################################
@@ -620,7 +620,7 @@ set sds_manifests(setupX86Vs2005) {
 #       supporting the .NET Framework 2.0 for x64.
 #
 set sds_manifests(setupX64Vs2005) {
-  {{tmp}\vcredist_x64_2005_SP1.exe}
+  {{tmp}\vcredist_x64_2005_SP1_MFC.exe}
 }
 
 ###############################################################################
@@ -629,7 +629,7 @@ set sds_manifests(setupX64Vs2005) {
 #       supporting the .NET Framework 3.5 for x86.
 #
 set sds_manifests(setupX86Vs2008) {
-  {{tmp}\vcredist_x86_2008_SP1.exe}
+  {{tmp}\vcredist_x86_2008_SP1_MFC.exe}
 }
 
 ###############################################################################
@@ -638,7 +638,7 @@ set sds_manifests(setupX86Vs2008) {
 #       supporting the .NET Framework 3.5 for x64.
 #
 set sds_manifests(setupX64Vs2008) {
-  {{tmp}\vcredist_x64_2008_SP1.exe}
+  {{tmp}\vcredist_x64_2008_SP1_MFC.exe}
 }
 
 ###############################################################################
@@ -647,7 +647,7 @@ set sds_manifests(setupX64Vs2008) {
 #       supporting the .NET Framework 4.0 for x86.
 #
 set sds_manifests(setupX86Vs2010) {
-  {{tmp}\vcredist_x86_2010_SP1.exe}
+  {{tmp}\vcredist_x86_2010_SP1_MFC.exe}
 }
 
 ###############################################################################
@@ -656,7 +656,7 @@ set sds_manifests(setupX86Vs2010) {
 #       supporting the .NET Framework 4.0 for x64.
 #
 set sds_manifests(setupX64Vs2010) {
-  {{tmp}\vcredist_x64_2010_SP1.exe}
+  {{tmp}\vcredist_x64_2010_SP1_MFC.exe}
 }
 
 ###############################################################################
@@ -665,7 +665,7 @@ set sds_manifests(setupX64Vs2010) {
 #       supporting the .NET Framework 4.5 for x86.
 #
 set sds_manifests(setupX86Vs2012) {
-  {{tmp}\vcredist_x86_2012_RTM.exe}
+  {{tmp}\vcredist_x86_2012_VSU1.exe}
 }
 
 ###############################################################################
@@ -674,7 +674,7 @@ set sds_manifests(setupX86Vs2012) {
 #       supporting the .NET Framework 4.5 for x64.
 #
 set sds_manifests(setupX64Vs2012) {
-  {{tmp}\vcredist_x64_2012_RTM.exe}
+  {{tmp}\vcredist_x64_2012_VSU1.exe}
 }
 
 ###############################################################################
