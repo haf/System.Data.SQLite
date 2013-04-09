@@ -21,6 +21,10 @@ namespace System.Data.SQLite
 #endif
   public sealed class SQLiteDataAdapter : DbDataAdapter
   {
+    private bool disposeSelect = true;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     private static object _updatingEventPH = new object();
     private static object _updatedEventPH = new object();
 
@@ -49,6 +53,7 @@ namespace System.Data.SQLite
     public SQLiteDataAdapter(SQLiteCommand cmd)
     {
       SelectCommand = cmd;
+      disposeSelect = false;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +151,7 @@ namespace System.Data.SQLite
                     // dispose managed resources here...
                     ////////////////////////////////////
 
-                    if (SelectCommand != null)
+                    if (disposeSelect && (SelectCommand != null))
                     {
                         SelectCommand.Dispose();
                         SelectCommand = null;
