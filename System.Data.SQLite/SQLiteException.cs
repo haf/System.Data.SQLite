@@ -309,6 +309,14 @@ namespace System.Data.SQLite
     /// </summary>
     NotADb /* 26 */,
     /// <summary>
+    /// Notifications from sqlite3_log()
+    /// </summary>
+    Notice /* 27 */,
+    /// <summary>
+    /// Warnings from sqlite3_log()
+    /// </summary>
+    Warning /* 28 */,
+    /// <summary>
     /// sqlite3_step() has another row ready
     /// </summary>
     Row = 100,
