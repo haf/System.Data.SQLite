@@ -29,7 +29,7 @@ proc usage { error } {
 #       variable "quiet" is non-zero.
 #
 proc qputs { args } {
-  if {!$::quiet} then {
+  if {![info exists ::quiet] || !$::quiet} then {
     eval puts $args; flush stdout
   }
 }
@@ -118,10 +118,14 @@ if {$argc >= 0 && $argc <= 7} then {
     }
 
     if {[string length $value] > 0} then {
-      set $name $value
+      set $name $value; set defaultValue false
     } else {
-      set $name $default($name)
+      set $name $default($name); set defaultValue true
     }
+
+    qputs stdout [appendArgs \
+        "named parameter \"" $name "\" value is now \"" [set $name] \" \
+        [expr {$defaultValue ? " (default)" : ""}] .]
   }
 
   #
