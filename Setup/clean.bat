@@ -76,6 +76,141 @@ FOR %%D IN (%CLEANDIRS%) DO (
   )
 )
 
+IF EXIST "%SOURCE%\*.cache" (
+  REM
+  REM NOTE: *WARNING* Deleting from the entire source tree.
+  REM
+  %__ECHO% DEL /S /Q "%SOURCE%\*.cache"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\*.cache".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\*.cache".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\*.cache" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\*.ncb" (
+  REM
+  REM NOTE: *WARNING* Deleting from the entire source tree.
+  REM
+  %__ECHO% DEL /S /Q "%SOURCE%\*.ncb"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\*.ncb".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\*.ncb".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\*.ncb" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\*.psess" (
+  %__ECHO% DEL /Q "%SOURCE%\*.psess"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\*.psess".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\*.psess".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\*.psess" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\*.sdf" (
+  %__ECHO% DEL /Q "%SOURCE%\*.sdf"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\*.sdf".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\*.sdf".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\*.sdf" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\*.suo" (
+  REM
+  REM NOTE: *WARNING* Unhiding in the entire source tree.
+  REM
+  %__ECHO% ATTRIB -H "%SOURCE%\*.suo" /S
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not make "%SOURCE%\*.suo" visible.
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Made "%SOURCE%\*.suo" visible.
+    %_AECHO%.
+  )
+
+  REM
+  REM NOTE: *WARNING* Deleting from the entire source tree.
+  REM
+  %__ECHO% DEL /S /Q "%SOURCE%\*.suo"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\*.suo".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\*.suo".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\*.suo" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\*.vsp" (
+  %__ECHO% DEL /Q "%SOURCE%\*.vsp"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\*.vsp".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\*.vsp".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\*.vsp" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\*.vsps" (
+  %__ECHO% DEL /Q "%SOURCE%\*.vsps"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\*.vsps".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\*.vsps".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\*.vsps" exist.
+  %_AECHO%.
+)
+
 IF EXIST "%SOURCE%\*.nupkg" (
   %__ECHO% DEL /Q "%SOURCE%\*.nupkg"
 
