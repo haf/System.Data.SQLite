@@ -1761,6 +1761,38 @@ namespace eval ::Eagle {
           }
 
           #
+          # NOTE: Skip trying to verify the build directory if we are so
+          #       instructed; otherwise, make sure it actually exists or
+          #       halt the entire testing process if it does not exist.
+          #
+          if {![info exists ::no(verifyBuildDirectory)]} then {
+            #
+            # NOTE: At this point, the build directory MUST exist as a
+            #       valid directory for the testing process to continue.
+            #
+            set directory [getBuildDirectory]
+
+            if {![file exists $directory] || \
+                ![file isdirectory $directory]} then {
+              #
+              # NOTE: Just prior to actually halting the testing process,
+              #       add an error to the test log file.
+              #
+              tputs $::test_channel [appendArgs \
+                  "---- could not verify build directory \"" $directory \
+                  "\", all testing halted\n"]
+
+              #
+              # NOTE: Raising a script error from this point should halt
+              #       the testing process.
+              #
+              error [appendArgs \
+                  "could not verify build directory \"" $directory \
+                  "\", all testing halted"]
+            }
+          }
+
+          #
           # NOTE: Skip trying to copy any files if we are so instructed.
           #
           if {![info exists ::no(copySqliteFiles)]} then {
