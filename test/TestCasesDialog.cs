@@ -62,7 +62,7 @@ namespace test
         item.CheckOnClick = true;
       }
 
-      this.Load += new EventHandler(TestCasesDialog_Load);
+      this.Shown += new EventHandler(TestCasesDialog_Shown);
     }
 
     private StringBuilder GridToText()
@@ -81,7 +81,7 @@ namespace test
         return result;
     }
 
-    void TestCasesDialog_Load(object sender, EventArgs e)
+    void TestCasesDialog_Shown(object sender, EventArgs e)
     {
         //
         // NOTE: In "automatic" mode, run all the tests as soon as the form is
@@ -91,6 +91,7 @@ namespace test
         {
             BeginInvoke(new DelegateWithNoArgs(delegate()
             {
+                Hide();
                 runButton_Click(sender, e);
             }));
         }
