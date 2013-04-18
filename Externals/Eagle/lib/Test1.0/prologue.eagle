@@ -358,7 +358,7 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Set the default test platform (e.g. x86, x64, etc), if necessary.
   #
   if {![info exists test_platform]} then {
-    set test_platform [getTestPlatform true]
+    set test_platform [getTestPlatform]
   }
 
   #
