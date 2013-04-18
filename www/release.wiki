@@ -99,10 +99,11 @@
   </li>
 
   <li>
-    Launch <b>Visual Studio 2008</b>, &quot;<b>Professional</b>&quot; edition or
-    &quot;better&quot;. As of this writing, in January 2012, <b>Visual Studio
-    2010 and later will not work</b> as they do not include the necessary
-    built-in support for Windows CE and the .NET Compact Framework.
+    Launch <b>Visual Studio 2005</b>, &quot;<b>Professional</b>&quot; edition or
+    &quot;better&quot; with the bundled Pocket PC 2003 SDK. As of this writing,
+    in January 2012, <b>Visual Studio 2010 and later will not work</b> as they
+    do not include the necessary built-in support for Windows CE and the .NET
+    Compact Framework.
   </li>
 
   <li>
@@ -343,14 +344,14 @@
 <h2>Publish Release</h2>
 
 <ol>
+  <li>Upload all the release packages to the web site.</li>
+
   <li>
     Commit pending source code changes to the
     [http://www.fossil-scm.org/ | Fossil] repository.
   </li>
 
   <li>Tag the release in the Fossil repository.</li>
-
-  <li>Upload all the release packages to the web site.</li>
 
   <li>
     Push the [http://www.nuget.org/ | NuGet] packages.<br />
