@@ -15,7 +15,11 @@
         the word &quot;<b>static</b>&quot; in their file name require the
         appropriate version (e.g. 2005, 2008, 2010, or 2012) of the Microsoft
         Visual C++ Runtime Library, to be successfully installed on the target
-        machine prior to making use of the executables contained therein.</big>
+        machine, prior to making use of the executables contained therein.  It
+        should also be noted that the downloadable packages on this web page
+        that include the word &quot;<b>setup</b>&quot; (i.e. the setup packages)
+        already include and will attempt to automatically install the required
+        version of the Microsoft Visual C++ Runtime Library.</big>
       </td>
     </tr>
 
