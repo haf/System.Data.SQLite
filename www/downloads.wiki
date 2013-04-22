@@ -5,6 +5,22 @@
   <table width="100%" cellpadding="5">
     <tr>
       <td colspan="3" class="importantHeader">
+        <b>Runtime Library Notes</b>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="importantNotes">
+        <big>All downloadable packages on this web page that do not include
+        the word &quot;<b>static</b>&quot; in their file name require the
+        appropriate version (e.g. 2005, 2008, 2010, or 2012) of the Microsoft
+        Visual C++ Runtime Library, to be successfully installed on the target
+        machine prior to making use of the executables contained therein.</big>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="importantHeader">
         <b>Support Notes</b>
       </td>
     </tr>
