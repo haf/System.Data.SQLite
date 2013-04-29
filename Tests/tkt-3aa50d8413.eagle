@@ -39,7 +39,6 @@ runTest {test tkt-3aa50d8413-1.1 {FillSchema with multiple result sets} -setup {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
-    using System;
     using System.Data;
     using System.Data.SQLite;
 

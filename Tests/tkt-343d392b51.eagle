@@ -366,7 +366,6 @@ runTest {test tkt-343d392b51-3.2 {adapter, attached db, table names} -setup {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
-    using System;
     using System.Data;
     using System.Data.SQLite;
 

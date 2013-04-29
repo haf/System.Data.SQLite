@@ -880,9 +880,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         } else {
           set id [object invoke Interpreter.GetActive NextId]
           set code [compileCSharpWith [subst {
-            using System;
             using System.Data.SQLite;
-            using System.Text;
 
             namespace _Dynamic${id}
             {
@@ -894,6 +892,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
                       "FullUri=${dstFileName};"))
                   {
                     source.Open();
+
                     using (SQLiteConnection destination = new SQLiteConnection(
                         "FullUri=${srcFileName};"))
                     {
@@ -963,9 +962,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
         } else {
           set id [object invoke Interpreter.GetActive NextId]
           set code [compileCSharpWith [subst {
-            using System;
             using System.Data.SQLite;
-            using System.Text;
 
             namespace _Dynamic${id}
             {
@@ -977,6 +974,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
                       "FullUri=${srcFileName};"))
                   {
                     source.Open();
+
                     using (SQLiteConnection destination = new SQLiteConnection(
                         "FullUri=${dstFileName};"))
                     {

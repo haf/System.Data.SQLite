@@ -111,7 +111,6 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
     unset -nocomplain results errors
 
     set code [compileCSharpWith [subst {
-      using System;
       using System.Data.SQLite;
       using System.Text;
       using Eagle._Components.Public;
