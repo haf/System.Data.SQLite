@@ -581,7 +581,7 @@ namespace System.Data.SQLite
       typeof(Double),   // Double (2)
       typeof(string),   // Text (3)
       typeof(byte[]),   // Blob (4)
-      typeof(DBNull),   // Null (5)
+      typeof(object),   // Null (5)
       typeof(DateTime), // DateTime (10)
       typeof(object)    // None (11)
     };
