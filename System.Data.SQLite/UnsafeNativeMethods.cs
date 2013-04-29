@@ -790,6 +790,13 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
+    internal static extern SQLiteErrorCode sqlite3_backup_finish(IntPtr backup);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
     internal static extern SQLiteErrorCode sqlite3_reset(IntPtr stmt);
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1538,13 +1545,6 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern SQLiteErrorCode sqlite3_backup_step(IntPtr backup, int nPage);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
-    internal static extern SQLiteErrorCode sqlite3_backup_finish(IntPtr backup);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

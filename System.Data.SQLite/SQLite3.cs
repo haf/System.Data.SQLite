@@ -1844,11 +1844,15 @@ namespace System.Data.SQLite
             throw new InvalidOperationException(
                 "Backup object has an invalid handle pointer.");
 
+#if !SQLITE_STANDARD
+        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish_interop(handlePtr);
+#else
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_backup_finish(handlePtr);
+#endif
         handle.SetHandleAsInvalid();
 
 #if COUNT_HANDLE
-        if (n == SQLiteErrorCode.Ok) handle.WasReleasedOk();
+        if ((n == SQLiteErrorCode.Ok) || (n == backup._stepResult)) handle.WasReleasedOk();
 #endif
 
         if ((n != SQLiteErrorCode.Ok) && (n != backup._stepResult))
