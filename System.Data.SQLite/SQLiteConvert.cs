@@ -528,8 +528,8 @@ namespace System.Data.SQLite
     /// </param>
     /// <returns>
     /// The new array of strings or null if the input string is null -OR- the
-    /// separator character is a double-quote (i.e. the character that is
-    /// normally used to escape separator characters).
+    /// separator character is a backslash or a double-quote -OR- the string
+    /// contains an unbalanced backslash or double-quote character.
     /// </returns>
     internal static string[] NewSplit(
         string value,
