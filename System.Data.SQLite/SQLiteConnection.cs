@@ -1402,7 +1402,7 @@ namespace System.Data.SQLite
       SortedList<string, string> ls = new SortedList<string, string>(StringComparer.OrdinalIgnoreCase);
 
       // First split into semi-colon delimited values.
-      string[] arParts = s.Split(';');
+      string[] arParts = SQLiteConvert.NewSplit(s, ';', true);
 
       int x = arParts.Length;
       // For each semi-colon piece, split into key and value pairs by the presence of the = sign

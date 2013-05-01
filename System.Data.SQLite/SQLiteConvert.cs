@@ -508,6 +508,127 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Splits the specified string into multiple strings based on a separator
+    /// and returns the result as an array of strings.
+    /// </summary>
+    /// <param name="value">
+    /// The string to split into pieces based on the separator character.  If
+    /// this string is null, null will always be returned.  If this string is
+    /// empty, an array of zero strings will always be returned.
+    /// </param>
+    /// <param name="separator">
+    /// The character used to divide the original string into sub-strings.
+    /// This character cannot be a backslash or a double-quote; otherwise, no
+    /// work will be performed and null will be returned.
+    /// </param>
+    /// <param name="keepQuote">
+    /// If this parameter is non-zero, all double-quote characters will be
+    /// retained in the returned list of strings; otherwise, they will be
+    /// dropped.
+    /// </param>
+    /// <returns>
+    /// The new array of strings or null if the input string is null -OR- the
+    /// separator character is a double-quote (i.e. the character that is
+    /// normally used to escape separator characters).
+    /// </returns>
+    internal static string[] NewSplit(
+        string value,
+        char separator,
+        bool keepQuote
+        )
+    {
+        const char EscapeChar = '\\';
+        const char QuoteChar = '\"';
+
+        //
+        // NOTE: It is illegal for the separator character to be either a
+        //       backslash or a double-quote because both of those characters
+        //       are used for escaping other characters (e.g. the separator
+        //       character).
+        //
+        if ((separator == EscapeChar) || (separator == QuoteChar))
+            return null;
+
+        if (value == null)
+            return null;
+
+        int length = value.Length;
+
+        if (length == 0)
+            return new string[0];
+
+        List<string> list = new List<string>();
+        StringBuilder element = new StringBuilder();
+        int index = 0;
+        bool escape = false;
+        bool quote = false;
+
+        while (index < length)
+        {
+            char character = value[index++];
+
+            if (escape)
+            {
+                //
+                // HACK: Only consider the escape character to be an actual
+                //       "escape" if it is followed by a reserved character;
+                //       otherwise, emit the original escape character and
+                //       the current character in an effort to help preserve
+                //       the original string content.
+                //
+                if ((character != EscapeChar) &&
+                    (character != QuoteChar) &&
+                    (character != separator))
+                {
+                    element.Append(EscapeChar);
+                }
+
+                element.Append(character);
+                escape = false;
+            }
+            else if (character == EscapeChar)
+            {
+                escape = true;
+            }
+            else if (character == QuoteChar)
+            {
+                if (keepQuote)
+                    element.Append(character);
+
+                quote = !quote;
+            }
+            else if (character == separator)
+            {
+                if (quote)
+                {
+                    element.Append(character);
+                }
+                else
+                {
+                    list.Add(element.ToString());
+                    element.Length = 0;
+                }
+            }
+            else
+            {
+                element.Append(character);
+            }
+        }
+
+        //
+        // NOTE: An unbalanced escape or quote character in the string is
+        //       considered to be a fatal error; therefore, return null.
+        //
+        if (escape || quote)
+            return null;
+
+        if (element.Length > 0)
+            list.Add(element.ToString());
+
+        return list.ToArray();
+    }
+
+    /// <summary>
     /// Convert a value to true or false.
     /// </summary>
     /// <param name="source">A string or number representing true or false</param>

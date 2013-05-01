@@ -1,0 +1,45 @@
+###############################################################################
+#
+# tkt-e47b3d8346.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-e47b3d8346-1.1 {parse semi-colon in data source} -setup {
+  unset -nocomplain result list pair
+} -body {
+  set result [list]
+
+  set list [object invoke -flags +NonPublic \
+      System.Data.SQLite.SQLiteConnection ParseConnectionString \
+      {Data Source="C:\full\path\to\file.db;more.data.here";}]
+
+  object foreach -alias pair $list {
+    lappend result [list [$pair Key] [$pair Value]]
+  }
+
+  set result
+} -cleanup {
+  unset -nocomplain result list pair
+} -constraints {eagle System.Data.SQLite} -result \
+{{{Data Source} {C:\full\path\to\file.db;more.data.here}}}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
