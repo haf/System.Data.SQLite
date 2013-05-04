@@ -10,7 +10,7 @@ In order to accept your contributions, we <u>must</u> have a
 [./contrib_agreement.wiki | Contributor Agreement] on file for you.  We require
 this in order to maintain clear title to the System.Data.SQLite code and prevent
 the introduction of code with incompatible licenses or other entanglements
-that might cause legal problems for System.Data.SQLite users.  
+that might cause legal problems for System.Data.SQLite users.
 
 If you do not wish to submit a Contributor Agreement, we would still
 welcome your suggestions and example code, but we will not use your code
@@ -20,10 +20,10 @@ might take longer.
 <h2>2.0 Submitting Patches</h2>
 
 Suggested changes or bug fixes can be submitted by creating a patch
-against the current source tree.  Email patches to 
-<a href="mailto:drh@sqlite.org">drh@sqlite.org</a>.  Be sure to 
+against the current source tree.  Email patches to
+<a href="mailto:drh@sqlite.org">drh@sqlite.org</a>.  Be sure to
 describe in detail what the patch does and which version of System.Data.SQLite
-it is written against.  
+it is written against.
 
 A contributor agreement is not strictly necessary to submit a patch.
 However, without a contributor agreement on file, your patch will be
@@ -47,30 +47,32 @@ A contributor agreement is, of course, a prerequisite for check-in
 privileges.</p>
 
 Contributors are asked to make all non-trivial changes on a branch.  A
-System.Data.SQLite admin will review the branch and merge the changes 
+System.Data.SQLite admin will review the branch and merge the changes
 into the trunk.</p>
 
 Contributors are required to following the
 [./checkin.wiki | pre-checkin checklist] prior to every checkin to
 the System.Data.SQLite self-hosting repository.  This checklist is short and succinct
-and should only require a few seconds to follow.  Contributors 
+and should only require a few seconds to follow.  Contributors
 should print out a copy of the pre-checkin checklist and keep
 it on a notecard beside their workstations, for quick reference.
 
 Contributors should review and try to mimic the coding style
 used through the rest of the System.Data.SQLite source code.  Your code should
 blend in.  A third-party reader should be unable to distinguish your
-code from any other code in the source corpus. 
+code from any other code in the source corpus.
 
 <h2>4.0 Testing</h2>
 
-System.Data.SQLite has a simple test harness that excercises the basic
-System.Data.SQLite functions, but this is an area that needs further work.  
+System.Data.SQLite has several automated test suites that excercise its base
+functionality, but this is an area that needs further work.
 (Your contributions here are welcomed!)
-Contributors with check-in privileges are expected to run the test harness 
-on all changes they contribute, and if appropriate add new automated test 
+Contributors with check-in privileges are expected to run the test suites
+on all changes they contribute, and if appropriate add new automated test
 scripts to cover their additions.
 
 <h2>5.0 See Also</h2>
 
+  *  [./build.wiki | Build Procedures]
+  *  [./test.wiki | Test Procedures]
   *  [./release.wiki | Release Procedures]
