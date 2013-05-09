@@ -236,7 +236,7 @@ if {$argc >= 0 && $argc <= 7} then {
         join $managed_directory System.Data.SQLite.dll] [file join \
         $native_directory [appendArgs SQLite.Interop. [format %03d \
         [$assemblyName Version.Build]] .dll]] [file join $managed_directory \
-        test.cfg]]
+        test.cfg] [file join $managed_directory test.sql]]
   }
 
   #

@@ -95,6 +95,9 @@
     <Content Include="test.cfg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="test.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Data.SQLite\System.Data.SQLite.Compact.2005.csproj">

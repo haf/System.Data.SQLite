@@ -76,6 +76,7 @@ namespace test
 
     private string connectionString;
     private DbConnection cnn;
+    private string sql;
     private bool autoClose;
     private int total;
     private int passed;
@@ -84,11 +85,13 @@ namespace test
     internal TestCases(
         string connectionString,
         DbConnection cnn,
+        string sql,
         bool autoExit
         )
     {
         this.connectionString = connectionString;
         this.cnn = cnn;
+        this.sql = sql;
         this.autoClose = autoExit;
     }
 
@@ -97,10 +100,30 @@ namespace test
         return (failed == 0) && (passed == total);
     }
 
+    private static string FormatString(string value)
+    {
+        if (value == null)
+            return "(null)";
+
+        if (value.Length == 0)
+            return "(empty)";
+
+        if (value.Trim().Length == 0)
+            return "(whitespace)";
+
+        return value;
+    }
+
     internal void Run()
     {
       frm = new Form1();
       frm.Show();
+
+      frm.WriteLine(String.Format("\r\nTest connection string:\r\n\r\n{0}",
+          FormatString(connectionString)));
+
+      frm.WriteLine(String.Format("\r\nTest initialization SQL:\r\n\r\n{0}",
+          FormatString(sql)));
 
       Type type = cnn.GetType();
       frm.WriteLine("\r\nBeginning Test on " + type.ToString());
@@ -154,7 +177,7 @@ namespace test
       catch (Exception) { frm.WriteLine("FAIL - VerifyBinaryData"); failed++; }
 
       total++;
-      try { LockTest(cnn); frm.WriteLine("SUCCESS - LockTest"); passed++; }
+      try { LockTest(cnn, sql); frm.WriteLine("SUCCESS - LockTest"); passed++; }
       catch (Exception) { frm.WriteLine("FAIL - LockTest"); failed++; }
 
       total++;
@@ -583,7 +606,7 @@ namespace test
       }
     }
 
-    internal static void LockTest(DbConnection cnn)
+    internal static void LockTest(DbConnection cnn, string sql)
     {
       using (DbCommand cmd = cnn.CreateCommand())
       {
@@ -604,6 +627,17 @@ namespace test
 
           using (DbConnection clone = (DbConnection)((ICloneable)cnn).Clone())
           {
+            if (sql != null)
+            {
+              using (DbCommand command = clone.CreateCommand())
+              {
+                command.CommandText = sql;
+
+                /* IGNORED */
+                command.ExecuteNonQuery(); /* throw */
+              }
+            }
+
             using (DbCommand newcmd = clone.CreateCommand())
             {
               newcmd.CommandText = "DELETE FROM TestCase WHERE Field6 IS NULL";
