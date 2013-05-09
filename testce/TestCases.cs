@@ -78,6 +78,7 @@ namespace test
     private DbConnection cnn;
     private string sql;
     private bool autoClose;
+    private bool isolatedSql;
     private int total;
     private int passed;
     private int failed;
@@ -86,13 +87,15 @@ namespace test
         string connectionString,
         DbConnection cnn,
         string sql,
-        bool autoExit
+        bool autoExit,
+        bool isolatedSql
         )
     {
         this.connectionString = connectionString;
         this.cnn = cnn;
         this.sql = sql;
         this.autoClose = autoExit;
+        this.isolatedSql = isolatedSql;
     }
 
     internal bool Succeeded()
@@ -177,7 +180,7 @@ namespace test
       catch (Exception) { frm.WriteLine("FAIL - VerifyBinaryData"); failed++; }
 
       total++;
-      try { LockTest(cnn, sql); frm.WriteLine("SUCCESS - LockTest"); passed++; }
+      try { LockTest(cnn, sql, isolatedSql); frm.WriteLine("SUCCESS - LockTest"); passed++; }
       catch (Exception) { frm.WriteLine("FAIL - LockTest"); failed++; }
 
       total++;
@@ -606,7 +609,7 @@ namespace test
       }
     }
 
-    internal static void LockTest(DbConnection cnn, string sql)
+    internal static void LockTest(DbConnection cnn, string sql, bool isolatedSql)
     {
       using (DbCommand cmd = cnn.CreateCommand())
       {
@@ -627,16 +630,7 @@ namespace test
 
           using (DbConnection clone = (DbConnection)((ICloneable)cnn).Clone())
           {
-            if (!String.IsNullOrEmpty(sql))
-            {
-              using (DbCommand command = clone.CreateCommand())
-              {
-                command.CommandText = sql;
-
-                /* IGNORED */
-                command.ExecuteNonQuery(); /* throw */
-              }
-            }
+            Program.ExecuteInitializationSQL(clone, sql, isolatedSql);
 
             using (DbCommand newcmd = clone.CreateCommand())
             {
