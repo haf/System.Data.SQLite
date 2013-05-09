@@ -627,7 +627,7 @@ namespace test
 
           using (DbConnection clone = (DbConnection)((ICloneable)cnn).Clone())
           {
-            if (sql != null)
+            if (!String.IsNullOrEmpty(sql))
             {
               using (DbCommand command = clone.CreateCommand())
               {
