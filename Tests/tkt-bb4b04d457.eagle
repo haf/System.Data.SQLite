@@ -23,8 +23,10 @@ runSQLiteTestPrologue
 runTest {test tkt-bb4b04d457-1.1 {TIMESTAMP column with Ticks} -setup {
   setupDb [set fileName tkt-bb4b04d457-1.1.db] "" Ticks Utc
 } -body {
-  set dateTime [object invoke -alias DateTime Parse 2011-11-29T12:34:56Z]
-  set dateTime [$dateTime -alias ToUniversalTime]
+  set dateTime [object invoke \
+      -create -alias DateTime Parse 2011-11-29T12:34:56Z]
+
+  set dateTime [$dateTime -create -alias ToUniversalTime]
 
   sql execute $db "CREATE TABLE t1(x TIMESTAMP NOT NULL);"
 

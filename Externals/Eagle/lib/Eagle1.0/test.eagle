@@ -1124,7 +1124,7 @@ namespace eval ::Eagle {
 
     foreach statistic $statistics {
       if {$array($statistic,after) > $array($statistic,before)} then {
-        incr count
+        incr count; lappend array(statistics,leaked) $statistic
 
         tputs $channel [appendArgs "==== \"" $fileName "\" LEAKED " \
             $statistic \n]
@@ -1287,6 +1287,39 @@ namespace eval ::Eagle {
 
     if {[isEagle]} then {
       host title $status
+    }
+  }
+
+  proc reportTestStatisticCounts { channel statsVarName } {
+    upvar 1 $statsVarName array
+
+    #
+    # NOTE: Were any counts recorded during the testing?
+    #
+    if {[info exists array(statistics,leaked)]} then {
+      #
+      # NOTE: Process each leak type in the list, recording any duplicates
+      #       in the temporary count array.
+      #
+      foreach statistic $array(statistics,leaked) {
+        if {[info exists count($statistic)]} then {
+          incr count($statistic)
+        } else {
+          set count($statistic) 1
+        }
+      }
+
+      #
+      # NOTE: Flatten the temporary count array into a dictionary formatted
+      #       list and then possibly display it (i.e. if it actually contains
+      #       any data).
+      #
+      set statistics [array get count]
+
+      if {[llength statistics] > 0} then {
+        tputs $channel [appendArgs "---- types of leaks detected: " \
+            [formatListAsDict $statistics] \n]
+      }
     }
   }
 
@@ -1590,6 +1623,8 @@ namespace eval ::Eagle {
       tputs $channel [appendArgs "---- files with leaking tests: " \
           [formatList $leaked] \n]
     }
+
+    reportTestStatisticCounts $channel leaks
   }
 
   proc configureTcltest { constraints imports force } {
@@ -2206,7 +2241,7 @@ namespace eval ::Eagle {
     ############################## END Tcl ONLY ###############################
     ###########################################################################
   }
-
+
   #
   # NOTE: Provide the Eagle test package to the interpreter.
   #

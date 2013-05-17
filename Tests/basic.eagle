@@ -1055,8 +1055,8 @@ Flags=(?:Default|LogCallbackException)\} 0 \{False, SetDefaults=False\} 0\
 ###############################################################################
 
 runTest {test data-1.17 {SQLiteConvert ToDateTime (Julian Day)} -body {
-  set dateTime [object invoke System.Data.SQLite.SQLiteConvert ToDateTime \
-      2455928.0 Utc]
+  set dateTime [object invoke -create System.Data.SQLite.SQLiteConvert \
+      ToDateTime 2455928.0 Utc]
 
   object invoke $dateTime ToString [getDateTimeFormat]
 } -cleanup {

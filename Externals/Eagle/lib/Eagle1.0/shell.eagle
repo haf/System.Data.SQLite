@@ -47,7 +47,7 @@ namespace eval ::Eagle {
     ############################## END Tcl ONLY ###############################
     ###########################################################################
   }
-
+
   #
   # NOTE: Provide the Eagle shell package to the interpreter.
   #

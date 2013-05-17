@@ -517,7 +517,8 @@ if {![info exists no([file tail [info script]])]} then {
       #         "ni" operator (and Tcl tries to compile it even though it will
       #         only actually ever be evaluated in Eagle).
       #
-      set expr {$publicKeyToken ni "29c6297630be05eb 1e22ec67879739a2"}
+      set expr {$publicKeyToken ni \
+          "29c6297630be05eb 1e22ec67879739a2 358030063a832bc3"}
 
       if {[expr $expr]} then {
         #
@@ -842,25 +843,44 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       #
-      # NOTE: Set the database connection string, if necessary.
+      # NOTE: Set the test database connection type, if necessary.
+      #
+      if {![info exists test_database_type]} then {
+        #
+        # NOTE: Use the default database connection type.
+        #
+        set test_database_type Sql; # TODO: Good test default?
+      }
+
+      #
+      # NOTE: Set the test database connection string, if necessary.
       #
       if {![info exists test_database]} then {
         #
-        # NOTE: Mono does not have support for trusted connections;
-        #       therefore, we must create a slightly different
-        #       connection string.
+        # NOTE: Mono does not have support for "trusted connections";
+        #       therefore, we must emit a different connection string
+        #       when running there.
         #
         set test_database [subst \
             {Data Source=${server};Initial Catalog=${database};Connect\
             Timeout=${timeout};[expr {[isMono] ? [subst \
             {User Id=${user};Password=${password};}] : {Integrated\
-            Security=SSPI;}}]}]
+            Security=SSPI;}}]}]; # NOTE: Microsoft SQL Server specific.
+      } elseif {[info exists test_database_subst]} then {
+        #
+        # NOTE: The test database connection string must be dynamically
+        #       post-processed using [subst], per request.  This allows
+        #       the [custom] test database connection string to contain
+        #       references to the other test database variables setup
+        #       by this test prologue.
+        #
+        set test_database [subst $test_database]
       }
 
       #
-      # NOTE: Can we access the local database?
+      # NOTE: Can we access the configured test database?
       #
-      checkForDatabase $test_channel $test_database
+      checkForDatabase $test_channel $test_database_type $test_database
 
       unset password user timeout database server
     }
@@ -1058,7 +1078,7 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       #
-      # NOTE: Has xml support been enabled (at compile-time)?
+      # NOTE: Has XML support been enabled (at compile-time)?
       #
       if {![info exists no(compileXml)]} then {
         #
@@ -1119,6 +1139,20 @@ if {![info exists no([file tail [info script]])]} then {
         # NOTE: For tests "tclLoad-1.5" and "tclLoad-1.6".
         #
         checkForCompileOption $test_channel TCL_THREADS
+      }
+
+      #
+      # NOTE: Has GDI+ drawing support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileDrawing)]} then {
+        checkForCompileOption $test_channel DRAWING
+      }
+
+      #
+      # NOTE: Has WinForms support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileWinForms)]} then {
+        checkForCompileOption $test_channel WINFORMS
       }
 
       #
@@ -1986,6 +2020,10 @@ if {![info exists no([file tail [info script]])]} then {
     checkForPlatform $test_channel
   }
 
+  if {![info exists no(windowsVersion)]} then {
+    checkForWindowsVersion $test_channel
+  }
+
   if {![info exists no(scriptLibrary)]} then {
     checkForScriptLibrary $test_channel
   }
@@ -2144,6 +2182,11 @@ if {![info exists no([file tail [info script]])]} then {
     # NOTE: For test "debug-1.9".
     #
     checkForInteractiveCommand $test_channel done
+
+    #
+    # NOTE: For test "object-15.9".
+    #
+    checkForInteractiveCommand $test_channel args
   }
 
   if {![info exists no(userInteraction)]} then {

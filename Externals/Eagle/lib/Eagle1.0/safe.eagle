@@ -75,7 +75,7 @@ namespace eval ::Eagle {
     ############################# END Eagle ONLY ##############################
     ###########################################################################
   }
-
+
   #
   # NOTE: Provide the Eagle "safe" package to the interpreter.
   #

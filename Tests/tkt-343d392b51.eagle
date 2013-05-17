@@ -39,7 +39,9 @@ for {set i 1} {$i < 5} {incr i} {
 
     switch -exact -- $dateTimeFormat {
       Ticks {
-        set paramDateTime1 [object invoke -alias DateTime Parse $paramDateTime1]
+        set paramDateTime1 [object invoke \
+            -create -alias DateTime Parse $paramDateTime1]
+
         set paramDateTime1 [$paramDateTime1 ToUniversalTime.Ticks]
         set paramDateTime2 $paramDateTime1
       }
@@ -47,8 +49,10 @@ for {set i 1} {$i < 5} {incr i} {
         set paramDateTime2 [appendArgs ' $paramDateTime1 ']
       }
       JulianDay {
-        set paramDateTime1 [object invoke -alias DateTime Parse $paramDateTime1]
-        set paramDateTime1 [$paramDateTime1 -alias ToUniversalTime]
+        set paramDateTime1 [object invoke \
+            -create -alias DateTime Parse $paramDateTime1]
+
+        set paramDateTime1 [$paramDateTime1 -create -alias ToUniversalTime]
 
         set paramDateTime1 [expr {[$paramDateTime1 ToOADate] + \
             [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \

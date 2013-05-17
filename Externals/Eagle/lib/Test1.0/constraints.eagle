@@ -74,6 +74,50 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForWindowsVersion { channel } {
+    tputs $channel "---- checking for Windows version... "
+
+    #
+    # NOTE: Are we running on Windows at all?
+    #
+    if {[info exists ::tcl_platform(platform)] && \
+        $::tcl_platform(platform) eq "windows"} then {
+      #
+      # NOTE: Is the specific OS name and version number available?
+      #
+      if {[info exists ::tcl_platform(os)] && \
+          [string length $::tcl_platform(os)] > 0 && \
+          [info exists ::tcl_platform(osVersion)] && \
+          [string length $::tcl_platform(osVersion)] > 0 && \
+          [regexp -- {^\d+\.\d+$} $::tcl_platform(osVersion)]} then {
+        #
+        # NOTE: Start out with the OS name, removing all spaces.
+        #
+        set version [appendArgs \
+            [string map [list " " ""] $::tcl_platform(os)] _ \
+            $::tcl_platform(osVersion)]
+
+        #
+        # NOTE: Add constraint containing the OS name and version number.
+        #
+        addConstraint [appendArgs osVersion. $version]
+
+        #
+        # NOTE: Show what we found for the OS name and version number.
+        #
+        tputs $channel [appendArgs "yes (" $::tcl_platform(os) " v" \
+            $::tcl_platform(osVersion) ")\n"]
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
+      }
+    }
+
+    tputs $channel no\n
+  }
+
   proc checkForScriptLibrary { channel } {
     tputs $channel "---- checking for script library... "
 
@@ -1817,7 +1861,7 @@ namespace eval ::Eagle {
       }
     }
 
-    proc checkForDatabase { channel string } {
+    proc checkForDatabase { channel type string } {
       tputs $channel "---- checking for database... "
 
       #
@@ -1829,11 +1873,19 @@ namespace eval ::Eagle {
         #
         # NOTE: Can we access the local database?
         #
-        if {[catch {sql open $string} connection] == 0} then {
+        if {[catch {sql open -type $type $string} connection] == 0} then {
           #
           # NOTE: Yes, it appears that we can connect to the local database.
           #
-          addConstraint sql
+          addConstraint database
+
+          #
+          # NOTE: Also record the test database connection type used as a
+          #       test constraint.
+          #
+          if {[string length $type] > 0} then {
+            addConstraint [appendArgs database. [string tolower $type]]
+          }
 
           #
           # NOTE: Cleanup the database connection we just opened.
@@ -2450,17 +2502,18 @@ namespace eval ::Eagle {
     #       global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        getKnownMonoVersions checkForPlatform checkForScriptLibrary \
-        checkForVariable checkForTclOptions checkForWindowsCommandProcessor \
-        checkForFossil checkForEagle checkForSymbols checkForLogFile \
-        checkForGaruda checkForShell checkForDebug checkForTk checkForVersion \
-        checkForCommand checkForTestMachine checkForTestPlatform \
-        checkForTestConfiguration checkForTestSuffix checkForFile \
-        checkForPathFile checkForNativeCode checkForTip127 checkForTip194 \
-        checkForTip241 checkForTip285 checkForTip405 checkForTiming \
-        checkForPerformance checkForStackIntensive checkForInteractive \
-        checkForInteractiveCommand checkForUserInteraction checkForNetwork \
-        checkForCompileOption] false false
+        getKnownMonoVersions checkForPlatform checkForWindowsVersion \
+        checkForScriptLibrary checkForVariable checkForTclOptions \
+        checkForWindowsCommandProcessor checkForFossil checkForEagle \
+        checkForSymbols checkForLogFile checkForGaruda checkForShell \
+        checkForDebug checkForTk checkForVersion checkForCommand \
+        checkForTestMachine checkForTestPlatform checkForTestConfiguration \
+        checkForTestSuffix checkForFile checkForPathFile checkForNativeCode \
+        checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
+        checkForTip405 checkForTiming checkForPerformance \
+        checkForStackIntensive checkForInteractive checkForInteractiveCommand \
+        checkForUserInteraction checkForNetwork checkForCompileOption] false \
+        false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
