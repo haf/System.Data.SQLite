@@ -31,7 +31,11 @@ using System.Runtime.ConstrainedExecution;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
+
+#if !NET_40 && !NET_45
 [assembly: AllowPartiallyTrustedCallers]
+#endif
+
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 
 // Version information for an assembly consists of the following four values:

@@ -7,6 +7,7 @@
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.7.17].</li>
+    <li>Disable use of the AllowPartiallyTrustedCallers attribute when compiled for the .NET Framework 4.0/4.5.</li>
     <li>Allow semi-colons in the data source file name. Fix for [e47b3d8346].</li>
     <li>NULL values should be reported as type &quot;object&quot;, not &quot;DBNull&quot;. Fix for [48a6b8e4ca].</li>
 </ul>

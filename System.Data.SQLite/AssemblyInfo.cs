@@ -44,7 +44,10 @@ using System.Runtime.ConstrainedExecution;
 [assembly: NeutralResourcesLanguage("en")]
 
 #if !PLATFORM_COMPACTFRAMEWORK
+#if !NET_40 && !NET_45
 [assembly: AllowPartiallyTrustedCallers]
+#endif
+
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 
 #if NET_40 || NET_45
