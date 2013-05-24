@@ -528,6 +528,7 @@ set sds_manifests(binaryCompact) {
   [appendArgs SQLite.Interop. [format %03d $build] .dll]
   [appendArgs SQLite.Interop. [format %03d $build] .pdb]
   test.cfg
+  test.sql
   testce.exe
   testce.pdb
 }
