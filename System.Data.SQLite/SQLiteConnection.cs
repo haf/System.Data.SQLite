@@ -108,7 +108,12 @@ namespace System.Data.SQLite
   /// </listheader>
   /// <item>
   /// <description>Data Source</description>
-  /// <description>This may be a file name, the string ":memory:", or any supported URI (starting with SQLite 3.7.7).</description>
+  /// <description>
+  /// This may be a file name, the string ":memory:", or any supported URI (starting with SQLite 3.7.7).
+  /// Starting with release 1.0.86.0, in order to use more than one consecutive backslash (e.g. for a
+  /// UNC path), each of the adjoining backslash characters must be doubled (e.g. "\\Network\Share\test.db"
+  /// would become "\\\\Network\Share\test.db").
+  /// </description>
   /// <description>Y</description>
   /// <description></description>
   /// </item>
@@ -1124,7 +1129,12 @@ namespace System.Data.SQLite
     /// </listheader>
     /// <item>
     /// <description>Data Source</description>
-    /// <description>This may be a file name, the string ":memory:", or any supported URI (starting with SQLite 3.7.7).</description>
+    /// <description>
+    /// This may be a file name, the string ":memory:", or any supported URI (starting with SQLite 3.7.7).
+    /// Starting with release 1.0.86.0, in order to use more than one consecutive backslash (e.g. for a
+    /// UNC path), each of the adjoining backslash characters must be doubled (e.g. "\\Network\Share\test.db"
+    /// would become "\\\\Network\Share\test.db").
+    /// </description>
     /// <description>Y</description>
     /// <description></description>
     /// </item>
