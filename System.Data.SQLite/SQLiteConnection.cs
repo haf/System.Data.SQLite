@@ -1414,7 +1414,7 @@ namespace System.Data.SQLite
       // First split into semi-colon delimited values.
       string[] arParts = SQLiteConvert.NewSplit(s, ';', true);
 
-      int x = arParts.Length;
+      int x = (arParts != null) ? arParts.Length : 0;
       // For each semi-colon piece, split into key and value pairs by the presence of the = sign
       for (n = 0; n < x; n++)
       {
