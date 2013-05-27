@@ -526,6 +526,10 @@ namespace System.Data.SQLite
     /// retained in the returned list of strings; otherwise, they will be
     /// dropped.
     /// </param>
+    /// <param name="error">
+    /// Upon failure, this parameter will be modified to contain an appropriate
+    /// error message.
+    /// </param>
     /// <returns>
     /// The new array of strings or null if the input string is null -OR- the
     /// separator character is a backslash or a double-quote -OR- the string
@@ -534,7 +538,8 @@ namespace System.Data.SQLite
     internal static string[] NewSplit(
         string value,
         char separator,
-        bool keepQuote
+        bool keepQuote,
+        ref string error
         )
     {
         const char EscapeChar = '\\';
@@ -547,10 +552,16 @@ namespace System.Data.SQLite
         //       character).
         //
         if ((separator == EscapeChar) || (separator == QuoteChar))
+        {
+            error = "separator character cannot be the escape or quote characters";
             return null;
+        }
 
         if (value == null)
+        {
+            error = "string value to split cannot be null";
             return null;
+        }
 
         int length = value.Length;
 
@@ -620,7 +631,10 @@ namespace System.Data.SQLite
         //       considered to be a fatal error; therefore, return null.
         //
         if (escape || quote)
+        {
+            error = "unbalanced escape or quote character found";
             return null;
+        }
 
         if (element.Length > 0)
             list.Add(element.ToString());

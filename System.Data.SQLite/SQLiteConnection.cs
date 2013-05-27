@@ -1412,7 +1412,11 @@ namespace System.Data.SQLite
       SortedList<string, string> ls = new SortedList<string, string>(StringComparer.OrdinalIgnoreCase);
 
       // First split into semi-colon delimited values.
-      string[] arParts = SQLiteConvert.NewSplit(s, ';', true);
+      string error = null;
+      string[] arParts = SQLiteConvert.NewSplit(s, ';', true, ref error);
+
+      if (arParts == null)
+          throw new ArgumentException(String.Format("Invalid ConnectionString format, cannot parse: {0}", error));
 
       int x = (arParts != null) ? arParts.Length : 0;
       // For each semi-colon piece, split into key and value pairs by the presence of the = sign
