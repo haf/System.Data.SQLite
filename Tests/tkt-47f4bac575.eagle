@@ -1,0 +1,46 @@
+###############################################################################
+#
+# tkt-47f4bac575.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-47f4bac575-1.1 {SQLiteConvert DbTypeToTypeName} -body {
+  foreach dbType [list \
+      AnsiString Binary Byte Boolean Currency Date DateTime Decimal \
+      Double Guid Int16 Int32 Int64 Object SByte Single String Time \
+      UInt16 UInt32 UInt64 VarNumeric AnsiStringFixedLength \
+      StringFixedLength Xml DateTime2 DateTimeOffset] {
+    lappend result [list $dbType [object invoke -flags +NonPublic \
+        System.Data.SQLite.SQLiteConvert DbTypeToTypeName $dbType]]
+  }
+  set result
+} -cleanup {
+  unset -nocomplain result dbType
+} -constraints {eagle System.Data.SQLite} -result {{AnsiString VARCHAR} {Binary\
+BLOB} {Byte TINYINT} {Boolean BIT} {Currency {}} {Date {}} {DateTime DATETIME}\
+{Decimal DECIMAL} {Double REAL} {Guid UNIQUEIDENTIFIER} {Int16 SMALLINT} {Int32\
+INT} {Int64 INTEGER} {Object {}} {SByte TINYSINT} {Single SINGLE} {String\
+NVARCHAR} {Time {}} {UInt16 SMALLUINT} {UInt32 UINT} {UInt64 UNSIGNEDINTEGER}\
+{VarNumeric {}} {AnsiStringFixedLength CHAR} {StringFixedLength NCHAR} {Xml {}}\
+{DateTime2 {}} {DateTimeOffset {}}}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
