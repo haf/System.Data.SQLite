@@ -1374,7 +1374,7 @@ namespace System.Data.SQLite
 
       /// <summary>
       /// Use the default command execution type.  Using this value is the same
-      /// as using the <see cref="SQLiteExecuteType.None" /> value.
+      /// as using the <see cref="SQLiteExecuteType.NonQuery" /> value.
       /// </summary>
       Default = NonQuery /* TODO: Good default? */
   }
