@@ -6,5 +6,5 @@
  */
 
 #ifndef INTEROP_VERSION
-#define INTEROP_VERSION       "1.0.86.0"
+#define INTEROP_VERSION       "1.0.87.0"
 #endif

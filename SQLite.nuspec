@@ -11,7 +11,7 @@
   <metadata>
     <id>System.Data.SQLite</id>
     <title>System.Data.SQLite (x86/x64)</title>
-    <version>1.0.86.0</version>
+    <version>1.0.87.0</version>
     <authors>SQLite Development Team</authors>
     <description>The official SQLite database engine for both x86 and x64 along with the ADO.NET provider.</description>
     <language>en-US</language>
