@@ -40,7 +40,7 @@ namespace System.Data.SQLite
     private const string FullFormat = "yyyy-MM-ddTHH:mm:ss.fffffffK";
 
     /// <summary>
-    /// An array of ISO8601 datetime formats we support conversion from
+    /// An array of ISO-8601 DateTime formats that we support parsing.
     /// </summary>
     private static string[] _datetimeFormats = new string[] {
       "THHmmssK",
@@ -319,7 +319,7 @@ namespace System.Data.SQLite
                             DateTimeStyles.None),
                         kind);
                 }
-            default:
+            default: /* ISO-8601 */
                 {
                     return DateTime.SpecifyKind(DateTime.ParseExact(
                         dateText, _datetimeFormats,

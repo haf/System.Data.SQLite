@@ -317,7 +317,11 @@ namespace System.Data.SQLite
 
       if ((_flags & SQLiteConnectionFlags.BindAllAsText) == SQLiteConnectionFlags.BindAllAsText)
       {
-          _sql.Bind_Text(this, _flags, index, obj.ToString());
+          if (obj is DateTime)
+              _sql.Bind_DateTime(this, _flags, index, (DateTime)obj);
+          else
+              _sql.Bind_Text(this, _flags, index, obj.ToString());
+
           return;
       }
 

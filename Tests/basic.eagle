@@ -2349,6 +2349,25 @@ runTest {test data-1.48 {static SQLiteCommand.Execute method} -setup {
 
 ###############################################################################
 
+runTest {test data-1.49 {BindAllAsText w/DateTime} -setup {
+  setupDb [set fileName data-1.49.db] "" Ticks Utc BindAllAsText
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+
+  list [sql execute $db "INSERT INTO t1 (x) VALUES(?);" \
+      [list param1 DateTime [set dateTime [object invoke DateTime Parse \
+      "2000.02.29 13:59:58.1234567Z"]]]] [sql execute -execute reader \
+      -format list $db "SELECT x FROM t1;"]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain dateTime db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{1 630874007980000000}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
