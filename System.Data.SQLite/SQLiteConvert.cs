@@ -869,26 +869,27 @@ namespace System.Data.SQLite
 
     internal static string DbTypeToTypeName(DbType typ)
     {
-      for (int n = 0; n < _dbtypeNames.Length; n++)
-      {
-        SQLiteTypeName typeName = _dbtypeNames[n];
+        lock (_syncRoot)
+        {
+            if (_typeNames == null)
+                _typeNames = GetSQLiteDbTypeMap();
 
-        if ((typeName.dataType == typ) && typeName.primary)
-          return typeName.typeName;
-      }
+            SQLiteDbTypeMapping value;
 
-      string defaultTypeName = String.Empty;
+            if (_typeNames.TryGetValue(typ, out value))
+                return value.typeName;
+        }
+
+        string defaultTypeName = String.Empty;
 
 #if !NET_COMPACT_20 && TRACE_WARNING
-      Trace.WriteLine(String.Format(
-          "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
-          defaultTypeName, typ));
+        Trace.WriteLine(String.Format(
+            "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
+            defaultTypeName, typ));
 #endif
 
-      return defaultTypeName;
+        return defaultTypeName;
     }
-
-    private static SQLiteTypeName[] _dbtypeNames = GetSQLiteTypeNames();
 
     /// <summary>
     /// Convert a DbType to a Type
@@ -977,78 +978,78 @@ namespace System.Data.SQLite
     /// An array containing the database column types recognized by this
     /// provider.
     /// </returns>
-    private static SQLiteTypeName[] GetSQLiteTypeNames()
+    private static SQLiteDbTypeMap GetSQLiteDbTypeMap()
     {
-        return new SQLiteTypeName[] {
-            new SQLiteTypeName("BIGINT", DbType.Int64, false),
-            new SQLiteTypeName("BIGUINT", DbType.UInt64, false),
-            new SQLiteTypeName("BINARY", DbType.Binary, false),
-            new SQLiteTypeName("BIT", DbType.Boolean, true),
-            new SQLiteTypeName("BLOB", DbType.Binary, true),
-            new SQLiteTypeName("BOOL", DbType.Boolean, false),
-            new SQLiteTypeName("BOOLEAN", DbType.Boolean, false),
-            new SQLiteTypeName("CHAR", DbType.AnsiStringFixedLength, true),
-            new SQLiteTypeName("COUNTER", DbType.Int64, false),
-            new SQLiteTypeName("CURRENCY", DbType.Decimal, false),
-            new SQLiteTypeName("DATE", DbType.DateTime, false),
-            new SQLiteTypeName("DATETIME", DbType.DateTime, true),
-            new SQLiteTypeName("DECIMAL", DbType.Decimal, true),
-            new SQLiteTypeName("DOUBLE", DbType.Double, false),
-            new SQLiteTypeName("FLOAT", DbType.Double, false),
-            new SQLiteTypeName("GENERAL", DbType.Binary, false),
-            new SQLiteTypeName("GUID", DbType.Guid, false),
-            new SQLiteTypeName("IDENTITY", DbType.Int64, false),
-            new SQLiteTypeName("IMAGE", DbType.Binary, false),
-            new SQLiteTypeName("INT", DbType.Int32, true),
-            new SQLiteTypeName("INT8", DbType.SByte, false),
-            new SQLiteTypeName("INT16", DbType.Int16, false),
-            new SQLiteTypeName("INT32", DbType.Int32, false),
-            new SQLiteTypeName("INT64", DbType.Int64, false),
-            new SQLiteTypeName("INTEGER", DbType.Int64, true),
-            new SQLiteTypeName("INTEGER8", DbType.SByte, false),
-            new SQLiteTypeName("INTEGER16", DbType.Int16, false),
-            new SQLiteTypeName("INTEGER32", DbType.Int32, false),
-            new SQLiteTypeName("INTEGER64", DbType.Int64, false),
-            new SQLiteTypeName("LOGICAL", DbType.Boolean, false),
-            new SQLiteTypeName("LONG", DbType.Int64, false),
-            new SQLiteTypeName("LONGCHAR", DbType.String, false),
-            new SQLiteTypeName("LONGTEXT", DbType.String, false),
-            new SQLiteTypeName("LONGVARCHAR", DbType.String, false),
-            new SQLiteTypeName("MEMO", DbType.String, false),
-            new SQLiteTypeName("MONEY", DbType.Decimal, false),
-            new SQLiteTypeName("NCHAR", DbType.StringFixedLength, true),
-            new SQLiteTypeName("NOTE", DbType.String, false),
-            new SQLiteTypeName("NTEXT", DbType.String, false),
-            new SQLiteTypeName("NUMERIC", DbType.Decimal, false),
-            new SQLiteTypeName("NVARCHAR", DbType.String, true),
-            new SQLiteTypeName("OLEOBJECT", DbType.Binary, false),
-            new SQLiteTypeName("REAL", DbType.Double, true),
-            new SQLiteTypeName("SINGLE", DbType.Single, true),
-            new SQLiteTypeName("SMALLDATE", DbType.DateTime, false),
-            new SQLiteTypeName("SMALLINT", DbType.Int16, true),
-            new SQLiteTypeName("SMALLUINT", DbType.UInt16, true),
-            new SQLiteTypeName("STRING", DbType.String, false),
-            new SQLiteTypeName("TEXT", DbType.String, false),
-            new SQLiteTypeName("TIME", DbType.DateTime, false),
-            new SQLiteTypeName("TIMESTAMP", DbType.DateTime, false),
-            new SQLiteTypeName("TINYINT", DbType.Byte, true),
-            new SQLiteTypeName("TINYSINT", DbType.SByte, true),
-            new SQLiteTypeName("UINT", DbType.UInt32, true),
-            new SQLiteTypeName("UINT8", DbType.Byte, false),
-            new SQLiteTypeName("UINT16", DbType.UInt16, false),
-            new SQLiteTypeName("UINT32", DbType.UInt32, false),
-            new SQLiteTypeName("UINT64", DbType.UInt64, false),
-            new SQLiteTypeName("ULONG", DbType.UInt64, false),
-            new SQLiteTypeName("UNIQUEIDENTIFIER", DbType.Guid, true),
-            new SQLiteTypeName("UNSIGNEDINTEGER", DbType.UInt64, true),
-            new SQLiteTypeName("UNSIGNEDINTEGER8", DbType.Byte, false),
-            new SQLiteTypeName("UNSIGNEDINTEGER16", DbType.UInt16, false),
-            new SQLiteTypeName("UNSIGNEDINTEGER32", DbType.UInt32, false),
-            new SQLiteTypeName("UNSIGNEDINTEGER64", DbType.UInt64, false),
-            new SQLiteTypeName("VARBINARY", DbType.Binary, false),
-            new SQLiteTypeName("VARCHAR", DbType.AnsiString, true),
-            new SQLiteTypeName("YESNO", DbType.Boolean, false)
-        };
+        return new SQLiteDbTypeMap(new SQLiteDbTypeMapping[] {
+            new SQLiteDbTypeMapping("BIGINT", DbType.Int64, false),
+            new SQLiteDbTypeMapping("BIGUINT", DbType.UInt64, false),
+            new SQLiteDbTypeMapping("BINARY", DbType.Binary, false),
+            new SQLiteDbTypeMapping("BIT", DbType.Boolean, true),
+            new SQLiteDbTypeMapping("BLOB", DbType.Binary, true),
+            new SQLiteDbTypeMapping("BOOL", DbType.Boolean, false),
+            new SQLiteDbTypeMapping("BOOLEAN", DbType.Boolean, false),
+            new SQLiteDbTypeMapping("CHAR", DbType.AnsiStringFixedLength, true),
+            new SQLiteDbTypeMapping("COUNTER", DbType.Int64, false),
+            new SQLiteDbTypeMapping("CURRENCY", DbType.Decimal, false),
+            new SQLiteDbTypeMapping("DATE", DbType.DateTime, false),
+            new SQLiteDbTypeMapping("DATETIME", DbType.DateTime, true),
+            new SQLiteDbTypeMapping("DECIMAL", DbType.Decimal, true),
+            new SQLiteDbTypeMapping("DOUBLE", DbType.Double, false),
+            new SQLiteDbTypeMapping("FLOAT", DbType.Double, false),
+            new SQLiteDbTypeMapping("GENERAL", DbType.Binary, false),
+            new SQLiteDbTypeMapping("GUID", DbType.Guid, false),
+            new SQLiteDbTypeMapping("IDENTITY", DbType.Int64, false),
+            new SQLiteDbTypeMapping("IMAGE", DbType.Binary, false),
+            new SQLiteDbTypeMapping("INT", DbType.Int32, true),
+            new SQLiteDbTypeMapping("INT8", DbType.SByte, false),
+            new SQLiteDbTypeMapping("INT16", DbType.Int16, false),
+            new SQLiteDbTypeMapping("INT32", DbType.Int32, false),
+            new SQLiteDbTypeMapping("INT64", DbType.Int64, false),
+            new SQLiteDbTypeMapping("INTEGER", DbType.Int64, true),
+            new SQLiteDbTypeMapping("INTEGER8", DbType.SByte, false),
+            new SQLiteDbTypeMapping("INTEGER16", DbType.Int16, false),
+            new SQLiteDbTypeMapping("INTEGER32", DbType.Int32, false),
+            new SQLiteDbTypeMapping("INTEGER64", DbType.Int64, false),
+            new SQLiteDbTypeMapping("LOGICAL", DbType.Boolean, false),
+            new SQLiteDbTypeMapping("LONG", DbType.Int64, false),
+            new SQLiteDbTypeMapping("LONGCHAR", DbType.String, false),
+            new SQLiteDbTypeMapping("LONGTEXT", DbType.String, false),
+            new SQLiteDbTypeMapping("LONGVARCHAR", DbType.String, false),
+            new SQLiteDbTypeMapping("MEMO", DbType.String, false),
+            new SQLiteDbTypeMapping("MONEY", DbType.Decimal, false),
+            new SQLiteDbTypeMapping("NCHAR", DbType.StringFixedLength, true),
+            new SQLiteDbTypeMapping("NOTE", DbType.String, false),
+            new SQLiteDbTypeMapping("NTEXT", DbType.String, false),
+            new SQLiteDbTypeMapping("NUMERIC", DbType.Decimal, false),
+            new SQLiteDbTypeMapping("NVARCHAR", DbType.String, true),
+            new SQLiteDbTypeMapping("OLEOBJECT", DbType.Binary, false),
+            new SQLiteDbTypeMapping("REAL", DbType.Double, true),
+            new SQLiteDbTypeMapping("SINGLE", DbType.Single, true),
+            new SQLiteDbTypeMapping("SMALLDATE", DbType.DateTime, false),
+            new SQLiteDbTypeMapping("SMALLINT", DbType.Int16, true),
+            new SQLiteDbTypeMapping("SMALLUINT", DbType.UInt16, true),
+            new SQLiteDbTypeMapping("STRING", DbType.String, false),
+            new SQLiteDbTypeMapping("TEXT", DbType.String, false),
+            new SQLiteDbTypeMapping("TIME", DbType.DateTime, false),
+            new SQLiteDbTypeMapping("TIMESTAMP", DbType.DateTime, false),
+            new SQLiteDbTypeMapping("TINYINT", DbType.Byte, true),
+            new SQLiteDbTypeMapping("TINYSINT", DbType.SByte, true),
+            new SQLiteDbTypeMapping("UINT", DbType.UInt32, true),
+            new SQLiteDbTypeMapping("UINT8", DbType.Byte, false),
+            new SQLiteDbTypeMapping("UINT16", DbType.UInt16, false),
+            new SQLiteDbTypeMapping("UINT32", DbType.UInt32, false),
+            new SQLiteDbTypeMapping("UINT64", DbType.UInt64, false),
+            new SQLiteDbTypeMapping("ULONG", DbType.UInt64, false),
+            new SQLiteDbTypeMapping("UNIQUEIDENTIFIER", DbType.Guid, true),
+            new SQLiteDbTypeMapping("UNSIGNEDINTEGER", DbType.UInt64, true),
+            new SQLiteDbTypeMapping("UNSIGNEDINTEGER8", DbType.Byte, false),
+            new SQLiteDbTypeMapping("UNSIGNEDINTEGER16", DbType.UInt16, false),
+            new SQLiteDbTypeMapping("UNSIGNEDINTEGER32", DbType.UInt32, false),
+            new SQLiteDbTypeMapping("UNSIGNEDINTEGER64", DbType.UInt64, false),
+            new SQLiteDbTypeMapping("VARBINARY", DbType.Binary, false),
+            new SQLiteDbTypeMapping("VARCHAR", DbType.AnsiString, true),
+            new SQLiteDbTypeMapping("YESNO", DbType.Boolean, false)
+        });
     }
 
     /// <summary>
@@ -1058,51 +1059,45 @@ namespace System.Data.SQLite
     /// <returns>The .NET DBType the text evaluates to.</returns>
     internal static DbType TypeNameToDbType(string Name)
     {
-      lock (_syncRoot)
-      {
-        if (_typeNames == null)
+        lock (_syncRoot)
         {
-          _typeNames = new Dictionary<string, SQLiteTypeName>(
-              new TypeNameStringComparer());
+            if (_typeNames == null)
+                _typeNames = GetSQLiteDbTypeMap();
 
-          foreach (SQLiteTypeName typeName in GetSQLiteTypeNames())
-            _typeNames.Add(typeName.typeName, typeName);
+            if (String.IsNullOrEmpty(Name)) return DbType.Object;
+
+            SQLiteDbTypeMapping value;
+
+            if (_typeNames.TryGetValue(Name, out value))
+            {
+                return value.dataType;
+            }
+            else
+            {
+                int index = Name.IndexOf('(');
+
+                if ((index > 0) &&
+                    _typeNames.TryGetValue(Name.Substring(0, index).TrimEnd(), out value))
+                {
+                    return value.dataType;
+                }
+            }
         }
-      }
 
-      if (String.IsNullOrEmpty(Name)) return DbType.Object;
-
-      SQLiteTypeName value;
-
-      if (_typeNames.TryGetValue(Name, out value))
-      {
-        return value.dataType;
-      }
-      else
-      {
-        int index = Name.IndexOf('(');
-
-        if ((index > 0) &&
-            _typeNames.TryGetValue(Name.Substring(0, index).TrimEnd(), out value))
-        {
-          return value.dataType;
-        }
-      }
-
-      DbType defaultDbType = DbType.Object;
+        DbType defaultDbType = DbType.Object;
 
 #if !NET_COMPACT_20 && TRACE_WARNING
-      Trace.WriteLine(String.Format(
-          "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
-          defaultDbType, Name));
+        Trace.WriteLine(String.Format(
+            "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
+            defaultDbType, Name));
 #endif
 
-      return defaultDbType;
+        return defaultDbType;
     }
     #endregion
 
     private static object _syncRoot = new object();
-    private static Dictionary<string, SQLiteTypeName> _typeNames = null;
+    private static SQLiteDbTypeMap _typeNames = null;
   }
 
   /// <summary>
@@ -1383,9 +1378,9 @@ namespace System.Data.SQLite
   }
 
   /// <summary>
-  /// Struct used internally to determine the datatype of a column in a resultset
+  /// Class used internally to determine the datatype of a column in a resultset
   /// </summary>
-  internal class SQLiteType
+  internal sealed class SQLiteType
   {
     /// <summary>
     /// The DbType of the column, or DbType.Object if it cannot be determined
@@ -1397,9 +1392,93 @@ namespace System.Data.SQLite
     internal TypeAffinity Affinity;
   }
 
-  internal struct SQLiteTypeName
+  /////////////////////////////////////////////////////////////////////////////
+
+  internal sealed class SQLiteDbTypeMap
+      : Dictionary<string, SQLiteDbTypeMapping>
   {
-    internal SQLiteTypeName(string newTypeName, DbType newDataType, bool newPrimary)
+      private Dictionary<DbType, SQLiteDbTypeMapping> reverse;
+
+      /////////////////////////////////////////////////////////////////////////
+
+      private SQLiteDbTypeMap()
+          : base(new TypeNameStringComparer())
+      {
+          reverse = new Dictionary<DbType, SQLiteDbTypeMapping>();
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      public SQLiteDbTypeMap(
+          IEnumerable<SQLiteDbTypeMapping> collection
+          )
+          : this()
+      {
+          Add(collection);
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      public void Add(
+          IEnumerable<SQLiteDbTypeMapping> collection
+          )
+      {
+          if (collection == null)
+              throw new ArgumentNullException("collection");
+
+          foreach (SQLiteDbTypeMapping item in collection)
+              Add(item);
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      public new void Add(
+          string key, /* IGNORED */
+          SQLiteDbTypeMapping value
+          )
+      {
+          Add(value);
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      public void Add(SQLiteDbTypeMapping item)
+      {
+          if (item == null)
+              throw new ArgumentNullException("item");
+
+          if (item.typeName == null)
+              throw new ArgumentException("item type name cannot be null");
+
+          base.Add(item.typeName, item);
+
+          if (item.primary)
+              reverse.Add(item.dataType, item);
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      public bool TryGetValue(DbType key, out SQLiteDbTypeMapping value)
+      {
+          if (reverse == null)
+          {
+              value = null;
+              return false;
+          }
+
+          return reverse.TryGetValue(key, out value);
+      }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  internal sealed class SQLiteDbTypeMapping
+  {
+    internal SQLiteDbTypeMapping(
+        string newTypeName,
+        DbType newDataType,
+        bool newPrimary
+        )
     {
       typeName = newTypeName;
       dataType = newDataType;
@@ -1411,7 +1490,7 @@ namespace System.Data.SQLite
     internal bool primary;
   }
 
-  internal class TypeNameStringComparer : IEqualityComparer<string>
+  internal sealed class TypeNameStringComparer : IEqualityComparer<string>
   {
     #region IEqualityComparer<string> Members
     public bool Equals(
