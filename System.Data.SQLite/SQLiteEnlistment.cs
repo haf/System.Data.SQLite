@@ -10,7 +10,7 @@ namespace System.Data.SQLite
 {
   using System.Transactions;
 
-  internal class SQLiteEnlistment : IEnlistmentNotification, IDisposable
+  internal sealed class SQLiteEnlistment : IEnlistmentNotification, IDisposable
   {
     internal SQLiteTransaction _transaction;
     internal Transaction _scope;
