@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -226,12 +226,12 @@ void * sqlite3Codec(void *pArg, void *data, Pgno nPageNum, int nMode)
 }
 
 /* Derive an encryption key from a user-supplied buffer */
-static HCRYPTKEY DeriveKey(const void *pKey, int nKeyLen)
+static HCRYPTKEY DeriveKey(const void *pKey, int nKey)
 {
   HCRYPTHASH hHash = 0;
   HCRYPTKEY  hKey;
 
-  if (!pKey || !nKeyLen) return 0;
+  if (!pKey || !nKey) return 0;
 
   if (!InitializeProvider())
   {
@@ -244,7 +244,7 @@ static HCRYPTKEY DeriveKey(const void *pKey, int nKeyLen)
 
     if (CryptCreateHash(g_hProvider, CALG_SHA1, 0, 0, &hHash))
     {
-      if (CryptHashData(hHash, (LPBYTE)pKey, nKeyLen, 0))
+      if (CryptHashData(hHash, (LPBYTE)pKey, nKey, 0))
       {
         CryptDeriveKey(g_hProvider, CALG_RC4, hHash, 0, &hKey);
       }
@@ -323,18 +323,23 @@ void sqlite3CodecGetKey(sqlite3 *db, int nDb, void **ppKey, int *pnKeyLen)
 }
 
 /* We do not attach this key to the temp store, only the main database. */
-SQLITE_API int sqlite3_key(sqlite3 *db, const unsigned char *pKey, int nKeySize)
+SQLITE_API int sqlite3_key_v2(sqlite3 *db, const char *zDbName, const void *pKey, int nKey)
 {
-  return sqlite3CodecAttach(db, 0, pKey, nKeySize);
+  return sqlite3CodecAttach(db, 0, pKey, nKey);
+}
+
+SQLITE_API int sqlite3_key(sqlite3 *db, const void *pKey, int nKey)
+{
+  return sqlite3_key_v2(db, 0, pKey, nKey);
 }
 
 /* Changes the encryption key for an existing database. */
-SQLITE_API int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySize)
+SQLITE_API int sqlite3_rekey_v2(sqlite3 *db, const char *zDbName, const void *pKey, int nKey)
 {
   Btree *pbt = db->aDb[0].pBt;
   Pager *p = sqlite3BtreePager(pbt);
   LPCRYPTBLOCK pBlock = (LPCRYPTBLOCK)sqlite3pager_get_codecarg(p);
-  HCRYPTKEY hKey = DeriveKey(pKey, nKeySize);
+  HCRYPTKEY hKey = DeriveKey(pKey, nKey);
   int rc = SQLITE_ERROR;
 
   if (hKey == MAXDWORD)
@@ -437,6 +442,11 @@ SQLITE_API int sqlite3_rekey(sqlite3 *db, const unsigned char *pKey, int nKeySiz
   sqlite3_mutex_leave(db->mutex);
 
   return rc;
+}
+
+SQLITE_API int sqlite3_rekey(sqlite3 *db, const void *pKey, int nKey)
+{
+  return sqlite3_rekey_v2(db, 0, pKey, nKey);
 }
 
 #endif /* SQLITE_HAS_CODEC */
