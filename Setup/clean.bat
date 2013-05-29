@@ -42,7 +42,7 @@ IF NOT EXIST "%TEMP%" (
 
 IF DEFINED CLEANDIRS GOTO skip_cleanDirs
 
-SET CLEANDIRS=bin obj Doc\Output Membership\bin Membership\obj Setup\Output
+SET CLEANDIRS=bin obj Doc\Output Setup\Output
 SET CLEANDIRS=%CLEANDIRS% SQLite.Designer\bin SQLite.Designer\obj
 SET CLEANDIRS=%CLEANDIRS% SQLite.Interop\bin SQLite.Interop\obj
 SET CLEANDIRS=%CLEANDIRS% System.Data.SQLite\bin System.Data.SQLite\obj

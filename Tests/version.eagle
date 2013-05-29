@@ -251,8 +251,6 @@ set fileNames [list \
     SQLite.x86.nuspec \
     [file join Doc Extra dbfactorysupport.html] \
     [file join Doc Extra welcome.html] \
-    [file join Membership Properties AssemblyInfo.cs] \
-    [file join Membership Properties AssemblyInfo.cs] \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Designer source.extension.vsixmanifest] \

@@ -130,7 +130,6 @@
         <li>&lt;root&gt;\SQLite.x64.nuspec</li>
         <li>&lt;root&gt;\Doc\Extra\dbfactorysupport.html</li>
         <li>&lt;root&gt;\Doc\Extra\welcome.html</li>
-        <li>&lt;root&gt;\Membership\Properties\AssemblyInfo.cs</li>
         <li>&lt;root&gt;\SQLite.Designer\AssemblyInfo.cs</li>
         <li>&lt;root&gt;\SQLite.Designer\source.extension.vsixmanifest</li>
         <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2005.vsprops</li>
