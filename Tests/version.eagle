@@ -186,10 +186,6 @@ set patterns [list \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
-    [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
-        $version(full)] \"\\)] \
-    [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
-        $version(full)] \"\\)] \
     [appendArgs <Version> [string map [list . \\.] \
         $version(full)] </Version>] \
     [appendArgs Value=\" [format %03d $version(build)] \"] \
