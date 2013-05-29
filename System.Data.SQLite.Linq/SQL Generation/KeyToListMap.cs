@@ -16,7 +16,7 @@ using System.Runtime;
 
 namespace System.Data.SQLite
 {
-	internal class KeyToListMap<TKey, TValue> : InternalBase
+	internal sealed class KeyToListMap<TKey, TValue> : InternalBase
 	{
 		// Fields
 		private Dictionary<TKey, List<TValue>> m_map;

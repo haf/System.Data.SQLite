@@ -16,7 +16,7 @@ namespace System.Data.SQLite
   using System.Text;
   using System.Globalization;
 
-  internal class SQLiteProviderServices : DbProviderServices, ISQLiteSchemaExtensions
+  internal sealed class SQLiteProviderServices : DbProviderServices, ISQLiteSchemaExtensions
   {
     internal static readonly SQLiteProviderServices Instance = new SQLiteProviderServices();
 

@@ -19,7 +19,7 @@ namespace System.Data.SQLite
   /// <summary>
   /// Alternate SQLite3 object, overriding many text behaviors to support UTF-16 (Unicode)
   /// </summary>
-  internal class SQLite3_UTF16 : SQLite3
+  internal sealed class SQLite3_UTF16 : SQLite3
   {
     internal SQLite3_UTF16(SQLiteDateFormats fmt, DateTimeKind kind)
       : base(fmt, kind)

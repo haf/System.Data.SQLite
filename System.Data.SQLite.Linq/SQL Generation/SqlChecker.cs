@@ -11,7 +11,7 @@ namespace System.Data.SQLite
   using System.Collections.Generic;
   using System.Data.Common.CommandTrees;
 
-    internal class SqlChecker : DbExpressionVisitor<bool>
+    internal sealed class SqlChecker : DbExpressionVisitor<bool>
   {
 #if false
     private static Type sql8rewriter;

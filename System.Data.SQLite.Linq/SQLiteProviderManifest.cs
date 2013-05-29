@@ -18,7 +18,7 @@ namespace System.Data.SQLite
   /// <summary>
   /// The Provider Manifest for SQL Server
   /// </summary>
-  internal class SQLiteProviderManifest : DbXmlEnabledProviderManifest
+  internal sealed class SQLiteProviderManifest : DbXmlEnabledProviderManifest
   {
     internal SQLiteDateFormats _dateFormat;
 

@@ -28,7 +28,7 @@ namespace System.Data.SQLite {
 #if !NET_COMPACT_20
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
 #endif
-    internal class SR {
+    internal sealed class SR {
         
         private static global::System.Resources.ResourceManager resourceMan;
         

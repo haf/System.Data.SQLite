@@ -70,7 +70,7 @@ namespace test
     }
   }
 
-  internal class TestCases
+  internal sealed class TestCases
   {
     internal Form1 frm;
 

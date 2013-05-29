@@ -15,7 +15,7 @@ using System.Text;
 
 namespace test
 {
-  internal class TestCases : TestCaseBase
+  internal sealed class TestCases : TestCaseBase
   {
     private const int NumThreads = 8;
     private const int ThreadTimeout = 60000;
@@ -1322,7 +1322,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
       }
     }
 
-    internal class MTTest
+    internal sealed class MTTest
     {
       internal DbConnection cnn;
       internal Exception e;
@@ -2170,7 +2170,7 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     Inconclusive = 2,
   }
 
-  internal class InconclusiveException : Exception
+  internal sealed class InconclusiveException : Exception
   {
     internal InconclusiveException()
       : base()
