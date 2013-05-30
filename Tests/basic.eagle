@@ -873,7 +873,8 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
       {
         public static string GetConnectionString(
           string format,
-          string kind
+          string kind,
+          string formatString
           )
         {
           SQLiteConnectionStringBuilder builder =
@@ -882,6 +883,7 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
           builder.Add("Date Source", "test.db");
           builder.Add("DateTimeFormat", format);
           builder.Add("DateTimeKind", kind);
+          builder.Add("DateTimeFormatString", formatString);
 
           return builder.ToString();
         }
@@ -900,19 +902,23 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
       [expr {[info exists errors] ? $errors : ""}] \
       [expr {$code eq "Ok" ? [catch {
         object invoke _Dynamic${id}.Test${id} GetConnectionString \
-            null null
+            null null null
       } result] : [set result ""]}] $result \
       [expr {$code eq "Ok" ? [catch {
         object invoke _Dynamic${id}.Test${id} GetConnectionString \
-            Default null
+            Default null null
       } result] : [set result ""]}] $result \
       [expr {$code eq "Ok" ? [catch {
         object invoke _Dynamic${id}.Test${id} GetConnectionString \
-            null Unspecified
+            null Unspecified null
       } result] : [set result ""]}] $result \
       [expr {$code eq "Ok" ? [catch {
         object invoke _Dynamic${id}.Test${id} GetConnectionString \
-            ISO8601 Utc
+            ISO8601 Utc null
+      } result] : [set result ""]}] $result \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetConnectionString \
+            Ticks Local yyyy-MM-dd
       } result] : [set result ""]}] $result
 } -cleanup {
   unset -nocomplain result results errors code id
@@ -921,7 +927,8 @@ runTest {test data-1.15 {SQLiteConnectionStringBuilder DateTime} -body {
 regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{Date\
 Source=test\.db\} 0 \{Date Source=test\.db;DateTimeFormat=(?:Default|ISO8601)\}\
 0 \{Date Source=test\.db;DateTimeKind=Unspecified\} 0 \{Date\
-Source=test\.db;DateTimeFormat=(?:Default|ISO8601);DateTimeKind=Utc\}$}}
+Source=test\.db;DateTimeFormat=(?:Default|ISO8601);DateTimeKind=Utc\} 0 \{Date\
+Source=test\.db;DateTimeFormat=Ticks;DateTimeKind=Local;DateTimeFormatString=yyyy-MM-dd\}$}}
 
 ###############################################################################
 
@@ -1001,15 +1008,15 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                    BinaryGUID "Data Source" Uri FullUri "Default Timeout" \
                    Enlist FailIfMissing "Legacy Format" "Read Only" \
                    Password "Page Size" "Max Page Count" "Cache Size" \
-                   DateTimeFormat DateTimeKind BaseSchemaName \
-                   "Journal Mode" "Default IsolationLevel" "Foreign Keys" \
-                   Flags SetDefaults ToFullPath HexPassword]
+                   DateTimeFormat DateTimeKind DateTimeFormatString \
+                   BaseSchemaName "Journal Mode" "Default IsolationLevel" \
+                   "Foreign Keys" Flags SetDefaults ToFullPath HexPassword]
 
     set values [list null 3 Normal True False \
                      True test.db test.db file:test.db 60 \
                      False True False True \
                      secret 4096 1024 8192 \
-                     UnixEpoch Utc sqlite_schema \
+                     UnixEpoch Utc yyyy-MM-dd sqlite_schema \
                      Memory Serializable False \
                      Default False False 736563726574]
 
@@ -1017,9 +1024,10 @@ runTest {test data-1.16 {SQLiteConnectionStringBuilder properties} -body {
                             BinaryGUID DataSource Uri FullUri DefaultTimeout \
                             Enlist FailIfMissing LegacyFormat ReadOnly \
                             Password PageSize MaxPageCount CacheSize \
-                            DateTimeFormat DateTimeKind BaseSchemaName \
-                            JournalMode DefaultIsolationLevel ForeignKeys \
-                            Flags SetDefaults ToFullPath HexPassword]
+                            DateTimeFormat DateTimeKind DateTimeFormatString \
+                            BaseSchemaName JournalMode DefaultIsolationLevel \
+                            ForeignKeys Flags SetDefaults ToFullPath \
+                            HexPassword]
 
     foreach key $keys value $values propertyName $propertyNames {
       set code [catch {
@@ -1046,9 +1054,10 @@ Enlist=False\} 0 \{True, FailIfMissing=True\} 0 \{False, Legacy Format=False\}\
 0 \{True, Read Only=True\} 0 \{secret, Password=secret\} 0 \{4096, Page\
 Size=4096\} 0 \{1024, Max Page Count=1024\} 0 \{8192, Cache Size=8192\} 0\
 \{UnixEpoch, DateTimeFormat=UnixEpoch\} 0 \{Utc, DateTimeKind=Utc\} 0\
-\{sqlite_schema, BaseSchemaName=sqlite_schema\} 0 \{Memory, Journal\
-Mode=Memory\} 0 \{Serializable, Default IsolationLevel=Serializable\} 0\
-\{False, Foreign Keys=False\} 0 \{(?:Default|LogCallbackException),\
+\{yyyy-MM-dd, DateTimeFormatString=yyyy-MM-dd\} 0 \{sqlite_schema,\
+BaseSchemaName=sqlite_schema\} 0 \{Memory, Journal Mode=Memory\} 0\
+\{Serializable, Default IsolationLevel=Serializable\} 0 \{False, Foreign\
+Keys=False\} 0 \{(?:Default|LogCallbackException),\
 Flags=(?:Default|LogCallbackException)\} 0 \{False, SetDefaults=False\} 0\
 \{False, ToFullPath=False\} 0 {736563726574, HexPassword=736563726574}$}}
 
@@ -1469,7 +1478,7 @@ runTest {test data-1.28 {SetMemoryStatus method} -setup {
   # NOTE: Create an instance of the core SQLite library interop wrapper class.
   #
   set sqlite3 [object create -flags +NonPublic System.Data.SQLite.SQLite3 \
-      Default Unspecified]
+      Default Unspecified null]
 } -body {
   set result(rc1) [object invoke -flags +NonPublic $sqlite3 SetMemoryStatus \
       false]

@@ -149,6 +149,13 @@ namespace System.Data.SQLite
   /// <description>Unspecified</description>
   /// </item>
   /// <item>
+  /// <description>DateTimeFormatString</description>
+  /// <description>The exact DateTime format string to use for all formatting and parsing of all DateTime
+  /// values for this connection.</description>
+  /// <description>N</description>
+  /// <description>null</description>
+  /// </item>
+  /// <item>
   /// <description>BaseSchemaName</description>
   /// <description>Some base data classes in the framework (e.g. those that build SQL queries dynamically)
   /// assume that an ADO.NET provider cannot support an alternate catalog (i.e. database) without supporting
@@ -312,6 +319,7 @@ namespace System.Data.SQLite
     private const IsolationLevel DefaultIsolationLevel = IsolationLevel.Serializable;
     private const SQLiteDateFormats DefaultDateTimeFormat = SQLiteDateFormats.ISO8601;
     private const DateTimeKind DefaultDateTimeKind = DateTimeKind.Unspecified;
+    private const string DefaultDateTimeFormatString = null;
     private const string DefaultDataSource = null;
     private const string DefaultUri = null;
     private const string DefaultFullUri = null;
@@ -1170,6 +1178,13 @@ namespace System.Data.SQLite
     /// <description>Unspecified</description>
     /// </item>
     /// <item>
+    /// <description>DateTimeFormatString</description>
+    /// <description>The exact DateTime format string to use for all formatting and parsing of all DateTime
+    /// values for this connection.</description>
+    /// <description>N</description>
+    /// <description>null</description>
+    /// </item>
+    /// <item>
     /// <description>BaseSchemaName</description>
     /// <description>Some base data classes in the framework (e.g. those that build SQL queries dynamically)
     /// assume that an ADO.NET provider cannot support an alternate catalog (i.e. database) without supporting
@@ -1413,10 +1428,21 @@ namespace System.Data.SQLite
 
       // First split into semi-colon delimited values.
       string error = null;
-      string[] arParts = SQLiteConvert.NewSplit(s, ';', true, ref error);
+      string[] arParts;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+      if (Environment.GetEnvironmentVariable("No_SQLiteConnectionNewParser") != null)
+          arParts = SQLiteConvert.Split(s, ';');
+      else
+#endif
+          arParts = SQLiteConvert.NewSplit(s, ';', true, ref error);
 
       if (arParts == null)
-          throw new ArgumentException(String.Format("Invalid ConnectionString format, cannot parse: {0}", error));
+      {
+          throw new ArgumentException(String.Format(
+              "Invalid ConnectionString format, cannot parse: {0}", (error != null) ?
+              error : "could not split connection string into properties"));
+      }
 
       int x = (arParts != null) ? arParts.Length : 0;
       // For each semi-colon piece, split into key and value pairs by the presence of the = sign
@@ -1870,6 +1896,9 @@ namespace System.Data.SQLite
             DateTimeKind kind = (enumValue is DateTimeKind) ?
                 (DateTimeKind)enumValue : DefaultDateTimeKind;
 
+            string dateTimeFormat = FindKey(opts, "DateTimeFormatString",
+                DefaultDateTimeFormatString);
+
             //
             // NOTE: SQLite automatically sets the encoding of the database to
             //       UTF16 if called from sqlite3_open16().
@@ -1877,11 +1906,11 @@ namespace System.Data.SQLite
             if (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding",
                       DefaultUseUTF16Encoding.ToString())))
             {
-                _sql = new SQLite3_UTF16(dateFormat, kind);
+                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat);
             }
             else
             {
-                _sql = new SQLite3(dateFormat, kind);
+                _sql = new SQLite3(dateFormat, kind, dateTimeFormat);
             }
         }
 
@@ -2299,6 +2328,9 @@ namespace System.Data.SQLite
             DateTimeKind kind = (enumValue is DateTimeKind) ?
                 (DateTimeKind)enumValue : DefaultDateTimeKind;
 
+            string dateTimeFormat = FindKey(opts, "DateTimeFormatString",
+                DefaultDateTimeFormatString);
+
             //
             // NOTE: SQLite automatically sets the encoding of the database to
             //       UTF16 if called from sqlite3_open16().
@@ -2306,11 +2338,11 @@ namespace System.Data.SQLite
             if (SQLiteConvert.ToBoolean(FindKey(opts,
                     "UseUTF16Encoding", DefaultUseUTF16Encoding.ToString())))
             {
-                _sql = new SQLite3_UTF16(dateFormat, kind);
+                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat);
             }
             else
             {
-                _sql = new SQLite3(dateFormat, kind);
+                _sql = new SQLite3(dateFormat, kind, dateTimeFormat);
             }
         }
         if (_sql != null) return _sql.Shutdown();

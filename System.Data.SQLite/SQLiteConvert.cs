@@ -93,7 +93,7 @@ namespace System.Data.SQLite
     /// </summary>
     private static Encoding _utf8 = new UTF8Encoding();
     /// <summary>
-    /// The default DateTime format for this instance
+    /// The default DateTime format for this instance.
     /// </summary>
     internal SQLiteDateFormats _datetimeFormat;
     /// <summary>
@@ -101,14 +101,24 @@ namespace System.Data.SQLite
     /// </summary>
     internal DateTimeKind _datetimeKind;
     /// <summary>
+    /// The default DateTime format string for this instance.
+    /// </summary>
+    internal string _datetimeFormatString = null;
+    /// <summary>
     /// Initializes the conversion class
     /// </summary>
     /// <param name="fmt">The default date/time format to use for this instance</param>
     /// <param name="kind">The DateTimeKind to use.</param>
-    internal SQLiteConvert(SQLiteDateFormats fmt, DateTimeKind kind)
+    /// <param name="fmtString">The DateTime format string to use.</param>
+    internal SQLiteConvert(
+        SQLiteDateFormats fmt,
+        DateTimeKind kind,
+        string fmtString
+        )
     {
       _datetimeFormat = fmt;
       _datetimeKind = kind;
+      _datetimeFormatString = fmtString;
     }
 
     #region UTF-8 Conversion Functions
@@ -185,7 +195,8 @@ namespace System.Data.SQLite
 
     #region DateTime Conversion Functions
     /// <summary>
-    /// Converts a string into a DateTime, using the current DateTimeFormat specified for the connection when it was opened.
+    /// Converts a string into a DateTime, using the DateTimeFormat, DateTimeKind,
+    /// and DateTimeFormatString specified for the connection when it was opened.
     /// </summary>
     /// <remarks>
     /// Acceptable ISO8601 DateTime formats are:
@@ -222,7 +233,9 @@ namespace System.Data.SQLite
     /// <item><description>yyyyMMdd</description></item>
     /// <item><description>yy-MM-dd</description></item>
     /// </list>
-    /// If the string cannot be matched to one of the above formats, an exception will be thrown.
+    /// If the string cannot be matched to one of the above formats -OR-
+    /// the DateTimeFormatString if one was provided, an exception will
+    /// be thrown.
     /// </remarks>
     /// <param name="dateText">The string containing either a long integer number of 100-nanosecond units since
     /// System.DateTime.MinValue, a Julian day double, an integer number of seconds since the Unix epoch, a
@@ -231,11 +244,12 @@ namespace System.Data.SQLite
     /// <returns>A DateTime value</returns>
     public DateTime ToDateTime(string dateText)
     {
-      return ToDateTime(dateText, _datetimeFormat, _datetimeKind);
+      return ToDateTime(dateText, _datetimeFormat, _datetimeKind, _datetimeFormatString);
     }
 
     /// <summary>
-    /// Converts a string into a DateTime, using the specified DateTimeFormat and DateTimeKind.
+    /// Converts a string into a DateTime, using the specified DateTimeFormat,
+    /// DateTimeKind and DateTimeFormatString.
     /// </summary>
     /// <remarks>
     /// Acceptable ISO8601 DateTime formats are:
@@ -272,7 +286,9 @@ namespace System.Data.SQLite
     /// <item><description>yyyyMMdd</description></item>
     /// <item><description>yy-MM-dd</description></item>
     /// </list>
-    /// If the string cannot be matched to one of the above formats, an exception will be thrown.
+    /// If the string cannot be matched to one of the above formats -OR-
+    /// the DateTimeFormatString if one was provided, an exception will
+    /// be thrown.
     /// </remarks>
     /// <param name="dateText">The string containing either a long integer number of 100-nanosecond units since
     /// System.DateTime.MinValue, a Julian day double, an integer number of seconds since the Unix epoch, a
@@ -280,8 +296,14 @@ namespace System.Data.SQLite
     /// culture, or an ISO8601-format string.</param>
     /// <param name="format">The SQLiteDateFormats to use.</param>
     /// <param name="kind">The DateTimeKind to use.</param>
+    /// <param name="formatString">The DateTime format string to use.</param>
     /// <returns>A DateTime value</returns>
-    public static DateTime ToDateTime(string dateText, SQLiteDateFormats format, DateTimeKind kind)
+    public static DateTime ToDateTime(
+        string dateText,
+        SQLiteDateFormats format,
+        DateTimeKind kind,
+        string formatString
+        )
     {
         switch (format)
         {
@@ -303,31 +325,58 @@ namespace System.Data.SQLite
                 }
             case SQLiteDateFormats.InvariantCulture:
                 {
-                    return DateTime.SpecifyKind(DateTime.Parse(
-                        dateText, DateTimeFormatInfo.InvariantInfo,
-                        kind == DateTimeKind.Utc ?
-                            DateTimeStyles.AdjustToUniversal :
-                            DateTimeStyles.None),
-                        kind);
+                    if (formatString != null)
+                        return DateTime.SpecifyKind(DateTime.ParseExact(
+                            dateText, formatString,
+                            DateTimeFormatInfo.InvariantInfo,
+                            kind == DateTimeKind.Utc ?
+                                DateTimeStyles.AdjustToUniversal :
+                                DateTimeStyles.None),
+                            kind);
+                    else
+                        return DateTime.SpecifyKind(DateTime.Parse(
+                            dateText, DateTimeFormatInfo.InvariantInfo,
+                            kind == DateTimeKind.Utc ?
+                                DateTimeStyles.AdjustToUniversal :
+                                DateTimeStyles.None),
+                            kind);
                 }
             case SQLiteDateFormats.CurrentCulture:
                 {
-                    return DateTime.SpecifyKind(DateTime.Parse(
-                        dateText, DateTimeFormatInfo.CurrentInfo,
-                        kind == DateTimeKind.Utc ?
-                            DateTimeStyles.AdjustToUniversal :
-                            DateTimeStyles.None),
-                        kind);
+                    if (formatString != null)
+                        return DateTime.SpecifyKind(DateTime.ParseExact(
+                            dateText, formatString,
+                            DateTimeFormatInfo.CurrentInfo,
+                            kind == DateTimeKind.Utc ?
+                                DateTimeStyles.AdjustToUniversal :
+                                DateTimeStyles.None),
+                            kind);
+                    else
+                        return DateTime.SpecifyKind(DateTime.Parse(
+                            dateText, DateTimeFormatInfo.CurrentInfo,
+                            kind == DateTimeKind.Utc ?
+                                DateTimeStyles.AdjustToUniversal :
+                                DateTimeStyles.None),
+                            kind);
                 }
             default: /* ISO-8601 */
                 {
-                    return DateTime.SpecifyKind(DateTime.ParseExact(
-                        dateText, _datetimeFormats,
-                        DateTimeFormatInfo.InvariantInfo,
-                        kind == DateTimeKind.Utc ?
-                            DateTimeStyles.AdjustToUniversal :
-                            DateTimeStyles.None),
-                        kind);
+                    if (formatString != null)
+                        return DateTime.SpecifyKind(DateTime.ParseExact(
+                            dateText, formatString,
+                            DateTimeFormatInfo.InvariantInfo,
+                            kind == DateTimeKind.Utc ?
+                                DateTimeStyles.AdjustToUniversal :
+                                DateTimeStyles.None),
+                            kind);
+                    else
+                        return DateTime.SpecifyKind(DateTime.ParseExact(
+                            dateText, _datetimeFormats,
+                            DateTimeFormatInfo.InvariantInfo,
+                            kind == DateTimeKind.Utc ?
+                                DateTimeStyles.AdjustToUniversal :
+                                DateTimeStyles.None),
+                            kind);
                 }
         }
     }
@@ -376,20 +425,26 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns the default DateTime format string to use for the specified
-    /// DateTimeKind.
+    /// Returns the DateTime format string to use for the specified DateTimeKind.
+    /// If <paramref name="formatString"/> is not null, it will be returned verbatim.
     /// </summary>
     /// <param name="kind">The DateTimeKind to use.</param>
+    /// <param name="formatString">The DateTime format string to use.</param>
     /// <returns>
-    /// The default DateTime format string to use for the specified DateTimeKind.
+    /// The DateTime format string to use for the specified DateTimeKind.
     /// </returns>
-    private static string GetDateTimeKindFormat(DateTimeKind kind)
+    private static string GetDateTimeKindFormat(
+        DateTimeKind kind,
+        string formatString
+        )
     {
+        if (formatString != null) return formatString;
         return (kind == DateTimeKind.Utc) ? _datetimeFormatUtc : _datetimeFormatLocal;
     }
 
     /// <summary>
-    /// Converts a DateTime to a string value, using the current DateTimeFormat specified for the connection when it was opened.
+    /// Converts a string into a DateTime, using the DateTimeFormat, DateTimeKind,
+    /// and DateTimeFormatString specified for the connection when it was opened.
     /// </summary>
     /// <param name="dateValue">The DateTime value to convert</param>
     /// <returns>Either a string containing the long integer number of 100-nanosecond units since System.DateTime.MinValue, a
@@ -406,14 +461,18 @@ namespace System.Data.SQLite
             case SQLiteDateFormats.UnixEpoch:
                 return ((long)(dateValue.Subtract(UnixEpoch).Ticks / TimeSpan.TicksPerSecond)).ToString();
             case SQLiteDateFormats.InvariantCulture:
-                return dateValue.ToString(FullFormat, CultureInfo.InvariantCulture);
+                return dateValue.ToString((_datetimeFormatString != null) ?
+                    _datetimeFormatString : FullFormat, CultureInfo.InvariantCulture);
             case SQLiteDateFormats.CurrentCulture:
-                return dateValue.ToString(FullFormat, CultureInfo.CurrentCulture);
+                return dateValue.ToString((_datetimeFormatString != null) ?
+                    _datetimeFormatString : FullFormat, CultureInfo.CurrentCulture);
             default:
                 return (dateValue.Kind == DateTimeKind.Unspecified) ?
                     DateTime.SpecifyKind(dateValue, _datetimeKind).ToString(
-                        GetDateTimeKindFormat(_datetimeKind), CultureInfo.InvariantCulture) :
-                    dateValue.ToString(GetDateTimeKindFormat(dateValue.Kind), CultureInfo.InvariantCulture);
+                        GetDateTimeKindFormat(_datetimeKind, _datetimeFormatString),
+                            CultureInfo.InvariantCulture) : dateValue.ToString(
+                        GetDateTimeKindFormat(dateValue.Kind, _datetimeFormatString),
+                            CultureInfo.InvariantCulture);
         }
     }
 
@@ -867,6 +926,11 @@ namespace System.Data.SQLite
       DBNull.Value  // Xml (25)
     };
 
+    /// <summary>
+    /// Determines the type name for the given database value type.
+    /// </summary>
+    /// <param name="typ">The database value type.</param>
+    /// <returns>The type name or an empty string if it cannot be determined.</returns>
     internal static string DbTypeToTypeName(DbType typ)
     {
         lock (_syncRoot)
@@ -971,11 +1035,11 @@ namespace System.Data.SQLite
     };
 
     /// <summary>
-    /// Builds and returns an array containing the database column types
+    /// Builds and returns a map containing the database column types
     /// recognized by this provider.
     /// </summary>
     /// <returns>
-    /// An array containing the database column types recognized by this
+    /// A map containing the database column types recognized by this
     /// provider.
     /// </returns>
     private static SQLiteDbTypeMap GetSQLiteDbTypeMap()
@@ -1428,16 +1492,6 @@ namespace System.Data.SQLite
 
           foreach (SQLiteDbTypeMapping item in collection)
               Add(item);
-      }
-
-      /////////////////////////////////////////////////////////////////////////
-
-      public new void Add(
-          string key, /* IGNORED */
-          SQLiteDbTypeMapping value
-          )
-      {
-          Add(value);
       }
 
       /////////////////////////////////////////////////////////////////////////

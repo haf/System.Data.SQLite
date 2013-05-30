@@ -492,6 +492,34 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Gets/sets the DateTime format string used for formatting
+    /// and parsing purposes.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(null)]
+    public string DateTimeFormatString
+    {
+        get
+        {
+            object value;
+
+            if (TryGetValue("datetimeformatstring", out value))
+            {
+                if (value is string)
+                    return (string)value;
+                else if (value != null)
+                    return value.ToString();
+            }
+
+            return null;
+        }
+        set
+        {
+            this["datetimeformatstring"] = value;
+        }
+    }
+
+    /// <summary>
     /// Gets/Sets the placeholder base schema name used for
     /// .NET Framework compatibility purposes.
     /// </summary>
