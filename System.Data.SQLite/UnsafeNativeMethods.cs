@@ -1559,6 +1559,42 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern int sqlite3_backup_pagecount(IntPtr backup);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void xDestroyModule(IntPtr pClientData);
+#endif
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_create_module_v2(
+        IntPtr db,
+        IntPtr name,
+        IntPtr pModule,
+        IntPtr pClientData,
+#if !PLATFORM_COMPACTFRAMEWORK
+        xDestroyModule xDestroy
+#else
+        IntPtr xDestroy
+#endif
+    );
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_declare_vtab(IntPtr db, IntPtr zSQL);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_mprintf(IntPtr format, __arglist);
     #endregion
   }
 
@@ -1657,6 +1693,10 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        private bool ownHandle;
+
+        ///////////////////////////////////////////////////////////////////////
+
         public static implicit operator IntPtr(SQLiteConnectionHandle db)
         {
             if (db != null)
@@ -1673,25 +1713,26 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal SQLiteConnectionHandle(IntPtr db)
-            : this()
+        internal SQLiteConnectionHandle(IntPtr db, bool ownHandle)
+            : this(ownHandle)
         {
 #if PLATFORM_COMPACTFRAMEWORK
             lock (syncRoot)
 #endif
             {
+                this.ownHandle = ownHandle;
                 SetHandle(db);
             }
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        private SQLiteConnectionHandle()
+        private SQLiteConnectionHandle(bool ownHandle)
             : base(IntPtr.Zero)
         {
 #if COUNT_HANDLE
-            Interlocked.Increment(
-                ref UnsafeNativeMethods.connectionCount);
+            if (ownHandle)
+                Interlocked.Increment(ref UnsafeNativeMethods.connectionCount);
 #endif
         }
 
@@ -1699,6 +1740,13 @@ namespace System.Data.SQLite
 
         protected override bool ReleaseHandle()
         {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (syncRoot)
+#endif
+            {
+                if (!ownHandle) return true;
+            }
+
             try
             {
 #if !PLATFORM_COMPACTFRAMEWORK

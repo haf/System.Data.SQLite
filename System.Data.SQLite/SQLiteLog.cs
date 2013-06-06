@@ -181,7 +181,7 @@ namespace System.Data.SQLite
                 //
                 if (_sql == null)
                     _sql = new SQLite3(SQLiteDateFormats.Default,
-                        DateTimeKind.Unspecified, null);
+                        DateTimeKind.Unspecified, null, true);
 
                 //
                 // NOTE: Create a single "global" (i.e. per-process) callback

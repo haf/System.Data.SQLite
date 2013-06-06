@@ -403,6 +403,13 @@ namespace System.Data.SQLite
     /// </summary>
     internal SQLiteEnlistment _enlistment;
 #endif
+
+    /// <summary>
+    /// This field will be non-zero if this instance owns the native connection
+    /// handle and should dispose of it when it is no longer needed.
+    /// </summary>
+    private bool _ownHandle;
+
     /// <summary>
     /// The base SQLite object to interop with
     /// </summary>
@@ -474,7 +481,7 @@ namespace System.Data.SQLite
     /// Default constructor
     /// </summary>
     public SQLiteConnection()
-      : this("")
+      : this((string)null)
     {
     }
 
@@ -489,10 +496,30 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Initializes the connection with a pre-existing native connection handle.
+    /// </summary>
+    /// <param name="db">
+    /// The native connection handle to use.
+    /// </param>
+    /// <param name="ownHandle">
+    /// Non-zero if this instance owns the native connection handle and
+    /// should dispose of it when it is no longer needed.
+    /// </param>
+    internal SQLiteConnection(IntPtr db, bool ownHandle)
+        : this()
+    {
+        _ownHandle = ownHandle;
+
+        _sql = new SQLite3(
+            SQLiteDateFormats.Default, DateTimeKind.Unspecified, null,
+            _ownHandle);
+    }
+
+    /// <summary>
     /// Initializes the connection with the specified connection string.
     /// </summary>
     /// <param name="connectionString">
-    /// The connection string to use on.
+    /// The connection string to use.
     /// </param>
     /// <param name="parseViaFramework">
     /// Non-zero to parse the connection string using the built-in (i.e.
@@ -541,10 +568,10 @@ namespace System.Data.SQLite
 #endif
 
       _parseViaFramework = parseViaFramework;
+      _ownHandle = true;
       _flags = SQLiteConnectionFlags.Default;
       _connectionState = ConnectionState.Closed;
-      _connectionString = "";
-      //_commandList = new List<WeakReference>();
+      _connectionString = null;
 
       if (connectionString != null)
         ConnectionString = connectionString;
@@ -557,7 +584,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="connection">The connection to copy the settings from.</param>
     public SQLiteConnection(SQLiteConnection connection)
-      : this(connection.ConnectionString)
+      : this(connection.ConnectionString, connection.ParseViaFramework)
     {
       string str;
 
@@ -687,7 +714,7 @@ namespace System.Data.SQLite
         )
     {
         if (nativeHandle == IntPtr.Zero) return null;
-        return new SQLiteConnectionHandle(nativeHandle);
+        return new SQLiteConnectionHandle(nativeHandle, true);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1903,14 +1930,16 @@ namespace System.Data.SQLite
             // NOTE: SQLite automatically sets the encoding of the database to
             //       UTF16 if called from sqlite3_open16().
             //
+            _ownHandle = true;
+
             if (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding",
                       DefaultUseUTF16Encoding.ToString())))
             {
-                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat);
+                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat, _ownHandle);
             }
             else
             {
-                _sql = new SQLite3(dateFormat, kind, dateTimeFormat);
+                _sql = new SQLite3(dateFormat, kind, dateTimeFormat, _ownHandle);
             }
         }
 
@@ -2338,11 +2367,11 @@ namespace System.Data.SQLite
             if (SQLiteConvert.ToBoolean(FindKey(opts,
                     "UseUTF16Encoding", DefaultUseUTF16Encoding.ToString())))
             {
-                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat);
+                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat, _ownHandle);
             }
             else
             {
-                _sql = new SQLite3(dateFormat, kind, dateTimeFormat);
+                _sql = new SQLite3(dateFormat, kind, dateTimeFormat, _ownHandle);
             }
         }
         if (_sql != null) return _sql.Shutdown();

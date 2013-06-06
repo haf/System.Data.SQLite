@@ -21,8 +21,8 @@ namespace System.Data.SQLite
   /// </summary>
   internal sealed class SQLite3_UTF16 : SQLite3
   {
-    internal SQLite3_UTF16(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString)
-      : base(fmt, kind, fmtString)
+    internal SQLite3_UTF16(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString, bool ownHandle)
+      : base(fmt, kind, fmtString, ownHandle)
     {
     }
 
@@ -143,7 +143,8 @@ namespace System.Data.SQLite
 #endif
 
           if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
-          _sql = new SQLiteConnectionHandle(db);
+          base._ownHandle = true;
+          _sql = new SQLiteConnectionHandle(db, base._ownHandle);
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }

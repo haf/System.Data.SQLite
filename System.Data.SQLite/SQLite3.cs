@@ -73,13 +73,22 @@ namespace System.Data.SQLite
 #endif
 
     /// <summary>
+    /// This field will be non-zero if this instance owns the native connection
+    /// handle and should dispose of it when it is no longer needed.
+    /// </summary>
+    protected bool _ownHandle;
+
+    /// <summary>
     /// The user-defined functions registered on this connection
     /// </summary>
     protected SQLiteFunction[] _functionsArray;
 
-    internal SQLite3(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString)
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    internal SQLite3(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString, bool ownHandle)
       : base(fmt, kind, fmtString)
     {
+        _ownHandle = ownHandle;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +142,9 @@ namespace System.Data.SQLite
     // resources belonging to the previously-registered functions.
     internal override void Close(bool canThrow)
     {
+      if (!_ownHandle)
+        return;
+
       if (_sql != null)
       {
           if (_usePool)
@@ -366,7 +378,8 @@ namespace System.Data.SQLite
 #endif
 
           if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
-          _sql = new SQLiteConnectionHandle(db);
+          _ownHandle = true;
+          _sql = new SQLiteConnectionHandle(db, _ownHandle);
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }

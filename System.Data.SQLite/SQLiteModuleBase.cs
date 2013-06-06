@@ -33,21 +33,21 @@ namespace System.Data.SQLite
 
     public class SQLiteIndexConstraint
     {
-        private SQLiteModuleBase.UnsafeNativeMethods.sqlite3_index_constraint constraint;
+        private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_constraint constraint;
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     public class SQLiteIndexOrderBy
     {
-        private SQLiteModuleBase.UnsafeNativeMethods.sqlite3_index_orderby orderBy;
+        private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_orderby orderBy;
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     public class SQLiteIndexConstraintUsage
     {
-        private SQLiteModuleBase.UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage;
+        private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_constraint_usage constraintUsage;
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ namespace System.Data.SQLite
 
     public class SQLiteVirtualTableCursor
     {
-        private SQLiteModuleBase.UnsafeNativeMethods.sqlite3_vtab_cursor cursor;
+        private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_vtab_cursor cursor;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -84,23 +84,23 @@ namespace System.Data.SQLite
 
     public interface ISQLiteNativeModule
     {
-        SQLiteErrorCode xCreate(IntPtr db, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr vTab, ref IntPtr error);
-        SQLiteErrorCode xConnect(IntPtr db, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr vTab, ref IntPtr error);
-        SQLiteErrorCode xBestIndex(IntPtr vTab, IntPtr index);
-        SQLiteErrorCode xDisconnect(IntPtr vTab);
-        SQLiteErrorCode xDestroy(IntPtr vTab);
-        SQLiteErrorCode xOpen(IntPtr vTab, ref IntPtr cursor);
+        SQLiteErrorCode xCreate(IntPtr db, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr error);
+        SQLiteErrorCode xConnect(IntPtr db, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr error);
+        SQLiteErrorCode xBestIndex(IntPtr pVtab, IntPtr index);
+        SQLiteErrorCode xDisconnect(IntPtr pVtab);
+        SQLiteErrorCode xDestroy(IntPtr pVtab);
+        SQLiteErrorCode xOpen(IntPtr pVtab, ref IntPtr cursor);
         SQLiteErrorCode xClose(IntPtr cursor);
         SQLiteErrorCode xFilter(IntPtr cursor, int idxNum, IntPtr idxStr, int argc, IntPtr[] argv);
         SQLiteErrorCode xNext(IntPtr cursor);
         SQLiteErrorCode xEof(IntPtr cursor);
         SQLiteErrorCode xColumn(IntPtr cursor, IntPtr context, int index);
         SQLiteErrorCode xRowId(IntPtr cursor, ref long rowId);
-        SQLiteErrorCode xUpdate(IntPtr vtab, int nData, ref IntPtr apData, ref long rowId);
-        SQLiteErrorCode xBegin(IntPtr vtab);
-        SQLiteErrorCode xSync(IntPtr vtab);
-        SQLiteErrorCode xCommit(IntPtr vtab);
-        SQLiteErrorCode xRollback(IntPtr vtab);
+        SQLiteErrorCode xUpdate(IntPtr pVtab, int nData, ref IntPtr apData, ref long rowId);
+        SQLiteErrorCode xBegin(IntPtr pVtab);
+        SQLiteErrorCode xSync(IntPtr pVtab);
+        SQLiteErrorCode xCommit(IntPtr pVtab);
+        SQLiteErrorCode xRollback(IntPtr pVtab);
         SQLiteErrorCode xFindFunction(IntPtr pVtab, int nArg, IntPtr zName, ref xFunc pxFunc, ref IntPtr ppArg);
         SQLiteErrorCode xRename(IntPtr pVtab, IntPtr zNew);
         SQLiteErrorCode xSavepoint(IntPtr pVtab, int iSavepoint);
@@ -143,7 +143,7 @@ namespace System.Data.SQLite
     {
         #region Unsafe Native Methods Class
         [SuppressUnmanagedCodeSecurity()]
-        internal static class UnsafeNativeMethods
+        internal static class UnsafeNativeMethods2
         {
             // https://www.sqlite.org/vtab.html
 
@@ -235,6 +235,10 @@ namespace System.Data.SQLite
                 double estimatedCost;      /* Estimated cost of using this index */
             }
 
+
+
+
+
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xCreate(
                 IntPtr db,
@@ -242,7 +246,7 @@ namespace System.Data.SQLite
                 int argc,
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
                 ref IntPtr[] argv,
-                ref IntPtr vTab,
+                ref IntPtr pVtab,
                 ref IntPtr error
             );
 
@@ -253,14 +257,14 @@ namespace System.Data.SQLite
                 int argc,
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
                 ref IntPtr[] argv,
-                ref IntPtr vTab,
+                ref IntPtr pVtab,
                 ref IntPtr error
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xBestIndex(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vTab,
+                IntPtr pVtab,
                 [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr index
             );
@@ -268,19 +272,19 @@ namespace System.Data.SQLite
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xDisconnect(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vTab
+                IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xDestroy(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vTab
+                IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xOpen(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vTab,
+                IntPtr pVtab,
                 ref IntPtr cursor
             );
 
@@ -330,7 +334,7 @@ namespace System.Data.SQLite
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xUpdate(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vtab,
+                IntPtr pVtab,
                 int nData,
                 ref IntPtr apData,
                 ref long rowId
@@ -339,25 +343,25 @@ namespace System.Data.SQLite
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xBegin(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vtab
+                IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xSync(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vtab
+                IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xCommit(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vtab
+                IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xRollback(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr vtab
+                IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -398,153 +402,144 @@ namespace System.Data.SQLite
                 int iSavepoint
             );
 
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void xDestroyModule(
-                IntPtr pClientData
-            );
-
             private static readonly int SQLITE_INDEX_CONSTRAINT_EQ = 2;
             private static readonly int SQLITE_INDEX_CONSTRAINT_GT = 4;
             private static readonly int SQLITE_INDEX_CONSTRAINT_LE = 8;
             private static readonly int SQLITE_INDEX_CONSTRAINT_LT = 16;
             private static readonly int SQLITE_INDEX_CONSTRAINT_GE = 32;
             private static readonly int SQLITE_INDEX_CONSTRAINT_MATCH = 64;
-
-            [DllImport("sqlite3", CallingConvention = CallingConvention.Cdecl)]
-            internal static extern void sqlite3_create_module_v2(
-                IntPtr db,
-                IntPtr name,
-                IntPtr pModule,
-                IntPtr pClientData,
-                xDestroyModule xDestroy
-                );
-
-            [DllImport("sqlite3", CallingConvention = CallingConvention.Cdecl)]
-            internal static extern SQLiteErrorCode sqlite3_declare_vtab(IntPtr db, IntPtr zSQL);
-
-            [DllImport("sqlite3", CallingConvention = CallingConvention.Cdecl)]
-            internal static extern IntPtr sqlite3_mprintf(IntPtr format, __arglist);
         }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Private Data
-        private IntPtr database;
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private UnsafeNativeMethods.sqlite3_module CreateNativeModule()
+        #region Private Methods
+        private UnsafeNativeMethods2.sqlite3_module CreateNativeModule()
         {
-            UnsafeNativeMethods.sqlite3_module module =
-                new UnsafeNativeMethods.sqlite3_module();
+            UnsafeNativeMethods2.sqlite3_module module =
+                new UnsafeNativeMethods2.sqlite3_module();
 
             module.iVersion = 2;
-            module.xCreate = new UnsafeNativeMethods.xCreate(xCreate);
-            module.xConnect = new UnsafeNativeMethods.xConnect(xConnect);
-            module.xBestIndex = new UnsafeNativeMethods.xBestIndex(xBestIndex);
-            module.xDisconnect = new UnsafeNativeMethods.xDisconnect(xDisconnect);
-            module.xDestroy = new UnsafeNativeMethods.xDestroy(xDestroy);
-            module.xOpen = new UnsafeNativeMethods.xOpen(xOpen);
-            module.xClose = new UnsafeNativeMethods.xClose(xClose);
-            module.xFilter = new UnsafeNativeMethods.xFilter(xFilter);
-            module.xNext = new UnsafeNativeMethods.xNext(xNext);
-            module.xEof = new UnsafeNativeMethods.xEof(xEof);
-            module.xColumn = new UnsafeNativeMethods.xColumn(xColumn);
-            module.xRowId = new UnsafeNativeMethods.xRowId(xRowId);
-            module.xUpdate = new UnsafeNativeMethods.xUpdate(xUpdate);
-            module.xBegin = new UnsafeNativeMethods.xBegin(xBegin);
-            module.xSync = new UnsafeNativeMethods.xSync(xSync);
-            module.xCommit = new UnsafeNativeMethods.xCommit(xCommit);
-            module.xRollback = new UnsafeNativeMethods.xRollback(xRollback);
-            module.xFindFunction = new UnsafeNativeMethods.xFindFunction(xFindFunction);
-            module.xRename = new UnsafeNativeMethods.xRename(xRename);
-            module.xSavepoint = new UnsafeNativeMethods.xSavepoint(xSavepoint);
-            module.xRelease = new UnsafeNativeMethods.xRelease(xRelease);
-            module.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(xRollbackTo);
-
-            IntPtr foo = IntPtr.Zero;
-
-            Marshal.PtrToStructure(foo, typeof(UnsafeNativeMethods.sqlite3_module));
+            module.xCreate = new UnsafeNativeMethods2.xCreate(xCreate);
+            module.xConnect = new UnsafeNativeMethods2.xConnect(xConnect);
+            module.xBestIndex = new UnsafeNativeMethods2.xBestIndex(xBestIndex);
+            module.xDisconnect = new UnsafeNativeMethods2.xDisconnect(xDisconnect);
+            module.xDestroy = new UnsafeNativeMethods2.xDestroy(xDestroy);
+            module.xOpen = new UnsafeNativeMethods2.xOpen(xOpen);
+            module.xClose = new UnsafeNativeMethods2.xClose(xClose);
+            module.xFilter = new UnsafeNativeMethods2.xFilter(xFilter);
+            module.xNext = new UnsafeNativeMethods2.xNext(xNext);
+            module.xEof = new UnsafeNativeMethods2.xEof(xEof);
+            module.xColumn = new UnsafeNativeMethods2.xColumn(xColumn);
+            module.xRowId = new UnsafeNativeMethods2.xRowId(xRowId);
+            module.xUpdate = new UnsafeNativeMethods2.xUpdate(xUpdate);
+            module.xBegin = new UnsafeNativeMethods2.xBegin(xBegin);
+            module.xSync = new UnsafeNativeMethods2.xSync(xSync);
+            module.xCommit = new UnsafeNativeMethods2.xCommit(xCommit);
+            module.xRollback = new UnsafeNativeMethods2.xRollback(xRollback);
+            module.xFindFunction = new UnsafeNativeMethods2.xFindFunction(xFindFunction);
+            module.xRename = new UnsafeNativeMethods2.xRename(xRename);
+            module.xSavepoint = new UnsafeNativeMethods2.xSavepoint(xSavepoint);
+            module.xRelease = new UnsafeNativeMethods2.xRelease(xRelease);
+            module.xRollbackTo = new UnsafeNativeMethods2.xRollbackTo(xRollbackTo);
 
             return module;
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Public Constructors
         public SQLiteModuleBase()
         {
-
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region ISQLiteNativeModule Members
         public SQLiteErrorCode xCreate(
             IntPtr db,
             IntPtr pAux,
             int argc,
             ref IntPtr[] argv,
-            ref IntPtr vTab,
+            ref IntPtr pVtab,
             ref IntPtr error
             )
         {
-            return SQLiteErrorCode.Ok;
+            SQLiteConnection connection = new SQLiteConnection(db, false);
+
+
+            pVtab = UnsafeNativeMethods.sqlite3_malloc(Marshal.SizeOf(typeof(
+                UnsafeNativeMethods2.sqlite3_vtab)));
+
+            string errorStr = null;
+
+            return Create(null, IntPtr.Zero, null, ref errorStr);
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xConnect(
             IntPtr db,
             IntPtr pAux,
             int argc,
             ref IntPtr[] argv,
-            ref IntPtr vTab,
+            ref IntPtr pVtab,
             ref IntPtr error
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xBestIndex(
-            IntPtr vTab,
+            IntPtr pVtab,
             IntPtr index
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xDisconnect(
-                IntPtr vTab
-        )
+            IntPtr pVtab
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xDestroy(
-                IntPtr vTab
-        )
+            IntPtr pVtab
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xOpen(
-            IntPtr vTab,
+            IntPtr pVtab,
             ref IntPtr cursor
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xClose(
-                IntPtr cursor
-        )
+            IntPtr cursor
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xFilter(
             IntPtr cursor,
@@ -552,87 +547,99 @@ namespace System.Data.SQLite
             IntPtr idxStr,
             int argc,
             IntPtr[] argv
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xNext(
             IntPtr cursor
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xEof(
-                IntPtr cursor
-        )
+            IntPtr cursor
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xColumn(
             IntPtr cursor,
             IntPtr context,
             int index
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xRowId(
             IntPtr cursor,
             ref long rowId
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xUpdate(
-            IntPtr vtab,
+            IntPtr pVtab,
             int nData,
             ref IntPtr apData,
             ref long rowId
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xBegin(
-            IntPtr vtab
-        )
+            IntPtr pVtab
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xSync(
-            IntPtr vtab
-        )
+            IntPtr pVtab
+            )
         {
             return SQLiteErrorCode.Ok;
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xCommit(
-            IntPtr vtab
-        )
+            IntPtr pVtab
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xRollback(
-            IntPtr vtab
-        )
+            IntPtr pVtab
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xFindFunction(
             IntPtr pVtab,
@@ -640,77 +647,188 @@ namespace System.Data.SQLite
             IntPtr zName,
             ref xFunc pxFunc,
             ref IntPtr ppArg
-        )
-        {
-            return SQLiteErrorCode.Ok;
-        }
-
-
-        public SQLiteErrorCode xRename(
-            IntPtr pVtab,
-            IntPtr zNew
-        )
-        {
-            return SQLiteErrorCode.Ok;
-        }
-
-
-        public SQLiteErrorCode xSavepoint(
-            IntPtr pVtab,
-            int iSavepoint
-        )
-        {
-            return SQLiteErrorCode.Ok;
-        }
-
-
-        public SQLiteErrorCode xRelease(
-            IntPtr pVtab,
-            int iSavepoint
-        )
-        {
-            return SQLiteErrorCode.Ok;
-        }
-
-        public SQLiteErrorCode xRollbackTo(
-            IntPtr pVtab,
-            int iSavepoint
-        )
+            )
         {
             return SQLiteErrorCode.Ok;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Create(SQLiteConnection connection, IntPtr pClientData, string[] argv, ref string error);
-        public abstract SQLiteErrorCode Connect(SQLiteConnection connection, IntPtr pClientData, string[] argv, ref string error);
-        public abstract SQLiteErrorCode BestIndex(ref SQLiteIndex index);
+        public SQLiteErrorCode xRename(
+            IntPtr pVtab,
+            IntPtr zNew
+            )
+        {
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public SQLiteErrorCode xSavepoint(
+            IntPtr pVtab,
+            int iSavepoint
+            )
+        {
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public SQLiteErrorCode xRelease(
+            IntPtr pVtab,
+            int iSavepoint
+            )
+        {
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public SQLiteErrorCode xRollbackTo(
+            IntPtr pVtab,
+            int iSavepoint
+            )
+        {
+            return SQLiteErrorCode.Ok;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region ISQLiteManagedModule Members
+        public abstract SQLiteErrorCode Create(
+            SQLiteConnection connection,
+            IntPtr pClientData,
+            string[] argv,
+            ref string error
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Connect(
+            SQLiteConnection connection,
+            IntPtr pClientData,
+            string[] argv,
+            ref string error
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode BestIndex(
+            ref SQLiteIndex index
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
         public abstract SQLiteErrorCode Disconnect();
+
+        ///////////////////////////////////////////////////////////////////////
+
         public abstract SQLiteErrorCode Destroy();
 
-        public abstract SQLiteErrorCode Open(ref SQLiteVirtualTableCursor cursor);
-        public abstract SQLiteErrorCode Close(SQLiteVirtualTableCursor cursor);
-        public abstract SQLiteErrorCode Filter(SQLiteVirtualTableCursor cursor, int idxNum, string idxStr, SQLiteValue[] values);
-        public abstract SQLiteErrorCode Next(SQLiteVirtualTableCursor cursor);
-        public abstract SQLiteErrorCode Eof(SQLiteVirtualTableCursor cursor);
+        ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Column(SQLiteVirtualTableCursor cursor, SQLiteContext context, int index);
-        public abstract SQLiteErrorCode RowId(SQLiteVirtualTableCursor cursor, ref long rowId);
+        public abstract SQLiteErrorCode Open(
+            ref SQLiteVirtualTableCursor cursor
+            );
 
-        public abstract SQLiteErrorCode Update(SQLiteValue[] values, ref long rowId);
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Close(
+            SQLiteVirtualTableCursor cursor
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Filter(
+            SQLiteVirtualTableCursor cursor,
+            int idxNum,
+            string idxStr,
+            SQLiteValue[] values
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Next(
+            SQLiteVirtualTableCursor cursor
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Eof(
+            SQLiteVirtualTableCursor cursor
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Column(
+            SQLiteVirtualTableCursor cursor,
+            SQLiteContext context,
+            int index
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode RowId(
+            SQLiteVirtualTableCursor cursor,
+            ref long rowId
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Update(
+            SQLiteValue[] values,
+            ref long rowId
+            );
+
+        ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode Begin();
+
+        ///////////////////////////////////////////////////////////////////////
+
         public abstract SQLiteErrorCode Sync();
+
+        ///////////////////////////////////////////////////////////////////////
+
         public abstract SQLiteErrorCode Commit();
+
+        ///////////////////////////////////////////////////////////////////////
+
         public abstract SQLiteErrorCode Rollback();
 
-        public abstract SQLiteErrorCode FindFunction(string zName, ref SQLiteFunction function, object[] args);
+        ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Rename(string zNew);
+        public abstract SQLiteErrorCode FindFunction(
+            string zName,
+            ref SQLiteFunction function,
+            object[] args
+            );
 
-        public abstract SQLiteErrorCode Savepoint(int iSavepoint);
-        public abstract SQLiteErrorCode Release(int iSavepoint);
-        public abstract SQLiteErrorCode RollbackTo(int iSavepoint);
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Rename(
+            string zNew
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Savepoint(
+            int iSavepoint
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode Release(
+            int iSavepoint
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public abstract SQLiteErrorCode RollbackTo(
+            int iSavepoint
+            );
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
