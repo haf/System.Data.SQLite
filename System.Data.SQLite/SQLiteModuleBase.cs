@@ -70,12 +70,12 @@ namespace System.Data.SQLite
 
     public class SQLiteVirtualTableCursor
     {
-        private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_vtab_cursor cursor;
+        internal SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_vtab_cursor cursor;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate int xFunc(
-        IntPtr context,
+        IntPtr pContext,
         int argc,
         [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
         IntPtr[] argv
@@ -88,13 +88,13 @@ namespace System.Data.SQLite
         SQLiteErrorCode xBestIndex(IntPtr pVtab, IntPtr index);
         SQLiteErrorCode xDisconnect(IntPtr pVtab);
         SQLiteErrorCode xDestroy(IntPtr pVtab);
-        SQLiteErrorCode xOpen(IntPtr pVtab, ref IntPtr cursor);
-        SQLiteErrorCode xClose(IntPtr cursor);
-        SQLiteErrorCode xFilter(IntPtr cursor, int idxNum, IntPtr idxStr, int argc, IntPtr[] argv);
-        SQLiteErrorCode xNext(IntPtr cursor);
-        SQLiteErrorCode xEof(IntPtr cursor);
-        SQLiteErrorCode xColumn(IntPtr cursor, IntPtr context, int index);
-        SQLiteErrorCode xRowId(IntPtr cursor, ref long rowId);
+        SQLiteErrorCode xOpen(IntPtr pVtab, ref IntPtr pCursor);
+        SQLiteErrorCode xClose(IntPtr pCursor);
+        SQLiteErrorCode xFilter(IntPtr pCursor, int idxNum, IntPtr idxStr, int argc, IntPtr[] argv);
+        SQLiteErrorCode xNext(IntPtr pCursor);
+        SQLiteErrorCode xEof(IntPtr pCursor);
+        SQLiteErrorCode xColumn(IntPtr pCursor, IntPtr pContext, int index);
+        SQLiteErrorCode xRowId(IntPtr pCursor, ref long rowId);
         SQLiteErrorCode xUpdate(IntPtr pVtab, int nData, ref IntPtr apData, ref long rowId);
         SQLiteErrorCode xBegin(IntPtr pVtab);
         SQLiteErrorCode xSync(IntPtr pVtab);
@@ -288,19 +288,19 @@ namespace System.Data.SQLite
             public delegate SQLiteErrorCode xOpen(
                 [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
-                ref IntPtr cursor
+                ref IntPtr pCursor
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xClose(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr cursor
+                IntPtr pCursor
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xFilter(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr cursor,
+                IntPtr pCursor,
                 int idxNum,
                 IntPtr idxStr,
                 int argc,
@@ -310,27 +310,27 @@ namespace System.Data.SQLite
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xNext(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr cursor
+                IntPtr pCursor
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xEof(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr cursor
+                IntPtr pCursor
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xColumn(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr cursor,
-                IntPtr context,
+                IntPtr pCursor,
+                IntPtr pContext,
                 int index
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xRowId(
                 [MarshalAs(UnmanagedType.LPStruct)]
-                IntPtr cursor,
+                IntPtr pCursor,
                 ref long rowId
             );
 
@@ -596,7 +596,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Protected Members
-        protected virtual IntPtr AllocateVirtualTable()
+        protected virtual IntPtr AllocateTable()
         {
             int size = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods2.sqlite3_vtab));
@@ -606,14 +606,96 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual void FreeVirtualTable(IntPtr pVtab)
+        protected virtual void FreeTable(IntPtr pVtab)
         {
             Free(pVtab);
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual SQLiteErrorCode DeclareVirtualTable(
+        protected virtual IntPtr AllocateCursor()
+        {
+            int size = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods2.sqlite3_vtab_cursor));
+
+            return Allocate(size);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual IntPtr GetTableFromCursor(
+            IntPtr pCursor
+            )
+        {
+            if (pCursor == IntPtr.Zero)
+                return IntPtr.Zero;
+
+            return Marshal.ReadIntPtr(pCursor);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual SQLiteVirtualTableCursor MarshalCursorFromIntPtr(
+            IntPtr pCursor
+            )
+        {
+            if (pCursor == IntPtr.Zero)
+                return null;
+
+            SQLiteVirtualTableCursor result = new SQLiteVirtualTableCursor();
+            Marshal.PtrToStructure(pCursor, result.cursor);
+
+            return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual IntPtr MarshalCursorToIntPtr(
+            SQLiteVirtualTableCursor cursor
+            )
+        {
+            if (cursor == null)
+                return IntPtr.Zero;
+
+            IntPtr result = IntPtr.Zero;
+            bool success = false;
+
+            try
+            {
+                result = AllocateCursor();
+
+                if (result != IntPtr.Zero)
+                {
+                    Marshal.StructureToPtr(cursor.cursor, result, false);
+                    success = true;
+                }
+            }
+            finally
+            {
+                if (!success && (result != IntPtr.Zero))
+                {
+                    FreeCursor(result);
+                    result = IntPtr.Zero;
+                }
+            }
+
+            return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual void FreeCursor(IntPtr pCursor)
+        {
+            Free(pCursor);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual SQLiteErrorCode DeclareTable(
             SQLiteConnection connection,
             string sql,
             ref string error
@@ -634,6 +716,31 @@ namespace System.Data.SQLite
             }
 
             return sqliteBase.DeclareVirtualTable(this, sql, ref error);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual bool SetTableError(
+            IntPtr pVtab,
+            string error
+            )
+        {
+            if (pVtab == IntPtr.Zero)
+                return false;
+
+            int offset = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods2.sqlite3_module)) + sizeof(int);
+
+            IntPtr pError = Marshal.ReadIntPtr(pVtab, offset);
+
+            if (pError != IntPtr.Zero)
+            {
+                Free(pError); pError = IntPtr.Zero;
+                Marshal.WriteIntPtr(pVtab, offset, pError);
+            }
+
+            Marshal.WriteIntPtr(pVtab, offset, Utf8IntPtrFromString(error));
+            return true;
         }
         #endregion
 
@@ -660,7 +767,7 @@ namespace System.Data.SQLite
                             StringArrayFromUtf8IntPtrArray(argv),
                             ref error) == SQLiteErrorCode.Ok)
                     {
-                        pVtab = AllocateVirtualTable();
+                        pVtab = AllocateTable();
                         return SQLiteErrorCode.Ok;
                     }
                     else
@@ -699,7 +806,7 @@ namespace System.Data.SQLite
                             StringArrayFromUtf8IntPtrArray(argv),
                             ref error) == SQLiteErrorCode.Ok)
                     {
-                        pVtab = AllocateVirtualTable();
+                        pVtab = AllocateTable();
                         return SQLiteErrorCode.Ok;
                     }
                     else
@@ -758,7 +865,7 @@ namespace System.Data.SQLite
             }
             finally
             {
-                FreeVirtualTable(pVtab);
+                FreeTable(pVtab);
             }
 
             return SQLiteErrorCode.Error;
@@ -796,7 +903,7 @@ namespace System.Data.SQLite
             }
             finally
             {
-                FreeVirtualTable(pVtab);
+                FreeTable(pVtab);
             }
 
             return SQLiteErrorCode.Error;
@@ -806,25 +913,72 @@ namespace System.Data.SQLite
 
         public SQLiteErrorCode xOpen(
             IntPtr pVtab,
-            ref IntPtr cursor
+            ref IntPtr pCursor
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                SQLiteVirtualTableCursor cursor = null;
+
+                if (Open(ref cursor) == SQLiteErrorCode.Ok)
+                {
+                    if (cursor != null)
+                    {
+                        pCursor = MarshalCursorToIntPtr(cursor);
+                        return SQLiteErrorCode.Ok;
+                    }
+                    else
+                    {
+                        SetTableError(pVtab, "no cursor was created");
+                    }
+                }
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+            finally
+            {
+                FreeCursor(pCursor);
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xClose(
-            IntPtr cursor
+            IntPtr pCursor
             )
         {
-            return SQLiteErrorCode.Ok;
+            IntPtr pVtab = IntPtr.Zero;
+
+            try
+            {
+                pVtab = GetTableFromCursor(pCursor);
+
+                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
+                    pCursor);
+
+                if (Close(cursor) == SQLiteErrorCode.Ok)
+                    return SQLiteErrorCode.Ok;
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+            finally
+            {
+                FreeCursor(pCursor);
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xFilter(
-            IntPtr cursor,
+            IntPtr pCursor,
             int idxNum,
             IntPtr idxStr,
             int argc,
@@ -837,7 +991,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xNext(
-            IntPtr cursor
+            IntPtr pCursor
             )
         {
             return SQLiteErrorCode.Ok;
@@ -846,7 +1000,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xEof(
-            IntPtr cursor
+            IntPtr pCursor
             )
         {
             return SQLiteErrorCode.Ok;
@@ -855,8 +1009,8 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xColumn(
-            IntPtr cursor,
-            IntPtr context,
+            IntPtr pCursor,
+            IntPtr pContext,
             int index
             )
         {
@@ -866,7 +1020,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xRowId(
-            IntPtr cursor,
+            IntPtr pCursor,
             ref long rowId
             )
         {

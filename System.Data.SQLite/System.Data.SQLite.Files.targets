@@ -68,8 +68,8 @@
 
   <ItemGroup Condition="'$(IsCompactFramework)' == 'false'">
     <Compile Include="SQLiteEnlistment.cs" />
-    <Compile Include="SQLiteModule.cs" />
     <Compile Include="SQLiteModuleBase.cs" />
+    <Compile Include="SQLiteModuleNoop.cs" />
     <Compile Condition="'$(NetFx35)' != 'false' Or
                         '$(NetFx40)' != 'false' Or
                         '$(NetFx45)' != 'false'"
