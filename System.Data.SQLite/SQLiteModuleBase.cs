@@ -416,57 +416,57 @@ namespace System.Data.SQLite
             public struct sqlite3_vtab
             {
                 [MarshalAs(UnmanagedType.LPStruct)]
-                sqlite3_module pModule;
-                int nRef; /* NO LONGER USED */
-                IntPtr zErrMsg;
+                public sqlite3_module pModule;
+                public int nRef; /* NO LONGER USED */
+                public IntPtr zErrMsg;
             }
 
             [StructLayout(LayoutKind.Sequential)]
             public struct sqlite3_vtab_cursor
             {
                 [MarshalAs(UnmanagedType.LPStruct)]
-                sqlite3_vtab pVTab;
+                public sqlite3_vtab pVTab;
             }
 
             [StructLayout(LayoutKind.Sequential)]
             public struct sqlite3_index_constraint
             {
-                int iColumn;
-                byte op;
-                byte usable;
-                int iTermOffset;
+                public int iColumn;
+                public byte op;
+                public byte usable;
+                public int iTermOffset;
             }
 
             [StructLayout(LayoutKind.Sequential)]
             public struct sqlite3_index_orderby
             {
-                int iColumn; /* Column number */
-                byte desc;   /* True for DESC.  False for ASC. */
+                public int iColumn; /* Column number */
+                public byte desc;   /* True for DESC.  False for ASC. */
             }
 
             [StructLayout(LayoutKind.Sequential)]
             public struct sqlite3_index_constraint_usage
             {
-                int argvIndex; /* if >0, constraint is part of argv to xFilter */
-                byte omit;     /* Do not code a test for this constraint */
+                public int argvIndex; /* if >0, constraint is part of argv to xFilter */
+                public byte omit;     /* Do not code a test for this constraint */
             }
 
             [StructLayout(LayoutKind.Sequential)]
             public struct sqlite3_index_info
             {
                 /* Inputs */
-                int nConstraint;           /* Number of entries in aConstraint */
+                public int nConstraint;           /* Number of entries in aConstraint */
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
-                sqlite3_index_constraint[] aConstraint;
-                int nOrderBy;
-                sqlite3_index_orderby[] aOrderBy;
+                public sqlite3_index_constraint[] aConstraint;
+                public int nOrderBy;
+                public sqlite3_index_orderby[] aOrderBy;
                 /* Outputs */
-                sqlite3_index_constraint_usage[] aConstraintUsage;
-                int idxNum;                /* Number used to identify the index */
-                string idxStr;              /* String, possibly obtained from sqlite3_malloc */
-                int needToFreeIdxStr;      /* Free idxStr using sqlite3_free() if true */
-                int orderByConsumed;       /* True if output is already ordered */
-                double estimatedCost;      /* Estimated cost of using this index */
+                public sqlite3_index_constraint_usage[] aConstraintUsage;
+                public int idxNum;                /* Number used to identify the index */
+                public string idxStr;              /* String, possibly obtained from sqlite3_malloc */
+                public int needToFreeIdxStr;      /* Free idxStr using sqlite3_free() if true */
+                public int orderByConsumed;       /* True if output is already ordered */
+                public double estimatedCost;      /* Estimated cost of using this index */
             }
 
 
@@ -818,6 +818,23 @@ namespace System.Data.SQLite
 
             return result;
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static SQLiteValue[] ValueArrayFromIntPtrArray(
+            IntPtr[] values
+            )
+        {
+            if (values == null)
+                return null;
+
+            SQLiteValue[] result = new SQLiteValue[values.Length];
+
+            for (int index = 0; index < result.Length; index++)
+                result[index] = new SQLiteValue(values[index]);
+
+            return result;
+        }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -917,10 +934,6 @@ namespace System.Data.SQLite
 
             return result;
         }
-
-        ///////////////////////////////////////////////////////////////////////
-
-
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -1221,7 +1234,28 @@ namespace System.Data.SQLite
             IntPtr[] argv
             )
         {
-            return SQLiteErrorCode.Ok;
+            IntPtr pVtab = IntPtr.Zero;
+
+            try
+            {
+                pVtab = GetTableFromCursor(pCursor);
+
+                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
+                    pCursor);
+
+                if (Filter(
+                        cursor, idxNum, StringFromUtf8IntPtr(idxStr),
+                        ValueArrayFromIntPtrArray(argv)) == SQLiteErrorCode.Ok)
+                {
+                    return SQLiteErrorCode.Ok;
+                }
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
