@@ -17,13 +17,165 @@ using System.Text;
 
 namespace System.Data.SQLite
 {
+    #region SQLite Context Helper Class
     public sealed class SQLiteContext
     {
+        #region Private Data
+        private IntPtr pContext;
+        #endregion
 
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Private Constructors
+        internal SQLiteContext(IntPtr pContext)
+        {
+            this.pContext = pContext;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Methods
+        public void SetNull()
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_null(pContext);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetDouble(double value)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_double(pContext, value);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetInt(int value)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_int(pContext, value);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetInt64(long value)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_int64(pContext, value);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetString(string value)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            byte[] bytes = SQLiteModuleBase.GetUtf8BytesFromString(value);
+
+            if (bytes == null)
+                throw new ArgumentNullException("value");
+
+            UnsafeNativeMethods.sqlite3_result_text(
+                pContext, bytes, bytes.Length, (IntPtr)(-1));
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetError(string value)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            byte[] bytes = SQLiteModuleBase.GetUtf8BytesFromString(value);
+
+            if (bytes == null)
+                throw new ArgumentNullException("value");
+
+            UnsafeNativeMethods.sqlite3_result_error(
+                pContext, bytes, bytes.Length);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetErrorCode(SQLiteErrorCode value)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_error_code(pContext, value);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetErrorTooBig()
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_error_toobig(pContext);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetErrorNoMemory()
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_error_nomem(pContext);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetBlob(byte[] value)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            if (value == null)
+                throw new ArgumentNullException("value");
+
+            UnsafeNativeMethods.sqlite3_result_blob(
+                pContext, value, value.Length, (IntPtr)(-1));
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetZeroBlob(int value)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_zeroblob(pContext, value);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void SetValue(IntPtr pValue)
+        {
+            if (pContext == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            UnsafeNativeMethods.sqlite3_result_value(pContext, pValue);
+        }
+        #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLite Value Helper Class
     public sealed class SQLiteValue
     {
         #region Private Data
@@ -97,6 +249,7 @@ namespace System.Data.SQLite
         }
         #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -510,7 +663,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static byte[] GetUtf8BytesFromString(string value)
+        internal static byte[] GetUtf8BytesFromString(string value)
         {
             if (value == null)
                 return null;
