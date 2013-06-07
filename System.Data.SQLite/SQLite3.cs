@@ -1514,6 +1514,10 @@ namespace System.Data.SQLite
     /// Calls the native SQLite core library in order to declare a virtual table
     /// in response to a call into the xCreate or xConnect virtual table methods.
     /// </summary>
+    /// <param name="module">
+    /// The virtual table module that is to be responsible for the virtual table
+    /// being declared.
+    /// </param>
     /// <param name="strSql">
     /// The string containing the SQL statement describing the virtual table to
     /// be declared.
@@ -1525,10 +1529,17 @@ namespace System.Data.SQLite
     /// <returns>
     /// A standard SQLite return code.
     /// </returns>
-    internal override SQLiteErrorCode DeclareVirtualTable(string strSql, ref string error)
+    internal override SQLiteErrorCode DeclareVirtualTable(
+        SQLiteModuleBase module,
+        string strSql,
+        ref string error
+        )
     {
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_declare_vtab(
             _sql, SQLiteModuleBase.Utf8IntPtrFromString(strSql));
+
+        if ((n == SQLiteErrorCode.Ok) && (module != null))
+            module.Declared = true;
 
         if (n != SQLiteErrorCode.Ok) error = GetLastError();
 

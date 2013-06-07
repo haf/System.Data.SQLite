@@ -108,6 +108,8 @@ namespace System.Data.SQLite
 
     public interface ISQLiteManagedModule
     {
+        bool Declared { get; }
+
         SQLiteErrorCode Create(SQLiteConnection connection, IntPtr pClientData, string[] argv, ref string error);
         SQLiteErrorCode Connect(SQLiteConnection connection, IntPtr pClientData, string[] argv, ref string error);
         SQLiteErrorCode BestIndex(ref SQLiteIndex index);
@@ -630,7 +632,7 @@ namespace System.Data.SQLite
                 return SQLiteErrorCode.Error;
             }
 
-            return sqliteBase.DeclareVirtualTable(sql, ref error);
+            return sqliteBase.DeclareVirtualTable(this, sql, ref error);
         }
         #endregion
 
@@ -658,6 +660,7 @@ namespace System.Data.SQLite
                             ref error) == SQLiteErrorCode.Ok)
                     {
                         pVtab = AllocateVirtualTable();
+                        return SQLiteErrorCode.Ok;
                     }
                     else
                     {
@@ -696,6 +699,7 @@ namespace System.Data.SQLite
                             ref error) == SQLiteErrorCode.Ok)
                     {
                         pVtab = AllocateVirtualTable();
+                        return SQLiteErrorCode.Ok;
                     }
                     else
                     {
@@ -915,6 +919,15 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region ISQLiteManagedModule Members
+        private bool declared;
+        public bool Declared
+        {
+            get { return declared; }
+            internal set { declared = value; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         public abstract SQLiteErrorCode Create(
             SQLiteConnection connection,
             IntPtr pClientData,
