@@ -44,6 +44,7 @@ namespace System.Data.SQLite
         #region Public Methods
         public TypeAffinity GetTypeAffinity()
         {
+            if (pValue == IntPtr.Zero) return TypeAffinity.None;
             return UnsafeNativeMethods.sqlite3_value_type(pValue);
         }
 
@@ -51,6 +52,7 @@ namespace System.Data.SQLite
 
         public int GetBytes()
         {
+            if (pValue == IntPtr.Zero) return 0;
             return UnsafeNativeMethods.sqlite3_value_bytes(pValue);
         }
 
@@ -58,6 +60,7 @@ namespace System.Data.SQLite
 
         public int GetInt()
         {
+            if (pValue == IntPtr.Zero) return default(int);
             return UnsafeNativeMethods.sqlite3_value_int(pValue);
         }
 
@@ -65,6 +68,7 @@ namespace System.Data.SQLite
 
         public long GetInt64()
         {
+            if (pValue == IntPtr.Zero) return default(long);
             return UnsafeNativeMethods.sqlite3_value_int64(pValue);
         }
 
@@ -72,6 +76,7 @@ namespace System.Data.SQLite
 
         public double GetDouble()
         {
+            if (pValue == IntPtr.Zero) return default(double);
             return UnsafeNativeMethods.sqlite3_value_double(pValue);
         }
 
@@ -79,6 +84,7 @@ namespace System.Data.SQLite
 
         public string GetString()
         {
+            if (pValue == IntPtr.Zero) return null;
             return SQLiteModuleBase.StringFromUtf8IntPtr(pValue, GetBytes());
         }
 
@@ -86,6 +92,7 @@ namespace System.Data.SQLite
 
         public byte[] GetBlob()
         {
+            if (pValue == IntPtr.Zero) return null;
             return SQLiteModuleBase.BytesFromIntPtr(pValue, GetBytes());
         }
         #endregion
@@ -579,9 +586,8 @@ namespace System.Data.SQLite
 
         internal static string StringFromUtf8IntPtr(IntPtr pValue)
         {
-            int length = ProbeForUtf8ByteLength(pValue, ThirtyBits);
-
-            return StringFromUtf8IntPtr(pValue, length);
+            return StringFromUtf8IntPtr(pValue,
+                ProbeForUtf8ByteLength(pValue, ThirtyBits));
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -666,6 +672,7 @@ namespace System.Data.SQLite
         #region Public Constructors
         public SQLiteModuleBase()
         {
+            // do nothing.
         }
         #endregion
 
