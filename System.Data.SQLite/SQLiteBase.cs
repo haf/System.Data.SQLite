@@ -19,6 +19,16 @@ namespace System.Data.SQLite
   /// </summary>
   internal abstract class SQLiteBase : SQLiteConvert, IDisposable
   {
+    #region Private Constants
+    /// <summary>
+    /// The error code used for logging exceptions caught in user-provided
+    /// code.
+    /// </summary>
+    internal const int COR_E_EXCEPTION = unchecked((int)0x80131500);
+    #endregion
+
+    /////////////////////////////////////////////////////////////////////////
+
     internal SQLiteBase(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString)
       : base(fmt, kind, fmtString) { }
 

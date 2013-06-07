@@ -5,6 +5,7 @@
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -731,7 +732,36 @@ namespace System.Data.SQLite
             IntPtr pVtab
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                if (Disconnect() == SQLiteErrorCode.Ok)
+                    return SQLiteErrorCode.Ok;
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                //
+                // NOTE: At this point, there is no way to report the error
+                //       condition back to the caller; therefore, use the
+                //       logging facility instead.
+                //
+                try
+                {
+                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                        String.Format(CultureInfo.CurrentCulture,
+                        "Caught exception in \"xDisconnect\" method: {0}",
+                        e)); /* throw */
+                }
+                catch
+                {
+                    // do nothing.
+                }
+            }
+            finally
+            {
+                FreeVirtualTable(pVtab);
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -740,7 +770,36 @@ namespace System.Data.SQLite
             IntPtr pVtab
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                if (Destroy() == SQLiteErrorCode.Ok)
+                    return SQLiteErrorCode.Ok;
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                //
+                // NOTE: At this point, there is no way to report the error
+                //       condition back to the caller; therefore, use the
+                //       logging facility instead.
+                //
+                try
+                {
+                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                        String.Format(CultureInfo.CurrentCulture,
+                        "Caught exception in \"xDestroy\" method: {0}",
+                        e)); /* throw */
+                }
+                catch
+                {
+                    // do nothing.
+                }
+            }
+            finally
+            {
+                FreeVirtualTable(pVtab);
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
