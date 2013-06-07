@@ -1511,6 +1511,31 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Calls the native SQLite core library in order to declare a virtual table
+    /// in response to a call into the xCreate or xConnect virtual table methods.
+    /// </summary>
+    /// <param name="strSql">
+    /// The string containing the SQL statement describing the virtual table to
+    /// be declared.
+    /// </param>
+    /// <param name="error">
+    /// Upon success, the contents of this parameter are undefined.  Upon failure,
+    /// it should contain an appropriate error message.
+    /// </param>
+    /// <returns>
+    /// A standard SQLite return code.
+    /// </returns>
+    internal override SQLiteErrorCode DeclareVirtualTable(string strSql, ref string error)
+    {
+        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_declare_vtab(
+            _sql, SQLiteModuleBase.Utf8IntPtrFromString(strSql));
+
+        if (n != SQLiteErrorCode.Ok) error = GetLastError();
+
+        return n;
+    }
+
+    /// <summary>
     /// Enables or disabled extension loading by SQLite.
     /// </summary>
     /// <param name="bOnOff">

@@ -1562,25 +1562,15 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void xDestroyModule(IntPtr pClientData);
 #endif
+    public delegate void xDestroyModule(IntPtr pClientData);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 #else
     [DllImport(SQLITE_DLL)]
 #endif
-    internal static extern SQLiteErrorCode sqlite3_create_module_v2(
-        IntPtr db,
-        IntPtr name,
-        IntPtr pModule,
-        IntPtr pClientData,
-#if !PLATFORM_COMPACTFRAMEWORK
-        xDestroyModule xDestroy
-#else
-        IntPtr xDestroy
-#endif
-    );
+    internal static extern SQLiteErrorCode sqlite3_create_module_v2(IntPtr db, IntPtr name, IntPtr pModule, IntPtr pClientData, xDestroyModule xDestroy);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

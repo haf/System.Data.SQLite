@@ -12,12 +12,10 @@ using System.Security;
 using System.Security.Permissions;
 #endif
 
+using System.Text;
+
 namespace System.Data.SQLite
 {
-
-
-
-
     public sealed class SQLiteContext
     {
 
@@ -84,8 +82,8 @@ namespace System.Data.SQLite
 
     public interface ISQLiteNativeModule
     {
-        SQLiteErrorCode xCreate(IntPtr db, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr error);
-        SQLiteErrorCode xConnect(IntPtr db, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr error);
+        SQLiteErrorCode xCreate(IntPtr pDb, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr pError);
+        SQLiteErrorCode xConnect(IntPtr pDb, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr pError);
         SQLiteErrorCode xBestIndex(IntPtr pVtab, IntPtr index);
         SQLiteErrorCode xDisconnect(IntPtr pVtab);
         SQLiteErrorCode xDestroy(IntPtr pVtab);
@@ -141,6 +139,8 @@ namespace System.Data.SQLite
 #endif
     public abstract class SQLiteModuleBase : ISQLiteManagedModule, ISQLiteNativeModule,  IDisposable
     {
+        private static Encoding Utf8Encoding = Encoding.UTF8;
+
         #region Unsafe Native Methods Class
         [SuppressUnmanagedCodeSecurity()]
         internal static class UnsafeNativeMethods2
@@ -241,24 +241,24 @@ namespace System.Data.SQLite
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xCreate(
-                IntPtr db,
+                IntPtr pDb,
                 IntPtr pAux,
                 int argc,
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
                 ref IntPtr[] argv,
                 ref IntPtr pVtab,
-                ref IntPtr error
+                ref IntPtr pError
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xConnect(
-                IntPtr db,
+                IntPtr pDb,
                 IntPtr pAux,
                 int argc,
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
                 ref IntPtr[] argv,
                 ref IntPtr pVtab,
-                ref IntPtr error
+                ref IntPtr pError
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -445,6 +445,141 @@ namespace System.Data.SQLite
 
             return module;
         }
+
+        private static int ThirtyBits = 0x3fffffff;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static byte[] GetUtf8BytesFromString(string value)
+        {
+            if (value == null)
+                return null;
+
+            return Utf8Encoding.GetBytes(value);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static string GetStringFromUtf8Bytes(byte[] bytes)
+        {
+            if (bytes == null)
+                return null;
+
+            return Utf8Encoding.GetString(bytes);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static IntPtr Allocate(int size)
+        {
+            return UnsafeNativeMethods.sqlite3_malloc(size);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void Free(IntPtr pMemory)
+        {
+            UnsafeNativeMethods.sqlite3_free(pMemory);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static int ProbeForUtf8ByteLength(IntPtr pValue, int limit)
+        {
+            int length = 0;
+
+            if (pValue != IntPtr.Zero)
+            {
+                do
+                {
+                    if (Marshal.ReadByte(pValue, length) == 0)
+                        break;
+
+                    if (length >= limit)
+                        break;
+
+                    length++;
+                } while (true);
+            }
+
+            return length;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static string StringFromUtf8IntPtr(IntPtr pValue)
+        {
+            if (pValue == IntPtr.Zero)
+                return null;
+
+            int length = ProbeForUtf8ByteLength(pValue, ThirtyBits);
+
+            if (length > 0)
+            {
+                byte[] bytes = new byte[length];
+                Marshal.Copy(pValue, bytes, 0, length);
+                return GetStringFromUtf8Bytes(bytes);
+            }
+
+            return String.Empty;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static string[] StringArrayFromUtf8IntPtrArray(
+            IntPtr[] pValues
+            )
+        {
+            if (pValues == null)
+                return null;
+
+            string[] result = new string[pValues.Length];
+
+            for (int index = 0; index < result.Length; index++)
+                result[index] = StringFromUtf8IntPtr(pValues[index]);
+
+            return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        internal static IntPtr Utf8IntPtrFromString(string value)
+        {
+            if (value == null)
+                return IntPtr.Zero;
+
+            IntPtr result = IntPtr.Zero;
+            byte[] bytes = GetUtf8BytesFromString(value);
+
+            if (bytes == null)
+                return IntPtr.Zero;
+
+            int length = bytes.Length;
+
+            result = Allocate(length + 1);
+
+            Marshal.Copy(bytes, 0, result, length);
+            Marshal.WriteByte(result, length, 0);
+
+            return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static IntPtr[] Utf8IntPtrArrayFromStringArray(
+            string[] values
+            )
+        {
+            if (values == null)
+                return null;
+
+            IntPtr[] result = new IntPtr[values.Length];
+
+            for (int index = 0; index < result.Length; index++)
+                result[index] = Utf8IntPtrFromString(values[index]);
+
+            return result;
+        }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -457,39 +592,123 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Protected Members
+        protected virtual IntPtr AllocateVirtualTable()
+        {
+            int size = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods2.sqlite3_vtab));
+
+            return Allocate(size);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual void FreeVirtualTable(IntPtr pVtab)
+        {
+            Free(pVtab);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual SQLiteErrorCode DeclareVirtualTable(
+            SQLiteConnection connection,
+            string sql,
+            ref string error
+            )
+        {
+            if (connection == null)
+            {
+                error = "invalid connection";
+                return SQLiteErrorCode.Error;
+            }
+
+            SQLiteBase sqliteBase = connection._sql;
+
+            if (sqliteBase == null)
+            {
+                error = "connection has invalid handle";
+                return SQLiteErrorCode.Error;
+            }
+
+            return sqliteBase.DeclareVirtualTable(sql, ref error);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region ISQLiteNativeModule Members
         public SQLiteErrorCode xCreate(
-            IntPtr db,
+            IntPtr pDb,
             IntPtr pAux,
             int argc,
             ref IntPtr[] argv,
             ref IntPtr pVtab,
-            ref IntPtr error
+            ref IntPtr pError
             )
         {
-            SQLiteConnection connection = new SQLiteConnection(db, false);
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(
+                        pDb, false))
+                {
+                    string error = null;
 
+                    if (Create(connection, pAux,
+                            StringArrayFromUtf8IntPtrArray(argv),
+                            ref error) == SQLiteErrorCode.Ok)
+                    {
+                        pVtab = AllocateVirtualTable();
+                    }
+                    else
+                    {
+                        pError = Utf8IntPtrFromString(error);
+                    }
+                }
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                pError = Utf8IntPtrFromString(e.ToString());
+            }
 
-            pVtab = UnsafeNativeMethods.sqlite3_malloc(Marshal.SizeOf(typeof(
-                UnsafeNativeMethods2.sqlite3_vtab)));
-
-            string errorStr = null;
-
-            return Create(null, IntPtr.Zero, null, ref errorStr);
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
         public SQLiteErrorCode xConnect(
-            IntPtr db,
+            IntPtr pDb,
             IntPtr pAux,
             int argc,
             ref IntPtr[] argv,
             ref IntPtr pVtab,
-            ref IntPtr error
+            ref IntPtr pError
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(
+                        pDb, false))
+                {
+                    string error = null;
+
+                    if (Connect(connection, pAux,
+                            StringArrayFromUtf8IntPtrArray(argv),
+                            ref error) == SQLiteErrorCode.Ok)
+                    {
+                        pVtab = AllocateVirtualTable();
+                    }
+                    else
+                    {
+                        pError = Utf8IntPtrFromString(error);
+                    }
+                }
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                pError = Utf8IntPtrFromString(e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////

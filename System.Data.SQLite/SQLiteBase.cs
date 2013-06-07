@@ -202,6 +202,23 @@ namespace System.Data.SQLite
     internal abstract void ReturnText(IntPtr context, string value);
 
     /// <summary>
+    /// Calls the native SQLite core library in order to declare a virtual table
+    /// in response to a call into the xCreate or xConnect virtual table methods.
+    /// </summary>
+    /// <param name="strSql">
+    /// The string containing the SQL statement describing the virtual table to
+    /// be declared.
+    /// </param>
+    /// <param name="error">
+    /// Upon success, the contents of this parameter are undefined.  Upon failure,
+    /// it should contain an appropriate error message.
+    /// </param>
+    /// <returns>
+    /// A standard SQLite return code.
+    /// </returns>
+    internal abstract SQLiteErrorCode DeclareVirtualTable(string strSql, ref string error);
+
+    /// <summary>
     /// Enables or disabled extension loading by SQLite.
     /// </summary>
     /// <param name="bOnOff">
