@@ -22,34 +22,97 @@ namespace System.Data.SQLite
 
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     public sealed class SQLiteValue
     {
+        #region Private Data
+        private IntPtr pValue;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Private Constructors
+        internal SQLiteValue(IntPtr pValue)
+        {
+            this.pValue = pValue;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Methods
+        public TypeAffinity GetTypeAffinity()
+        {
+            return UnsafeNativeMethods.sqlite3_value_type(pValue);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public int GetBytes()
+        {
+            return UnsafeNativeMethods.sqlite3_value_bytes(pValue);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public int GetInt()
+        {
+            return UnsafeNativeMethods.sqlite3_value_int(pValue);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public long GetInt64()
+        {
+            return UnsafeNativeMethods.sqlite3_value_int64(pValue);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public double GetDouble()
+        {
+            return UnsafeNativeMethods.sqlite3_value_double(pValue);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public string GetString()
+        {
+            return SQLiteModuleBase.StringFromUtf8IntPtr(pValue, GetBytes());
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public byte[] GetBlob()
+        {
+            return SQLiteModuleBase.BytesFromIntPtr(pValue, GetBytes());
+        }
+        #endregion
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     public class SQLiteIndexConstraint
     {
         private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_constraint constraint;
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     public class SQLiteIndexOrderBy
     {
         private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_orderby orderBy;
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     public class SQLiteIndexConstraintUsage
     {
         private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_constraint_usage constraintUsage;
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     public class SQLiteIndex
     {
@@ -66,12 +129,14 @@ namespace System.Data.SQLite
         double estimatedCost; /* Estimated cost of using this index */
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     public class SQLiteVirtualTableCursor
     {
         internal SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_vtab_cursor cursor;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate int xFunc(
@@ -80,6 +145,8 @@ namespace System.Data.SQLite
         [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
         IntPtr[] argv
     );
+
+    ///////////////////////////////////////////////////////////////////////////
 
     public interface ISQLiteNativeModule
     {
@@ -106,6 +173,8 @@ namespace System.Data.SQLite
         SQLiteErrorCode xRelease(IntPtr pVtab, int iSavepoint);
         SQLiteErrorCode xRollbackTo(IntPtr pVtab, int iSavepoint);
     }
+
+    ///////////////////////////////////////////////////////////////////////////
 
     public interface ISQLiteManagedModule
     {
@@ -134,6 +203,8 @@ namespace System.Data.SQLite
         SQLiteErrorCode Release(int iSavepoint);
         SQLiteErrorCode RollbackTo(int iSavepoint);
     }
+
+    ///////////////////////////////////////////////////////////////////////////
 
 #if NET_40
     [SecurityCritical()]
@@ -266,40 +337,33 @@ namespace System.Data.SQLite
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xBestIndex(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr index
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xDisconnect(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xDestroy(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xOpen(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
                 ref IntPtr pCursor
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xClose(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pCursor
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xFilter(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pCursor,
                 int idxNum,
                 IntPtr idxStr,
@@ -309,19 +373,16 @@ namespace System.Data.SQLite
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xNext(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pCursor
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xEof(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pCursor
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xColumn(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pCursor,
                 IntPtr pContext,
                 int index
@@ -329,14 +390,12 @@ namespace System.Data.SQLite
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xRowId(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pCursor,
                 ref long rowId
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xUpdate(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
                 int nData,
                 ref IntPtr apData,
@@ -345,31 +404,26 @@ namespace System.Data.SQLite
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xBegin(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xSync(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xCommit(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xRollback(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xFindFunction(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
                 int nArg,
                 IntPtr zName,
@@ -379,28 +433,24 @@ namespace System.Data.SQLite
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xRename(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
                 IntPtr zNew
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xSavepoint(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
                 int iSavepoint
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xRelease(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
                 int iSavepoint
             );
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate SQLiteErrorCode xRollbackTo(
-                [MarshalAs(UnmanagedType.LPStruct)]
                 IntPtr pVtab,
                 int iSavepoint
             );
@@ -487,6 +537,23 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        internal static byte[] BytesFromIntPtr(IntPtr pValue, int length)
+        {
+            if (pValue == IntPtr.Zero)
+                return null;
+
+            if (length == 0)
+                return new byte[0];
+
+            byte[] result = new byte[length];
+
+            Marshal.Copy(pValue, result, 0, length);
+
+            return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static int ProbeForUtf8ByteLength(IntPtr pValue, int limit)
         {
             int length = 0;
@@ -510,17 +577,26 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static string StringFromUtf8IntPtr(IntPtr pValue)
+        internal static string StringFromUtf8IntPtr(IntPtr pValue)
+        {
+            int length = ProbeForUtf8ByteLength(pValue, ThirtyBits);
+
+            return StringFromUtf8IntPtr(pValue, length);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        internal static string StringFromUtf8IntPtr(IntPtr pValue, int length)
         {
             if (pValue == IntPtr.Zero)
                 return null;
 
-            int length = ProbeForUtf8ByteLength(pValue, ThirtyBits);
-
             if (length > 0)
             {
                 byte[] bytes = new byte[length];
+
                 Marshal.Copy(pValue, bytes, 0, length);
+
                 return GetStringFromUtf8Bytes(bytes);
             }
 
