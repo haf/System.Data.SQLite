@@ -58,6 +58,7 @@ namespace System.Data.SQLite
             ref string error
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -70,6 +71,7 @@ namespace System.Data.SQLite
             ref string error
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -79,6 +81,7 @@ namespace System.Data.SQLite
             ref SQLiteIndex index
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -86,6 +89,7 @@ namespace System.Data.SQLite
 
         public override SQLiteErrorCode Disconnect()
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -93,6 +97,7 @@ namespace System.Data.SQLite
 
         public override SQLiteErrorCode Destroy()
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -102,6 +107,7 @@ namespace System.Data.SQLite
             ref SQLiteVirtualTableCursor cursor
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -111,6 +117,7 @@ namespace System.Data.SQLite
             SQLiteVirtualTableCursor cursor
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -123,6 +130,7 @@ namespace System.Data.SQLite
             SQLiteValue[] argv
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -132,6 +140,7 @@ namespace System.Data.SQLite
             SQLiteVirtualTableCursor cursor
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -141,6 +150,7 @@ namespace System.Data.SQLite
             SQLiteVirtualTableCursor cursor
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -152,6 +162,7 @@ namespace System.Data.SQLite
             int index
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -162,6 +173,7 @@ namespace System.Data.SQLite
             ref long rowId
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -172,6 +184,7 @@ namespace System.Data.SQLite
             ref long rowId
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -179,6 +192,7 @@ namespace System.Data.SQLite
 
         public override SQLiteErrorCode Begin()
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -186,6 +200,7 @@ namespace System.Data.SQLite
 
         public override SQLiteErrorCode Sync()
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -193,6 +208,7 @@ namespace System.Data.SQLite
 
         public override SQLiteErrorCode Commit()
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -200,6 +216,7 @@ namespace System.Data.SQLite
 
         public override SQLiteErrorCode Rollback()
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -211,6 +228,7 @@ namespace System.Data.SQLite
             object[] args
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -220,6 +238,7 @@ namespace System.Data.SQLite
             string zNew
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -229,6 +248,7 @@ namespace System.Data.SQLite
             int iSavepoint
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -238,6 +258,7 @@ namespace System.Data.SQLite
             int iSavepoint
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
 
@@ -247,6 +268,7 @@ namespace System.Data.SQLite
             int iSavepoint
             )
         {
+            CheckDisposed();
             throw new NotImplementedException();
         }
         #endregion
