@@ -51,7 +51,11 @@ namespace System.Data.SQLite
             if (pContext == IntPtr.Zero)
                 throw new InvalidOperationException();
 
+#if !PLATFORM_COMPACTFRAMEWORK
             UnsafeNativeMethods.sqlite3_result_double(pContext, value);
+#else
+            UnsafeNativeMethods.sqlite3_result_double_interop(pContext, ref value);
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -71,7 +75,11 @@ namespace System.Data.SQLite
             if (pContext == IntPtr.Zero)
                 throw new InvalidOperationException();
 
+#if !PLATFORM_COMPACTFRAMEWORK
             UnsafeNativeMethods.sqlite3_result_int64(pContext, value);
+#else
+            UnsafeNativeMethods.sqlite3_result_int64_interop(pContext, ref value);
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -221,7 +229,14 @@ namespace System.Data.SQLite
         public long GetInt64()
         {
             if (pValue == IntPtr.Zero) return default(long);
+
+#if !PLATFORM_COMPACTFRAMEWORK
             return UnsafeNativeMethods.sqlite3_value_int64(pValue);
+#else
+            long value;
+            UnsafeNativeMethods.sqlite3_value_int64_interop(pValue, out value);
+            return value;
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -229,7 +244,14 @@ namespace System.Data.SQLite
         public double GetDouble()
         {
             if (pValue == IntPtr.Zero) return default(double);
+
+#if !PLATFORM_COMPACTFRAMEWORK
             return UnsafeNativeMethods.sqlite3_value_double(pValue);
+#else
+            double value;
+            UnsafeNativeMethods.sqlite3_value_double_interop(pValue, out value);
+            return value;
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -255,21 +277,21 @@ namespace System.Data.SQLite
 
     public class SQLiteIndexConstraint
     {
-        private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_constraint constraint;
+        private UnsafeNativeMethods.sqlite3_index_constraint constraint;
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
     public class SQLiteIndexOrderBy
     {
-        private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_orderby orderBy;
+        private UnsafeNativeMethods.sqlite3_index_orderby orderBy;
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
     public class SQLiteIndexConstraintUsage
     {
-        private SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_index_constraint_usage constraintUsage;
+        private UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -293,23 +315,28 @@ namespace System.Data.SQLite
 
     public class SQLiteVirtualTableCursor
     {
-        internal SQLiteModuleBase.UnsafeNativeMethods2.sqlite3_vtab_cursor cursor;
+        public SQLiteVirtualTableCursor(
+            IntPtr nativeHandle
+            )
+        {
+            this.nativeHandle = nativeHandle;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private IntPtr nativeHandle;
+        public IntPtr NativeHandle
+        {
+            get { return nativeHandle; }
+        }
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate int xFunc(
-        IntPtr pContext,
-        int argc,
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
-        IntPtr[] argv
-    );
 
     ///////////////////////////////////////////////////////////////////////////
 
     public interface ISQLiteNativeModule
     {
+        // https://www.sqlite.org/vtab.html
+
         SQLiteErrorCode xCreate(IntPtr pDb, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr pError);
         SQLiteErrorCode xConnect(IntPtr pDb, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr pError);
         SQLiteErrorCode xBestIndex(IntPtr pVtab, IntPtr index);
@@ -327,7 +354,7 @@ namespace System.Data.SQLite
         SQLiteErrorCode xSync(IntPtr pVtab);
         SQLiteErrorCode xCommit(IntPtr pVtab);
         SQLiteErrorCode xRollback(IntPtr pVtab);
-        SQLiteErrorCode xFindFunction(IntPtr pVtab, int nArg, IntPtr zName, ref xFunc pxFunc, ref IntPtr ppArg);
+        SQLiteErrorCode xFindFunction(IntPtr pVtab, int nArg, IntPtr zName, ref IntPtr pxFunc, ref IntPtr ppArg);
         SQLiteErrorCode xRename(IntPtr pVtab, IntPtr zNew);
         SQLiteErrorCode xSavepoint(IntPtr pVtab, int iSavepoint);
         SQLiteErrorCode xRelease(IntPtr pVtab, int iSavepoint);
@@ -366,295 +393,42 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-#if NET_40
-    [SecurityCritical()]
-#else
-    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-#endif
-    public abstract class SQLiteModuleBase : ISQLiteManagedModule, ISQLiteNativeModule,  IDisposable
+    public abstract class SQLiteModuleBase :
+            ISQLiteManagedModule, ISQLiteNativeModule,  IDisposable
     {
         private static Encoding Utf8Encoding = Encoding.UTF8;
-
-        #region Unsafe Native Methods Class
-        [SuppressUnmanagedCodeSecurity()]
-        internal static class UnsafeNativeMethods2
-        {
-            // https://www.sqlite.org/vtab.html
-
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct sqlite3_module
-            {
-                public int iVersion;
-                public xCreate xCreate;
-                public xConnect xConnect;
-                public xBestIndex xBestIndex;
-                public xDisconnect xDisconnect;
-                public xDestroy xDestroy;
-                public xOpen xOpen;
-                public xClose xClose;
-                public xFilter xFilter;
-                public xNext xNext;
-                public xEof xEof;
-                public xColumn xColumn;
-                public xRowId xRowId;
-                public xUpdate xUpdate;
-                public xBegin xBegin;
-                public xSync xSync;
-                public xCommit xCommit;
-                public xRollback xRollback;
-                public xFindFunction xFindFunction;
-                public xRename xRename;
-                /* The methods above are in version 1 of the sqlite3_module
-                 * object.  Those below are for version 2 and greater. */
-                public xSavepoint xSavepoint;
-                public xRelease xRelease;
-                public xRollbackTo xRollbackTo;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct sqlite3_vtab
-            {
-                [MarshalAs(UnmanagedType.LPStruct)]
-                public sqlite3_module pModule;
-                public int nRef; /* NO LONGER USED */
-                public IntPtr zErrMsg;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct sqlite3_vtab_cursor
-            {
-                [MarshalAs(UnmanagedType.LPStruct)]
-                public sqlite3_vtab pVTab;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct sqlite3_index_constraint
-            {
-                public int iColumn;
-                public byte op;
-                public byte usable;
-                public int iTermOffset;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct sqlite3_index_orderby
-            {
-                public int iColumn; /* Column number */
-                public byte desc;   /* True for DESC.  False for ASC. */
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct sqlite3_index_constraint_usage
-            {
-                public int argvIndex; /* if >0, constraint is part of argv to xFilter */
-                public byte omit;     /* Do not code a test for this constraint */
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct sqlite3_index_info
-            {
-                /* Inputs */
-                public int nConstraint;           /* Number of entries in aConstraint */
-                [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
-                public sqlite3_index_constraint[] aConstraint;
-                public int nOrderBy;
-                public sqlite3_index_orderby[] aOrderBy;
-                /* Outputs */
-                public sqlite3_index_constraint_usage[] aConstraintUsage;
-                public int idxNum;                /* Number used to identify the index */
-                public string idxStr;              /* String, possibly obtained from sqlite3_malloc */
-                public int needToFreeIdxStr;      /* Free idxStr using sqlite3_free() if true */
-                public int orderByConsumed;       /* True if output is already ordered */
-                public double estimatedCost;      /* Estimated cost of using this index */
-            }
-
-
-
-
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xCreate(
-                IntPtr pDb,
-                IntPtr pAux,
-                int argc,
-                [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-                ref IntPtr[] argv,
-                ref IntPtr pVtab,
-                ref IntPtr pError
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xConnect(
-                IntPtr pDb,
-                IntPtr pAux,
-                int argc,
-                [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-                ref IntPtr[] argv,
-                ref IntPtr pVtab,
-                ref IntPtr pError
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xBestIndex(
-                IntPtr pVtab,
-                IntPtr index
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xDisconnect(
-                IntPtr pVtab
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xDestroy(
-                IntPtr pVtab
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xOpen(
-                IntPtr pVtab,
-                ref IntPtr pCursor
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xClose(
-                IntPtr pCursor
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xFilter(
-                IntPtr pCursor,
-                int idxNum,
-                IntPtr idxStr,
-                int argc,
-                IntPtr[] argv
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xNext(
-                IntPtr pCursor
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xEof(
-                IntPtr pCursor
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xColumn(
-                IntPtr pCursor,
-                IntPtr pContext,
-                int index
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xRowId(
-                IntPtr pCursor,
-                ref long rowId
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xUpdate(
-                IntPtr pVtab,
-                int nData,
-                ref IntPtr apData,
-                ref long rowId
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xBegin(
-                IntPtr pVtab
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xSync(
-                IntPtr pVtab
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xCommit(
-                IntPtr pVtab
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xRollback(
-                IntPtr pVtab
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xFindFunction(
-                IntPtr pVtab,
-                int nArg,
-                IntPtr zName,
-                ref xFunc pxFunc,
-                ref IntPtr ppArg
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xRename(
-                IntPtr pVtab,
-                IntPtr zNew
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xSavepoint(
-                IntPtr pVtab,
-                int iSavepoint
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xRelease(
-                IntPtr pVtab,
-                int iSavepoint
-            );
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate SQLiteErrorCode xRollbackTo(
-                IntPtr pVtab,
-                int iSavepoint
-            );
-
-            private static readonly int SQLITE_INDEX_CONSTRAINT_EQ = 2;
-            private static readonly int SQLITE_INDEX_CONSTRAINT_GT = 4;
-            private static readonly int SQLITE_INDEX_CONSTRAINT_LE = 8;
-            private static readonly int SQLITE_INDEX_CONSTRAINT_LT = 16;
-            private static readonly int SQLITE_INDEX_CONSTRAINT_GE = 32;
-            private static readonly int SQLITE_INDEX_CONSTRAINT_MATCH = 64;
-        }
-        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Methods
-        private UnsafeNativeMethods2.sqlite3_module CreateNativeModule()
+        private UnsafeNativeMethods.sqlite3_module CreateNativeModule()
         {
-            UnsafeNativeMethods2.sqlite3_module module =
-                new UnsafeNativeMethods2.sqlite3_module();
+            UnsafeNativeMethods.sqlite3_module module =
+                new UnsafeNativeMethods.sqlite3_module();
 
             module.iVersion = 2;
-            module.xCreate = new UnsafeNativeMethods2.xCreate(xCreate);
-            module.xConnect = new UnsafeNativeMethods2.xConnect(xConnect);
-            module.xBestIndex = new UnsafeNativeMethods2.xBestIndex(xBestIndex);
-            module.xDisconnect = new UnsafeNativeMethods2.xDisconnect(xDisconnect);
-            module.xDestroy = new UnsafeNativeMethods2.xDestroy(xDestroy);
-            module.xOpen = new UnsafeNativeMethods2.xOpen(xOpen);
-            module.xClose = new UnsafeNativeMethods2.xClose(xClose);
-            module.xFilter = new UnsafeNativeMethods2.xFilter(xFilter);
-            module.xNext = new UnsafeNativeMethods2.xNext(xNext);
-            module.xEof = new UnsafeNativeMethods2.xEof(xEof);
-            module.xColumn = new UnsafeNativeMethods2.xColumn(xColumn);
-            module.xRowId = new UnsafeNativeMethods2.xRowId(xRowId);
-            module.xUpdate = new UnsafeNativeMethods2.xUpdate(xUpdate);
-            module.xBegin = new UnsafeNativeMethods2.xBegin(xBegin);
-            module.xSync = new UnsafeNativeMethods2.xSync(xSync);
-            module.xCommit = new UnsafeNativeMethods2.xCommit(xCommit);
-            module.xRollback = new UnsafeNativeMethods2.xRollback(xRollback);
-            module.xFindFunction = new UnsafeNativeMethods2.xFindFunction(xFindFunction);
-            module.xRename = new UnsafeNativeMethods2.xRename(xRename);
-            module.xSavepoint = new UnsafeNativeMethods2.xSavepoint(xSavepoint);
-            module.xRelease = new UnsafeNativeMethods2.xRelease(xRelease);
-            module.xRollbackTo = new UnsafeNativeMethods2.xRollbackTo(xRollbackTo);
+            module.xCreate = new UnsafeNativeMethods.xCreate(xCreate);
+            module.xConnect = new UnsafeNativeMethods.xConnect(xConnect);
+            module.xBestIndex = new UnsafeNativeMethods.xBestIndex(xBestIndex);
+            module.xDisconnect = new UnsafeNativeMethods.xDisconnect(xDisconnect);
+            module.xDestroy = new UnsafeNativeMethods.xDestroy(xDestroy);
+            module.xOpen = new UnsafeNativeMethods.xOpen(xOpen);
+            module.xClose = new UnsafeNativeMethods.xClose(xClose);
+            module.xFilter = new UnsafeNativeMethods.xFilter(xFilter);
+            module.xNext = new UnsafeNativeMethods.xNext(xNext);
+            module.xEof = new UnsafeNativeMethods.xEof(xEof);
+            module.xColumn = new UnsafeNativeMethods.xColumn(xColumn);
+            module.xRowId = new UnsafeNativeMethods.xRowId(xRowId);
+            module.xUpdate = new UnsafeNativeMethods.xUpdate(xUpdate);
+            module.xBegin = new UnsafeNativeMethods.xBegin(xBegin);
+            module.xSync = new UnsafeNativeMethods.xSync(xSync);
+            module.xCommit = new UnsafeNativeMethods.xCommit(xCommit);
+            module.xRollback = new UnsafeNativeMethods.xRollback(xRollback);
+            module.xFindFunction = new UnsafeNativeMethods.xFindFunction(xFindFunction);
+            module.xRename = new UnsafeNativeMethods.xRename(xRename);
+            module.xSavepoint = new UnsafeNativeMethods.xSavepoint(xSavepoint);
+            module.xRelease = new UnsafeNativeMethods.xRelease(xRelease);
+            module.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(xRollbackTo);
 
             return module;
         }
@@ -678,7 +452,11 @@ namespace System.Data.SQLite
             if (bytes == null)
                 return null;
 
+#if !PLATFORM_COMPACTFRAMEWORK
             return Utf8Encoding.GetString(bytes);
+#else
+            return Utf8Encoding.GetString(bytes, 0, bytes.Length);
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -852,7 +630,7 @@ namespace System.Data.SQLite
         protected virtual IntPtr AllocateTable()
         {
             int size = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods2.sqlite3_vtab));
+                UnsafeNativeMethods.sqlite3_vtab));
 
             return Allocate(size);
         }
@@ -869,7 +647,7 @@ namespace System.Data.SQLite
         protected virtual IntPtr AllocateCursor()
         {
             int size = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods2.sqlite3_vtab_cursor));
+                UnsafeNativeMethods.sqlite3_vtab_cursor));
 
             return Allocate(size);
         }
@@ -895,8 +673,10 @@ namespace System.Data.SQLite
             if (pCursor == IntPtr.Zero)
                 return null;
 
-            SQLiteVirtualTableCursor result = new SQLiteVirtualTableCursor();
-            Marshal.PtrToStructure(pCursor, result.cursor);
+            SQLiteVirtualTableCursor result =
+                new SQLiteVirtualTableCursor(pCursor);
+
+            // Marshal.PtrToStructure(pCursor, result.cursor);
 
             return result;
         }
@@ -919,7 +699,7 @@ namespace System.Data.SQLite
 
                 if (result != IntPtr.Zero)
                 {
-                    Marshal.StructureToPtr(cursor.cursor, result, false);
+                    // Marshal.StructureToPtr(cursor.cursor, result, false);
                     success = true;
                 }
             }
@@ -969,6 +749,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+#if PLATFORM_COMPACTFRAMEWORK
+        protected virtual IntPtr IntPtrForOffset(
+            IntPtr pointer,
+            int offset
+            )
+        {
+            return new IntPtr(pointer.ToInt64() + offset);
+        }
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
+
         protected virtual bool SetTableError(
             IntPtr pVtab,
             string error
@@ -978,17 +770,32 @@ namespace System.Data.SQLite
                 return false;
 
             int offset = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods2.sqlite3_module)) + sizeof(int);
+                UnsafeNativeMethods.sqlite3_module)) + sizeof(int);
 
+#if !PLATFORM_COMPACTFRAMEWORK
             IntPtr pError = Marshal.ReadIntPtr(pVtab, offset);
+#else
+            IntPtr pError = Marshal.ReadIntPtr(IntPtrForOffset(pVtab, offset));
+#endif
 
             if (pError != IntPtr.Zero)
             {
                 Free(pError); pError = IntPtr.Zero;
+
+#if !PLATFORM_COMPACTFRAMEWORK
                 Marshal.WriteIntPtr(pVtab, offset, pError);
+#else
+                Marshal.WriteIntPtr(IntPtrForOffset(pVtab, offset), pError);
+#endif
             }
 
+#if !PLATFORM_COMPACTFRAMEWORK
             Marshal.WriteIntPtr(pVtab, offset, Utf8IntPtrFromString(error));
+#else
+            Marshal.WriteIntPtr(IntPtrForOffset(pVtab, offset),
+                Utf8IntPtrFromString(error));
+#endif
+
             return true;
         }
         #endregion
@@ -1351,7 +1158,7 @@ namespace System.Data.SQLite
             IntPtr pVtab,
             int nArg,
             IntPtr zName,
-            ref xFunc pxFunc,
+            ref IntPtr pxFunc,
             ref IntPtr ppArg
             )
         {

@@ -43,6 +43,8 @@
     <Compile Include="SQLiteKeyReader.cs" />
     <Compile Include="SQLiteLog.cs" />
     <Compile Include="SQLiteMetaDataCollectionNames.cs" />
+    <Compile Include="SQLiteModuleBase.cs" />
+    <Compile Include="SQLiteModuleNoop.cs" />
     <Compile Include="SQLiteParameter.cs" />
     <Compile Include="SQLiteParameterCollection.cs" />
     <Compile Include="SQLiteStatement.cs" />
@@ -68,8 +70,6 @@
 
   <ItemGroup Condition="'$(IsCompactFramework)' == 'false'">
     <Compile Include="SQLiteEnlistment.cs" />
-    <Compile Include="SQLiteModuleBase.cs" />
-    <Compile Include="SQLiteModuleNoop.cs" />
     <Compile Condition="'$(NetFx35)' != 'false' Or
                         '$(NetFx40)' != 'false' Or
                         '$(NetFx45)' != 'false'"
