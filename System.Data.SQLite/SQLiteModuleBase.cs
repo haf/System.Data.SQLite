@@ -275,40 +275,64 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-    public class SQLiteIndexConstraint
+    /* [Flags()] */
+    public enum SQLiteIndexConstraintOp : byte
+    {
+        EqualTo = 2,
+        GreaterThan = 4,
+        LessThanOrEqualTo = 8,
+        LessThan = 16,
+        GreaterThanOrEqualTo = 32,
+        Match = 64
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    public sealed class SQLiteIndexConstraint
     {
         private UnsafeNativeMethods.sqlite3_index_constraint constraint;
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
-    public class SQLiteIndexOrderBy
+    public sealed class SQLiteIndexOrderBy
     {
         private UnsafeNativeMethods.sqlite3_index_orderby orderBy;
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
-    public class SQLiteIndexConstraintUsage
+    public sealed class SQLiteIndexConstraintUsage
     {
         private UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage;
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
-    public class SQLiteIndex
+    public sealed class SQLiteIndexInputs
     {
-        SQLiteIndexConstraint[] Constraints;
-        SQLiteIndexOrderBy[] OrderBys;
+        private SQLiteIndexConstraint[] Constraints;
+        private SQLiteIndexOrderBy[] OrderBys;
+    }
 
+    ///////////////////////////////////////////////////////////////////////////
 
-        SQLiteIndexConstraintUsage[] ConstraintUsages;
+    public sealed class SQLiteIndexOutputs
+    {
+        private SQLiteIndexConstraintUsage[] ConstraintUsages;
+        private int idxNum;           /* Number used to identify the index */
+        private string idxStr;        /* String, possibly obtained from sqlite3_malloc */
+        private int needToFreeIdxStr; /* Free idxStr using sqlite3_free() if true */
+        private int orderByConsumed;  /* True if output is already ordered */
+        private double estimatedCost; /* Estimated cost of using this index */
+    }
 
-        int idxNum;           /* Number used to identify the index */
-        string idxStr;        /* String, possibly obtained from sqlite3_malloc */
-        int needToFreeIdxStr; /* Free idxStr using sqlite3_free() if true */
-        int orderByConsumed;  /* True if output is already ordered */
-        double estimatedCost; /* Estimated cost of using this index */
+    ///////////////////////////////////////////////////////////////////////////
+
+    public sealed class SQLiteIndex
+    {
+        public SQLiteIndexInputs inputs;
+        public SQLiteIndexOutputs outputs;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -369,7 +393,7 @@ namespace System.Data.SQLite
 
         SQLiteErrorCode Create(SQLiteConnection connection, IntPtr pClientData, string[] argv, ref string error);
         SQLiteErrorCode Connect(SQLiteConnection connection, IntPtr pClientData, string[] argv, ref string error);
-        SQLiteErrorCode BestIndex(ref SQLiteIndex index);
+        SQLiteErrorCode BestIndex(SQLiteIndex index);
         SQLiteErrorCode Disconnect();
         SQLiteErrorCode Destroy();
         SQLiteErrorCode Open(ref SQLiteVirtualTableCursor cursor);
@@ -1237,7 +1261,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode BestIndex(
-            ref SQLiteIndex index
+            SQLiteIndex index
             );
 
         ///////////////////////////////////////////////////////////////////////

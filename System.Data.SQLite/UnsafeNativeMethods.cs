@@ -1927,7 +1927,7 @@ namespace System.Data.SQLite
     internal struct sqlite3_index_constraint
     {
         public int iColumn;
-        public byte op;
+        public SQLiteIndexConstraintOp op;
         public byte usable;
         public int iTermOffset;
     }
@@ -1970,15 +1970,6 @@ namespace System.Data.SQLite
         public double estimatedCost; /* Estimated cost of using this index */
     }
     #endregion
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    private static readonly int SQLITE_INDEX_CONSTRAINT_EQ = 2;
-    private static readonly int SQLITE_INDEX_CONSTRAINT_GT = 4;
-    private static readonly int SQLITE_INDEX_CONSTRAINT_LE = 8;
-    private static readonly int SQLITE_INDEX_CONSTRAINT_LT = 16;
-    private static readonly int SQLITE_INDEX_CONSTRAINT_GE = 32;
-    private static readonly int SQLITE_INDEX_CONSTRAINT_MATCH = 64;
   }
 
 #if PLATFORM_COMPACTFRAMEWORK

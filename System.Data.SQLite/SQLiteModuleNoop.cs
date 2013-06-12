@@ -78,7 +78,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override SQLiteErrorCode BestIndex(
-            ref SQLiteIndex index
+            SQLiteIndex index
             )
         {
             CheckDisposed();
