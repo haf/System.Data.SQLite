@@ -370,15 +370,15 @@ namespace System.Data.SQLite
         SQLiteErrorCode xClose(IntPtr pCursor);
         SQLiteErrorCode xFilter(IntPtr pCursor, int idxNum, IntPtr idxStr, int argc, IntPtr[] argv);
         SQLiteErrorCode xNext(IntPtr pCursor);
-        SQLiteErrorCode xEof(IntPtr pCursor);
+        bool xEof(IntPtr pCursor);
         SQLiteErrorCode xColumn(IntPtr pCursor, IntPtr pContext, int index);
         SQLiteErrorCode xRowId(IntPtr pCursor, ref long rowId);
-        SQLiteErrorCode xUpdate(IntPtr pVtab, int nData, ref IntPtr apData, ref long rowId);
+        SQLiteErrorCode xUpdate(IntPtr pVtab, int nData, IntPtr apData, ref long rowId);
         SQLiteErrorCode xBegin(IntPtr pVtab);
         SQLiteErrorCode xSync(IntPtr pVtab);
         SQLiteErrorCode xCommit(IntPtr pVtab);
         SQLiteErrorCode xRollback(IntPtr pVtab);
-        SQLiteErrorCode xFindFunction(IntPtr pVtab, int nArg, IntPtr zName, ref IntPtr pxFunc, ref IntPtr ppArg);
+        bool xFindFunction(IntPtr pVtab, int nArg, IntPtr zName, ref SQLiteCallback callback, ref IntPtr pClientData);
         SQLiteErrorCode xRename(IntPtr pVtab, IntPtr zNew);
         SQLiteErrorCode xSavepoint(IntPtr pVtab, int iSavepoint);
         SQLiteErrorCode xRelease(IntPtr pVtab, int iSavepoint);
@@ -400,7 +400,7 @@ namespace System.Data.SQLite
         SQLiteErrorCode Close(SQLiteVirtualTableCursor cursor);
         SQLiteErrorCode Filter(SQLiteVirtualTableCursor cursor, int idxNum, string idxStr, SQLiteValue[] argv);
         SQLiteErrorCode Next(SQLiteVirtualTableCursor cursor);
-        SQLiteErrorCode Eof(SQLiteVirtualTableCursor cursor);
+        bool Eof(SQLiteVirtualTableCursor cursor);
         SQLiteErrorCode Column(SQLiteVirtualTableCursor cursor, SQLiteContext context, int index);
         SQLiteErrorCode RowId(SQLiteVirtualTableCursor cursor, ref long rowId);
         SQLiteErrorCode Update(SQLiteValue[] values, ref long rowId);
@@ -408,7 +408,7 @@ namespace System.Data.SQLite
         SQLiteErrorCode Sync();
         SQLiteErrorCode Commit();
         SQLiteErrorCode Rollback();
-        SQLiteErrorCode FindFunction(string zName, ref SQLiteFunction function, object[] args);
+        bool FindFunction(string zName, ref SQLiteFunction function, ref IntPtr pClientData);
         SQLiteErrorCode Rename(string zNew);
         SQLiteErrorCode Savepoint(int iSavepoint);
         SQLiteErrorCode Release(int iSavepoint);
@@ -617,6 +617,39 @@ namespace System.Data.SQLite
 
             for (int index = 0; index < result.Length; index++)
                 result[index] = Utf8IntPtrFromString(values[index]);
+
+            return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static SQLiteValue[] ValueArrayFromSizeAndIntPtr(
+            int nData,
+            IntPtr apData
+            )
+        {
+            if (nData < 0)
+                return null;
+
+            if (apData == IntPtr.Zero)
+                return null;
+
+            SQLiteValue[] result = new SQLiteValue[nData];
+
+            for (int index = 0, offset = 0;
+                    index < result.Length;
+                    index++, offset += IntPtr.Size)
+            {
+#if !PLATFORM_COMPACTFRAMEWORK
+                IntPtr pData = Marshal.ReadIntPtr(apData, offset);
+#else
+                IntPtr pData = Marshal.ReadIntPtr(IntPtrForOffset(
+                    apData, offset));
+#endif
+
+                result[index] = (pData != IntPtr.Zero) ?
+                    new SQLiteValue(pData) : null;
+            }
 
             return result;
         }
@@ -1095,16 +1128,49 @@ namespace System.Data.SQLite
             IntPtr pCursor
             )
         {
-            return SQLiteErrorCode.Ok;
+            IntPtr pVtab = IntPtr.Zero;
+
+            try
+            {
+                pVtab = GetTableFromCursor(pCursor);
+
+                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
+                    pCursor);
+
+                if (Next(cursor) == SQLiteErrorCode.Ok)
+                    return SQLiteErrorCode.Ok;
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xEof(
+        public bool xEof(
             IntPtr pCursor
             )
         {
-            return SQLiteErrorCode.Ok;
+            IntPtr pVtab = IntPtr.Zero;
+
+            try
+            {
+                pVtab = GetTableFromCursor(pCursor);
+
+                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
+                    pCursor);
+
+                return Eof(cursor);
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return true;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1115,7 +1181,25 @@ namespace System.Data.SQLite
             int index
             )
         {
-            return SQLiteErrorCode.Ok;
+            IntPtr pVtab = IntPtr.Zero;
+
+            try
+            {
+                pVtab = GetTableFromCursor(pCursor);
+
+                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
+                    pCursor);
+
+                SQLiteContext context = new SQLiteContext(pContext);
+
+                return Column(cursor, context, index);
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1125,7 +1209,23 @@ namespace System.Data.SQLite
             ref long rowId
             )
         {
-            return SQLiteErrorCode.Ok;
+            IntPtr pVtab = IntPtr.Zero;
+
+            try
+            {
+                pVtab = GetTableFromCursor(pCursor);
+
+                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
+                    pCursor);
+
+                return RowId(cursor, ref rowId);
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1133,11 +1233,23 @@ namespace System.Data.SQLite
         public SQLiteErrorCode xUpdate(
             IntPtr pVtab,
             int nData,
-            ref IntPtr apData,
+            IntPtr apData,
             ref long rowId
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                SQLiteValue[] values = ValueArrayFromSizeAndIntPtr(
+                    nData, apData);
+
+                return Update(values, ref rowId);
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1146,7 +1258,16 @@ namespace System.Data.SQLite
             IntPtr pVtab
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                return Begin();
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1155,7 +1276,16 @@ namespace System.Data.SQLite
             IntPtr pVtab
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                return Sync();
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1164,7 +1294,16 @@ namespace System.Data.SQLite
             IntPtr pVtab
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                return Commit();
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1173,20 +1312,53 @@ namespace System.Data.SQLite
             IntPtr pVtab
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                return Rollback();
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xFindFunction(
+        public bool xFindFunction(
             IntPtr pVtab,
             int nArg,
             IntPtr zName,
-            ref IntPtr pxFunc,
-            ref IntPtr ppArg
+            ref SQLiteCallback callback,
+            ref IntPtr pClientData
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                SQLiteFunction function = null;
+
+                if (FindFunction(
+                        StringFromUtf8IntPtr(zName), ref function,
+                        ref pClientData))
+                {
+                    if (function != null)
+                    {
+                        callback = function.ScalarCallback;
+                        return true;
+                    }
+                    else
+                    {
+                        SetTableError(pVtab, "no function was created");
+                    }
+                }
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return false;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1196,7 +1368,16 @@ namespace System.Data.SQLite
             IntPtr zNew
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                return Rename(StringFromUtf8IntPtr(zNew));
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1206,7 +1387,16 @@ namespace System.Data.SQLite
             int iSavepoint
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                return Savepoint(iSavepoint);
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1216,7 +1406,16 @@ namespace System.Data.SQLite
             int iSavepoint
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                return Release(iSavepoint);
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1226,7 +1425,16 @@ namespace System.Data.SQLite
             int iSavepoint
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                return RollbackTo(iSavepoint);
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
         #endregion
 
@@ -1301,7 +1509,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Eof(
+        public abstract bool Eof(
             SQLiteVirtualTableCursor cursor
             );
 
@@ -1345,10 +1553,10 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode FindFunction(
+        public abstract bool FindFunction(
             string zName,
             ref SQLiteFunction function,
-            object[] args
+            ref IntPtr pClientData
             );
 
         ///////////////////////////////////////////////////////////////////////

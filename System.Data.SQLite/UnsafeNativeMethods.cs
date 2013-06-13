@@ -1722,7 +1722,8 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
-    public delegate SQLiteErrorCode xEof(
+    [return: MarshalAs(UnmanagedType.I4)]
+    public delegate bool xEof(
         IntPtr pCursor
     );
 
@@ -1755,7 +1756,7 @@ namespace System.Data.SQLite
     public delegate SQLiteErrorCode xUpdate(
         IntPtr pVtab,
         int nData,
-        ref IntPtr apData,
+        IntPtr apData,
         ref long rowId
     );
 
@@ -1800,12 +1801,13 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
-    public delegate SQLiteErrorCode xFindFunction(
+    [return: MarshalAs(UnmanagedType.I4)]
+    public delegate bool xFindFunction(
         IntPtr pVtab,
         int nArg,
         IntPtr zName,
-        ref IntPtr pxFunc,
-        ref IntPtr ppArg
+        ref SQLiteCallback callback,
+        ref IntPtr pUserData
     );
 
     ///////////////////////////////////////////////////////////////////////////

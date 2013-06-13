@@ -836,13 +836,13 @@ namespace System.Data.SQLite
   /// <summary>
   /// An internal callback delegate declaration.
   /// </summary>
-  /// <param name="context">Raw context pointer for the user function</param>
-  /// <param name="nArgs">Count of arguments to the function</param>
-  /// <param name="argsptr">A pointer to the array of argument pointers</param>
+  /// <param name="context">Raw native context pointer for the user function.</param>
+  /// <param name="argc">Total number of arguments to the user function.</param>
+  /// <param name="argv">Raw native pointer to the array of raw native argument pointers.</param>
 #if !PLATFORM_COMPACTFRAMEWORK
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
-  internal delegate void SQLiteCallback(IntPtr context, int nArgs, IntPtr argsptr);
+  public delegate void SQLiteCallback(IntPtr context, int argc, IntPtr argv);
   /// <summary>
   /// An internal final callback delegate declaration.
   /// </summary>

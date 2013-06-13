@@ -146,7 +146,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public override SQLiteErrorCode Eof(
+        public override bool Eof(
             SQLiteVirtualTableCursor cursor
             )
         {
@@ -222,10 +222,10 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public override SQLiteErrorCode FindFunction(
+        public override bool FindFunction(
             string zName,
             ref SQLiteFunction function,
-            object[] args
+            ref IntPtr pClientData
             )
         {
             CheckDisposed();
