@@ -223,6 +223,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override bool FindFunction(
+            int nArg,
             string zName,
             ref SQLiteFunction function,
             ref IntPtr pClientData

@@ -311,28 +311,117 @@ namespace System.Data.SQLite
 
     public sealed class SQLiteIndexInputs
     {
-        private SQLiteIndexConstraint[] Constraints;
-        private SQLiteIndexOrderBy[] OrderBys;
+        public SQLiteIndexInputs(int nConstraint, int nOrderBy)
+        {
+            constraints = new SQLiteIndexConstraint[nConstraint];
+            orderBys = new SQLiteIndexOrderBy[nOrderBy];
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteIndexConstraint[] constraints;
+        public SQLiteIndexConstraint[] Constraints
+        {
+            get { return constraints; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteIndexOrderBy[] orderBys;
+        public SQLiteIndexOrderBy[] OrderBys
+        {
+            get { return orderBys; }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
     public sealed class SQLiteIndexOutputs
     {
-        private SQLiteIndexConstraintUsage[] ConstraintUsages;
-        private int idxNum;           /* Number used to identify the index */
-        private string idxStr;        /* String, possibly obtained from sqlite3_malloc */
+        public SQLiteIndexOutputs(int nConstraint)
+        {
+            constraintUsages = new SQLiteIndexConstraintUsage[nConstraint];
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteIndexConstraintUsage[] constraintUsages;
+        public SQLiteIndexConstraintUsage[] ConstraintUsages
+        {
+            get { return constraintUsages; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private int idxNum; /* Number used to identify the index */
+        public int IdxNum
+        {
+            get { return idxNum; }
+            set { idxNum = value; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private string idxStr; /* String, possibly obtained from sqlite3_malloc */
+        public string IdxStr
+        {
+            get { return idxStr; }
+            set { idxStr = value; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private int needToFreeIdxStr; /* Free idxStr using sqlite3_free() if true */
-        private int orderByConsumed;  /* True if output is already ordered */
+        public int NeedToFreeIdxStr
+        {
+            get { return needToFreeIdxStr; }
+            set { needToFreeIdxStr = value; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private int orderByConsumed; /* True if output is already ordered */
+        public int OrderByConsumed
+        {
+            get { return orderByConsumed; }
+            set { orderByConsumed = value; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private double estimatedCost; /* Estimated cost of using this index */
+        public double EstimatedCost
+        {
+            get { return estimatedCost; }
+            set { estimatedCost = value; }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
     public sealed class SQLiteIndex
     {
-        public SQLiteIndexInputs inputs;
-        public SQLiteIndexOutputs outputs;
+        public SQLiteIndex(int nConstraint, int nOrderBy)
+        {
+            inputs = new SQLiteIndexInputs(nConstraint, nOrderBy);
+            outputs = new SQLiteIndexOutputs(nConstraint);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteIndexInputs inputs;
+        public SQLiteIndexInputs Inputs
+        {
+            get { return inputs; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteIndexOutputs outputs;
+        public SQLiteIndexOutputs Outputs
+        {
+            get { return outputs; }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -363,7 +452,7 @@ namespace System.Data.SQLite
 
         SQLiteErrorCode xCreate(IntPtr pDb, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr pError);
         SQLiteErrorCode xConnect(IntPtr pDb, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr pError);
-        SQLiteErrorCode xBestIndex(IntPtr pVtab, IntPtr index);
+        SQLiteErrorCode xBestIndex(IntPtr pVtab, IntPtr pIndex);
         SQLiteErrorCode xDisconnect(IntPtr pVtab);
         SQLiteErrorCode xDestroy(IntPtr pVtab);
         SQLiteErrorCode xOpen(IntPtr pVtab, ref IntPtr pCursor);
@@ -408,7 +497,7 @@ namespace System.Data.SQLite
         SQLiteErrorCode Sync();
         SQLiteErrorCode Commit();
         SQLiteErrorCode Rollback();
-        bool FindFunction(string zName, ref SQLiteFunction function, ref IntPtr pClientData);
+        bool FindFunction(int nArg, string zName, ref SQLiteFunction function, ref IntPtr pClientData);
         SQLiteErrorCode Rename(string zNew);
         SQLiteErrorCode Savepoint(int iSavepoint);
         SQLiteErrorCode Release(int iSavepoint);
@@ -669,6 +758,29 @@ namespace System.Data.SQLite
                 result[index] = new SQLiteValue(values[index]);
 
             return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static UnsafeNativeMethods.sqlite3_index_info IndexFromIntPtr(
+            IntPtr pIndex
+            )
+        {
+            if (pIndex == IntPtr.Zero)
+                return new UnsafeNativeMethods.sqlite3_index_info();
+
+            return new UnsafeNativeMethods.sqlite3_index_info();
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void IndexOutputsToIntPtr(
+            UnsafeNativeMethods.sqlite3_index_info index,
+            SQLiteIndexOutputs indexOutputs
+            )
+        {
+
+
         }
         #endregion
 
@@ -940,10 +1052,22 @@ namespace System.Data.SQLite
 
         public SQLiteErrorCode xBestIndex(
             IntPtr pVtab,
-            IntPtr index
+            IntPtr pIndex
             )
         {
-            return SQLiteErrorCode.Ok;
+            try
+            {
+                if (BestIndex(null) == SQLiteErrorCode.Ok)
+                {
+                    return SQLiteErrorCode.Ok;
+                }
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                SetTableError(pVtab, e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1339,7 +1463,7 @@ namespace System.Data.SQLite
                 SQLiteFunction function = null;
 
                 if (FindFunction(
-                        StringFromUtf8IntPtr(zName), ref function,
+                        nArg, StringFromUtf8IntPtr(zName), ref function,
                         ref pClientData))
                 {
                     if (function != null)
@@ -1554,6 +1678,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public abstract bool FindFunction(
+            int nArg,
             string zName,
             ref SQLiteFunction function,
             ref IntPtr pClientData

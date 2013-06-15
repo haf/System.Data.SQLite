@@ -1655,7 +1655,7 @@ namespace System.Data.SQLite
 #endif
     public delegate SQLiteErrorCode xBestIndex(
         IntPtr pVtab,
-        IntPtr index
+        IntPtr pIndex
     );
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1962,8 +1962,10 @@ namespace System.Data.SQLite
         [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
         public sqlite3_index_constraint[] aConstraint;
         public int nOrderBy;
+        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
         public sqlite3_index_orderby[] aOrderBy;
         /* Outputs */
+        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
         public sqlite3_index_constraint_usage[] aConstraintUsage;
         public int idxNum;           /* Number used to identify the index */
         public string idxStr;        /* String, possibly obtained from sqlite3_malloc */
