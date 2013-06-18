@@ -89,7 +89,7 @@ namespace System.Data.SQLite
             if (pContext == IntPtr.Zero)
                 throw new InvalidOperationException();
 
-            byte[] bytes = SQLiteModuleBase.GetUtf8BytesFromString(value);
+            byte[] bytes = SQLiteMarshal.GetUtf8BytesFromString(value);
 
             if (bytes == null)
                 throw new ArgumentNullException("value");
@@ -105,7 +105,7 @@ namespace System.Data.SQLite
             if (pContext == IntPtr.Zero)
                 throw new InvalidOperationException();
 
-            byte[] bytes = SQLiteModuleBase.GetUtf8BytesFromString(value);
+            byte[] bytes = SQLiteMarshal.GetUtf8BytesFromString(value);
 
             if (bytes == null)
                 throw new ArgumentNullException("value");
@@ -259,7 +259,7 @@ namespace System.Data.SQLite
         public string GetString()
         {
             if (pValue == IntPtr.Zero) return null;
-            return SQLiteModuleBase.StringFromUtf8IntPtr(pValue, GetBytes());
+            return SQLiteMarshal.StringFromUtf8IntPtr(pValue, GetBytes());
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -267,7 +267,7 @@ namespace System.Data.SQLite
         public byte[] GetBlob()
         {
             if (pValue == IntPtr.Zero) return null;
-            return SQLiteModuleBase.BytesFromIntPtr(pValue, GetBytes());
+            return SQLiteMarshal.BytesFromIntPtr(pValue, GetBytes());
         }
         #endregion
     }
@@ -905,64 +905,30 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-    #region SQLiteModuleBase Class
-    public abstract class SQLiteModuleBase :
-            ISQLiteManagedModule, ISQLiteNativeModule,  IDisposable
+    #region SQLiteMarshal Class
+    internal static class SQLiteMarshal
     {
         #region Private Constants
+        private static int ThirtyBits = 0x3fffffff;
         private static readonly Encoding Utf8Encoding = Encoding.UTF8;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Private Methods
-        private UnsafeNativeMethods.sqlite3_module CreateNativeModule()
-        {
-            UnsafeNativeMethods.sqlite3_module module =
-                new UnsafeNativeMethods.sqlite3_module();
-
-            module.iVersion = 2;
-            module.xCreate = new UnsafeNativeMethods.xCreate(xCreate);
-            module.xConnect = new UnsafeNativeMethods.xConnect(xConnect);
-            module.xBestIndex = new UnsafeNativeMethods.xBestIndex(xBestIndex);
-            module.xDisconnect = new UnsafeNativeMethods.xDisconnect(xDisconnect);
-            module.xDestroy = new UnsafeNativeMethods.xDestroy(xDestroy);
-            module.xOpen = new UnsafeNativeMethods.xOpen(xOpen);
-            module.xClose = new UnsafeNativeMethods.xClose(xClose);
-            module.xFilter = new UnsafeNativeMethods.xFilter(xFilter);
-            module.xNext = new UnsafeNativeMethods.xNext(xNext);
-            module.xEof = new UnsafeNativeMethods.xEof(xEof);
-            module.xColumn = new UnsafeNativeMethods.xColumn(xColumn);
-            module.xRowId = new UnsafeNativeMethods.xRowId(xRowId);
-            module.xUpdate = new UnsafeNativeMethods.xUpdate(xUpdate);
-            module.xBegin = new UnsafeNativeMethods.xBegin(xBegin);
-            module.xSync = new UnsafeNativeMethods.xSync(xSync);
-            module.xCommit = new UnsafeNativeMethods.xCommit(xCommit);
-            module.xRollback = new UnsafeNativeMethods.xRollback(xRollback);
-            module.xFindFunction = new UnsafeNativeMethods.xFindFunction(xFindFunction);
-            module.xRename = new UnsafeNativeMethods.xRename(xRename);
-            module.xSavepoint = new UnsafeNativeMethods.xSavepoint(xSavepoint);
-            module.xRelease = new UnsafeNativeMethods.xRelease(xRelease);
-            module.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(xRollbackTo);
-
-            return module;
-        }
-
-        private static int ThirtyBits = 0x3fffffff;
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static IntPtr IntPtrForOffset(
+        #region IntPtr Helper Methods
+        internal static IntPtr IntPtrForOffset(
             IntPtr pointer,
             int offset
             )
         {
             return new IntPtr(pointer.ToInt64() + offset);
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static int MarshalReadInt32(
+        #region Marshal Read Helper Methods
+        internal static int ReadInt32(
             IntPtr pointer,
             int offset
             )
@@ -976,7 +942,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static double MarshalReadDouble(
+        internal static double ReadDouble(
             IntPtr pointer,
             int offset
             )
@@ -992,7 +958,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static IntPtr MarshalReadIntPtr(
+        internal static IntPtr ReadIntPtr(
             IntPtr pointer,
             int offset
             )
@@ -1003,10 +969,12 @@ namespace System.Data.SQLite
             return Marshal.ReadIntPtr(IntPtrForOffset(pointer, offset));
 #endif
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static void MarshalWriteInt32(
+        #region Marshal Write Helper Methods
+        internal static void WriteInt32(
             IntPtr pointer,
             int offset,
             int value
@@ -1021,7 +989,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static void MarshalWriteDouble(
+        internal static void WriteDouble(
             IntPtr pointer,
             int offset,
             double value
@@ -1038,7 +1006,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static void MarshalWriteIntPtr(
+        internal static void WriteIntPtr(
             IntPtr pointer,
             int offset,
             IntPtr value
@@ -1050,48 +1018,50 @@ namespace System.Data.SQLite
             Marshal.WriteIntPtr(IntPtrForOffset(pointer, offset), value);
 #endif
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static byte[] GetUtf8BytesFromString(string value)
-        {
-            if (value == null)
-                return null;
-
-            return Utf8Encoding.GetBytes(value);
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static string GetStringFromUtf8Bytes(byte[] bytes)
-        {
-            if (bytes == null)
-                return null;
-
-#if !PLATFORM_COMPACTFRAMEWORK
-            return Utf8Encoding.GetString(bytes);
-#else
-            return Utf8Encoding.GetString(bytes, 0, bytes.Length);
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        private static IntPtr Allocate(int size)
+        #region Memory Allocation Helper Methods
+        internal static IntPtr Allocate(int size)
         {
             return UnsafeNativeMethods.sqlite3_malloc(size);
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static void Free(IntPtr pMemory)
+        internal static void Free(IntPtr pMemory)
         {
             UnsafeNativeMethods.sqlite3_free(pMemory);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Byte Array Helper Methods
+        internal static byte[] BytesFromIntPtr(
+            IntPtr pValue,
+            int length
+            )
+        {
+            if (pValue == IntPtr.Zero)
+                return null;
+
+            if (length == 0)
+                return new byte[0];
+
+            byte[] result = new byte[length];
+
+            Marshal.Copy(pValue, result, 0, length);
+
+            return result;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static IntPtr BytesToIntPtr(byte[] value)
+        internal static IntPtr BytesToIntPtr(
+            byte[] value
+            )
         {
             if (value == null)
                 return IntPtr.Zero;
@@ -1110,27 +1080,45 @@ namespace System.Data.SQLite
 
             return result;
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static byte[] BytesFromIntPtr(IntPtr pValue, int length)
+        #region UTF-8 Encoding Helper Methods
+        internal static byte[] GetUtf8BytesFromString(
+            string value
+            )
         {
-            if (pValue == IntPtr.Zero)
+            if (value == null)
                 return null;
 
-            if (length == 0)
-                return new byte[0];
-
-            byte[] result = new byte[length];
-
-            Marshal.Copy(pValue, result, 0, length);
-
-            return result;
+            return Utf8Encoding.GetBytes(value);
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static int ProbeForUtf8ByteLength(IntPtr pValue, int limit)
+        internal static string GetStringFromUtf8Bytes(
+            byte[] bytes
+            )
+        {
+            if (bytes == null)
+                return null;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+            return Utf8Encoding.GetString(bytes);
+#else
+            return Utf8Encoding.GetString(bytes, 0, bytes.Length);
+#endif
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region UTF-8 String Helper Methods
+        internal static int ProbeForUtf8ByteLength(
+            IntPtr pValue,
+            int limit
+            )
         {
             int length = 0;
 
@@ -1153,7 +1141,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static string StringFromUtf8IntPtr(IntPtr pValue)
+        internal static string StringFromUtf8IntPtr(
+            IntPtr pValue
+            )
         {
             return StringFromUtf8IntPtr(pValue,
                 ProbeForUtf8ByteLength(pValue, ThirtyBits));
@@ -1161,7 +1151,10 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static string StringFromUtf8IntPtr(IntPtr pValue, int length)
+        internal static string StringFromUtf8IntPtr(
+            IntPtr pValue,
+            int length
+            )
         {
             if (pValue == IntPtr.Zero)
                 return null;
@@ -1180,24 +1173,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static string[] StringArrayFromUtf8IntPtrArray(
-            IntPtr[] pValues
+        internal static IntPtr Utf8IntPtrFromString(
+            string value
             )
-        {
-            if (pValues == null)
-                return null;
-
-            string[] result = new string[pValues.Length];
-
-            for (int index = 0; index < result.Length; index++)
-                result[index] = StringFromUtf8IntPtr(pValues[index]);
-
-            return result;
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        internal static IntPtr Utf8IntPtrFromString(string value)
         {
             if (value == null)
                 return IntPtr.Zero;
@@ -1220,10 +1198,29 @@ namespace System.Data.SQLite
 
             return result;
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static IntPtr[] Utf8IntPtrArrayFromStringArray(
+        #region UTF-8 String Array Helper Methods
+        internal static string[] StringArrayFromUtf8IntPtrArray(
+            IntPtr[] pValues
+            )
+        {
+            if (pValues == null)
+                return null;
+
+            string[] result = new string[pValues.Length];
+
+            for (int index = 0; index < result.Length; index++)
+                result[index] = StringFromUtf8IntPtr(pValues[index]);
+
+            return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        internal static IntPtr[] Utf8IntPtrArrayFromStringArray(
             string[] values
             )
         {
@@ -1237,10 +1234,12 @@ namespace System.Data.SQLite
 
             return result;
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static SQLiteValue[] ValueArrayFromSizeAndIntPtr(
+        #region SQLiteValue Helper Methods
+        internal static SQLiteValue[] ValueArrayFromSizeAndIntPtr(
             int nData,
             IntPtr apData
             )
@@ -1257,7 +1256,7 @@ namespace System.Data.SQLite
                     index < result.Length;
                     index++, offset += IntPtr.Size)
             {
-                IntPtr pData = MarshalReadIntPtr(apData, offset);
+                IntPtr pData = ReadIntPtr(apData, offset);
 
                 result[index] = (pData != IntPtr.Zero) ?
                     new SQLiteValue(pData) : null;
@@ -1268,7 +1267,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static SQLiteValue[] ValueArrayFromIntPtrArray(
+        internal static SQLiteValue[] ValueArrayFromIntPtrArray(
             IntPtr[] values
             )
         {
@@ -1282,10 +1281,111 @@ namespace System.Data.SQLite
 
             return result;
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static void IndexToIntPtr(
+        #region SQLiteIndex Helper Methods
+        internal static void IndexFromIntPtr(
+            IntPtr pIndex,
+            ref SQLiteIndex index
+            )
+        {
+            if (pIndex == IntPtr.Zero)
+                return;
+
+            int offset = 0;
+
+            int nConstraint = ReadInt32(pIndex, offset);
+
+            offset += sizeof(int);
+
+            IntPtr pConstraint = ReadIntPtr(pIndex, offset);
+
+            offset += IntPtr.Size;
+
+            int nOrderBy = ReadInt32(pIndex, offset);
+
+            index = new SQLiteIndex(nConstraint, nOrderBy);
+
+            offset += sizeof(int);
+
+            IntPtr pOrderBy = ReadIntPtr(pIndex, offset);
+
+            offset += IntPtr.Size;
+
+            IntPtr pConstraintUsage = ReadIntPtr(pIndex, offset);
+
+            offset += IntPtr.Size;
+
+            index.Outputs.IdxNum = ReadInt32(pIndex, offset);
+
+            offset += sizeof(int);
+
+            index.Outputs.IdxStr = StringFromUtf8IntPtr(IntPtrForOffset(
+                pIndex, offset));
+
+            offset += IntPtr.Size;
+
+            index.Outputs.NeedToFreeIdxStr = ReadInt32(pIndex, offset);
+
+            offset += sizeof(int);
+
+            index.Outputs.OrderByConsumed = ReadInt32(pIndex, offset);
+
+            offset += sizeof(int);
+
+            index.Outputs.EstimatedCost = ReadDouble(pIndex, offset);
+
+            int sizeOfConstraintType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_constraint));
+
+            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
+            {
+                UnsafeNativeMethods.sqlite3_index_constraint constraint =
+                    new UnsafeNativeMethods.sqlite3_index_constraint();
+
+                Marshal.PtrToStructure(IntPtrForOffset(pConstraint,
+                    iConstraint * sizeOfConstraintType), constraint);
+
+                index.Inputs.Constraints[iConstraint] =
+                    new SQLiteIndexConstraint(constraint);
+            }
+
+            int sizeOfOrderByType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_orderby));
+
+            for (int iOrderBy = 0; iOrderBy < nOrderBy; iOrderBy++)
+            {
+                UnsafeNativeMethods.sqlite3_index_orderby orderBy =
+                    new UnsafeNativeMethods.sqlite3_index_orderby();
+
+                Marshal.PtrToStructure(IntPtrForOffset(pOrderBy,
+                    iOrderBy * sizeOfOrderByType), orderBy);
+
+                index.Inputs.OrderBys[iOrderBy] =
+                    new SQLiteIndexOrderBy(orderBy);
+            }
+
+            int sizeOfConstraintUsageType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_constraint_usage));
+
+            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
+            {
+                UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage =
+                    new UnsafeNativeMethods.sqlite3_index_constraint_usage();
+
+                Marshal.PtrToStructure(IntPtrForOffset(pConstraintUsage,
+                    iConstraint * sizeOfConstraintUsageType), constraintUsage);
+
+                index.Outputs.ConstraintUsages[iConstraint] =
+                    new SQLiteIndexConstraintUsage(constraintUsage);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        internal static void IndexToIntPtr(
             SQLiteIndex index,
             IntPtr pIndex
             )
@@ -1303,7 +1403,7 @@ namespace System.Data.SQLite
 
             int offset = 0;
 
-            int nConstraint = MarshalReadInt32(pIndex, offset);
+            int nConstraint = ReadInt32(pIndex, offset);
 
             if (nConstraint != index.Inputs.Constraints.Length)
                 return;
@@ -1313,21 +1413,21 @@ namespace System.Data.SQLite
 
             offset += sizeof(int);
 
-            IntPtr pConstraint = MarshalReadIntPtr(pIndex, offset);
+            IntPtr pConstraint = ReadIntPtr(pIndex, offset);
 
             offset += IntPtr.Size;
 
-            int nOrderBy = MarshalReadInt32(pIndex, offset);
+            int nOrderBy = ReadInt32(pIndex, offset);
 
             index = new SQLiteIndex(nConstraint, nOrderBy);
 
             offset += sizeof(int);
 
-            IntPtr pOrderBy = MarshalReadIntPtr(pIndex, offset);
+            IntPtr pOrderBy = ReadIntPtr(pIndex, offset);
 
             offset += IntPtr.Size;
 
-            IntPtr pConstraintUsage = MarshalReadIntPtr(pIndex, offset);
+            IntPtr pConstraintUsage = ReadIntPtr(pIndex, offset);
 
             int sizeOfConstraintType = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_index_constraint));
@@ -1380,104 +1480,47 @@ namespace System.Data.SQLite
                     new SQLiteIndexConstraintUsage(constraintUsage);
             }
         }
+        #endregion
+    }
+    #endregion
 
-        ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
-        private static void IndexFromIntPtr(
-            IntPtr pIndex,
-            ref SQLiteIndex index
-            )
+    #region SQLiteModuleBase Class
+    public abstract class SQLiteModuleBase :
+            ISQLiteManagedModule, ISQLiteNativeModule,  IDisposable
+    {
+        #region Internal Methods
+        internal UnsafeNativeMethods.sqlite3_module CreateNativeModule()
         {
-            if (pIndex == IntPtr.Zero)
-                return;
+            UnsafeNativeMethods.sqlite3_module module =
+                new UnsafeNativeMethods.sqlite3_module();
 
-            int offset = 0;
+            module.iVersion = 2;
+            module.xCreate = new UnsafeNativeMethods.xCreate(xCreate);
+            module.xConnect = new UnsafeNativeMethods.xConnect(xConnect);
+            module.xBestIndex = new UnsafeNativeMethods.xBestIndex(xBestIndex);
+            module.xDisconnect = new UnsafeNativeMethods.xDisconnect(xDisconnect);
+            module.xDestroy = new UnsafeNativeMethods.xDestroy(xDestroy);
+            module.xOpen = new UnsafeNativeMethods.xOpen(xOpen);
+            module.xClose = new UnsafeNativeMethods.xClose(xClose);
+            module.xFilter = new UnsafeNativeMethods.xFilter(xFilter);
+            module.xNext = new UnsafeNativeMethods.xNext(xNext);
+            module.xEof = new UnsafeNativeMethods.xEof(xEof);
+            module.xColumn = new UnsafeNativeMethods.xColumn(xColumn);
+            module.xRowId = new UnsafeNativeMethods.xRowId(xRowId);
+            module.xUpdate = new UnsafeNativeMethods.xUpdate(xUpdate);
+            module.xBegin = new UnsafeNativeMethods.xBegin(xBegin);
+            module.xSync = new UnsafeNativeMethods.xSync(xSync);
+            module.xCommit = new UnsafeNativeMethods.xCommit(xCommit);
+            module.xRollback = new UnsafeNativeMethods.xRollback(xRollback);
+            module.xFindFunction = new UnsafeNativeMethods.xFindFunction(xFindFunction);
+            module.xRename = new UnsafeNativeMethods.xRename(xRename);
+            module.xSavepoint = new UnsafeNativeMethods.xSavepoint(xSavepoint);
+            module.xRelease = new UnsafeNativeMethods.xRelease(xRelease);
+            module.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(xRollbackTo);
 
-            int nConstraint = MarshalReadInt32(pIndex, offset);
-
-            offset += sizeof(int);
-
-            IntPtr pConstraint = MarshalReadIntPtr(pIndex, offset);
-
-            offset += IntPtr.Size;
-
-            int nOrderBy = MarshalReadInt32(pIndex, offset);
-
-            index = new SQLiteIndex(nConstraint, nOrderBy);
-
-            offset += sizeof(int);
-
-            IntPtr pOrderBy = MarshalReadIntPtr(pIndex, offset);
-
-            offset += IntPtr.Size;
-
-            IntPtr pConstraintUsage = MarshalReadIntPtr(pIndex, offset);
-
-            offset += IntPtr.Size;
-
-            index.Outputs.IdxNum = MarshalReadInt32(pIndex, offset);
-
-            offset += sizeof(int);
-
-            index.Outputs.IdxStr = StringFromUtf8IntPtr(IntPtrForOffset(
-                pIndex, offset));
-
-            offset += IntPtr.Size;
-
-            index.Outputs.NeedToFreeIdxStr = MarshalReadInt32(pIndex, offset);
-
-            offset += sizeof(int);
-
-            index.Outputs.OrderByConsumed = MarshalReadInt32(pIndex, offset);
-
-            offset += sizeof(int);
-
-            index.Outputs.EstimatedCost = MarshalReadDouble(pIndex, offset);
-
-            int sizeOfConstraintType = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_index_constraint));
-
-            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
-            {
-                UnsafeNativeMethods.sqlite3_index_constraint constraint =
-                    new UnsafeNativeMethods.sqlite3_index_constraint();
-
-                Marshal.PtrToStructure(IntPtrForOffset(pConstraint,
-                    iConstraint * sizeOfConstraintType), constraint);
-
-                index.Inputs.Constraints[iConstraint] =
-                    new SQLiteIndexConstraint(constraint);
-            }
-
-            int sizeOfOrderByType = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_index_orderby));
-
-            for (int iOrderBy = 0; iOrderBy < nOrderBy; iOrderBy++)
-            {
-                UnsafeNativeMethods.sqlite3_index_orderby orderBy =
-                    new UnsafeNativeMethods.sqlite3_index_orderby();
-
-                Marshal.PtrToStructure(IntPtrForOffset(pOrderBy,
-                    iOrderBy * sizeOfOrderByType), orderBy);
-
-                index.Inputs.OrderBys[iOrderBy] =
-                    new SQLiteIndexOrderBy(orderBy);
-            }
-
-            int sizeOfConstraintUsageType = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_index_constraint_usage));
-
-            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
-            {
-                UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage =
-                    new UnsafeNativeMethods.sqlite3_index_constraint_usage();
-
-                Marshal.PtrToStructure(IntPtrForOffset(pConstraintUsage,
-                    iConstraint * sizeOfConstraintUsageType), constraintUsage);
-
-                index.Outputs.ConstraintUsages[iConstraint] =
-                    new SQLiteIndexConstraintUsage(constraintUsage);
-            }
+            return module;
         }
         #endregion
 
@@ -1498,14 +1541,14 @@ namespace System.Data.SQLite
             int size = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_vtab));
 
-            return Allocate(size);
+            return SQLiteMarshal.Allocate(size);
         }
 
         ///////////////////////////////////////////////////////////////////////
 
         protected virtual void FreeTable(IntPtr pVtab)
         {
-            Free(pVtab);
+            SQLiteMarshal.Free(pVtab);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1515,7 +1558,7 @@ namespace System.Data.SQLite
             int size = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_vtab_cursor));
 
-            return Allocate(size);
+            return SQLiteMarshal.Allocate(size);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1542,8 +1585,6 @@ namespace System.Data.SQLite
             SQLiteVirtualTableCursor result =
                 new SQLiteVirtualTableCursor(pCursor);
 
-            // Marshal.PtrToStructure(pCursor, result.cursor);
-
             return result;
         }
 
@@ -1564,10 +1605,7 @@ namespace System.Data.SQLite
                 result = AllocateCursor();
 
                 if (result != IntPtr.Zero)
-                {
-                    // Marshal.StructureToPtr(cursor.cursor, result, false);
                     success = true;
-                }
             }
             finally
             {
@@ -1585,7 +1623,7 @@ namespace System.Data.SQLite
 
         protected virtual void FreeCursor(IntPtr pCursor)
         {
-            Free(pCursor);
+            SQLiteMarshal.Free(pCursor);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1626,15 +1664,17 @@ namespace System.Data.SQLite
             int offset = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_module)) + sizeof(int);
 
-            IntPtr pError = MarshalReadIntPtr(pVtab, offset);
+            IntPtr pError = SQLiteMarshal.ReadIntPtr(pVtab, offset);
 
             if (pError != IntPtr.Zero)
             {
-                Free(pError); pError = IntPtr.Zero;
-                MarshalWriteIntPtr(pVtab, offset, pError);
+                SQLiteMarshal.Free(pError); pError = IntPtr.Zero;
+                SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
             }
 
-            MarshalWriteIntPtr(pVtab, offset, Utf8IntPtrFromString(error));
+            SQLiteMarshal.WriteIntPtr(pVtab, offset,
+                SQLiteMarshal.Utf8IntPtrFromString(error));
+
             return true;
         }
         #endregion
@@ -1659,7 +1699,7 @@ namespace System.Data.SQLite
                     string error = null;
 
                     if (Create(connection, pAux,
-                            StringArrayFromUtf8IntPtrArray(argv),
+                            SQLiteMarshal.StringArrayFromUtf8IntPtrArray(argv),
                             ref error) == SQLiteErrorCode.Ok)
                     {
                         pVtab = AllocateTable();
@@ -1667,13 +1707,13 @@ namespace System.Data.SQLite
                     }
                     else
                     {
-                        pError = Utf8IntPtrFromString(error);
+                        pError = SQLiteMarshal.Utf8IntPtrFromString(error);
                     }
                 }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
-                pError = Utf8IntPtrFromString(e.ToString());
+                pError = SQLiteMarshal.Utf8IntPtrFromString(e.ToString());
             }
 
             return SQLiteErrorCode.Error;
@@ -1698,7 +1738,7 @@ namespace System.Data.SQLite
                     string error = null;
 
                     if (Connect(connection, pAux,
-                            StringArrayFromUtf8IntPtrArray(argv),
+                            SQLiteMarshal.StringArrayFromUtf8IntPtrArray(argv),
                             ref error) == SQLiteErrorCode.Ok)
                     {
                         pVtab = AllocateTable();
@@ -1706,13 +1746,13 @@ namespace System.Data.SQLite
                     }
                     else
                     {
-                        pError = Utf8IntPtrFromString(error);
+                        pError = SQLiteMarshal.Utf8IntPtrFromString(error);
                     }
                 }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
-                pError = Utf8IntPtrFromString(e.ToString());
+                pError = SQLiteMarshal.Utf8IntPtrFromString(e.ToString());
             }
 
             return SQLiteErrorCode.Error;
@@ -1729,11 +1769,11 @@ namespace System.Data.SQLite
             {
                 SQLiteIndex index = null;
 
-                IndexFromIntPtr(pIndex, ref index);
+                SQLiteMarshal.IndexFromIntPtr(pIndex, ref index);
 
                 if (BestIndex(index) == SQLiteErrorCode.Ok)
                 {
-                    IndexToIntPtr(index, pIndex);
+                    SQLiteMarshal.IndexToIntPtr(index, pIndex);
                     return SQLiteErrorCode.Ok;
                 }
             }
@@ -1907,8 +1947,8 @@ namespace System.Data.SQLite
                     pCursor);
 
                 if (Filter(
-                        cursor, idxNum, StringFromUtf8IntPtr(idxStr),
-                        ValueArrayFromIntPtrArray(argv)) == SQLiteErrorCode.Ok)
+                        cursor, idxNum, SQLiteMarshal.StringFromUtf8IntPtr(idxStr),
+                        SQLiteMarshal.ValueArrayFromIntPtrArray(argv)) == SQLiteErrorCode.Ok)
                 {
                     return SQLiteErrorCode.Ok;
                 }
@@ -2038,7 +2078,7 @@ namespace System.Data.SQLite
         {
             try
             {
-                SQLiteValue[] values = ValueArrayFromSizeAndIntPtr(
+                SQLiteValue[] values = SQLiteMarshal.ValueArrayFromSizeAndIntPtr(
                     nData, apData);
 
                 return Update(values, ref rowId);
@@ -2138,8 +2178,8 @@ namespace System.Data.SQLite
                 SQLiteFunction function = null;
 
                 if (FindFunction(
-                        nArg, StringFromUtf8IntPtr(zName), ref function,
-                        ref pClientData))
+                        nArg, SQLiteMarshal.StringFromUtf8IntPtr(zName),
+                        ref function, ref pClientData))
                 {
                     if (function != null)
                     {
@@ -2169,7 +2209,7 @@ namespace System.Data.SQLite
         {
             try
             {
-                return Rename(StringFromUtf8IntPtr(zNew));
+                return Rename(SQLiteMarshal.StringFromUtf8IntPtr(zNew));
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {

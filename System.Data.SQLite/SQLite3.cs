@@ -1536,7 +1536,7 @@ namespace System.Data.SQLite
         )
     {
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_declare_vtab(
-            _sql, SQLiteModuleBase.Utf8IntPtrFromString(strSql));
+            _sql, SQLiteMarshal.Utf8IntPtrFromString(strSql));
 
         if ((n == SQLiteErrorCode.Ok) && (module != null))
             module.Declared = true;
