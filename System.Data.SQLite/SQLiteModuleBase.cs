@@ -426,22 +426,33 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-    public class SQLiteVirtualTableCursor
+    public class SQLiteVirtualTableCursor : ISQLiteNativeHandle
     {
+        #region Public Constructors
         public SQLiteVirtualTableCursor(
             IntPtr nativeHandle
             )
         {
             this.nativeHandle = nativeHandle;
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region ISQLiteNativeHandle Members
         private IntPtr nativeHandle;
         public IntPtr NativeHandle
         {
             get { return nativeHandle; }
         }
+        #endregion
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    public interface ISQLiteNativeHandle
+    {
+        IntPtr NativeHandle { get; }
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -550,6 +561,109 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+#if PLATFORM_COMPACTFRAMEWORK
+        protected virtual IntPtr IntPtrForOffset(
+            IntPtr pointer,
+            int offset
+            )
+        {
+            return new IntPtr(pointer.ToInt64() + offset);
+        }
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static int MarshalReadInt32(
+            IntPtr pointer,
+            int offset
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            return Marshal.ReadInt32(pointer, offset);
+#else
+            return Marshal.ReadInt32(IntPtrForOffset(pointer, offset));
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static double MarshalReadDouble(
+            IntPtr pointer,
+            int offset
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            return BitConverter.Int64BitsToDouble(Marshal.ReadInt64(
+                pointer, offset));
+#else
+            return BitConverter.ToDouble(BitConverter.GetBytes(
+                Marshal.ReadInt64(IntPtrForOffset(pointer, offset)), 0);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static IntPtr MarshalReadIntPtr(
+            IntPtr pointer,
+            int offset
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            return Marshal.ReadIntPtr(pointer, offset);
+#else
+            return Marshal.ReadIntPtr(IntPtrForOffset(pointer, offset));
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void MarshalWriteInt32(
+            IntPtr pointer,
+            int offset,
+            int value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteInt32(pointer, offset, value);
+#else
+            Marshal.WriteInt32(IntPtrForOffset(pointer, offset), value);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void MarshalWriteDouble(
+            IntPtr pointer,
+            int offset,
+            double value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteInt64(pointer, offset,
+                BitConverter.DoubleToInt64Bits(value));
+#else
+            Marshal.WriteInt64(IntPtrForOffset(pointer, offset),
+                BitConverter.ToInt64(BitConverter.GetBytes(value)));
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void MarshalWriteIntPtr(
+            IntPtr pointer,
+            int offset,
+            IntPtr value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteIntPtr(pointer, offset, value);
+#else
+            Marshal.WriteIntPtr(IntPtrForOffset(pointer, offset), value);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         internal static byte[] GetUtf8BytesFromString(string value)
         {
             if (value == null)
@@ -584,6 +698,28 @@ namespace System.Data.SQLite
         private static void Free(IntPtr pMemory)
         {
             UnsafeNativeMethods.sqlite3_free(pMemory);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static IntPtr BytesToIntPtr(byte[] value)
+        {
+            if (value == null)
+                return IntPtr.Zero;
+
+            int length = value.Length;
+
+            if (length == 0)
+                return IntPtr.Zero;
+
+            IntPtr result = Allocate(length);
+
+            if (result == IntPtr.Zero)
+                return IntPtr.Zero;
+
+            Marshal.Copy(value, 0, result, length);
+
+            return result;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -687,6 +823,9 @@ namespace System.Data.SQLite
 
             result = Allocate(length + 1);
 
+            if (result == IntPtr.Zero)
+                return IntPtr.Zero;
+
             Marshal.Copy(bytes, 0, result, length);
             Marshal.WriteByte(result, length, 0);
 
@@ -729,12 +868,7 @@ namespace System.Data.SQLite
                     index < result.Length;
                     index++, offset += IntPtr.Size)
             {
-#if !PLATFORM_COMPACTFRAMEWORK
-                IntPtr pData = Marshal.ReadIntPtr(apData, offset);
-#else
-                IntPtr pData = Marshal.ReadIntPtr(IntPtrForOffset(
-                    apData, offset));
-#endif
+                IntPtr pData = MarshalReadIntPtr(apData, offset);
 
                 result[index] = (pData != IntPtr.Zero) ?
                     new SQLiteValue(pData) : null;
@@ -762,14 +896,34 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static UnsafeNativeMethods.sqlite3_index_info IndexFromIntPtr(
-            IntPtr pIndex
+        private static void IndexFromIntPtr(
+            IntPtr pIndex,
+            ref UnsafeNativeMethods.sqlite3_index_info index
             )
         {
             if (pIndex == IntPtr.Zero)
-                return new UnsafeNativeMethods.sqlite3_index_info();
+                return;
 
-            return new UnsafeNativeMethods.sqlite3_index_info();
+            Type type = typeof(UnsafeNativeMethods.sqlite3_index_info);
+
+            int nConstraint = MarshalReadInt32(pIndex, 0);
+            int nOrderBy = MarshalReadInt32(pIndex, sizeof(int) + IntPtr.Size);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -918,18 +1072,6 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-#if PLATFORM_COMPACTFRAMEWORK
-        protected virtual IntPtr IntPtrForOffset(
-            IntPtr pointer,
-            int offset
-            )
-        {
-            return new IntPtr(pointer.ToInt64() + offset);
-        }
-#endif
-
-        ///////////////////////////////////////////////////////////////////////
-
         protected virtual bool SetTableError(
             IntPtr pVtab,
             string error
@@ -941,30 +1083,15 @@ namespace System.Data.SQLite
             int offset = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_module)) + sizeof(int);
 
-#if !PLATFORM_COMPACTFRAMEWORK
-            IntPtr pError = Marshal.ReadIntPtr(pVtab, offset);
-#else
-            IntPtr pError = Marshal.ReadIntPtr(IntPtrForOffset(pVtab, offset));
-#endif
+            IntPtr pError = MarshalReadIntPtr(pVtab, offset);
 
             if (pError != IntPtr.Zero)
             {
                 Free(pError); pError = IntPtr.Zero;
-
-#if !PLATFORM_COMPACTFRAMEWORK
-                Marshal.WriteIntPtr(pVtab, offset, pError);
-#else
-                Marshal.WriteIntPtr(IntPtrForOffset(pVtab, offset), pError);
-#endif
+                MarshalWriteIntPtr(pVtab, offset, pError);
             }
 
-#if !PLATFORM_COMPACTFRAMEWORK
-            Marshal.WriteIntPtr(pVtab, offset, Utf8IntPtrFromString(error));
-#else
-            Marshal.WriteIntPtr(IntPtrForOffset(pVtab, offset),
-                Utf8IntPtrFromString(error));
-#endif
-
+            MarshalWriteIntPtr(pVtab, offset, Utf8IntPtrFromString(error));
             return true;
         }
         #endregion
@@ -1057,6 +1184,11 @@ namespace System.Data.SQLite
         {
             try
             {
+
+
+
+
+
                 if (BestIndex(null) == SQLiteErrorCode.Ok)
                 {
                     return SQLiteErrorCode.Ok;
