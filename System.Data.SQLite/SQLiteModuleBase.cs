@@ -275,6 +275,7 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteIndexConstraintOp Enumeration
     /* [Flags()] */
     public enum SQLiteIndexConstraintOp : byte
     {
@@ -285,40 +286,157 @@ namespace System.Data.SQLite
         GreaterThanOrEqualTo = 32,
         Match = 64
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteIndexConstraint Class
     public sealed class SQLiteIndexConstraint
     {
-        private UnsafeNativeMethods.sqlite3_index_constraint constraint;
+        #region Internal Constructors
+        internal SQLiteIndexConstraint(
+            UnsafeNativeMethods.sqlite3_index_constraint constraint
+            )
+            : this(constraint.iColumn, constraint.op, constraint.usable,
+                   constraint.iTermOffset)
+        {
+            // do nothing.
+        }
+        #endregion
+
+        //////////////////////////////////////////////////////////////////////
+
+        #region Private Constructors
+        private SQLiteIndexConstraint(
+            int iColumn,
+            SQLiteIndexConstraintOp op,
+            byte usable,
+            int iTermOffset
+            )
+        {
+            this.iColumn = iColumn;
+            this.op = op;
+            this.usable = usable;
+            this.iTermOffset = iTermOffset;
+        }
+        #endregion
+
+        //////////////////////////////////////////////////////////////////////
+
+        #region Public Fields
+        public int iColumn;
+
+        //////////////////////////////////////////////////////////////////////
+
+        public SQLiteIndexConstraintOp op;
+
+        //////////////////////////////////////////////////////////////////////
+
+        public byte usable;
+
+        //////////////////////////////////////////////////////////////////////
+
+        public int iTermOffset;
+        #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteIndexOrderBy Class
     public sealed class SQLiteIndexOrderBy
     {
-        private UnsafeNativeMethods.sqlite3_index_orderby orderBy;
+        #region Internal Constructors
+        internal SQLiteIndexOrderBy(
+            UnsafeNativeMethods.sqlite3_index_orderby orderBy
+            )
+            : this(orderBy.iColumn, orderBy.desc)
+        {
+            // do nothing.
+        }
+        #endregion
+
+        //////////////////////////////////////////////////////////////////////
+
+        #region Private Constructors
+        private SQLiteIndexOrderBy(
+            int iColumn,
+            byte desc
+            )
+        {
+            this.iColumn = iColumn;
+            this.desc = desc;
+        }
+        #endregion
+
+        //////////////////////////////////////////////////////////////////////
+
+        #region Public Fields
+        public int iColumn; /* Column number */
+
+        //////////////////////////////////////////////////////////////////////
+
+        public byte desc;   /* True for DESC.  False for ASC. */
+        #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteIndexConstraintUsage Class
     public sealed class SQLiteIndexConstraintUsage
     {
-        private UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage;
+        #region Internal Constructors
+        internal SQLiteIndexConstraintUsage(
+            UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage
+            )
+            : this(constraintUsage.argvIndex, constraintUsage.omit)
+        {
+            // do nothing.
+        }
+        #endregion
+
+        //////////////////////////////////////////////////////////////////////
+
+        #region Private Constructors
+        private SQLiteIndexConstraintUsage(
+            int argvIndex,
+            byte omit
+            )
+        {
+            this.argvIndex = argvIndex;
+            this.omit = omit;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Fields
+        public int argvIndex;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public byte omit;
+        #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteIndexInputs Class
     public sealed class SQLiteIndexInputs
     {
-        public SQLiteIndexInputs(int nConstraint, int nOrderBy)
+        #region Internal Constructors
+        internal SQLiteIndexInputs(int nConstraint, int nOrderBy)
         {
             constraints = new SQLiteIndexConstraint[nConstraint];
             orderBys = new SQLiteIndexOrderBy[nOrderBy];
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Public Properties
         private SQLiteIndexConstraint[] constraints;
         public SQLiteIndexConstraint[] Constraints
         {
@@ -332,19 +450,25 @@ namespace System.Data.SQLite
         {
             get { return orderBys; }
         }
+        #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteIndexOutputs Class
     public sealed class SQLiteIndexOutputs
     {
-        public SQLiteIndexOutputs(int nConstraint)
+        #region Internal Constructors
+        internal SQLiteIndexOutputs(int nConstraint)
         {
             constraintUsages = new SQLiteIndexConstraintUsage[nConstraint];
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Public Properties
         private SQLiteIndexConstraintUsage[] constraintUsages;
         public SQLiteIndexConstraintUsage[] ConstraintUsages
         {
@@ -353,7 +477,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private int idxNum; /* Number used to identify the index */
+        private int idxNum;
         public int IdxNum
         {
             get { return idxNum; }
@@ -362,7 +486,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private string idxStr; /* String, possibly obtained from sqlite3_malloc */
+        private string idxStr;
         public string IdxStr
         {
             get { return idxStr; }
@@ -371,7 +495,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private int needToFreeIdxStr; /* Free idxStr using sqlite3_free() if true */
+        private int needToFreeIdxStr;
         public int NeedToFreeIdxStr
         {
             get { return needToFreeIdxStr; }
@@ -380,7 +504,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private int orderByConsumed; /* True if output is already ordered */
+        private int orderByConsumed;
         public int OrderByConsumed
         {
             get { return orderByConsumed; }
@@ -389,26 +513,32 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private double estimatedCost; /* Estimated cost of using this index */
+        private double estimatedCost;
         public double EstimatedCost
         {
             get { return estimatedCost; }
             set { estimatedCost = value; }
         }
+        #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteIndex Class
     public sealed class SQLiteIndex
     {
-        public SQLiteIndex(int nConstraint, int nOrderBy)
+        #region Internal Constructors
+        internal SQLiteIndex(int nConstraint, int nOrderBy)
         {
             inputs = new SQLiteIndexInputs(nConstraint, nOrderBy);
             outputs = new SQLiteIndexOutputs(nConstraint);
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Public Properties
         private SQLiteIndexInputs inputs;
         public SQLiteIndexInputs Inputs
         {
@@ -422,10 +552,13 @@ namespace System.Data.SQLite
         {
             get { return outputs; }
         }
+        #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteVirtualTableCursor Class
     public class SQLiteVirtualTableCursor : ISQLiteNativeHandle
     {
         #region Public Constructors
@@ -447,80 +580,338 @@ namespace System.Data.SQLite
         }
         #endregion
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region ISQLiteNativeHandle Interface
     public interface ISQLiteNativeHandle
     {
         IntPtr NativeHandle { get; }
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region ISQLiteNativeModule Interface
     public interface ISQLiteNativeModule
     {
-        // https://www.sqlite.org/vtab.html
+        SQLiteErrorCode xCreate(
+            IntPtr pDb,
+            IntPtr pAux,
+            int argc,
+            IntPtr[] argv,
+            ref IntPtr pVtab,
+            ref IntPtr pError
+            );
 
-        SQLiteErrorCode xCreate(IntPtr pDb, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr pError);
-        SQLiteErrorCode xConnect(IntPtr pDb, IntPtr pAux, int argc, ref IntPtr[] argv, ref IntPtr pVtab, ref IntPtr pError);
-        SQLiteErrorCode xBestIndex(IntPtr pVtab, IntPtr pIndex);
-        SQLiteErrorCode xDisconnect(IntPtr pVtab);
-        SQLiteErrorCode xDestroy(IntPtr pVtab);
-        SQLiteErrorCode xOpen(IntPtr pVtab, ref IntPtr pCursor);
-        SQLiteErrorCode xClose(IntPtr pCursor);
-        SQLiteErrorCode xFilter(IntPtr pCursor, int idxNum, IntPtr idxStr, int argc, IntPtr[] argv);
-        SQLiteErrorCode xNext(IntPtr pCursor);
-        bool xEof(IntPtr pCursor);
-        SQLiteErrorCode xColumn(IntPtr pCursor, IntPtr pContext, int index);
-        SQLiteErrorCode xRowId(IntPtr pCursor, ref long rowId);
-        SQLiteErrorCode xUpdate(IntPtr pVtab, int nData, IntPtr apData, ref long rowId);
-        SQLiteErrorCode xBegin(IntPtr pVtab);
-        SQLiteErrorCode xSync(IntPtr pVtab);
-        SQLiteErrorCode xCommit(IntPtr pVtab);
-        SQLiteErrorCode xRollback(IntPtr pVtab);
-        bool xFindFunction(IntPtr pVtab, int nArg, IntPtr zName, ref SQLiteCallback callback, ref IntPtr pClientData);
-        SQLiteErrorCode xRename(IntPtr pVtab, IntPtr zNew);
-        SQLiteErrorCode xSavepoint(IntPtr pVtab, int iSavepoint);
-        SQLiteErrorCode xRelease(IntPtr pVtab, int iSavepoint);
-        SQLiteErrorCode xRollbackTo(IntPtr pVtab, int iSavepoint);
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xConnect(
+            IntPtr pDb,
+            IntPtr pAux,
+            int argc,
+            IntPtr[] argv,
+            ref IntPtr pVtab,
+            ref IntPtr pError
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xBestIndex(
+            IntPtr pVtab,
+            IntPtr pIndex
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xDisconnect(
+            IntPtr pVtab
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xDestroy(
+            IntPtr pVtab
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xOpen(
+            IntPtr pVtab,
+            ref IntPtr pCursor
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xClose(
+            IntPtr pCursor
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xFilter(
+            IntPtr pCursor,
+            int idxNum,
+            IntPtr idxStr,
+            int argc,
+            IntPtr[] argv
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xNext(
+            IntPtr pCursor
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        bool xEof(
+            IntPtr pCursor
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xColumn(
+            IntPtr pCursor,
+            IntPtr pContext,
+            int index
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xRowId(
+            IntPtr pCursor,
+            ref long rowId
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xUpdate(
+            IntPtr pVtab,
+            int nData,
+            IntPtr apData,
+            ref long rowId
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xBegin(
+            IntPtr pVtab
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xSync(
+            IntPtr pVtab
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xCommit(
+            IntPtr pVtab
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xRollback(
+            IntPtr pVtab
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        bool xFindFunction(
+            IntPtr pVtab,
+            int nArg,
+            IntPtr zName,
+            ref SQLiteCallback callback,
+            ref IntPtr pClientData
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xRename(
+            IntPtr pVtab,
+            IntPtr zNew
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xSavepoint(
+            IntPtr pVtab,
+            int iSavepoint
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xRelease(
+            IntPtr pVtab,
+            int iSavepoint
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode xRollbackTo(
+            IntPtr pVtab,
+            int iSavepoint
+            );
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region ISQLiteManagedModule Interface
     public interface ISQLiteManagedModule
     {
         bool Declared { get; }
 
-        SQLiteErrorCode Create(SQLiteConnection connection, IntPtr pClientData, string[] argv, ref string error);
-        SQLiteErrorCode Connect(SQLiteConnection connection, IntPtr pClientData, string[] argv, ref string error);
-        SQLiteErrorCode BestIndex(SQLiteIndex index);
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Create(
+            SQLiteConnection connection, /* in */
+            IntPtr pClientData,          /* in */
+            string[] argv,               /* in */
+            ref string error             /* out */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Connect(
+            SQLiteConnection connection, /* in */
+            IntPtr pClientData,          /* in */
+            string[] argv,               /* in */
+            ref string error             /* out */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode BestIndex(
+            SQLiteIndex index /* in, out */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
         SQLiteErrorCode Disconnect();
+
+        ///////////////////////////////////////////////////////////////////////
+
         SQLiteErrorCode Destroy();
-        SQLiteErrorCode Open(ref SQLiteVirtualTableCursor cursor);
-        SQLiteErrorCode Close(SQLiteVirtualTableCursor cursor);
-        SQLiteErrorCode Filter(SQLiteVirtualTableCursor cursor, int idxNum, string idxStr, SQLiteValue[] argv);
-        SQLiteErrorCode Next(SQLiteVirtualTableCursor cursor);
-        bool Eof(SQLiteVirtualTableCursor cursor);
-        SQLiteErrorCode Column(SQLiteVirtualTableCursor cursor, SQLiteContext context, int index);
-        SQLiteErrorCode RowId(SQLiteVirtualTableCursor cursor, ref long rowId);
-        SQLiteErrorCode Update(SQLiteValue[] values, ref long rowId);
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Open(
+            ref SQLiteVirtualTableCursor cursor /* out */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Close(
+            SQLiteVirtualTableCursor cursor /* in */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Filter(
+            SQLiteVirtualTableCursor cursor, /* in */
+            int idxNum,                      /* in */
+            string idxStr,                   /* in */
+            SQLiteValue[] argv               /* in */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Next(
+            SQLiteVirtualTableCursor cursor /* in */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        bool Eof(
+            SQLiteVirtualTableCursor cursor /* in */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Column(
+            SQLiteVirtualTableCursor cursor, /* in */
+            SQLiteContext context,           /* in */
+            int index                        /* in */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode RowId(
+            SQLiteVirtualTableCursor cursor, /* in */
+            ref long rowId                   /* out */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Update(
+            SQLiteValue[] values, /* in */
+            ref long rowId        /* in, out */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
         SQLiteErrorCode Begin();
+
+        ///////////////////////////////////////////////////////////////////////
+
         SQLiteErrorCode Sync();
+
+        ///////////////////////////////////////////////////////////////////////
+
         SQLiteErrorCode Commit();
+
+        ///////////////////////////////////////////////////////////////////////
+
         SQLiteErrorCode Rollback();
-        bool FindFunction(int nArg, string zName, ref SQLiteFunction function, ref IntPtr pClientData);
-        SQLiteErrorCode Rename(string zNew);
-        SQLiteErrorCode Savepoint(int iSavepoint);
-        SQLiteErrorCode Release(int iSavepoint);
-        SQLiteErrorCode RollbackTo(int iSavepoint);
+
+        ///////////////////////////////////////////////////////////////////////
+
+        bool FindFunction(
+            int nArg,                    /* in */
+            string zName,                /* in */
+            ref SQLiteFunction function, /* out */
+            ref IntPtr pClientData       /* out */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Rename(
+            string zNew /* in */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Savepoint(
+            int iSavepoint /* in */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode Release(
+            int iSavepoint /* in */
+            );
+
+        ///////////////////////////////////////////////////////////////////////
+
+        SQLiteErrorCode RollbackTo(
+            int iSavepoint /* in */
+            );
     }
+    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
+    #region SQLiteModuleBase Class
     public abstract class SQLiteModuleBase :
             ISQLiteManagedModule, ISQLiteNativeModule,  IDisposable
     {
-        private static Encoding Utf8Encoding = Encoding.UTF8;
+        #region Private Constants
+        private static readonly Encoding Utf8Encoding = Encoding.UTF8;
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -561,7 +952,6 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-#if PLATFORM_COMPACTFRAMEWORK
         private static IntPtr IntPtrForOffset(
             IntPtr pointer,
             int offset
@@ -569,7 +959,6 @@ namespace System.Data.SQLite
         {
             return new IntPtr(pointer.ToInt64() + offset);
         }
-#endif
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -896,45 +1285,199 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        private static void IndexToIntPtr(
+            SQLiteIndex index,
+            IntPtr pIndex
+            )
+        {
+            if ((index == null) || (index.Inputs == null) ||
+                (index.Inputs.Constraints == null) ||
+                (index.Inputs.OrderBys == null) || (index.Outputs == null) ||
+                (index.Outputs.ConstraintUsages == null))
+            {
+                return;
+            }
+
+            if (pIndex == IntPtr.Zero)
+                return;
+
+            int offset = 0;
+
+            int nConstraint = MarshalReadInt32(pIndex, offset);
+
+            if (nConstraint != index.Inputs.Constraints.Length)
+                return;
+
+            if (nConstraint != index.Outputs.ConstraintUsages.Length)
+                return;
+
+            offset += sizeof(int);
+
+            IntPtr pConstraint = MarshalReadIntPtr(pIndex, offset);
+
+            offset += IntPtr.Size;
+
+            int nOrderBy = MarshalReadInt32(pIndex, offset);
+
+            index = new SQLiteIndex(nConstraint, nOrderBy);
+
+            offset += sizeof(int);
+
+            IntPtr pOrderBy = MarshalReadIntPtr(pIndex, offset);
+
+            offset += IntPtr.Size;
+
+            IntPtr pConstraintUsage = MarshalReadIntPtr(pIndex, offset);
+
+            int sizeOfConstraintType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_constraint));
+
+            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
+            {
+                UnsafeNativeMethods.sqlite3_index_constraint constraint =
+                    new UnsafeNativeMethods.sqlite3_index_constraint(
+                        index.Inputs.Constraints[iConstraint]);
+
+                Marshal.StructureToPtr(
+                    constraint, IntPtrForOffset(pConstraint,
+                    iConstraint * sizeOfConstraintType), false);
+
+                index.Inputs.Constraints[iConstraint] =
+                    new SQLiteIndexConstraint(constraint);
+            }
+
+            int sizeOfOrderByType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_orderby));
+
+            for (int iOrderBy = 0; iOrderBy < nOrderBy; iOrderBy++)
+            {
+                UnsafeNativeMethods.sqlite3_index_orderby orderBy =
+                    new UnsafeNativeMethods.sqlite3_index_orderby(
+                        index.Inputs.OrderBys[iOrderBy]);
+
+                Marshal.StructureToPtr(
+                    orderBy, IntPtrForOffset(pOrderBy,
+                    iOrderBy * sizeOfOrderByType), false);
+
+                index.Inputs.OrderBys[iOrderBy] =
+                    new SQLiteIndexOrderBy(orderBy);
+            }
+
+            int sizeOfConstraintUsageType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_constraint_usage));
+
+            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
+            {
+                UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage =
+                    new UnsafeNativeMethods.sqlite3_index_constraint_usage(
+                        index.Outputs.ConstraintUsages[iConstraint]);
+
+                Marshal.StructureToPtr(
+                    constraintUsage, IntPtrForOffset(pConstraintUsage,
+                    iConstraint * sizeOfConstraintUsageType), false);
+
+                index.Outputs.ConstraintUsages[iConstraint] =
+                    new SQLiteIndexConstraintUsage(constraintUsage);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static void IndexFromIntPtr(
             IntPtr pIndex,
-            ref UnsafeNativeMethods.sqlite3_index_info index
+            ref SQLiteIndex index
             )
         {
             if (pIndex == IntPtr.Zero)
                 return;
 
-            Type type = typeof(UnsafeNativeMethods.sqlite3_index_info);
+            int offset = 0;
 
-            int nConstraint = MarshalReadInt32(pIndex, 0);
-            int nOrderBy = MarshalReadInt32(pIndex, sizeof(int) + IntPtr.Size);
+            int nConstraint = MarshalReadInt32(pIndex, offset);
 
+            offset += sizeof(int);
 
+            IntPtr pConstraint = MarshalReadIntPtr(pIndex, offset);
 
+            offset += IntPtr.Size;
 
+            int nOrderBy = MarshalReadInt32(pIndex, offset);
 
+            index = new SQLiteIndex(nConstraint, nOrderBy);
 
+            offset += sizeof(int);
 
+            IntPtr pOrderBy = MarshalReadIntPtr(pIndex, offset);
 
+            offset += IntPtr.Size;
 
+            IntPtr pConstraintUsage = MarshalReadIntPtr(pIndex, offset);
 
+            offset += IntPtr.Size;
 
+            index.Outputs.IdxNum = MarshalReadInt32(pIndex, offset);
 
+            offset += sizeof(int);
 
+            index.Outputs.IdxStr = StringFromUtf8IntPtr(IntPtrForOffset(
+                pIndex, offset));
 
+            offset += IntPtr.Size;
 
+            index.Outputs.NeedToFreeIdxStr = MarshalReadInt32(pIndex, offset);
 
-        }
+            offset += sizeof(int);
 
-        ///////////////////////////////////////////////////////////////////////
+            index.Outputs.OrderByConsumed = MarshalReadInt32(pIndex, offset);
 
-        private static void IndexOutputsToIntPtr(
-            UnsafeNativeMethods.sqlite3_index_info index,
-            SQLiteIndexOutputs indexOutputs
-            )
-        {
+            offset += sizeof(int);
 
+            index.Outputs.EstimatedCost = MarshalReadDouble(pIndex, offset);
 
+            int sizeOfConstraintType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_constraint));
+
+            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
+            {
+                UnsafeNativeMethods.sqlite3_index_constraint constraint =
+                    new UnsafeNativeMethods.sqlite3_index_constraint();
+
+                Marshal.PtrToStructure(IntPtrForOffset(pConstraint,
+                    iConstraint * sizeOfConstraintType), constraint);
+
+                index.Inputs.Constraints[iConstraint] =
+                    new SQLiteIndexConstraint(constraint);
+            }
+
+            int sizeOfOrderByType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_orderby));
+
+            for (int iOrderBy = 0; iOrderBy < nOrderBy; iOrderBy++)
+            {
+                UnsafeNativeMethods.sqlite3_index_orderby orderBy =
+                    new UnsafeNativeMethods.sqlite3_index_orderby();
+
+                Marshal.PtrToStructure(IntPtrForOffset(pOrderBy,
+                    iOrderBy * sizeOfOrderByType), orderBy);
+
+                index.Inputs.OrderBys[iOrderBy] =
+                    new SQLiteIndexOrderBy(orderBy);
+            }
+
+            int sizeOfConstraintUsageType = Marshal.SizeOf(typeof(
+                UnsafeNativeMethods.sqlite3_index_constraint_usage));
+
+            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
+            {
+                UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage =
+                    new UnsafeNativeMethods.sqlite3_index_constraint_usage();
+
+                Marshal.PtrToStructure(IntPtrForOffset(pConstraintUsage,
+                    iConstraint * sizeOfConstraintUsageType), constraintUsage);
+
+                index.Outputs.ConstraintUsages[iConstraint] =
+                    new SQLiteIndexConstraintUsage(constraintUsage);
+            }
         }
         #endregion
 
@@ -1103,7 +1646,7 @@ namespace System.Data.SQLite
             IntPtr pDb,
             IntPtr pAux,
             int argc,
-            ref IntPtr[] argv,
+            IntPtr[] argv,
             ref IntPtr pVtab,
             ref IntPtr pError
             )
@@ -1142,7 +1685,7 @@ namespace System.Data.SQLite
             IntPtr pDb,
             IntPtr pAux,
             int argc,
-            ref IntPtr[] argv,
+            IntPtr[] argv,
             ref IntPtr pVtab,
             ref IntPtr pError
             )
@@ -1184,13 +1727,13 @@ namespace System.Data.SQLite
         {
             try
             {
+                SQLiteIndex index = null;
 
+                IndexFromIntPtr(pIndex, ref index);
 
-
-
-
-                if (BestIndex(null) == SQLiteErrorCode.Ok)
+                if (BestIndex(index) == SQLiteErrorCode.Ok)
                 {
+                    IndexToIntPtr(index, pIndex);
                     return SQLiteErrorCode.Ok;
                 }
             }
@@ -1894,4 +2437,5 @@ namespace System.Data.SQLite
         }
         #endregion
     }
+    #endregion
 }

@@ -1628,7 +1628,7 @@ namespace System.Data.SQLite
         IntPtr pAux,
         int argc,
         [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-        ref IntPtr[] argv,
+        IntPtr[] argv,
         ref IntPtr pVtab,
         ref IntPtr pError
     );
@@ -1643,7 +1643,7 @@ namespace System.Data.SQLite
         IntPtr pAux,
         int argc,
         [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-        ref IntPtr[] argv,
+        IntPtr[] argv,
         ref IntPtr pVtab,
         ref IntPtr pError
     );
@@ -1928,6 +1928,22 @@ namespace System.Data.SQLite
     [StructLayout(LayoutKind.Sequential)]
     internal struct sqlite3_index_constraint
     {
+        public sqlite3_index_constraint(
+            SQLiteIndexConstraint constraint
+            )
+            : this()
+        {
+            if (constraint != null)
+            {
+                iColumn = constraint.iColumn;
+                op = constraint.op;
+                usable = constraint.usable;
+                iTermOffset = constraint.iTermOffset;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         public int iColumn;
         public SQLiteIndexConstraintOp op;
         public byte usable;
@@ -1939,6 +1955,20 @@ namespace System.Data.SQLite
     [StructLayout(LayoutKind.Sequential)]
     internal struct sqlite3_index_orderby
     {
+        public sqlite3_index_orderby(
+            SQLiteIndexOrderBy orderBy
+            )
+            : this()
+        {
+            if (orderBy != null)
+            {
+                iColumn = orderBy.iColumn;
+                desc = orderBy.desc;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         public int iColumn; /* Column number */
         public byte desc;   /* True for DESC.  False for ASC. */
     }
@@ -1948,6 +1978,20 @@ namespace System.Data.SQLite
     [StructLayout(LayoutKind.Sequential)]
     internal struct sqlite3_index_constraint_usage
     {
+        public sqlite3_index_constraint_usage(
+            SQLiteIndexConstraintUsage constraintUsage
+            )
+            : this()
+        {
+            if (constraintUsage != null)
+            {
+                argvIndex = constraintUsage.argvIndex;
+                omit = constraintUsage.omit;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         public int argvIndex; /* if >0, constraint is part of argv to xFilter */
         public byte omit;     /* Do not code a test for this constraint */
     }
@@ -1959,14 +2003,11 @@ namespace System.Data.SQLite
     {
         /* Inputs */
         public int nConstraint; /* Number of entries in aConstraint */
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
-        public sqlite3_index_constraint[] aConstraint;
+        public IntPtr aConstraint;
         public int nOrderBy;
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-        public sqlite3_index_orderby[] aOrderBy;
+        public IntPtr aOrderBy;
         /* Outputs */
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
-        public sqlite3_index_constraint_usage[] aConstraintUsage;
+        public IntPtr aConstraintUsage;
         public int idxNum;           /* Number used to identify the index */
         public string idxStr;        /* String, possibly obtained from sqlite3_malloc */
         public int needToFreeIdxStr; /* Free idxStr using sqlite3_free() if true */
