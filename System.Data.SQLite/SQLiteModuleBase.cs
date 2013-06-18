@@ -562,7 +562,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
 #if PLATFORM_COMPACTFRAMEWORK
-        protected virtual IntPtr IntPtrForOffset(
+        private static IntPtr IntPtrForOffset(
             IntPtr pointer,
             int offset
             )
@@ -597,7 +597,7 @@ namespace System.Data.SQLite
                 pointer, offset));
 #else
             return BitConverter.ToDouble(BitConverter.GetBytes(
-                Marshal.ReadInt64(IntPtrForOffset(pointer, offset)), 0);
+                Marshal.ReadInt64(IntPtrForOffset(pointer, offset))), 0);
 #endif
         }
 
@@ -643,7 +643,7 @@ namespace System.Data.SQLite
                 BitConverter.DoubleToInt64Bits(value));
 #else
             Marshal.WriteInt64(IntPtrForOffset(pointer, offset),
-                BitConverter.ToInt64(BitConverter.GetBytes(value)));
+                BitConverter.ToInt64(BitConverter.GetBytes(value), 0));
 #endif
         }
 
