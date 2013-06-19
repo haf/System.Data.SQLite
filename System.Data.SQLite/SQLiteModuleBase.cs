@@ -666,7 +666,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        bool xEof(
+        int xEof(
             IntPtr pCursor
             );
 
@@ -720,7 +720,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        bool xFindFunction(
+        int xFindFunction(
             IntPtr pVtab,
             int nArg,
             IntPtr zName,
@@ -764,6 +764,7 @@ namespace System.Data.SQLite
     public interface ISQLiteManagedModule
     {
         bool Declared { get; }
+        string Name { get; }
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -1490,46 +1491,60 @@ namespace System.Data.SQLite
     public abstract class SQLiteModuleBase :
             ISQLiteManagedModule, ISQLiteNativeModule,  IDisposable
     {
+        #region Private Data
+        private UnsafeNativeMethods.sqlite3_module nativeModule;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Internal Methods
+        internal UnsafeNativeMethods.sqlite3_module GetNativeModule()
+        {
+            return nativeModule;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         internal UnsafeNativeMethods.sqlite3_module CreateNativeModule()
         {
-            UnsafeNativeMethods.sqlite3_module module =
-                new UnsafeNativeMethods.sqlite3_module();
+            if (nativeModule.iVersion != 0)
+                return nativeModule;
 
-            module.iVersion = 2;
-            module.xCreate = new UnsafeNativeMethods.xCreate(xCreate);
-            module.xConnect = new UnsafeNativeMethods.xConnect(xConnect);
-            module.xBestIndex = new UnsafeNativeMethods.xBestIndex(xBestIndex);
-            module.xDisconnect = new UnsafeNativeMethods.xDisconnect(xDisconnect);
-            module.xDestroy = new UnsafeNativeMethods.xDestroy(xDestroy);
-            module.xOpen = new UnsafeNativeMethods.xOpen(xOpen);
-            module.xClose = new UnsafeNativeMethods.xClose(xClose);
-            module.xFilter = new UnsafeNativeMethods.xFilter(xFilter);
-            module.xNext = new UnsafeNativeMethods.xNext(xNext);
-            module.xEof = new UnsafeNativeMethods.xEof(xEof);
-            module.xColumn = new UnsafeNativeMethods.xColumn(xColumn);
-            module.xRowId = new UnsafeNativeMethods.xRowId(xRowId);
-            module.xUpdate = new UnsafeNativeMethods.xUpdate(xUpdate);
-            module.xBegin = new UnsafeNativeMethods.xBegin(xBegin);
-            module.xSync = new UnsafeNativeMethods.xSync(xSync);
-            module.xCommit = new UnsafeNativeMethods.xCommit(xCommit);
-            module.xRollback = new UnsafeNativeMethods.xRollback(xRollback);
-            module.xFindFunction = new UnsafeNativeMethods.xFindFunction(xFindFunction);
-            module.xRename = new UnsafeNativeMethods.xRename(xRename);
-            module.xSavepoint = new UnsafeNativeMethods.xSavepoint(xSavepoint);
-            module.xRelease = new UnsafeNativeMethods.xRelease(xRelease);
-            module.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(xRollbackTo);
+            nativeModule = new UnsafeNativeMethods.sqlite3_module();
+            nativeModule.iVersion = 2;
+            nativeModule.xCreate = new UnsafeNativeMethods.xCreate(xCreate);
+            nativeModule.xConnect = new UnsafeNativeMethods.xConnect(xConnect);
+            nativeModule.xBestIndex = new UnsafeNativeMethods.xBestIndex(xBestIndex);
+            nativeModule.xDisconnect = new UnsafeNativeMethods.xDisconnect(xDisconnect);
+            nativeModule.xDestroy = new UnsafeNativeMethods.xDestroy(xDestroy);
+            nativeModule.xOpen = new UnsafeNativeMethods.xOpen(xOpen);
+            nativeModule.xClose = new UnsafeNativeMethods.xClose(xClose);
+            nativeModule.xFilter = new UnsafeNativeMethods.xFilter(xFilter);
+            nativeModule.xNext = new UnsafeNativeMethods.xNext(xNext);
+            nativeModule.xEof = new UnsafeNativeMethods.xEof(xEof);
+            nativeModule.xColumn = new UnsafeNativeMethods.xColumn(xColumn);
+            nativeModule.xRowId = new UnsafeNativeMethods.xRowId(xRowId);
+            nativeModule.xUpdate = new UnsafeNativeMethods.xUpdate(xUpdate);
+            nativeModule.xBegin = new UnsafeNativeMethods.xBegin(xBegin);
+            nativeModule.xSync = new UnsafeNativeMethods.xSync(xSync);
+            nativeModule.xCommit = new UnsafeNativeMethods.xCommit(xCommit);
+            nativeModule.xRollback = new UnsafeNativeMethods.xRollback(xRollback);
+            nativeModule.xFindFunction = new UnsafeNativeMethods.xFindFunction(xFindFunction);
+            nativeModule.xRename = new UnsafeNativeMethods.xRename(xRename);
+            nativeModule.xSavepoint = new UnsafeNativeMethods.xSavepoint(xSavepoint);
+            nativeModule.xRelease = new UnsafeNativeMethods.xRelease(xRelease);
+            nativeModule.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(xRollbackTo);
 
-            return module;
+            return nativeModule;
         }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region Public Constructors
-        public SQLiteModuleBase()
+        public SQLiteModuleBase(string name)
         {
-            // do nothing.
+            this.name = name;
         }
         #endregion
 
@@ -1989,7 +2004,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public bool xEof(
+        public int xEof(
             IntPtr pCursor
             )
         {
@@ -2002,14 +2017,14 @@ namespace System.Data.SQLite
                 SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
                     pCursor);
 
-                return Eof(cursor);
+                return Eof(cursor) ? 1 : 0;
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
                 SetTableError(pVtab, e.ToString());
             }
 
-            return true;
+            return 1;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -2165,7 +2180,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public bool xFindFunction(
+        public int xFindFunction(
             IntPtr pVtab,
             int nArg,
             IntPtr zName,
@@ -2184,7 +2199,7 @@ namespace System.Data.SQLite
                     if (function != null)
                     {
                         callback = function.ScalarCallback;
-                        return true;
+                        return 1;
                     }
                     else
                     {
@@ -2197,7 +2212,7 @@ namespace System.Data.SQLite
                 SetTableError(pVtab, e.ToString());
             }
 
-            return false;
+            return 0;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -2285,6 +2300,14 @@ namespace System.Data.SQLite
         {
             get { return declared; }
             internal set { declared = value; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private string name;
+        public string Name
+        {
+            get { return name; }
         }
 
         ///////////////////////////////////////////////////////////////////////

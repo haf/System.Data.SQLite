@@ -632,18 +632,18 @@ namespace System.Data.SQLite
     //
     // NOTE: Otherwise, if the standard SQLite library is enabled, use it.
     //
-    private const string SQLITE_DLL = "sqlite3";
+    internal const string SQLITE_DLL = "sqlite3";
 #elif USE_INTEROP_DLL
-    //
+      //
     // NOTE: Otherwise, if the native SQLite interop assembly is enabled,
     //       use it.
     //
-    private const string SQLITE_DLL = "SQLite.Interop.dll";
+    internal const string SQLITE_DLL = "SQLite.Interop.dll";
 #else
     //
     // NOTE: Finally, assume that the mixed-mode assembly is being used.
     //
-    private const string SQLITE_DLL = "System.Data.SQLite.dll";
+    internal const string SQLITE_DLL = "System.Data.SQLite.dll";
 #endif
 
     // This section uses interop calls that also fetch text length to optimize conversion.
@@ -1600,13 +1600,6 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
-    internal static extern SQLiteErrorCode sqlite3_create_module_v2(IntPtr db, IntPtr name, IntPtr pModule, IntPtr pClientData, xDestroyModule xDestroy);
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
     internal static extern SQLiteErrorCode sqlite3_declare_vtab(IntPtr db, IntPtr zSQL);
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1615,6 +1608,24 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern IntPtr sqlite3_mprintf(IntPtr format, __arglist);
+    #endregion
+
+    // SQLite API calls that are provided by "well-known" extensions that may be statically
+    // linked with the SQLite core native library currently in use.
+    #region extension sqlite api calls
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_create_disposable_module(IntPtr db, IntPtr name, ref sqlite3_module module, IntPtr pClientData, xDestroyModule xDestroy);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern void sqlite3_dispose_module(ref sqlite3_module pModule);
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1722,8 +1733,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
-    [return: MarshalAs(UnmanagedType.I4)]
-    public delegate bool xEof(
+    public delegate int xEof(
         IntPtr pCursor
     );
 
@@ -1801,8 +1811,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
-    [return: MarshalAs(UnmanagedType.I4)]
-    public delegate bool xFindFunction(
+    public delegate int xFindFunction(
         IntPtr pVtab,
         int nArg,
         IntPtr zName,

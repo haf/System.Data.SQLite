@@ -83,6 +83,11 @@ namespace System.Data.SQLite
     /// </summary>
     protected SQLiteFunction[] _functionsArray;
 
+    /// <summary>
+    /// The modules created using this connection.
+    /// </summary>
+    protected Dictionary<string, SQLiteModuleBase> _modules;
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     internal SQLite3(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString, bool ownHandle)
@@ -121,6 +126,19 @@ namespace System.Data.SQLite
                 //////////////////////////////////////
                 // release unmanaged resources here...
                 //////////////////////////////////////
+
+                if (_modules != null)
+                {
+                    foreach (KeyValuePair<string, SQLiteModuleBase> pair in _modules)
+                    {
+                        SQLiteModuleBase module = pair.Value;
+
+                        if (module == null)
+                            continue;
+
+                        module.Dispose();
+                    }
+                }
 
                 Close(false); /* Disposing, cannot throw. */
 
@@ -1503,6 +1521,57 @@ namespace System.Data.SQLite
     {
       byte[] b = ToUTF8(value);
       UnsafeNativeMethods.sqlite3_result_text(context, ToUTF8(value), b.Length - 1, (IntPtr)(-1));
+    }
+
+    internal override void CreateModule(SQLiteModuleBase module)
+    {
+        if (module == null)
+            throw new ArgumentNullException("module");
+
+        SetLoadExtension(true);
+        LoadExtension(UnsafeNativeMethods.SQLITE_DLL, "sqlite3_vtshim_init");
+
+        IntPtr pName = IntPtr.Zero;
+
+        try
+        {
+            pName = SQLiteMarshal.Utf8IntPtrFromString(module.Name);
+            UnsafeNativeMethods.sqlite3_module nativeModule = module.CreateNativeModule();
+
+            if (UnsafeNativeMethods.sqlite3_create_disposable_module(
+                    _sql, pName, ref nativeModule, IntPtr.Zero, null) != IntPtr.Zero)
+            {
+                if (_modules == null)
+                    _modules = new Dictionary<string, SQLiteModuleBase>();
+
+                _modules.Add(module.Name, module);
+            }
+            else
+            {
+                throw new SQLiteException(SQLiteErrorCode.Error, GetLastError());
+            }
+        }
+        finally
+        {
+            if (pName != IntPtr.Zero)
+            {
+                SQLiteMarshal.Free(pName);
+                pName = IntPtr.Zero;
+            }
+        }
+    }
+
+    internal override void DisposeModule(SQLiteModuleBase module)
+    {
+        if (module == null)
+            throw new ArgumentNullException("module");
+
+        UnsafeNativeMethods.sqlite3_module nativeModule = module.GetNativeModule();
+
+        if (nativeModule.iVersion == 0)
+            throw new ArgumentException("native module is not initialized");
+
+        UnsafeNativeMethods.sqlite3_dispose_module(ref nativeModule);
     }
 
     internal override IntPtr AggregateContext(IntPtr context)

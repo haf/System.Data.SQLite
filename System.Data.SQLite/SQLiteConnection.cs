@@ -1722,6 +1722,26 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Creates a disposable module containing the implementation of a virtual
+    /// table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object to be used when creating the disposable module.
+    /// </param>
+    public void CreateModule(
+        SQLiteModuleBase module
+        )
+    {
+        CheckDisposed();
+
+        if (_sql == null)
+            throw new InvalidOperationException(
+                "Database connection not valid for creating modules.");
+
+        _sql.CreateModule(module);
+    }
+
+    /// <summary>
     /// Parses a string containing a sequence of zero or more hexadecimal
     /// encoded byte values and returns the resulting byte array.  The
     /// "0x" prefix is not allowed on the input string.

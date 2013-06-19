@@ -9,6 +9,264 @@ namespace System.Data.SQLite
 {
     public class SQLiteModuleNoop : SQLiteModuleBase
     {
+        #region Public Constructors
+        public SQLiteModuleNoop(string name)
+            : base(name)
+        {
+            // do nothing.
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region ISQLiteManagedModule Members
+        public override SQLiteErrorCode Create(
+            SQLiteConnection connection,
+            IntPtr pClientData,
+            string[] argv,
+            ref string error
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Connect(
+            SQLiteConnection connection,
+            IntPtr pClientData,
+            string[] argv,
+            ref string error
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode BestIndex(
+            SQLiteIndex index
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Disconnect()
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Destroy()
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Open(
+            ref SQLiteVirtualTableCursor cursor
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Close(
+            SQLiteVirtualTableCursor cursor
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Filter(
+            SQLiteVirtualTableCursor cursor,
+            int idxNum,
+            string idxStr,
+            SQLiteValue[] argv
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Next(
+            SQLiteVirtualTableCursor cursor
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override bool Eof(
+            SQLiteVirtualTableCursor cursor
+            )
+        {
+            CheckDisposed();
+
+            return true;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Column(
+            SQLiteVirtualTableCursor cursor,
+            SQLiteContext context,
+            int index
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode RowId(
+            SQLiteVirtualTableCursor cursor,
+            ref long rowId
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Update(
+            SQLiteValue[] values,
+            ref long rowId
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Begin()
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Sync()
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Commit()
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Rollback()
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override bool FindFunction(
+            int nArg,
+            string zName,
+            ref SQLiteFunction function,
+            ref IntPtr pClientData
+            )
+        {
+            CheckDisposed();
+
+            return false;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Rename(
+            string zNew
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Savepoint(
+            int iSavepoint
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Release(
+            int iSavepoint
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode RollbackTo(
+            int iSavepoint
+            )
+        {
+            CheckDisposed();
+
+            return SQLiteErrorCode.Ok;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region IDisposable "Pattern" Members
         private bool disposed;
         private void CheckDisposed() /* throw */
@@ -45,232 +303,6 @@ namespace System.Data.SQLite
             {
                 base.Dispose(disposing);
             }
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region ISQLiteManagedModule Members
-        public override SQLiteErrorCode Create(
-            SQLiteConnection connection,
-            IntPtr pClientData,
-            string[] argv,
-            ref string error
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Connect(
-            SQLiteConnection connection,
-            IntPtr pClientData,
-            string[] argv,
-            ref string error
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode BestIndex(
-            SQLiteIndex index
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Disconnect()
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Destroy()
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Open(
-            ref SQLiteVirtualTableCursor cursor
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Close(
-            SQLiteVirtualTableCursor cursor
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Filter(
-            SQLiteVirtualTableCursor cursor,
-            int idxNum,
-            string idxStr,
-            SQLiteValue[] argv
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Next(
-            SQLiteVirtualTableCursor cursor
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override bool Eof(
-            SQLiteVirtualTableCursor cursor
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Column(
-            SQLiteVirtualTableCursor cursor,
-            SQLiteContext context,
-            int index
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode RowId(
-            SQLiteVirtualTableCursor cursor,
-            ref long rowId
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Update(
-            SQLiteValue[] values,
-            ref long rowId
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Begin()
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Sync()
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Commit()
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Rollback()
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override bool FindFunction(
-            int nArg,
-            string zName,
-            ref SQLiteFunction function,
-            ref IntPtr pClientData
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Rename(
-            string zNew
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Savepoint(
-            int iSavepoint
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode Release(
-            int iSavepoint
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public override SQLiteErrorCode RollbackTo(
-            int iSavepoint
-            )
-        {
-            CheckDisposed();
-            throw new NotImplementedException();
         }
         #endregion
     }

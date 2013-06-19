@@ -212,6 +212,25 @@ namespace System.Data.SQLite
     internal abstract void ReturnText(IntPtr context, string value);
 
     /// <summary>
+    /// Calls the native SQLite core library in order to create a disposable
+    /// module containing the implementation of a virtual table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object to be used when creating the native disposable module.
+    /// </param>
+    internal abstract void CreateModule(SQLiteModuleBase module);
+
+    /// <summary>
+    /// Calls the native SQLite core library in order to cleanup the resources
+    /// associated with a module containing the implementation of a virtual table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object previously passed to the <see cref="CreateModule" />
+    /// method.
+    /// </param>
+    internal abstract void DisposeModule(SQLiteModuleBase module);
+
+    /// <summary>
     /// Calls the native SQLite core library in order to declare a virtual table
     /// in response to a call into the xCreate or xConnect virtual table methods.
     /// </summary>
