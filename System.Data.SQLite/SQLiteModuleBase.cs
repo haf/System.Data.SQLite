@@ -1708,8 +1708,11 @@ namespace System.Data.SQLite
         {
             try
             {
+                string fileName = SQLiteMarshal.StringFromUtf8IntPtr(
+                    UnsafeNativeMethods.sqlite3_db_filename(pDb, IntPtr.Zero));
+
                 using (SQLiteConnection connection = new SQLiteConnection(
-                        pDb, false))
+                        pDb, fileName, false))
                 {
                     string error = null;
 
@@ -1747,8 +1750,11 @@ namespace System.Data.SQLite
         {
             try
             {
+                string fileName = SQLiteMarshal.StringFromUtf8IntPtr(
+                    UnsafeNativeMethods.sqlite3_db_filename(pDb, IntPtr.Zero));
+
                 using (SQLiteConnection connection = new SQLiteConnection(
-                        pDb, false))
+                        pDb, fileName, false))
                 {
                     string error = null;
 

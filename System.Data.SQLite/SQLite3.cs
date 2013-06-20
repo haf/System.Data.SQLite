@@ -90,10 +90,22 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    internal SQLite3(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString, bool ownHandle)
+    internal SQLite3(
+        SQLiteDateFormats fmt,
+        DateTimeKind kind,
+        string fmtString,
+        IntPtr db,
+        string fileName,
+        bool ownHandle
+        )
       : base(fmt, kind, fmtString)
     {
-        _ownHandle = ownHandle;
+        if (db != IntPtr.Zero)
+        {
+            _sql = new SQLiteConnectionHandle(db, ownHandle);
+            _fileName = fileName;
+            _ownHandle = ownHandle;
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1535,6 +1547,9 @@ namespace System.Data.SQLite
         if (module == null)
             throw new ArgumentNullException("module");
 
+        if (_sql == null)
+            throw new SQLiteException("connection has an invalid handle");
+
         SetLoadExtension(true);
         LoadExtension(UnsafeNativeMethods.SQLITE_DLL, "sqlite3_vtshim_init");
 
@@ -1619,6 +1634,12 @@ namespace System.Data.SQLite
         ref string error
         )
     {
+        if (_sql == null)
+        {
+            error = "connection has an invalid handle";
+            return SQLiteErrorCode.Error;
+        }
+
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_declare_vtab(
             _sql, SQLiteMarshal.Utf8IntPtrFromString(strSql));
 

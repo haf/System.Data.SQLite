@@ -33,6 +33,7 @@ runTest {test vtab-1.1 {virtual table support} -setup {
   unset -nocomplain results errors
 
   set code [compileCSharpWith [subst {
+    using System;
     using System.Data.SQLite;
 
     namespace _Dynamic${id}
@@ -43,6 +44,24 @@ runTest {test vtab-1.1 {virtual table support} -setup {
           : base(name)
         {
           // do nothing.
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Create(
+          SQLiteConnection connection,
+          IntPtr pClientData,
+          string\[\] argv,
+          ref string error
+          )
+        {
+          SQLiteErrorCode rc = DeclareTable(
+            connection, "CREATE TABLE ignored(x);", ref error);
+
+          if (rc != SQLiteErrorCode.Ok)
+            return rc;
+
+          return base.Create(connection, pClientData, argv, ref error);
         }
       }
 
@@ -80,7 +99,9 @@ runTest {test vtab-1.1 {virtual table support} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors sql dataSource id db fileName
-} -constraints [fixConstraints {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite}] -match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+} -constraints [fixConstraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite}] -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
 
 ###############################################################################
 

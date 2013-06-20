@@ -180,8 +180,11 @@ namespace System.Data.SQLite
                 // NOTE: Create an instance of the SQLite wrapper class.
                 //
                 if (_sql == null)
-                    _sql = new SQLite3(SQLiteDateFormats.Default,
-                        DateTimeKind.Unspecified, null, true);
+                {
+                    _sql = new SQLite3(
+                        SQLiteDateFormats.Default, DateTimeKind.Unspecified,
+                        null, IntPtr.Zero, null, true);
+                }
 
                 //
                 // NOTE: Create a single "global" (i.e. per-process) callback

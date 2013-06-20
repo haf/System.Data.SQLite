@@ -10,7 +10,9 @@ namespace System.Data.SQLite
     public class SQLiteModuleNoop : SQLiteModuleBase
     {
         #region Public Constructors
-        public SQLiteModuleNoop(string name)
+        public SQLiteModuleNoop(
+            string name
+            )
             : base(name)
         {
             // do nothing.
