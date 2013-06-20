@@ -1917,7 +1917,6 @@ namespace System.Data.SQLite
     [StructLayout(LayoutKind.Sequential)]
     internal struct sqlite3_vtab
     {
-        [MarshalAs(UnmanagedType.LPStruct)]
         public sqlite3_module pModule;
         public int nRef; /* NO LONGER USED */
         public IntPtr zErrMsg;
@@ -1928,7 +1927,6 @@ namespace System.Data.SQLite
     [StructLayout(LayoutKind.Sequential)]
     internal struct sqlite3_vtab_cursor
     {
-        [MarshalAs(UnmanagedType.LPStruct)]
         public sqlite3_vtab pVTab;
     }
 

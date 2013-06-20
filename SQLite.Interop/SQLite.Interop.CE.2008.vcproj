@@ -771,6 +771,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\ext\vtshim.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\win\interop.c"
 				>
 			</File>

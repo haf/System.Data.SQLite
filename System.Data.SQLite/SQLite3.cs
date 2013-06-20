@@ -1523,6 +1523,13 @@ namespace System.Data.SQLite
       UnsafeNativeMethods.sqlite3_result_text(context, ToUTF8(value), b.Length - 1, (IntPtr)(-1));
     }
 
+    /// <summary>
+    /// Calls the native SQLite core library in order to create a disposable
+    /// module containing the implementation of a virtual table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object to be used when creating the native disposable module.
+    /// </param>
     internal override void CreateModule(SQLiteModuleBase module)
     {
         if (module == null)
@@ -1561,6 +1568,14 @@ namespace System.Data.SQLite
         }
     }
 
+    /// <summary>
+    /// Calls the native SQLite core library in order to cleanup the resources
+    /// associated with a module containing the implementation of a virtual table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object previously passed to the <see cref="CreateModule" />
+    /// method.
+    /// </param>
     internal override void DisposeModule(SQLiteModuleBase module)
     {
         if (module == null)

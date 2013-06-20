@@ -461,6 +461,7 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Comman
     <ClCompile Include="src\contrib\extension-functions.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\ext\vtshim.c" />
     <ClCompile Include="src\win\interop.c" />
     <ClCompile Include="src\core\sqlite3.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
