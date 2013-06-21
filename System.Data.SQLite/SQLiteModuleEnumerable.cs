@@ -103,7 +103,7 @@ namespace System.Data.SQLite
         /// The <see cref="IEnumerable" /> instance containing the backing data
         /// for the virtual table.
         /// </summary>
-        private IEnumerable collection;
+        private IEnumerable enumerable;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -111,14 +111,14 @@ namespace System.Data.SQLite
         #region Public Constructors
         public SQLiteModuleEnumerable(
             string name,
-            IEnumerable collection
+            IEnumerable enumerable
             )
             : base(name)
         {
-            if (collection == null)
-                throw new ArgumentNullException("collection");
+            if (enumerable == null)
+                throw new ArgumentNullException("enumerable");
 
-            this.collection = collection;
+            this.enumerable = enumerable;
         }
         #endregion
 
@@ -131,6 +131,49 @@ namespace System.Data.SQLite
         {
             SetCursorError(cursor, "not an \"enumerable\" cursor");
             return SQLiteErrorCode.Error;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual SQLiteErrorCode CursorEndOfEnumeratorError(
+            SQLiteVirtualTableCursor cursor
+            )
+        {
+            SetCursorError(cursor, "already hit end of enumerator");
+            return SQLiteErrorCode.Error; 
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual string GetStringFromObject(
+            object value
+            )
+        {
+            if (value == null)
+                return null;
+
+            return value.ToString();
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual long GetRowIdFromObject(
+            object value
+            )
+        {
+            if (value == null)
+                return 0;
+
+            return value.GetHashCode();
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual bool CodeToEofResult(
+            SQLiteErrorCode returnCode
+            )
+        {
+            return (returnCode == SQLiteErrorCode.Ok) ? false : true;
         }
         #endregion
 
@@ -192,9 +235,7 @@ namespace System.Data.SQLite
 
             if (!SetDefaultEstimatedCost(index))
             {
-                SetTableError(table.NativeHandle,
-                    "failed to set default estimated cost");
-
+                SetTableError(table, "failed to set default estimated cost");
                 return SQLiteErrorCode.Error;
             }
 
@@ -235,7 +276,7 @@ namespace System.Data.SQLite
             CheckDisposed();
 
             cursor = new SQLiteVirtualTableCursorEnumerable(
-                table, collection.GetEnumerator());
+                table, enumerable.GetEnumerator());
 
             return SQLiteErrorCode.Ok;
         }
@@ -296,6 +337,9 @@ namespace System.Data.SQLite
             if (enumerableCursor == null)
                 return CursorTypeMismatchError(cursor);
 
+            if (enumerableCursor.EndOfEnumerator)
+                return CursorEndOfEnumeratorError(cursor);
+
             enumerableCursor.MoveNext(); /* IGNORED */
             return SQLiteErrorCode.Ok;
         }
@@ -312,10 +356,7 @@ namespace System.Data.SQLite
                 cursor as SQLiteVirtualTableCursorEnumerable;
 
             if (enumerableCursor == null)
-            {
-                CursorTypeMismatchError(cursor);
-                return true;
-            }
+                return CodeToEofResult(CursorTypeMismatchError(cursor));
 
             return enumerableCursor.EndOfEnumerator;
         }
@@ -337,14 +378,14 @@ namespace System.Data.SQLite
                 return CursorTypeMismatchError(cursor);
 
             if (enumerableCursor.EndOfEnumerator)
-            {
-                context.SetNull();
-                return SQLiteErrorCode.Ok;
-            }
+                return CursorEndOfEnumeratorError(cursor);
 
             object current = enumerableCursor.Current;
 
-            context.SetString((current != null) ? current.ToString() : null);
+            if (current != null)
+                context.SetString(GetStringFromObject(current));
+            else
+                context.SetNull();
 
             return SQLiteErrorCode.Ok;
         }
@@ -365,15 +406,11 @@ namespace System.Data.SQLite
                 return CursorTypeMismatchError(cursor);
 
             if (enumerableCursor.EndOfEnumerator)
-            {
-                SetCursorError(cursor, "already hit end of enumerable cursor");
-                return SQLiteErrorCode.Error;
-            }
+                return CursorEndOfEnumeratorError(cursor);
 
             object current = enumerableCursor.Current;
 
-            rowId = (current != null) ? current.GetHashCode() : 0;
-
+            rowId = GetRowIdFromObject(current);
             return SQLiteErrorCode.Ok;
         }
 
@@ -387,7 +424,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            SetTableError(table.NativeHandle, String.Format(
+            SetTableError(table, String.Format(
                 "virtual table \"{0}\" is read-only", table.TableName));
 
             return SQLiteErrorCode.Error;
@@ -404,8 +441,8 @@ namespace System.Data.SQLite
 
             if (!table.Rename(newName))
             {
-                SetTableError(table.NativeHandle, String.Format(
-                    "failed to rename virtual table \"{0}\" to \"{1}\"",
+                SetTableError(table, String.Format(
+                    "failed to rename virtual table from \"{0}\" to \"{1}\"",
                     table.TableName, newName));
 
                 return SQLiteErrorCode.Error;

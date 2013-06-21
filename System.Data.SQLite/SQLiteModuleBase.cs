@@ -2319,6 +2319,24 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        protected virtual bool SetTableError(
+            SQLiteVirtualTable table,
+            string error
+            )
+        {
+            if (table == null)
+                return false;
+
+            IntPtr pVtab = table.NativeHandle;
+
+            if (pVtab == IntPtr.Zero)
+                return false;
+
+            return SetTableError(pVtab, error);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         protected virtual bool SetCursorError(
             SQLiteVirtualTableCursor cursor,
             string error
