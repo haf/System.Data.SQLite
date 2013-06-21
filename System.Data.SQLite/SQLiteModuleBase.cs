@@ -1998,7 +1998,7 @@ namespace System.Data.SQLite
     #region SQLiteModuleBase Class
     /* NOT SEALED */
     public abstract class SQLiteModuleBase :
-            ISQLiteManagedModule, ISQLiteNativeModule, IDisposable
+            ISQLiteManagedModule, /*ISQLiteNativeModule,*/ IDisposable
     {
         #region Private Constants
         private const double DefaultCost = double.MaxValue;
@@ -2024,35 +2024,7 @@ namespace System.Data.SQLite
 
         internal UnsafeNativeMethods.sqlite3_module CreateNativeModule()
         {
-            if (nativeModule.iVersion != 0)
-                return nativeModule;
-
-            nativeModule = new UnsafeNativeMethods.sqlite3_module();
-            nativeModule.iVersion = 2;
-            nativeModule.xCreate = new UnsafeNativeMethods.xCreate(xCreate);
-            nativeModule.xConnect = new UnsafeNativeMethods.xConnect(xConnect);
-            nativeModule.xBestIndex = new UnsafeNativeMethods.xBestIndex(xBestIndex);
-            nativeModule.xDisconnect = new UnsafeNativeMethods.xDisconnect(xDisconnect);
-            nativeModule.xDestroy = new UnsafeNativeMethods.xDestroy(xDestroy);
-            nativeModule.xOpen = new UnsafeNativeMethods.xOpen(xOpen);
-            nativeModule.xClose = new UnsafeNativeMethods.xClose(xClose);
-            nativeModule.xFilter = new UnsafeNativeMethods.xFilter(xFilter);
-            nativeModule.xNext = new UnsafeNativeMethods.xNext(xNext);
-            nativeModule.xEof = new UnsafeNativeMethods.xEof(xEof);
-            nativeModule.xColumn = new UnsafeNativeMethods.xColumn(xColumn);
-            nativeModule.xRowId = new UnsafeNativeMethods.xRowId(xRowId);
-            nativeModule.xUpdate = new UnsafeNativeMethods.xUpdate(xUpdate);
-            nativeModule.xBegin = new UnsafeNativeMethods.xBegin(xBegin);
-            nativeModule.xSync = new UnsafeNativeMethods.xSync(xSync);
-            nativeModule.xCommit = new UnsafeNativeMethods.xCommit(xCommit);
-            nativeModule.xRollback = new UnsafeNativeMethods.xRollback(xRollback);
-            nativeModule.xFindFunction = new UnsafeNativeMethods.xFindFunction(xFindFunction);
-            nativeModule.xRename = new UnsafeNativeMethods.xRename(xRename);
-            nativeModule.xSavepoint = new UnsafeNativeMethods.xSavepoint(xSavepoint);
-            nativeModule.xRelease = new UnsafeNativeMethods.xRelease(xRelease);
-            nativeModule.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(xRollbackTo);
-
-            return nativeModule;
+            return CreateNativeModule(CreateNativeModuleImpl());
         }
         #endregion
 
@@ -2072,7 +2044,156 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Private Methods
+        private UnsafeNativeMethods.sqlite3_module CreateNativeModule(
+            ISQLiteNativeModule module
+            )
+        {
+            nativeModule = new UnsafeNativeMethods.sqlite3_module();
+            nativeModule.iVersion = 2;
+
+            if (module != null)
+            {
+                nativeModule.xCreate = new UnsafeNativeMethods.xCreate(
+                    module.xCreate);
+
+                nativeModule.xConnect = new UnsafeNativeMethods.xConnect(
+                    module.xConnect);
+
+                nativeModule.xBestIndex = new UnsafeNativeMethods.xBestIndex(
+                    module.xBestIndex);
+
+                nativeModule.xDisconnect = new UnsafeNativeMethods.xDisconnect(
+                    module.xDisconnect);
+
+                nativeModule.xDestroy = new UnsafeNativeMethods.xDestroy(
+                    module.xDestroy);
+
+                nativeModule.xOpen = new UnsafeNativeMethods.xOpen(
+                    module.xOpen);
+
+                nativeModule.xClose = new UnsafeNativeMethods.xClose(
+                    module.xClose);
+
+                nativeModule.xFilter = new UnsafeNativeMethods.xFilter(
+                    module.xFilter);
+
+                nativeModule.xNext = new UnsafeNativeMethods.xNext(
+                    module.xNext);
+
+                nativeModule.xEof = new UnsafeNativeMethods.xEof(module.xEof);
+
+                nativeModule.xColumn = new UnsafeNativeMethods.xColumn(
+                    module.xColumn);
+
+                nativeModule.xRowId = new UnsafeNativeMethods.xRowId(
+                    module.xRowId);
+
+                nativeModule.xUpdate = new UnsafeNativeMethods.xUpdate(
+                    module.xUpdate);
+
+                nativeModule.xBegin = new UnsafeNativeMethods.xBegin(
+                    module.xBegin);
+
+                nativeModule.xSync = new UnsafeNativeMethods.xSync(
+                    module.xSync);
+
+                nativeModule.xCommit = new UnsafeNativeMethods.xCommit(
+                    module.xCommit);
+
+                nativeModule.xRollback = new UnsafeNativeMethods.xRollback(
+                    module.xRollback);
+
+                nativeModule.xFindFunction = new UnsafeNativeMethods.xFindFunction(
+                    module.xFindFunction);
+
+                nativeModule.xRename = new UnsafeNativeMethods.xRename(
+                    module.xRename);
+
+                nativeModule.xSavepoint = new UnsafeNativeMethods.xSavepoint(
+                    module.xSavepoint);
+
+                nativeModule.xRelease = new UnsafeNativeMethods.xRelease(
+                    module.xRelease);
+
+                nativeModule.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(
+                    module.xRollbackTo);
+            }
+            else
+            {
+                nativeModule.xCreate = new UnsafeNativeMethods.xCreate(
+                    xCreate);
+
+                nativeModule.xConnect = new UnsafeNativeMethods.xConnect(
+                    xConnect);
+
+                nativeModule.xBestIndex = new UnsafeNativeMethods.xBestIndex(
+                    xBestIndex);
+
+                nativeModule.xDisconnect = new UnsafeNativeMethods.xDisconnect(
+                    xDisconnect);
+
+                nativeModule.xDestroy = new UnsafeNativeMethods.xDestroy(
+                    xDestroy);
+
+                nativeModule.xOpen = new UnsafeNativeMethods.xOpen(xOpen);
+                nativeModule.xClose = new UnsafeNativeMethods.xClose(xClose);
+
+                nativeModule.xFilter = new UnsafeNativeMethods.xFilter(
+                    xFilter);
+
+                nativeModule.xNext = new UnsafeNativeMethods.xNext(xNext);
+                nativeModule.xEof = new UnsafeNativeMethods.xEof(xEof);
+
+                nativeModule.xColumn = new UnsafeNativeMethods.xColumn(
+                    xColumn);
+
+                nativeModule.xRowId = new UnsafeNativeMethods.xRowId(xRowId);
+
+                nativeModule.xUpdate = new UnsafeNativeMethods.xUpdate(
+                    xUpdate);
+
+                nativeModule.xBegin = new UnsafeNativeMethods.xBegin(xBegin);
+                nativeModule.xSync = new UnsafeNativeMethods.xSync(xSync);
+
+                nativeModule.xCommit = new UnsafeNativeMethods.xCommit(
+                    xCommit);
+
+                nativeModule.xRollback = new UnsafeNativeMethods.xRollback(
+                    xRollback);
+
+                nativeModule.xFindFunction = new UnsafeNativeMethods.xFindFunction(
+                    xFindFunction);
+
+                nativeModule.xRename = new UnsafeNativeMethods.xRename(
+                    xRename);
+
+                nativeModule.xSavepoint = new UnsafeNativeMethods.xSavepoint(
+                    xSavepoint);
+
+                nativeModule.xRelease = new UnsafeNativeMethods.xRelease(
+                    xRelease);
+
+                nativeModule.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(
+                    xRollbackTo);
+            }
+
+            return nativeModule;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Protected Members
+        #region Module Helper Methods
+        protected virtual ISQLiteNativeModule CreateNativeModuleImpl()
+        {
+            return null; /* NOTE: Use built-in defaults. */
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Native Table Helper Methods
         protected virtual IntPtr AllocateTable()
         {
@@ -2084,7 +2205,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual void ZeroTable(IntPtr pVtab)
+        protected virtual void ZeroTable(
+            IntPtr pVtab
+            )
         {
             if (pVtab == IntPtr.Zero)
                 return;
@@ -2104,7 +2227,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual void FreeTable(IntPtr pVtab)
+        protected virtual void FreeTable(
+            IntPtr pVtab
+            )
         {
             SetTableError(pVtab, null);
             SQLiteMemory.Free(pVtab);
@@ -2124,7 +2249,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual void FreeCursor(IntPtr pCursor)
+        protected virtual void FreeCursor(
+            IntPtr pCursor
+            )
         {
             SQLiteMemory.Free(pCursor);
         }
@@ -2309,9 +2436,12 @@ namespace System.Data.SQLite
         {
             try
             {
-                SQLiteLog.LogMessage(SQLiteErrorCode.Error,
-                    String.Format(CultureInfo.CurrentCulture,
-                    "Virtual table error: {0}", error)); /* throw */
+                if (LogErrors)
+                {
+                    SQLiteLog.LogMessage(SQLiteErrorCode.Error,
+                        String.Format(CultureInfo.CurrentCulture,
+                        "Virtual table error: {0}", error)); /* throw */
+                }
             }
             catch
             {
@@ -2413,8 +2543,28 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Public Properties
+        private bool logErrors;
+        public virtual bool LogErrors
+        {
+            get { CheckDisposed(); return logErrors; }
+            set { CheckDisposed(); logErrors = value; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private bool logExceptions;
+        public virtual bool LogExceptions
+        {
+            get { CheckDisposed(); return logExceptions; }
+            set { CheckDisposed(); logExceptions = value; }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region ISQLiteNativeModule Members
-        public SQLiteErrorCode xCreate(
+        private SQLiteErrorCode xCreate(
             IntPtr pDb,
             IntPtr pAux,
             int argc,
@@ -2465,7 +2615,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xConnect(
+        private SQLiteErrorCode xConnect(
             IntPtr pDb,
             IntPtr pAux,
             int argc,
@@ -2516,7 +2666,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xBestIndex(
+        private SQLiteErrorCode xBestIndex(
             IntPtr pVtab,
             IntPtr pIndex
             )
@@ -2548,7 +2698,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xDisconnect(
+        private SQLiteErrorCode xDisconnect(
             IntPtr pVtab
             )
         {
@@ -2576,10 +2726,13 @@ namespace System.Data.SQLite
                 //
                 try
                 {
-                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
-                        String.Format(CultureInfo.CurrentCulture,
-                        "Caught exception in \"xDisconnect\" method: {0}",
-                        e)); /* throw */
+                    if (LogExceptions)
+                    {
+                        SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                            String.Format(CultureInfo.CurrentCulture,
+                            "Caught exception in \"xDisconnect\" method: {0}",
+                            e)); /* throw */
+                    }
                 }
                 catch
                 {
@@ -2596,7 +2749,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xDestroy(
+        private SQLiteErrorCode xDestroy(
             IntPtr pVtab
             )
         {
@@ -2624,10 +2777,13 @@ namespace System.Data.SQLite
                 //
                 try
                 {
-                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
-                        String.Format(CultureInfo.CurrentCulture,
-                        "Caught exception in \"xDestroy\" method: {0}",
-                        e)); /* throw */
+                    if (LogExceptions)
+                    {
+                        SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                            String.Format(CultureInfo.CurrentCulture,
+                            "Caught exception in \"xDestroy\" method: {0}",
+                            e)); /* throw */
+                    }
                 }
                 catch
                 {
@@ -2644,7 +2800,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xOpen(
+        private SQLiteErrorCode xOpen(
             IntPtr pVtab,
             ref IntPtr pCursor
             )
@@ -2691,7 +2847,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xClose(
+        private SQLiteErrorCode xClose(
             IntPtr pCursor
             )
         {
@@ -2729,7 +2885,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xFilter(
+        private SQLiteErrorCode xFilter(
             IntPtr pCursor,
             int idxNum,
             IntPtr idxStr,
@@ -2767,7 +2923,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xNext(
+        private SQLiteErrorCode xNext(
             IntPtr pCursor
             )
         {
@@ -2796,7 +2952,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public int xEof(
+        private int xEof(
             IntPtr pCursor
             )
         {
@@ -2822,7 +2978,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xColumn(
+        private SQLiteErrorCode xColumn(
             IntPtr pCursor,
             IntPtr pContext,
             int index
@@ -2854,7 +3010,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xRowId(
+        private SQLiteErrorCode xRowId(
             IntPtr pCursor,
             ref long rowId
             )
@@ -2881,7 +3037,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xUpdate(
+        private SQLiteErrorCode xUpdate(
             IntPtr pVtab,
             int nData,
             IntPtr apData,
@@ -2911,7 +3067,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xBegin(
+        private SQLiteErrorCode xBegin(
             IntPtr pVtab
             )
         {
@@ -2932,7 +3088,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xSync(
+        private SQLiteErrorCode xSync(
             IntPtr pVtab
             )
         {
@@ -2953,7 +3109,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xCommit(
+        private SQLiteErrorCode xCommit(
             IntPtr pVtab
             )
         {
@@ -2974,7 +3130,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xRollback(
+        private SQLiteErrorCode xRollback(
             IntPtr pVtab
             )
         {
@@ -2995,7 +3151,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public int xFindFunction(
+        private int xFindFunction(
             IntPtr pVtab,
             int nArg,
             IntPtr zName,
@@ -3038,7 +3194,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xRename(
+        private SQLiteErrorCode xRename(
             IntPtr pVtab,
             IntPtr zNew
             )
@@ -3063,7 +3219,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xSavepoint(
+        private SQLiteErrorCode xSavepoint(
             IntPtr pVtab,
             int iSavepoint
             )
@@ -3085,7 +3241,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xRelease(
+        private SQLiteErrorCode xRelease(
             IntPtr pVtab,
             int iSavepoint
             )
@@ -3107,7 +3263,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public SQLiteErrorCode xRollbackTo(
+        private SQLiteErrorCode xRollbackTo(
             IntPtr pVtab,
             int iSavepoint
             )
@@ -3132,18 +3288,18 @@ namespace System.Data.SQLite
 
         #region ISQLiteManagedModule Members
         private bool declared;
-        public bool Declared
+        public virtual bool Declared
         {
-            get { return declared; }
+            get { CheckDisposed(); return declared; }
             internal set { declared = value; }
         }
 
         ///////////////////////////////////////////////////////////////////////
 
         private string name;
-        public string Name
+        public virtual string Name
         {
-            get { return name; }
+            get { CheckDisposed(); return name; }
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -3356,10 +3512,13 @@ namespace System.Data.SQLite
                 {
                     try
                     {
-                        SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
-                            String.Format(CultureInfo.CurrentCulture,
-                            "Caught exception in \"Dispose\" method: {0}",
-                            e)); /* throw */
+                        if (LogExceptions)
+                        {
+                            SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                                String.Format(CultureInfo.CurrentCulture,
+                                "Caught exception in \"Dispose\" method: {0}",
+                                e)); /* throw */
+                        }
                     }
                     catch
                     {

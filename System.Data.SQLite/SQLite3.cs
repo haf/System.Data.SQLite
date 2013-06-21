@@ -1594,10 +1594,13 @@ namespace System.Data.SQLite
         try
         {
             pName = SQLiteMarshal.Utf8IntPtrFromString(module.Name);
-            UnsafeNativeMethods.sqlite3_module nativeModule = module.CreateNativeModule();
+
+            UnsafeNativeMethods.sqlite3_module nativeModule =
+                module.CreateNativeModule();
 
             if (UnsafeNativeMethods.sqlite3_create_disposable_module(
-                    _sql, pName, ref nativeModule, IntPtr.Zero, null) != IntPtr.Zero)
+                    _sql, pName, ref nativeModule, IntPtr.Zero,
+                    null) != IntPtr.Zero)
             {
                 if (_modules == null)
                     _modules = new Dictionary<string, SQLiteModuleBase>();
