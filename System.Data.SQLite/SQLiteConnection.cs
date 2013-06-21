@@ -516,6 +516,13 @@ namespace System.Data.SQLite
         _sql = new SQLite3(
             SQLiteDateFormats.Default, DateTimeKind.Unspecified, null,
             db, fileName, _ownHandle);
+
+        _flags = SQLiteConnectionFlags.None;
+
+        _connectionState = (db != IntPtr.Zero) ?
+            ConnectionState.Open : ConnectionState.Closed;
+
+        _connectionString = null; /* unknown */
     }
 
     /// <summary>
@@ -571,7 +578,6 @@ namespace System.Data.SQLite
 #endif
 
       _parseViaFramework = parseViaFramework;
-      _ownHandle = true;
       _flags = SQLiteConnectionFlags.Default;
       _connectionState = ConnectionState.Closed;
       _connectionString = null;
@@ -589,8 +595,6 @@ namespace System.Data.SQLite
     public SQLiteConnection(SQLiteConnection connection)
       : this(connection.ConnectionString, connection.ParseViaFramework)
     {
-      string str;
-
       if (connection.State == ConnectionState.Open)
       {
         Open();
@@ -600,7 +604,7 @@ namespace System.Data.SQLite
         {
           foreach (DataRow row in tbl.Rows)
           {
-            str = row[0].ToString();
+            string str = row[0].ToString();
             if (String.Compare(str, "main", StringComparison.OrdinalIgnoreCase) != 0
               && String.Compare(str, "temp", StringComparison.OrdinalIgnoreCase) != 0)
             {
@@ -864,6 +868,62 @@ namespace System.Data.SQLite
 
         if (handle.IsClosed)
             throw new InvalidOperationException("The connection handle is closed.");
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static SortedList<string, string> ParseConnectionString(
+        string connectionString,
+        bool parseViaFramework
+        )
+    {
+        return parseViaFramework ?
+            ParseConnectionStringViaFramework(connectionString, false) :
+            ParseConnectionString(connectionString);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void SetupSQLiteBase(SortedList<string, string> opts)
+    {
+        object enumValue;
+
+        enumValue = TryParseEnum(
+            typeof(SQLiteDateFormats), FindKey(opts, "DateTimeFormat",
+            DefaultDateTimeFormat.ToString()), true);
+
+        SQLiteDateFormats dateFormat = (enumValue is SQLiteDateFormats) ?
+            (SQLiteDateFormats)enumValue : DefaultDateTimeFormat;
+
+        enumValue = TryParseEnum(
+            typeof(DateTimeKind), FindKey(opts, "DateTimeKind",
+            DefaultDateTimeKind.ToString()), true);
+
+        DateTimeKind kind = (enumValue is DateTimeKind) ?
+            (DateTimeKind)enumValue : DefaultDateTimeKind;
+
+        string dateTimeFormat = FindKey(opts, "DateTimeFormatString",
+            DefaultDateTimeFormatString);
+
+        //
+        // NOTE: SQLite automatically sets the encoding of the database
+        //       to UTF16 if called from sqlite3_open16().
+        //
+        _ownHandle = true;
+
+        if (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding",
+                  DefaultUseUTF16Encoding.ToString())))
+        {
+            _sql = new SQLite3_UTF16(
+                dateFormat, kind, dateTimeFormat, IntPtr.Zero, null,
+                _ownHandle);
+        }
+        else
+        {
+            _sql = new SQLite3(
+                dateFormat, kind, dateTimeFormat, IntPtr.Zero, null,
+                _ownHandle);
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1867,9 +1927,8 @@ namespace System.Data.SQLite
 
       Close();
 
-      SortedList<string, string> opts = _parseViaFramework ?
-          ParseConnectionStringViaFramework(_connectionString, false) :
-          ParseConnectionString(_connectionString);
+      SortedList<string, string> opts = ParseConnectionString(
+          _connectionString, _parseViaFramework);
 
       OnChanged(this, new ConnectionEventArgs(
           SQLiteConnectionEventType.ConnectionString, null, null, null, _connectionString, opts));
@@ -1936,36 +1995,7 @@ namespace System.Data.SQLite
 
         if (_sql == null)
         {
-            enumValue = TryParseEnum(typeof(SQLiteDateFormats), FindKey(opts,
-                "DateTimeFormat", DefaultDateTimeFormat.ToString()), true);
-
-            SQLiteDateFormats dateFormat = (enumValue is SQLiteDateFormats) ?
-                (SQLiteDateFormats)enumValue : DefaultDateTimeFormat;
-
-            enumValue = TryParseEnum(typeof(DateTimeKind), FindKey(opts,
-                "DateTimeKind", DefaultDateTimeKind.ToString()), true);
-
-            DateTimeKind kind = (enumValue is DateTimeKind) ?
-                (DateTimeKind)enumValue : DefaultDateTimeKind;
-
-            string dateTimeFormat = FindKey(opts, "DateTimeFormatString",
-                DefaultDateTimeFormatString);
-
-            //
-            // NOTE: SQLite automatically sets the encoding of the database to
-            //       UTF16 if called from sqlite3_open16().
-            //
-            _ownHandle = true;
-
-            if (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding",
-                      DefaultUseUTF16Encoding.ToString())))
-            {
-                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat, IntPtr.Zero, null, _ownHandle);
-            }
-            else
-            {
-                _sql = new SQLite3(dateFormat, kind, dateTimeFormat, IntPtr.Zero, null, _ownHandle);
-            }
+            SetupSQLiteBase(opts);
         }
 
         SQLiteOpenFlagsEnum flags = SQLiteOpenFlagsEnum.None;
@@ -2365,40 +2395,10 @@ namespace System.Data.SQLite
         // make sure we have an instance of the base class
         if (_sql == null)
         {
-            SortedList<string, string> opts = _parseViaFramework ?
-                ParseConnectionStringViaFramework(_connectionString, false) :
-                ParseConnectionString(_connectionString);
+            SortedList<string, string> opts = ParseConnectionString(
+                _connectionString, _parseViaFramework);
 
-            object enumValue;
-
-            enumValue = TryParseEnum(typeof(SQLiteDateFormats), FindKey(opts,
-                "DateTimeFormat", DefaultDateTimeFormat.ToString()), true);
-
-            SQLiteDateFormats dateFormat = (enumValue is SQLiteDateFormats) ?
-                (SQLiteDateFormats)enumValue : DefaultDateTimeFormat;
-
-            enumValue = TryParseEnum(typeof(DateTimeKind), FindKey(opts,
-                "DateTimeKind", DefaultDateTimeKind.ToString()), true);
-
-            DateTimeKind kind = (enumValue is DateTimeKind) ?
-                (DateTimeKind)enumValue : DefaultDateTimeKind;
-
-            string dateTimeFormat = FindKey(opts, "DateTimeFormatString",
-                DefaultDateTimeFormatString);
-
-            //
-            // NOTE: SQLite automatically sets the encoding of the database to
-            //       UTF16 if called from sqlite3_open16().
-            //
-            if (SQLiteConvert.ToBoolean(FindKey(opts,
-                    "UseUTF16Encoding", DefaultUseUTF16Encoding.ToString())))
-            {
-                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat, IntPtr.Zero, null, _ownHandle);
-            }
-            else
-            {
-                _sql = new SQLite3(dateFormat, kind, dateTimeFormat, IntPtr.Zero, null, _ownHandle);
-            }
+            SetupSQLiteBase(opts);
         }
         if (_sql != null) return _sql.Shutdown();
         throw new InvalidOperationException("Database connection not active.");

@@ -102,9 +102,9 @@ namespace System.Data.SQLite
     {
         if (db != IntPtr.Zero)
         {
-            _sql = new SQLiteConnectionHandle(db, ownHandle);
-            _fileName = fileName;
             _ownHandle = ownHandle;
+            _sql = new SQLiteConnectionHandle(db, _ownHandle);
+            _fileName = fileName;
         }
     }
 
@@ -173,7 +173,10 @@ namespace System.Data.SQLite
     internal override void Close(bool canThrow)
     {
       if (!_ownHandle)
+      {
+        _sql = null;
         return;
+      }
 
       if (_sql != null)
       {
@@ -532,7 +535,7 @@ namespace System.Data.SQLite
       if (n != SQLiteErrorCode.Ok)
         throw new SQLiteException(n, GetLastError());
 
-      return SQLiteErrorCode.Ok; // We reset OK, no schema changes
+      return n; // We reset OK, no schema changes
     }
 
     internal override string GetLastError()

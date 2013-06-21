@@ -1226,10 +1226,13 @@ INSERT INTO B (ID, MYVAL) VALUES(1,'TEST');
     [Test]
     internal void ConnectionStringBuilder()
     {
-      DbConnectionStringBuilder builder = _fact.CreateConnectionStringBuilder();
-      if (builder is SQLiteConnectionStringBuilder)
+      if (_fact.GetType().Name.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) > -1)
       {
-        bool pool = ((SQLiteConnectionStringBuilder)builder).Pooling;
+        DbConnectionStringBuilder builder = _fact.CreateConnectionStringBuilder();
+        if (builder is SQLiteConnectionStringBuilder)
+        {
+          bool pool = ((SQLiteConnectionStringBuilder)builder).Pooling;
+        }
       }
     }
 
