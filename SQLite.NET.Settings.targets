@@ -199,6 +199,15 @@
     <CountHandle Condition="'$(CountHandle)' == ''">false</CountHandle>
 
     <!--
+        NOTE: Enable tracking of all outstanding bytes allocated by the
+              SQLiteMarshal class.  By default, this is disabled.  If this is
+              enabled, this library will keep track of all outstanding bytes
+              allocated by the SQLiteMarshal class.  This has the potential to
+              slow down the library a bit.
+    -->
+    <TrackMarshalBytes Condition="'$(TrackMarshalBytes)' == ''">false</TrackMarshalBytes>
+
+    <!--
         NOTE: For interaction with the native SQLite implementation, use the
               custom built interop DLL (i.e. "SQLite.Interop.dll")?  By default,
               this is enabled.  This property is mutually exclusive with the

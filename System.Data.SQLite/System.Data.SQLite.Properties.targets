@@ -78,6 +78,13 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Enable tracking of bytes allocated by the SQLiteMarshal class?
+  -->
+  <PropertyGroup Condition="'$(TrackMarshalBytes)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACK_MARSHAL_BYTES</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: For interaction with the native SQLite implementation, use the
             custom build interop DLL (i.e. "SQLite.Interop.DLL")?
   -->

@@ -288,10 +288,12 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_last_insert_rowid(_sql);
-#else
+#elif !SQLITE_STANDARD
         long rowId = 0;
         UnsafeNativeMethods.sqlite3_last_insert_rowid_interop(_sql, ref rowId);
         return rowId;
+#else
+        throw new NotImplementedException();
 #endif
       }
     }
@@ -314,10 +316,12 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_memory_used();
-#else
+#elif !SQLITE_STANDARD
         long bytes = 0;
         UnsafeNativeMethods.sqlite3_memory_used_interop(ref bytes);
         return bytes;
+#else
+        throw new NotImplementedException();
 #endif
       }
     }
@@ -328,10 +332,12 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_memory_highwater(0);
-#else
+#elif !SQLITE_STANDARD
         long bytes = 0;
         UnsafeNativeMethods.sqlite3_memory_highwater_interop(0, ref bytes);
         return bytes;
+#else
+        throw new NotImplementedException();
 #endif
       }
     }
@@ -784,8 +790,10 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double_interop(handle, index, ref value);
+#else
+        throw new NotImplementedException();
 #endif
         if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
@@ -822,8 +830,10 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
             n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value2);
-#else
+#elif !SQLITE_STANDARD
             n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value2);
+#else
+            throw new NotImplementedException();
 #endif
         }
         else
@@ -844,8 +854,10 @@ namespace System.Data.SQLite
         }
 
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value);
+#else
+        throw new NotImplementedException();
 #endif
         if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
@@ -861,8 +873,10 @@ namespace System.Data.SQLite
         }
 
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_uint64(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_uint64_interop(handle, index, ref value);
+#else
+        throw new NotImplementedException();
 #endif
         if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
@@ -915,8 +929,10 @@ namespace System.Data.SQLite
                     }
 
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value);
+#else
+                    throw new NotImplementedException();
 #endif
                     if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
                     break;
@@ -932,8 +948,10 @@ namespace System.Data.SQLite
                     }
 
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double_interop(handle, index, ref value);
+#else
+                    throw new NotImplementedException();
 #endif
                     if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
                     break;
@@ -949,8 +967,10 @@ namespace System.Data.SQLite
                     }
 
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value);
+#else
+                    throw new NotImplementedException();
 #endif
                     if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
                     break;
@@ -1193,8 +1213,10 @@ namespace System.Data.SQLite
       double value;
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_column_double(stmt._sqlite_stmt, index);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_column_double_interop(stmt._sqlite_stmt, index, out value);
+#else
+      throw new NotImplementedException();
 #endif
       return value;
     }
@@ -1234,8 +1256,10 @@ namespace System.Data.SQLite
       long value;
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_column_int64(stmt._sqlite_stmt, index);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_column_int64_interop(stmt._sqlite_stmt, index, out value);
+#else
+      throw new NotImplementedException();
 #endif
       return value;
     }
@@ -1453,8 +1477,10 @@ namespace System.Data.SQLite
       double value;
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_value_double(ptr);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_value_double_interop(ptr, out value);
+#else
+      throw new NotImplementedException();
 #endif
       return value;
     }
@@ -1469,8 +1495,10 @@ namespace System.Data.SQLite
       Int64 value;
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_value_int64(ptr);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_value_int64_interop(ptr, out value);
+#else
+      throw new NotImplementedException();
 #endif
       return value;
     }
@@ -1500,8 +1528,10 @@ namespace System.Data.SQLite
     {
 #if !PLATFORM_COMPACTFRAMEWORK
       UnsafeNativeMethods.sqlite3_result_double(context, value);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_result_double_interop(context, ref value);
+#else
+      throw new NotImplementedException();
 #endif
     }
 
@@ -1519,8 +1549,10 @@ namespace System.Data.SQLite
     {
 #if !PLATFORM_COMPACTFRAMEWORK
       UnsafeNativeMethods.sqlite3_result_int64(context, value);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_result_int64_interop(context, ref value);
+#else
+      throw new NotImplementedException();
 #endif
     }
 

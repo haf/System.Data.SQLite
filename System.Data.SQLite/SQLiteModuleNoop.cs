@@ -298,8 +298,8 @@ namespace System.Data.SQLite
 #if THROW_ON_DISPOSED
             if (disposed)
             {
-                throw new ObjectDisposedException(typeof(
-                    SQLiteModuleNoop).Name);
+                throw new ObjectDisposedException(
+                    typeof(SQLiteModuleNoop).Name);
             }
 #endif
         }

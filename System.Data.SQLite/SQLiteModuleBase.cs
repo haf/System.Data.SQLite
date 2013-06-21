@@ -10,6 +10,10 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#if TRACK_MARSHAL_BYTES
+using System.Threading;
+#endif
+
 namespace System.Data.SQLite
 {
     #region SQLite Context Helper Class
@@ -48,8 +52,10 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
             UnsafeNativeMethods.sqlite3_result_double(pContext, value);
-#else
+#elif !SQLITE_STANDARD
             UnsafeNativeMethods.sqlite3_result_double_interop(pContext, ref value);
+#else
+            throw new NotImplementedException();
 #endif
         }
 
@@ -72,8 +78,10 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
             UnsafeNativeMethods.sqlite3_result_int64(pContext, value);
-#else
+#elif !SQLITE_STANDARD
             UnsafeNativeMethods.sqlite3_result_int64_interop(pContext, ref value);
+#else
+            throw new NotImplementedException();
 #endif
         }
 
@@ -263,10 +271,12 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
             return UnsafeNativeMethods.sqlite3_value_int64(pValue);
-#else
+#elif !SQLITE_STANDARD
             long value;
             UnsafeNativeMethods.sqlite3_value_int64_interop(pValue, out value);
             return value;
+#else
+            throw new NotImplementedException();
 #endif
         }
 
@@ -278,10 +288,12 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
             return UnsafeNativeMethods.sqlite3_value_double(pValue);
-#else
+#elif !SQLITE_STANDARD
             double value;
             UnsafeNativeMethods.sqlite3_value_double_interop(pValue, out value);
             return value;
+#else
+            throw new NotImplementedException();
 #endif
         }
 
@@ -1341,6 +1353,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Private Data
+#if TRACK_MARSHAL_BYTES
+        private static int bytesAllocated;
+        private static int maximumBytesAllocated;
+#endif
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region IntPtr Helper Methods
         internal static IntPtr IntPtrForOffset(
             IntPtr pointer,
@@ -1451,13 +1472,57 @@ namespace System.Data.SQLite
         #region Memory Allocation Helper Methods
         internal static IntPtr Allocate(int size)
         {
-            return UnsafeNativeMethods.sqlite3_malloc(size);
+            IntPtr pMemory = UnsafeNativeMethods.sqlite3_malloc(size);
+
+#if TRACK_MARSHAL_BYTES
+            if (pMemory != IntPtr.Zero)
+            {
+                int blockSize = Size(pMemory);
+
+                if (blockSize > 0)
+                {
+                    Interlocked.Add(ref bytesAllocated, blockSize);
+                    Interlocked.Add(ref maximumBytesAllocated, blockSize);
+                }
+            }
+#endif
+
+            return pMemory;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        internal static int Size(IntPtr pMemory)
+        {
+#if !SQLITE_STANDARD
+            try
+            {
+                return UnsafeNativeMethods.sqlite3_malloc_size_interop(
+                    pMemory);
+            }
+            catch
+            {
+                // do nothing.
+            }
+#endif
+
+            return 0;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
         internal static void Free(IntPtr pMemory)
         {
+#if TRACK_MARSHAL_BYTES
+            if (pMemory != IntPtr.Zero)
+            {
+                int blockSize = Size(pMemory);
+
+                if (blockSize > 0)
+                    Interlocked.Add(ref bytesAllocated, -blockSize);
+            }
+#endif
+
             UnsafeNativeMethods.sqlite3_free(pMemory);
         }
         #endregion
@@ -2021,6 +2086,7 @@ namespace System.Data.SQLite
 
         protected virtual void FreeTable(IntPtr pVtab)
         {
+            SetTableError(pVtab, null);
             SQLiteMarshal.Free(pVtab);
         }
         #endregion
@@ -2230,6 +2296,9 @@ namespace System.Data.SQLite
                 SQLiteMarshal.Free(pError); pError = IntPtr.Zero;
                 SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
             }
+
+            if (error == null)
+                return true;
 
             bool success = false;
 
@@ -3203,7 +3272,10 @@ namespace System.Data.SQLite
         {
 #if THROW_ON_DISPOSED
             if (disposed)
-                throw new ObjectDisposedException(typeof(SQLiteModuleBase).Name);
+            {
+                throw new ObjectDisposedException(
+                    typeof(SQLiteModuleBase).Name);
+            }
 #endif
         }
 
@@ -3223,6 +3295,9 @@ namespace System.Data.SQLite
                 //////////////////////////////////////
                 // release unmanaged resources here...
                 //////////////////////////////////////
+
+
+
 
                 disposed = true;
             }

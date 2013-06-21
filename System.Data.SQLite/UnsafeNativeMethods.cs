@@ -707,6 +707,9 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_value_text16_interop(IntPtr p, out int len);
 
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_malloc_size_interop(IntPtr p);
+
 #if INTEROP_LOG
     [DllImport(SQLITE_DLL)]
     internal static extern SQLiteErrorCode sqlite3_config_log_interop();
@@ -1060,9 +1063,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_last_insert_rowid(IntPtr db);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_last_insert_rowid_interop(IntPtr db, ref long rowId);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1075,17 +1075,11 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_memory_used();
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_memory_used_interop(ref long bytes);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_memory_highwater(int resetFlag);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_memory_highwater_interop(int resetFlag, ref long bytes);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1112,9 +1106,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern SQLiteErrorCode sqlite3_bind_double(IntPtr stmt, int index, double value);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern SQLiteErrorCode sqlite3_bind_double_interop(IntPtr stmt, int index, ref double value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1138,9 +1129,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern SQLiteErrorCode sqlite3_bind_int64(IntPtr stmt, int index, long value);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern SQLiteErrorCode sqlite3_bind_int64_interop(IntPtr stmt, int index, ref long value);
 #endif
 
     //
@@ -1150,9 +1138,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int64", CallingConvention = CallingConvention.Cdecl)]
     internal static extern SQLiteErrorCode sqlite3_bind_uint64(IntPtr stmt, int index, ulong value);
-#else
-    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int64_interop")]
-    internal static extern SQLiteErrorCode sqlite3_bind_uint64_interop(IntPtr stmt, int index, ref ulong value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1200,9 +1185,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern double sqlite3_column_double(IntPtr stmt, int index);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_column_double_interop(IntPtr stmt, int index, out double value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1215,9 +1197,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_column_int64(IntPtr stmt, int index);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_column_int64_interop(IntPtr stmt, int index, out long value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1286,9 +1265,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern double sqlite3_value_double(IntPtr p);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_value_double_interop(IntPtr p, out double value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1301,9 +1277,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_value_int64(IntPtr p);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_value_int64_interop(IntPtr p, out Int64 value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1323,9 +1296,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void sqlite3_result_double(IntPtr context, double value);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_double_interop(IntPtr context, ref double value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1380,9 +1350,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void sqlite3_result_int64(IntPtr context, long value);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_int64_interop(IntPtr context, ref Int64 value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1633,6 +1600,49 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern void sqlite3_dispose_module(ref sqlite3_module pModule);
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region sqlite interop api calls (.NET Compact Framework only)
+#if PLATFORM_COMPACTFRAMEWORK && !SQLITE_STANDARD
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_last_insert_rowid_interop(IntPtr db, ref long rowId);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_memory_used_interop(ref long bytes);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_memory_highwater_interop(int resetFlag, ref long bytes);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern SQLiteErrorCode sqlite3_bind_double_interop(IntPtr stmt, int index, ref double value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern SQLiteErrorCode sqlite3_bind_int64_interop(IntPtr stmt, int index, ref long value);
+
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int64_interop")]
+    internal static extern SQLiteErrorCode sqlite3_bind_uint64_interop(IntPtr stmt, int index, ref ulong value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_column_double_interop(IntPtr stmt, int index, out double value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_column_int64_interop(IntPtr stmt, int index, out long value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_value_double_interop(IntPtr p, out double value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_value_int64_interop(IntPtr p, out Int64 value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_result_double_interop(IntPtr context, ref double value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_result_int64_interop(IntPtr context, ref Int64 value);
+#endif
+    // PLATFORM_COMPACTFRAMEWORK && !SQLITE_STANDARD
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////
