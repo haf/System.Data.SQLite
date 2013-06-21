@@ -5,14 +5,9 @@
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Security;
-
-#if !NET_40
-using System.Security.Permissions;
-#endif
-
 using System.Text;
 
 namespace System.Data.SQLite
@@ -201,6 +196,42 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Private Methods
+        private void PreventNativeAccess()
+        {
+            pValue = IntPtr.Zero;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Properties
+        private bool persisted;
+        public bool Persisted
+        {
+            get { return persisted; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private object value;
+        public object Value
+        {
+            get
+            {
+                if (!persisted)
+                {
+                    throw new InvalidOperationException(
+                        "value was not persisted");
+                }
+
+                return value;
+            }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Public Methods
         public TypeAffinity GetTypeAffinity()
         {
@@ -268,6 +299,55 @@ namespace System.Data.SQLite
         {
             if (pValue == IntPtr.Zero) return null;
             return SQLiteMarshal.BytesFromIntPtr(pValue, GetBytes());
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public bool Persist()
+        {
+            switch (GetTypeAffinity())
+            {
+                case TypeAffinity.Uninitialized:
+                    {
+                        value = null;
+                        PreventNativeAccess();
+                        return (persisted = true);
+                    }
+                case TypeAffinity.Int64:
+                    {
+                        value = GetInt64();
+                        PreventNativeAccess();
+                        return (persisted = true);
+                    }
+                case TypeAffinity.Double:
+                    {
+                        value = GetDouble();
+                        PreventNativeAccess();
+                        return (persisted = true);
+                    }
+                case TypeAffinity.Text:
+                    {
+                        value = GetString();
+                        PreventNativeAccess();
+                        return (persisted = true);
+                    }
+                case TypeAffinity.Blob:
+                    {
+                        value = GetBytes();
+                        PreventNativeAccess();
+                        return (persisted = true);
+                    }
+                case TypeAffinity.Null:
+                    {
+                        value = DBNull.Value;
+                        PreventNativeAccess();
+                        return (persisted = true);
+                    }
+                default:
+                    {
+                        return false;
+                    }
+            }
         }
         #endregion
     }
@@ -477,29 +557,29 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private int idxNum;
-        public int IdxNum
+        private int indexNumber;
+        public int IndexNumber
         {
-            get { return idxNum; }
-            set { idxNum = value; }
+            get { return indexNumber; }
+            set { indexNumber = value; }
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        private string idxStr;
-        public string IdxStr
+        private string indexString;
+        public string IndexString
         {
-            get { return idxStr; }
-            set { idxStr = value; }
+            get { return indexString; }
+            set { indexString = value; }
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        private int needToFreeIdxStr;
-        public int NeedToFreeIdxStr
+        private int needToFreeIndexString;
+        public int NeedToFreeIndexString
         {
-            get { return needToFreeIdxStr; }
-            set { needToFreeIdxStr = value; }
+            get { return needToFreeIndexString; }
+            set { needToFreeIndexString = value; }
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -529,7 +609,10 @@ namespace System.Data.SQLite
     public sealed class SQLiteIndex
     {
         #region Internal Constructors
-        internal SQLiteIndex(int nConstraint, int nOrderBy)
+        internal SQLiteIndex(
+            int nConstraint,
+            int nOrderBy
+            )
         {
             inputs = new SQLiteIndexInputs(nConstraint, nOrderBy);
             outputs = new SQLiteIndexOutputs(nConstraint);
@@ -558,15 +641,120 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-    #region SQLiteVirtualTableCursor Class
-    public class SQLiteVirtualTableCursor : ISQLiteNativeHandle
+    #region SQLiteVirtualTable Class
+    /* NOT SEALED */
+    public class SQLiteVirtualTable : ISQLiteNativeHandle, IDisposable
     {
+        #region Private Constants
+        private const int ModuleNameIndex = 0;
+        private const int DatabaseNameIndex = 1;
+        private const int TableNameIndex = 2;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Public Constructors
-        public SQLiteVirtualTableCursor(
-            IntPtr nativeHandle
+        public SQLiteVirtualTable(
+            string[] arguments
             )
         {
-            this.nativeHandle = nativeHandle;
+            this.arguments = arguments;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Properties
+        private string[] arguments;
+        public virtual string[] Arguments
+        {
+            get { CheckDisposed(); return arguments; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public virtual string ModuleName
+        {
+            get
+            {
+                CheckDisposed();
+
+                string[] arguments = Arguments;
+
+                if ((arguments != null) &&
+                    (arguments.Length > ModuleNameIndex))
+                {
+                    return arguments[ModuleNameIndex];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public virtual string DatabaseName
+        {
+            get
+            {
+                CheckDisposed();
+
+                string[] arguments = Arguments;
+
+                if ((arguments != null) &&
+                    (arguments.Length > DatabaseNameIndex))
+                {
+                    return arguments[DatabaseNameIndex];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public virtual string TableName
+        {
+            get
+            {
+                CheckDisposed();
+
+                string[] arguments = Arguments;
+
+                if ((arguments != null) &&
+                    (arguments.Length > TableNameIndex))
+                {
+                    return arguments[TableNameIndex];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Methods
+        public virtual bool Rename(
+            string name
+            )
+        {
+            CheckDisposed();
+
+            if ((arguments != null) &&
+                (arguments.Length > TableNameIndex))
+            {
+                arguments[TableNameIndex] = name;
+                return true;
+            }
+
+            return false;
         }
         #endregion
 
@@ -574,9 +762,224 @@ namespace System.Data.SQLite
 
         #region ISQLiteNativeHandle Members
         private IntPtr nativeHandle;
-        public IntPtr NativeHandle
+        public virtual IntPtr NativeHandle
         {
-            get { return nativeHandle; }
+            get { CheckDisposed(); return nativeHandle; }
+            internal set { nativeHandle = value; }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region IDisposable Members
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region IDisposable "Pattern" Members
+        private bool disposed;
+        private void CheckDisposed() /* throw */
+        {
+#if THROW_ON_DISPOSED
+            if (disposed)
+            {
+                throw new ObjectDisposedException(
+                    typeof(SQLiteVirtualTable).Name);
+            }
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        #endregion
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region SQLiteVirtualTableCursor Class
+    /* NOT SEALED */
+    public class SQLiteVirtualTableCursor : ISQLiteNativeHandle, IDisposable
+    {
+        #region Public Constructors
+        public SQLiteVirtualTableCursor(
+            SQLiteVirtualTable table
+            )
+        {
+            this.table = table;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Properties
+        private SQLiteVirtualTable table;
+        public virtual SQLiteVirtualTable Table
+        {
+            get { CheckDisposed(); return table; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private int indexNumber;
+        public virtual int IndexNumber
+        {
+            get { CheckDisposed(); return indexNumber; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private string indexString;
+        public virtual string IndexString
+        {
+            get { CheckDisposed(); return indexString; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteValue[] values;
+        public virtual SQLiteValue[] Values
+        {
+            get { CheckDisposed(); return values; }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Protected Methods
+        protected virtual int TryPersistValues(
+            SQLiteValue[] values
+            )
+        {
+            int result = 0;
+
+            if (values != null)
+            {
+                foreach (SQLiteValue value in values)
+                {
+                    if (value == null)
+                        continue;
+
+                    if (value.Persist())
+                        result++;
+                }
+            }
+
+            return result;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Methods
+        public virtual void Filter(
+            int indexNumber,
+            string indexString,
+            SQLiteValue[] values
+            )
+        {
+            CheckDisposed();
+
+            if ((values != null) &&
+                (TryPersistValues(values) != values.Length))
+            {
+                throw new SQLiteException(SQLiteErrorCode.Error,
+                    "failed to persist one or more values");
+            }
+
+            this.indexNumber = indexNumber;
+            this.indexString = indexString;
+            this.values = values;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region ISQLiteNativeHandle Members
+        private IntPtr nativeHandle;
+        public virtual IntPtr NativeHandle
+        {
+            get { CheckDisposed(); return nativeHandle; }
+            internal set { nativeHandle = value; }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region IDisposable Members
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region IDisposable "Pattern" Members
+        private bool disposed;
+        private void CheckDisposed() /* throw */
+        {
+#if THROW_ON_DISPOSED
+            if (disposed)
+            {
+                throw new ObjectDisposedException(
+                    typeof(SQLiteVirtualTableCursor).Name);
+            }
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                //if (disposing)
+                //{
+                //    ////////////////////////////////////
+                //    // dispose managed resources here...
+                //    ////////////////////////////////////
+                //}
+
+                //////////////////////////////////////
+                // release unmanaged resources here...
+                //////////////////////////////////////
+
+                disposed = true;
+            }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Destructor
+        ~SQLiteVirtualTableCursor()
+        {
+            Dispose(false);
         }
         #endregion
     }
@@ -769,38 +1172,46 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode Create(
-            SQLiteConnection connection, /* in */
-            IntPtr pClientData,          /* in */
-            string[] argv,               /* in */
-            ref string error             /* out */
+            SQLiteConnection connection,  /* in */
+            IntPtr pClientData,           /* in */
+            string[] arguments,           /* in */
+            ref SQLiteVirtualTable table, /* out */
+            ref string error              /* out */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode Connect(
-            SQLiteConnection connection, /* in */
-            IntPtr pClientData,          /* in */
-            string[] argv,               /* in */
-            ref string error             /* out */
+            SQLiteConnection connection,  /* in */
+            IntPtr pClientData,           /* in */
+            string[] arguments,           /* in */
+            ref SQLiteVirtualTable table, /* out */
+            ref string error              /* out */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode BestIndex(
-            SQLiteIndex index /* in, out */
+            SQLiteVirtualTable table, /* in */
+            SQLiteIndex index         /* in, out */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
-        SQLiteErrorCode Disconnect();
+        SQLiteErrorCode Disconnect(
+            SQLiteVirtualTable table /* in */
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
-        SQLiteErrorCode Destroy();
+        SQLiteErrorCode Destroy(
+            SQLiteVirtualTable table /* in */
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode Open(
+            SQLiteVirtualTable table,           /* in */
             ref SQLiteVirtualTableCursor cursor /* out */
             );
 
@@ -814,9 +1225,9 @@ namespace System.Data.SQLite
 
         SQLiteErrorCode Filter(
             SQLiteVirtualTableCursor cursor, /* in */
-            int idxNum,                      /* in */
-            string idxStr,                   /* in */
-            SQLiteValue[] argv               /* in */
+            int indexNumber,                 /* in */
+            string indexString,              /* in */
+            SQLiteValue[] values             /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
@@ -849,31 +1260,41 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode Update(
-            SQLiteValue[] values, /* in */
-            ref long rowId        /* in, out */
+            SQLiteVirtualTable table, /* in */
+            SQLiteValue[] values,     /* in */
+            ref long rowId            /* in, out */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
-        SQLiteErrorCode Begin();
+        SQLiteErrorCode Begin(
+            SQLiteVirtualTable table /* in */
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
-        SQLiteErrorCode Sync();
+        SQLiteErrorCode Sync(
+            SQLiteVirtualTable table /* in */
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
-        SQLiteErrorCode Commit();
+        SQLiteErrorCode Commit(
+            SQLiteVirtualTable table /* in */
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
-        SQLiteErrorCode Rollback();
+        SQLiteErrorCode Rollback(
+            SQLiteVirtualTable table /* in */
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
         bool FindFunction(
-            int nArg,                    /* in */
-            string zName,                /* in */
+            SQLiteVirtualTable table,    /* in */
+            int argumentCount,           /* in */
+            string name,                 /* in */
             ref SQLiteFunction function, /* out */
             ref IntPtr pClientData       /* out */
             );
@@ -881,25 +1302,29 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode Rename(
-            string zNew /* in */
+            SQLiteVirtualTable table, /* in */
+            string newName            /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode Savepoint(
-            int iSavepoint /* in */
+            SQLiteVirtualTable table, /* in */
+            int savepoint             /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode Release(
-            int iSavepoint /* in */
+            SQLiteVirtualTable table, /* in */
+            int savepoint             /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         SQLiteErrorCode RollbackTo(
-            int iSavepoint /* in */
+            SQLiteVirtualTable table, /* in */
+            int savepoint             /* in */
             );
     }
     #endregion
@@ -1319,16 +1744,16 @@ namespace System.Data.SQLite
 
             offset += IntPtr.Size;
 
-            index.Outputs.IdxNum = ReadInt32(pIndex, offset);
+            index.Outputs.IndexNumber = ReadInt32(pIndex, offset);
 
             offset += sizeof(int);
 
-            index.Outputs.IdxStr = StringFromUtf8IntPtr(IntPtrForOffset(
+            index.Outputs.IndexString = StringFromUtf8IntPtr(IntPtrForOffset(
                 pIndex, offset));
 
             offset += IntPtr.Size;
 
-            index.Outputs.NeedToFreeIdxStr = ReadInt32(pIndex, offset);
+            index.Outputs.NeedToFreeIndexString = ReadInt32(pIndex, offset);
 
             offset += sizeof(int);
 
@@ -1420,8 +1845,6 @@ namespace System.Data.SQLite
 
             int nOrderBy = ReadInt32(pIndex, offset);
 
-            index = new SQLiteIndex(nConstraint, nOrderBy);
-
             offset += sizeof(int);
 
             IntPtr pOrderBy = ReadIntPtr(pIndex, offset);
@@ -1488,11 +1911,20 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteModuleBase Class
+    /* NOT SEALED */
     public abstract class SQLiteModuleBase :
-            ISQLiteManagedModule, ISQLiteNativeModule,  IDisposable
+            ISQLiteManagedModule, ISQLiteNativeModule, IDisposable
     {
+        #region Private Constants
+        private const double DefaultCost = double.MaxValue;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Private Data
         private UnsafeNativeMethods.sqlite3_module nativeModule;
+        private Dictionary<IntPtr, SQLiteVirtualTable> tables;
+        private Dictionary<IntPtr, SQLiteVirtualTableCursor> cursors;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -1544,13 +1976,19 @@ namespace System.Data.SQLite
         #region Public Constructors
         public SQLiteModuleBase(string name)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
             this.name = name;
+            this.tables = new Dictionary<IntPtr, SQLiteVirtualTable>();
+            this.cursors = new Dictionary<IntPtr, SQLiteVirtualTableCursor>();
         }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region Protected Members
+        #region Native Table Helper Methods
         protected virtual IntPtr AllocateTable()
         {
             int size = Marshal.SizeOf(typeof(
@@ -1561,13 +1999,35 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual void FreeTable(IntPtr pVtab)
+        protected virtual void ZeroTable(IntPtr pVtab)
         {
-            SQLiteMarshal.Free(pVtab);
+            if (pVtab == IntPtr.Zero)
+                return;
+
+            int offset = 0;
+
+            SQLiteMarshal.WriteIntPtr(pVtab, offset, IntPtr.Zero);
+
+            offset += IntPtr.Size;
+
+            SQLiteMarshal.WriteInt32(pVtab, offset, 0);
+
+            offset += sizeof(int);
+
+            SQLiteMarshal.WriteIntPtr(pVtab, offset, IntPtr.Zero);
         }
 
         ///////////////////////////////////////////////////////////////////////
 
+        protected virtual void FreeTable(IntPtr pVtab)
+        {
+            SQLiteMarshal.Free(pVtab);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Native Cursor Helper Methods
         protected virtual IntPtr AllocateCursor()
         {
             int size = Marshal.SizeOf(typeof(
@@ -1578,7 +2038,16 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual IntPtr GetTableFromCursor(
+        protected virtual void FreeCursor(IntPtr pCursor)
+        {
+            SQLiteMarshal.Free(pCursor);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Table Lookup Methods
+        protected virtual IntPtr TableFromCursor(
             IntPtr pCursor
             )
         {
@@ -1590,59 +2059,134 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual SQLiteVirtualTableCursor MarshalCursorFromIntPtr(
-            IntPtr pCursor
+        protected virtual SQLiteVirtualTable TableFromIntPtr(
+            IntPtr pVtab
             )
         {
-            if (pCursor == IntPtr.Zero)
+            if (pVtab == IntPtr.Zero)
+            {
+                SetTableError(pVtab, "invalid native table");
                 return null;
+            }
 
-            SQLiteVirtualTableCursor result =
-                new SQLiteVirtualTableCursor(pCursor);
+            SQLiteVirtualTable table;
 
-            return result;
+            if ((tables != null) &&
+                tables.TryGetValue(pVtab, out table))
+            {
+                return table;
+            }
+
+            SetTableError(pVtab, String.Format(
+                "managed table for {0} not found", pVtab));
+
+            return null;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual IntPtr MarshalCursorToIntPtr(
-            SQLiteVirtualTableCursor cursor
+        protected virtual IntPtr TableToIntPtr(
+            SQLiteVirtualTable table
             )
         {
-            if (cursor == null)
+            if ((table == null) || (tables == null))
                 return IntPtr.Zero;
 
-            IntPtr result = IntPtr.Zero;
+            IntPtr pVtab = IntPtr.Zero;
             bool success = false;
 
             try
             {
-                result = AllocateCursor();
+                pVtab = AllocateTable();
 
-                if (result != IntPtr.Zero)
+                if (pVtab != IntPtr.Zero)
+                {
+                    ZeroTable(pVtab);
+                    table.NativeHandle = pVtab;
+                    tables.Add(pVtab, table);
                     success = true;
+                }
             }
             finally
             {
-                if (!success && (result != IntPtr.Zero))
+                if (!success && (pVtab != IntPtr.Zero))
                 {
-                    FreeCursor(result);
-                    result = IntPtr.Zero;
+                    FreeTable(pVtab);
+                    pVtab = IntPtr.Zero;
                 }
             }
 
-            return result;
+            return pVtab;
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual void FreeCursor(IntPtr pCursor)
+        #region Cursor Lookup Methods
+        protected virtual SQLiteVirtualTableCursor CursorFromIntPtr(
+            IntPtr pVtab,
+            IntPtr pCursor
+            )
         {
-            SQLiteMarshal.Free(pCursor);
+            if (pCursor == IntPtr.Zero)
+            {
+                SetTableError(pVtab, "invalid native cursor");
+                return null;
+            }
+
+            SQLiteVirtualTableCursor cursor;
+
+            if ((cursors != null) &&
+                cursors.TryGetValue(pCursor, out cursor))
+            {
+                return cursor;
+            }
+
+            SetTableError(pVtab, String.Format(
+                "managed cursor for {0} not found", pCursor));
+
+            return null;
         }
 
         ///////////////////////////////////////////////////////////////////////
 
+        protected virtual IntPtr CursorToIntPtr(
+            SQLiteVirtualTableCursor cursor
+            )
+        {
+            if ((cursor == null) || (cursors == null))
+                return IntPtr.Zero;
+
+            IntPtr pCursor = IntPtr.Zero;
+            bool success = false;
+
+            try
+            {
+                pCursor = AllocateCursor();
+
+                if (pCursor != IntPtr.Zero)
+                {
+                    cursor.NativeHandle = pCursor;
+                    cursors.Add(pCursor, cursor);
+                    success = true;
+                }
+            }
+            finally
+            {
+                if (!success && (pCursor != IntPtr.Zero))
+                {
+                    FreeCursor(pCursor);
+                    pCursor = IntPtr.Zero;
+                }
+            }
+
+            return pCursor;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Table Declaration Helper Methods
         protected virtual SQLiteErrorCode DeclareTable(
             SQLiteConnection connection,
             string sql,
@@ -1665,9 +2209,11 @@ namespace System.Data.SQLite
 
             return sqliteBase.DeclareVirtualTable(this, sql, ref error);
         }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Error Handling Helper Methods
         protected virtual bool SetTableError(
             IntPtr pVtab,
             string error
@@ -1676,9 +2222,7 @@ namespace System.Data.SQLite
             if (pVtab == IntPtr.Zero)
                 return false;
 
-            int offset = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_module)) + sizeof(int);
-
+            int offset = IntPtr.Size + sizeof(int);
             IntPtr pError = SQLiteMarshal.ReadIntPtr(pVtab, offset);
 
             if (pError != IntPtr.Zero)
@@ -1687,11 +2231,64 @@ namespace System.Data.SQLite
                 SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
             }
 
-            SQLiteMarshal.WriteIntPtr(pVtab, offset,
-                SQLiteMarshal.Utf8IntPtrFromString(error));
+            bool success = false;
 
+            try
+            {
+                pError = SQLiteMarshal.Utf8IntPtrFromString(error);
+                SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
+                success = true;
+            }
+            finally
+            {
+                if (!success && (pError != IntPtr.Zero))
+                {
+                    SQLiteMarshal.Free(pError);
+                    pError = IntPtr.Zero;
+                }
+            }
+
+            return success;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual bool SetCursorError(
+            SQLiteVirtualTableCursor cursor,
+            string error
+            )
+        {
+            if (cursor == null)
+                return false;
+
+            IntPtr pCursor = cursor.NativeHandle;
+
+            if (pCursor == IntPtr.Zero)
+                return false;
+
+            IntPtr pVtab = TableFromCursor(pCursor);
+
+            if (pVtab == IntPtr.Zero)
+                return false;
+
+            return SetTableError(pVtab, error);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Index Handling Helper Methods
+        protected virtual bool SetDefaultEstimatedCost(
+            SQLiteIndex index
+            )
+        {
+            if ((index == null) || (index.Outputs == null))
+                return false;
+
+            index.Outputs.EstimatedCost = DefaultCost;
             return true;
         }
+        #endregion
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -1714,14 +2311,23 @@ namespace System.Data.SQLite
                 using (SQLiteConnection connection = new SQLiteConnection(
                         pDb, fileName, false))
                 {
+                    SQLiteVirtualTable table = null;
                     string error = null;
 
                     if (Create(connection, pAux,
                             SQLiteMarshal.StringArrayFromUtf8IntPtrArray(argv),
-                            ref error) == SQLiteErrorCode.Ok)
+                            ref table, ref error) == SQLiteErrorCode.Ok)
                     {
-                        pVtab = AllocateTable();
-                        return SQLiteErrorCode.Ok;
+                        if (table != null)
+                        {
+                            pVtab = TableToIntPtr(table);
+                            return SQLiteErrorCode.Ok;
+                        }
+                        else
+                        {
+                            pError = SQLiteMarshal.Utf8IntPtrFromString(
+                                "no table was created");
+                        }
                     }
                     else
                     {
@@ -1756,14 +2362,23 @@ namespace System.Data.SQLite
                 using (SQLiteConnection connection = new SQLiteConnection(
                         pDb, fileName, false))
                 {
+                    SQLiteVirtualTable table = null;
                     string error = null;
 
                     if (Connect(connection, pAux,
                             SQLiteMarshal.StringArrayFromUtf8IntPtrArray(argv),
-                            ref error) == SQLiteErrorCode.Ok)
+                            ref table, ref error) == SQLiteErrorCode.Ok)
                     {
-                        pVtab = AllocateTable();
-                        return SQLiteErrorCode.Ok;
+                        if (table != null)
+                        {
+                            pVtab = TableToIntPtr(table);
+                            return SQLiteErrorCode.Ok;
+                        }
+                        else
+                        {
+                            pError = SQLiteMarshal.Utf8IntPtrFromString(
+                                "no table was created");
+                        }
                     }
                     else
                     {
@@ -1788,14 +2403,19 @@ namespace System.Data.SQLite
         {
             try
             {
-                SQLiteIndex index = null;
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
 
-                SQLiteMarshal.IndexFromIntPtr(pIndex, ref index);
-
-                if (BestIndex(index) == SQLiteErrorCode.Ok)
+                if (table != null)
                 {
-                    SQLiteMarshal.IndexToIntPtr(index, pIndex);
-                    return SQLiteErrorCode.Ok;
+                    SQLiteIndex index = null;
+
+                    SQLiteMarshal.IndexFromIntPtr(pIndex, ref index);
+
+                    if (BestIndex(table, index) == SQLiteErrorCode.Ok)
+                    {
+                        SQLiteMarshal.IndexToIntPtr(index, pIndex);
+                        return SQLiteErrorCode.Ok;
+                    }
                 }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
@@ -1814,8 +2434,18 @@ namespace System.Data.SQLite
         {
             try
             {
-                if (Disconnect() == SQLiteErrorCode.Ok)
-                    return SQLiteErrorCode.Ok;
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                {
+                    if (Disconnect(table) == SQLiteErrorCode.Ok)
+                    {
+                        if (tables != null)
+                            tables.Remove(pVtab);
+
+                        return SQLiteErrorCode.Ok;
+                    }
+                }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -1852,8 +2482,18 @@ namespace System.Data.SQLite
         {
             try
             {
-                if (Destroy() == SQLiteErrorCode.Ok)
-                    return SQLiteErrorCode.Ok;
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                {
+                    if (Destroy(table) == SQLiteErrorCode.Ok)
+                    {
+                        if (tables != null)
+                            tables.Remove(pVtab);
+
+                        return SQLiteErrorCode.Ok;
+                    }
+                }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -1891,28 +2531,39 @@ namespace System.Data.SQLite
         {
             try
             {
-                SQLiteVirtualTableCursor cursor = null;
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
 
-                if (Open(ref cursor) == SQLiteErrorCode.Ok)
+                if (table != null)
                 {
-                    if (cursor != null)
+                    SQLiteVirtualTableCursor cursor = null;
+
+                    if (Open(table, ref cursor) == SQLiteErrorCode.Ok)
                     {
-                        pCursor = MarshalCursorToIntPtr(cursor);
-                        return SQLiteErrorCode.Ok;
-                    }
-                    else
-                    {
-                        SetTableError(pVtab, "no cursor was created");
+                        if (cursor != null)
+                        {
+                            pCursor = CursorToIntPtr(cursor);
+
+                            if (pCursor != IntPtr.Zero)
+                            {
+                                return SQLiteErrorCode.Ok;
+                            }
+                            else
+                            {
+                                SetTableError(pVtab,
+                                    "no native cursor was created");
+                            }
+                        }
+                        else
+                        {
+                            SetTableError(pVtab,
+                                "no managed cursor was created");
+                        }
                     }
                 }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
                 SetTableError(pVtab, e.ToString());
-            }
-            finally
-            {
-                FreeCursor(pCursor);
             }
 
             return SQLiteErrorCode.Error;
@@ -1928,13 +2579,21 @@ namespace System.Data.SQLite
 
             try
             {
-                pVtab = GetTableFromCursor(pCursor);
+                pVtab = TableFromCursor(pCursor);
 
-                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
-                    pCursor);
+                SQLiteVirtualTableCursor cursor = CursorFromIntPtr(
+                    pVtab, pCursor);
 
-                if (Close(cursor) == SQLiteErrorCode.Ok)
-                    return SQLiteErrorCode.Ok;
+                if (cursor != null)
+                {
+                    if (Close(cursor) == SQLiteErrorCode.Ok)
+                    {
+                        if (cursors != null)
+                            cursors.Remove(pCursor);
+
+                        return SQLiteErrorCode.Ok;
+                    }
+                }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -1962,16 +2621,20 @@ namespace System.Data.SQLite
 
             try
             {
-                pVtab = GetTableFromCursor(pCursor);
+                pVtab = TableFromCursor(pCursor);
 
-                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
-                    pCursor);
+                SQLiteVirtualTableCursor cursor = CursorFromIntPtr(
+                    pVtab, pCursor);
 
-                if (Filter(
-                        cursor, idxNum, SQLiteMarshal.StringFromUtf8IntPtr(idxStr),
-                        SQLiteMarshal.ValueArrayFromIntPtrArray(argv)) == SQLiteErrorCode.Ok)
+                if (cursor != null)
                 {
-                    return SQLiteErrorCode.Ok;
+                    if (Filter(cursor, idxNum,
+                            SQLiteMarshal.StringFromUtf8IntPtr(idxStr),
+                            SQLiteMarshal.ValueArrayFromIntPtrArray(
+                                argv)) == SQLiteErrorCode.Ok)
+                    {
+                        return SQLiteErrorCode.Ok;
+                    }
                 }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
@@ -1992,13 +2655,16 @@ namespace System.Data.SQLite
 
             try
             {
-                pVtab = GetTableFromCursor(pCursor);
+                pVtab = TableFromCursor(pCursor);
 
-                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
-                    pCursor);
+                SQLiteVirtualTableCursor cursor = CursorFromIntPtr(
+                    pVtab, pCursor);
 
-                if (Next(cursor) == SQLiteErrorCode.Ok)
-                    return SQLiteErrorCode.Ok;
+                if (cursor != null)
+                {
+                    if (Next(cursor) == SQLiteErrorCode.Ok)
+                        return SQLiteErrorCode.Ok;
+                }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2018,12 +2684,13 @@ namespace System.Data.SQLite
 
             try
             {
-                pVtab = GetTableFromCursor(pCursor);
+                pVtab = TableFromCursor(pCursor);
 
-                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
-                    pCursor);
+                SQLiteVirtualTableCursor cursor = CursorFromIntPtr(
+                    pVtab, pCursor);
 
-                return Eof(cursor) ? 1 : 0;
+                if (cursor != null)
+                    return Eof(cursor) ? 1 : 0;
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2045,14 +2712,17 @@ namespace System.Data.SQLite
 
             try
             {
-                pVtab = GetTableFromCursor(pCursor);
+                pVtab = TableFromCursor(pCursor);
 
-                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
-                    pCursor);
+                SQLiteVirtualTableCursor cursor = CursorFromIntPtr(
+                    pVtab, pCursor);
 
-                SQLiteContext context = new SQLiteContext(pContext);
+                if (cursor != null)
+                {
+                    SQLiteContext context = new SQLiteContext(pContext);
 
-                return Column(cursor, context, index);
+                    return Column(cursor, context, index);
+                }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2073,12 +2743,13 @@ namespace System.Data.SQLite
 
             try
             {
-                pVtab = GetTableFromCursor(pCursor);
+                pVtab = TableFromCursor(pCursor);
 
-                SQLiteVirtualTableCursor cursor = MarshalCursorFromIntPtr(
-                    pCursor);
+                SQLiteVirtualTableCursor cursor = CursorFromIntPtr(
+                    pVtab, pCursor);
 
-                return RowId(cursor, ref rowId);
+                if (cursor != null)
+                    return RowId(cursor, ref rowId);
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2099,10 +2770,16 @@ namespace System.Data.SQLite
         {
             try
             {
-                SQLiteValue[] values = SQLiteMarshal.ValueArrayFromSizeAndIntPtr(
-                    nData, apData);
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
 
-                return Update(values, ref rowId);
+                if (table != null)
+                {
+                    SQLiteValue[] values =
+                        SQLiteMarshal.ValueArrayFromSizeAndIntPtr(
+                            nData, apData);
+
+                    return Update(table, values, ref rowId);
+                }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2120,7 +2797,10 @@ namespace System.Data.SQLite
         {
             try
             {
-                return Begin();
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                    return Begin(table);
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2138,7 +2818,10 @@ namespace System.Data.SQLite
         {
             try
             {
-                return Sync();
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                    return Sync(table);
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2156,7 +2839,10 @@ namespace System.Data.SQLite
         {
             try
             {
-                return Commit();
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                    return Commit(table);
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2174,7 +2860,10 @@ namespace System.Data.SQLite
         {
             try
             {
-                return Rollback();
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                    return Rollback(table);
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2196,20 +2885,26 @@ namespace System.Data.SQLite
         {
             try
             {
-                SQLiteFunction function = null;
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
 
-                if (FindFunction(
-                        nArg, SQLiteMarshal.StringFromUtf8IntPtr(zName),
-                        ref function, ref pClientData))
+                if (table != null)
                 {
-                    if (function != null)
+                    SQLiteFunction function = null;
+
+                    if (FindFunction(
+                            table, nArg,
+                            SQLiteMarshal.StringFromUtf8IntPtr(zName),
+                            ref function, ref pClientData))
                     {
-                        callback = function.ScalarCallback;
-                        return 1;
-                    }
-                    else
-                    {
-                        SetTableError(pVtab, "no function was created");
+                        if (function != null)
+                        {
+                            callback = function.ScalarCallback;
+                            return 1;
+                        }
+                        else
+                        {
+                            SetTableError(pVtab, "no function was created");
+                        }
                     }
                 }
             }
@@ -2230,7 +2925,13 @@ namespace System.Data.SQLite
         {
             try
             {
-                return Rename(SQLiteMarshal.StringFromUtf8IntPtr(zNew));
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                {
+                    return Rename(table,
+                        SQLiteMarshal.StringFromUtf8IntPtr(zNew));
+                }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2249,7 +2950,10 @@ namespace System.Data.SQLite
         {
             try
             {
-                return Savepoint(iSavepoint);
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                    return Savepoint(table, iSavepoint);
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2268,7 +2972,10 @@ namespace System.Data.SQLite
         {
             try
             {
-                return Release(iSavepoint);
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                    return Release(table, iSavepoint);
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2287,7 +2994,10 @@ namespace System.Data.SQLite
         {
             try
             {
-                return RollbackTo(iSavepoint);
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                    return RollbackTo(table, iSavepoint);
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
             {
@@ -2321,7 +3031,8 @@ namespace System.Data.SQLite
         public abstract SQLiteErrorCode Create(
             SQLiteConnection connection,
             IntPtr pClientData,
-            string[] argv,
+            string[] arguments,
+            ref SQLiteVirtualTable table,
             ref string error
             );
 
@@ -2330,27 +3041,34 @@ namespace System.Data.SQLite
         public abstract SQLiteErrorCode Connect(
             SQLiteConnection connection,
             IntPtr pClientData,
-            string[] argv,
+            string[] arguments,
+            ref SQLiteVirtualTable table,
             ref string error
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode BestIndex(
+            SQLiteVirtualTable table,
             SQLiteIndex index
             );
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Disconnect();
+        public abstract SQLiteErrorCode Disconnect(
+            SQLiteVirtualTable table
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Destroy();
+        public abstract SQLiteErrorCode Destroy(
+            SQLiteVirtualTable table
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode Open(
+            SQLiteVirtualTable table,
             ref SQLiteVirtualTableCursor cursor
             );
 
@@ -2364,8 +3082,8 @@ namespace System.Data.SQLite
 
         public abstract SQLiteErrorCode Filter(
             SQLiteVirtualTableCursor cursor,
-            int idxNum,
-            string idxStr,
+            int indexNumber,
+            string indexString,
             SQLiteValue[] values
             );
 
@@ -2399,31 +3117,41 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode Update(
+            SQLiteVirtualTable table,
             SQLiteValue[] values,
             ref long rowId
             );
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Begin();
+        public abstract SQLiteErrorCode Begin(
+            SQLiteVirtualTable table
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Sync();
+        public abstract SQLiteErrorCode Sync(
+            SQLiteVirtualTable table
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Commit();
+        public abstract SQLiteErrorCode Commit(
+            SQLiteVirtualTable table
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
-        public abstract SQLiteErrorCode Rollback();
+        public abstract SQLiteErrorCode Rollback(
+            SQLiteVirtualTable table
+            );
 
         ///////////////////////////////////////////////////////////////////////
 
         public abstract bool FindFunction(
-            int nArg,
-            string zName,
+            SQLiteVirtualTable table,
+            int argumentCount,
+            string name,
             ref SQLiteFunction function,
             ref IntPtr pClientData
             );
@@ -2431,25 +3159,29 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode Rename(
-            string zNew
+            SQLiteVirtualTable table,
+            string newName
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode Savepoint(
-            int iSavepoint
+            SQLiteVirtualTable table,
+            int savepoint
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode Release(
-            int iSavepoint
+            SQLiteVirtualTable table,
+            int savepoint
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         public abstract SQLiteErrorCode RollbackTo(
-            int iSavepoint
+            SQLiteVirtualTable table,
+            int savepoint
             );
         #endregion
 

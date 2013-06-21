@@ -1199,7 +1199,7 @@ namespace System.Data.SQLite
     /// </summary>
     DateTime = 10,
     /// <summary>
-    /// Used internally
+    /// Used internally by this provider
     /// </summary>
     None = 11,
   }

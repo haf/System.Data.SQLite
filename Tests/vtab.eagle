@@ -27,7 +27,7 @@ runTest {test vtab-1.1 {virtual table support} -setup {
   set dataSource [file join [getDatabaseDirectory] $fileName]
 
   set sql { \
-    CREATE VIRTUAL TABLE t${id} USING vt${id}; \
+    CREATE VIRTUAL TABLE t${id} USING mod${id}; \
   }
 
   unset -nocomplain results errors
@@ -51,7 +51,8 @@ runTest {test vtab-1.1 {virtual table support} -setup {
         public override SQLiteErrorCode Create(
           SQLiteConnection connection,
           IntPtr pClientData,
-          string\[\] argv,
+          string\[\] arguments,
+          ref SQLiteVirtualTable table,
           ref string error
           )
         {
@@ -61,7 +62,8 @@ runTest {test vtab-1.1 {virtual table support} -setup {
           if (rc != SQLiteErrorCode.Ok)
             return rc;
 
-          return base.Create(connection, pClientData, argv, ref error);
+          table = new SQLiteVirtualTable(arguments);
+          return SQLiteErrorCode.Ok;
         }
       }
 
@@ -75,7 +77,7 @@ runTest {test vtab-1.1 {virtual table support} -setup {
               "Data Source=${dataSource};"))
           {
             connection.Open();
-            connection.CreateModule(new SQLiteModuleTest${id}("vt${id}"));
+            connection.CreateModule(new SQLiteModuleTest${id}("mod${id}"));
 
             using (SQLiteCommand command = connection.CreateCommand())
             {
@@ -99,9 +101,116 @@ runTest {test vtab-1.1 {virtual table support} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors sql dataSource id db fileName
-} -constraints [fixConstraints {eagle monoBug28 command.sql compile.DATA SQLite\
-System.Data.SQLite}] -match regexp -result {^Ok\
-System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+
+###############################################################################
+
+runTest {test vtab-1.2 {IEnumerable virtual table} -setup {
+  setupDb [set fileName vtab-1.2.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql(1) { \
+    CREATE VIRTUAL TABLE t${id} USING mod${id}; \
+  }
+
+  set sql(2) { \
+    SELECT * FROM t${id}; \
+  }
+
+  set sql(3) { \
+    UPDATE t${id} SET x = 1; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+    using Eagle._Containers.Public;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static StringList GetList(params string\[\] strings)
+        {
+          StringList result = new StringList();
+
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            connection.CreateModule(new SQLiteModuleEnumerable(
+              "mod${id}", strings));
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(1)}]";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(2)}]";
+
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                while (dataReader.Read())
+                  result.Add(dataReader\[0\].ToString());
+              }
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(3)}]";
+
+              try
+              {
+                command.ExecuteNonQuery();
+              }
+              catch (SQLiteException e)
+              {
+                result.Add(e.ReturnCode.ToString());
+                result.Add(e.Message);
+              }
+            }
+
+            connection.Close();
+          }
+
+          return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors [list System.Data.SQLite.dll Eagle.dll]]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetList one two three 4 5.0
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{one two three 4 5.0 Error\
+\{SQL logic error or missing database
+SQL logic error or missing database\}\}$}]}
 
 ###############################################################################
 

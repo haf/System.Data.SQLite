@@ -1640,15 +1640,30 @@ namespace System.Data.SQLite
             return SQLiteErrorCode.Error;
         }
 
-        SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_declare_vtab(
-            _sql, SQLiteMarshal.Utf8IntPtrFromString(strSql));
+        IntPtr pSql = IntPtr.Zero;
 
-        if ((n == SQLiteErrorCode.Ok) && (module != null))
-            module.Declared = true;
+        try
+        {
+            pSql = SQLiteMarshal.Utf8IntPtrFromString(strSql);
 
-        if (n != SQLiteErrorCode.Ok) error = GetLastError();
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_declare_vtab(
+                _sql, pSql);
 
-        return n;
+            if ((n == SQLiteErrorCode.Ok) && (module != null))
+                module.Declared = true;
+
+            if (n != SQLiteErrorCode.Ok) error = GetLastError();
+
+            return n;
+        }
+        finally
+        {
+            if (pSql != IntPtr.Zero)
+            {
+                SQLiteMarshal.Free(pSql);
+                pSql = IntPtr.Zero;
+            }
+        }
     }
 
     /// <summary>

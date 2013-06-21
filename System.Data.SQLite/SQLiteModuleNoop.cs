@@ -25,7 +25,8 @@ namespace System.Data.SQLite
         public override SQLiteErrorCode Create(
             SQLiteConnection connection,
             IntPtr pClientData,
-            string[] argv,
+            string[] arguments,
+            ref SQLiteVirtualTable table,
             ref string error
             )
         {
@@ -39,7 +40,8 @@ namespace System.Data.SQLite
         public override SQLiteErrorCode Connect(
             SQLiteConnection connection,
             IntPtr pClientData,
-            string[] argv,
+            string[] arguments,
+            ref SQLiteVirtualTable table,
             ref string error
             )
         {
@@ -51,6 +53,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override SQLiteErrorCode BestIndex(
+            SQLiteVirtualTable table,
             SQLiteIndex index
             )
         {
@@ -61,7 +64,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public override SQLiteErrorCode Disconnect()
+        public override SQLiteErrorCode Disconnect(
+            SQLiteVirtualTable table
+            )
         {
             CheckDisposed();
 
@@ -70,7 +75,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public override SQLiteErrorCode Destroy()
+        public override SQLiteErrorCode Destroy(
+            SQLiteVirtualTable table
+            )
         {
             CheckDisposed();
 
@@ -80,6 +87,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override SQLiteErrorCode Open(
+            SQLiteVirtualTable table,
             ref SQLiteVirtualTableCursor cursor
             )
         {
@@ -103,9 +111,9 @@ namespace System.Data.SQLite
 
         public override SQLiteErrorCode Filter(
             SQLiteVirtualTableCursor cursor,
-            int idxNum,
-            string idxStr,
-            SQLiteValue[] argv
+            int indexNumber,
+            string indexString,
+            SQLiteValue[] values
             )
         {
             CheckDisposed();
@@ -163,6 +171,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override SQLiteErrorCode Update(
+            SQLiteVirtualTable table,
             SQLiteValue[] values,
             ref long rowId
             )
@@ -174,7 +183,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public override SQLiteErrorCode Begin()
+        public override SQLiteErrorCode Begin(
+            SQLiteVirtualTable table
+            )
         {
             CheckDisposed();
 
@@ -183,7 +194,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public override SQLiteErrorCode Sync()
+        public override SQLiteErrorCode Sync(
+            SQLiteVirtualTable table
+            )
         {
             CheckDisposed();
 
@@ -192,7 +205,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public override SQLiteErrorCode Commit()
+        public override SQLiteErrorCode Commit(
+            SQLiteVirtualTable table
+            )
         {
             CheckDisposed();
 
@@ -201,7 +216,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public override SQLiteErrorCode Rollback()
+        public override SQLiteErrorCode Rollback(
+            SQLiteVirtualTable table
+            )
         {
             CheckDisposed();
 
@@ -211,8 +228,9 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override bool FindFunction(
-            int nArg,
-            string zName,
+            SQLiteVirtualTable table,
+            int argumentCount,
+            string name,
             ref SQLiteFunction function,
             ref IntPtr pClientData
             )
@@ -225,7 +243,8 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override SQLiteErrorCode Rename(
-            string zNew
+            SQLiteVirtualTable table,
+            string newName
             )
         {
             CheckDisposed();
@@ -236,7 +255,8 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override SQLiteErrorCode Savepoint(
-            int iSavepoint
+            SQLiteVirtualTable table,
+            int savepoint
             )
         {
             CheckDisposed();
@@ -247,7 +267,8 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override SQLiteErrorCode Release(
-            int iSavepoint
+            SQLiteVirtualTable table,
+            int savepoint
             )
         {
             CheckDisposed();
@@ -258,7 +279,8 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         public override SQLiteErrorCode RollbackTo(
-            int iSavepoint
+            SQLiteVirtualTable table,
+            int savepoint
             )
         {
             CheckDisposed();
@@ -275,7 +297,10 @@ namespace System.Data.SQLite
         {
 #if THROW_ON_DISPOSED
             if (disposed)
-                throw new ObjectDisposedException(typeof(SQLiteModuleNoop).Name);
+            {
+                throw new ObjectDisposedException(typeof(
+                    SQLiteModuleNoop).Name);
+            }
 #endif
         }
 
