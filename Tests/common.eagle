@@ -1478,13 +1478,13 @@ namespace eval ::Eagle {
       # NOTE: Skip all output if we are running in "quiet" mode.
       #
       if {[haveConstraint \
-              defineConstant.System.Data.SQLite.TRACK_MARSHAL_BYTES]} then {
+              defineConstant.System.Data.SQLite.TRACK_MEMORY_BYTES]} then {
         if {!$quiet} then {
-          tputs $channel "---- current memory in use by SQLiteMarshal... "
+          tputs $channel "---- current memory in use by SQLiteMemory... "
         }
 
         if {[catch {object invoke -flags +NonPublic \
-                System.Data.SQLite.SQLiteMarshal \
+                System.Data.SQLite.SQLiteMemory \
                 bytesAllocated} memory] == 0} then {
           if {!$quiet} then {
             tputs $channel [appendArgs $memory " bytes\n"]
@@ -1498,11 +1498,11 @@ namespace eval ::Eagle {
         }
 
         if {!$quiet} then {
-          tputs $channel "---- maximum memory in use by SQLiteMarshal... "
+          tputs $channel "---- maximum memory in use by SQLiteMemory... "
         }
 
         if {[catch {object invoke -flags +NonPublic \
-                System.Data.SQLite.SQLiteMarshal \
+                System.Data.SQLite.SQLiteMemory \
                 maximumBytesAllocated} memory] == 0} then {
           if {!$quiet} then {
             tputs $channel [appendArgs $memory " bytes\n"]
@@ -1955,7 +1955,7 @@ namespace eval ::Eagle {
             PLATFORM_COMPACTFRAMEWORK PRELOAD_NATIVE_LIBRARY RETARGETABLE \
             SQLITE_STANDARD THROW_ON_DISPOSED TRACE TRACE_CONNECTION \
             TRACE_HANDLE TRACE_PRELOAD TRACE_STATEMENT TRACE_WARNING \
-            TRACK_MARSHAL_BYTES USE_INTEROP_DLL USE_PREPARE_V2 WINDOWS] {
+            TRACK_MEMORY_BYTES USE_INTEROP_DLL USE_PREPARE_V2 WINDOWS] {
           #
           # NOTE: Check if the compile-time option is listed in the list of
           #       "define constants" kept track of by the managed assembly.

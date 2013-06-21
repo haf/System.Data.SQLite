@@ -1609,7 +1609,7 @@ namespace System.Data.SQLite
         {
             if (pName != IntPtr.Zero)
             {
-                SQLiteMarshal.Free(pName);
+                SQLiteMemory.Free(pName);
                 pName = IntPtr.Zero;
             }
         }
@@ -1692,7 +1692,7 @@ namespace System.Data.SQLite
         {
             if (pSql != IntPtr.Zero)
             {
-                SQLiteMarshal.Free(pSql);
+                SQLiteMemory.Free(pSql);
                 pSql = IntPtr.Zero;
             }
         }

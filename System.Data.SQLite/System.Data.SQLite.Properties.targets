@@ -78,10 +78,10 @@
   </PropertyGroup>
 
   <!--
-      NOTE: Enable tracking of bytes allocated by the SQLiteMarshal class?
+      NOTE: Enable tracking of bytes allocated by the SQLiteMemory class?
   -->
-  <PropertyGroup Condition="'$(TrackMarshalBytes)' != 'false'">
-    <DefineConstants>$(DefineConstants);TRACK_MARSHAL_BYTES</DefineConstants>
+  <PropertyGroup Condition="'$(TrackMemoryBytes)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACK_MEMORY_BYTES</DefineConstants>
   </PropertyGroup>
 
   <!--

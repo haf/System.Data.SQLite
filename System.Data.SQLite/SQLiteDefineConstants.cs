@@ -112,8 +112,8 @@ namespace System.Data.SQLite
             "TRACE_WARNING",
 #endif
 
-#if TRACK_MARSHAL_BYTES
-            "TRACK_MARSHAL_BYTES",
+#if TRACK_MEMORY_BYTES
+            "TRACK_MEMORY_BYTES",
 #endif
 
 #if USE_INTEROP_DLL

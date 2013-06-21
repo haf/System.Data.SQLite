@@ -200,12 +200,12 @@
 
     <!--
         NOTE: Enable tracking of all outstanding bytes allocated by the
-              SQLiteMarshal class.  By default, this is disabled.  If this is
+              SQLiteMemory class.  By default, this is disabled.  If this is
               enabled, this library will keep track of all outstanding bytes
-              allocated by the SQLiteMarshal class.  This has the potential to
+              allocated by the SQLiteMemory class.  This has the potential to
               slow down the library a bit.
     -->
-    <TrackMarshalBytes Condition="'$(TrackMarshalBytes)' == ''">false</TrackMarshalBytes>
+    <TrackMemoryBytes Condition="'$(TrackMemoryBytes)' == ''">false</TrackMemoryBytes>
 
     <!--
         NOTE: For interaction with the native SQLite implementation, use the

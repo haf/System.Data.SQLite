@@ -10,7 +10,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
-#if TRACK_MARSHAL_BYTES
+#if TRACK_MEMORY_BYTES
 using System.Threading;
 #endif
 
@@ -1343,18 +1343,11 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-    #region SQLiteMarshal Class
-    internal static class SQLiteMarshal
+    #region SQLiteMemory Class
+    internal static class SQLiteMemory
     {
-        #region Private Constants
-        private static int ThirtyBits = 0x3fffffff;
-        private static readonly Encoding Utf8Encoding = Encoding.UTF8;
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
         #region Private Data
-#if TRACK_MARSHAL_BYTES
+#if TRACK_MEMORY_BYTES
         private static int bytesAllocated;
         private static int maximumBytesAllocated;
 #endif
@@ -1362,119 +1355,12 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region IntPtr Helper Methods
-        internal static IntPtr IntPtrForOffset(
-            IntPtr pointer,
-            int offset
-            )
-        {
-            return new IntPtr(pointer.ToInt64() + offset);
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region Marshal Read Helper Methods
-        internal static int ReadInt32(
-            IntPtr pointer,
-            int offset
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            return Marshal.ReadInt32(pointer, offset);
-#else
-            return Marshal.ReadInt32(IntPtrForOffset(pointer, offset));
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        internal static double ReadDouble(
-            IntPtr pointer,
-            int offset
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            return BitConverter.Int64BitsToDouble(Marshal.ReadInt64(
-                pointer, offset));
-#else
-            return BitConverter.ToDouble(BitConverter.GetBytes(
-                Marshal.ReadInt64(IntPtrForOffset(pointer, offset))), 0);
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        internal static IntPtr ReadIntPtr(
-            IntPtr pointer,
-            int offset
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            return Marshal.ReadIntPtr(pointer, offset);
-#else
-            return Marshal.ReadIntPtr(IntPtrForOffset(pointer, offset));
-#endif
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region Marshal Write Helper Methods
-        internal static void WriteInt32(
-            IntPtr pointer,
-            int offset,
-            int value
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            Marshal.WriteInt32(pointer, offset, value);
-#else
-            Marshal.WriteInt32(IntPtrForOffset(pointer, offset), value);
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        internal static void WriteDouble(
-            IntPtr pointer,
-            int offset,
-            double value
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            Marshal.WriteInt64(pointer, offset,
-                BitConverter.DoubleToInt64Bits(value));
-#else
-            Marshal.WriteInt64(IntPtrForOffset(pointer, offset),
-                BitConverter.ToInt64(BitConverter.GetBytes(value), 0));
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        internal static void WriteIntPtr(
-            IntPtr pointer,
-            int offset,
-            IntPtr value
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            Marshal.WriteIntPtr(pointer, offset, value);
-#else
-            Marshal.WriteIntPtr(IntPtrForOffset(pointer, offset), value);
-#endif
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
         #region Memory Allocation Helper Methods
-        internal static IntPtr Allocate(int size)
+        public static IntPtr Allocate(int size)
         {
             IntPtr pMemory = UnsafeNativeMethods.sqlite3_malloc(size);
 
-#if TRACK_MARSHAL_BYTES
+#if TRACK_MEMORY_BYTES
             if (pMemory != IntPtr.Zero)
             {
                 int blockSize = Size(pMemory);
@@ -1492,28 +1378,20 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static int Size(IntPtr pMemory)
+        public static int Size(IntPtr pMemory)
         {
 #if !SQLITE_STANDARD
-            try
-            {
-                return UnsafeNativeMethods.sqlite3_malloc_size_interop(
-                    pMemory);
-            }
-            catch
-            {
-                // do nothing.
-            }
-#endif
-
+            return UnsafeNativeMethods.sqlite3_malloc_size_interop(pMemory);
+#else
             return 0;
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static void Free(IntPtr pMemory)
+        public static void Free(IntPtr pMemory)
         {
-#if TRACK_MARSHAL_BYTES
+#if TRACK_MEMORY_BYTES
             if (pMemory != IntPtr.Zero)
             {
                 int blockSize = Size(pMemory);
@@ -1526,11 +1404,130 @@ namespace System.Data.SQLite
             UnsafeNativeMethods.sqlite3_free(pMemory);
         }
         #endregion
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region SQLiteMarshal Class
+    internal static class SQLiteMarshal
+    {
+        #region Private Constants
+        private static int ThirtyBits = 0x3fffffff;
+        private static readonly Encoding Utf8Encoding = Encoding.UTF8;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region IntPtr Helper Methods
+        public static IntPtr IntPtrForOffset(
+            IntPtr pointer,
+            int offset
+            )
+        {
+            return new IntPtr(pointer.ToInt64() + offset);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Marshal Read Helper Methods
+        public static int ReadInt32(
+            IntPtr pointer,
+            int offset
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            return Marshal.ReadInt32(pointer, offset);
+#else
+            return Marshal.ReadInt32(IntPtrForOffset(pointer, offset));
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static double ReadDouble(
+            IntPtr pointer,
+            int offset
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            return BitConverter.Int64BitsToDouble(Marshal.ReadInt64(
+                pointer, offset));
+#else
+            return BitConverter.ToDouble(BitConverter.GetBytes(
+                Marshal.ReadInt64(IntPtrForOffset(pointer, offset))), 0);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static IntPtr ReadIntPtr(
+            IntPtr pointer,
+            int offset
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            return Marshal.ReadIntPtr(pointer, offset);
+#else
+            return Marshal.ReadIntPtr(IntPtrForOffset(pointer, offset));
+#endif
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Marshal Write Helper Methods
+        public static void WriteInt32(
+            IntPtr pointer,
+            int offset,
+            int value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteInt32(pointer, offset, value);
+#else
+            Marshal.WriteInt32(IntPtrForOffset(pointer, offset), value);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void WriteDouble(
+            IntPtr pointer,
+            int offset,
+            double value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteInt64(pointer, offset,
+                BitConverter.DoubleToInt64Bits(value));
+#else
+            Marshal.WriteInt64(IntPtrForOffset(pointer, offset),
+                BitConverter.ToInt64(BitConverter.GetBytes(value), 0));
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void WriteIntPtr(
+            IntPtr pointer,
+            int offset,
+            IntPtr value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteIntPtr(pointer, offset, value);
+#else
+            Marshal.WriteIntPtr(IntPtrForOffset(pointer, offset), value);
+#endif
+        }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region Byte Array Helper Methods
-        internal static byte[] BytesFromIntPtr(
+        public static byte[] BytesFromIntPtr(
             IntPtr pValue,
             int length
             )
@@ -1550,7 +1547,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static IntPtr BytesToIntPtr(
+        public static IntPtr BytesToIntPtr(
             byte[] value
             )
         {
@@ -1562,7 +1559,7 @@ namespace System.Data.SQLite
             if (length == 0)
                 return IntPtr.Zero;
 
-            IntPtr result = Allocate(length);
+            IntPtr result = SQLiteMemory.Allocate(length);
 
             if (result == IntPtr.Zero)
                 return IntPtr.Zero;
@@ -1576,7 +1573,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region UTF-8 Encoding Helper Methods
-        internal static byte[] GetUtf8BytesFromString(
+        public static byte[] GetUtf8BytesFromString(
             string value
             )
         {
@@ -1588,7 +1585,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static string GetStringFromUtf8Bytes(
+        public static string GetStringFromUtf8Bytes(
             byte[] bytes
             )
         {
@@ -1606,7 +1603,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region UTF-8 String Helper Methods
-        internal static int ProbeForUtf8ByteLength(
+        public static int ProbeForUtf8ByteLength(
             IntPtr pValue,
             int limit
             )
@@ -1632,7 +1629,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static string StringFromUtf8IntPtr(
+        public static string StringFromUtf8IntPtr(
             IntPtr pValue
             )
         {
@@ -1642,7 +1639,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static string StringFromUtf8IntPtr(
+        public static string StringFromUtf8IntPtr(
             IntPtr pValue,
             int length
             )
@@ -1664,7 +1661,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static IntPtr Utf8IntPtrFromString(
+        public static IntPtr Utf8IntPtrFromString(
             string value
             )
         {
@@ -1679,7 +1676,7 @@ namespace System.Data.SQLite
 
             int length = bytes.Length;
 
-            result = Allocate(length + 1);
+            result = SQLiteMemory.Allocate(length + 1);
 
             if (result == IntPtr.Zero)
                 return IntPtr.Zero;
@@ -1694,7 +1691,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region UTF-8 String Array Helper Methods
-        internal static string[] StringArrayFromUtf8IntPtrArray(
+        public static string[] StringArrayFromUtf8IntPtrArray(
             IntPtr[] pValues
             )
         {
@@ -1711,7 +1708,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static IntPtr[] Utf8IntPtrArrayFromStringArray(
+        public static IntPtr[] Utf8IntPtrArrayFromStringArray(
             string[] values
             )
         {
@@ -1730,7 +1727,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region SQLiteValue Helper Methods
-        internal static SQLiteValue[] ValueArrayFromSizeAndIntPtr(
+        public static SQLiteValue[] ValueArrayFromSizeAndIntPtr(
             int nData,
             IntPtr apData
             )
@@ -1758,7 +1755,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static SQLiteValue[] ValueArrayFromIntPtrArray(
+        public static SQLiteValue[] ValueArrayFromIntPtrArray(
             IntPtr[] values
             )
         {
@@ -1777,7 +1774,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region SQLiteIndex Helper Methods
-        internal static void IndexFromIntPtr(
+        public static void IndexFromIntPtr(
             IntPtr pIndex,
             ref SQLiteIndex index
             )
@@ -1876,7 +1873,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal static void IndexToIntPtr(
+        public static void IndexToIntPtr(
             SQLiteIndex index,
             IntPtr pIndex
             )
@@ -2059,7 +2056,7 @@ namespace System.Data.SQLite
             int size = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_vtab));
 
-            return SQLiteMarshal.Allocate(size);
+            return SQLiteMemory.Allocate(size);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -2087,7 +2084,7 @@ namespace System.Data.SQLite
         protected virtual void FreeTable(IntPtr pVtab)
         {
             SetTableError(pVtab, null);
-            SQLiteMarshal.Free(pVtab);
+            SQLiteMemory.Free(pVtab);
         }
         #endregion
 
@@ -2099,14 +2096,14 @@ namespace System.Data.SQLite
             int size = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_vtab_cursor));
 
-            return SQLiteMarshal.Allocate(size);
+            return SQLiteMemory.Allocate(size);
         }
 
         ///////////////////////////////////////////////////////////////////////
 
         protected virtual void FreeCursor(IntPtr pCursor)
         {
-            SQLiteMarshal.Free(pCursor);
+            SQLiteMemory.Free(pCursor);
         }
         #endregion
 
@@ -2293,7 +2290,7 @@ namespace System.Data.SQLite
 
             if (pError != IntPtr.Zero)
             {
-                SQLiteMarshal.Free(pError); pError = IntPtr.Zero;
+                SQLiteMemory.Free(pError); pError = IntPtr.Zero;
                 SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
             }
 
@@ -2312,7 +2309,7 @@ namespace System.Data.SQLite
             {
                 if (!success && (pError != IntPtr.Zero))
                 {
-                    SQLiteMarshal.Free(pError);
+                    SQLiteMemory.Free(pError);
                     pError = IntPtr.Zero;
                 }
             }
