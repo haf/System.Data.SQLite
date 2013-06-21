@@ -2020,13 +2020,6 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Internal Methods
-        internal UnsafeNativeMethods.sqlite3_module GetNativeModule()
-        {
-            return nativeModule;
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
         internal UnsafeNativeMethods.sqlite3_module CreateNativeModule()
         {
             return CreateNativeModule(CreateNativeModuleImpl());
