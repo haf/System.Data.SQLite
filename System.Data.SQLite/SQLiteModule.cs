@@ -10,10 +10,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
-#if TRACK_MEMORY_BYTES
-using System.Threading;
-#endif
-
 namespace System.Data.SQLite
 {
     #region SQLiteContext Helper Class
@@ -1348,9 +1344,7 @@ namespace System.Data.SQLite
     {
         #region Private Data
 #if TRACK_MEMORY_BYTES
-#if PLATFORM_COMPACTFRAMEWORK
         private static object syncRoot = new object();
-#endif
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -1373,16 +1367,13 @@ namespace System.Data.SQLite
 
                 if (blockSize > 0)
                 {
-#if !PLATFORM_COMPACTFRAMEWORK
-                    Interlocked.Add(ref bytesAllocated, blockSize);
-                    Interlocked.Add(ref maximumBytesAllocated, blockSize);
-#else
                     lock (syncRoot)
                     {
                         bytesAllocated += blockSize;
-                        maximumBytesAllocated += blockSize;
+
+                        if (bytesAllocated > maximumBytesAllocated)
+                            maximumBytesAllocated = bytesAllocated;
                     }
-#endif
                 }
             }
 #endif
@@ -1412,14 +1403,10 @@ namespace System.Data.SQLite
 
                 if (blockSize > 0)
                 {
-#if !PLATFORM_COMPACTFRAMEWORK
-                    Interlocked.Add(ref bytesAllocated, -blockSize);
-#else
                     lock (syncRoot)
                     {
                         bytesAllocated -= blockSize;
                     }
-#endif
                 }
             }
 #endif
