@@ -2307,6 +2307,17 @@ namespace System.Data.SQLite
             string error
             )
         {
+            try
+            {
+                SQLiteLog.LogMessage(SQLiteErrorCode.Error,
+                    String.Format(CultureInfo.CurrentCulture,
+                    "Virtual table error: {0}", error)); /* throw */
+            }
+            catch
+            {
+                // do nothing.
+            }
+
             if (pVtab == IntPtr.Zero)
                 return false;
 
