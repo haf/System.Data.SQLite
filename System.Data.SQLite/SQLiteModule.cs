@@ -2002,7 +2002,7 @@ namespace System.Data.SQLite
 
     #region SQLiteModule Base Class
     /* NOT SEALED */
-    public abstract class SQLiteModuleBase :
+    public abstract class SQLiteModule :
             ISQLiteManagedModule, /*ISQLiteNativeModule,*/ IDisposable
     {
         #region Private Constants
@@ -2036,7 +2036,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Public Constructors
-        public SQLiteModuleBase(string name)
+        public SQLiteModule(string name)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -3486,7 +3486,7 @@ namespace System.Data.SQLite
             if (disposed)
             {
                 throw new ObjectDisposedException(
-                    typeof(SQLiteModuleBase).Name);
+                    typeof(SQLiteModule).Name);
             }
 #endif
         }
@@ -3539,7 +3539,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Destructor
-        ~SQLiteModuleBase()
+        ~SQLiteModule()
         {
             Dispose(false);
         }

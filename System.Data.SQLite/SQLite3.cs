@@ -86,7 +86,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The modules created using this connection.
     /// </summary>
-    protected Dictionary<string, SQLiteModuleBase> _modules;
+    protected Dictionary<string, SQLiteModule> _modules;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -141,9 +141,9 @@ namespace System.Data.SQLite
 
                 if (_modules != null)
                 {
-                    foreach (KeyValuePair<string, SQLiteModuleBase> pair in _modules)
+                    foreach (KeyValuePair<string, SQLiteModule> pair in _modules)
                     {
-                        SQLiteModuleBase module = pair.Value;
+                        SQLiteModule module = pair.Value;
 
                         if (module == null)
                             continue;
@@ -1578,7 +1578,7 @@ namespace System.Data.SQLite
     /// <param name="module">
     /// The module object to be used when creating the native disposable module.
     /// </param>
-    internal override void CreateModule(SQLiteModuleBase module)
+    internal override void CreateModule(SQLiteModule module)
     {
         if (module == null)
             throw new ArgumentNullException("module");
@@ -1603,7 +1603,7 @@ namespace System.Data.SQLite
                     null) != IntPtr.Zero)
             {
                 if (_modules == null)
-                    _modules = new Dictionary<string, SQLiteModuleBase>();
+                    _modules = new Dictionary<string, SQLiteModule>();
 
                 _modules.Add(module.Name, module);
             }
@@ -1630,7 +1630,7 @@ namespace System.Data.SQLite
     /// The module object previously passed to the <see cref="CreateModule" />
     /// method.
     /// </param>
-    internal override void DisposeModule(SQLiteModuleBase module)
+    internal override void DisposeModule(SQLiteModule module)
     {
         if (module == null)
             throw new ArgumentNullException("module");
@@ -1663,7 +1663,7 @@ namespace System.Data.SQLite
     /// A standard SQLite return code.
     /// </returns>
     internal override SQLiteErrorCode DeclareVirtualTable(
-        SQLiteModuleBase module,
+        SQLiteModule module,
         string strSql,
         ref string error
         )

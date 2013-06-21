@@ -43,7 +43,7 @@
     <Compile Include="SQLiteKeyReader.cs" />
     <Compile Include="SQLiteLog.cs" />
     <Compile Include="SQLiteMetaDataCollectionNames.cs" />
-    <Compile Include="SQLiteModuleBase.cs" />
+    <Compile Include="SQLiteModule.cs" />
     <Compile Include="SQLiteModuleEnumerable.cs" />
     <Compile Include="SQLiteModuleNoop.cs" />
     <Compile Include="SQLiteParameter.cs" />

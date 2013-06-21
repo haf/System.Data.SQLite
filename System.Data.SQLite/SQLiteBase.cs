@@ -218,7 +218,7 @@ namespace System.Data.SQLite
     /// <param name="module">
     /// The module object to be used when creating the native disposable module.
     /// </param>
-    internal abstract void CreateModule(SQLiteModuleBase module);
+    internal abstract void CreateModule(SQLiteModule module);
 
     /// <summary>
     /// Calls the native SQLite core library in order to cleanup the resources
@@ -228,7 +228,7 @@ namespace System.Data.SQLite
     /// The module object previously passed to the <see cref="CreateModule" />
     /// method.
     /// </param>
-    internal abstract void DisposeModule(SQLiteModuleBase module);
+    internal abstract void DisposeModule(SQLiteModule module);
 
     /// <summary>
     /// Calls the native SQLite core library in order to declare a virtual table
@@ -249,7 +249,7 @@ namespace System.Data.SQLite
     /// <returns>
     /// A standard SQLite return code.
     /// </returns>
-    internal abstract SQLiteErrorCode DeclareVirtualTable(SQLiteModuleBase module, string strSql, ref string error);
+    internal abstract SQLiteErrorCode DeclareVirtualTable(SQLiteModule module, string strSql, ref string error);
 
     /// <summary>
     /// Enables or disabled extension loading by SQLite.

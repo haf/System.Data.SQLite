@@ -7,7 +7,7 @@
 
 namespace System.Data.SQLite
 {
-    public class SQLiteModuleNoop : SQLiteModuleBase
+    public class SQLiteModuleNoop : SQLiteModule
     {
         #region Public Constructors
         public SQLiteModuleNoop(

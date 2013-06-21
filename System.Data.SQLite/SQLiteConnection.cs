@@ -1733,7 +1733,7 @@ namespace System.Data.SQLite
     /// The module object to be used when creating the disposable module.
     /// </param>
     public void CreateModule(
-        SQLiteModuleBase module
+        SQLiteModule module
         )
     {
         CheckDisposed();
