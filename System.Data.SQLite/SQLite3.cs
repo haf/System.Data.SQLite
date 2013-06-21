@@ -1593,7 +1593,7 @@ namespace System.Data.SQLite
 
         try
         {
-            pName = SQLiteMarshal.Utf8IntPtrFromString(module.Name);
+            pName = SQLiteString.Utf8IntPtrFromString(module.Name);
 
             UnsafeNativeMethods.sqlite3_module nativeModule =
                 module.CreateNativeModule();
@@ -1678,7 +1678,7 @@ namespace System.Data.SQLite
 
         try
         {
-            pSql = SQLiteMarshal.Utf8IntPtrFromString(strSql);
+            pSql = SQLiteString.Utf8IntPtrFromString(strSql);
 
             SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_declare_vtab(
                 _sql, pSql);
