@@ -709,6 +709,7 @@ namespace System.Data.SQLite
         IntPtr handleIntPtr = handle;
 
         SQLiteLog.LogMessage(String.Format(
+            CultureInfo.CurrentCulture,
             "Binding statement {0} paramter #{1} as NULL...",
             handleIntPtr, index));
     }
@@ -1033,6 +1034,7 @@ namespace System.Data.SQLite
             IntPtr handleIntPtr = handle;
 
             SQLiteLog.LogMessage(String.Format(
+                CultureInfo.CurrentCulture,
                 "Statement {0} paramter count is {1}.",
                 handleIntPtr, value));
         }
@@ -1057,6 +1059,7 @@ namespace System.Data.SQLite
             IntPtr handleIntPtr = handle;
 
             SQLiteLog.LogMessage(String.Format(
+                CultureInfo.CurrentCulture,
                 "Statement {0} paramter #{1} name is {{{2}}}.",
                 handleIntPtr, index, name));
         }
@@ -1074,6 +1077,7 @@ namespace System.Data.SQLite
             IntPtr handleIntPtr = handle;
 
             SQLiteLog.LogMessage(String.Format(
+                CultureInfo.CurrentCulture,
                 "Statement {0} paramter index of name {{{1}}} is #{2}.",
                 handleIntPtr, paramName, index));
         }
@@ -1628,12 +1632,7 @@ namespace System.Data.SQLite
         if (module == null)
             throw new ArgumentNullException("module");
 
-        UnsafeNativeMethods.sqlite3_module nativeModule = module.GetNativeModule();
-
-        if (nativeModule.iVersion == 0)
-            throw new ArgumentException("native module is not initialized");
-
-        UnsafeNativeMethods.sqlite3_dispose_module(ref nativeModule);
+        module.Dispose();
     }
 
     internal override IntPtr AggregateContext(IntPtr context)

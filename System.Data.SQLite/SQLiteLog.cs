@@ -10,6 +10,7 @@ namespace System.Data.SQLite
     using System;
     using System.Data.Common;
     using System.Diagnostics;
+    using System.Globalization;
 
     /// <summary>
     /// Event data for logging event handlers.
@@ -526,7 +527,8 @@ namespace System.Data.SQLite
             else if (errorCode is int)
                 success = ((int)errorCode == 0);
 
-            Trace.WriteLine(String.Format("SQLite {0} ({1}): {2}",
+            Trace.WriteLine(String.Format(
+                CultureInfo.CurrentCulture, "SQLite {0} ({1}): {2}",
                 success ? "message" : "error", errorCode, message));
 #endif
         }

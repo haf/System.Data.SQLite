@@ -1348,6 +1348,12 @@ namespace System.Data.SQLite
     {
         #region Private Data
 #if TRACK_MEMORY_BYTES
+#if PLATFORM_COMPACTFRAMEWORK
+        private static object syncRoot = new object();
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
+
         private static int bytesAllocated;
         private static int maximumBytesAllocated;
 #endif
@@ -1367,8 +1373,16 @@ namespace System.Data.SQLite
 
                 if (blockSize > 0)
                 {
+#if !PLATFORM_COMPACTFRAMEWORK
                     Interlocked.Add(ref bytesAllocated, blockSize);
                     Interlocked.Add(ref maximumBytesAllocated, blockSize);
+#else
+                    lock (syncRoot)
+                    {
+                        bytesAllocated += blockSize;
+                        maximumBytesAllocated += blockSize;
+                    }
+#endif
                 }
             }
 #endif
@@ -1397,7 +1411,16 @@ namespace System.Data.SQLite
                 int blockSize = Size(pMemory);
 
                 if (blockSize > 0)
+                {
+#if !PLATFORM_COMPACTFRAMEWORK
                     Interlocked.Add(ref bytesAllocated, -blockSize);
+#else
+                    lock (syncRoot)
+                    {
+                        bytesAllocated -= blockSize;
+                    }
+#endif
+                }
             }
 #endif
 
@@ -2141,6 +2164,7 @@ namespace System.Data.SQLite
             }
 
             SetTableError(pVtab, String.Format(
+                CultureInfo.CurrentCulture,
                 "managed table for {0} not found", pVtab));
 
             return null;
@@ -2206,6 +2230,7 @@ namespace System.Data.SQLite
             }
 
             SetTableError(pVtab, String.Format(
+                CultureInfo.CurrentCulture,
                 "managed cursor for {0} not found", pCursor));
 
             return null;
@@ -3311,8 +3336,25 @@ namespace System.Data.SQLite
                 // release unmanaged resources here...
                 //////////////////////////////////////
 
-
-
+                try
+                {
+                    UnsafeNativeMethods.sqlite3_dispose_module(
+                        ref nativeModule);
+                }
+                catch (Exception e)
+                {
+                    try
+                    {
+                        SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                            String.Format(CultureInfo.CurrentCulture,
+                            "Caught exception in \"Dispose\" method: {0}",
+                            e)); /* throw */
+                    }
+                    catch
+                    {
+                        // do nothing.
+                    }
+                }
 
                 disposed = true;
             }

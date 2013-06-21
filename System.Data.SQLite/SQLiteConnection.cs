@@ -1469,7 +1469,7 @@ namespace System.Data.SQLite
 
       if (arParts == null)
       {
-          throw new ArgumentException(String.Format(
+          throw new ArgumentException(String.Format(CultureInfo.CurrentCulture,
               "Invalid ConnectionString format, cannot parse: {0}", (error != null) ?
               error : "could not split connection string into properties"));
       }
@@ -1679,6 +1679,7 @@ namespace System.Data.SQLite
 
         if (_sql == null)
             throw new InvalidOperationException(String.Format(
+                CultureInfo.CurrentCulture,
                 "Database connection not valid for {0} extensions.",
                 enable ? "enabling" : "disabling"));
 
@@ -1840,6 +1841,7 @@ namespace System.Data.SQLite
                     NumberStyles.HexNumber, out result[index / 2]))
             {
                 error = String.Format(
+                    CultureInfo.CurrentCulture,
                     "string contains \"{0}\", which cannot be converted to a byte value",
                     value);
 
@@ -2000,6 +2002,7 @@ namespace System.Data.SQLite
             if (hexPasswordBytes == null)
             {
                 throw new FormatException(String.Format(
+                    CultureInfo.CurrentCulture,
                     "Cannot parse 'HexPassword' property value into byte values: {0}",
                     error));
             }

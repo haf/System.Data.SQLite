@@ -6,6 +6,7 @@
  ********************************************************/
 
 using System.Collections;
+using System.Globalization;
 
 namespace System.Data.SQLite
 {
@@ -93,7 +94,8 @@ namespace System.Data.SQLite
     {
         #region Private Constants
         private static readonly string declareSql = String.Format(
-            "CREATE TABLE {0}(x);", typeof(SQLiteModuleEnumerable).Name);
+            CultureInfo.CurrentCulture, "CREATE TABLE {0}(x);",
+            typeof(SQLiteModuleEnumerable).Name);
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -424,7 +426,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            SetTableError(table, String.Format(
+            SetTableError(table, String.Format(CultureInfo.CurrentCulture,
                 "virtual table \"{0}\" is read-only", table.TableName));
 
             return SQLiteErrorCode.Error;
@@ -441,7 +443,7 @@ namespace System.Data.SQLite
 
             if (!table.Rename(newName))
             {
-                SetTableError(table, String.Format(
+                SetTableError(table, String.Format(CultureInfo.CurrentCulture,
                     "failed to rename virtual table from \"{0}\" to \"{1}\"",
                     table.TableName, newName));
 

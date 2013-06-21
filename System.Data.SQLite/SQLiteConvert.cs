@@ -948,6 +948,7 @@ namespace System.Data.SQLite
 
 #if !NET_COMPACT_20 && TRACE_WARNING
         Trace.WriteLine(String.Format(
+            CultureInfo.CurrentCulture,
             "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
             defaultTypeName, typ));
 #endif
@@ -1152,6 +1153,7 @@ namespace System.Data.SQLite
 
 #if !NET_COMPACT_20 && TRACE_WARNING
         Trace.WriteLine(String.Format(
+            CultureInfo.CurrentCulture,
             "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
             defaultDbType, Name));
 #endif
