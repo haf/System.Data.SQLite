@@ -210,7 +210,7 @@ runTest {test vtab-1.2 {IEnumerable virtual table} -setup {
 regexp -result [string map [list \n \r\n] {^Ok\
 System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{one two three 4 5.0 Error\
 \{SQL logic error or missing database
-SQL logic error or missing database\}\}$}]}
+virtual table "t\d+" is read-only\}\}$}]}
 
 ###############################################################################
 

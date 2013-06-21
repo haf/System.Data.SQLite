@@ -1733,6 +1733,7 @@ namespace System.Data.SQLite
         int idxNum,
         IntPtr idxStr,
         int argc,
+        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
         IntPtr[] argv
     );
 
