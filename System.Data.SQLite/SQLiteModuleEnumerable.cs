@@ -235,7 +235,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            if (!SetDefaultEstimatedCost(index))
+            if (!SetEstimatedCost(index))
             {
                 SetTableError(table, "failed to set default estimated cost");
                 return SQLiteErrorCode.Error;

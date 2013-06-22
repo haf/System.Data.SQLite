@@ -2513,15 +2513,25 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Index Handling Helper Methods
-        protected virtual bool SetDefaultEstimatedCost(
-            SQLiteIndex index
+        protected virtual bool SetEstimatedCost(
+            SQLiteIndex index,
+            double estimatedCost
             )
         {
             if ((index == null) || (index.Outputs == null))
                 return false;
 
-            index.Outputs.EstimatedCost = DefaultCost;
+            index.Outputs.EstimatedCost = estimatedCost;
             return true;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual bool SetEstimatedCost(
+            SQLiteIndex index
+            )
+        {
+            return SetEstimatedCost(index, DefaultCost);
         }
         #endregion
         #endregion
