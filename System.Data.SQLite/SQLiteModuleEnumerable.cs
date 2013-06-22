@@ -237,7 +237,7 @@ namespace System.Data.SQLite
 
             if (!SetEstimatedCost(index))
             {
-                SetTableError(table, "failed to set default estimated cost");
+                SetTableError(table, "failed to set estimated cost");
                 return SQLiteErrorCode.Error;
             }
 
