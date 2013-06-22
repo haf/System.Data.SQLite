@@ -96,7 +96,8 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
 } -cleanup {
   cleanupFile $fileName
 
-  unset -nocomplain code output error fileName
+  unset -nocomplain totalCount failureCount successCount code output \
+      error fileName
 } -constraints {eagle SQLite file_System.Data.SQLite.dll file_test.exe} \
 -result {0 {}}}
 
