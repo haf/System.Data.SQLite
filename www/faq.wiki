@@ -540,10 +540,17 @@
 </p>
 
 <p>
-  As of version 1.0.82.0, the resources associated with a SQLiteConnection are
-  not fully cleaned up until all the SQLiteCommand, SQLiteDataReader, and
-  SQLiteBackup objects associated with that SQLiteConnection have also been
-  disposed.  This is accomplished through careful use of the
+  As of version 1.0.82.0, the native resources for a SQLiteConnection object,
+  including any native locks on the underlying file, are not fully released
+  until all SQLiteCommand, SQLiteDataReader, and SQLiteBackup objects associated
+  with that SQLiteConnection object have also been disposed.  These changes were
+  made to allow the SQLite native resource management to integrate better with
+  the
+  <a href="http://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29">garbage collection</a>
+  semantics used by the
+  <a href="http://en.wikipedia.org/wiki/Common_Language_Runtime">Common Language
+  Runtime</a>.  Allowing native SQLite resources to be released in a
+  non-deterministic order is accomplished through careful use of the
   <a href="http://www.sqlite.org/c3ref/close.html">sqlite3_close_v2()</a> core
-  native library function.
+  native library routine.
 </p>
