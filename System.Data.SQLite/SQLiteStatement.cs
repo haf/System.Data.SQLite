@@ -278,9 +278,10 @@ namespace System.Data.SQLite
             case TypeCode.String:
                 return Convert.ToBoolean(obj, provider);
             default:
-                throw new SQLiteException(SQLiteErrorCode.Error,
-                    String.Format(CultureInfo.CurrentCulture,
-                    "Cannot convert type {0} to boolean", typeCode));
+                throw new SQLiteException(String.Format(
+                    CultureInfo.CurrentCulture,
+                    "Cannot convert type {0} to boolean",
+                    typeCode));
         }
     }
 
@@ -292,7 +293,7 @@ namespace System.Data.SQLite
     private void BindParameter(int index, SQLiteParameter param)
     {
       if (param == null)
-        throw new SQLiteException(SQLiteErrorCode.Error, "Insufficient parameters supplied to the command");
+        throw new SQLiteException("Insufficient parameters supplied to the command");
 
       object obj = param.Value;
       DbType objType = param.DbType;

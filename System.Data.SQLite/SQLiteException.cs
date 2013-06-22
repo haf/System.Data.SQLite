@@ -67,7 +67,7 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="message">Error message text.</param>
     public SQLiteException(string message)
-      : base(message)
+      : this(SQLiteErrorCode.Unknown, message)
     {
     }
 
@@ -200,6 +200,11 @@ namespace System.Data.SQLite
   /// </summary>
   public enum SQLiteErrorCode
   {
+    /// <summary>
+    /// The error code is unknown.  This error code
+    /// is only used by the managed wrapper itself.
+    /// </summary>
+    Unknown = -1,
     /// <summary>
     /// Successful result
     /// </summary>

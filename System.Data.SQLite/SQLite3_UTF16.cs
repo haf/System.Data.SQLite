@@ -100,7 +100,10 @@ namespace System.Data.SQLite
 
     internal override void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool)
     {
-      if (_sql != null) return;
+      if (_sql != null) Close(true);
+
+      if (_sql != null)
+          throw new SQLiteException("connection handle is still active");
 
       _usePool = usePool;
       _fileName = strFilename;

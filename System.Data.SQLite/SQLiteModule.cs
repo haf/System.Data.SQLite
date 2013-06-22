@@ -914,7 +914,7 @@ namespace System.Data.SQLite
             if ((values != null) &&
                 (TryPersistValues(values) != values.Length))
             {
-                throw new SQLiteException(SQLiteErrorCode.Error,
+                throw new SQLiteException(
                     "failed to persist one or more values");
             }
 

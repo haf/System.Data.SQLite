@@ -347,10 +347,7 @@ namespace System.Data.SQLite
         get
         {
             if (_sql == null)
-            {
-                throw new SQLiteException(SQLiteErrorCode.Error,
-                    "no connection handle available");
-            }
+                throw new SQLiteException("no connection handle available");
 
             return _sql.OwnHandle;
         }
@@ -387,7 +384,10 @@ namespace System.Data.SQLite
 
     internal override void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool)
     {
-      if (_sql != null) return;
+      if (_sql != null) Close(true);
+
+      if (_sql != null)
+          throw new SQLiteException("connection handle is still active");
 
       _usePool = usePool;
       _fileName = strFilename;
@@ -537,7 +537,7 @@ namespace System.Data.SQLite
           // Reapply parameters
           stmt.BindParameters();
         }
-        return (SQLiteErrorCode)(-1); // Reset was OK, with schema change
+        return SQLiteErrorCode.Unknown; // Reset was OK, with schema change
       }
       else if (n == SQLiteErrorCode.Locked || n == SQLiteErrorCode.Busy)
         return n;
@@ -1622,7 +1622,7 @@ namespace System.Data.SQLite
             }
             else
             {
-                throw new SQLiteException(SQLiteErrorCode.Error, GetLastError());
+                throw new SQLiteException(GetLastError());
             }
         }
         finally
