@@ -150,8 +150,7 @@ namespace System.Data.SQLite
 #endif
 
           if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
-          base._ownHandle = true;
-          _sql = new SQLiteConnectionHandle(db, base._ownHandle);
+          _sql = new SQLiteConnectionHandle(db, true);
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }

@@ -184,7 +184,7 @@ namespace System.Data.SQLite
                 {
                     _sql = new SQLite3(
                         SQLiteDateFormats.Default, DateTimeKind.Unspecified,
-                        null, IntPtr.Zero, null, true);
+                        null, IntPtr.Zero, null, false);
                 }
 
                 //

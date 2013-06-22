@@ -73,12 +73,6 @@ namespace System.Data.SQLite
 #endif
 
     /// <summary>
-    /// This field will be non-zero if this instance owns the native connection
-    /// handle and should dispose of it when it is no longer needed.
-    /// </summary>
-    protected bool _ownHandle;
-
-    /// <summary>
     /// The user-defined functions registered on this connection
     /// </summary>
     protected SQLiteFunction[] _functionsArray;
@@ -102,8 +96,7 @@ namespace System.Data.SQLite
     {
         if (db != IntPtr.Zero)
         {
-            _ownHandle = ownHandle;
-            _sql = new SQLiteConnectionHandle(db, _ownHandle);
+            _sql = new SQLiteConnectionHandle(db, ownHandle);
             _fileName = fileName;
         }
     }
@@ -172,14 +165,14 @@ namespace System.Data.SQLite
     // resources belonging to the previously-registered functions.
     internal override void Close(bool canThrow)
     {
-      if (!_ownHandle)
-      {
-        _sql = null;
-        return;
-      }
-
       if (_sql != null)
       {
+          if (!_sql.OwnHandle)
+          {
+              _sql = null;
+              return;
+          }
+
           if (_usePool)
           {
               if (SQLiteBase.ResetConnection(_sql, _sql, canThrow))
@@ -345,6 +338,24 @@ namespace System.Data.SQLite
       }
     }
 
+    /// <summary>
+    /// Returns non-zero if the underlying native connection handle is owned
+    /// by this instance.
+    /// </summary>
+    internal override bool OwnHandle
+    {
+        get
+        {
+            if (_sql == null)
+            {
+                throw new SQLiteException(SQLiteErrorCode.Error,
+                    "no connection handle available");
+            }
+
+            return _sql.OwnHandle;
+        }
+    }
+
     internal override SQLiteErrorCode SetMemoryStatus(bool value)
     {
         return StaticSetMemoryStatus(value);
@@ -417,8 +428,7 @@ namespace System.Data.SQLite
 #endif
 
           if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
-          _ownHandle = true;
-          _sql = new SQLiteConnectionHandle(db, _ownHandle);
+          _sql = new SQLiteConnectionHandle(db, true);
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }

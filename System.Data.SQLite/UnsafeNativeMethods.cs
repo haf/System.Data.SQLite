@@ -2279,6 +2279,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        public bool OwnHandle
+        {
+            get
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (syncRoot)
+#endif
+                {
+                    return ownHandle;
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         public override bool IsInvalid
         {
             get

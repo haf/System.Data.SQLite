@@ -405,12 +405,6 @@ namespace System.Data.SQLite
 #endif
 
     /// <summary>
-    /// This field will be non-zero if this instance owns the native connection
-    /// handle and should dispose of it when it is no longer needed.
-    /// </summary>
-    private bool _ownHandle;
-
-    /// <summary>
     /// The base SQLite object to interop with
     /// </summary>
     internal SQLiteBase _sql;
@@ -511,11 +505,9 @@ namespace System.Data.SQLite
     internal SQLiteConnection(IntPtr db, string fileName, bool ownHandle)
         : this()
     {
-        _ownHandle = ownHandle;
-
         _sql = new SQLite3(
             SQLiteDateFormats.Default, DateTimeKind.Unspecified, null,
-            db, fileName, _ownHandle);
+            db, fileName, ownHandle);
 
         _flags = SQLiteConnectionFlags.None;
 
@@ -909,20 +901,18 @@ namespace System.Data.SQLite
         // NOTE: SQLite automatically sets the encoding of the database
         //       to UTF16 if called from sqlite3_open16().
         //
-        _ownHandle = true;
-
         if (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding",
                   DefaultUseUTF16Encoding.ToString())))
         {
             _sql = new SQLite3_UTF16(
                 dateFormat, kind, dateTimeFormat, IntPtr.Zero, null,
-                _ownHandle);
+                false);
         }
         else
         {
             _sql = new SQLite3(
                 dateFormat, kind, dateTimeFormat, IntPtr.Zero, null,
-                _ownHandle);
+                false);
         }
     }
 
@@ -2215,6 +2205,23 @@ namespace System.Data.SQLite
     {
       get { CheckDisposed(); return _flags; }
       set { CheckDisposed(); _flags = value; }
+    }
+
+    /// <summary>
+    /// Returns non-zero if the underlying native connection handle is
+    /// owned by this instance.
+    /// </summary>
+    public bool OwnHandle
+    {
+        get
+        {
+            CheckDisposed();
+
+            if (_sql == null)
+                throw new InvalidOperationException("Database connection not valid for checking handle.");
+
+            return _sql.OwnHandle;
+        }
     }
 
     /// <summary>

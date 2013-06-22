@@ -59,6 +59,10 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract long MemoryHighwater { get; }
     /// <summary>
+    /// Returns non-zero if the underlying native connection handle is owned by this instance.
+    /// </summary>
+    internal abstract bool OwnHandle { get; }
+    /// <summary>
     /// Sets the status of the memory usage tracking subsystem in the SQLite core library.  By default, this is enabled.
     /// If this is disabled, memory usage tracking will not be performed.  This is not really a per-connection value, it is
     /// global to the process.
