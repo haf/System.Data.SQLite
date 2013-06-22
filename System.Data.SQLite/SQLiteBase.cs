@@ -215,6 +215,7 @@ namespace System.Data.SQLite
     internal abstract void ReturnNull(IntPtr context);
     internal abstract void ReturnText(IntPtr context, string value);
 
+#if INTEROP_VIRTUAL_TABLE
     /// <summary>
     /// Calls the native SQLite core library in order to create a disposable
     /// module containing the implementation of a virtual table.
@@ -254,6 +255,7 @@ namespace System.Data.SQLite
     /// A standard SQLite return code.
     /// </returns>
     internal abstract SQLiteErrorCode DeclareVirtualTable(SQLiteModule module, string strSql, ref string error);
+#endif
 
     /// <summary>
     /// Enables or disabled extension loading by SQLite.

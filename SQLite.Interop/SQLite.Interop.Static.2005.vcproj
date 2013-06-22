@@ -53,6 +53,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="$(INTEROP_INCLUDE_DIRECTORIES)"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES);$(INTEROP_EXTRA_DEFINES);$(INTEROP_DEBUG_DEFINES)"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -150,6 +151,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="$(INTEROP_INCLUDE_DIRECTORIES)"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;x64;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES);$(INTEROP_EXTRA_DEFINES);$(INTEROP_DEBUG_DEFINES)"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -246,6 +248,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="$(INTEROP_INCLUDE_DIRECTORIES)"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES);$(INTEROP_EXTRA_DEFINES);$(INTEROP_DEBUG_DEFINES)"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -337,6 +340,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="$(INTEROP_INCLUDE_DIRECTORIES)"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;x64;_DEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES);$(INTEROP_EXTRA_DEFINES);$(INTEROP_DEBUG_DEFINES)"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -430,6 +434,7 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="$(INTEROP_INCLUDE_DIRECTORIES)"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES);$(INTEROP_EXTRA_DEFINES)"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -529,6 +534,7 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="$(INTEROP_INCLUDE_DIRECTORIES)"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;x64;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES);$(INTEROP_EXTRA_DEFINES)"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -627,6 +633,7 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="$(INTEROP_INCLUDE_DIRECTORIES)"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES);$(INTEROP_EXTRA_DEFINES)"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -720,6 +727,7 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="$(INTEROP_INCLUDE_DIRECTORIES)"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0400;x64;NDEBUG;_WINDOWS;_USRDLL;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES);$(INTEROP_EXTRA_DEFINES)"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -999,6 +1007,70 @@
 			<File
 				RelativePath=".\src\ext\vtshim.c"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugNativeOnly|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugNativeOnly|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseNativeOnly|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseNativeOnly|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\win\interop.c"

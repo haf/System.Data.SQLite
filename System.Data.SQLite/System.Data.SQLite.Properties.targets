@@ -138,21 +138,6 @@
   </PropertyGroup>
 
   <!--
-      NOTE: Enable support (in the managed assemblies) for the custom extension
-            functions?
-  -->
-  <PropertyGroup Condition="'$(InteropExtensionFunctions)' != 'false'">
-    <DefineConstants>$(DefineConstants);INTEROP_EXTENSION_FUNCTIONS</DefineConstants>
-  </PropertyGroup>
-
-  <!--
-      NOTE: Enable support (in the managed assemblies) for the test extension?
-  -->
-  <PropertyGroup Condition="'$(InteropTestExtension)' != 'false'">
-    <DefineConstants>$(DefineConstants);INTEROP_TEST_EXTENSION</DefineConstants>
-  </PropertyGroup>
-
-  <!--
       NOTE: Enable support (in the managed assemblies) for encrypted databases
             using the CryptoAPI based codec?
   -->
@@ -169,6 +154,14 @@
   </PropertyGroup>
 
   <!--
+      NOTE: Enable support (in the managed assemblies) for the custom extension
+            functions?
+  -->
+  <PropertyGroup Condition="'$(InteropExtensionFunctions)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_EXTENSION_FUNCTIONS</DefineConstants>
+  </PropertyGroup>
+
+  <!--
       NOTE: Disable all use of the sqlite3_close_v2() native API and use the
             legacy System.Data.SQLite connection closing algorithm instead.
   -->
@@ -182,6 +175,22 @@
   -->
   <PropertyGroup Condition="'$(InteropLog)' != 'false'">
     <DefineConstants>$(DefineConstants);INTEROP_LOG</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+      NOTE: Enable support (in the managed assemblies) for the test extension?
+  -->
+  <PropertyGroup Condition="'$(InteropTestExtension)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_TEST_EXTENSION</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+      NOTE: Enable including the "vtshim" module as a statically available
+            extension?  This will allow virtual tables to be implemented in
+            managed code.
+  -->
+  <PropertyGroup Condition="'$(InteropVirtualTable)' != 'false'">
+    <DefineConstants>$(DefineConstants);INTEROP_VIRTUAL_TABLE</DefineConstants>
   </PropertyGroup>
 
   <!--

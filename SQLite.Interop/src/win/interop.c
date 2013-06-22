@@ -9,6 +9,10 @@
 
 #include "../core/sqlite3.c"
 
+#if defined(INTEROP_VIRTUAL_TABLE)
+#include "../ext/vtshim.c"
+#endif
+
 #if defined(INTEROP_EXTENSION_FUNCTIONS)
 #include "../contrib/extension-functions.c"
 extern int RegisterExtensionFunctions(sqlite3 *db);

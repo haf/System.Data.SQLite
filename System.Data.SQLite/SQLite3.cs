@@ -77,10 +77,12 @@ namespace System.Data.SQLite
     /// </summary>
     protected SQLiteFunction[] _functionsArray;
 
+#if INTEROP_VIRTUAL_TABLE
     /// <summary>
     /// The modules created using this connection.
     /// </summary>
     protected Dictionary<string, SQLiteModule> _modules;
+#endif
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -132,6 +134,7 @@ namespace System.Data.SQLite
                 // release unmanaged resources here...
                 //////////////////////////////////////
 
+#if INTEROP_VIRTUAL_TABLE
                 if (_modules != null)
                 {
                     foreach (KeyValuePair<string, SQLiteModule> pair in _modules)
@@ -144,6 +147,7 @@ namespace System.Data.SQLite
                         module.Dispose();
                     }
                 }
+#endif
 
                 Close(false); /* Disposing, cannot throw. */
 
@@ -1584,6 +1588,7 @@ namespace System.Data.SQLite
       UnsafeNativeMethods.sqlite3_result_text(context, ToUTF8(value), b.Length - 1, (IntPtr)(-1));
     }
 
+#if INTEROP_VIRTUAL_TABLE
     /// <summary>
     /// Calls the native SQLite core library in order to create a disposable
     /// module containing the implementation of a virtual table.
@@ -1650,12 +1655,14 @@ namespace System.Data.SQLite
 
         module.Dispose();
     }
+#endif
 
     internal override IntPtr AggregateContext(IntPtr context)
     {
       return UnsafeNativeMethods.sqlite3_aggregate_context(context, 1);
     }
 
+#if INTEROP_VIRTUAL_TABLE
     /// <summary>
     /// Calls the native SQLite core library in order to declare a virtual table
     /// in response to a call into the xCreate or xConnect virtual table methods.
@@ -1712,6 +1719,7 @@ namespace System.Data.SQLite
             }
         }
     }
+#endif
 
     /// <summary>
     /// Enables or disabled extension loading by SQLite.

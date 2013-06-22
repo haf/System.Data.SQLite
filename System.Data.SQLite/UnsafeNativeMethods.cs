@@ -1587,6 +1587,7 @@ namespace System.Data.SQLite
     // SQLite API calls that are provided by "well-known" extensions that may be statically
     // linked with the SQLite core native library currently in use.
     #region extension sqlite api calls
+#if INTEROP_VIRTUAL_TABLE
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 #else
@@ -1600,6 +1601,7 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern void sqlite3_dispose_module(ref sqlite3_module pModule);
+#endif
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1648,6 +1650,7 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region Native Delegates
+#if INTEROP_VIRTUAL_TABLE
 #if !PLATFORM_COMPACTFRAMEWORK
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
@@ -1895,11 +1898,13 @@ namespace System.Data.SQLite
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
     public delegate void xDestroyModule(IntPtr pClientData);
+#endif
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
     #region Native Structures
+#if INTEROP_VIRTUAL_TABLE
     [StructLayout(LayoutKind.Sequential)]
     internal struct sqlite3_module
     {
@@ -2039,6 +2044,7 @@ namespace System.Data.SQLite
         public int orderByConsumed;  /* True if output is already ordered */
         public double estimatedCost; /* Estimated cost of using this index */
     }
+#endif
     #endregion
   }
 

@@ -1775,6 +1775,7 @@ namespace System.Data.SQLite
         _sql.LoadExtension(fileName, procName);
     }
 
+#if INTEROP_VIRTUAL_TABLE
     /// <summary>
     /// Creates a disposable module containing the implementation of a virtual
     /// table.
@@ -1794,6 +1795,7 @@ namespace System.Data.SQLite
 
         _sql.CreateModule(module);
     }
+#endif
 
     /// <summary>
     /// Parses a string containing a sequence of zero or more hexadecimal

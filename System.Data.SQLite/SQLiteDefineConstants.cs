@@ -48,6 +48,10 @@ namespace System.Data.SQLite
             "INTEROP_TEST_EXTENSION",
 #endif
 
+#if INTEROP_VIRTUAL_TABLE
+            "INTEROP_VIRTUAL_TABLE",
+#endif
+
 #if NET_20
             "NET_20",
 #endif

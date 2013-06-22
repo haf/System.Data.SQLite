@@ -102,8 +102,9 @@ runTest {test vtab-1.1 {virtual table support} -setup {
 
   unset -nocomplain result code results errors sql dataSource id db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
+{^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
 
 ###############################################################################
 
@@ -206,10 +207,10 @@ runTest {test vtab-1.2 {IEnumerable virtual table} -setup {
 
   unset -nocomplain result code results errors sql dataSource id db fileName
 } -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result [string map [list \n \r\n] {^Ok\
-System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{one two three 4 5.0 Error\
-\{SQL logic error or missing database
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
+[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
+\{\} 0 \{one two three 4 5.0 Error \{SQL logic error or missing database
 virtual table "t\d+" is read-only\}\}$}]}
 
 ###############################################################################
