@@ -13,15 +13,29 @@ using System.Text;
 namespace System.Data.SQLite
 {
     #region SQLiteContext Helper Class
-    public sealed class SQLiteContext
+    /// <summary>
+    /// This class represents a context from the SQLite core library that can
+    /// be passed to the sqlite3_result_*() and associated functions.
+    /// </summary>
+    public sealed class SQLiteContext : ISQLiteNativeHandle
     {
         #region Private Data
+        /// <summary>
+        /// The native context handle.
+        /// </summary>
         private IntPtr pContext;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Constructors
+        /// <summary>
+        /// Constructs an instance of this class using the specified native
+        /// context handle.
+        /// </summary>
+        /// <param name="pContext">
+        /// The native context handle to use.
+        /// </param>
         internal SQLiteContext(IntPtr pContext)
         {
             this.pContext = pContext;
@@ -30,7 +44,23 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region ISQLiteNativeHandle Members
+        /// <summary>
+        /// Returns the underlying SQLite native handle associated with this
+        /// object instance.
+        /// </summary>
+        public virtual IntPtr NativeHandle
+        {
+            get { return pContext; }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Public Methods
+        /// <summary>
+        /// Sets the context result to NULL.
+        /// </summary>
         public void SetNull()
         {
             if (pContext == IntPtr.Zero)
@@ -41,6 +71,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to the specified <see cref="System.Double" />
+        /// value.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="System.Double" /> value to use.
+        /// </param>
         public void SetDouble(double value)
         {
             if (pContext == IntPtr.Zero)
@@ -57,6 +94,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to the specified <see cref="System.Int32" />
+        /// value.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="System.Int32" /> value to use.
+        /// </param>
         public void SetInt(int value)
         {
             if (pContext == IntPtr.Zero)
@@ -67,6 +111,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to the specified <see cref="System.Int64" />
+        /// value.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="System.Int64" /> value to use.
+        /// </param>
         public void SetInt64(long value)
         {
             if (pContext == IntPtr.Zero)
@@ -83,6 +134,14 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to the specified <see cref="System.String" />
+        /// value.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="System.String" /> value to use.  This value will be
+        /// converted to the UTF-8 encoding prior to being used.
+        /// </param>
         public void SetString(string value)
         {
             if (pContext == IntPtr.Zero)
@@ -99,6 +158,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to the specified <see cref="System.String" />
+        /// value containing an error message.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="System.String" /> value containing the error message
+        /// text.  This value will be converted to the UTF-8 encoding prior to
+        /// being used.
+        /// </param>
         public void SetError(string value)
         {
             if (pContext == IntPtr.Zero)
@@ -115,6 +183,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to the specified <see cref="SQLiteErrorCode" />
+        /// value.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="SQLiteErrorCode" /> value to use.
+        /// </param>
         public void SetErrorCode(SQLiteErrorCode value)
         {
             if (pContext == IntPtr.Zero)
@@ -125,6 +200,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to contain the error code SQLITE_TOOBIG.
+        /// </summary>
         public void SetErrorTooBig()
         {
             if (pContext == IntPtr.Zero)
@@ -135,6 +213,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to contain the error code SQLITE_NOMEM.
+        /// </summary>
         public void SetErrorNoMemory()
         {
             if (pContext == IntPtr.Zero)
@@ -145,6 +226,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to the specified <see cref="System.Byte[]" />
+        /// value.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="System.Byte[]" /> value to use.
+        /// </param>
         public void SetBlob(byte[] value)
         {
             if (pContext == IntPtr.Zero)
@@ -159,6 +247,12 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Sets the context result to a BLOB of zeros of the specified size.
+        /// </summary>
+        /// <param name="value">
+        /// The number of zero bytes to use for the BLOB context result.
+        /// </param>
         public void SetZeroBlob(int value)
         {
             if (pContext == IntPtr.Zero)
@@ -169,12 +263,22 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public void SetValue(IntPtr pValue)
+        /// <summary>
+        /// Sets the context result to the specified <see cref="SQLiteValue" />.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="SQLiteValue" /> to use.
+        /// </param>
+        public void SetValue(SQLiteValue value)
         {
             if (pContext == IntPtr.Zero)
                 throw new InvalidOperationException();
 
-            UnsafeNativeMethods.sqlite3_result_value(pContext, pValue);
+            if (value == null)
+                throw new ArgumentNullException("value");
+
+            UnsafeNativeMethods.sqlite3_result_value(
+                pContext, value.NativeHandle);
         }
         #endregion
     }
@@ -183,15 +287,25 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteValue Helper Class
-    public sealed class SQLiteValue
+    public sealed class SQLiteValue : ISQLiteNativeHandle
     {
         #region Private Data
+        /// <summary>
+        /// The native value handle.
+        /// </summary>
         private IntPtr pValue;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Constructors
+        /// <summary>
+        /// Constructs an instance of this class using the specified native
+        /// value handle.
+        /// </summary>
+        /// <param name="pContext">
+        /// The native value handle to use.
+        /// </param>
         internal SQLiteValue(IntPtr pValue)
         {
             this.pValue = pValue;
@@ -201,6 +315,10 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Methods
+        /// <summary>
+        /// Invalidates the native value handle, thereby preventing further
+        /// access to it from this object instance.
+        /// </summary>
         private void PreventNativeAccess()
         {
             pValue = IntPtr.Zero;
@@ -209,8 +327,26 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region ISQLiteNativeHandle Members
+        /// <summary>
+        /// Returns the underlying SQLite native handle associated with this
+        /// object instance.
+        /// </summary>
+        public virtual IntPtr NativeHandle
+        {
+            get { return pValue; }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Public Properties
         private bool persisted;
+        /// <summary>
+        /// Returns non-zero if the native SQLite value has been successfully
+        /// persisted as a managed value within this object instance (i.e. the
+        /// <see cref="Value" /> property may then be read successfully).
+        /// </summary>
         public bool Persisted
         {
             get { return persisted; }
@@ -219,6 +355,12 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private object value;
+        /// <summary>
+        /// If the managed value for this object instance is available (i.e. it
+        /// has been previously persisted via the <see cref="Persist"/>) method,
+        /// that value is returned; otherwise, an exception is thrown.  The
+        /// returned value may be null.
+        /// </summary>
         public object Value
         {
             get
@@ -237,6 +379,12 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Public Methods
+        /// <summary>
+        /// Gets and returns the type affinity associated with this value.
+        /// </summary>
+        /// <returns>
+        /// The type affinity associated with this value.
+        /// </returns>
         public TypeAffinity GetTypeAffinity()
         {
             if (pValue == IntPtr.Zero) return TypeAffinity.None;
@@ -245,6 +393,14 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Gets and returns the number of bytes associated with this value, if
+        /// it refers to a UTF-8 encoded string.
+        /// </summary>
+        /// <returns>
+        /// The number of bytes associated with this value.  The returned value
+        /// may be zero.
+        /// </returns>
         public int GetBytes()
         {
             if (pValue == IntPtr.Zero) return 0;
@@ -253,6 +409,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Gets and returns the <see cref="System.Int32" /> associated with
+        /// this value.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="System.Int32" /> associated with this value.
+        /// </returns>
         public int GetInt()
         {
             if (pValue == IntPtr.Zero) return default(int);
@@ -261,6 +424,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Gets and returns the <see cref="System.Int64" /> associated with
+        /// this value.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="System.Int64" /> associated with this value.
+        /// </returns>
         public long GetInt64()
         {
             if (pValue == IntPtr.Zero) return default(long);
@@ -278,6 +448,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Gets and returns the <see cref="System.Double" /> associated with
+        /// this value.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="System.Double" /> associated with this value.
+        /// </returns>
         public double GetDouble()
         {
             if (pValue == IntPtr.Zero) return default(double);
@@ -295,6 +472,14 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Gets and returns the <see cref="System.String" /> associated with
+        /// this value.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="System.String" /> associated with this value.  The
+        /// value is converted from the UTF-8 encoding prior to being returned.
+        /// </returns>
         public string GetString()
         {
             if (pValue == IntPtr.Zero) return null;
@@ -303,6 +488,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Gets and returns the <see cref="System.Byte[]" /> associated with
+        /// this value.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="System.Byte[]" /> associated with this value.
+        /// </returns>
         public byte[] GetBlob()
         {
             if (pValue == IntPtr.Zero) return null;
@@ -311,6 +503,16 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Uses the native value handle to obtain and store the managed value
+        /// for this object instance, thus saving it for later use.  The type
+        /// of the managed value is determined by the type affinity of the
+        /// native value.  If the type affinity is not recognized by this
+        /// method, no work is done and false is returned.
+        /// </summary>
+        /// <returns>
+        /// Non-zero if the native value was persisted successfully.
+        /// </returns>
         public bool Persist()
         {
             switch (GetTypeAffinity())
@@ -364,14 +566,41 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteIndexConstraintOp Enumeration
-    /* [Flags()] */
+    /// <summary>
+    /// These are the allowed values for the operators that are part of a
+    /// constraint term in the WHERE clause of a query that uses a virtual
+    /// table.
+    /// </summary>
     public enum SQLiteIndexConstraintOp : byte
     {
+        /// <summary>
+        /// This value represents the equality operator.
+        /// </summary>
         EqualTo = 2,
+
+        /// <summary>
+        /// This value represents the greater than operator.
+        /// </summary>
         GreaterThan = 4,
+
+        /// <summary>
+        /// This value represents the less than or equal to operator.
+        /// </summary>
         LessThanOrEqualTo = 8,
+
+        /// <summary>
+        /// This value represents the less than operator.
+        /// </summary>
         LessThan = 16,
+
+        /// <summary>
+        /// This value represents the greater than or equal to operator.
+        /// </summary>
         GreaterThanOrEqualTo = 32,
+
+        /// <summary>
+        /// This value represents the MATCH operator.
+        /// </summary>
         Match = 64
     }
     #endregion
@@ -379,9 +608,20 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteIndexConstraint Helper Class
+    /// <summary>
+    /// This class represents the native sqlite3_index_constraint structure
+    /// from the SQLite core library.
+    /// </summary>
     public sealed class SQLiteIndexConstraint
     {
         #region Internal Constructors
+        /// <summary>
+        /// Constructs an instance of this class using the specified native
+        /// sqlite3_index_constraint structure.
+        /// </summary>
+        /// <param name="constraint">
+        /// The native sqlite3_index_constraint structure to use.
+        /// </param>
         internal SQLiteIndexConstraint(
             UnsafeNativeMethods.sqlite3_index_constraint constraint
             )
@@ -395,6 +635,23 @@ namespace System.Data.SQLite
         //////////////////////////////////////////////////////////////////////
 
         #region Private Constructors
+        /// <summary>
+        /// Constructs an instance of this class using the specified field
+        /// values.
+        /// </summary>
+        /// <param name="iColumn">
+        /// Column on left-hand side of constraint.
+        /// </param>
+        /// <param name="op">
+        /// Constraint operator (<see cref="SQLiteIndexConstraintOp" />).
+        /// </param>
+        /// <param name="usable">
+        /// True if this constraint is usable.
+        /// </param>
+        /// <param name="iTermOffset">
+        /// Used internally - <see cref="ISQLiteManagedModule.BestIndex" />
+        /// should ignore.
+        /// </param>
         private SQLiteIndexConstraint(
             int iColumn,
             SQLiteIndexConstraintOp op,
@@ -412,18 +669,31 @@ namespace System.Data.SQLite
         //////////////////////////////////////////////////////////////////////
 
         #region Public Fields
+        /// <summary>
+        /// Column on left-hand side of constraint.
+        /// </summary>
         public int iColumn;
 
         //////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Constraint operator (<see cref="SQLiteIndexConstraintOp" />).
+        /// </summary>
         public SQLiteIndexConstraintOp op;
 
         //////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// True if this constraint is usable.
+        /// </summary>
         public byte usable;
 
         //////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Used internally - <see cref="ISQLiteManagedModule.BestIndex" />
+        /// should ignore.
+        /// </summary>
         public int iTermOffset;
         #endregion
     }
@@ -432,9 +702,20 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteIndexOrderBy Helper Class
+    /// <summary>
+    /// This class represents the native sqlite3_index_orderby structure from
+    /// the SQLite core library.
+    /// </summary>
     public sealed class SQLiteIndexOrderBy
     {
         #region Internal Constructors
+        /// <summary>
+        /// Constructs an instance of this class using the specified native
+        /// sqlite3_index_orderby structure.
+        /// </summary>
+        /// <param name="orderBy">
+        /// The native sqlite3_index_orderby structure to use.
+        /// </param>
         internal SQLiteIndexOrderBy(
             UnsafeNativeMethods.sqlite3_index_orderby orderBy
             )
@@ -447,6 +728,16 @@ namespace System.Data.SQLite
         //////////////////////////////////////////////////////////////////////
 
         #region Private Constructors
+        /// <summary>
+        /// Constructs an instance of this class using the specified field
+        /// values.
+        /// </summary>
+        /// <param name="iColumn">
+        /// Column number.
+        /// </param>
+        /// <param name="desc">
+        /// True for DESC.  False for ASC.
+        /// </param>
         private SQLiteIndexOrderBy(
             int iColumn,
             byte desc
@@ -460,11 +751,17 @@ namespace System.Data.SQLite
         //////////////////////////////////////////////////////////////////////
 
         #region Public Fields
-        public int iColumn; /* Column number */
+        /// <summary>
+        /// Column number.
+        /// </summary>
+        public int iColumn;
 
         //////////////////////////////////////////////////////////////////////
 
-        public byte desc;   /* True for DESC.  False for ASC. */
+        /// <summary>
+        /// True for DESC.  False for ASC.
+        /// </summary>
+        public byte desc;
         #endregion
     }
     #endregion
@@ -472,9 +769,20 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteIndexConstraintUsage Helper Class
+    /// <summary>
+    /// This class represents the native sqlite3_index_constraint_usage
+    /// structure from the SQLite core library.
+    /// </summary>
     public sealed class SQLiteIndexConstraintUsage
     {
         #region Internal Constructors
+        /// <summary>
+        /// Constructs an instance of this class using the specified native
+        /// sqlite3_index_constraint_usage structure.
+        /// </summary>
+        /// <param name="constraintUsage">
+        /// The native sqlite3_index_constraint_usage structure to use.
+        /// </param>
         internal SQLiteIndexConstraintUsage(
             UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage
             )
@@ -487,6 +795,16 @@ namespace System.Data.SQLite
         //////////////////////////////////////////////////////////////////////
 
         #region Private Constructors
+        /// <summary>
+        /// Constructs an instance of this class using the specified field
+        /// values.
+        /// </summary>
+        /// <param name="argvIndex">
+        /// If greater than 0, constraint is part of argv to xFilter.
+        /// </param>
+        /// <param name="omit">
+        /// Do not code a test for this constraint.
+        /// </param>
         private SQLiteIndexConstraintUsage(
             int argvIndex,
             byte omit
@@ -500,10 +818,16 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Public Fields
+        /// <summary>
+        /// If greater than 0, constraint is part of argv to xFilter.
+        /// </summary>
         public int argvIndex;
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Do not code a test for this constraint.
+        /// </summary>
         public byte omit;
         #endregion
     }
@@ -512,9 +836,24 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteIndexInputs Helper Class
+    /// <summary>
+    /// This class represents the various inputs provided by the SQLite core
+    /// library to the <see cref="ISQLiteManagedModule.BestIndex" /> method.
+    /// </summary>
     public sealed class SQLiteIndexInputs
     {
         #region Internal Constructors
+        /// <summary>
+        /// Constructs an instance of this class.
+        /// </summary>
+        /// <param name="nConstraint">
+        /// The number of <see cref="SQLiteIndexConstraint" /> instances to
+        /// pre-allocate space for.
+        /// </param>
+        /// <param name="nOrderBy">
+        /// The number of <see cref="SQLiteIndexOrderBy" /> instances to
+        /// pre-allocate space for.
+        /// </param>
         internal SQLiteIndexInputs(int nConstraint, int nOrderBy)
         {
             constraints = new SQLiteIndexConstraint[nConstraint];
@@ -526,6 +865,10 @@ namespace System.Data.SQLite
 
         #region Public Properties
         private SQLiteIndexConstraint[] constraints;
+        /// <summary>
+        /// An array of <see cref="SQLiteIndexConstraint" /> object instances,
+        /// each containing information supplied by the SQLite core library.
+        /// </summary>
         public SQLiteIndexConstraint[] Constraints
         {
             get { return constraints; }
@@ -534,6 +877,10 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private SQLiteIndexOrderBy[] orderBys;
+        /// <summary>
+        /// An array of <see cref="SQLiteIndexOrderBy" /> object instances,
+        /// each containing information supplied by the SQLite core library.
+        /// </summary>
         public SQLiteIndexOrderBy[] OrderBys
         {
             get { return orderBys; }
@@ -545,9 +892,20 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteIndexOutputs Helper Class
+    /// <summary>
+    /// This class represents the various outputs provided to the SQLite core
+    /// library by the <see cref="ISQLiteManagedModule.BestIndex" /> method.
+    /// </summary>
     public sealed class SQLiteIndexOutputs
     {
         #region Internal Constructors
+        /// <summary>
+        /// Constructs an instance of this class.
+        /// </summary>
+        /// <param name="nConstraint">
+        /// The number of <see cref="SQLiteIndexConstraintUsage" /> instances
+        /// to pre-allocate space for.
+        /// </param>
         internal SQLiteIndexOutputs(int nConstraint)
         {
             constraintUsages = new SQLiteIndexConstraintUsage[nConstraint];
@@ -558,6 +916,11 @@ namespace System.Data.SQLite
 
         #region Public Properties
         private SQLiteIndexConstraintUsage[] constraintUsages;
+        /// <summary>
+        /// An array of <see cref="SQLiteIndexConstraintUsage" /> object
+        /// instances, each containing information to be supplied to the SQLite
+        /// core library.
+        /// </summary>
         public SQLiteIndexConstraintUsage[] ConstraintUsages
         {
             get { return constraintUsages; }
@@ -566,6 +929,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private int indexNumber;
+        /// <summary>
+        /// Number used to help identify the selected index.  This value will
+        /// later be provided to the <see cref="ISQLiteManagedModule.Filter" />
+        /// method.
+        /// </summary>
         public int IndexNumber
         {
             get { return indexNumber; }
@@ -575,6 +943,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private string indexString;
+        /// <summary>
+        /// String used to help identify the selected index.  This value will
+        /// later be provided to the <see cref="ISQLiteManagedModule.Filter" />
+        /// method.
+        /// </summary>
         public string IndexString
         {
             get { return indexString; }
@@ -584,6 +957,10 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private int needToFreeIndexString;
+        /// <summary>
+        /// Non-zero if the index string must be freed by the SQLite core
+        /// library.
+        /// </summary>
         public int NeedToFreeIndexString
         {
             get { return needToFreeIndexString; }
@@ -593,6 +970,9 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private int orderByConsumed;
+        /// <summary>
+        /// True if output is already ordered.
+        /// </summary>
         public int OrderByConsumed
         {
             get { return orderByConsumed; }
@@ -602,6 +982,9 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private double estimatedCost;
+        /// <summary>
+        /// Estimated cost of using this index.
+        /// </summary>
         public double EstimatedCost
         {
             get { return estimatedCost; }
@@ -614,9 +997,22 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteIndex Helper Class
+    /// <summary>
+    /// This class represents the various inputs and outputs used with the
+    /// <see cref="ISQLiteManagedModule.BestIndex" /> method.
+    /// </summary>
     public sealed class SQLiteIndex
     {
         #region Internal Constructors
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nConstraint">
+        /// 
+        /// </param>
+        /// <param name="nOrderBy">
+        /// 
+        /// </param>
         internal SQLiteIndex(
             int nConstraint,
             int nOrderBy
@@ -631,6 +1027,9 @@ namespace System.Data.SQLite
 
         #region Public Properties
         private SQLiteIndexInputs inputs;
+        /// <summary>
+        /// 
+        /// </summary>
         public SQLiteIndexInputs Inputs
         {
             get { return inputs; }
@@ -639,6 +1038,9 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private SQLiteIndexOutputs outputs;
+        /// <summary>
+        /// 
+        /// </summary>
         public SQLiteIndexOutputs Outputs
         {
             get { return outputs; }
@@ -770,6 +1172,10 @@ namespace System.Data.SQLite
 
         #region ISQLiteNativeHandle Members
         private IntPtr nativeHandle;
+        /// <summary>
+        /// Returns the underlying SQLite native handle associated with this
+        /// object instance.
+        /// </summary>
         public virtual IntPtr NativeHandle
         {
             get { CheckDisposed(); return nativeHandle; }
@@ -928,6 +1334,10 @@ namespace System.Data.SQLite
 
         #region ISQLiteNativeHandle Members
         private IntPtr nativeHandle;
+        /// <summary>
+        /// Returns the underlying SQLite native handle associated with this
+        /// object instance.
+        /// </summary>
         public virtual IntPtr NativeHandle
         {
             get { CheckDisposed(); return nativeHandle; }

@@ -21,6 +21,32 @@ namespace System.Data.SQLite
   /// </summary>
   internal sealed class SQLite3_UTF16 : SQLite3
   {
+    /// <summary>
+    /// Constructs the object used to interact with the SQLite core library
+    /// using the UTF-8 text encoding.
+    /// </summary>
+    /// <param name="fmt">
+    /// The DateTime format to be used when converting string values to a
+    /// DateTime and binding DateTime parameters.
+    /// </param>
+    /// <param name="kind">
+    /// The <see cref="DateTimeKind" /> to be used when creating DateTime
+    /// values.
+    /// </param>
+    /// <param name="fmtString">
+    /// The format string to be used when parsing and formatting DateTime
+    /// values.
+    /// </param>
+    /// <param name="db">
+    /// The native handle to be associated with the database connection.
+    /// </param>
+    /// <param name="fileName">
+    /// The fully qualified file name associated with <paramref name="db "/>.
+    /// </param>
+    /// <param name="ownHandle">
+    /// Non-zero if the newly created object instance will need to dispose
+    /// of <paramref name="db" /> when it is no longer needed.
+    /// </param>
     internal SQLite3_UTF16(
         SQLiteDateFormats fmt,
         DateTimeKind kind,
@@ -100,8 +126,18 @@ namespace System.Data.SQLite
 
     internal override void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool)
     {
+      //
+      // NOTE: If the database connection is currently open, attempt to
+      //       close it now.  This must be done because the file name or
+      //       other parameters that may impact the underlying database
+      //       connection may have changed.
+      //
       if (_sql != null) Close(true);
 
+      //
+      // NOTE: If the connection was not closed successfully, throw an
+      //       exception now.
+      //
       if (_sql != null)
           throw new SQLiteException("connection handle is still active");
 
