@@ -110,6 +110,13 @@
     view the various lists of tickets for the System.Data.SQLite project?
     </a>
   </li>
+  <br>
+  <li>
+    <a href="#q22">Since upgrading a project to use System.Data.SQLite version
+    1.0.82.0 (or later), the database file is <b>still locked</b> after all its
+    connections have been closed.  Why is this happening?
+    </a>
+  </li>
 </ol>
 
 <hr>
@@ -521,4 +528,29 @@
       The list of tickets closed without needing a fix.
     </a></li>
   </ol>
+</p>
+
+<hr>
+<a name="q22"></a>
+<p>
+  <b>(22) Since upgrading a project to use System.Data.SQLite version 1.0.82.0
+  (or later), the database file is still locked after all its connections have
+  been closed.  Why is this happening?
+</b>
+</p>
+
+<p>
+  As of version 1.0.82.0, the native resources for a SQLiteConnection object,
+  including any native locks on the underlying file, are not fully released
+  until all SQLiteCommand, SQLiteDataReader, and SQLiteBackup objects associated
+  with that SQLiteConnection object have also been disposed.  These changes were
+  made to allow the SQLite native resource management to integrate better with
+  the
+  <a href="http://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29">garbage collection</a>
+  semantics used by the
+  <a href="http://en.wikipedia.org/wiki/Common_Language_Runtime">Common Language
+  Runtime</a>.  Allowing native SQLite resources to be released in a
+  non-deterministic order is accomplished through careful use of the
+  <a href="http://www.sqlite.org/c3ref/close.html">sqlite3_close_v2()</a> core
+  native library routine.
 </p>

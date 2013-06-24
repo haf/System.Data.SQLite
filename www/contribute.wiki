@@ -52,8 +52,8 @@ into the trunk.</p>
 
 Contributors are required to following the
 [./checkin.wiki | pre-checkin checklist] prior to every checkin to
-the System.Data.SQLite self-hosting repository.  This checklist is short and succinct
-and should only require a few seconds to follow.  Contributors
+the System.Data.SQLite self-hosting repository.  This checklist is short and
+succinct and should only require a few seconds to follow.  Contributors
 should print out a copy of the pre-checkin checklist and keep
 it on a notecard beside their workstations, for quick reference.
 
@@ -61,6 +61,9 @@ Contributors should review and try to mimic the coding style
 used through the rest of the System.Data.SQLite source code.  Your code should
 blend in.  A third-party reader should be unable to distinguish your
 code from any other code in the source corpus.
+
+Furthermore, all new code must contain &quot;documentation comments&quot; that
+can be successfully processed up by the Microsoft C# compiler.
 
 <h2>4.0 Testing</h2>
 
