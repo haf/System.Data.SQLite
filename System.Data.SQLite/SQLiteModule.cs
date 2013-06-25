@@ -2166,7 +2166,19 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// The xNext method advances a virtual table cursor to the next row of
+        /// a result set initiated by xFilter. If the cursor is already
+        /// pointing at the last row when this routine is called, then the
+        /// cursor no longer points to valid data and a subsequent call to the
+        /// xEof method must return true (non-zero). If the cursor is
+        /// successfully advanced to another row of content, then subsequent
+        /// calls to xEof must return false (zero).
+        ///
+        /// This method must return SQLITE_OK if successful, or an sqlite error
+        /// code if an error occurs.
+        ///
+        /// The xNext method is required for every virtual table
+        /// implementation.
         /// </summary>
         /// <param name="pCursor">
         /// The native pointer to the sqlite3_vtab_cursor derived structure.
@@ -2181,7 +2193,12 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// The xEof method must return false (zero) if the specified cursor
+        /// currently points to a valid row of data, or true (non-zero)
+        /// otherwise. This method is called by the SQL engine immediately
+        /// after each xFilter and xNext invocation.
+        ///
+        /// The xEof method is required for every virtual table implementation.
         /// </summary>
         /// <param name="pCursor">
         /// The native pointer to the sqlite3_vtab_cursor derived structure.
@@ -2201,16 +2218,16 @@ namespace System.Data.SQLite
         /// column is numbered 0. The xColumn method may return its result back
         /// to SQLite using one of the following interface:
         ///
-        ///   * sqlite3_result_blob()
-        ///   * sqlite3_result_double()
-        ///   * sqlite3_result_int()
-        ///   * sqlite3_result_int64()
-        ///   * sqlite3_result_null()
-        ///   * sqlite3_result_text()
-        ///   * sqlite3_result_text16()
-        ///   * sqlite3_result_text16le()
-        ///   * sqlite3_result_text16be()
-        ///   * sqlite3_result_zeroblob()
+        ///     * sqlite3_result_blob()
+        ///     * sqlite3_result_double()
+        ///     * sqlite3_result_int()
+        ///     * sqlite3_result_int64()
+        ///     * sqlite3_result_null()
+        ///     * sqlite3_result_text()
+        ///     * sqlite3_result_text16()
+        ///     * sqlite3_result_text16le()
+        ///     * sqlite3_result_text16be()
+        ///     * sqlite3_result_zeroblob()
         ///
         /// If the xColumn method implementation calls none of the functions
         /// above, then the value of the column defaults to an SQL NULL.
@@ -2368,12 +2385,13 @@ namespace System.Data.SQLite
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
         /// </param>
-        /// <param name="nData">
+        /// <param name="argc">
         /// The number of new or modified column values contained in
-        /// <paramref name="apData" />.
+        /// <paramref name="argv" />.
         /// </param>
-        /// <param name="apData">
-        /// 
+        /// <param name="argv">
+        /// The array of native pointers to sqlite3_value structures containing
+        /// the new or modified column values, if any.
         /// </param>
         /// <param name="rowId">
         /// Upon success, this parameter must be modified to contain the unique
@@ -2384,15 +2402,24 @@ namespace System.Data.SQLite
         /// </returns>
         SQLiteErrorCode xUpdate(
             IntPtr pVtab,
-            int nData,
-            IntPtr apData,
+            int argc,
+            IntPtr[] argv,
             ref long rowId
             );
 
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// This method begins a transaction on a virtual table. This is method
+        /// is optional. The xBegin pointer of sqlite3_module may be NULL.
+        ///
+        /// This method is always followed by one call to either the xCommit or
+        /// xRollback method. Virtual table transactions do not nest, so the
+        /// xBegin method will not be invoked more than once on a single
+        /// virtual table without an intervening call to either xCommit or
+        /// xRollback. Multiple calls to other methods can and likely will
+        /// occur in between the xBegin and the corresponding xCommit or
+        /// xRollback.
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2407,7 +2434,15 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// This method signals the start of a two-phase commit on a virtual
+        /// table. This is method is optional. The xSync pointer of
+        /// sqlite3_module may be NULL.
+        ///
+        /// This method is only invoked after call to the xBegin method and
+        /// prior to an xCommit or xRollback. In order to implement two-phase
+        /// commit, the xSync method on all virtual tables is invoked prior to
+        /// invoking the xCommit method on any virtual table. If any of the
+        /// xSync methods fail, the entire transaction is rolled back.
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2422,7 +2457,12 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// This method causes a virtual table transaction to commit. This is
+        /// method is optional. The xCommit pointer of sqlite3_module may be
+        /// NULL.
+        ///
+        /// A call to this method always follows a prior call to xBegin and
+        /// xSync.
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2437,7 +2477,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// This method causes a virtual table transaction to rollback. This is
+        /// method is optional. The xRollback pointer of sqlite3_module may be
+        /// NULL.
+        ///
+        /// A call to this method always follows a prior call to xBegin.
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2452,25 +2496,34 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// This method provides notification that the virtual table
+        /// implementation that the virtual table will be given a new name. If
+        /// this method returns SQLITE_OK then SQLite renames the table. If
+        /// this method returns an error code then the renaming is prevented.
+        ///
+        /// The xRename method is required for every virtual table
+        /// implementation.
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
         /// </param>
         /// <param name="nArg">
-        /// 
+        /// The number of arguments to the function being sought.
         /// </param>
         /// <param name="zName">
-        /// 
+        /// The name of the function being sought.
         /// </param>
         /// <param name="callback">
-        /// 
+        /// Upon success, this parameter must be modified to contain the
+        /// delegate responsible for implementing the specified function.
         /// </param>
         /// <param name="pClientData">
-        /// 
+        /// Upon success, this parameter must be modified to contain the
+        /// native user data pointer associated with
+        /// <paramref name="callback" />.
         /// </param>
         /// <returns>
-        /// 
+        /// Non-zero if the specified function was found; zero otherwise.
         /// </returns>
         int xFindFunction(
             IntPtr pVtab,
@@ -2483,7 +2536,13 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// This method provides notification that the virtual table
+        /// implementation that the virtual table will be given a new name. If
+        /// this method returns SQLITE_OK then SQLite renames the table. If
+        /// this method returns an error code then the renaming is prevented.
+        ///
+        /// The xRename method is required for every virtual table
+        /// implementation.
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2503,13 +2562,30 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// These methods provide the virtual table implementation an
+        /// opportunity to implement nested transactions. They are always
+        /// optional and will only be called in SQLite version 3.7.7 and later.
+        ///
+        /// When xSavepoint(X,N) is invoked, that is a signal to the virtual
+        /// table X that it should save its current state as savepoint N. A
+        /// subsequent call to xRollbackTo(X,R) means that the state of the
+        /// virtual table should return to what it was when xSavepoint(X,R) was
+        /// last called. The call to xRollbackTo(X,R) will invalidate all
+        /// savepoints with N>R; none of the invalided savepoints will be
+        /// rolled back or released without first being reinitialized by a call
+        /// to xSavepoint(). A call to xRelease(X,M) invalidates all savepoints
+        /// where N>=M.
+        ///
+        /// None of the xSavepoint(), xRelease(), or xRollbackTo() methods will
+        /// ever be called except in between calls to xBegin() and either
+        /// xCommit() or xRollback().
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
         /// </param>
         /// <param name="iSavepoint">
-        /// 
+        /// This is an integer identifier under which the the current state of
+        /// the virtual table should be saved.
         /// </param>
         /// <returns>
         /// A standard SQLite return code.
@@ -2522,13 +2598,31 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// These methods provide the virtual table implementation an
+        /// opportunity to implement nested transactions. They are always
+        /// optional and will only be called in SQLite version 3.7.7 and later.
+        ///
+        /// When xSavepoint(X,N) is invoked, that is a signal to the virtual
+        /// table X that it should save its current state as savepoint N. A
+        /// subsequent call to xRollbackTo(X,R) means that the state of the
+        /// virtual table should return to what it was when xSavepoint(X,R) was
+        /// last called. The call to xRollbackTo(X,R) will invalidate all
+        /// savepoints with N>R; none of the invalided savepoints will be
+        /// rolled back or released without first being reinitialized by a call
+        /// to xSavepoint(). A call to xRelease(X,M) invalidates all savepoints
+        /// where N>=M.
+        ///
+        /// None of the xSavepoint(), xRelease(), or xRollbackTo() methods will
+        /// ever be called except in between calls to xBegin() and either
+        /// xCommit() or xRollback().
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
         /// </param>
         /// <param name="iSavepoint">
-        /// 
+        /// This is an integer used to indicate that any saved states with an
+        /// identifier greater than or equal to this should be deleted by the
+        /// virtual table.
         /// </param>
         /// <returns>
         /// A standard SQLite return code.
@@ -2541,13 +2635,32 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// 
+        /// These methods provide the virtual table implementation an
+        /// opportunity to implement nested transactions. They are always
+        /// optional and will only be called in SQLite version 3.7.7 and later.
+        ///
+        /// When xSavepoint(X,N) is invoked, that is a signal to the virtual
+        /// table X that it should save its current state as savepoint N. A
+        /// subsequent call to xRollbackTo(X,R) means that the state of the
+        /// virtual table should return to what it was when xSavepoint(X,R) was
+        /// last called. The call to xRollbackTo(X,R) will invalidate all
+        /// savepoints with N>R; none of the invalided savepoints will be
+        /// rolled back or released without first being reinitialized by a call
+        /// to xSavepoint(). A call to xRelease(X,M) invalidates all savepoints
+        /// where N>=M.
+        ///
+        /// None of the xSavepoint(), xRelease(), or xRollbackTo() methods will
+        /// ever be called except in between calls to xBegin() and either
+        /// xCommit() or xRollback().
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
         /// </param>
         /// <param name="iSavepoint">
-        /// 
+        /// This is an integer identifier used to specify a specific saved
+        /// state for the virtual table for it to restore itself back to, which
+        /// should also have the effect of deleting all saved states with an
+        /// integer identifier greater than this one.
         /// </param>
         /// <returns>
         /// A standard SQLite return code.
@@ -4431,8 +4544,8 @@ namespace System.Data.SQLite
 
         private SQLiteErrorCode xUpdate(
             IntPtr pVtab,
-            int nData,
-            IntPtr apData,
+            int argc,
+            IntPtr[] argv,
             ref long rowId
             )
         {
@@ -4442,11 +4555,9 @@ namespace System.Data.SQLite
 
                 if (table != null)
                 {
-                    SQLiteValue[] values =
-                        SQLiteMarshal.ValueArrayFromSizeAndIntPtr(
-                            nData, apData);
-
-                    return Update(table, values, ref rowId);
+                    return Update(
+                        table, SQLiteMarshal.ValueArrayFromIntPtrArray(argv),
+                        ref rowId);
                 }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */

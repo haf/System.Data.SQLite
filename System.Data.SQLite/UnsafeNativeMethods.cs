@@ -1786,8 +1786,9 @@ namespace System.Data.SQLite
 #endif
     public delegate SQLiteErrorCode xUpdate(
         IntPtr pVtab,
-        int nData,
-        IntPtr apData,
+        int argc,
+        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
+        IntPtr[] argv,
         ref long rowId
     );
 
