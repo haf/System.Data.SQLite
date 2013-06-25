@@ -1685,7 +1685,7 @@ namespace System.Data.SQLite
             IntPtr pDb,
             IntPtr pAux,
             int argc,
-            IntPtr[] argv,
+            IntPtr argv,
             ref IntPtr pVtab,
             ref IntPtr pError
             );
@@ -1775,7 +1775,7 @@ namespace System.Data.SQLite
             IntPtr pDb,
             IntPtr pAux,
             int argc,
-            IntPtr[] argv,
+            IntPtr argv,
             ref IntPtr pVtab,
             ref IntPtr pError
             );
@@ -2241,7 +2241,7 @@ namespace System.Data.SQLite
             int idxNum,
             IntPtr idxStr,
             int argc,
-            IntPtr[] argv
+            IntPtr argv
             );
 
         ///////////////////////////////////////////////////////////////////////
@@ -2521,7 +2521,7 @@ namespace System.Data.SQLite
         SQLiteErrorCode xUpdate(
             IntPtr pVtab,
             int argc,
-            IntPtr[] argv,
+            IntPtr argv,
             ref long rowId
             );
 
@@ -3709,26 +3709,42 @@ namespace System.Data.SQLite
 
         #region UTF-8 String Array Helper Methods
         /// <summary>
-        /// Converts an array of native NUL-terminated UTF-8 string pointers
-        /// into an array of managed strings.
+        /// Converts a logical array of native NUL-terminated UTF-8 string
+        /// pointers into an array of managed strings.
         /// </summary>
-        /// <param name="pValues">
-        /// The array of native NUL-terminated UTF-8 string pointers.
+        /// <param name="argc">
+        /// The number of elements in the logical array of native
+        /// NUL-terminated UTF-8 string pointers.
+        /// </param>
+        /// <param name="argv">
+        /// The native pointer to the logical array of native NUL-terminated
+        /// UTF-8 string pointers to convert.
         /// </param>
         /// <returns>
         /// The array of managed strings or null upon failure.
         /// </returns>
-        public static string[] StringArrayFromUtf8IntPtrArray(
-            IntPtr[] pValues
+        public static string[] StringArrayFromUtf8SizeAndIntPtr(
+            int argc,
+            IntPtr argv
             )
         {
-            if (pValues == null)
+            if (argc < 0)
                 return null;
 
-            string[] result = new string[pValues.Length];
+            if (argv == IntPtr.Zero)
+                return null;
 
-            for (int index = 0; index < result.Length; index++)
-                result[index] = StringFromUtf8IntPtr(pValues[index]);
+            string[] result = new string[argc];
+
+            for (int index = 0, offset = 0;
+                    index < result.Length;
+                    index++, offset += IntPtr.Size)
+            {
+                IntPtr pArg = SQLiteMarshal.ReadIntPtr(argv, offset);
+
+                result[index] = (pArg != IntPtr.Zero) ?
+                    StringFromUtf8IntPtr(pArg) : null;
+            }
 
             return result;
         }
@@ -4063,28 +4079,44 @@ namespace System.Data.SQLite
 
         #region SQLiteValue Helper Methods
         /// <summary>
-        /// Converts an array of native pointers to native sqlite3_value
+        /// Converts a logical array of native pointers to native sqlite3_value
         /// structures into a managed array of <see cref="SQLiteValue" />
         /// object instances.
         /// </summary>
-        /// <param name="values">
-        /// The array of native pointers to convert.
+        /// <param name="argc">
+        /// The number of elements in the logical array of native sqlite3_value
+        /// structures.
+        /// </param>
+        /// <param name="argv">
+        /// The native pointer to the logical array of native sqlite3_value
+        /// structures to convert.
         /// </param>
         /// <returns>
         /// The managed array of <see cref="SQLiteValue" /> object instances or
         /// null upon failure.
         /// </returns>
-        public static SQLiteValue[] ValueArrayFromIntPtrArray(
-            IntPtr[] values
+        public static SQLiteValue[] ValueArrayFromSizeAndIntPtr(
+            int argc,
+            IntPtr argv
             )
         {
-            if (values == null)
+            if (argc < 0)
                 return null;
 
-            SQLiteValue[] result = new SQLiteValue[values.Length];
+            if (argv == IntPtr.Zero)
+                return null;
 
-            for (int index = 0; index < result.Length; index++)
-                result[index] = new SQLiteValue(values[index]);
+            SQLiteValue[] result = new SQLiteValue[argc];
+
+            for (int index = 0, offset = 0;
+                    index < result.Length;
+                    index++, offset += IntPtr.Size)
+            {
+                IntPtr pArg = ReadIntPtr(argv, offset);
+
+                result[index] = (pArg != IntPtr.Zero) ?
+                    new SQLiteValue(pArg) : null;
+            }
 
             return result;
         }
@@ -4392,7 +4424,7 @@ namespace System.Data.SQLite
                 IntPtr pDb,
                 IntPtr pAux,
                 int argc,
-                IntPtr[] argv,
+                IntPtr argv,
                 ref IntPtr pVtab,
                 ref IntPtr pError
                 )
@@ -4441,7 +4473,7 @@ namespace System.Data.SQLite
                 IntPtr pDb,
                 IntPtr pAux,
                 int argc,
-                IntPtr[] argv,
+                IntPtr argv,
                 ref IntPtr pVtab,
                 ref IntPtr pError
                 )
@@ -4611,7 +4643,7 @@ namespace System.Data.SQLite
                 int idxNum,
                 IntPtr idxStr,
                 int argc,
-                IntPtr[] argv
+                IntPtr argv
                 )
             {
                 // CheckDisposed();
@@ -4752,7 +4784,7 @@ namespace System.Data.SQLite
             public SQLiteErrorCode xUpdate(
                 IntPtr pVtab,
                 int argc,
-                IntPtr[] argv,
+                IntPtr argv,
                 ref long rowId
                 )
             {
@@ -6197,7 +6229,7 @@ namespace System.Data.SQLite
             IntPtr pDb,
             IntPtr pAux,
             int argc,
-            IntPtr[] argv,
+            IntPtr argv,
             ref IntPtr pVtab,
             ref IntPtr pError
             )
@@ -6214,8 +6246,8 @@ namespace System.Data.SQLite
                     string error = null;
 
                     if (Create(connection, pAux,
-                            SQLiteString.StringArrayFromUtf8IntPtrArray(argv),
-                            ref table, ref error) == SQLiteErrorCode.Ok)
+                            SQLiteString.StringArrayFromUtf8SizeAndIntPtr(argc,
+                            argv), ref table, ref error) == SQLiteErrorCode.Ok)
                     {
                         if (table != null)
                         {
@@ -6272,7 +6304,7 @@ namespace System.Data.SQLite
             IntPtr pDb,
             IntPtr pAux,
             int argc,
-            IntPtr[] argv,
+            IntPtr argv,
             ref IntPtr pVtab,
             ref IntPtr pError
             )
@@ -6289,8 +6321,8 @@ namespace System.Data.SQLite
                     string error = null;
 
                     if (Connect(connection, pAux,
-                            SQLiteString.StringArrayFromUtf8IntPtrArray(argv),
-                            ref table, ref error) == SQLiteErrorCode.Ok)
+                            SQLiteString.StringArrayFromUtf8SizeAndIntPtr(argc,
+                            argv), ref table, ref error) == SQLiteErrorCode.Ok)
                     {
                         if (table != null)
                         {
@@ -6615,7 +6647,7 @@ namespace System.Data.SQLite
             int idxNum,
             IntPtr idxStr,
             int argc,
-            IntPtr[] argv
+            IntPtr argv
             )
         {
             IntPtr pVtab = IntPtr.Zero;
@@ -6631,7 +6663,7 @@ namespace System.Data.SQLite
                 {
                     if (Filter(cursor, idxNum,
                             SQLiteString.StringFromUtf8IntPtr(idxStr),
-                            SQLiteMarshal.ValueArrayFromIntPtrArray(
+                            SQLiteMarshal.ValueArrayFromSizeAndIntPtr(argc,
                                 argv)) == SQLiteErrorCode.Ok)
                     {
                         return SQLiteErrorCode.Ok;
@@ -6828,7 +6860,7 @@ namespace System.Data.SQLite
         private SQLiteErrorCode xUpdate(
             IntPtr pVtab,
             int argc,
-            IntPtr[] argv,
+            IntPtr argv,
             ref long rowId
             )
         {
@@ -6839,8 +6871,8 @@ namespace System.Data.SQLite
                 if (table != null)
                 {
                     return Update(
-                        table, SQLiteMarshal.ValueArrayFromIntPtrArray(argv),
-                        ref rowId);
+                        table, SQLiteMarshal.ValueArrayFromSizeAndIntPtr(
+                        argc, argv), ref rowId);
                 }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
@@ -7778,7 +7810,7 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
                     UnsafeNativeMethods.sqlite3_dispose_module(
                         ref nativeModule);
-#else
+#elif !SQLITE_STANDARD
                     if (pNativeModule != IntPtr.Zero)
                     {
                         try
@@ -7791,6 +7823,8 @@ namespace System.Data.SQLite
                             SQLiteMemory.Free(pNativeModule);
                         }
                     }
+#else
+                    throw new NotImplementedException();
 #endif
                 }
                 catch (Exception e)

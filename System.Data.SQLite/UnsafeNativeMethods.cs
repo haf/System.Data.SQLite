@@ -1672,8 +1672,7 @@ namespace System.Data.SQLite
         IntPtr pDb,
         IntPtr pAux,
         int argc,
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-        IntPtr[] argv,
+        IntPtr argv,
         ref IntPtr pVtab,
         ref IntPtr pError
     );
@@ -1687,8 +1686,7 @@ namespace System.Data.SQLite
         IntPtr pDb,
         IntPtr pAux,
         int argc,
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-        IntPtr[] argv,
+        IntPtr argv,
         ref IntPtr pVtab,
         ref IntPtr pError
     );
@@ -1750,8 +1748,7 @@ namespace System.Data.SQLite
         int idxNum,
         IntPtr idxStr,
         int argc,
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
-        IntPtr[] argv
+        IntPtr argv
     );
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1801,8 +1798,7 @@ namespace System.Data.SQLite
     public delegate SQLiteErrorCode xUpdate(
         IntPtr pVtab,
         int argc,
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
-        IntPtr[] argv,
+        IntPtr argv,
         ref long rowId
     );
 
@@ -1893,18 +1889,6 @@ namespace System.Data.SQLite
     public delegate SQLiteErrorCode xRollbackTo(
         IntPtr pVtab,
         int iSavepoint
-    );
-
-    ///////////////////////////////////////////////////////////////////////////
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-#endif
-    public delegate int xFunc(
-        IntPtr pContext,
-        int argc,
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
-        IntPtr[] argv
     );
 
     ///////////////////////////////////////////////////////////////////////////

@@ -1662,7 +1662,7 @@ namespace System.Data.SQLite
             if (UnsafeNativeMethods.sqlite3_create_disposable_module(
                     _sql, pName, ref nativeModule, IntPtr.Zero,
                     null) != IntPtr.Zero)
-#else
+#elif !SQLITE_STANDARD
             if (UnsafeNativeMethods.sqlite3_create_disposable_module_interop(
                     _sql, pName, module.CreateNativeModuleInterop(),
                     nativeModule.iVersion, nativeModule.xCreate,
@@ -1677,7 +1677,10 @@ namespace System.Data.SQLite
                     nativeModule.xFindFunction, nativeModule.xRename,
                     nativeModule.xSavepoint, nativeModule.xRelease,
                     nativeModule.xRollbackTo, IntPtr.Zero, null) != IntPtr.Zero)
+#else
+            throw new NotImplementedException();
 #endif
+#if !PLATFORM_COMPACTFRAMEWORK || !SQLITE_STANDARD
             {
                 if (_modules == null)
                     _modules = new Dictionary<string, SQLiteModule>();
@@ -1688,6 +1691,7 @@ namespace System.Data.SQLite
             {
                 throw new SQLiteException(GetLastError());
             }
+#endif
         }
         finally
         {
