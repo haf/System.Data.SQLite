@@ -3362,15 +3362,34 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteMemory Static Class
+    /// <summary>
+    /// This class contains static methods that are used to allocate,
+    /// manipulate, and free native memory provided by the SQLite core library.
+    /// </summary>
     internal static class SQLiteMemory
     {
         #region Private Data
 #if TRACK_MEMORY_BYTES
+        /// <summary>
+        /// This object instance is used to synchronize access to the other
+        /// static fields of this class.
+        /// </summary>
         private static object syncRoot = new object();
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// The total number of outstanding memory bytes allocated by this
+        /// class using the SQLite core library.
+        /// </summary>
         private static int bytesAllocated;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// The maximum number of outstanding memory bytes ever allocated by
+        /// this class using the SQLite core library.
+        /// </summary>
         private static int maximumBytesAllocated;
 #endif
         #endregion
@@ -3378,6 +3397,19 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Memory Allocation Helper Methods
+        /// <summary>
+        /// Allocates at least the specified number of bytes of native memory
+        /// via the SQLite core library sqlite3_malloc() function and returns
+        /// the resulting native pointer.
+        /// </summary>
+        /// <param name="size">
+        /// The number of bytes to allocate.
+        /// </param>
+        /// <returns>
+        /// The native pointer that points to a block of memory of at least the
+        /// specified size -OR- <see cref="IntPtr.Zero" /> if the memory could
+        /// not be allocated.
+        /// </returns>
         public static IntPtr Allocate(int size)
         {
             IntPtr pMemory = UnsafeNativeMethods.sqlite3_malloc(size);
@@ -3405,6 +3437,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Gets and returns the actual size of the specified memory block that
+        /// was previously obtained from the <see cref="Allocate" /> method.
+        /// </summary>
+        /// <param name="pMemory">
+        /// The native pointer to the memory block previously obtained from the
+        /// <see cref="Allocate" /> method.
+        /// </param>
+        /// <returns>
+        /// The actual size, in bytes, of the memory block specified via the
+        /// native pointer.
+        /// </returns>
         public static int Size(IntPtr pMemory)
         {
 #if !SQLITE_STANDARD
@@ -3416,6 +3460,14 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Frees a memory block previously obtained from the
+        /// <see cref="Allocate" /> method.
+        /// </summary>
+        /// <param name="pMemory">
+        /// The native pointer to the memory block previously obtained from the
+        /// <see cref="Allocate" /> method.
+        /// </param>
         public static void Free(IntPtr pMemory)
         {
 #if TRACK_MEMORY_BYTES

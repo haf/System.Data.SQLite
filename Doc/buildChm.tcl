@@ -87,9 +87,6 @@ set count 0
 set pattern { cref="([A-Z]):System\.Data\.SQLite\.}
 incr count [regsub -all -- $pattern $data { cref="\1:system.Data.SQLite.} data]
 
-set pattern { name="([A-Z]):System\.Data\.SQLite\.}
-incr count [regsub -all -- $pattern $data { name="\1:system.Data.SQLite.} data]
-
 if {$count > 0} then {
   writeFile $xmlDocFile $data
 } else {
