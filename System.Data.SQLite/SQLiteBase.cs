@@ -862,6 +862,18 @@ namespace System.Data.SQLite
       GetAllAsText = 0x100,
 
       /// <summary>
+      /// Prevent this <see cref="SQLiteConnection" /> object instance from
+      /// loading extensions.
+      /// </summary>
+      NoLoadExtension = 0x200,
+
+      /// <summary>
+      /// Prevent this <see cref="SQLiteConnection" /> object instance from
+      /// creating virtual table modules.
+      /// </summary>
+      NoCreateModule = 0x400,
+
+      /// <summary>
       /// When binding and returning column values, always treat them as though
       /// they were plain text (i.e. no numeric, date/time, or other conversions
       /// should be attempted).

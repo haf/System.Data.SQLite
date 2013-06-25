@@ -1733,6 +1733,9 @@ namespace System.Data.SQLite
                 "Database connection not valid for {0} extensions.",
                 enable ? "enabling" : "disabling"));
 
+        if ((_flags & SQLiteConnectionFlags.NoLoadExtension) == SQLiteConnectionFlags.NoLoadExtension)
+            throw new SQLiteException("Loading extensions is disabled for this database connection.");
+
         _sql.SetLoadExtension(enable);
     }
 
@@ -1772,6 +1775,9 @@ namespace System.Data.SQLite
             throw new InvalidOperationException(
                 "Database connection not valid for loading extensions.");
 
+        if ((_flags & SQLiteConnectionFlags.NoLoadExtension) == SQLiteConnectionFlags.NoLoadExtension)
+            throw new SQLiteException("Loading extensions is disabled for this database connection.");
+
         _sql.LoadExtension(fileName, procName);
     }
 
@@ -1792,6 +1798,9 @@ namespace System.Data.SQLite
         if (_sql == null)
             throw new InvalidOperationException(
                 "Database connection not valid for creating modules.");
+
+        if ((_flags & SQLiteConnectionFlags.NoCreateModule) == SQLiteConnectionFlags.NoCreateModule)
+            throw new SQLiteException("Creating modules is disabled for this database connection.");
 
         _sql.CreateModule(module);
     }
