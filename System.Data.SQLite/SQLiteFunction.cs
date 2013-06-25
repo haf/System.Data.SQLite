@@ -38,16 +38,6 @@ namespace System.Data.SQLite
 
     /////////////////////////////////////////////////////////////////////////
 
-    #region Private Constants
-    /// <summary>
-    /// The error code used for logging exceptions caught in user-provided
-    /// code.
-    /// </summary>
-    private const int COR_E_EXCEPTION = unchecked((int)0x80131500);
-    #endregion
-
-    /////////////////////////////////////////////////////////////////////////
-
     /// <summary>
     /// The base connection this function is attached to
     /// </summary>
@@ -390,8 +380,8 @@ namespace System.Data.SQLite
                 if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
                         SQLiteConnectionFlags.LogCallbackException)
                 {
-                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
-                        CultureInfo.CurrentCulture,
+                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                        String.Format(CultureInfo.CurrentCulture,
                         "Caught exception in \"Invoke\" method: {0}",
                         e)); /* throw */
                 }
@@ -428,8 +418,8 @@ namespace System.Data.SQLite
                 if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
                         SQLiteConnectionFlags.LogCallbackException)
                 {
-                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
-                        CultureInfo.CurrentCulture,
+                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                        String.Format(CultureInfo.CurrentCulture,
                         "Caught exception in \"Compare\" (UTF8) method: {0}",
                         e)); /* throw */
                 }
@@ -475,8 +465,8 @@ namespace System.Data.SQLite
                 if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
                         SQLiteConnectionFlags.LogCallbackException)
                 {
-                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
-                        CultureInfo.CurrentCulture,
+                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                        String.Format(CultureInfo.CurrentCulture,
                         "Caught exception in \"Compare\" (UTF16) method: {0}",
                         e)); /* throw */
                 }
@@ -548,8 +538,8 @@ namespace System.Data.SQLite
                 if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
                         SQLiteConnectionFlags.LogCallbackException)
                 {
-                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
-                        CultureInfo.CurrentCulture,
+                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                        String.Format(CultureInfo.CurrentCulture,
                         "Caught exception in \"Step\" method: {1}",
                         e)); /* throw */
                 }
@@ -603,8 +593,8 @@ namespace System.Data.SQLite
                 if ((_flags & SQLiteConnectionFlags.LogCallbackException) ==
                         SQLiteConnectionFlags.LogCallbackException)
                 {
-                    SQLiteLog.LogMessage(COR_E_EXCEPTION, String.Format(
-                        CultureInfo.CurrentCulture,
+                    SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                        String.Format(CultureInfo.CurrentCulture,
                         "Caught exception in \"Final\" method: {1}",
                         e)); /* throw */
                 }
@@ -846,13 +836,13 @@ namespace System.Data.SQLite
   /// <summary>
   /// An internal callback delegate declaration.
   /// </summary>
-  /// <param name="context">Raw context pointer for the user function</param>
-  /// <param name="nArgs">Count of arguments to the function</param>
-  /// <param name="argsptr">A pointer to the array of argument pointers</param>
+  /// <param name="context">Raw native context pointer for the user function.</param>
+  /// <param name="argc">Total number of arguments to the user function.</param>
+  /// <param name="argv">Raw native pointer to the array of raw native argument pointers.</param>
 #if !PLATFORM_COMPACTFRAMEWORK
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
-  internal delegate void SQLiteCallback(IntPtr context, int nArgs, IntPtr argsptr);
+  public delegate void SQLiteCallback(IntPtr context, int argc, IntPtr argv);
   /// <summary>
   /// An internal final callback delegate declaration.
   /// </summary>

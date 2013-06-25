@@ -77,9 +77,56 @@ namespace System.Data.SQLite
     /// </summary>
     protected SQLiteFunction[] _functionsArray;
 
-    internal SQLite3(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString)
+#if INTEROP_VIRTUAL_TABLE
+    /// <summary>
+    /// The modules created using this connection.
+    /// </summary>
+    protected Dictionary<string, SQLiteModule> _modules;
+#endif
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Constructs the object used to interact with the SQLite core library
+    /// using the UTF-8 text encoding.
+    /// </summary>
+    /// <param name="fmt">
+    /// The DateTime format to be used when converting string values to a
+    /// DateTime and binding DateTime parameters.
+    /// </param>
+    /// <param name="kind">
+    /// The <see cref="DateTimeKind" /> to be used when creating DateTime
+    /// values.
+    /// </param>
+    /// <param name="fmtString">
+    /// The format string to be used when parsing and formatting DateTime
+    /// values.
+    /// </param>
+    /// <param name="db">
+    /// The native handle to be associated with the database connection.
+    /// </param>
+    /// <param name="fileName">
+    /// The fully qualified file name associated with <paramref name="db "/>.
+    /// </param>
+    /// <param name="ownHandle">
+    /// Non-zero if the newly created object instance will need to dispose
+    /// of <paramref name="db" /> when it is no longer needed.
+    /// </param>
+    internal SQLite3(
+        SQLiteDateFormats fmt,
+        DateTimeKind kind,
+        string fmtString,
+        IntPtr db,
+        string fileName,
+        bool ownHandle
+        )
       : base(fmt, kind, fmtString)
     {
+        if (db != IntPtr.Zero)
+        {
+            _sql = new SQLiteConnectionHandle(db, ownHandle);
+            _fileName = fileName;
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,6 +160,27 @@ namespace System.Data.SQLite
                 // release unmanaged resources here...
                 //////////////////////////////////////
 
+#if INTEROP_VIRTUAL_TABLE
+                //
+                // NOTE: If any modules were created, attempt to dispose of
+                //       them now.  This code is designed to avoid throwing
+                //       exceptions unless the Dispose method of the module
+                //       itself throws an exception.
+                //
+                if (_modules != null)
+                {
+                    foreach (KeyValuePair<string, SQLiteModule> pair in _modules)
+                    {
+                        SQLiteModule module = pair.Value;
+
+                        if (module == null)
+                            continue;
+
+                        module.Dispose();
+                    }
+                }
+#endif
+
                 Close(false); /* Disposing, cannot throw. */
 
                 disposed = true;
@@ -135,6 +203,12 @@ namespace System.Data.SQLite
     {
       if (_sql != null)
       {
+          if (!_sql.OwnHandle)
+          {
+              _sql = null;
+              return;
+          }
+
           if (_usePool)
           {
               if (SQLiteBase.ResetConnection(_sql, _sql, canThrow))
@@ -246,10 +320,12 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_last_insert_rowid(_sql);
-#else
+#elif !SQLITE_STANDARD
         long rowId = 0;
         UnsafeNativeMethods.sqlite3_last_insert_rowid_interop(_sql, ref rowId);
         return rowId;
+#else
+        throw new NotImplementedException();
 #endif
       }
     }
@@ -272,10 +348,12 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_memory_used();
-#else
+#elif !SQLITE_STANDARD
         long bytes = 0;
         UnsafeNativeMethods.sqlite3_memory_used_interop(ref bytes);
         return bytes;
+#else
+        throw new NotImplementedException();
 #endif
       }
     }
@@ -286,12 +364,29 @@ namespace System.Data.SQLite
       {
 #if !PLATFORM_COMPACTFRAMEWORK
         return UnsafeNativeMethods.sqlite3_memory_highwater(0);
-#else
+#elif !SQLITE_STANDARD
         long bytes = 0;
         UnsafeNativeMethods.sqlite3_memory_highwater_interop(0, ref bytes);
         return bytes;
+#else
+        throw new NotImplementedException();
 #endif
       }
+    }
+
+    /// <summary>
+    /// Returns non-zero if the underlying native connection handle is owned
+    /// by this instance.
+    /// </summary>
+    internal override bool OwnHandle
+    {
+        get
+        {
+            if (_sql == null)
+                throw new SQLiteException("no connection handle available");
+
+            return _sql.OwnHandle;
+        }
     }
 
     internal override SQLiteErrorCode SetMemoryStatus(bool value)
@@ -325,7 +420,20 @@ namespace System.Data.SQLite
 
     internal override void Open(string strFilename, SQLiteConnectionFlags connectionFlags, SQLiteOpenFlagsEnum openFlags, int maxPoolSize, bool usePool)
     {
-      if (_sql != null) return;
+      //
+      // NOTE: If the database connection is currently open, attempt to
+      //       close it now.  This must be done because the file name or
+      //       other parameters that may impact the underlying database
+      //       connection may have changed.
+      //
+      if (_sql != null) Close(true);
+
+      //
+      // NOTE: If the connection was not closed successfully, throw an
+      //       exception now.
+      //
+      if (_sql != null)
+          throw new SQLiteException("connection handle is still active");
 
       _usePool = usePool;
       _fileName = strFilename;
@@ -366,7 +474,7 @@ namespace System.Data.SQLite
 #endif
 
           if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, null);
-          _sql = new SQLiteConnectionHandle(db);
+          _sql = new SQLiteConnectionHandle(db, true);
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }
@@ -475,7 +583,7 @@ namespace System.Data.SQLite
           // Reapply parameters
           stmt.BindParameters();
         }
-        return (SQLiteErrorCode)(-1); // Reset was OK, with schema change
+        return SQLiteErrorCode.Unknown; // Reset was OK, with schema change
       }
       else if (n == SQLiteErrorCode.Locked || n == SQLiteErrorCode.Busy)
         return n;
@@ -483,7 +591,7 @@ namespace System.Data.SQLite
       if (n != SQLiteErrorCode.Ok)
         throw new SQLiteException(n, GetLastError());
 
-      return SQLiteErrorCode.Ok; // We reset OK, no schema changes
+      return n; // We reset OK, no schema changes
     }
 
     internal override string GetLastError()
@@ -660,6 +768,7 @@ namespace System.Data.SQLite
         IntPtr handleIntPtr = handle;
 
         SQLiteLog.LogMessage(String.Format(
+            CultureInfo.CurrentCulture,
             "Binding statement {0} paramter #{1} as NULL...",
             handleIntPtr, index));
     }
@@ -741,8 +850,10 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double_interop(handle, index, ref value);
+#else
+        throw new NotImplementedException();
 #endif
         if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
@@ -779,8 +890,10 @@ namespace System.Data.SQLite
 
 #if !PLATFORM_COMPACTFRAMEWORK
             n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value2);
-#else
+#elif !SQLITE_STANDARD
             n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value2);
+#else
+            throw new NotImplementedException();
 #endif
         }
         else
@@ -801,8 +914,10 @@ namespace System.Data.SQLite
         }
 
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value);
+#else
+        throw new NotImplementedException();
 #endif
         if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
@@ -818,8 +933,10 @@ namespace System.Data.SQLite
         }
 
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_uint64(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
         SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_uint64_interop(handle, index, ref value);
+#else
+        throw new NotImplementedException();
 #endif
         if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
@@ -872,8 +989,10 @@ namespace System.Data.SQLite
                     }
 
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value);
+#else
+                    throw new NotImplementedException();
 #endif
                     if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
                     break;
@@ -889,8 +1008,10 @@ namespace System.Data.SQLite
                     }
 
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_double_interop(handle, index, ref value);
+#else
+                    throw new NotImplementedException();
 #endif
                     if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
                     break;
@@ -906,8 +1027,10 @@ namespace System.Data.SQLite
                     }
 
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64(handle, index, value);
-#else
+#elif !SQLITE_STANDARD
                     SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_bind_int64_interop(handle, index, ref value);
+#else
+                    throw new NotImplementedException();
 #endif
                     if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
                     break;
@@ -970,6 +1093,7 @@ namespace System.Data.SQLite
             IntPtr handleIntPtr = handle;
 
             SQLiteLog.LogMessage(String.Format(
+                CultureInfo.CurrentCulture,
                 "Statement {0} paramter count is {1}.",
                 handleIntPtr, value));
         }
@@ -994,6 +1118,7 @@ namespace System.Data.SQLite
             IntPtr handleIntPtr = handle;
 
             SQLiteLog.LogMessage(String.Format(
+                CultureInfo.CurrentCulture,
                 "Statement {0} paramter #{1} name is {{{2}}}.",
                 handleIntPtr, index, name));
         }
@@ -1011,6 +1136,7 @@ namespace System.Data.SQLite
             IntPtr handleIntPtr = handle;
 
             SQLiteLog.LogMessage(String.Format(
+                CultureInfo.CurrentCulture,
                 "Statement {0} paramter index of name {{{1}}} is #{2}.",
                 handleIntPtr, paramName, index));
         }
@@ -1150,8 +1276,10 @@ namespace System.Data.SQLite
       double value;
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_column_double(stmt._sqlite_stmt, index);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_column_double_interop(stmt._sqlite_stmt, index, out value);
+#else
+      throw new NotImplementedException();
 #endif
       return value;
     }
@@ -1191,8 +1319,10 @@ namespace System.Data.SQLite
       long value;
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_column_int64(stmt._sqlite_stmt, index);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_column_int64_interop(stmt._sqlite_stmt, index, out value);
+#else
+      throw new NotImplementedException();
 #endif
       return value;
     }
@@ -1410,8 +1540,10 @@ namespace System.Data.SQLite
       double value;
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_value_double(ptr);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_value_double_interop(ptr, out value);
+#else
+      throw new NotImplementedException();
 #endif
       return value;
     }
@@ -1426,8 +1558,10 @@ namespace System.Data.SQLite
       Int64 value;
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_value_int64(ptr);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_value_int64_interop(ptr, out value);
+#else
+      throw new NotImplementedException();
 #endif
       return value;
     }
@@ -1457,8 +1591,10 @@ namespace System.Data.SQLite
     {
 #if !PLATFORM_COMPACTFRAMEWORK
       UnsafeNativeMethods.sqlite3_result_double(context, value);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_result_double_interop(context, ref value);
+#else
+      throw new NotImplementedException();
 #endif
     }
 
@@ -1476,8 +1612,10 @@ namespace System.Data.SQLite
     {
 #if !PLATFORM_COMPACTFRAMEWORK
       UnsafeNativeMethods.sqlite3_result_int64(context, value);
-#else
+#elif !SQLITE_STANDARD
       UnsafeNativeMethods.sqlite3_result_int64_interop(context, ref value);
+#else
+      throw new NotImplementedException();
 #endif
     }
 
@@ -1492,10 +1630,159 @@ namespace System.Data.SQLite
       UnsafeNativeMethods.sqlite3_result_text(context, ToUTF8(value), b.Length - 1, (IntPtr)(-1));
     }
 
+#if INTEROP_VIRTUAL_TABLE
+    /// <summary>
+    /// Calls the native SQLite core library in order to create a disposable
+    /// module containing the implementation of a virtual table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object to be used when creating the native disposable module.
+    /// </param>
+    internal override void CreateModule(SQLiteModule module)
+    {
+        if (module == null)
+            throw new ArgumentNullException("module");
+
+        if (_sql == null)
+            throw new SQLiteException("connection has an invalid handle");
+
+        SetLoadExtension(true);
+        LoadExtension(UnsafeNativeMethods.SQLITE_DLL, "sqlite3_vtshim_init");
+
+        IntPtr pName = IntPtr.Zero;
+
+        try
+        {
+            pName = SQLiteString.Utf8IntPtrFromString(module.Name);
+
+            UnsafeNativeMethods.sqlite3_module nativeModule =
+                module.CreateNativeModule();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+            if (UnsafeNativeMethods.sqlite3_create_disposable_module(
+                    _sql, pName, ref nativeModule, IntPtr.Zero,
+                    null) != IntPtr.Zero)
+#elif !SQLITE_STANDARD
+            if (UnsafeNativeMethods.sqlite3_create_disposable_module_interop(
+                    _sql, pName, module.CreateNativeModuleInterop(),
+                    nativeModule.iVersion, nativeModule.xCreate,
+                    nativeModule.xConnect, nativeModule.xBestIndex,
+                    nativeModule.xDisconnect, nativeModule.xDestroy,
+                    nativeModule.xOpen, nativeModule.xClose,
+                    nativeModule.xFilter, nativeModule.xNext,
+                    nativeModule.xEof, nativeModule.xColumn,
+                    nativeModule.xRowId, nativeModule.xUpdate,
+                    nativeModule.xBegin, nativeModule.xSync,
+                    nativeModule.xCommit, nativeModule.xRollback,
+                    nativeModule.xFindFunction, nativeModule.xRename,
+                    nativeModule.xSavepoint, nativeModule.xRelease,
+                    nativeModule.xRollbackTo, IntPtr.Zero, null) != IntPtr.Zero)
+#else
+            throw new NotImplementedException();
+#endif
+#if !PLATFORM_COMPACTFRAMEWORK || !SQLITE_STANDARD
+            {
+                if (_modules == null)
+                    _modules = new Dictionary<string, SQLiteModule>();
+
+                _modules.Add(module.Name, module);
+            }
+            else
+            {
+                throw new SQLiteException(GetLastError());
+            }
+#endif
+        }
+        finally
+        {
+            if (pName != IntPtr.Zero)
+            {
+                SQLiteMemory.Free(pName);
+                pName = IntPtr.Zero;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calls the native SQLite core library in order to cleanup the resources
+    /// associated with a module containing the implementation of a virtual table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object previously passed to the <see cref="CreateModule" />
+    /// method.
+    /// </param>
+    internal override void DisposeModule(SQLiteModule module)
+    {
+        if (module == null)
+            throw new ArgumentNullException("module");
+
+        module.Dispose();
+    }
+#endif
+
     internal override IntPtr AggregateContext(IntPtr context)
     {
       return UnsafeNativeMethods.sqlite3_aggregate_context(context, 1);
     }
+
+#if INTEROP_VIRTUAL_TABLE
+    /// <summary>
+    /// Calls the native SQLite core library in order to declare a virtual table
+    /// in response to a call into the xCreate or xConnect virtual table methods.
+    /// </summary>
+    /// <param name="module">
+    /// The virtual table module that is to be responsible for the virtual table
+    /// being declared.
+    /// </param>
+    /// <param name="strSql">
+    /// The string containing the SQL statement describing the virtual table to
+    /// be declared.
+    /// </param>
+    /// <param name="error">
+    /// Upon success, the contents of this parameter are undefined.  Upon failure,
+    /// it should contain an appropriate error message.
+    /// </param>
+    /// <returns>
+    /// A standard SQLite return code.
+    /// </returns>
+    internal override SQLiteErrorCode DeclareVirtualTable(
+        SQLiteModule module,
+        string strSql,
+        ref string error
+        )
+    {
+        if (_sql == null)
+        {
+            error = "connection has an invalid handle";
+            return SQLiteErrorCode.Error;
+        }
+
+        IntPtr pSql = IntPtr.Zero;
+
+        try
+        {
+            pSql = SQLiteString.Utf8IntPtrFromString(strSql);
+
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_declare_vtab(
+                _sql, pSql);
+
+            if ((n == SQLiteErrorCode.Ok) && (module != null))
+                module.Declared = true;
+
+            if (n != SQLiteErrorCode.Ok) error = GetLastError();
+
+            return n;
+        }
+        finally
+        {
+            if (pSql != IntPtr.Zero)
+            {
+                SQLiteMemory.Free(pSql);
+                pSql = IntPtr.Zero;
+            }
+        }
+    }
+#endif
 
     /// <summary>
     /// Enables or disabled extension loading by SQLite.

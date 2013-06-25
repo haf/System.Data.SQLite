@@ -82,8 +82,10 @@ if {[string length $xmlDocFile] == 0 || ![file exists $xmlDocFile]} then {
 }
 
 set data [readFile $xmlDocFile]
+set count 0
+
 set pattern { cref="([A-Z]):System\.Data\.SQLite\.}
-set count [regsub -all -- $pattern $data { cref="\1:system.Data.SQLite.} data]
+incr count [regsub -all -- $pattern $data { cref="\1:system.Data.SQLite.} data]
 
 if {$count > 0} then {
   writeFile $xmlDocFile $data
@@ -104,15 +106,26 @@ puts stdout $result; if {$code != 0} then {exit $code}
 
 set fileNames [list SQLite.NET.hhp SQLite.NET.hhc]
 
-set exps(.hhc,1) {<!--This document contains Table of Contents information for\
-the HtmlHelp compiler\.--><UL>}
+foreach fileName [glob -nocomplain [file join $outputPath *.html]] {
+  lappend fileNames [file tail $fileName]
+}
 
-set exps(.hhp,1) {Default topic=~System\.Data\.SQLite\.html}
-set exps(.hhp,2) {"~System\.Data\.SQLite\.html","~System\.Data\.SQLite\.html",,,,,}
+set patterns(.hhc,1) {<!--This document contains Table of Contents information\
+for the HtmlHelp compiler\.--><UL>}
+
+set patterns(.hhp,1) {Default topic=~System\.Data\.SQLite\.html}
+
+set patterns(.hhp,2) \
+    {"~System\.Data\.SQLite\.html","~System\.Data\.SQLite\.html",,,,,}
+
+set patterns(.html,1) \
+    {"http://msdn\.microsoft\.com/en-us/library/(System\.Data\.SQLite\.(?:.*?))\(VS\.\d+\)\.aspx"}
 
 set subSpecs(.hhc,1) [readFileAsSubSpec [file join $path SQLite.NET.hhc]]
 set subSpecs(.hhp,1) {Default topic=welcome.html}
 set subSpecs(.hhp,2) {"welcome.html","welcome.html",,,,,}
+
+set subSpecs(.html,1) {"System.Data.SQLite~\1.html"}
 
 foreach fileName $fileNames {
   set fileName [file join $path $outputPath $fileName]
@@ -135,20 +148,20 @@ foreach fileName $fileNames {
   #
   set count 0
 
-  foreach name [lsort [array names exps [file extension $fileName],*]] {
-    set exp $exps($name)
+  foreach name [lsort [array names patterns [file extension $fileName],*]] {
+    set pattern $patterns($name)
     set subSpec ""
 
     if {[info exists subSpecs($name)]} then {
       set subSpec $subSpecs($name)
     }
 
-    set expCount [regsub -- $exp $data $subSpec data]
+    set patternCount [regsub -all -- $pattern $data $subSpec data]
 
-    if {$expCount > 0} then {
-      incr count $expCount
+    if {$patternCount > 0} then {
+      incr count $patternCount
     } else {
-      puts stdout "*WARNING* File \"$fileName\" does not match: $exp"
+      puts stdout "*WARNING* File \"$fileName\" does not match: $pattern"
     }
   }
 

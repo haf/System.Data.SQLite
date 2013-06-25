@@ -1477,6 +1477,47 @@ namespace eval ::Eagle {
       #
       # NOTE: Skip all output if we are running in "quiet" mode.
       #
+      if {[haveConstraint \
+              defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE] && \
+          [haveConstraint \
+              defineConstant.System.Data.SQLite.TRACK_MEMORY_BYTES]} then {
+        if {!$quiet} then {
+          tputs $channel "---- current memory in use by SQLiteMemory... "
+        }
+
+        if {[catch {object invoke -flags +NonPublic \
+                System.Data.SQLite.SQLiteMemory \
+                bytesAllocated} memory] == 0} then {
+          if {!$quiet} then {
+            tputs $channel [appendArgs $memory " bytes\n"]
+          }
+        } else {
+          set memory unknown
+
+          if {!$quiet} then {
+            tputs $channel [appendArgs $memory \n]
+          }
+        }
+
+        if {!$quiet} then {
+          tputs $channel "---- maximum memory in use by SQLiteMemory... "
+        }
+
+        if {[catch {object invoke -flags +NonPublic \
+                System.Data.SQLite.SQLiteMemory \
+                maximumBytesAllocated} memory] == 0} then {
+          if {!$quiet} then {
+            tputs $channel [appendArgs $memory " bytes\n"]
+          }
+        } else {
+          set memory unknown
+
+          if {!$quiet} then {
+            tputs $channel [appendArgs $memory \n]
+          }
+        }
+      }
+
       if {!$quiet} then {
         tputs $channel "---- current memory in use by SQLite... "
       }
@@ -1912,10 +1953,11 @@ namespace eval ::Eagle {
         foreach defineConstant [list \
             CHECK_STATE COUNT_HANDLE DEBUG INTEROP_CODEC INTEROP_DEBUG \
             INTEROP_EXTENSION_FUNCTIONS INTEROP_LEGACY_CLOSE INTEROP_LOG \
-            INTEROP_TEST_EXTENSION NET_20 NET_35 NET_40 NET_45 NET_COMPACT_20 \
-            PLATFORM_COMPACTFRAMEWORK PRELOAD_NATIVE_LIBRARY RETARGETABLE \
-            SQLITE_STANDARD THROW_ON_DISPOSED TRACE TRACE_CONNECTION \
-            TRACE_HANDLE TRACE_PRELOAD TRACE_STATEMENT TRACE_WARNING \
+            INTEROP_TEST_EXTENSION INTEROP_VIRTUAL_TABLE NET_20 NET_35 \
+            NET_40 NET_45 NET_COMPACT_20 PLATFORM_COMPACTFRAMEWORK \
+            PRELOAD_NATIVE_LIBRARY RETARGETABLE SQLITE_STANDARD \
+            THROW_ON_DISPOSED TRACE TRACE_CONNECTION TRACE_HANDLE \
+            TRACE_PRELOAD TRACE_STATEMENT TRACE_WARNING TRACK_MEMORY_BYTES \
             USE_INTEROP_DLL USE_PREPARE_V2 WINDOWS] {
           #
           # NOTE: Check if the compile-time option is listed in the list of

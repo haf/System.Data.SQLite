@@ -632,18 +632,18 @@ namespace System.Data.SQLite
     //
     // NOTE: Otherwise, if the standard SQLite library is enabled, use it.
     //
-    private const string SQLITE_DLL = "sqlite3";
+    internal const string SQLITE_DLL = "sqlite3";
 #elif USE_INTEROP_DLL
-    //
+      //
     // NOTE: Otherwise, if the native SQLite interop assembly is enabled,
     //       use it.
     //
-    private const string SQLITE_DLL = "SQLite.Interop.dll";
+    internal const string SQLITE_DLL = "SQLite.Interop.dll";
 #else
     //
     // NOTE: Finally, assume that the mixed-mode assembly is being used.
     //
-    private const string SQLITE_DLL = "System.Data.SQLite.dll";
+    internal const string SQLITE_DLL = "System.Data.SQLite.dll";
 #endif
 
     // This section uses interop calls that also fetch text length to optimize conversion.
@@ -706,6 +706,9 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern IntPtr sqlite3_value_text16_interop(IntPtr p, out int len);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int sqlite3_malloc_size_interop(IntPtr p);
 
 #if INTEROP_LOG
     [DllImport(SQLITE_DLL)]
@@ -1060,9 +1063,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_last_insert_rowid(IntPtr db);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_last_insert_rowid_interop(IntPtr db, ref long rowId);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1075,17 +1075,11 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_memory_used();
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_memory_used_interop(ref long bytes);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_memory_highwater(int resetFlag);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_memory_highwater_interop(int resetFlag, ref long bytes);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1112,9 +1106,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern SQLiteErrorCode sqlite3_bind_double(IntPtr stmt, int index, double value);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern SQLiteErrorCode sqlite3_bind_double_interop(IntPtr stmt, int index, ref double value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1138,9 +1129,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern SQLiteErrorCode sqlite3_bind_int64(IntPtr stmt, int index, long value);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern SQLiteErrorCode sqlite3_bind_int64_interop(IntPtr stmt, int index, ref long value);
 #endif
 
     //
@@ -1150,9 +1138,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int64", CallingConvention = CallingConvention.Cdecl)]
     internal static extern SQLiteErrorCode sqlite3_bind_uint64(IntPtr stmt, int index, ulong value);
-#else
-    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int64_interop")]
-    internal static extern SQLiteErrorCode sqlite3_bind_uint64_interop(IntPtr stmt, int index, ref ulong value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1200,9 +1185,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern double sqlite3_column_double(IntPtr stmt, int index);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_column_double_interop(IntPtr stmt, int index, out double value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1215,9 +1197,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_column_int64(IntPtr stmt, int index);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_column_int64_interop(IntPtr stmt, int index, out long value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1286,9 +1265,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern double sqlite3_value_double(IntPtr p);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_value_double_interop(IntPtr p, out double value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1301,9 +1277,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern long sqlite3_value_int64(IntPtr p);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_value_int64_interop(IntPtr p, out Int64 value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1323,9 +1296,6 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void sqlite3_result_double(IntPtr context, double value);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_double_interop(IntPtr context, ref double value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1340,14 +1310,46 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
+    internal static extern void sqlite3_result_error_code(IntPtr context, SQLiteErrorCode value);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern void sqlite3_result_error_toobig(IntPtr context);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern void sqlite3_result_error_nomem(IntPtr context);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern void sqlite3_result_value(IntPtr context, IntPtr value);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern void sqlite3_result_zeroblob(IntPtr context, int nLen);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
     internal static extern void sqlite3_result_int(IntPtr context, int value);
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void sqlite3_result_int64(IntPtr context, long value);
-#else
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_result_int64_interop(IntPtr context, ref Int64 value);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1471,6 +1473,13 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
+    internal static extern IntPtr sqlite3_db_filename(IntPtr db, IntPtr dbName);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
     internal static extern IntPtr sqlite3_next_stmt(IntPtr db, IntPtr stmt);
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1559,6 +1568,482 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL)]
 #endif
     internal static extern int sqlite3_backup_pagecount(IntPtr backup);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_declare_vtab(IntPtr db, IntPtr zSQL);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_mprintf(IntPtr format, __arglist);
+    #endregion
+
+    // SQLite API calls that are provided by "well-known" extensions that may be statically
+    // linked with the SQLite core native library currently in use.
+    #region extension sqlite api calls
+#if INTEROP_VIRTUAL_TABLE
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_create_disposable_module(IntPtr db, IntPtr name, ref sqlite3_module module, IntPtr pClientData, xDestroyModule xDestroy);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern void sqlite3_dispose_module(ref sqlite3_module pModule);
+#endif
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region sqlite interop api calls (.NET Compact Framework only)
+#if PLATFORM_COMPACTFRAMEWORK && !SQLITE_STANDARD
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_last_insert_rowid_interop(IntPtr db, ref long rowId);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_memory_used_interop(ref long bytes);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_memory_highwater_interop(int resetFlag, ref long bytes);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern SQLiteErrorCode sqlite3_bind_double_interop(IntPtr stmt, int index, ref double value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern SQLiteErrorCode sqlite3_bind_int64_interop(IntPtr stmt, int index, ref long value);
+
+    [DllImport(SQLITE_DLL, EntryPoint = "sqlite3_bind_int64_interop")]
+    internal static extern SQLiteErrorCode sqlite3_bind_uint64_interop(IntPtr stmt, int index, ref ulong value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_column_double_interop(IntPtr stmt, int index, out double value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_column_int64_interop(IntPtr stmt, int index, out long value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_value_double_interop(IntPtr p, out double value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_value_int64_interop(IntPtr p, out Int64 value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_result_double_interop(IntPtr context, ref double value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_result_int64_interop(IntPtr context, ref Int64 value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_create_disposable_module_interop(
+        IntPtr db, IntPtr name, IntPtr pModule, int iVersion, xCreate xCreate,
+        xConnect xConnect, xBestIndex xBestIndex, xDisconnect xDisconnect,
+        xDestroy xDestroy, xOpen xOpen, xClose xClose, xFilter xFilter,
+        xNext xNext, xEof xEof, xColumn xColumn, xRowId xRowId, xUpdate xUpdate,
+        xBegin xBegin, xSync xSync, xCommit xCommit, xRollback xRollback,
+        xFindFunction xFindFunction, xRename xRename, xSavepoint xSavepoint,
+        xRelease xRelease, xRollbackTo xRollbackTo, IntPtr pClientData,
+        xDestroyModule xDestroyModule);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_dispose_module_interop(IntPtr pModule);
+#endif
+    // PLATFORM_COMPACTFRAMEWORK && !SQLITE_STANDARD
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region Native Delegates
+#if INTEROP_VIRTUAL_TABLE
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xCreate(
+        IntPtr pDb,
+        IntPtr pAux,
+        int argc,
+        IntPtr argv,
+        ref IntPtr pVtab,
+        ref IntPtr pError
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xConnect(
+        IntPtr pDb,
+        IntPtr pAux,
+        int argc,
+        IntPtr argv,
+        ref IntPtr pVtab,
+        ref IntPtr pError
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xBestIndex(
+        IntPtr pVtab,
+        IntPtr pIndex
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xDisconnect(
+        IntPtr pVtab
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xDestroy(
+        IntPtr pVtab
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xOpen(
+        IntPtr pVtab,
+        ref IntPtr pCursor
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xClose(
+        IntPtr pCursor
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xFilter(
+        IntPtr pCursor,
+        int idxNum,
+        IntPtr idxStr,
+        int argc,
+        IntPtr argv
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xNext(
+        IntPtr pCursor
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate int xEof(
+        IntPtr pCursor
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xColumn(
+        IntPtr pCursor,
+        IntPtr pContext,
+        int index
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xRowId(
+        IntPtr pCursor,
+        ref long rowId
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xUpdate(
+        IntPtr pVtab,
+        int argc,
+        IntPtr argv,
+        ref long rowId
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xBegin(
+        IntPtr pVtab
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xSync(
+        IntPtr pVtab
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xCommit(
+        IntPtr pVtab
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xRollback(
+        IntPtr pVtab
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate int xFindFunction(
+        IntPtr pVtab,
+        int nArg,
+        IntPtr zName,
+        ref SQLiteCallback callback,
+        ref IntPtr pUserData
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xRename(
+        IntPtr pVtab,
+        IntPtr zNew
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xSavepoint(
+        IntPtr pVtab,
+        int iSavepoint
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xRelease(
+        IntPtr pVtab,
+        int iSavepoint
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate SQLiteErrorCode xRollbackTo(
+        IntPtr pVtab,
+        int iSavepoint
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
+    public delegate void xDestroyModule(IntPtr pClientData);
+#endif
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region Native Structures
+#if INTEROP_VIRTUAL_TABLE
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct sqlite3_module
+    {
+        public int iVersion;
+        public xCreate xCreate;
+        public xConnect xConnect;
+        public xBestIndex xBestIndex;
+        public xDisconnect xDisconnect;
+        public xDestroy xDestroy;
+        public xOpen xOpen;
+        public xClose xClose;
+        public xFilter xFilter;
+        public xNext xNext;
+        public xEof xEof;
+        public xColumn xColumn;
+        public xRowId xRowId;
+        public xUpdate xUpdate;
+        public xBegin xBegin;
+        public xSync xSync;
+        public xCommit xCommit;
+        public xRollback xRollback;
+        public xFindFunction xFindFunction;
+        public xRename xRename;
+        /* The methods above are in version 1 of the sqlite3_module
+         * object.  Those below are for version 2 and greater. */
+        public xSavepoint xSavepoint;
+        public xRelease xRelease;
+        public xRollbackTo xRollbackTo;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct sqlite3_vtab
+    {
+        public IntPtr pModule;
+        public int nRef; /* NO LONGER USED */
+        public IntPtr zErrMsg;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct sqlite3_vtab_cursor
+    {
+        public IntPtr pVTab;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct sqlite3_index_constraint
+    {
+        public sqlite3_index_constraint(
+            SQLiteIndexConstraint constraint
+            )
+            : this()
+        {
+            if (constraint != null)
+            {
+                iColumn = constraint.iColumn;
+                op = constraint.op;
+                usable = constraint.usable;
+                iTermOffset = constraint.iTermOffset;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public int iColumn;
+        public SQLiteIndexConstraintOp op;
+        public byte usable;
+        public int iTermOffset;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct sqlite3_index_orderby
+    {
+        public sqlite3_index_orderby(
+            SQLiteIndexOrderBy orderBy
+            )
+            : this()
+        {
+            if (orderBy != null)
+            {
+                iColumn = orderBy.iColumn;
+                desc = orderBy.desc;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public int iColumn; /* Column number */
+        public byte desc;   /* True for DESC.  False for ASC. */
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct sqlite3_index_constraint_usage
+    {
+        public sqlite3_index_constraint_usage(
+            SQLiteIndexConstraintUsage constraintUsage
+            )
+            : this()
+        {
+            if (constraintUsage != null)
+            {
+                argvIndex = constraintUsage.argvIndex;
+                omit = constraintUsage.omit;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public int argvIndex; /* if >0, constraint is part of argv to xFilter */
+        public byte omit;     /* Do not code a test for this constraint */
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct sqlite3_index_info
+    {
+        /* Inputs */
+        public int nConstraint; /* Number of entries in aConstraint */
+        public IntPtr aConstraint;
+        public int nOrderBy;
+        public IntPtr aOrderBy;
+        /* Outputs */
+        public IntPtr aConstraintUsage;
+        public int idxNum;           /* Number used to identify the index */
+        public string idxStr;        /* String, possibly obtained from sqlite3_malloc */
+        public int needToFreeIdxStr; /* Free idxStr using sqlite3_free() if true */
+        public int orderByConsumed;  /* True if output is already ordered */
+        public double estimatedCost; /* Estimated cost of using this index */
+    }
+#endif
     #endregion
   }
 
@@ -1657,6 +2142,10 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        private bool ownHandle;
+
+        ///////////////////////////////////////////////////////////////////////
+
         public static implicit operator IntPtr(SQLiteConnectionHandle db)
         {
             if (db != null)
@@ -1673,25 +2162,26 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal SQLiteConnectionHandle(IntPtr db)
-            : this()
+        internal SQLiteConnectionHandle(IntPtr db, bool ownHandle)
+            : this(ownHandle)
         {
 #if PLATFORM_COMPACTFRAMEWORK
             lock (syncRoot)
 #endif
             {
+                this.ownHandle = ownHandle;
                 SetHandle(db);
             }
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        private SQLiteConnectionHandle()
+        private SQLiteConnectionHandle(bool ownHandle)
             : base(IntPtr.Zero)
         {
 #if COUNT_HANDLE
-            Interlocked.Increment(
-                ref UnsafeNativeMethods.connectionCount);
+            if (ownHandle)
+                Interlocked.Increment(ref UnsafeNativeMethods.connectionCount);
 #endif
         }
 
@@ -1699,6 +2189,13 @@ namespace System.Data.SQLite
 
         protected override bool ReleaseHandle()
         {
+#if PLATFORM_COMPACTFRAMEWORK
+            lock (syncRoot)
+#endif
+            {
+                if (!ownHandle) return true;
+            }
+
             try
             {
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -1784,6 +2281,21 @@ namespace System.Data.SQLite
                 ref UnsafeNativeMethods.connectionCount);
         }
 #endif
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public bool OwnHandle
+        {
+            get
+            {
+#if PLATFORM_COMPACTFRAMEWORK
+                lock (syncRoot)
+#endif
+                {
+                    return ownHandle;
+                }
+            }
+        }
 
         ///////////////////////////////////////////////////////////////////////
 

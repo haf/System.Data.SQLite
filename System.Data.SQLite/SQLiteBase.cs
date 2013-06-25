@@ -19,6 +19,16 @@ namespace System.Data.SQLite
   /// </summary>
   internal abstract class SQLiteBase : SQLiteConvert, IDisposable
   {
+    #region Private Constants
+    /// <summary>
+    /// The error code used for logging exceptions caught in user-provided
+    /// code.
+    /// </summary>
+    internal const int COR_E_EXCEPTION = unchecked((int)0x80131500);
+    #endregion
+
+    /////////////////////////////////////////////////////////////////////////
+
     internal SQLiteBase(SQLiteDateFormats fmt, DateTimeKind kind, string fmtString)
       : base(fmt, kind, fmtString) { }
 
@@ -48,6 +58,10 @@ namespace System.Data.SQLite
     /// This is not really a per-connection value, it is global to the process.
     /// </summary>
     internal abstract long MemoryHighwater { get; }
+    /// <summary>
+    /// Returns non-zero if the underlying native connection handle is owned by this instance.
+    /// </summary>
+    internal abstract bool OwnHandle { get; }
     /// <summary>
     /// Sets the status of the memory usage tracking subsystem in the SQLite core library.  By default, this is enabled.
     /// If this is disabled, memory usage tracking will not be performed.  This is not really a per-connection value, it is
@@ -200,6 +214,48 @@ namespace System.Data.SQLite
     internal abstract void ReturnInt64(IntPtr context, Int64 value);
     internal abstract void ReturnNull(IntPtr context);
     internal abstract void ReturnText(IntPtr context, string value);
+
+#if INTEROP_VIRTUAL_TABLE
+    /// <summary>
+    /// Calls the native SQLite core library in order to create a disposable
+    /// module containing the implementation of a virtual table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object to be used when creating the native disposable module.
+    /// </param>
+    internal abstract void CreateModule(SQLiteModule module);
+
+    /// <summary>
+    /// Calls the native SQLite core library in order to cleanup the resources
+    /// associated with a module containing the implementation of a virtual table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object previously passed to the <see cref="CreateModule" />
+    /// method.
+    /// </param>
+    internal abstract void DisposeModule(SQLiteModule module);
+
+    /// <summary>
+    /// Calls the native SQLite core library in order to declare a virtual table
+    /// in response to a call into the xCreate or xConnect virtual table methods.
+    /// </summary>
+    /// <param name="module">
+    /// The virtual table module that is to be responsible for the virtual table
+    /// being declared.
+    /// </param>
+    /// <param name="strSql">
+    /// The string containing the SQL statement describing the virtual table to
+    /// be declared.
+    /// </param>
+    /// <param name="error">
+    /// Upon success, the contents of this parameter are undefined.  Upon failure,
+    /// it should contain an appropriate error message.
+    /// </param>
+    /// <returns>
+    /// A standard SQLite return code.
+    /// </returns>
+    internal abstract SQLiteErrorCode DeclareVirtualTable(SQLiteModule module, string strSql, ref string error);
+#endif
 
     /// <summary>
     /// Enables or disabled extension loading by SQLite.
@@ -804,6 +860,18 @@ namespace System.Data.SQLite
       /// be attempted).
       /// </summary>
       GetAllAsText = 0x100,
+
+      /// <summary>
+      /// Prevent this <see cref="SQLiteConnection" /> object instance from
+      /// loading extensions.
+      /// </summary>
+      NoLoadExtension = 0x200,
+
+      /// <summary>
+      /// Prevent this <see cref="SQLiteConnection" /> object instance from
+      /// creating virtual table modules.
+      /// </summary>
+      NoCreateModule = 0x400,
 
       /// <summary>
       /// When binding and returning column values, always treat them as though

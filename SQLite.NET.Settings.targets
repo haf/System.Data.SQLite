@@ -199,6 +199,15 @@
     <CountHandle Condition="'$(CountHandle)' == ''">false</CountHandle>
 
     <!--
+        NOTE: Enable tracking of all outstanding bytes allocated by the
+              SQLiteMemory class.  By default, this is disabled.  If this is
+              enabled, this library will keep track of all outstanding bytes
+              allocated by the SQLiteMemory class.  This has the potential to
+              slow down the library a bit.
+    -->
+    <TrackMemoryBytes Condition="'$(TrackMemoryBytes)' == ''">false</TrackMemoryBytes>
+
+    <!--
         NOTE: For interaction with the native SQLite implementation, use the
               custom built interop DLL (i.e. "SQLite.Interop.dll")?  By default,
               this is enabled.  This property is mutually exclusive with the
@@ -362,6 +371,22 @@
     -->
     <InteropLog Condition="'$(InteropLog)' == '' And '$(Configuration)' == 'Debug'">true</InteropLog>
     <InteropLog Condition="'$(InteropLog)' == '' And '$(Configuration)' != 'Debug'">false</InteropLog>
+
+    <!--
+        NOTE: Enable including the vtshim module as a statically available
+              extension?  This will allow virtual tables to be implemented in
+              managed code.  By default, this is enabled.  If this is disabled,
+              support for implementing virtual tables in managed code will be
+              unavailable.  If this is enabled, it must also be enabled via
+              the "INTEROP_VIRTUAL_TABLE=1" preprocessor define being present
+              in the "INTEROP_EXTRA_DEFINES" macro in the build properties
+              file:
+
+                  "SQLite.Interop\props\SQLite.Interop.20YY.[vs]props"
+
+              both for the corresponding version(s) of Visual Studio.
+    -->
+    <InteropVirtualTable Condition="'$(InteropVirtualTable)' == ''">true</InteropVirtualTable>
 
     <!--
         NOTE: Enable the use of native Windows APIs, when available?  By

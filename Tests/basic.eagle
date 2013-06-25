@@ -79,6 +79,15 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
         -fileName [appendArgs \" [file nativename $fileName] \"]
   } error]
 
+  set successCount [regexp -all -- {\tSucceeded\t} $output]
+  set failureCount [regexp -all -- {\tFailed\t} $output]
+  set totalCount [expr {$successCount + $failureCount}]
+
+  tputs $test_channel [appendArgs \
+      "---- found and executed " $totalCount " unit tests from \"" \
+      $testExeFile "\", " $successCount " passed, " $failureCount \
+      " failed\n"]
+
   tlog "---- BEGIN STDOUT OUTPUT\n"
   tlog $output
   tlog "\n---- END STDOUT OUTPUT\n"
@@ -87,7 +96,8 @@ runTest {test data-1.1 {unit tests from the 'test' project} -setup {
 } -cleanup {
   cleanupFile $fileName
 
-  unset -nocomplain code output error fileName
+  unset -nocomplain totalCount failureCount successCount code output \
+      error fileName
 } -constraints {eagle SQLite file_System.Data.SQLite.dll file_test.exe} \
 -result {0 {}}}
 
@@ -1475,10 +1485,15 @@ runTest {test data-1.28 {SetMemoryStatus method} -setup {
   shutdownSQLite $test_channel
 
   #
+  # NOTE: Create an IntPtr instance with a value of zero.
+  #
+  set zero [object invoke -create IntPtr Zero]
+
+  #
   # NOTE: Create an instance of the core SQLite library interop wrapper class.
   #
   set sqlite3 [object create -flags +NonPublic System.Data.SQLite.SQLite3 \
-      Default Unspecified null]
+      Default Unspecified null $zero null true]
 } -body {
   set result(rc1) [object invoke -flags +NonPublic $sqlite3 SetMemoryStatus \
       false]
@@ -1542,7 +1557,7 @@ runTest {test data-1.28 {SetMemoryStatus method} -setup {
         sqlite3_config_int SQLITE_CONFIG_MEMSTATUS 1
   }
 
-  unset -nocomplain result sqlite3
+  unset -nocomplain result sqlite3 zero
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
 regexp -result {^Ok Misuse Ok Ok System#IntPtr#\d+ System#IntPtr#\d+ \d+ \d+\

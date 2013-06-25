@@ -9,6 +9,10 @@
 
 #include "../core/sqlite3.c"
 
+#if defined(INTEROP_VIRTUAL_TABLE)
+#include "../ext/vtshim.c"
+#endif
+
 #if defined(INTEROP_EXTENSION_FUNCTIONS)
 #include "../contrib/extension-functions.c"
 extern int RegisterExtensionFunctions(sqlite3 *db);
@@ -76,6 +80,10 @@ SQLITE_PRIVATE void sqlite3InteropLogCallback(void *pArg, int iCode, const char 
   sqlite3InteropDebug("INTEROP_LOG (%d) %s\n", iCode, zMsg);
 }
 #endif
+
+SQLITE_API int WINAPI sqlite3_malloc_size_interop(void *p){
+  return sqlite3MallocSize(p);
+}
 
 #if defined(INTEROP_LEGACY_CLOSE) || SQLITE_VERSION_NUMBER < 3007014
 SQLITE_PRIVATE void * sqlite3DbMallocZero_interop(sqlite3 *db, int n)
@@ -324,6 +332,68 @@ SQLITE_API int WINAPI sqlite3_prepare16_interop(sqlite3 *db, const void *sql, in
   *plen = (*pztail != 0) ? wcslen((wchar_t *)*pztail) * sizeof(wchar_t) : 0;
 
   return n;
+}
+
+SQLITE_API void *WINAPI sqlite3_create_disposable_module_interop(
+  sqlite3 *db,
+  const char *zName,
+  sqlite3_module *pModule,
+  int iVersion,
+  int (*xCreate)(sqlite3*, void *, int, const char *const*, sqlite3_vtab **, char**),
+  int (*xConnect)(sqlite3*, void *, int, const char *const*, sqlite3_vtab **, char**),
+  int (*xBestIndex)(sqlite3_vtab *, sqlite3_index_info*),
+  int (*xDisconnect)(sqlite3_vtab *),
+  int (*xDestroy)(sqlite3_vtab *),
+  int (*xOpen)(sqlite3_vtab *, sqlite3_vtab_cursor **),
+  int (*xClose)(sqlite3_vtab_cursor*),
+  int (*xFilter)(sqlite3_vtab_cursor*, int, const char *, int, sqlite3_value **),
+  int (*xNext)(sqlite3_vtab_cursor*),
+  int (*xEof)(sqlite3_vtab_cursor*),
+  int (*xColumn)(sqlite3_vtab_cursor*, sqlite3_context*, int),
+  int (*xRowid)(sqlite3_vtab_cursor*, sqlite3_int64 *),
+  int (*xUpdate)(sqlite3_vtab *, int, sqlite3_value **, sqlite3_int64 *),
+  int (*xBegin)(sqlite3_vtab *),
+  int (*xSync)(sqlite3_vtab *),
+  int (*xCommit)(sqlite3_vtab *),
+  int (*xRollback)(sqlite3_vtab *),
+  int (*xFindFunction)(sqlite3_vtab *, int, const char *, void (**pxFunc)(sqlite3_context*, int, sqlite3_value**), void **ppArg),
+  int (*xRename)(sqlite3_vtab *, const char *),
+  int (*xSavepoint)(sqlite3_vtab *, int),
+  int (*xRelease)(sqlite3_vtab *, int),
+  int (*xRollbackTo)(sqlite3_vtab *, int),
+  void *pClientData,
+  void(*xDestroyModule)(void*)
+){
+  memset(pModule, 0, sizeof(*pModule));
+  pModule->iVersion = iVersion;
+  pModule->xCreate = xCreate;
+  pModule->xConnect = xConnect;
+  pModule->xBestIndex = xBestIndex;
+  pModule->xDisconnect = xDisconnect;
+  pModule->xDestroy = xDestroy;
+  pModule->xOpen = xOpen;
+  pModule->xClose = xClose;
+  pModule->xFilter = xFilter;
+  pModule->xNext = xNext;
+  pModule->xEof = xEof;
+  pModule->xColumn = xColumn;
+  pModule->xRowid = xRowid;
+  pModule->xUpdate = xUpdate;
+  pModule->xBegin = xBegin;
+  pModule->xSync = xSync;
+  pModule->xCommit = xCommit;
+  pModule->xRollback = xRollback;
+  pModule->xFindFunction = xFindFunction;
+  pModule->xRename = xRename;
+  pModule->xSavepoint = xSavepoint;
+  pModule->xRelease = xRelease;
+  pModule->xRollbackTo = xRollbackTo;
+  return sqlite3_create_disposable_module(db, zName, pModule, pClientData, xDestroyModule);
+}
+
+SQLITE_API void WINAPI sqlite3_dispose_module_interop(void *pModule)
+{
+  sqlite3_dispose_module(pModule);
 }
 
 SQLITE_API int WINAPI sqlite3_bind_double_interop(sqlite3_stmt *stmt, int iCol, double *val)

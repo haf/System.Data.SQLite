@@ -84,4 +84,16 @@
     <EmbeddedResource Include="SQLiteConnection.bmp" />
     <EmbeddedResource Include="SQLiteDataAdapter.bmp" />
   </ItemGroup>
+
+  <!--
+  ******************************************************************************
+  **                           Virtual Table Files                            **
+  ******************************************************************************
+  -->
+
+  <ItemGroup Condition="'$(InteropVirtualTable)' != 'false'">
+    <Compile Include="SQLiteModule.cs" />
+    <Compile Include="SQLiteModuleEnumerable.cs" />
+    <Compile Include="SQLiteModuleNoop.cs" />
+  </ItemGroup>
 </Project>

@@ -403,6 +403,7 @@ namespace System.Data.SQLite
     /// </summary>
     internal SQLiteEnlistment _enlistment;
 #endif
+
     /// <summary>
     /// The base SQLite object to interop with
     /// </summary>
@@ -474,7 +475,7 @@ namespace System.Data.SQLite
     /// Default constructor
     /// </summary>
     public SQLiteConnection()
-      : this("")
+      : this((string)null)
     {
     }
 
@@ -489,10 +490,38 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Initializes the connection with a pre-existing native connection handle.
+    /// </summary>
+    /// <param name="db">
+    /// The native connection handle to use.
+    /// </param>
+    /// <param name="fileName">
+    /// The file name corresponding to the native connection handle.
+    /// </param>
+    /// <param name="ownHandle">
+    /// Non-zero if this instance owns the native connection handle and
+    /// should dispose of it when it is no longer needed.
+    /// </param>
+    internal SQLiteConnection(IntPtr db, string fileName, bool ownHandle)
+        : this()
+    {
+        _sql = new SQLite3(
+            SQLiteDateFormats.Default, DateTimeKind.Unspecified, null,
+            db, fileName, ownHandle);
+
+        _flags = SQLiteConnectionFlags.None;
+
+        _connectionState = (db != IntPtr.Zero) ?
+            ConnectionState.Open : ConnectionState.Closed;
+
+        _connectionString = null; /* unknown */
+    }
+
+    /// <summary>
     /// Initializes the connection with the specified connection string.
     /// </summary>
     /// <param name="connectionString">
-    /// The connection string to use on.
+    /// The connection string to use.
     /// </param>
     /// <param name="parseViaFramework">
     /// Non-zero to parse the connection string using the built-in (i.e.
@@ -543,8 +572,7 @@ namespace System.Data.SQLite
       _parseViaFramework = parseViaFramework;
       _flags = SQLiteConnectionFlags.Default;
       _connectionState = ConnectionState.Closed;
-      _connectionString = "";
-      //_commandList = new List<WeakReference>();
+      _connectionString = null;
 
       if (connectionString != null)
         ConnectionString = connectionString;
@@ -557,10 +585,8 @@ namespace System.Data.SQLite
     /// </summary>
     /// <param name="connection">The connection to copy the settings from.</param>
     public SQLiteConnection(SQLiteConnection connection)
-      : this(connection.ConnectionString)
+      : this(connection.ConnectionString, connection.ParseViaFramework)
     {
-      string str;
-
       if (connection.State == ConnectionState.Open)
       {
         Open();
@@ -570,7 +596,7 @@ namespace System.Data.SQLite
         {
           foreach (DataRow row in tbl.Rows)
           {
-            str = row[0].ToString();
+            string str = row[0].ToString();
             if (String.Compare(str, "main", StringComparison.OrdinalIgnoreCase) != 0
               && String.Compare(str, "temp", StringComparison.OrdinalIgnoreCase) != 0)
             {
@@ -687,7 +713,7 @@ namespace System.Data.SQLite
         )
     {
         if (nativeHandle == IntPtr.Zero) return null;
-        return new SQLiteConnectionHandle(nativeHandle);
+        return new SQLiteConnectionHandle(nativeHandle, true);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -834,6 +860,60 @@ namespace System.Data.SQLite
 
         if (handle.IsClosed)
             throw new InvalidOperationException("The connection handle is closed.");
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static SortedList<string, string> ParseConnectionString(
+        string connectionString,
+        bool parseViaFramework
+        )
+    {
+        return parseViaFramework ?
+            ParseConnectionStringViaFramework(connectionString, false) :
+            ParseConnectionString(connectionString);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void SetupSQLiteBase(SortedList<string, string> opts)
+    {
+        object enumValue;
+
+        enumValue = TryParseEnum(
+            typeof(SQLiteDateFormats), FindKey(opts, "DateTimeFormat",
+            DefaultDateTimeFormat.ToString()), true);
+
+        SQLiteDateFormats dateFormat = (enumValue is SQLiteDateFormats) ?
+            (SQLiteDateFormats)enumValue : DefaultDateTimeFormat;
+
+        enumValue = TryParseEnum(
+            typeof(DateTimeKind), FindKey(opts, "DateTimeKind",
+            DefaultDateTimeKind.ToString()), true);
+
+        DateTimeKind kind = (enumValue is DateTimeKind) ?
+            (DateTimeKind)enumValue : DefaultDateTimeKind;
+
+        string dateTimeFormat = FindKey(opts, "DateTimeFormatString",
+            DefaultDateTimeFormatString);
+
+        //
+        // NOTE: SQLite automatically sets the encoding of the database
+        //       to UTF16 if called from sqlite3_open16().
+        //
+        if (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding",
+                  DefaultUseUTF16Encoding.ToString())))
+        {
+            _sql = new SQLite3_UTF16(
+                dateFormat, kind, dateTimeFormat, IntPtr.Zero, null,
+                false);
+        }
+        else
+        {
+            _sql = new SQLite3(
+                dateFormat, kind, dateTimeFormat, IntPtr.Zero, null,
+                false);
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1439,7 +1519,7 @@ namespace System.Data.SQLite
 
       if (arParts == null)
       {
-          throw new ArgumentException(String.Format(
+          throw new ArgumentException(String.Format(CultureInfo.CurrentCulture,
               "Invalid ConnectionString format, cannot parse: {0}", (error != null) ?
               error : "could not split connection string into properties"));
       }
@@ -1649,8 +1729,12 @@ namespace System.Data.SQLite
 
         if (_sql == null)
             throw new InvalidOperationException(String.Format(
+                CultureInfo.CurrentCulture,
                 "Database connection not valid for {0} extensions.",
                 enable ? "enabling" : "disabling"));
+
+        if ((_flags & SQLiteConnectionFlags.NoLoadExtension) == SQLiteConnectionFlags.NoLoadExtension)
+            throw new SQLiteException("Loading extensions is disabled for this database connection.");
 
         _sql.SetLoadExtension(enable);
     }
@@ -1691,8 +1775,36 @@ namespace System.Data.SQLite
             throw new InvalidOperationException(
                 "Database connection not valid for loading extensions.");
 
+        if ((_flags & SQLiteConnectionFlags.NoLoadExtension) == SQLiteConnectionFlags.NoLoadExtension)
+            throw new SQLiteException("Loading extensions is disabled for this database connection.");
+
         _sql.LoadExtension(fileName, procName);
     }
+
+#if INTEROP_VIRTUAL_TABLE
+    /// <summary>
+    /// Creates a disposable module containing the implementation of a virtual
+    /// table.
+    /// </summary>
+    /// <param name="module">
+    /// The module object to be used when creating the disposable module.
+    /// </param>
+    public void CreateModule(
+        SQLiteModule module
+        )
+    {
+        CheckDisposed();
+
+        if (_sql == null)
+            throw new InvalidOperationException(
+                "Database connection not valid for creating modules.");
+
+        if ((_flags & SQLiteConnectionFlags.NoCreateModule) == SQLiteConnectionFlags.NoCreateModule)
+            throw new SQLiteException("Creating modules is disabled for this database connection.");
+
+        _sql.CreateModule(module);
+    }
+#endif
 
     /// <summary>
     /// Parses a string containing a sequence of zero or more hexadecimal
@@ -1790,6 +1902,7 @@ namespace System.Data.SQLite
                     NumberStyles.HexNumber, out result[index / 2]))
             {
                 error = String.Format(
+                    CultureInfo.CurrentCulture,
                     "string contains \"{0}\", which cannot be converted to a byte value",
                     value);
 
@@ -1815,9 +1928,8 @@ namespace System.Data.SQLite
 
       Close();
 
-      SortedList<string, string> opts = _parseViaFramework ?
-          ParseConnectionStringViaFramework(_connectionString, false) :
-          ParseConnectionString(_connectionString);
+      SortedList<string, string> opts = ParseConnectionString(
+          _connectionString, _parseViaFramework);
 
       OnChanged(this, new ConnectionEventArgs(
           SQLiteConnectionEventType.ConnectionString, null, null, null, _connectionString, opts));
@@ -1884,34 +1996,7 @@ namespace System.Data.SQLite
 
         if (_sql == null)
         {
-            enumValue = TryParseEnum(typeof(SQLiteDateFormats), FindKey(opts,
-                "DateTimeFormat", DefaultDateTimeFormat.ToString()), true);
-
-            SQLiteDateFormats dateFormat = (enumValue is SQLiteDateFormats) ?
-                (SQLiteDateFormats)enumValue : DefaultDateTimeFormat;
-
-            enumValue = TryParseEnum(typeof(DateTimeKind), FindKey(opts,
-                "DateTimeKind", DefaultDateTimeKind.ToString()), true);
-
-            DateTimeKind kind = (enumValue is DateTimeKind) ?
-                (DateTimeKind)enumValue : DefaultDateTimeKind;
-
-            string dateTimeFormat = FindKey(opts, "DateTimeFormatString",
-                DefaultDateTimeFormatString);
-
-            //
-            // NOTE: SQLite automatically sets the encoding of the database to
-            //       UTF16 if called from sqlite3_open16().
-            //
-            if (SQLiteConvert.ToBoolean(FindKey(opts, "UseUTF16Encoding",
-                      DefaultUseUTF16Encoding.ToString())))
-            {
-                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat);
-            }
-            else
-            {
-                _sql = new SQLite3(dateFormat, kind, dateTimeFormat);
-            }
+            SetupSQLiteBase(opts);
         }
 
         SQLiteOpenFlagsEnum flags = SQLiteOpenFlagsEnum.None;
@@ -1948,6 +2033,7 @@ namespace System.Data.SQLite
             if (hexPasswordBytes == null)
             {
                 throw new FormatException(String.Format(
+                    CultureInfo.CurrentCulture,
                     "Cannot parse 'HexPassword' property value into byte values: {0}",
                     error));
             }
@@ -2133,6 +2219,23 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns non-zero if the underlying native connection handle is
+    /// owned by this instance.
+    /// </summary>
+    public bool OwnHandle
+    {
+        get
+        {
+            CheckDisposed();
+
+            if (_sql == null)
+                throw new InvalidOperationException("Database connection not valid for checking handle.");
+
+            return _sql.OwnHandle;
+        }
+    }
+
+    /// <summary>
     /// Returns the version of the underlying SQLite database engine
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -2310,40 +2413,10 @@ namespace System.Data.SQLite
         // make sure we have an instance of the base class
         if (_sql == null)
         {
-            SortedList<string, string> opts = _parseViaFramework ?
-                ParseConnectionStringViaFramework(_connectionString, false) :
-                ParseConnectionString(_connectionString);
+            SortedList<string, string> opts = ParseConnectionString(
+                _connectionString, _parseViaFramework);
 
-            object enumValue;
-
-            enumValue = TryParseEnum(typeof(SQLiteDateFormats), FindKey(opts,
-                "DateTimeFormat", DefaultDateTimeFormat.ToString()), true);
-
-            SQLiteDateFormats dateFormat = (enumValue is SQLiteDateFormats) ?
-                (SQLiteDateFormats)enumValue : DefaultDateTimeFormat;
-
-            enumValue = TryParseEnum(typeof(DateTimeKind), FindKey(opts,
-                "DateTimeKind", DefaultDateTimeKind.ToString()), true);
-
-            DateTimeKind kind = (enumValue is DateTimeKind) ?
-                (DateTimeKind)enumValue : DefaultDateTimeKind;
-
-            string dateTimeFormat = FindKey(opts, "DateTimeFormatString",
-                DefaultDateTimeFormatString);
-
-            //
-            // NOTE: SQLite automatically sets the encoding of the database to
-            //       UTF16 if called from sqlite3_open16().
-            //
-            if (SQLiteConvert.ToBoolean(FindKey(opts,
-                    "UseUTF16Encoding", DefaultUseUTF16Encoding.ToString())))
-            {
-                _sql = new SQLite3_UTF16(dateFormat, kind, dateTimeFormat);
-            }
-            else
-            {
-                _sql = new SQLite3(dateFormat, kind, dateTimeFormat);
-            }
+            SetupSQLiteBase(opts);
         }
         if (_sql != null) return _sql.Shutdown();
         throw new InvalidOperationException("Database connection not active.");

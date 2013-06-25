@@ -199,19 +199,19 @@ namespace System.Data.SQLite
 
       if (_cnn._version != _version)
       {
-        if (throwError == true) throw new SQLiteException(SQLiteErrorCode.Misuse, "The connection was closed and re-opened, changes were already rolled back");
+        if (throwError == true) throw new SQLiteException("The connection was closed and re-opened, changes were already rolled back");
         else return false;
       }
       if (_cnn.State != ConnectionState.Open)
       {
-        if (throwError == true) throw new SQLiteException(SQLiteErrorCode.Misuse, "Connection was closed");
+        if (throwError == true) throw new SQLiteException("Connection was closed");
         else return false;
       }
 
       if (_cnn._transactionLevel == 0 || _cnn._sql.AutoCommit == true)
       {
         _cnn._transactionLevel = 0; // Make sure the transaction level is reset before returning
-        if (throwError == true) throw new SQLiteException(SQLiteErrorCode.Misuse, "No transaction is active on this connection");
+        if (throwError == true) throw new SQLiteException("No transaction is active on this connection");
         else return false;
       }
 
