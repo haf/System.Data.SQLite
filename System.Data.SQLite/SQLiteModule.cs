@@ -1066,7 +1066,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// This class represents a managed virtual table implementation.  It is
     /// not sealed and should be used as the base class for any user-defined
-    /// virtual tables implemented in managed code.
+    /// virtual table classes implemented in managed code.
     /// </summary>
     public class SQLiteVirtualTable :
             ISQLiteNativeHandle, IDisposable /* NOT SEALED */
@@ -1337,7 +1337,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// This class represents a managed virtual table cursor implementation.
     /// It is not sealed and should be used as the base class for any
-    /// user-defined virtual table cursor implemented in managed code.
+    /// user-defined virtual table cursor classes implemented in managed code.
     /// </summary>
     public class SQLiteVirtualTableCursor :
             ISQLiteNativeHandle, IDisposable /* NOT SEALED */
@@ -4062,6 +4062,18 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region SQLiteValue Helper Methods
+        /// <summary>
+        /// Converts an array of native pointers to native sqlite3_value
+        /// structures into a managed array of <see cref="SQLiteValue" />
+        /// object instances.
+        /// </summary>
+        /// <param name="values">
+        /// The array of native pointers to convert.
+        /// </param>
+        /// <returns>
+        /// The managed array of <see cref="SQLiteValue" /> object instances or
+        /// null upon failure.
+        /// </returns>
         public static SQLiteValue[] ValueArrayFromIntPtrArray(
             IntPtr[] values
             )
@@ -4081,6 +4093,18 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region SQLiteIndex Helper Methods
+        /// <summary>
+        /// Converts a native pointer to a native sqlite3_index_info structure
+        /// into a new <see cref="SQLiteIndex" /> object instance.
+        /// </summary>
+        /// <param name="pIndex">
+        /// The native pointer to the native sqlite3_index_info structure to
+        /// convert.
+        /// </param>
+        /// <param name="index">
+        /// Upon success, this parameter will be modified to contain the newly
+        /// created <see cref="SQLiteIndex" /> object instance.
+        /// </param>
         public static void IndexFromIntPtr(
             IntPtr pIndex,
             ref SQLiteIndex index
@@ -4101,36 +4125,11 @@ namespace System.Data.SQLite
 
             int nOrderBy = ReadInt32(pIndex, offset);
 
-            index = new SQLiteIndex(nConstraint, nOrderBy);
-
             offset += sizeof(int);
 
             IntPtr pOrderBy = ReadIntPtr(pIndex, offset);
 
-            offset += IntPtr.Size;
-
-            IntPtr pConstraintUsage = ReadIntPtr(pIndex, offset);
-
-            offset += IntPtr.Size;
-
-            index.Outputs.IndexNumber = ReadInt32(pIndex, offset);
-
-            offset += sizeof(int);
-
-            index.Outputs.IndexString = SQLiteString.StringFromUtf8IntPtr(
-                IntPtrForOffset(pIndex, offset));
-
-            offset += IntPtr.Size;
-
-            index.Outputs.NeedToFreeIndexString = ReadInt32(pIndex, offset);
-
-            offset += sizeof(int);
-
-            index.Outputs.OrderByConsumed = ReadInt32(pIndex, offset);
-
-            offset += sizeof(int);
-
-            index.Outputs.EstimatedCost = ReadDouble(pIndex, offset);
+            index = new SQLiteIndex(nConstraint, nOrderBy);
 
             int sizeOfConstraintType = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_index_constraint));
@@ -4161,25 +4160,23 @@ namespace System.Data.SQLite
                 index.Inputs.OrderBys[iOrderBy] =
                     new SQLiteIndexOrderBy(orderBy);
             }
-
-            int sizeOfConstraintUsageType = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_index_constraint_usage));
-
-            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
-            {
-                UnsafeNativeMethods.sqlite3_index_constraint_usage constraintUsage =
-                    new UnsafeNativeMethods.sqlite3_index_constraint_usage();
-
-                Marshal.PtrToStructure(IntPtrForOffset(pConstraintUsage,
-                    iConstraint * sizeOfConstraintUsageType), constraintUsage);
-
-                index.Outputs.ConstraintUsages[iConstraint] =
-                    new SQLiteIndexConstraintUsage(constraintUsage);
-            }
         }
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Populates the outputs of a pre-allocated native sqlite3_index_info
+        /// structure using an existing <see cref="SQLiteIndex" /> object
+        /// instance.
+        /// </summary>
+        /// <param name="index">
+        /// The existing <see cref="SQLiteIndex" /> object instance containing
+        /// the output data to use.
+        /// </param>
+        /// <param name="pIndex">
+        /// The native pointer to the pre-allocated native sqlite3_index_info
+        /// structure.
+        /// </param>
         public static void IndexToIntPtr(
             SQLiteIndex index,
             IntPtr pIndex
@@ -4187,7 +4184,7 @@ namespace System.Data.SQLite
         {
             if ((index == null) || (index.Inputs == null) ||
                 (index.Inputs.Constraints == null) ||
-                (index.Inputs.OrderBys == null) || (index.Outputs == null) ||
+                (index.Outputs == null) ||
                 (index.Outputs.ConstraintUsages == null))
             {
                 return;
@@ -4206,55 +4203,9 @@ namespace System.Data.SQLite
             if (nConstraint != index.Outputs.ConstraintUsages.Length)
                 return;
 
-            offset += sizeof(int);
-
-            IntPtr pConstraint = ReadIntPtr(pIndex, offset);
-
-            offset += IntPtr.Size;
-
-            int nOrderBy = ReadInt32(pIndex, offset);
-
-            offset += sizeof(int);
-
-            IntPtr pOrderBy = ReadIntPtr(pIndex, offset);
-
-            offset += IntPtr.Size;
+            offset += sizeof(int) + IntPtr.Size + sizeof(int) + IntPtr.Size;
 
             IntPtr pConstraintUsage = ReadIntPtr(pIndex, offset);
-
-            int sizeOfConstraintType = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_index_constraint));
-
-            for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
-            {
-                UnsafeNativeMethods.sqlite3_index_constraint constraint =
-                    new UnsafeNativeMethods.sqlite3_index_constraint(
-                        index.Inputs.Constraints[iConstraint]);
-
-                Marshal.StructureToPtr(
-                    constraint, IntPtrForOffset(pConstraint,
-                    iConstraint * sizeOfConstraintType), false);
-
-                index.Inputs.Constraints[iConstraint] =
-                    new SQLiteIndexConstraint(constraint);
-            }
-
-            int sizeOfOrderByType = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_index_orderby));
-
-            for (int iOrderBy = 0; iOrderBy < nOrderBy; iOrderBy++)
-            {
-                UnsafeNativeMethods.sqlite3_index_orderby orderBy =
-                    new UnsafeNativeMethods.sqlite3_index_orderby(
-                        index.Inputs.OrderBys[iOrderBy]);
-
-                Marshal.StructureToPtr(
-                    orderBy, IntPtrForOffset(pOrderBy,
-                    iOrderBy * sizeOfOrderByType), false);
-
-                index.Inputs.OrderBys[iOrderBy] =
-                    new SQLiteIndexOrderBy(orderBy);
-            }
 
             int sizeOfConstraintUsageType = Marshal.SizeOf(typeof(
                 UnsafeNativeMethods.sqlite3_index_constraint_usage));
@@ -4272,6 +4223,27 @@ namespace System.Data.SQLite
                 index.Outputs.ConstraintUsages[iConstraint] =
                     new SQLiteIndexConstraintUsage(constraintUsage);
             }
+
+            offset += IntPtr.Size;
+
+            WriteInt32(pIndex, offset, index.Outputs.IndexNumber);
+
+            offset += sizeof(int);
+
+            WriteIntPtr(pIndex, offset, SQLiteString.Utf8IntPtrFromString(
+                index.Outputs.IndexString));
+
+            offset += IntPtr.Size;
+
+            WriteInt32(pIndex, offset, 1); /* NOTE: We just allocated it. */
+
+            offset += sizeof(int);
+
+            WriteInt32(pIndex, offset, index.Outputs.OrderByConsumed);
+
+            offset += sizeof(int);
+
+            WriteDouble(pIndex, offset, index.Outputs.EstimatedCost);
         }
         #endregion
     }
@@ -4280,6 +4252,11 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteModule Base Class
+    /// <summary>
+    /// This class represents a managed virtual table module implementation.
+    /// It is not sealed and must be used as the base class for any
+    /// user-defined virtual table module classes implemented in managed code.
+    /// </summary>
     public abstract class SQLiteModule :
             ISQLiteManagedModule, /*ISQLiteNativeModule,*/
             IDisposable /* NOT SEALED */
@@ -5167,7 +5144,7 @@ namespace System.Data.SQLite
         /// Constructs an instance of this class.
         /// </summary>
         /// <param name="name">
-        /// The name of the module.
+        /// The name of the module.  This parameter cannot be null.
         /// </param>
         public SQLiteModule(string name)
         {
