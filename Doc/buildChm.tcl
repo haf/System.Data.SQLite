@@ -82,8 +82,13 @@ if {[string length $xmlDocFile] == 0 || ![file exists $xmlDocFile]} then {
 }
 
 set data [readFile $xmlDocFile]
+set count 0
+
 set pattern { cref="([A-Z]):System\.Data\.SQLite\.}
-set count [regsub -all -- $pattern $data { cref="\1:system.Data.SQLite.} data]
+incr count [regsub -all -- $pattern $data { cref="\1:system.Data.SQLite.} data]
+
+set pattern { name="([A-Z]):System\.Data\.SQLite\.}
+incr count [regsub -all -- $pattern $data { name="\1:system.Data.SQLite.} data]
 
 if {$count > 0} then {
   writeFile $xmlDocFile $data

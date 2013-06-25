@@ -287,6 +287,10 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteValue Helper Class
+    /// <summary>
+    /// This class represents a value from the SQLite core library that can be
+    /// passed to the sqlite3_value_*() and associated functions.
+    /// </summary>
     public sealed class SQLiteValue : ISQLiteNativeHandle
     {
         #region Private Data
@@ -1599,6 +1603,7 @@ namespace System.Data.SQLite
     public interface ISQLiteNativeModule
     {
         /// <summary>
+        /// <para>
         /// This method is called to create a new instance of a virtual table
         /// in response to a CREATE VIRTUAL TABLE statement. The db parameter
         /// is a pointer to the SQLite database connection that is executing
@@ -1620,17 +1625,23 @@ namespace System.Data.SQLite
         /// VIRTUAL TABLE statement. If present, the fourth and subsequent
         /// strings in the argv[] array report the arguments to the module name
         /// in the CREATE VIRTUAL TABLE statement.
-        ///
+        /// </para>
+        /// <para>
         /// The job of this method is to construct the new virtual table object
         /// (an sqlite3_vtab object) and return a pointer to it in *ppVTab.
-        ///
+        /// </para>
+        /// <para>
         /// As part of the task of creating a new sqlite3_vtab structure, this
         /// method must invoke sqlite3_declare_vtab() to tell the SQLite core
         /// about the columns and datatypes in the virtual table. The
         /// sqlite3_declare_vtab() API has the following prototype:
-        ///
+        /// </para>
+        /// <para>
+        /// <code>
         /// int sqlite3_declare_vtab(sqlite3 *db, const char *zCreateTable)
-        ///
+        /// </code>
+        /// </para>
+        /// <para>
         /// The first argument to sqlite3_declare_vtab() must be the same
         /// database connection pointer as the first parameter to this method.
         /// The second argument to sqlite3_declare_vtab() must a
@@ -1641,6 +1652,7 @@ namespace System.Data.SQLite
         /// and datatypes matter. The CREATE TABLE statement string need not to
         /// be held in persistent memory. The string can be deallocated and/or
         /// reused as soon as the sqlite3_declare_vtab() routine returns.
+        /// </para>
         /// </summary>
         /// <param name="pDb">
         /// The native database connection handle.
@@ -1681,34 +1693,40 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// The xConnect method is very similar to xCreate. It has the same
         /// parameters and constructs a new sqlite3_vtab structure just like
         /// xCreate. And it must also call sqlite3_declare_vtab() like xCreate.
-        ///
+        /// </para>
+        /// <para>
         /// The difference is that xConnect is called to establish a new
         /// connection to an existing virtual table whereas xCreate is called
         /// to create a new virtual table from scratch.
-        ///
+        /// </para>
+        /// <para>
         /// The xCreate and xConnect methods are only different when the
         /// virtual table has some kind of backing store that must be
         /// initialized the first time the virtual table is created. The
         /// xCreate method creates and initializes the backing store. The
         /// xConnect method just connects to an existing backing store.
-        ///
+        /// </para>
+        /// <para>
         /// As an example, consider a virtual table implementation that
         /// provides read-only access to existing comma-separated-value (CSV)
         /// files on disk. There is no backing store that needs to be created
         /// or initialized for such a virtual table (since the CSV files
         /// already exist on disk) so the xCreate and xConnect methods will be
         /// identical for that module.
-        ///
+        /// </para>
+        /// <para>
         /// Another example is a virtual table that implements a full-text
         /// index. The xCreate method must create and initialize data
         /// structures to hold the dictionary and posting lists for that index.
         /// The xConnect method, on the other hand, only has to locate and use
         /// an existing dictionary and posting lists that were created by a
         /// prior xCreate call.
-        ///
+        /// </para>
+        /// <para>
         /// The xConnect method must return SQLITE_OK if it is successful in
         /// creating the new virtual table, or SQLITE_ERROR if it is not
         /// successful. If not successful, the sqlite3_vtab structure must not
@@ -1718,11 +1736,13 @@ namespace System.Data.SQLite
         /// sqlite3_malloc() or sqlite3_mprintf() as the SQLite core will
         /// attempt to free the space using sqlite3_free() after the error has
         /// been reported up to the application.
-        ///
+        /// </para>
+        /// <para>
         /// The xConnect method is required for every virtual table
         /// implementation, though the xCreate and xConnect pointers of the
         /// sqlite3_module object may point to the same function the virtual
         /// table does not need to initialize backing store.
+        /// </para>
         /// </summary>
         /// <param name="pDb">
         /// The native database connection handle.
@@ -1763,19 +1783,23 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// SQLite uses the xBestIndex method of a virtual table module to
         /// determine the best way to access the virtual table. The xBestIndex
         /// method has a prototype like this:
-        ///
-        ///  int (*xBestIndex)(sqlite3_vtab *pVTab, sqlite3_index_info*);
-        ///
+        /// </para>
+        /// <code>
+        /// int (*xBestIndex)(sqlite3_vtab *pVTab, sqlite3_index_info*);
+        /// </code>
+        /// <para>
         /// The SQLite core communicates with the xBestIndex method by filling
         /// in certain fields of the sqlite3_index_info structure and passing a
         /// pointer to that structure into xBestIndex as the second parameter.
         /// The xBestIndex method fills out other fields of this structure
         /// which forms the reply. The sqlite3_index_info structure looks like
         /// this:
-        ///
+        /// </para>
+        /// <code>
         ///  struct sqlite3_index_info {
         ///    /* Inputs */
         ///    const int nConstraint;   /* Number of entries in aConstraint */
@@ -1808,16 +1832,19 @@ namespace System.Data.SQLite
         ///    int orderByConsumed;     /* True if output is already ordered */
         ///    double estimatedCost;    /* Estimated cost of using this index */
         ///  };
-        ///
+        /// </code>
+        /// <para>
         /// In addition, there are some defined constants:
-        ///
+        /// </para>
+        /// <code>
         ///  #define SQLITE_INDEX_CONSTRAINT_EQ    2
         ///  #define SQLITE_INDEX_CONSTRAINT_GT    4
         ///  #define SQLITE_INDEX_CONSTRAINT_LE    8
         ///  #define SQLITE_INDEX_CONSTRAINT_LT    16
         ///  #define SQLITE_INDEX_CONSTRAINT_GE    32
         ///  #define SQLITE_INDEX_CONSTRAINT_MATCH 64
-        ///
+        /// </code>
+        /// <para>
         /// The SQLite core calls the xBestIndex method when it is compiling a
         /// query that involves a virtual table. In other words, SQLite calls
         /// this method when it is running sqlite3_prepare() or the equivalent.
@@ -1827,12 +1854,14 @@ namespace System.Data.SQLite
         /// that access. The xBestIndex method replies with information that
         /// the SQLite core can then use to conduct an efficient search of the
         /// virtual table.
-        ///
+        /// </para>
+        /// <para>
         /// While compiling a single SQL query, the SQLite core might call
         /// xBestIndex multiple times with different settings in
         /// sqlite3_index_info. The SQLite core will then select the
         /// combination that appears to give the best performance.
-        ///
+        /// </para>
+        /// <para>
         /// Before calling this method, the SQLite core initializes an instance
         /// of the sqlite3_index_info structure with information about the
         /// query that it is currently trying to process. This information
@@ -1841,7 +1870,8 @@ namespace System.Data.SQLite
         /// query is a join. The information that the SQLite core provides to
         /// the xBestIndex method is held in the part of the structure that is
         /// marked as "Inputs". The "Outputs" section is initialized to zero.
-        ///
+        /// </para>
+        /// <para>
         /// The information in the sqlite3_index_info structure is ephemeral
         /// and may be overwritten or deallocated as soon as the xBestIndex
         /// method returns. If the xBestIndex method needs to remember any part
@@ -1849,50 +1879,63 @@ namespace System.Data.SQLite
         /// must be take to store the copy in a place where it will be
         /// deallocated, such as in the idxStr field with needToFreeIdxStr set
         /// to 1.
-        ///
+        /// </para>
+        /// <para>
         /// Note that xBestIndex will always be called before xFilter, since
         /// the idxNum and idxStr outputs from xBestIndex are required inputs
         /// to xFilter. However, there is no guarantee that xFilter will be
         /// called following a successful xBestIndex.
-        ///
+        /// </para>
+        /// <para>
         /// The xBestIndex method is required for every virtual table
         /// implementation.
-        /// 
+        /// </para>
+        /// <para>
         /// 2.3.1 Inputs
-        ///
+        /// </para>
+        /// <para>
         /// The main thing that the SQLite core is trying to communicate to the
         /// virtual table is the constraints that are available to limit the
         /// number of rows that need to be searched. The aConstraint[] array
         /// contains one entry for each constraint. There will be exactly
         /// nConstraint entries in that array.
-        ///
+        /// </para>
+        /// <para>
         /// Each constraint will correspond to a term in the WHERE clause or in
         /// a USING or ON clause that is of the form
-        ///
+        /// </para>
+        /// <code>
         ///     column OP EXPR
-        ///
+        /// </code>
+        /// <para>
         /// Where "column" is a column in the virtual table, OP is an operator
         /// like "=" or "&lt;", and EXPR is an arbitrary expression. So, for
         /// example, if the WHERE clause contained a term like this:
-        ///
+        /// </para>
+        /// <code>
         ///          a = 5
-        ///
+        /// </code>
+        /// <para>
         /// Then one of the constraints would be on the "a" column with
         /// operator "=" and an expression of "5". Constraints need not have a
         /// literal representation of the WHERE clause. The query optimizer
         /// might make transformations to the WHERE clause in order to extract
         /// as many constraints as it can. So, for example, if the WHERE clause
         /// contained something like this:
-        ///
+        /// </para>
+        /// <code>
         ///          x BETWEEN 10 AND 100 AND 999&gt;y
-        ///
+        /// </code>
+        /// <para>
         /// The query optimizer might translate this into three separate
         /// constraints:
-        ///
+        /// </para>
+        /// <code>
         ///          x &gt;= 10
         ///          x &lt;= 100
         ///          y &lt; 999
-        ///
+        /// </code>
+        /// <para>
         /// For each constraint, the aConstraint[].iColumn field indicates
         /// which column appears on the left-hand side of the constraint. The
         /// first column of the virtual table is column 0. The rowid of the
@@ -1902,13 +1945,15 @@ namespace System.Data.SQLite
         /// they were defined by the call to sqlite3_declare_vtab() in the
         /// xCreate or xConnect method. Hidden columns are counted when
         /// determining the column index.
-        ///
+        /// </para>
+        /// <para>
         /// The aConstraint[] array contains information about all constraints
         /// that apply to the virtual table. But some of the constraints might
         /// not be usable because of the way tables are ordered in a join. The
         /// xBestIndex method must therefore only consider constraints that
         /// have an aConstraint[].usable flag which is true.
-        ///
+        /// </para>
+        /// <para>
         /// In addition to WHERE clause constraints, the SQLite core also tells
         /// the xBestIndex method about the ORDER BY clause. (In an aggregate
         /// query, the SQLite core might put in GROUP BY clause information in
@@ -1918,12 +1963,15 @@ namespace System.Data.SQLite
         /// will be the number of terms in the ORDER BY clause and the
         /// aOrderBy[] array will identify the column for each term in the
         /// order by clause and whether or not that column is ASC or DESC.
-        /// 
+        /// </para>
+        /// <para>
         /// 2.3.2 Outputs
-        ///
+        /// </para>
+        /// <para>
         /// Given all of the information above, the job of the xBestIndex
         /// method it to figure out the best way to search the virtual table.
-        ///
+        /// </para>
+        /// <para>
         /// The xBestIndex method fills the idxNum and idxStr fields with
         /// information that communicates an indexing strategy to the xFilter
         /// method. The information in idxNum and idxStr is arbitrary as far as
@@ -1931,46 +1979,54 @@ namespace System.Data.SQLite
         /// information through to the xFilter method. Any desired meaning can
         /// be assigned to idxNum and idxStr as long as xBestIndex and xFilter
         /// agree on what that meaning is.
-        ///
+        /// </para>
+        /// <para>
         /// The idxStr value may be a string obtained from an SQLite memory
         /// allocation function such as sqlite3_mprintf(). If this is the case,
         /// then the needToFreeIdxStr flag must be set to true so that the
         /// SQLite core will know to call sqlite3_free() on that string when it
         /// has finished with it, and thus avoid a memory leak.
-        ///
+        /// </para>
+        /// <para>
         /// If the virtual table will output rows in the order specified by the
         /// ORDER BY clause, then the orderByConsumed flag may be set to true.
         /// If the output is not automatically in the correct order then
         /// orderByConsumed must be left in its default false setting. This
         /// will indicate to the SQLite core that it will need to do a separate
         /// sorting pass over the data after it comes out of the virtual table.
-        ///
+        /// </para>
+        /// <para>
         /// The estimatedCost field should be set to the estimated number of
         /// disk access operations required to execute this query against the
         /// virtual table. The SQLite core will often call xBestIndex multiple
         /// times with different constraints, obtain multiple cost estimates,
         /// then choose the query plan that gives the lowest estimate.
-        ///
+        /// </para>
+        /// <para>
         /// The aConstraintUsage[] array contains one element for each of the
         /// nConstraint constraints in the inputs section of the
         /// sqlite3_index_info structure. The aConstraintUsage[] array is used
         /// by xBestIndex to tell the core how it is using the constraints.
-        ///
+        /// </para>
+        /// <para>
         /// The xBestIndex method may set aConstraintUsage[].argvIndex entries
         /// to values greater than one. Exactly one entry should be set to 1,
         /// another to 2, another to 3, and so forth up to as many or as few as
         /// the xBestIndex method wants. The EXPR of the corresponding
         /// constraints will then be passed in as the argv[] parameters to
         /// xFilter.
-        ///
+        /// </para>
+        /// <para>
         /// For example, if the aConstraint[3].argvIndex is set to 1, then when
         /// xFilter is called, the argv[0] passed to xFilter will have the EXPR
         /// value of the aConstraint[3] constraint.
-        ///
+        /// </para>
+        /// <para>
         /// By default, the SQLite core double checks all constraints on each
         /// row of the virtual table that it receives. If such a check is
         /// redundant, the xBestFilter method can suppress that double-check by
         /// setting aConstraintUsage[].omit.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -1989,19 +2045,23 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method releases a connection to a virtual table. Only the
         /// sqlite3_vtab object is destroyed. The virtual table is not
         /// destroyed and any backing store associated with the virtual table
         /// persists. This method undoes the work of xConnect.
-        ///
+        /// </para>
+        /// <para>
         /// This method is a destructor for a connection to the virtual table.
         /// Contrast this method with xDestroy. The xDestroy is a destructor
         /// for the entire virtual table.
-        ///
+        /// </para>
+        /// <para>
         /// The xDisconnect method is required for every virtual table
         /// implementation, though it is acceptable for the xDisconnect and
         /// xDestroy methods to be the same function if that makes sense for
         /// the particular virtual table.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2016,19 +2076,23 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method releases a connection to a virtual table, just like the
         /// xDisconnect method, and it also destroys the underlying table
         /// implementation. This method undoes the work of xCreate.
-        ///
+        /// </para>
+        /// <para>
         /// The xDisconnect method is called whenever a database connection
         /// that uses a virtual table is closed. The xDestroy method is only
         /// called when a DROP TABLE statement is executed against the virtual
         /// table.
-        ///
+        /// </para>
+        /// <para>
         /// The xDestroy method is required for every virtual table
         /// implementation, though it is acceptable for the xDisconnect and
         /// xDestroy methods to be the same function if that makes sense for
         /// the particular virtual table.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2043,28 +2107,35 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// The xOpen method creates a new cursor used for accessing (read
         /// and/or writing) a virtual table. A successful invocation of this
         /// method will allocate the memory for the sqlite3_vtab_cursor (or a
         /// subclass), initialize the new object, and make *ppCursor point to
         /// the new object. The successful call then returns SQLITE_OK.
-        ///
+        /// </para>
+        /// <para>
         /// For every successful call to this method, the SQLite core will
         /// later invoke the xClose method to destroy the allocated cursor.
-        ///
+        /// </para>
+        /// <para>
         /// The xOpen method need not initialize the pVtab field of the
         /// sqlite3_vtab_cursor structure. The SQLite core will take care of
         /// that chore automatically.
-        ///
+        /// </para>
+        /// <para>
         /// A virtual table implementation must be able to support an arbitrary
         /// number of simultaneously open cursors.
-        ///
+        /// </para>
+        /// <para>
         /// When initially opened, the cursor is in an undefined state. The
         /// SQLite core will invoke the xFilter method on the cursor prior to
         /// any attempt to position or read from the cursor.
-        ///
+        /// </para>
+        /// <para>
         /// The xOpen method is required for every virtual table
         /// implementation.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2084,17 +2155,21 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// The xClose method closes a cursor previously opened by xOpen. The
         /// SQLite core will always call xClose once for each cursor opened
         /// using xOpen.
-        ///
+        /// </para>
+        /// <para>
         /// This method must release all resources allocated by the
         /// corresponding xOpen call. The routine will not be called again even
         /// if it returns an error. The SQLite core will not use the
         /// sqlite3_vtab_cursor again after it has been closed.
-        ///
+        /// </para>
+        /// <para>
         /// The xClose method is required for every virtual table
         /// implementation.
+        /// </para>
         /// </summary>
         /// <param name="pCursor">
         /// The native pointer to the sqlite3_vtab_cursor derived structure.
@@ -2109,17 +2184,20 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method begins a search of a virtual table. The first argument
         /// is a cursor opened by xOpen. The next two argument define a
         /// particular search index previously chosen by xBestIndex. The
         /// specific meanings of idxNum and idxStr are unimportant as long as
         /// xFilter and xBestIndex agree on what that meaning is.
-        ///
+        /// </para>
+        /// <para>
         /// The xBestIndex function may have requested the values of certain
         /// expressions using the aConstraintUsage[].argvIndex values of the
         /// sqlite3_index_info structure. Those values are passed to xFilter
         /// using the argc and argv parameters.
-        ///
+        /// </para>
+        /// <para>
         /// If the virtual table contains one or more rows that match the
         /// search criteria, then the cursor must be left point at the first
         /// row. Subsequent calls to xEof must return false (zero). If there
@@ -2127,12 +2205,15 @@ namespace System.Data.SQLite
         /// will cause the xEof to return true (non-zero). The SQLite engine
         /// will use the xColumn and xRowid methods to access that row content.
         /// The xNext method will be used to advance to the next row.
-        ///
+        /// </para>
+        /// <para>
         /// This method must return SQLITE_OK if successful, or an sqlite error
         /// code if an error occurs.
-        ///
+        /// </para>
+        /// <para>
         /// The xFilter method is required for every virtual table
         /// implementation.
+        /// </para>
         /// </summary>
         /// <param name="pCursor">
         /// The native pointer to the sqlite3_vtab_cursor derived structure.
@@ -2166,6 +2247,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// The xNext method advances a virtual table cursor to the next row of
         /// a result set initiated by xFilter. If the cursor is already
         /// pointing at the last row when this routine is called, then the
@@ -2173,12 +2255,15 @@ namespace System.Data.SQLite
         /// xEof method must return true (non-zero). If the cursor is
         /// successfully advanced to another row of content, then subsequent
         /// calls to xEof must return false (zero).
-        ///
+        /// </para>
+        /// <para>
         /// This method must return SQLITE_OK if successful, or an sqlite error
         /// code if an error occurs.
-        ///
+        /// </para>
+        /// <para>
         /// The xNext method is required for every virtual table
         /// implementation.
+        /// </para>
         /// </summary>
         /// <param name="pCursor">
         /// The native pointer to the sqlite3_vtab_cursor derived structure.
@@ -2193,12 +2278,15 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// The xEof method must return false (zero) if the specified cursor
         /// currently points to a valid row of data, or true (non-zero)
         /// otherwise. This method is called by the SQL engine immediately
         /// after each xFilter and xNext invocation.
-        ///
+        /// </para>
+        /// <para>
         /// The xEof method is required for every virtual table implementation.
+        /// </para>
         /// </summary>
         /// <param name="pCursor">
         /// The native pointer to the sqlite3_vtab_cursor derived structure.
@@ -2213,32 +2301,38 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// The SQLite core invokes this method in order to find the value for
         /// the N-th column of the current row. N is zero-based so the first
         /// column is numbered 0. The xColumn method may return its result back
         /// to SQLite using one of the following interface:
-        ///
-        ///     * sqlite3_result_blob()
-        ///     * sqlite3_result_double()
-        ///     * sqlite3_result_int()
-        ///     * sqlite3_result_int64()
-        ///     * sqlite3_result_null()
-        ///     * sqlite3_result_text()
-        ///     * sqlite3_result_text16()
-        ///     * sqlite3_result_text16le()
-        ///     * sqlite3_result_text16be()
-        ///     * sqlite3_result_zeroblob()
-        ///
+        /// </para>
+        /// <code>
+        ///     sqlite3_result_blob()
+        ///     sqlite3_result_double()
+        ///     sqlite3_result_int()
+        ///     sqlite3_result_int64()
+        ///     sqlite3_result_null()
+        ///     sqlite3_result_text()
+        ///     sqlite3_result_text16()
+        ///     sqlite3_result_text16le()
+        ///     sqlite3_result_text16be()
+        ///     sqlite3_result_zeroblob()
+        /// </code>
+        /// <para>
         /// If the xColumn method implementation calls none of the functions
         /// above, then the value of the column defaults to an SQL NULL.
-        ///
+        /// </para>
+        /// <para>
         /// To raise an error, the xColumn method should use one of the
         /// result_text() methods to set the error message text, then return an
         /// appropriate error code. The xColumn method must return SQLITE_OK on
         /// success.
-        ///
+        /// </para>
+        /// <para>
         /// The xColumn method is required for every virtual table
         /// implementation.
+        /// </para>
         /// </summary>
         /// <param name="pCursor">
         /// The native pointer to the sqlite3_vtab_cursor derived structure.
@@ -2264,13 +2358,16 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// A successful invocation of this method will cause *pRowid to be
         /// filled with the rowid of row that the virtual table cursor pCur is
         /// currently pointing at. This method returns SQLITE_OK on success. It
         /// returns an appropriate error code on failure.
-        ///
+        /// </para>
+        /// <para>
         /// The xRowid method is required for every virtual table
         /// implementation.
+        /// </para>
         /// </summary>
         /// <param name="pCursor">
         /// The native pointer to the sqlite3_vtab_cursor derived structure.
@@ -2290,23 +2387,28 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// All changes to a virtual table are made using the xUpdate method.
         /// This one method can be used to insert, delete, or update.
-        ///
+        /// </para>
+        /// <para>
         /// The argc parameter specifies the number of entries in the argv
         /// array. The value of argc will be 1 for a pure delete operation or
         /// N+2 for an insert or replace or update where N is the number of
         /// columns in the table. In the previous sentence, N includes any
         /// hidden columns.
-        ///
+        /// </para>
+        /// <para>
         /// Every argv entry will have a non-NULL value in C but may contain
         /// the SQL value NULL. In other words, it is always true that
         /// argv[i]!=0 for i between 0 and argc-1. However, it might be the
         /// case that sqlite3_value_type(argv[i])==SQLITE_NULL.
-        ///
+        /// </para>
+        /// <para>
         /// The argv[0] parameter is the rowid of a row in the virtual table
         /// to be deleted. If argv[0] is an SQL NULL, then no deletion occurs.
-        ///
+        /// </para>
+        /// <para>
         /// The argv[1] parameter is the rowid of a new row to be inserted into
         /// the virtual table. If argv[1] is an SQL NULL, then the
         /// implementation must choose a rowid for the newly inserted row.
@@ -2315,61 +2417,75 @@ namespace System.Data.SQLite
         /// number of columns will match the table declaration that the
         /// xConnect or xCreate method made using the sqlite3_declare_vtab()
         /// call. All hidden columns are included.
-        ///
+        /// </para>
+        /// <para>
         /// When doing an insert without a rowid (argc>1, argv[1] is an SQL
         /// NULL), the implementation must set *pRowid to the rowid of the
         /// newly inserted row; this will become the value returned by the
         /// sqlite3_last_insert_rowid() function. Setting this value in all the
         /// other cases is a harmless no-op; the SQLite engine ignores the
         /// *pRowid return value if argc==1 or argv[1] is not an SQL NULL.
-        ///
+        /// </para>
+        /// <para>
         /// Each call to xUpdate will fall into one of cases shown below. Note
         /// that references to argv[i] mean the SQL value held within the
         /// argv[i] object, not the argv[i] object itself.
-        ///
+        /// </para>
+        /// <code>
         ///     argc = 1
-        ///
+        /// </code>
+        /// <para>
         ///         The single row with rowid equal to argv[0] is deleted. No
         ///         insert occurs.
-        ///
+        /// </para>
+        /// <code>
         ///     argc > 1
         ///     argv[0] = NULL
-        ///
+        /// </code>
+        /// <para>
         ///         A new row is inserted with a rowid argv[1] and column
         ///         values in argv[2] and following. If argv[1] is an SQL NULL,
         ///         the a new unique rowid is generated automatically.
-        ///
+        /// </para>
+        /// <code>
         ///     argc > 1
         ///     argv[0] ? NULL
         ///     argv[0] = argv[1]
-        ///
+        /// </code>
+        /// <para>
         ///         The row with rowid argv[0] is updated with new values in
         ///         argv[2] and following parameters.
-        ///
+        /// </para>
+        /// <code>
         ///     argc > 1
         ///     argv[0] ? NULL
         ///     argv[0] ? argv[1]
-        ///
+        /// </code>
+        /// <para>
         ///         The row with rowid argv[0] is updated with rowid argv[1]
         ///         and new values in argv[2] and following parameters. This
         ///         will occur when an SQL statement updates a rowid, as in
         ///         the statement:
-        ///
+        /// </para>
+        /// <code>
         ///             UPDATE table SET rowid=rowid+1 WHERE ...;
-        ///
+        /// </code>
+        /// <para>
         /// The xUpdate method must return SQLITE_OK if and only if it is
         /// successful. If a failure occurs, the xUpdate must return an
         /// appropriate error code. On a failure, the pVTab->zErrMsg element
         /// may optionally be replaced with error message text stored in memory
         /// allocated from SQLite using functions such as sqlite3_mprintf() or
         /// sqlite3_malloc().
-        ///
+        /// </para>
+        /// <para>
         /// If the xUpdate method violates some constraint of the virtual table
         /// (including, but not limited to, attempting to store a value of the
         /// wrong datatype, attempting to store a value that is too large or
         /// too small, or attempting to change a read-only value) then the
         /// xUpdate must fail with an appropriate error code.
-        ///
+        /// </para>
+        /// <para>
         /// There might be one or more sqlite3_vtab_cursor objects open and in
         /// use on the virtual table instance and perhaps even on the row of
         /// the virtual table when the xUpdate method is invoked. The
@@ -2377,10 +2493,12 @@ namespace System.Data.SQLite
         /// or modify rows of the table out from other existing cursors. If the
         /// virtual table cannot accommodate such changes, the xUpdate method
         /// must return an error code.
-        ///
+        /// </para>
+        /// <para>
         /// The xUpdate method is optional. If the xUpdate pointer in the
         /// sqlite3_module for a virtual table is a NULL pointer, then the
         /// virtual table is read-only.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2410,9 +2528,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method begins a transaction on a virtual table. This is method
         /// is optional. The xBegin pointer of sqlite3_module may be NULL.
-        ///
+        /// </para>
+        /// <para>
         /// This method is always followed by one call to either the xCommit or
         /// xRollback method. Virtual table transactions do not nest, so the
         /// xBegin method will not be invoked more than once on a single
@@ -2420,6 +2540,7 @@ namespace System.Data.SQLite
         /// xRollback. Multiple calls to other methods can and likely will
         /// occur in between the xBegin and the corresponding xCommit or
         /// xRollback.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2434,15 +2555,18 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method signals the start of a two-phase commit on a virtual
         /// table. This is method is optional. The xSync pointer of
         /// sqlite3_module may be NULL.
-        ///
+        /// </para>
+        /// <para>
         /// This method is only invoked after call to the xBegin method and
         /// prior to an xCommit or xRollback. In order to implement two-phase
         /// commit, the xSync method on all virtual tables is invoked prior to
         /// invoking the xCommit method on any virtual table. If any of the
         /// xSync methods fail, the entire transaction is rolled back.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2457,12 +2581,15 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method causes a virtual table transaction to commit. This is
         /// method is optional. The xCommit pointer of sqlite3_module may be
         /// NULL.
-        ///
+        /// </para>
+        /// <para>
         /// A call to this method always follows a prior call to xBegin and
         /// xSync.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2477,11 +2604,14 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method causes a virtual table transaction to rollback. This is
         /// method is optional. The xRollback pointer of sqlite3_module may be
         /// NULL.
-        ///
+        /// </para>
+        /// <para>
         /// A call to this method always follows a prior call to xBegin.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2496,13 +2626,16 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method provides notification that the virtual table
         /// implementation that the virtual table will be given a new name. If
         /// this method returns SQLITE_OK then SQLite renames the table. If
         /// this method returns an error code then the renaming is prevented.
-        ///
+        /// </para>
+        /// <para>
         /// The xRename method is required for every virtual table
         /// implementation.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2536,13 +2669,16 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// This method provides notification that the virtual table
         /// implementation that the virtual table will be given a new name. If
         /// this method returns SQLITE_OK then SQLite renames the table. If
         /// this method returns an error code then the renaming is prevented.
-        ///
+        /// </para>
+        /// <para>
         /// The xRename method is required for every virtual table
         /// implementation.
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2562,10 +2698,12 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// These methods provide the virtual table implementation an
         /// opportunity to implement nested transactions. They are always
         /// optional and will only be called in SQLite version 3.7.7 and later.
-        ///
+        /// </para>
+        /// <para>
         /// When xSavepoint(X,N) is invoked, that is a signal to the virtual
         /// table X that it should save its current state as savepoint N. A
         /// subsequent call to xRollbackTo(X,R) means that the state of the
@@ -2575,10 +2713,12 @@ namespace System.Data.SQLite
         /// rolled back or released without first being reinitialized by a call
         /// to xSavepoint(). A call to xRelease(X,M) invalidates all savepoints
         /// where N>=M.
-        ///
+        /// </para>
+        /// <para>
         /// None of the xSavepoint(), xRelease(), or xRollbackTo() methods will
         /// ever be called except in between calls to xBegin() and either
         /// xCommit() or xRollback().
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2598,10 +2738,12 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// These methods provide the virtual table implementation an
         /// opportunity to implement nested transactions. They are always
         /// optional and will only be called in SQLite version 3.7.7 and later.
-        ///
+        /// </para>
+        /// <para>
         /// When xSavepoint(X,N) is invoked, that is a signal to the virtual
         /// table X that it should save its current state as savepoint N. A
         /// subsequent call to xRollbackTo(X,R) means that the state of the
@@ -2611,10 +2753,12 @@ namespace System.Data.SQLite
         /// rolled back or released without first being reinitialized by a call
         /// to xSavepoint(). A call to xRelease(X,M) invalidates all savepoints
         /// where N>=M.
-        ///
+        /// </para>
+        /// <para>
         /// None of the xSavepoint(), xRelease(), or xRollbackTo() methods will
         /// ever be called except in between calls to xBegin() and either
         /// xCommit() or xRollback().
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -2635,10 +2779,12 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// <para>
         /// These methods provide the virtual table implementation an
         /// opportunity to implement nested transactions. They are always
         /// optional and will only be called in SQLite version 3.7.7 and later.
-        ///
+        /// </para>
+        /// <para>
         /// When xSavepoint(X,N) is invoked, that is a signal to the virtual
         /// table X that it should save its current state as savepoint N. A
         /// subsequent call to xRollbackTo(X,R) means that the state of the
@@ -2648,10 +2794,12 @@ namespace System.Data.SQLite
         /// rolled back or released without first being reinitialized by a call
         /// to xSavepoint(). A call to xRelease(X,M) invalidates all savepoints
         /// where N>=M.
-        ///
+        /// </para>
+        /// <para>
         /// None of the xSavepoint(), xRelease(), or xRollbackTo() methods will
         /// ever be called except in between calls to xBegin() and either
         /// xCommit() or xRollback().
+        /// </para>
         /// </summary>
         /// <param name="pVtab">
         /// The native pointer to the sqlite3_vtab derived structure.
@@ -4039,7 +4187,9 @@ namespace System.Data.SQLite
             /// <param name="pError">
             /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
             /// </param>
-            /// <returns></returns>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+            /// </returns>
             public SQLiteErrorCode xConnect(
                 IntPtr pDb,
                 IntPtr pAux,
@@ -4697,29 +4847,58 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Constants
-        private const double DefaultCost = double.MaxValue;
+        /// <summary>
+        /// The default estimated cost for use with the
+        /// <see cref="ISQLiteManagedModule.BestIndex" /> method.
+        /// </summary>
+        private static readonly double DefaultEstimatedCost = double.MaxValue;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// The default version of the native sqlite3_module structure in use.
+        /// </summary>
+        private static readonly int DefaultModuleVersion = 2;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Data
+        /// <summary>
+        /// This field is used to store the native sqlite3_module structure
+        /// associated with this object instance.
+        /// </summary>
         private UnsafeNativeMethods.sqlite3_module nativeModule;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// This field is used to store the virtual table instances associated
+        /// with this module.  The native pointer to the sqlite3_vtab derived
+        /// structure is used to key into this collection.
+        /// </summary>
         private Dictionary<IntPtr, SQLiteVirtualTable> tables;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// This field is used to store the virtual table cursor instances
+        /// associated with this module.  The native pointer to the
+        /// sqlite3_vtab_cursor derived structure is used to key into this
+        /// collection.
+        /// </summary>
         private Dictionary<IntPtr, SQLiteVirtualTableCursor> cursors;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Internal Methods
-        internal UnsafeNativeMethods.sqlite3_module CreateNativeModule()
-        {
-            return CreateNativeModule(GetNativeModuleImpl());
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
         #region Public Constructors
+        /// <summary>
+        /// Constructs an instance of this class.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the module.
+        /// </param>
         public SQLiteModule(string name)
         {
             if (name == null)
@@ -4733,13 +4912,45 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Internal Methods
+        /// <summary>
+        /// Creates and returns the native sqlite_module structure using the
+        /// configured (or default) <see cref="ISQLiteNativeModule" />
+        /// interface implementation.
+        /// </summary>
+        /// <returns>
+        /// The native sqlite_module structure using the configured (or
+        /// default) <see cref="ISQLiteNativeModule" /> interface
+        /// implementation.
+        /// </returns>
+        internal UnsafeNativeMethods.sqlite3_module CreateNativeModule()
+        {
+            return CreateNativeModule(GetNativeModuleImpl());
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Private Methods
+        /// <summary>
+        /// Creates and returns the native sqlite_module structure using the
+        /// specified <see cref="ISQLiteNativeModule" /> interface
+        /// implementation.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="ISQLiteNativeModule" /> interface implementation to
+        /// use.
+        /// </param>
+        /// <returns>
+        /// The native sqlite_module structure using the specified
+        /// <see cref="ISQLiteNativeModule" /> interface implementation.
+        /// </returns>
         private UnsafeNativeMethods.sqlite3_module CreateNativeModule(
             ISQLiteNativeModule module
             )
         {
             nativeModule = new UnsafeNativeMethods.sqlite3_module();
-            nativeModule.iVersion = 2;
+            nativeModule.iVersion = DefaultModuleVersion;
 
             if (module != null)
             {
@@ -4875,13 +5086,38 @@ namespace System.Data.SQLite
 
         #region Protected Members
         #region Module Helper Methods
+        /// <summary>
+        /// Gets and returns the <see cref="ISQLiteNativeModule" /> interface
+        /// implementation to be used when creating the native sqlite3_module
+        /// structure.  Derived classes may override this method to supply an
+        /// alternate implementation for the <see cref="ISQLiteNativeModule" />
+        /// interface.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="ISQLiteNativeModule" /> interface implementation to
+        /// be used when populating the native sqlite3_module structure.  If
+        /// the returned value is null, the private methods provided by the
+        /// <see cref="SQLiteModule" /> class and relating to the
+        /// <see cref="ISQLiteNativeModule" /> interface  will be used to
+        /// create the necessary delegates.
+        /// </returns>
         protected virtual ISQLiteNativeModule GetNativeModuleImpl()
         {
-            return null; /* NOTE: Use built-in defaults. */
+            return null; /* NOTE: Use the built-in default delegates. */
         }
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Creates and returns the <see cref="ISQLiteNativeModule" />
+        /// interface implementation corresponding to the current
+        /// <see cref="SQLiteModule" /> object instance.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="ISQLiteNativeModule" /> interface implementation
+        /// corresponding to the current <see cref="SQLiteModule" /> object
+        /// instance.
+        /// </returns>
         protected virtual ISQLiteNativeModule CreateNativeModuleImpl()
         {
             return new SQLiteNativeModule(this);
@@ -4891,6 +5127,13 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Native Table Helper Methods
+        /// <summary>
+        /// Allocates a native sqlite3_vtab derived structure and returns a
+        /// native pointer to it.
+        /// </summary>
+        /// <returns>
+        /// A native pointer to a native sqlite3_vtab derived structure.
+        /// </returns>
         protected virtual IntPtr AllocateTable()
         {
             int size = Marshal.SizeOf(typeof(
@@ -4901,6 +5144,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Zeros out the fields of a native sqlite3_vtab derived structure.
+        /// </summary>
+        /// <param name="pVtab">
+        /// The native pointer to the native sqlite3_vtab derived structure to
+        /// zero.
+        /// </param>
         protected virtual void ZeroTable(
             IntPtr pVtab
             )
@@ -4923,6 +5173,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Frees a native sqlite3_vtab structure using the provided native
+        /// pointer to it.
+        /// </summary>
+        /// <param name="pVtab">
+        /// A native pointer to a native sqlite3_vtab derived structure.
+        /// </param>
         protected virtual void FreeTable(
             IntPtr pVtab
             )
@@ -4935,6 +5192,13 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Native Cursor Helper Methods
+        /// <summary>
+        /// Allocates a native sqlite3_vtab_cursor derived structure and
+        /// returns a native pointer to it.
+        /// </summary>
+        /// <returns>
+        /// A native pointer to a native sqlite3_vtab_cursor derived structure.
+        /// </returns>
         protected virtual IntPtr AllocateCursor()
         {
             int size = Marshal.SizeOf(typeof(
@@ -4945,6 +5209,13 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Frees a native sqlite3_vtab_cursor structure using the provided
+        /// native pointer to it.
+        /// </summary>
+        /// <param name="pCursor">
+        /// A native pointer to a native sqlite3_vtab_cursor derived structure.
+        /// </param>
         protected virtual void FreeCursor(
             IntPtr pCursor
             )
@@ -4956,6 +5227,23 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Static Table Lookup Methods
+        /// <summary>
+        /// Reads and returns the native pointer to the sqlite3_vtab derived
+        /// structure based on the native pointer to the sqlite3_vtab_cursor
+        /// derived structure.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="pCursor">
+        /// The native pointer to the sqlite3_vtab_cursor derived structure
+        /// from which to read the native pointer to the sqlite3_vtab derived
+        /// structure.
+        /// </param>
+        /// <returns>
+        /// The native pointer to the sqlite3_vtab derived structure -OR-
+        /// <see cref="IntPtr.Zero"/> if it cannot be determined.
+        /// </returns>
         private static IntPtr TableFromCursor(
             SQLiteModule module,
             IntPtr pCursor
@@ -4971,6 +5259,20 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Table Lookup Methods
+        /// <summary>
+        /// Reads and returns the native pointer to the sqlite3_vtab derived
+        /// structure based on the native pointer to the sqlite3_vtab_cursor
+        /// derived structure.
+        /// </summary>
+        /// <param name="pCursor">
+        /// The native pointer to the sqlite3_vtab_cursor derived structure
+        /// from which to read the native pointer to the sqlite3_vtab derived
+        /// structure.
+        /// </param>
+        /// <returns>
+        /// The native pointer to the sqlite3_vtab derived structure -OR-
+        /// <see cref="IntPtr.Zero"/> if it cannot be determined.
+        /// </returns>
         protected virtual IntPtr TableFromCursor(
             IntPtr pCursor
             )
@@ -4980,6 +5282,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Looks up and returns the <see cref="SQLiteVirtualTable" /> object
+        /// instance based on the native pointer to the sqlite3_vtab derived
+        /// structure.
+        /// </summary>
+        /// <param name="pVtab">
+        /// The native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <returns>
+        /// The <see cref="SQLiteVirtualTable" /> object instance or null if
+        /// the corresponding one cannot be found.
+        /// </returns>
         protected virtual SQLiteVirtualTable TableFromIntPtr(
             IntPtr pVtab
             )
@@ -5007,6 +5321,19 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Allocates and returns a native pointer to a sqlite3_vtab derived
+        /// structure and creates an association between it and the specified
+        /// <see cref="SQLiteVirtualTable" /> object instance.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance to be used
+        /// when creating the association.
+        /// </param>
+        /// <returns>
+        /// The native pointer to a sqlite3_vtab derived structure or
+        /// <see cref="IntPtr.Zero"/> if the method fails for any reason.
+        /// </returns>
         protected virtual IntPtr TableToIntPtr(
             SQLiteVirtualTable table
             )
@@ -5045,6 +5372,21 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Cursor Lookup Methods
+        /// <summary>
+        /// Looks up and returns the <see cref="SQLiteVirtualTableCursor" />
+        /// object instance based on the native pointer to the
+        /// sqlite3_vtab_cursor derived structure.
+        /// </summary>
+        /// <param name="pVtab">
+        /// The native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="pCursor">
+        /// The native pointer to the sqlite3_vtab_cursor derived structure.
+        /// </param>
+        /// <returns>
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance or null
+        /// if the corresponding one cannot be found.
+        /// </returns>
         protected virtual SQLiteVirtualTableCursor CursorFromIntPtr(
             IntPtr pVtab,
             IntPtr pCursor
@@ -5073,6 +5415,19 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Allocates and returns a native pointer to a sqlite3_vtab_cursor
+        /// derived structure and creates an association between it and the
+        /// specified <see cref="SQLiteVirtualTableCursor" /> object instance.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance to be
+        /// used when creating the association.
+        /// </param>
+        /// <returns>
+        /// The native pointer to a sqlite3_vtab_cursor derived structure or
+        /// <see cref="IntPtr.Zero"/> if the method fails for any reason.
+        /// </returns>
         protected virtual IntPtr CursorToIntPtr(
             SQLiteVirtualTableCursor cursor
             )
@@ -5110,6 +5465,25 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Table Declaration Helper Methods
+        /// <summary>
+        /// Attempts to declare the schema for the virtual table using the
+        /// specified database connection.
+        /// </summary>
+        /// <param name="connection">
+        /// The <see cref="SQLiteConnection" /> object instance to use when
+        /// declaring the schema of the virtual table.
+        /// </param>
+        /// <param name="sql">
+        /// The string containing the CREATE TABLE statement that completely
+        /// describes the schema for the virtual table.
+        /// </param>
+        /// <param name="error">
+        /// Upon failure, this parameter must be modified to contain an error
+        /// message.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         protected virtual SQLiteErrorCode DeclareTable(
             SQLiteConnection connection,
             string sql,
@@ -5137,6 +5511,20 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Error Handling Helper Methods
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="pVtab">
+        /// The native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         protected virtual bool SetTableError(
             IntPtr pVtab,
             string error
@@ -5147,6 +5535,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance used to
+        /// lookup the native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         protected virtual bool SetTableError(
             SQLiteVirtualTable table,
             string error
@@ -5157,6 +5560,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance used to
+        /// lookup the native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         protected virtual bool SetCursorError(
             SQLiteVirtualTableCursor cursor,
             string error
@@ -5169,6 +5587,27 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Static Error Handling Helper Methods
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="pVtab">
+        /// The native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="logErrors">
+        /// Non-zero if this error message should also be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         private static bool SetTableError(
             SQLiteModule module,
             IntPtr pVtab,
@@ -5227,6 +5666,28 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance used to
+        /// lookup the native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="logErrors">
+        /// Non-zero if this error message should also be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         private static bool SetTableError(
             SQLiteModule module,
             SQLiteVirtualTable table,
@@ -5247,6 +5708,29 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="pCursor">
+        /// The native pointer to the sqlite3_vtab_cursor derived structure
+        /// used to get the native pointer to the sqlite3_vtab derived
+        /// structure.
+        /// </param>
+        /// <param name="logErrors">
+        /// Non-zero if this error message should also be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         private static bool SetCursorError(
             SQLiteModule module,
             IntPtr pCursor,
@@ -5267,6 +5751,28 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance used to
+        /// lookup the native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="logErrors">
+        /// Non-zero if this error message should also be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         private static bool SetCursorError(
             SQLiteModule module,
             SQLiteVirtualTableCursor cursor,
@@ -5289,6 +5795,19 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Index Handling Helper Methods
+        /// <summary>
+        /// Modifies the specified <see cref="SQLiteIndex" /> object instance
+        /// to contain the specified estimated cost.
+        /// </summary>
+        /// <param name="index">
+        /// The <see cref="SQLiteIndex" /> object instance to modify.
+        /// </param>
+        /// <param name="estimatedCost">
+        /// The estimated cost value to use.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         protected virtual bool SetEstimatedCost(
             SQLiteIndex index,
             double estimatedCost
@@ -5303,11 +5822,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Modifies the specified <see cref="SQLiteIndex" /> object instance
+        /// to contain the default estimated cost.
+        /// </summary>
+        /// <param name="index">
+        /// The <see cref="SQLiteIndex" /> object instance to modify.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
         protected virtual bool SetEstimatedCost(
             SQLiteIndex index
             )
         {
-            return SetEstimatedCost(index, DefaultCost);
+            return SetEstimatedCost(index, DefaultEstimatedCost);
         }
         #endregion
         #endregion
@@ -5316,6 +5845,10 @@ namespace System.Data.SQLite
 
         #region Public Properties
         private bool logErrors;
+        /// <summary>
+        /// Returns or sets a boolean value indicating whether virtual table
+        /// errors should be logged using the <see cref="SQLiteLog" /> class.
+        /// </summary>
         public virtual bool LogErrors
         {
             get { CheckDisposed(); return logErrors; }
@@ -5325,6 +5858,14 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private bool logExceptions;
+        /// <summary>
+        /// Returns or sets a boolean value indicating whether exceptions
+        /// caught in the
+        /// <see cref="ISQLiteNativeModule.xDisconnect" /> method,
+        /// <see cref="ISQLiteNativeModule.xDestroy" /> method, and the
+        /// <see cref="Dispose()" /> method should be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </summary>
         public virtual bool LogExceptions
         {
             get { CheckDisposed(); return logExceptions; }
@@ -5335,6 +5876,30 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region ISQLiteNativeModule Members
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </summary>
+        /// <param name="pDb">
+        /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </param>
+        /// <param name="pAux">
+        /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </param>
+        /// <param name="argc">
+        /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </param>
+        /// <param name="argv">
+        /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </param>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </param>
+        /// <param name="pError">
+        /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </returns>
         private SQLiteErrorCode xCreate(
             IntPtr pDb,
             IntPtr pAux,
@@ -5386,6 +5951,30 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </summary>
+        /// <param name="pDb">
+        /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </param>
+        /// <param name="pAux">
+        /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </param>
+        /// <param name="argc">
+        /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </param>
+        /// <param name="argv">
+        /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </param>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </param>
+        /// <param name="pError">
+        /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </returns>
         private SQLiteErrorCode xConnect(
             IntPtr pDb,
             IntPtr pAux,
@@ -5437,6 +6026,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+        /// </param>
+        /// <param name="pIndex">
+        /// See the <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+        /// </returns>
         private SQLiteErrorCode xBestIndex(
             IntPtr pVtab,
             IntPtr pIndex
@@ -5469,6 +6070,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xDisconnect" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xDisconnect" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xDisconnect" /> method.
+        /// </returns>
         private SQLiteErrorCode xDisconnect(
             IntPtr pVtab
             )
@@ -5520,6 +6130,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xDestroy" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xDestroy" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xDestroy" /> method.
+        /// </returns>
         private SQLiteErrorCode xDestroy(
             IntPtr pVtab
             )
@@ -5571,6 +6190,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xOpen" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xOpen" /> method.
+        /// </param>
+        /// <param name="pCursor">
+        /// See the <see cref="ISQLiteNativeModule.xOpen" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xOpen" /> method.
+        /// </returns>
         private SQLiteErrorCode xOpen(
             IntPtr pVtab,
             ref IntPtr pCursor
@@ -5618,6 +6249,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xClose" /> method.
+        /// </summary>
+        /// <param name="pCursor">
+        /// See the <see cref="ISQLiteNativeModule.xClose" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xClose" /> method.
+        /// </returns>
         private SQLiteErrorCode xClose(
             IntPtr pCursor
             )
@@ -5656,6 +6296,27 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </summary>
+        /// <param name="pCursor">
+        /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </param>
+        /// <param name="idxNum">
+        /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </param>
+        /// <param name="idxStr">
+        /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </param>
+        /// <param name="argc">
+        /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </param>
+        /// <param name="argv">
+        /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </returns>
         private SQLiteErrorCode xFilter(
             IntPtr pCursor,
             int idxNum,
@@ -5694,6 +6355,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xNext" /> method.
+        /// </summary>
+        /// <param name="pCursor">
+        /// See the <see cref="ISQLiteNativeModule.xNext" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xNext" /> method.
+        /// </returns>
         private SQLiteErrorCode xNext(
             IntPtr pCursor
             )
@@ -5723,6 +6393,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xEof" /> method.
+        /// </summary>
+        /// <param name="pCursor">
+        /// See the <see cref="ISQLiteNativeModule.xEof" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xEof" /> method.
+        /// </returns>
         private int xEof(
             IntPtr pCursor
             )
@@ -5749,6 +6428,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+        /// </summary>
+        /// <param name="pCursor">
+        /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+        /// </param>
+        /// <param name="pContext">
+        /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+        /// </param>
+        /// <param name="index">
+        /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+        /// </returns>
         private SQLiteErrorCode xColumn(
             IntPtr pCursor,
             IntPtr pContext,
@@ -5781,6 +6475,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xRowId" /> method.
+        /// </summary>
+        /// <param name="pCursor">
+        /// See the <see cref="ISQLiteNativeModule.xRowId" /> method.
+        /// </param>
+        /// <param name="rowId">
+        /// See the <see cref="ISQLiteNativeModule.xRowId" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xRowId" /> method.
+        /// </returns>
         private SQLiteErrorCode xRowId(
             IntPtr pCursor,
             ref long rowId
@@ -5808,6 +6514,24 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+        /// </param>
+        /// <param name="argc">
+        /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+        /// </param>
+        /// <param name="argv">
+        /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+        /// </param>
+        /// <param name="rowId">
+        /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+        /// </returns>
         private SQLiteErrorCode xUpdate(
             IntPtr pVtab,
             int argc,
@@ -5836,6 +6560,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xBegin" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xBegin" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xBegin" /> method.
+        /// </returns>
         private SQLiteErrorCode xBegin(
             IntPtr pVtab
             )
@@ -5857,6 +6590,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xSync" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xSync" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xSync" /> method.
+        /// </returns>
         private SQLiteErrorCode xSync(
             IntPtr pVtab
             )
@@ -5878,6 +6620,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xCommit" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xCommit" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xCommit" /> method.
+        /// </returns>
         private SQLiteErrorCode xCommit(
             IntPtr pVtab
             )
@@ -5899,6 +6650,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xRollback" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xRollback" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xRollback" /> method.
+        /// </returns>
         private SQLiteErrorCode xRollback(
             IntPtr pVtab
             )
@@ -5920,6 +6680,27 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </param>
+        /// <param name="nArg">
+        /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </param>
+        /// <param name="zName">
+        /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </param>
+        /// <param name="callback">
+        /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </param>
+        /// <param name="pClientData">
+        /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </returns>
         private int xFindFunction(
             IntPtr pVtab,
             int nArg,
@@ -5963,6 +6744,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xRename" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xRename" /> method.
+        /// </param>
+        /// <param name="zNew">
+        /// See the <see cref="ISQLiteNativeModule.xRename" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xRename" /> method.
+        /// </returns>
         private SQLiteErrorCode xRename(
             IntPtr pVtab,
             IntPtr zNew
@@ -5988,6 +6781,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+        /// </param>
+        /// <param name="iSavepoint">
+        /// See the <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+        /// </returns>
         private SQLiteErrorCode xSavepoint(
             IntPtr pVtab,
             int iSavepoint
@@ -6010,6 +6815,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xRelease" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xRelease" /> method.
+        /// </param>
+        /// <param name="iSavepoint">
+        /// See the <see cref="ISQLiteNativeModule.xRelease" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xRelease" /> method.
+        /// </returns>
         private SQLiteErrorCode xRelease(
             IntPtr pVtab,
             int iSavepoint
@@ -6032,6 +6849,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// See the <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+        /// </summary>
+        /// <param name="pVtab">
+        /// See the <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+        /// </param>
+        /// <param name="iSavepoint">
+        /// See the <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+        /// </returns>
         private SQLiteErrorCode xRollbackTo(
             IntPtr pVtab,
             int iSavepoint
@@ -6057,6 +6886,10 @@ namespace System.Data.SQLite
 
         #region ISQLiteManagedModule Members
         private bool declared;
+        /// <summary>
+        /// Returns non-zero if the schema for the virtual table has been
+        /// declared.
+        /// </summary>
         public virtual bool Declared
         {
             get { CheckDisposed(); return declared; }
@@ -6066,6 +6899,10 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private string name;
+        /// <summary>
+        /// Returns the name of the module as it was registered with the SQLite
+        /// core library.
+        /// </summary>
         public virtual string Name
         {
             get { CheckDisposed(); return name; }
@@ -6073,6 +6910,35 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </summary>
+        /// <param name="connection">
+        /// The <see cref="SQLiteConnection" /> object instance associated with
+        /// the virtual table.
+        /// </param>
+        /// <param name="pClientData">
+        /// The native user-data pointer associated with this module, as it was
+        /// provided to the SQLite core library when the native module instance
+        /// was created.
+        /// </param>
+        /// <param name="arguments">
+        /// The module name, database name, virtual table name, and all other
+        /// arguments passed to the CREATE VIRTUAL TABLE statement.
+        /// </param>
+        /// <param name="table">
+        /// Upon success, this parameter must be modified to contain the
+        /// <see cref="SQLiteVirtualTable" /> object instance associated with
+        /// the virtual table.
+        /// </param>
+        /// <param name="error">
+        /// Upon failure, this parameter must be modified to contain an error
+        /// message.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Create(
             SQLiteConnection connection,
             IntPtr pClientData,
@@ -6083,6 +6949,35 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </summary>
+        /// <param name="connection">
+        /// The <see cref="SQLiteConnection" /> object instance associated with
+        /// the virtual table.
+        /// </param>
+        /// <param name="pClientData">
+        /// The native user-data pointer associated with this module, as it was
+        /// provided to the SQLite core library when the native module instance
+        /// was created.
+        /// </param>
+        /// <param name="arguments">
+        /// The module name, database name, virtual table name, and all other
+        /// arguments passed to the CREATE VIRTUAL TABLE statement.
+        /// </param>
+        /// <param name="table">
+        /// Upon success, this parameter must be modified to contain the
+        /// <see cref="SQLiteVirtualTable" /> object instance associated with
+        /// the virtual table.
+        /// </param>
+        /// <param name="error">
+        /// Upon failure, this parameter must be modified to contain an error
+        /// message.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Connect(
             SQLiteConnection connection,
             IntPtr pClientData,
@@ -6093,6 +6988,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="index">
+        /// The <see cref="SQLiteIndex" /> object instance containing all the
+        /// data for the inputs and outputs relating to index selection.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode BestIndex(
             SQLiteVirtualTable table,
             SQLiteIndex index
@@ -6100,18 +7010,56 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xDisconnect" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Disconnect(
             SQLiteVirtualTable table
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xDestroy" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Destroy(
             SQLiteVirtualTable table
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xOpen" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="cursor">
+        /// Upon success, this parameter must be modified to contain the
+        /// <see cref="SQLiteVirtualTableCursor" /> object instance associated
+        /// with the newly opened virtual table cursor.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Open(
             SQLiteVirtualTable table,
             ref SQLiteVirtualTableCursor cursor
@@ -6119,12 +7067,45 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xClose" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Close(
             SQLiteVirtualTableCursor cursor
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <param name="indexNumber">
+        /// Number used to help identify the selected index.
+        /// </param>
+        /// <param name="indexString">
+        /// String used to help identify the selected index.
+        /// </param>
+        /// <param name="values">
+        /// The values corresponding to each column in the selected index.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Filter(
             SQLiteVirtualTableCursor cursor,
             int indexNumber,
@@ -6134,18 +7115,62 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xNext" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Next(
             SQLiteVirtualTableCursor cursor
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xEof" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <returns>
+        /// Non-zero if no more rows are available; zero otherwise.
+        /// </returns>
         public abstract bool Eof(
             SQLiteVirtualTableCursor cursor
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xColumn" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <param name="context">
+        /// The <see cref="SQLiteContext" /> object instance to be used for
+        /// returning the specified column value to the SQLite core library.
+        /// </param>
+        /// <param name="index">
+        /// The zero-based index corresponding to the column containing the
+        /// value to be returned.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Column(
             SQLiteVirtualTableCursor cursor,
             SQLiteContext context,
@@ -6154,6 +7179,22 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRowId" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <param name="rowId">
+        /// Upon success, this parameter must be modified to contain the unique
+        /// integer row identifier for the current row for the specified cursor.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode RowId(
             SQLiteVirtualTableCursor cursor,
             ref long rowId
@@ -6161,6 +7202,25 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xUpdate" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="values">
+        /// The array of <see cref="SQLiteValue" /> object instances containing
+        /// the new or modified column values, if any.
+        /// </param>
+        /// <param name="rowId">
+        /// Upon success, this parameter must be modified to contain the unique
+        /// integer row identifier for the row that was inserted, if any.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Update(
             SQLiteVirtualTable table,
             SQLiteValue[] values,
@@ -6169,30 +7229,101 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xBegin" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Begin(
             SQLiteVirtualTable table
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xSync" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Sync(
             SQLiteVirtualTable table
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xCommit" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Commit(
             SQLiteVirtualTable table
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRollback" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Rollback(
             SQLiteVirtualTable table
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="argumentCount">
+        /// The number of arguments to the function being sought.
+        /// </param>
+        /// <param name="name">
+        /// The name of the function being sought.
+        /// </param>
+        /// <param name="function">
+        /// Upon success, this parameter must be modified to contain the
+        /// <see cref="SQLiteFunction" /> object instance responsible for
+        /// implementing the specified function.
+        /// </param>
+        /// <param name="pClientData">
+        /// Upon success, this parameter must be modified to contain the
+        /// native user-data pointer associated with
+        /// <paramref name="function" />.
+        /// </param>
+        /// <returns>
+        /// Non-zero if the specified function was found; zero otherwise.
+        /// </returns>
         public abstract bool FindFunction(
             SQLiteVirtualTable table,
             int argumentCount,
@@ -6203,6 +7334,20 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRename" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="newName">
+        /// The new name for the virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Rename(
             SQLiteVirtualTable table,
             string newName
@@ -6210,6 +7355,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="savepoint">
+        /// This is an integer identifier under which the the current state of
+        /// the virtual table should be saved.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Savepoint(
             SQLiteVirtualTable table,
             int savepoint
@@ -6217,6 +7377,22 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRelease" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="savepoint">
+        /// This is an integer used to indicate that any saved states with an
+        /// identifier greater than or equal to this should be deleted by the
+        /// virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode Release(
             SQLiteVirtualTable table,
             int savepoint
@@ -6224,6 +7400,23 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="savepoint">
+        /// This is an integer identifier used to specify a specific saved
+        /// state for the virtual table for it to restore itself back to, which
+        /// should also have the effect of deleting all saved states with an
+        /// integer identifier greater than this one.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         public abstract SQLiteErrorCode RollbackTo(
             SQLiteVirtualTable table,
             int savepoint
@@ -6233,6 +7426,9 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region IDisposable Members
+        /// <summary>
+        /// Disposes of this object instance.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -6244,6 +7440,10 @@ namespace System.Data.SQLite
 
         #region IDisposable "Pattern" Members
         private bool disposed;
+        /// <summary>
+        /// Throws an <see cref="System.ObjectDisposedException"/> if this
+        /// object instance has been disposed.
+        /// </summary>
         private void CheckDisposed() /* throw */
         {
 #if THROW_ON_DISPOSED
@@ -6257,6 +7457,14 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Disposes of this object instance.
+        /// </summary>
+        /// <param name="disposing">
+        /// Non-zero if this method is being called from the
+        /// <see cref="Dispose()" /> method.  Zero if this method is being
+        /// called from the finalizer.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -6303,6 +7511,9 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Destructor
+        /// <summary>
+        /// Finalizes this object instance.
+        /// </summary>
         ~SQLiteModule()
         {
             Dispose(false);
