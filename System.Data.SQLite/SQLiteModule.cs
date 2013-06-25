@@ -2519,7 +2519,7 @@ namespace System.Data.SQLite
         /// </param>
         /// <param name="pClientData">
         /// Upon success, this parameter must be modified to contain the
-        /// native user data pointer associated with
+        /// native user-data pointer associated with
         /// <paramref name="callback" />.
         /// </param>
         /// <returns>
@@ -2681,14 +2681,51 @@ namespace System.Data.SQLite
     /// </summary>
     public interface ISQLiteManagedModule
     {
+        /// <summary>
+        /// Returns non-zero if the schema for the virtual table has been
+        /// declared.
+        /// </summary>
         bool Declared { get; }
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Returns the name of the module as it was registered with the SQLite
+        /// core library.
+        /// </summary>
         string Name { get; }
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xCreate" /> method.
+        /// </summary>
+        /// <param name="connection">
+        /// The <see cref="SQLiteConnection" /> object instance associated with
+        /// the virtual table.
+        /// </param>
+        /// <param name="pClientData">
+        /// The native user-data pointer associated with this module, as it was
+        /// provided to the SQLite core library when the native module instance
+        /// was created.
+        /// </param>
+        /// <param name="arguments">
+        /// The module name, database name, virtual table name, and all other
+        /// arguments passed to the CREATE VIRTUAL TABLE statement.
+        /// </param>
+        /// <param name="table">
+        /// Upon success, this parameter must be modified to contain the
+        /// <see cref="SQLiteVirtualTable" /> object instance associated with
+        /// the virtual table.
+        /// </param>
+        /// <param name="error">
+        /// Upon failure, this parameter must be modified to contain an error
+        /// message.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Create(
             SQLiteConnection connection,  /* in */
             IntPtr pClientData,           /* in */
@@ -2699,6 +2736,35 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xConnect" /> method.
+        /// </summary>
+        /// <param name="connection">
+        /// The <see cref="SQLiteConnection" /> object instance associated with
+        /// the virtual table.
+        /// </param>
+        /// <param name="pClientData">
+        /// The native user-data pointer associated with this module, as it was
+        /// provided to the SQLite core library when the native module instance
+        /// was created.
+        /// </param>
+        /// <param name="arguments">
+        /// The module name, database name, virtual table name, and all other
+        /// arguments passed to the CREATE VIRTUAL TABLE statement.
+        /// </param>
+        /// <param name="table">
+        /// Upon success, this parameter must be modified to contain the
+        /// <see cref="SQLiteVirtualTable" /> object instance associated with
+        /// the virtual table.
+        /// </param>
+        /// <param name="error">
+        /// Upon failure, this parameter must be modified to contain an error
+        /// message.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Connect(
             SQLiteConnection connection,  /* in */
             IntPtr pClientData,           /* in */
@@ -2709,6 +2775,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="index">
+        /// The <see cref="SQLiteIndex" /> object instance containing all the
+        /// data for the inputs and outputs relating to index selection.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode BestIndex(
             SQLiteVirtualTable table, /* in */
             SQLiteIndex index         /* in, out */
@@ -2716,18 +2797,56 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xDisconnect" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Disconnect(
             SQLiteVirtualTable table /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xDestroy" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Destroy(
             SQLiteVirtualTable table /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xOpen" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="cursor">
+        /// Upon success, this parameter must be modified to contain the
+        /// <see cref="SQLiteVirtualTableCursor" /> object instance associated
+        /// with the newly opened virtual table cursor.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Open(
             SQLiteVirtualTable table,           /* in */
             ref SQLiteVirtualTableCursor cursor /* out */
@@ -2735,12 +2854,45 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xClose" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Close(
             SQLiteVirtualTableCursor cursor /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xFilter" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <param name="indexNumber">
+        /// Number used to help identify the selected index.
+        /// </param>
+        /// <param name="indexString">
+        /// String used to help identify the selected index.
+        /// </param>
+        /// <param name="values">
+        /// The values corresponding to each column in the selected index.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Filter(
             SQLiteVirtualTableCursor cursor, /* in */
             int indexNumber,                 /* in */
@@ -2750,18 +2902,62 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xNext" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Next(
             SQLiteVirtualTableCursor cursor /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xEof" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <returns>
+        /// Non-zero if no more rows are available; zero otherwise.
+        /// </returns>
         bool Eof(
             SQLiteVirtualTableCursor cursor /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xColumn" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <param name="context">
+        /// The <see cref="SQLiteContext" /> object instance to be used for
+        /// returning the specified column value to the SQLite core library.
+        /// </param>
+        /// <param name="index">
+        /// The zero-based index corresponding to the column containing the
+        /// value to be returned.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Column(
             SQLiteVirtualTableCursor cursor, /* in */
             SQLiteContext context,           /* in */
@@ -2770,6 +2966,22 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRowId" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
+        /// <param name="rowId">
+        /// Upon success, this parameter must be modified to contain the unique
+        /// integer row identifier for the current row for the specified cursor.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode RowId(
             SQLiteVirtualTableCursor cursor, /* in */
             ref long rowId                   /* out */
@@ -2777,38 +2989,128 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xUpdate" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="values">
+        /// The array of <see cref="SQLiteValue" /> object instances containing
+        /// the new or modified column values, if any.
+        /// </param>
+        /// <param name="rowId">
+        /// Upon success, this parameter must be modified to contain the unique
+        /// integer row identifier for the row that was inserted, if any.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Update(
             SQLiteVirtualTable table, /* in */
             SQLiteValue[] values,     /* in */
-            ref long rowId            /* in, out */
+            ref long rowId            /* out */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xBegin" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Begin(
             SQLiteVirtualTable table /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xSync" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Sync(
             SQLiteVirtualTable table /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xCommit" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Commit(
             SQLiteVirtualTable table /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRollback" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Rollback(
             SQLiteVirtualTable table /* in */
             );
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="argumentCount">
+        /// The number of arguments to the function being sought.
+        /// </param>
+        /// <param name="name">
+        /// The name of the function being sought.
+        /// </param>
+        /// <param name="function">
+        /// Upon success, this parameter must be modified to contain the
+        /// <see cref="SQLiteFunction" /> object instance responsible for
+        /// implementing the specified function.
+        /// </param>
+        /// <param name="pClientData">
+        /// Upon success, this parameter must be modified to contain the
+        /// native user-data pointer associated with
+        /// <paramref name="function" />.
+        /// </param>
+        /// <returns>
+        /// Non-zero if the specified function was found; zero otherwise.
+        /// </returns>
         bool FindFunction(
             SQLiteVirtualTable table,    /* in */
             int argumentCount,           /* in */
@@ -2819,6 +3121,20 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRename" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="newName">
+        /// The new name for the virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Rename(
             SQLiteVirtualTable table, /* in */
             string newName            /* in */
@@ -2826,6 +3142,21 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="savepoint">
+        /// This is an integer identifier under which the the current state of
+        /// the virtual table should be saved.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Savepoint(
             SQLiteVirtualTable table, /* in */
             int savepoint             /* in */
@@ -2833,6 +3164,22 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRelease" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="savepoint">
+        /// This is an integer used to indicate that any saved states with an
+        /// identifier greater than or equal to this should be deleted by the
+        /// virtual table.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode Release(
             SQLiteVirtualTable table, /* in */
             int savepoint             /* in */
@@ -2840,6 +3187,23 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This method is called in response to the
+        /// <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this virtual table.
+        /// </param>
+        /// <param name="savepoint">
+        /// This is an integer identifier used to specify a specific saved
+        /// state for the virtual table for it to restore itself back to, which
+        /// should also have the effect of deleting all saved states with an
+        /// integer identifier greater than this one.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         SQLiteErrorCode RollbackTo(
             SQLiteVirtualTable table, /* in */
             int savepoint             /* in */
@@ -3498,10 +3862,840 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteModule Base Class
-    /* NOT SEALED */
     public abstract class SQLiteModule :
-            ISQLiteManagedModule, /*ISQLiteNativeModule,*/ IDisposable
+            ISQLiteManagedModule, /*ISQLiteNativeModule,*/
+            IDisposable /* NOT SEALED */
     {
+        #region SQLiteNativeModule Private Class
+        private sealed class SQLiteNativeModule :
+                ISQLiteNativeModule, IDisposable
+        {
+            #region Private Constants
+            /// <summary>
+            /// This is the value that is always used for the "logErrors"
+            /// parameter to the various static error handling methods provided
+            /// by the <see cref="SQLiteModule" /> class.
+            /// </summary>
+            private const bool DefaultLogErrors = true;
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// This is the error message text used when the contained
+            /// <see cref="SQLiteModule" /> object instance is not available
+            /// for any reason.
+            /// </summary>
+            private const string ModuleNotAvailableErrorMessage =
+                "native module implementation not available";
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Private Data
+            /// <summary>
+            /// The <see cref="SQLiteModule" /> object instance used to provide
+            /// an implementation of the <see cref="ISQLiteNativeModule" />
+            /// interface.
+            /// </summary>
+            private SQLiteModule module;
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Public Constructors
+            /// <summary>
+            /// Constructs an instance of this class.
+            /// </summary>
+            /// <param name="module">
+            /// The <see cref="SQLiteModule" /> object instance used to provide
+            /// an implementation of the <see cref="ISQLiteNativeModule" />
+            /// interface.
+            /// </param>
+            public SQLiteNativeModule(
+                SQLiteModule module
+                )
+            {
+                this.module = module;
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Private Static Methods
+            /// <summary>
+            /// Sets the table error message to one that indicates the native
+            /// module implementation is not available.
+            /// </summary>
+            /// <param name="pVtab">
+            /// The native pointer to the sqlite3_vtab derived structure.
+            /// </param>
+            /// <returns>
+            /// The value of <see cref="SQLiteErrorCode.Error"/>.
+            /// </returns>
+            private static SQLiteErrorCode ModuleNotAvailableTableError(
+                IntPtr pVtab
+                )
+            {
+                SetTableError(null, pVtab, DefaultLogErrors,
+                    ModuleNotAvailableErrorMessage);
+
+                return SQLiteErrorCode.Error;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// Sets the table error message to one that indicates the native
+            /// module implementation is not available.
+            /// </summary>
+            /// <param name="pCursor">
+            /// The native pointer to the sqlite3_vtab_cursor derived
+            /// structure.
+            /// </param>
+            /// <returns>
+            /// The value of <see cref="SQLiteErrorCode.Error"/>.
+            /// </returns>
+            private static SQLiteErrorCode ModuleNotAvailableCursorError(
+                IntPtr pCursor
+                )
+            {
+                SetCursorError(null, pCursor, DefaultLogErrors,
+                    ModuleNotAvailableErrorMessage);
+
+                return SQLiteErrorCode.Error;
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region ISQLiteNativeModule Members
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+            /// </summary>
+            /// <param name="pDb">
+            /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+            /// </param>
+            /// <param name="pAux">
+            /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+            /// </param>
+            /// <param name="argc">
+            /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+            /// </param>
+            /// <param name="argv">
+            /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+            /// </param>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+            /// </param>
+            /// <param name="pError">
+            /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xCreate" /> method.
+            /// </returns>
+            public SQLiteErrorCode xCreate(
+                IntPtr pDb,
+                IntPtr pAux,
+                int argc,
+                IntPtr[] argv,
+                ref IntPtr pVtab,
+                ref IntPtr pError
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                {
+                    pError = SQLiteString.Utf8IntPtrFromString(
+                        ModuleNotAvailableErrorMessage);
+
+                    return SQLiteErrorCode.Error;
+                }
+
+                return module.xCreate(
+                    pDb, pAux, argc, argv, ref pVtab, ref pError);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+            /// </summary>
+            /// <param name="pDb">
+            /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+            /// </param>
+            /// <param name="pAux">
+            /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+            /// </param>
+            /// <param name="argc">
+            /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+            /// </param>
+            /// <param name="argv">
+            /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+            /// </param>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+            /// </param>
+            /// <param name="pError">
+            /// See the <see cref="ISQLiteNativeModule.xConnect" /> method.
+            /// </param>
+            /// <returns></returns>
+            public SQLiteErrorCode xConnect(
+                IntPtr pDb,
+                IntPtr pAux,
+                int argc,
+                IntPtr[] argv,
+                ref IntPtr pVtab,
+                ref IntPtr pError
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                {
+                    pError = SQLiteString.Utf8IntPtrFromString(
+                        ModuleNotAvailableErrorMessage);
+
+                    return SQLiteErrorCode.Error;
+                }
+
+                return module.xConnect(
+                    pDb, pAux, argc, argv, ref pVtab, ref pError);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+            /// </param>
+            /// <param name="pIndex">
+            /// See the <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xBestIndex" /> method.
+            /// </returns>
+            public SQLiteErrorCode xBestIndex(
+                IntPtr pVtab,
+                IntPtr pIndex
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xBestIndex(pVtab, pIndex);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xDisconnect" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xDisconnect" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xDisconnect" /> method.
+            /// </returns>
+            public SQLiteErrorCode xDisconnect(
+                IntPtr pVtab
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xDisconnect(pVtab);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xDestroy" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xDestroy" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xDestroy" /> method.
+            /// </returns>
+            public SQLiteErrorCode xDestroy(
+                IntPtr pVtab
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xDestroy(pVtab);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xOpen" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xOpen" /> method.
+            /// </param>
+            /// <param name="pCursor">
+            /// See the <see cref="ISQLiteNativeModule.xOpen" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xOpen" /> method.
+            /// </returns>
+            public SQLiteErrorCode xOpen(
+                IntPtr pVtab,
+                ref IntPtr pCursor
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xOpen(pVtab, ref pCursor);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xClose" /> method.
+            /// </summary>
+            /// <param name="pCursor">
+            /// See the <see cref="ISQLiteNativeModule.xClose" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xClose" /> method.
+            /// </returns>
+            public SQLiteErrorCode xClose(
+                IntPtr pCursor
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableCursorError(pCursor);
+
+                return module.xClose(pCursor);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+            /// </summary>
+            /// <param name="pCursor">
+            /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+            /// </param>
+            /// <param name="idxNum">
+            /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+            /// </param>
+            /// <param name="idxStr">
+            /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+            /// </param>
+            /// <param name="argc">
+            /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+            /// </param>
+            /// <param name="argv">
+            /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xFilter" /> method.
+            /// </returns>
+            public SQLiteErrorCode xFilter(
+                IntPtr pCursor,
+                int idxNum,
+                IntPtr idxStr,
+                int argc,
+                IntPtr[] argv
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableCursorError(pCursor);
+
+                return module.xFilter(pCursor, idxNum, idxStr, argc, argv);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xNext" /> method.
+            /// </summary>
+            /// <param name="pCursor">
+            /// See the <see cref="ISQLiteNativeModule.xNext" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xNext" /> method.
+            /// </returns>
+            public SQLiteErrorCode xNext(
+                IntPtr pCursor
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableCursorError(pCursor);
+
+                return module.xNext(pCursor);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xEof" /> method.
+            /// </summary>
+            /// <param name="pCursor">
+            /// See the <see cref="ISQLiteNativeModule.xEof" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xEof" /> method.
+            /// </returns>
+            public int xEof(
+                IntPtr pCursor
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                {
+                    ModuleNotAvailableCursorError(pCursor);
+                    return 1;
+                }
+
+                return module.xEof(pCursor);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+            /// </summary>
+            /// <param name="pCursor">
+            /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+            /// </param>
+            /// <param name="pContext">
+            /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+            /// </param>
+            /// <param name="index">
+            /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xColumn" /> method.
+            /// </returns>
+            public SQLiteErrorCode xColumn(
+                IntPtr pCursor,
+                IntPtr pContext,
+                int index
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableCursorError(pCursor);
+
+                return module.xColumn(pCursor, pContext, index);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xRowId" /> method.
+            /// </summary>
+            /// <param name="pCursor">
+            /// See the <see cref="ISQLiteNativeModule.xRowId" /> method.
+            /// </param>
+            /// <param name="rowId">
+            /// See the <see cref="ISQLiteNativeModule.xRowId" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xRowId" /> method.
+            /// </returns>
+            public SQLiteErrorCode xRowId(
+                IntPtr pCursor,
+                ref long rowId
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableCursorError(pCursor);
+
+                return module.xRowId(pCursor, ref rowId);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+            /// </param>
+            /// <param name="argc">
+            /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+            /// </param>
+            /// <param name="argv">
+            /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+            /// </param>
+            /// <param name="rowId">
+            /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xUpdate" /> method.
+            /// </returns>
+            public SQLiteErrorCode xUpdate(
+                IntPtr pVtab,
+                int argc,
+                IntPtr[] argv,
+                ref long rowId
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xUpdate(pVtab, argc, argv, ref rowId);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xBegin" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xBegin" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xBegin" /> method.
+            /// </returns>
+            public SQLiteErrorCode xBegin(
+                IntPtr pVtab
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xBegin(pVtab);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xSync" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xSync" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xSync" /> method.
+            /// </returns>
+            public SQLiteErrorCode xSync(
+                IntPtr pVtab
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xSync(pVtab);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xCommit" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xCommit" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xCommit" /> method.
+            /// </returns>
+            public SQLiteErrorCode xCommit(
+                IntPtr pVtab
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xCommit(pVtab);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xRollback" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xRollback" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xRollback" /> method.
+            /// </returns>
+            public SQLiteErrorCode xRollback(
+                IntPtr pVtab
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xRollback(pVtab);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+            /// </param>
+            /// <param name="nArg">
+            /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+            /// </param>
+            /// <param name="zName">
+            /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+            /// </param>
+            /// <param name="callback">
+            /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+            /// </param>
+            /// <param name="pClientData">
+            /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xFindFunction" /> method.
+            /// </returns>
+            public int xFindFunction(
+                IntPtr pVtab,
+                int nArg,
+                IntPtr zName,
+                ref SQLiteCallback callback,
+                ref IntPtr pClientData
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                {
+                    ModuleNotAvailableTableError(pVtab);
+                    return 0;
+                }
+
+                return module.xFindFunction(
+                    pVtab, nArg, zName, ref callback, ref pClientData);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xRename" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xRename" /> method.
+            /// </param>
+            /// <param name="zNew">
+            /// See the <see cref="ISQLiteNativeModule.xRename" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xRename" /> method.
+            /// </returns>
+            public SQLiteErrorCode xRename(
+                IntPtr pVtab,
+                IntPtr zNew
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xRename(pVtab, zNew);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+            /// </param>
+            /// <param name="iSavepoint">
+            /// See the <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xSavepoint" /> method.
+            /// </returns>
+            public SQLiteErrorCode xSavepoint(
+                IntPtr pVtab,
+                int iSavepoint
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xSavepoint(pVtab, iSavepoint);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xRelease" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xRelease" /> method.
+            /// </param>
+            /// <param name="iSavepoint">
+            /// See the <see cref="ISQLiteNativeModule.xRelease" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xRelease" /> method.
+            /// </returns>
+            public SQLiteErrorCode xRelease(
+                IntPtr pVtab,
+                int iSavepoint
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xRelease(pVtab, iSavepoint);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// See the <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+            /// </summary>
+            /// <param name="pVtab">
+            /// See the <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+            /// </param>
+            /// <param name="iSavepoint">
+            /// See the <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+            /// </param>
+            /// <returns>
+            /// See the <see cref="ISQLiteNativeModule.xRollbackTo" /> method.
+            /// </returns>
+            public SQLiteErrorCode xRollbackTo(
+                IntPtr pVtab,
+                int iSavepoint
+                )
+            {
+                // CheckDisposed();
+
+                if (module == null)
+                    return ModuleNotAvailableTableError(pVtab);
+
+                return module.xRollbackTo(pVtab, iSavepoint);
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region IDisposable Members
+            /// <summary>
+            /// Disposes of this object instance.
+            /// </summary>
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region IDisposable "Pattern" Members
+            private bool disposed;
+            /// <summary>
+            /// Throws an <see cref="System.ObjectDisposedException"/> if this
+            /// object instance has been disposed.
+            /// </summary>
+            private void CheckDisposed() /* throw */
+            {
+#if THROW_ON_DISPOSED
+                if (disposed)
+                {
+                    throw new ObjectDisposedException(
+                        typeof(SQLiteNativeModule).Name);
+                }
+#endif
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
+            /// Disposes of this object instance.
+            /// </summary>
+            /// <param name="disposing">
+            /// Non-zero if this method is being called from the
+            /// <see cref="Dispose()" /> method.  Zero if this method is being
+            /// called from the finalizer.
+            /// </param>
+            private /* protected virtual */ void Dispose(bool disposing)
+            {
+                if (!disposed)
+                {
+                    //if (disposing)
+                    //{
+                    //    ////////////////////////////////////
+                    //    // dispose managed resources here...
+                    //    ////////////////////////////////////
+                    //}
+
+                    //////////////////////////////////////
+                    // release unmanaged resources here...
+                    //////////////////////////////////////
+
+                    //
+                    // NOTE: The module is not owned by us; therefore, do not
+                    //       dispose it.
+                    //
+                    if (module != null)
+                        module = null;
+
+                    disposed = true;
+                }
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Destructor
+            /// <summary>
+            /// Finalizes this object instance.
+            /// </summary>
+            ~SQLiteNativeModule()
+            {
+                Dispose(false);
+            }
+            #endregion
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Private Constants
         private const double DefaultCost = double.MaxValue;
         #endregion
@@ -3519,7 +4713,7 @@ namespace System.Data.SQLite
         #region Internal Methods
         internal UnsafeNativeMethods.sqlite3_module CreateNativeModule()
         {
-            return CreateNativeModule(CreateNativeModuleImpl());
+            return CreateNativeModule(GetNativeModuleImpl());
         }
         #endregion
 
@@ -3681,9 +4875,16 @@ namespace System.Data.SQLite
 
         #region Protected Members
         #region Module Helper Methods
-        protected virtual ISQLiteNativeModule CreateNativeModuleImpl()
+        protected virtual ISQLiteNativeModule GetNativeModuleImpl()
         {
             return null; /* NOTE: Use built-in defaults. */
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual ISQLiteNativeModule CreateNativeModuleImpl()
+        {
+            return new SQLiteNativeModule(this);
         }
         #endregion
 
@@ -3754,8 +4955,9 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Table Lookup Methods
-        protected virtual IntPtr TableFromCursor(
+        #region Static Table Lookup Methods
+        private static IntPtr TableFromCursor(
+            SQLiteModule module,
             IntPtr pCursor
             )
         {
@@ -3763,6 +4965,17 @@ namespace System.Data.SQLite
                 return IntPtr.Zero;
 
             return Marshal.ReadIntPtr(pCursor);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Table Lookup Methods
+        protected virtual IntPtr TableFromCursor(
+            IntPtr pCursor
+            )
+        {
+            return TableFromCursor(this, pCursor);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -3929,9 +5142,43 @@ namespace System.Data.SQLite
             string error
             )
         {
+            return SetTableError(this, pVtab, LogErrors, error);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual bool SetTableError(
+            SQLiteVirtualTable table,
+            string error
+            )
+        {
+            return SetTableError(this, table, LogErrors, error);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        protected virtual bool SetCursorError(
+            SQLiteVirtualTableCursor cursor,
+            string error
+            )
+        {
+            return SetCursorError(this, cursor, LogErrors, error);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Static Error Handling Helper Methods
+        private static bool SetTableError(
+            SQLiteModule module,
+            IntPtr pVtab,
+            bool logErrors,
+            string error
+            )
+        {
             try
             {
-                if (LogErrors)
+                if (logErrors)
                 {
                     SQLiteLog.LogMessage(SQLiteErrorCode.Error,
                         String.Format(CultureInfo.CurrentCulture,
@@ -3980,8 +5227,10 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual bool SetTableError(
+        private static bool SetTableError(
+            SQLiteModule module,
             SQLiteVirtualTable table,
+            bool logErrors,
             string error
             )
         {
@@ -3993,13 +5242,35 @@ namespace System.Data.SQLite
             if (pVtab == IntPtr.Zero)
                 return false;
 
-            return SetTableError(pVtab, error);
+            return SetTableError(module, pVtab, logErrors, error);
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        protected virtual bool SetCursorError(
+        private static bool SetCursorError(
+            SQLiteModule module,
+            IntPtr pCursor,
+            bool logErrors,
+            string error
+            )
+        {
+            if (pCursor == IntPtr.Zero)
+                return false;
+
+            IntPtr pVtab = TableFromCursor(module, pCursor);
+
+            if (pVtab == IntPtr.Zero)
+                return false;
+
+            return SetTableError(module, pVtab, logErrors, error);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static bool SetCursorError(
+            SQLiteModule module,
             SQLiteVirtualTableCursor cursor,
+            bool logErrors,
             string error
             )
         {
@@ -4011,12 +5282,7 @@ namespace System.Data.SQLite
             if (pCursor == IntPtr.Zero)
                 return false;
 
-            IntPtr pVtab = TableFromCursor(pCursor);
-
-            if (pVtab == IntPtr.Zero)
-                return false;
-
-            return SetTableError(pVtab, error);
+            return SetCursorError(module, pCursor, logErrors, error);
         }
         #endregion
 
