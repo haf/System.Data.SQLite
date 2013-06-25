@@ -72,11 +72,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Sets the context result to the specified <see cref="System.Double" />
+        /// Sets the context result to the specified <see cref="Double" />
         /// value.
         /// </summary>
         /// <param name="value">
-        /// The <see cref="System.Double" /> value to use.
+        /// The <see cref="Double" /> value to use.
         /// </param>
         public void SetDouble(double value)
         {
@@ -95,11 +95,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Sets the context result to the specified <see cref="System.Int32" />
+        /// Sets the context result to the specified <see cref="Int32" />
         /// value.
         /// </summary>
         /// <param name="value">
-        /// The <see cref="System.Int32" /> value to use.
+        /// The <see cref="Int32" /> value to use.
         /// </param>
         public void SetInt(int value)
         {
@@ -112,11 +112,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Sets the context result to the specified <see cref="System.Int64" />
+        /// Sets the context result to the specified <see cref="Int64" />
         /// value.
         /// </summary>
         /// <param name="value">
-        /// The <see cref="System.Int64" /> value to use.
+        /// The <see cref="Int64" /> value to use.
         /// </param>
         public void SetInt64(long value)
         {
@@ -135,11 +135,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Sets the context result to the specified <see cref="System.String" />
+        /// Sets the context result to the specified <see cref="String" />
         /// value.
         /// </summary>
         /// <param name="value">
-        /// The <see cref="System.String" /> value to use.  This value will be
+        /// The <see cref="String" /> value to use.  This value will be
         /// converted to the UTF-8 encoding prior to being used.
         /// </param>
         public void SetString(string value)
@@ -159,13 +159,13 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Sets the context result to the specified <see cref="System.String" />
+        /// Sets the context result to the specified <see cref="String" />
         /// value containing an error message.
         /// </summary>
         /// <param name="value">
-        /// The <see cref="System.String" /> value containing the error message
-        /// text.  This value will be converted to the UTF-8 encoding prior to
-        /// being used.
+        /// The <see cref="String" /> value containing the error message text.
+        /// This value will be converted to the UTF-8 encoding prior to being
+        /// used.
         /// </param>
         public void SetError(string value)
         {
@@ -227,11 +227,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Sets the context result to the specified <see cref="System.Byte" />
-        /// array value.
+        /// Sets the context result to the specified <see cref="Byte" /> array
+        /// value.
         /// </summary>
         /// <param name="value">
-        /// The <see cref="System.Byte" /> array value to use.
+        /// The <see cref="Byte" /> array value to use.
         /// </param>
         public void SetBlob(byte[] value)
         {
@@ -414,11 +414,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Gets and returns the <see cref="System.Int32" /> associated with
-        /// this value.
+        /// Gets and returns the <see cref="Int32" /> associated with this
+        /// value.
         /// </summary>
         /// <returns>
-        /// The <see cref="System.Int32" /> associated with this value.
+        /// The <see cref="Int32" /> associated with this value.
         /// </returns>
         public int GetInt()
         {
@@ -429,11 +429,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Gets and returns the <see cref="System.Int64" /> associated with
+        /// Gets and returns the <see cref="Int64" /> associated with
         /// this value.
         /// </summary>
         /// <returns>
-        /// The <see cref="System.Int64" /> associated with this value.
+        /// The <see cref="Int64" /> associated with this value.
         /// </returns>
         public long GetInt64()
         {
@@ -453,11 +453,11 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Gets and returns the <see cref="System.Double" /> associated with
-        /// this value.
+        /// Gets and returns the <see cref="Double" /> associated with this
+        /// value.
         /// </summary>
         /// <returns>
-        /// The <see cref="System.Double" /> associated with this value.
+        /// The <see cref="Double" /> associated with this value.
         /// </returns>
         public double GetDouble()
         {
@@ -477,12 +477,12 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Gets and returns the <see cref="System.String" /> associated with
-        /// this value.
+        /// Gets and returns the <see cref="String" /> associated with this
+        /// value.
         /// </summary>
         /// <returns>
-        /// The <see cref="System.String" /> associated with this value.  The
-        /// value is converted from the UTF-8 encoding prior to being returned.
+        /// The <see cref="String" /> associated with this value.  The value is
+        /// converted from the UTF-8 encoding prior to being returned.
         /// </returns>
         public string GetString()
         {
@@ -493,16 +493,16 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Gets and returns the <see cref="System.Byte" /> array associated
-        /// with this value.
+        /// Gets and returns the <see cref="Byte" /> array associated with this
+        /// value.
         /// </summary>
         /// <returns>
-        /// The <see cref="System.Byte" /> array associated with this value.
+        /// The <see cref="Byte" /> array associated with this value.
         /// </returns>
         public byte[] GetBlob()
         {
             if (pValue == IntPtr.Zero) return null;
-            return SQLiteMarshal.BytesFromIntPtr(pValue, GetBytes());
+            return SQLiteBytes.FromIntPtr(pValue, GetBytes());
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -1273,8 +1273,8 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="System.ObjectDisposedException"/> if this
-        /// object instance has been disposed.
+        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */
         {
@@ -1519,8 +1519,8 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="System.ObjectDisposedException"/> if this
-        /// object instance has been disposed.
+        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */
         {
@@ -3494,6 +3494,10 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteString Static Class
+    /// <summary>
+    /// This class contains static methods that are used to deal with native
+    /// UTF-8 string pointers to be used with the SQLite core library.
+    /// </summary>
     internal static class SQLiteString
     {
         #region Private Constants
@@ -3762,118 +3766,29 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////
 
-    #region SQLiteMarshal Static Class
-    internal static class SQLiteMarshal
+    #region SQLiteBytes Static Class
+    /// <summary>
+    /// This class contains static methods that are used to deal with native
+    /// pointers to memory blocks that logically contain arrays of bytes to be
+    /// used with the SQLite core library.
+    /// </summary>
+    internal static class SQLiteBytes
     {
-        #region IntPtr Helper Methods
-        public static IntPtr IntPtrForOffset(
-            IntPtr pointer,
-            int offset
-            )
-        {
-            return new IntPtr(pointer.ToInt64() + offset);
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region Marshal Read Helper Methods
-        public static int ReadInt32(
-            IntPtr pointer,
-            int offset
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            return Marshal.ReadInt32(pointer, offset);
-#else
-            return Marshal.ReadInt32(IntPtrForOffset(pointer, offset));
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public static double ReadDouble(
-            IntPtr pointer,
-            int offset
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            return BitConverter.Int64BitsToDouble(Marshal.ReadInt64(
-                pointer, offset));
-#else
-            return BitConverter.ToDouble(BitConverter.GetBytes(
-                Marshal.ReadInt64(IntPtrForOffset(pointer, offset))), 0);
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public static IntPtr ReadIntPtr(
-            IntPtr pointer,
-            int offset
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            return Marshal.ReadIntPtr(pointer, offset);
-#else
-            return Marshal.ReadIntPtr(IntPtrForOffset(pointer, offset));
-#endif
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region Marshal Write Helper Methods
-        public static void WriteInt32(
-            IntPtr pointer,
-            int offset,
-            int value
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            Marshal.WriteInt32(pointer, offset, value);
-#else
-            Marshal.WriteInt32(IntPtrForOffset(pointer, offset), value);
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public static void WriteDouble(
-            IntPtr pointer,
-            int offset,
-            double value
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            Marshal.WriteInt64(pointer, offset,
-                BitConverter.DoubleToInt64Bits(value));
-#else
-            Marshal.WriteInt64(IntPtrForOffset(pointer, offset),
-                BitConverter.ToInt64(BitConverter.GetBytes(value), 0));
-#endif
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public static void WriteIntPtr(
-            IntPtr pointer,
-            int offset,
-            IntPtr value
-            )
-        {
-#if !PLATFORM_COMPACTFRAMEWORK
-            Marshal.WriteIntPtr(pointer, offset, value);
-#else
-            Marshal.WriteIntPtr(IntPtrForOffset(pointer, offset), value);
-#endif
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
         #region Byte Array Helper Methods
-        public static byte[] BytesFromIntPtr(
+        /// <summary>
+        /// Converts a native pointer to a logical array of bytes of the
+        /// specified length into a managed byte array.
+        /// </summary>
+        /// <param name="pValue">
+        /// The native pointer to the logical array of bytes to convert.
+        /// </param>
+        /// <param name="length">
+        /// The length, in bytes, of the logical array of bytes to convert.
+        /// </param>
+        /// <returns>
+        /// The managed byte array or null upon failure.
+        /// </returns>
+        public static byte[] FromIntPtr(
             IntPtr pValue,
             int length
             )
@@ -3893,7 +3808,17 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        public static IntPtr BytesToIntPtr(
+        /// <summary>
+        /// Converts a managed byte array into a native pointer to a logical
+        /// array of bytes.
+        /// </summary>
+        /// <param name="value">
+        /// The managed byte array to convert.
+        /// </param>
+        /// <returns>
+        /// The native pointer to a logical byte array or null upon failure.
+        /// </returns>
+        public static IntPtr ToIntPtr(
             byte[] value
             )
         {
@@ -3915,38 +3840,228 @@ namespace System.Data.SQLite
             return result;
         }
         #endregion
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region SQLiteMarshal Static Class
+    internal static class SQLiteMarshal
+    {
+        #region IntPtr Helper Methods
+        /// <summary>
+        /// Returns a new <see cref="IntPtr" /> object instance based on the
+        /// specified <see cref="IntPtr" /> object instance and an integer
+        /// offset.
+        /// </summary>
+        /// <param name="pointer">
+        /// The <see cref="IntPtr" /> object instance representing the base
+        /// memory location.
+        /// </param>
+        /// <param name="offset">
+        /// The integer offset from the base memory location that the new
+        /// <see cref="IntPtr" /> object instance should point to.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="IntPtr" /> object instance.
+        /// </returns>
+        public static IntPtr IntPtrForOffset(
+            IntPtr pointer,
+            int offset
+            )
+        {
+            return new IntPtr(pointer.ToInt64() + offset);
+        }
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region SQLiteValue Helper Methods
-        public static SQLiteValue[] ValueArrayFromSizeAndIntPtr(
-            int nData,
-            IntPtr apData
+        #region Marshal Read Helper Methods
+        /// <summary>
+        /// Reads a <see cref="Int32" /> value from the specified memory
+        /// location.
+        /// </summary>
+        /// <param name="pointer">
+        /// The <see cref="IntPtr" /> object instance representing the base
+        /// memory location.
+        /// </param>
+        /// <param name="offset">
+        /// The integer offset from the base memory location where the
+        /// <see cref="Int32" /> value to be read is located.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Int32" /> value at the specified memory location.
+        /// </returns>
+        public static int ReadInt32(
+            IntPtr pointer,
+            int offset
             )
         {
-            if (nData < 0)
-                return null;
-
-            if (apData == IntPtr.Zero)
-                return null;
-
-            SQLiteValue[] result = new SQLiteValue[nData];
-
-            for (int index = 0, offset = 0;
-                    index < result.Length;
-                    index++, offset += IntPtr.Size)
-            {
-                IntPtr pData = ReadIntPtr(apData, offset);
-
-                result[index] = (pData != IntPtr.Zero) ?
-                    new SQLiteValue(pData) : null;
-            }
-
-            return result;
+#if !PLATFORM_COMPACTFRAMEWORK
+            return Marshal.ReadInt32(pointer, offset);
+#else
+            return Marshal.ReadInt32(IntPtrForOffset(pointer, offset));
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Reads a <see cref="Double" /> value from the specified memory
+        /// location.
+        /// </summary>
+        /// <param name="pointer">
+        /// The <see cref="IntPtr" /> object instance representing the base
+        /// memory location.
+        /// </param>
+        /// <param name="offset">
+        /// The integer offset from the base memory location where the
+        /// <see cref="Double" /> to be read is located.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Double" /> value at the specified memory location.
+        /// </returns>
+        public static double ReadDouble(
+            IntPtr pointer,
+            int offset
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            return BitConverter.Int64BitsToDouble(Marshal.ReadInt64(
+                pointer, offset));
+#else
+            return BitConverter.ToDouble(BitConverter.GetBytes(
+                Marshal.ReadInt64(IntPtrForOffset(pointer, offset))), 0);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Reads an <see cref="IntPtr" /> value from the specified memory
+        /// location.
+        /// </summary>
+        /// <param name="pointer">
+        /// The <see cref="IntPtr" /> object instance representing the base
+        /// memory location.
+        /// </param>
+        /// <param name="offset">
+        /// The integer offset from the base memory location where the
+        /// <see cref="IntPtr" /> value to be read is located.
+        /// </param>
+        /// <returns>
+        /// The <see cref="IntPtr" /> value at the specified memory location.
+        /// </returns>
+        public static IntPtr ReadIntPtr(
+            IntPtr pointer,
+            int offset
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            return Marshal.ReadIntPtr(pointer, offset);
+#else
+            return Marshal.ReadIntPtr(IntPtrForOffset(pointer, offset));
+#endif
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Marshal Write Helper Methods
+        /// <summary>
+        /// Writes an <see cref="Int32" /> value to the specified memory
+        /// location.
+        /// </summary>
+        /// <param name="pointer">
+        /// The <see cref="IntPtr" /> object instance representing the base
+        /// memory location.
+        /// </param>
+        /// <param name="offset">
+        /// The integer offset from the base memory location where the
+        /// <see cref="Int32" /> value to be written is located.
+        /// </param>
+        /// <param name="value">
+        /// The <see cref="Int32" /> value to write.
+        /// </param>
+        public static void WriteInt32(
+            IntPtr pointer,
+            int offset,
+            int value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteInt32(pointer, offset, value);
+#else
+            Marshal.WriteInt32(IntPtrForOffset(pointer, offset), value);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Writes a <see cref="Double" /> value to the specified memory
+        /// location.
+        /// </summary>
+        /// <param name="pointer">
+        /// The <see cref="IntPtr" /> object instance representing the base
+        /// memory location.
+        /// </param>
+        /// <param name="offset">
+        /// The integer offset from the base memory location where the
+        /// <see cref="Double" /> value to be written is located.
+        /// </param>
+        /// <param name="value">
+        /// The <see cref="Double" /> value to write.
+        /// </param>
+        public static void WriteDouble(
+            IntPtr pointer,
+            int offset,
+            double value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteInt64(pointer, offset,
+                BitConverter.DoubleToInt64Bits(value));
+#else
+            Marshal.WriteInt64(IntPtrForOffset(pointer, offset),
+                BitConverter.ToInt64(BitConverter.GetBytes(value), 0));
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Writes a <see cref="IntPtr" /> value to the specified memory
+        /// location.
+        /// </summary>
+        /// <param name="pointer">
+        /// The <see cref="IntPtr" /> object instance representing the base
+        /// memory location.
+        /// </param>
+        /// <param name="offset">
+        /// The integer offset from the base memory location where the
+        /// <see cref="IntPtr" /> value to be written is located.
+        /// </param>
+        /// <param name="value">
+        /// The <see cref="IntPtr" /> value to write.
+        /// </param>
+        public static void WriteIntPtr(
+            IntPtr pointer,
+            int offset,
+            IntPtr value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteIntPtr(pointer, offset, value);
+#else
+            Marshal.WriteIntPtr(IntPtrForOffset(pointer, offset), value);
+#endif
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region SQLiteValue Helper Methods
         public static SQLiteValue[] ValueArrayFromIntPtrArray(
             IntPtr[] values
             )
@@ -4934,8 +5049,8 @@ namespace System.Data.SQLite
             #region IDisposable "Pattern" Members
             private bool disposed;
             /// <summary>
-            /// Throws an <see cref="System.ObjectDisposedException"/> if this
-            /// object instance has been disposed.
+            /// Throws an <see cref="ObjectDisposedException"/> if this object
+            /// instance has been disposed.
             /// </summary>
             private void CheckDisposed() /* throw */
             {
@@ -7596,8 +7711,8 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="System.ObjectDisposedException"/> if this
-        /// object instance has been disposed.
+        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */
         {
