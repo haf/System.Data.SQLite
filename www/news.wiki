@@ -6,6 +6,7 @@
     <b>1.0.87.0 - June XX, 2013 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
+    <li>Add all the necessary infrastructure to allow virtual tables to be implemented in managed code. Fix for [9a544991be].</li>
     <li>The DbType to type name translation needs to prioritize the Entity Framework type names. Fix for [47f4bac575].</li>
     <li>Add DateTimeFormatString connection string property to allow the DateTime format string used for all parsing and formatting to be overridden.</li>
     <li>Disable use of the new connection string parsing algorithm when the No_SQLiteConnectionNewParser environment variable is set. Pursuant to [bbdda6eae2].</li>
