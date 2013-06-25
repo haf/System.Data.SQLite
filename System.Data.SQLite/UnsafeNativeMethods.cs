@@ -1643,6 +1643,20 @@ namespace System.Data.SQLite
 
     [DllImport(SQLITE_DLL)]
     internal static extern void sqlite3_result_int64_interop(IntPtr context, ref Int64 value);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_create_disposable_module_interop(
+        IntPtr db, IntPtr name, IntPtr pModule, int iVersion, xCreate xCreate,
+        xConnect xConnect, xBestIndex xBestIndex, xDisconnect xDisconnect,
+        xDestroy xDestroy, xOpen xOpen, xClose xClose, xFilter xFilter,
+        xNext xNext, xEof xEof, xColumn xColumn, xRowId xRowId, xUpdate xUpdate,
+        xBegin xBegin, xSync xSync, xCommit xCommit, xRollback xRollback,
+        xFindFunction xFindFunction, xRename xRename, xSavepoint xSavepoint,
+        xRelease xRelease, xRollbackTo xRollbackTo, IntPtr pClientData,
+        xDestroyModule xDestroyModule);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern void sqlite3_dispose_module_interop(IntPtr pModule);
 #endif
     // PLATFORM_COMPACTFRAMEWORK && !SQLITE_STANDARD
     #endregion

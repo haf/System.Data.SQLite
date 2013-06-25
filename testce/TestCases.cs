@@ -220,6 +220,10 @@ namespace test
       catch (Exception) { frm.WriteLine("FAIL - Int64Properties"); failed++; }
 
       total++;
+      try { ManagedVirtualTable(cnn); frm.WriteLine("SUCCESS - ManagedVirtualTable"); passed++; }
+      catch (Exception) { frm.WriteLine("FAIL - ManagedVirtualTable"); failed++; }
+
+      total++;
       try { MultipleThreadStress(cnn); frm.WriteLine("SUCCESS - MultipleThreadStress"); passed++; }
       catch (Exception) { frm.WriteLine("FAIL - MultipleThreadStress"); failed++; }
 
@@ -944,6 +948,67 @@ namespace test
                 })
             {
                 // do nothing.
+            }
+
+            return;
+        }
+
+        throw new NotSupportedException("not a SQLite connection");
+    }
+
+    // Make sure that managed virtual table support works on the .NET Compact Framework.
+    internal void ManagedVirtualTable(DbConnection cnn)
+    {
+        SQLiteConnection cnn2 = cnn as SQLiteConnection;
+
+        if (cnn2 != null)
+        {
+            string[] result = new string[5];
+
+            cnn2.CreateModule(new SQLiteModuleEnumerable("enumMod", new string[] {
+                "one", "two", "three", "4", "5.0"
+            }));
+
+            using (SQLiteCommand command = cnn2.CreateCommand())
+            {
+                command.CommandText = "CREATE VIRTUAL TABLE enumTab USING enumMod;";
+                command.ExecuteNonQuery();
+            }
+
+            using (SQLiteCommand command = cnn2.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM enumTab;";
+
+                using (SQLiteDataReader dataReader = command.ExecuteReader())
+                {
+                    int index = 0;
+
+                    while (dataReader.Read())
+                        result[index++] = dataReader[0].ToString();
+
+                    if (result[0] != "one") throw new ArgumentException("one");
+                    if (result[1] != "two") throw new ArgumentException("two");
+                    if (result[2] != "three") throw new ArgumentException("three");
+                    if (result[3] != "4") throw new ArgumentException("4");
+                    if (result[4] != "5.0") throw new ArgumentException("5.0");
+                }
+            }
+
+            using (SQLiteCommand command = cnn2.CreateCommand())
+            {
+                command.CommandText = "UPDATE enumTab SET x = 1;";
+
+                try
+                {
+                    command.ExecuteNonQuery();
+
+                    throw new InvalidOperationException(
+                        "UPDATE should throw exception");
+                }
+                catch (SQLiteException)
+                {
+                    // do nothing.
+                }
             }
 
             return;

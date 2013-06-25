@@ -5119,6 +5119,17 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+#if PLATFORM_COMPACTFRAMEWORK
+        /// <summary>
+        /// This field is used to hold the block of native memory that contains
+        /// the native sqlite3_module structure associated with this object
+        /// instance when running on the .NET Compact Framework.
+        /// </summary>
+        private IntPtr pNativeModule;
+#endif
+
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// This field is used to store the virtual table instances associated
         /// with this module.  The native pointer to the sqlite3_vtab derived
@@ -5174,6 +5185,41 @@ namespace System.Data.SQLite
         {
             return CreateNativeModule(GetNativeModuleImpl());
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+#if PLATFORM_COMPACTFRAMEWORK
+        /// <summary>
+        /// Creates and returns a memory block obtained from the SQLite core
+        /// library used to store the native sqlite3_module structure for this
+        /// object instance when running on the .NET Compact Framework.
+        /// </summary>
+        /// <returns>
+        /// The native pointer to the native sqlite3_module structure.
+        /// </returns>
+        internal IntPtr CreateNativeModuleInterop()
+        {
+            if (pNativeModule == IntPtr.Zero)
+            {
+                //
+                // HACK: No easy way to determine the size of the native
+                //       sqlite_module structure when running on the .NET
+                //       Compact Framework; therefore, just base the size
+                //       on what we know:
+                //
+                //       There is one integer member.
+                //       There are 22 function pointers.
+                //
+                pNativeModule = SQLiteMemory.Allocate(
+                    sizeof(int) + (22 * IntPtr.Size));
+
+                if (pNativeModule == IntPtr.Zero)
+                    throw new OutOfMemoryException("sqlite3_module");
+            }
+
+            return pNativeModule;
+        }
+#endif
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -7729,8 +7775,23 @@ namespace System.Data.SQLite
 
                 try
                 {
+#if !PLATFORM_COMPACTFRAMEWORK
                     UnsafeNativeMethods.sqlite3_dispose_module(
                         ref nativeModule);
+#else
+                    if (pNativeModule != IntPtr.Zero)
+                    {
+                        try
+                        {
+                            UnsafeNativeMethods.sqlite3_dispose_module_interop(
+                                pNativeModule);
+                        }
+                        finally
+                        {
+                            SQLiteMemory.Free(pNativeModule);
+                        }
+                    }
+#endif
                 }
                 catch (Exception e)
                 {

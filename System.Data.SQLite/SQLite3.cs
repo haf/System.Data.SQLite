@@ -1658,9 +1658,26 @@ namespace System.Data.SQLite
             UnsafeNativeMethods.sqlite3_module nativeModule =
                 module.CreateNativeModule();
 
+#if !PLATFORM_COMPACTFRAMEWORK
             if (UnsafeNativeMethods.sqlite3_create_disposable_module(
                     _sql, pName, ref nativeModule, IntPtr.Zero,
                     null) != IntPtr.Zero)
+#else
+            if (UnsafeNativeMethods.sqlite3_create_disposable_module_interop(
+                    _sql, pName, module.CreateNativeModuleInterop(),
+                    nativeModule.iVersion, nativeModule.xCreate,
+                    nativeModule.xConnect, nativeModule.xBestIndex,
+                    nativeModule.xDisconnect, nativeModule.xDestroy,
+                    nativeModule.xOpen, nativeModule.xClose,
+                    nativeModule.xFilter, nativeModule.xNext,
+                    nativeModule.xEof, nativeModule.xColumn,
+                    nativeModule.xRowId, nativeModule.xUpdate,
+                    nativeModule.xBegin, nativeModule.xSync,
+                    nativeModule.xCommit, nativeModule.xRollback,
+                    nativeModule.xFindFunction, nativeModule.xRename,
+                    nativeModule.xSavepoint, nativeModule.xRelease,
+                    nativeModule.xRollbackTo, IntPtr.Zero, null) != IntPtr.Zero)
+#endif
             {
                 if (_modules == null)
                     _modules = new Dictionary<string, SQLiteModule>();
