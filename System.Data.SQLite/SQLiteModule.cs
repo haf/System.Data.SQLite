@@ -3497,13 +3497,36 @@ namespace System.Data.SQLite
     internal static class SQLiteString
     {
         #region Private Constants
+        /// <summary>
+        /// This is the maximum possible length for the native UTF-8 encoded
+        /// strings used with the SQLite core library.
+        /// </summary>
         private static int ThirtyBits = 0x3fffffff;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// This is the <see cref="Encoding" /> object instance used to handle
+        /// conversions from/to UTF-8.
+        /// </summary>
         private static readonly Encoding Utf8Encoding = Encoding.UTF8;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region UTF-8 Encoding Helper Methods
+        /// <summary>
+        /// Converts the specified managed string into the UTF-8 encoding and
+        /// returns the array of bytes containing its representation in that
+        /// encoding.
+        /// </summary>
+        /// <param name="value">
+        /// The managed string to convert.
+        /// </param>
+        /// <returns>
+        /// The array of bytes containing the representation of the managed
+        /// string in the UTF-8 encoding or null upon failure.
+        /// </returns>
         public static byte[] GetUtf8BytesFromString(
             string value
             )
@@ -3516,6 +3539,16 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Converts the specified array of bytes representing a string in the
+        /// UTF-8 encoding and returns a managed string.
+        /// </summary>
+        /// <param name="bytes">
+        /// The array of bytes to convert.
+        /// </param>
+        /// <returns>
+        /// The managed string or null upon failure.
+        /// </returns>
         public static string GetStringFromUtf8Bytes(
             byte[] bytes
             )
@@ -3534,6 +3567,20 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region UTF-8 String Helper Methods
+        /// <summary>
+        /// Probes a native pointer to a string in the UTF-8 encoding for its
+        /// terminating NUL character, within the specified length limit.
+        /// </summary>
+        /// <param name="pValue">
+        /// The native NUL-terminated string pointer.
+        /// </param>
+        /// <param name="limit">
+        /// The maximum length of the native string, in bytes.
+        /// </param>
+        /// <returns>
+        /// The length of the native string, in bytes -OR- zero if the length
+        /// could not be determined.
+        /// </returns>
         public static int ProbeForUtf8ByteLength(
             IntPtr pValue,
             int limit
@@ -3541,7 +3588,7 @@ namespace System.Data.SQLite
         {
             int length = 0;
 
-            if (pValue != IntPtr.Zero)
+            if ((pValue != IntPtr.Zero) && (limit > 0))
             {
                 do
                 {
@@ -3560,6 +3607,16 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Converts the specified native NUL-terminated UTF-8 string pointer
+        /// into a managed string.
+        /// </summary>
+        /// <param name="pValue">
+        /// The native NUL-terminated UTF-8 string pointer.
+        /// </param>
+        /// <returns>
+        /// The managed string or null upon failure.
+        /// </returns>
         public static string StringFromUtf8IntPtr(
             IntPtr pValue
             )
@@ -3570,6 +3627,19 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Converts the specified native UTF-8 string pointer of the specified
+        /// length into a managed string.
+        /// </summary>
+        /// <param name="pValue">
+        /// The native UTF-8 string pointer.
+        /// </param>
+        /// <param name="length">
+        /// The length of the native string, in bytes.
+        /// </param>
+        /// <returns>
+        /// The managed string or null upon failure.
+        /// </returns>
         public static string StringFromUtf8IntPtr(
             IntPtr pValue,
             int length
@@ -3592,6 +3662,18 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Converts the specified managed string into a native NUL-terminated
+        /// UTF-8 string pointer using memory obtained from the SQLite core
+        /// library.
+        /// </summary>
+        /// <param name="value">
+        /// The managed string to convert.
+        /// </param>
+        /// <returns>
+        /// The native NUL-terminated UTF-8 string pointer or
+        /// <see cref="IntPtr.Zero" /> upon failure.
+        /// </returns>
         public static IntPtr Utf8IntPtrFromString(
             string value
             )
@@ -3622,6 +3704,16 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region UTF-8 String Array Helper Methods
+        /// <summary>
+        /// Converts an array of native NUL-terminated UTF-8 string pointers
+        /// into an array of managed strings.
+        /// </summary>
+        /// <param name="pValues">
+        /// The array of native NUL-terminated UTF-8 string pointers.
+        /// </param>
+        /// <returns>
+        /// The array of managed strings or null upon failure.
+        /// </returns>
         public static string[] StringArrayFromUtf8IntPtrArray(
             IntPtr[] pValues
             )
@@ -3639,6 +3731,17 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Converts an array of managed strings into an array of native
+        /// NUL-terminated UTF-8 string pointers.
+        /// </summary>
+        /// <param name="values">
+        /// The array of managed strings to convert.
+        /// </param>
+        /// <returns>
+        /// The array of native NUL-terminated UTF-8 string pointers or null
+        /// upon failure.
+        /// </returns>
         public static IntPtr[] Utf8IntPtrArrayFromStringArray(
             string[] values
             )
