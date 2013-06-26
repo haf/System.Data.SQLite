@@ -121,11 +121,17 @@ set patterns(.hhp,2) \
 set patterns(.html,1) \
     {"http://msdn\.microsoft\.com/en-us/library/(System\.Data\.SQLite\.(?:.*?))\(VS\.\d+\)\.aspx"}
 
+set patterns(.html,2) {System.Collections.Generic.IEnumerable`1}
+set patterns(.html,3) {System.Collections.Generic.IEnumerator`1}
+
 set subSpecs(.hhc,1) [readFileAsSubSpec [file join $path SQLite.NET.hhc]]
+
 set subSpecs(.hhp,1) {Default topic=welcome.html}
 set subSpecs(.hhp,2) {"welcome.html","welcome.html",,,,,}
 
 set subSpecs(.html,1) {"System.Data.SQLite~\1.html"}
+set subSpecs(.html,2) {9eekhta0}
+set subSpecs(.html,3) {78dfe2yb}
 
 foreach fileName $fileNames {
   set fileName [file join $path $outputPath $fileName]
