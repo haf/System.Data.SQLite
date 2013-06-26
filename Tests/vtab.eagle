@@ -215,5 +215,113 @@ virtual table "t\d+" is read-only\}\}$}]}
 
 ###############################################################################
 
+runTest {test vtab-1.3 {IEnumerable<T> virtual table} -setup {
+  setupDb [set fileName vtab-1.3.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql(1) { \
+    CREATE VIRTUAL TABLE t${id} USING mod${id}; \
+  }
+
+  set sql(2) { \
+    SELECT * FROM t${id}; \
+  }
+
+  set sql(3) { \
+    UPDATE t${id} SET x = 1; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+    using System.Data.SQLite.Generic;
+    using Eagle._Containers.Public;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static StringList GetList(params int\[\] integers)
+        {
+          StringList result = new StringList();
+
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            connection.CreateModule(new SQLiteModuleEnumerable<int>(
+              "mod${id}", integers));
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(1)}]";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(2)}]";
+
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                while (dataReader.Read())
+                  result.Add(dataReader\[0\].ToString());
+              }
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(3)}]";
+
+              try
+              {
+                command.ExecuteNonQuery();
+              }
+              catch (SQLiteException e)
+              {
+                result.Add(e.ResultCode.ToString());
+                result.Add(e.Message);
+              }
+            }
+
+            connection.Close();
+          }
+
+          return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors [list System.Data.SQLite.dll Eagle.dll]]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetList 1 2 3 4 5
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
+[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
+\{\} 0 \{1 2 3 4 5 Error \{SQL logic error or missing database
+virtual table "t\d+" is read-only\}\}$}]}
+
+###############################################################################
+
 runSQLiteTestEpilogue
 runTestEpilogue

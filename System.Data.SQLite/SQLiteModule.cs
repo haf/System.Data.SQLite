@@ -361,7 +361,7 @@ namespace System.Data.SQLite
         private object value;
         /// <summary>
         /// If the managed value for this object instance is available (i.e. it
-        /// has been previously persisted via the <see cref="Persist"/>) method,
+        /// has been previously persisted via the <see cref="Persist" />) method,
         /// that value is returned; otherwise, an exception is thrown.  The
         /// returned value may be null.
         /// </summary>
@@ -1273,7 +1273,7 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// Throws an <see cref="ObjectDisposedException" /> if this object
         /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */
@@ -1519,7 +1519,7 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// Throws an <see cref="ObjectDisposedException" /> if this object
         /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */
@@ -4357,7 +4357,7 @@ namespace System.Data.SQLite
             /// The native pointer to the sqlite3_vtab derived structure.
             /// </param>
             /// <returns>
-            /// The value of <see cref="SQLiteErrorCode.Error"/>.
+            /// The value of <see cref="SQLiteErrorCode.Error" />.
             /// </returns>
             private static SQLiteErrorCode ModuleNotAvailableTableError(
                 IntPtr pVtab
@@ -4380,7 +4380,7 @@ namespace System.Data.SQLite
             /// structure.
             /// </param>
             /// <returns>
-            /// The value of <see cref="SQLiteErrorCode.Error"/>.
+            /// The value of <see cref="SQLiteErrorCode.Error" />.
             /// </returns>
             private static SQLiteErrorCode ModuleNotAvailableCursorError(
                 IntPtr pCursor
@@ -5058,7 +5058,7 @@ namespace System.Data.SQLite
             #region IDisposable "Pattern" Members
             private bool disposed;
             /// <summary>
-            /// Throws an <see cref="ObjectDisposedException"/> if this object
+            /// Throws an <see cref="ObjectDisposedException" /> if this object
             /// instance has been disposed.
             /// </summary>
             private void CheckDisposed() /* throw */
@@ -5567,7 +5567,7 @@ namespace System.Data.SQLite
         /// </param>
         /// <returns>
         /// The native pointer to the sqlite3_vtab derived structure -OR-
-        /// <see cref="IntPtr.Zero"/> if it cannot be determined.
+        /// <see cref="IntPtr.Zero" /> if it cannot be determined.
         /// </returns>
         private static IntPtr TableFromCursor(
             SQLiteModule module,
@@ -5596,7 +5596,7 @@ namespace System.Data.SQLite
         /// </param>
         /// <returns>
         /// The native pointer to the sqlite3_vtab derived structure -OR-
-        /// <see cref="IntPtr.Zero"/> if it cannot be determined.
+        /// <see cref="IntPtr.Zero" /> if it cannot be determined.
         /// </returns>
         protected virtual IntPtr TableFromCursor(
             IntPtr pCursor
@@ -5657,7 +5657,7 @@ namespace System.Data.SQLite
         /// </param>
         /// <returns>
         /// The native pointer to a sqlite3_vtab derived structure or
-        /// <see cref="IntPtr.Zero"/> if the method fails for any reason.
+        /// <see cref="IntPtr.Zero" /> if the method fails for any reason.
         /// </returns>
         protected virtual IntPtr TableToIntPtr(
             SQLiteVirtualTable table
@@ -5751,7 +5751,7 @@ namespace System.Data.SQLite
         /// </param>
         /// <returns>
         /// The native pointer to a sqlite3_vtab_cursor derived structure or
-        /// <see cref="IntPtr.Zero"/> if the method fails for any reason.
+        /// <see cref="IntPtr.Zero" /> if the method fails for any reason.
         /// </returns>
         protected virtual IntPtr CursorToIntPtr(
             SQLiteVirtualTableCursor cursor
@@ -7766,7 +7766,7 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// Throws an <see cref="ObjectDisposedException" /> if this object
         /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */

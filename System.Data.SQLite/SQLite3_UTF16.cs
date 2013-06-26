@@ -41,7 +41,7 @@ namespace System.Data.SQLite
     /// The native handle to be associated with the database connection.
     /// </param>
     /// <param name="fileName">
-    /// The fully qualified file name associated with <paramref name="db "/>.
+    /// The fully qualified file name associated with <paramref name="db" />.
     /// </param>
     /// <param name="ownHandle">
     /// Non-zero if the newly created object instance will need to dispose

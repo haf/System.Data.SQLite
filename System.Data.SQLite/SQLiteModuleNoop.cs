@@ -720,7 +720,7 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// Throws an <see cref="ObjectDisposedException" /> if this object
         /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */

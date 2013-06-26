@@ -6,8 +6,10 @@
  ********************************************************/
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 
+#region Non-Generic Classes
 namespace System.Data.SQLite
 {
     #region SQLiteVirtualTableCursorEnumerator Class
@@ -18,7 +20,7 @@ namespace System.Data.SQLite
     /// class that wraps an <see cref="IEnumerator" /> object instance.
     /// </summary>
     public class SQLiteVirtualTableCursorEnumerator :
-            SQLiteVirtualTableCursor /* NOT SEALED */
+            SQLiteVirtualTableCursor, IEnumerator /* NOT SEALED */
     {
         #region Private Data
         /// <summary>
@@ -31,7 +33,7 @@ namespace System.Data.SQLite
 
         /// <summary>
         /// This value will be non-zero if false has been returned from the
-        /// <see cref="IEnumerator.MoveNext"/> method.
+        /// <see cref="IEnumerator.MoveNext" /> method.
         /// </summary>
         private bool endOfEnumerator;
         #endregion
@@ -151,7 +153,7 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// Throws an <see cref="ObjectDisposedException" /> if this object
         /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */
@@ -275,7 +277,7 @@ namespace System.Data.SQLite
         /// The <see cref="SQLiteVirtualTableCursor" /> object instance.
         /// </param>
         /// <returns>
-        /// The value of <see cref="SQLiteErrorCode.Error"/>.
+        /// The value of <see cref="SQLiteErrorCode.Error" />.
         /// </returns>
         protected virtual SQLiteErrorCode CursorTypeMismatchError(
             SQLiteVirtualTableCursor cursor
@@ -295,7 +297,7 @@ namespace System.Data.SQLite
         /// The <see cref="SQLiteVirtualTableCursor" /> object instance.
         /// </param>
         /// <returns>
-        /// The value of <see cref="SQLiteErrorCode.Error"/>.
+        /// The value of <see cref="SQLiteErrorCode.Error" />.
         /// </returns>
         protected virtual SQLiteErrorCode CursorEndOfEnumeratorError(
             SQLiteVirtualTableCursor cursor
@@ -324,6 +326,9 @@ namespace System.Data.SQLite
         {
             if (value == null)
                 return null;
+
+            if (value is string)
+                return (string)value;
 
             return value.ToString();
         }
@@ -813,7 +818,7 @@ namespace System.Data.SQLite
         #region IDisposable "Pattern" Members
         private bool disposed;
         /// <summary>
-        /// Throws an <see cref="ObjectDisposedException"/> if this object
+        /// Throws an <see cref="ObjectDisposedException" /> if this object
         /// instance has been disposed.
         /// </summary>
         private void CheckDisposed() /* throw */
@@ -822,7 +827,7 @@ namespace System.Data.SQLite
             if (disposed)
             {
                 throw new ObjectDisposedException(
-                    typeof(SQLiteModuleNoop).Name);
+                    typeof(SQLiteModuleEnumerable).Name);
             }
 #endif
         }
@@ -866,3 +871,325 @@ namespace System.Data.SQLite
     }
     #endregion
 }
+#endregion
+
+///////////////////////////////////////////////////////////////////////////////
+
+#region Generic Classes
+namespace System.Data.SQLite.Generic
+{
+    #region SQLiteVirtualTableCursorEnumerator<T> Class
+    /// <summary>
+    /// This class represents a virtual table cursor to be used with the
+    /// <see cref="SQLiteModuleEnumerable" /> class.  It is not sealed and may
+    /// be used as the base class for any user-defined virtual table cursor
+    /// class that wraps an <see cref="IEnumerator{T}" /> object instance.
+    /// </summary>
+    public class SQLiteVirtualTableCursorEnumerator<T> :
+            SQLiteVirtualTableCursorEnumerator, IEnumerator<T> /* NOT SEALED */
+    {
+        #region Private Data
+        /// <summary>
+        /// The <see cref="IEnumerator{T}" /> instance provided when this
+        /// cursor was created.
+        /// </summary>
+        private IEnumerator<T> enumerator;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Constructors
+        /// <summary>
+        /// Constructs an instance of this class.
+        /// </summary>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance associated
+        /// with this object instance.
+        /// </param>
+        /// <param name="enumerator">
+        /// The <see cref="IEnumerator{T}" /> instance to expose as a virtual
+        /// table cursor.
+        /// </param>
+        public SQLiteVirtualTableCursorEnumerator(
+            SQLiteVirtualTable table,
+            IEnumerator<T> enumerator
+            )
+            : base(table, enumerator as IEnumerator)
+        {
+            this.enumerator = enumerator;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Members
+        /// <summary>
+        /// Returns the value for the current row of the virtual table cursor
+        /// using the <see cref="IEnumerator{T}.Current" /> property of the
+        /// <see cref="IEnumerator{T}" /> object instance.
+        /// </summary>
+        T IEnumerator<T>.Current
+        {
+            get
+            {
+                CheckDisposed();
+
+                if (enumerator == null)
+                    return default(T);
+
+                return enumerator.Current;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Closes the virtual table cursor.
+        /// </summary>
+        public override void Close()
+        {
+            // CheckDisposed();
+
+            if (enumerator != null)
+                enumerator = null;
+
+            base.Close();
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region IDisposable "Pattern" Members
+        private bool disposed;
+        /// <summary>
+        /// Throws an <see cref="ObjectDisposedException" /> if this object
+        /// instance has been disposed.
+        /// </summary>
+        private void CheckDisposed() /* throw */
+        {
+#if THROW_ON_DISPOSED
+            if (disposed)
+            {
+                throw new ObjectDisposedException(
+                    typeof(SQLiteVirtualTableCursorEnumerator<T>).Name);
+            }
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Disposes of this object instance.
+        /// </summary>
+        /// <param name="disposing">
+        /// Non-zero if this method is being called from the
+        /// <see cref="IDisposable.Dispose" /> method.  Zero if this method is
+        /// being called from the finalizer.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (!disposed)
+                {
+                    //if (disposing)
+                    //{
+                    //    ////////////////////////////////////
+                    //    // dispose managed resources here...
+                    //    ////////////////////////////////////
+                    //}
+
+                    //////////////////////////////////////
+                    // release unmanaged resources here...
+                    //////////////////////////////////////
+
+                    Close();
+
+                    disposed = true;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+        #endregion
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region SQLiteModuleEnumerable<T> Class
+    /// <summary>
+    /// This class implements a virtual table module that exposes an
+    /// <see cref="IEnumerable{T}" /> object instance as a read-only virtual
+    /// table.  It is not sealed and may be used as the base class for any
+    /// user-defined virtual table class that wraps an
+    /// <see cref="IEnumerable{T}" /> object instance.
+    /// </summary>
+    public class SQLiteModuleEnumerable<T> :
+            SQLiteModuleEnumerable /* NOT SEALED */
+    {
+        #region Private Data
+        /// <summary>
+        /// The <see cref="IEnumerable{T}" /> instance containing the backing
+        /// data for the virtual table.
+        /// </summary>
+        private IEnumerable<T> enumerable;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Public Constructors
+        /// <summary>
+        /// Constructs an instance of this class.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the module.  This parameter cannot be null.
+        /// </param>
+        /// <param name="enumerable">
+        /// The <see cref="IEnumerable{T}" /> instance to expose as a virtual
+        /// table.  This parameter cannot be null.
+        /// </param>
+        public SQLiteModuleEnumerable(
+            string name,
+            IEnumerable<T> enumerable
+            )
+            : base(name, enumerable as IEnumerable)
+        {
+            this.enumerable = enumerable;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region ISQLiteManagedModule Members
+        /// <summary>
+        /// See the <see cref="ISQLiteManagedModule.Open" /> method.
+        /// </summary>
+        /// <param name="table">
+        /// See the <see cref="ISQLiteManagedModule.Open" /> method.
+        /// </param>
+        /// <param name="cursor">
+        /// See the <see cref="ISQLiteManagedModule.Open" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteManagedModule.Open" /> method.
+        /// </returns>
+        public override SQLiteErrorCode Open(
+            SQLiteVirtualTable table,
+            ref SQLiteVirtualTableCursor cursor
+            )
+        {
+            CheckDisposed();
+
+            cursor = new SQLiteVirtualTableCursorEnumerator<T>(
+                table, enumerable.GetEnumerator());
+
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// See the <see cref="ISQLiteManagedModule.Column" /> method.
+        /// </summary>
+        /// <param name="cursor">
+        /// See the <see cref="ISQLiteManagedModule.Column" /> method.
+        /// </param>
+        /// <param name="context">
+        /// See the <see cref="ISQLiteManagedModule.Column" /> method.
+        /// </param>
+        /// <param name="index">
+        /// See the <see cref="ISQLiteManagedModule.Column" /> method.
+        /// </param>
+        /// <returns>
+        /// See the <see cref="ISQLiteManagedModule.Column" /> method.
+        /// </returns>
+        public override SQLiteErrorCode Column(
+            SQLiteVirtualTableCursor cursor,
+            SQLiteContext context,
+            int index
+            )
+        {
+            CheckDisposed();
+
+            SQLiteVirtualTableCursorEnumerator<T> enumeratorCursor =
+                cursor as SQLiteVirtualTableCursorEnumerator<T>;
+
+            if (enumeratorCursor == null)
+                return CursorTypeMismatchError(cursor);
+
+            if (enumeratorCursor.EndOfEnumerator)
+                return CursorEndOfEnumeratorError(cursor);
+
+            T current = ((IEnumerator<T>)enumeratorCursor).Current;
+
+            if (current != null)
+                context.SetString(GetStringFromObject(current));
+            else
+                context.SetNull();
+
+            return SQLiteErrorCode.Ok;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region IDisposable "Pattern" Members
+        private bool disposed;
+        /// <summary>
+        /// Throws an <see cref="ObjectDisposedException" /> if this object
+        /// instance has been disposed.
+        /// </summary>
+        private void CheckDisposed() /* throw */
+        {
+#if THROW_ON_DISPOSED
+            if (disposed)
+            {
+                throw new ObjectDisposedException(
+                    typeof(SQLiteModuleEnumerable<T>).Name);
+            }
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Disposes of this object instance.
+        /// </summary>
+        /// <param name="disposing">
+        /// Non-zero if this method is being called from the
+        /// <see cref="IDisposable.Dispose" /> method.  Zero if this method is
+        /// being called from the finalizer.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (!disposed)
+                {
+                    //if (disposing)
+                    //{
+                    //    ////////////////////////////////////
+                    //    // dispose managed resources here...
+                    //    ////////////////////////////////////
+                    //}
+
+                    //////////////////////////////////////
+                    // release unmanaged resources here...
+                    //////////////////////////////////////
+
+                    disposed = true;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+        #endregion
+    }
+    #endregion
+}
+#endregion

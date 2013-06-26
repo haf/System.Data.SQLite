@@ -426,7 +426,7 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Returns the DateTime format string to use for the specified DateTimeKind.
-    /// If <paramref name="formatString"/> is not null, it will be returned verbatim.
+    /// If <paramref name="formatString" /> is not null, it will be returned verbatim.
     /// </summary>
     /// <param name="kind">The DateTimeKind to use.</param>
     /// <param name="formatString">The DateTime format string to use.</param>
@@ -1431,7 +1431,7 @@ namespace System.Data.SQLite
       Scalar = 2,
 
       /// <summary>
-      /// The command is expected to return <see cref="SQLiteDataReader"/> result.
+      /// The command is expected to return <see cref="SQLiteDataReader" /> result.
       /// The <see cref="SQLiteCommand.ExecuteReader()" /> method will be called.
       /// </summary>
       Reader = 3,
