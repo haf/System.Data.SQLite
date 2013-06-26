@@ -3048,7 +3048,7 @@ namespace System.Data.SQLite
               {
                 while (rdTable.Read())
                 {
-                  if (rdTable.GetInt32(5) == 1)
+                  if (rdTable.GetInt32(5) != 0)
                   {
                     primaryKeys.Add(rdTable.GetInt32(0));
 

@@ -1,0 +1,84 @@
+###############################################################################
+#
+# tkt-f2c47a01eb.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-f2c47a01eb-1.1 {GetSchema w/INDEXES, PK} -setup {
+  setupDb [set fileName tkt-f2c47a01eb-1.1.db]
+} -body {
+  set connection [getDbConnection]
+
+  sql execute $db "CREATE TABLE t1(x TEXT PRIMARY KEY, y TEXT);"
+  sql execute $db "CREATE INDEX t1_1 ON t1(x, y);"
+  sql execute $db "CREATE UNIQUE INDEX t1_2 ON t1(x, y);"
+
+  set dataTable [$connection -alias GetSchema INDEXES]
+  set results [list]
+
+  object foreach -alias dataRow [set dataRows [$dataTable -alias Rows]] {
+    lappend results [list [$dataRow Item TABLE_NAME] \
+        [$dataRow Item INDEX_NAME] [$dataRow Item PRIMARY_KEY]]
+  }
+
+  set results
+} -cleanup {
+  cleanupDb $fileName
+
+  freeDbConnection
+
+  unset -nocomplain dataRow dataRows dataTable results connection db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-result {{t1 t1_2 False} {t1 t1_1 False} {t1 sqlite_autoindex_t1_1 True}}}
+
+###############################################################################
+
+runTest {test tkt-f2c47a01eb-1.2 {GetSchema w/INDEXES, composite PK} -setup {
+  setupDb [set fileName tkt-f2c47a01eb-1.2.db]
+} -body {
+  set connection [getDbConnection]
+
+  sql execute $db "CREATE TABLE t1(x TEXT, y TEXT, PRIMARY KEY(x, y));"
+  sql execute $db "CREATE INDEX t1_1 ON t1(x, y);"
+  sql execute $db "CREATE UNIQUE INDEX t1_2 ON t1(x, y);"
+
+  set dataTable [$connection -alias GetSchema INDEXES]
+  set results [list]
+
+  object foreach -alias dataRow [set dataRows [$dataTable -alias Rows]] {
+    lappend results [list [$dataRow Item TABLE_NAME] \
+        [$dataRow Item INDEX_NAME] [$dataRow Item PRIMARY_KEY]]
+  }
+
+  set results
+} -cleanup {
+  cleanupDb $fileName
+
+  freeDbConnection
+
+  unset -nocomplain dataRow dataRows dataTable results connection db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-result {{t1 t1_2 False} {t1 t1_1 False} {t1 sqlite_autoindex_t1_1 True}}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
