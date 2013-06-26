@@ -9,7 +9,7 @@
     <li>Add all the necessary infrastructure to allow virtual tables to be implemented in managed code. Fix for [9a544991be].</li>
     <li>The DbType to type name translation needs to prioritize the Entity Framework type names. Fix for [47f4bac575].</li>
     <li>Add DateTimeFormatString connection string property to allow the DateTime format string used for all parsing and formatting to be overridden.</li>
-    <li>Modify the index introspection code so that it does not treat PRAGMA table_info 'pk' column values as boolean. Fix for [f2c47a01eb].</li>
+    <li>Modify the index introspection code so that it does not treat PRAGMA table_info &quot;pk&quot; column values as boolean. Fix for [f2c47a01eb].</li>
     <li>Disable use of the new connection string parsing algorithm when the No_SQLiteConnectionNewParser environment variable is set. Pursuant to [bbdda6eae2].</li>
     <li>Rename the ReturnCode property of the SQLiteException class to ResultCode.&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
