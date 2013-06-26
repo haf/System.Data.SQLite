@@ -137,7 +137,8 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Closes the virtual table cursor.
+        /// Closes the virtual table cursor.  This method must not throw any
+        /// exceptions.
         /// </summary>
         public virtual void Close()
         {
@@ -944,7 +945,8 @@ namespace System.Data.SQLite.Generic
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Closes the virtual table cursor.
+        /// Closes the virtual table cursor.  This method must not throw any
+        /// exceptions.
         /// </summary>
         public override void Close()
         {
