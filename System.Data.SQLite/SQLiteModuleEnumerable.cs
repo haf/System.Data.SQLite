@@ -10,14 +10,14 @@ using System.Globalization;
 
 namespace System.Data.SQLite
 {
-    #region SQLiteVirtualTableCursorEnumerable Class
+    #region SQLiteVirtualTableCursorEnumerator Class
     /// <summary>
     /// This class represents a virtual table cursor to be used with the
     /// <see cref="SQLiteModuleEnumerable" /> class.  It is not sealed and may
     /// be used as the base class for any user-defined virtual table cursor
     /// class that wraps an <see cref="IEnumerator" /> object instance.
     /// </summary>
-    public class SQLiteVirtualTableCursorEnumerable :
+    public class SQLiteVirtualTableCursorEnumerator :
             SQLiteVirtualTableCursor /* NOT SEALED */
     {
         #region Private Data
@@ -50,7 +50,7 @@ namespace System.Data.SQLite
         /// The <see cref="IEnumerator" /> instance to expose as a virtual
         /// table cursor.
         /// </param>
-        public SQLiteVirtualTableCursorEnumerable(
+        public SQLiteVirtualTableCursorEnumerator(
             SQLiteVirtualTable table,
             IEnumerator enumerator
             )
@@ -160,7 +160,7 @@ namespace System.Data.SQLite
             if (disposed)
             {
                 throw new ObjectDisposedException(
-                    typeof(SQLiteVirtualTableCursorEnumerable).Name);
+                    typeof(SQLiteVirtualTableCursorEnumerator).Name);
             }
 #endif
         }
@@ -211,9 +211,10 @@ namespace System.Data.SQLite
     #region SQLiteModuleEnumerable Class
     /// <summary>
     /// This class implements a virtual table module that exposes an
-    /// IEnumerable instance as a read-only virtual table.  It is not sealed
-    /// and may be used as the base class for any user-defined virtual table
-    /// class that wraps an <see cref="IEnumerable" /> object instance.
+    /// <see cref="IEnumerable" /> object instance as a read-only virtual
+    /// table.  It is not sealed and may be used as the base class for any
+    /// user-defined virtual table class that wraps an
+    /// <see cref="IEnumerable" /> object instance.
     /// </summary>
     public class SQLiteModuleEnumerable : SQLiteModuleNoop /* NOT SEALED */
     {
@@ -280,7 +281,7 @@ namespace System.Data.SQLite
             SQLiteVirtualTableCursor cursor
             )
         {
-            SetCursorError(cursor, "not an \"enumerable\" cursor");
+            SetCursorError(cursor, "not an \"enumerator\" cursor");
             return SQLiteErrorCode.Error;
         }
 
@@ -531,7 +532,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            cursor = new SQLiteVirtualTableCursorEnumerable(
+            cursor = new SQLiteVirtualTableCursorEnumerator(
                 table, enumerable.GetEnumerator());
 
             return SQLiteErrorCode.Ok;
@@ -554,13 +555,13 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            SQLiteVirtualTableCursorEnumerable enumerableCursor =
-                cursor as SQLiteVirtualTableCursorEnumerable;
+            SQLiteVirtualTableCursorEnumerator enumeratorCursor =
+                cursor as SQLiteVirtualTableCursorEnumerator;
 
-            if (enumerableCursor == null)
+            if (enumeratorCursor == null)
                 return CursorTypeMismatchError(cursor);
 
-            enumerableCursor.Close();
+            enumeratorCursor.Close();
             return SQLiteErrorCode.Ok;
         }
 
@@ -593,15 +594,15 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            SQLiteVirtualTableCursorEnumerable enumerableCursor =
-                cursor as SQLiteVirtualTableCursorEnumerable;
+            SQLiteVirtualTableCursorEnumerator enumeratorCursor =
+                cursor as SQLiteVirtualTableCursorEnumerator;
 
-            if (enumerableCursor == null)
+            if (enumeratorCursor == null)
                 return CursorTypeMismatchError(cursor);
 
-            enumerableCursor.Filter(indexNumber, indexString, values);
-            enumerableCursor.Reset(); /* NO RESULT */
-            enumerableCursor.MoveNext(); /* IGNORED */
+            enumeratorCursor.Filter(indexNumber, indexString, values);
+            enumeratorCursor.Reset(); /* NO RESULT */
+            enumeratorCursor.MoveNext(); /* IGNORED */
 
             return SQLiteErrorCode.Ok;
         }
@@ -623,16 +624,16 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            SQLiteVirtualTableCursorEnumerable enumerableCursor =
-                cursor as SQLiteVirtualTableCursorEnumerable;
+            SQLiteVirtualTableCursorEnumerator enumeratorCursor =
+                cursor as SQLiteVirtualTableCursorEnumerator;
 
-            if (enumerableCursor == null)
+            if (enumeratorCursor == null)
                 return CursorTypeMismatchError(cursor);
 
-            if (enumerableCursor.EndOfEnumerator)
+            if (enumeratorCursor.EndOfEnumerator)
                 return CursorEndOfEnumeratorError(cursor);
 
-            enumerableCursor.MoveNext(); /* IGNORED */
+            enumeratorCursor.MoveNext(); /* IGNORED */
             return SQLiteErrorCode.Ok;
         }
 
@@ -653,13 +654,13 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            SQLiteVirtualTableCursorEnumerable enumerableCursor =
-                cursor as SQLiteVirtualTableCursorEnumerable;
+            SQLiteVirtualTableCursorEnumerator enumeratorCursor =
+                cursor as SQLiteVirtualTableCursorEnumerator;
 
-            if (enumerableCursor == null)
+            if (enumeratorCursor == null)
                 return ResultCodeToEofResult(CursorTypeMismatchError(cursor));
 
-            return enumerableCursor.EndOfEnumerator;
+            return enumeratorCursor.EndOfEnumerator;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -687,16 +688,16 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            SQLiteVirtualTableCursorEnumerable enumerableCursor =
-                cursor as SQLiteVirtualTableCursorEnumerable;
+            SQLiteVirtualTableCursorEnumerator enumeratorCursor =
+                cursor as SQLiteVirtualTableCursorEnumerator;
 
-            if (enumerableCursor == null)
+            if (enumeratorCursor == null)
                 return CursorTypeMismatchError(cursor);
 
-            if (enumerableCursor.EndOfEnumerator)
+            if (enumeratorCursor.EndOfEnumerator)
                 return CursorEndOfEnumeratorError(cursor);
 
-            object current = enumerableCursor.Current;
+            object current = enumeratorCursor.Current;
 
             if (current != null)
                 context.SetString(GetStringFromObject(current));
@@ -727,16 +728,16 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            SQLiteVirtualTableCursorEnumerable enumerableCursor =
-                cursor as SQLiteVirtualTableCursorEnumerable;
+            SQLiteVirtualTableCursorEnumerator enumeratorCursor =
+                cursor as SQLiteVirtualTableCursorEnumerator;
 
-            if (enumerableCursor == null)
+            if (enumeratorCursor == null)
                 return CursorTypeMismatchError(cursor);
 
-            if (enumerableCursor.EndOfEnumerator)
+            if (enumeratorCursor.EndOfEnumerator)
                 return CursorEndOfEnumeratorError(cursor);
 
-            object current = enumerableCursor.Current;
+            object current = enumeratorCursor.Current;
 
             rowId = GetRowIdFromObject(current);
             return SQLiteErrorCode.Ok;
