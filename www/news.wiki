@@ -10,6 +10,7 @@
     <li>The DbType to type name translation needs to prioritize the Entity Framework type names. Fix for [47f4bac575].</li>
     <li>Add DateTimeFormatString connection string property to allow the DateTime format string used for all parsing and formatting to be overridden.</li>
     <li>Disable use of the new connection string parsing algorithm when the No_SQLiteConnectionNewParser environment variable is set. Pursuant to [bbdda6eae2].</li>
+    <li>Rename the ReturnCode property of the SQLiteException class to ResultCode.&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>
     <b>1.0.86.0 - May 23, 2013</b>

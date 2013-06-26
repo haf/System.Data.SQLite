@@ -5,6 +5,8 @@
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
+using System.Collections.Generic;
+
 namespace System.Data.SQLite
 {
     /// <summary>
@@ -12,6 +14,17 @@ namespace System.Data.SQLite
     /// </summary>
     public class SQLiteModuleNoop : SQLiteModule /* NOT SEALED */
     {
+        #region Private Data
+        /// <summary>
+        /// This field is used to store the <see cref="SQLiteErrorCode" />
+        /// values to return, on a per-method basis, for all methods that are
+        /// part of the <see cref="ISQLiteManagedModule" /> interface.
+        /// </summary>
+        private Dictionary<string, SQLiteErrorCode> resultCodes;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Public Constructors
         /// <summary>
         /// Constructs an instance of this class.
@@ -24,7 +37,134 @@ namespace System.Data.SQLite
             )
             : base(name)
         {
-            // do nothing.
+            resultCodes = new Dictionary<string, SQLiteErrorCode>();
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Protected Methods
+        /// <summary>
+        /// Determines the default <see cref="SQLiteErrorCode" /> value to be
+        /// returned by methods of the <see cref="ISQLiteManagedModule" />
+        /// interface that lack an overridden implementation in all classes
+        /// derived from the <see cref="SQLiteModuleNoop" /> class.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="SQLiteErrorCode" /> value that should be returned
+        /// by all <see cref="ISQLiteManagedModule" /> interface methods unless
+        /// a more specific result code has been set for that interface method.
+        /// </returns>
+        protected virtual SQLiteErrorCode GetDefaultResultCode()
+        {
+            return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Converts a <see cref="SQLiteErrorCode" /> value into a boolean
+        /// return value for use with the
+        /// <see cref="ISQLiteManagedModule.Eof" /> method.
+        /// </summary>
+        /// <param name="resultCode">
+        /// The <see cref="SQLiteErrorCode" /> value to convert.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Boolean" /> value.
+        /// </returns>
+        protected virtual bool ResultCodeToEofResult(
+            SQLiteErrorCode resultCode
+            )
+        {
+            return (resultCode == SQLiteErrorCode.Ok) ? false : true;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Converts a <see cref="SQLiteErrorCode" /> value into a boolean
+        /// return value for use with the
+        /// <see cref="ISQLiteManagedModule.FindFunction" /> method.
+        /// </summary>
+        /// <param name="resultCode">
+        /// The <see cref="SQLiteErrorCode" /> value to convert.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Boolean" /> value.
+        /// </returns>
+        protected virtual bool ResultCodeToFindFunctionResult(
+            SQLiteErrorCode resultCode
+            )
+        {
+            return (resultCode == SQLiteErrorCode.Ok) ? true : false;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Determines the <see cref="SQLiteErrorCode" /> value that should be
+        /// returned by the specified <see cref="ISQLiteManagedModule" />
+        /// interface method if it lack an overridden implementation.  If no
+        /// specific <see cref="SQLiteErrorCode" /> value is available (or set)
+        /// for the specified method, the <see cref="SQLiteErrorCode" /> value
+        /// returned by the <see cref="GetDefaultResultCode" /> method will be
+        /// returned instead.
+        /// </summary>
+        /// <param name="methodName">
+        /// The name of the method.  Currently, this method must be part of
+        /// the <see cref="ISQLiteManagedModule" /> interface.
+        /// </param>
+        /// <returns>
+        /// The <see cref="SQLiteErrorCode" /> value that should be returned
+        /// by the <see cref="ISQLiteManagedModule" /> interface method.
+        /// </returns>
+        protected virtual SQLiteErrorCode GetMethodResultCode(
+            string methodName
+            )
+        {
+            if ((methodName == null) || (resultCodes == null))
+                return GetDefaultResultCode();
+
+            SQLiteErrorCode resultCode;
+
+            if ((resultCodes != null) &&
+                resultCodes.TryGetValue(methodName, out resultCode))
+            {
+                return resultCode;
+            }
+
+            return GetDefaultResultCode();
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Sets the <see cref="SQLiteErrorCode" /> value that should be
+        /// returned by the specified <see cref="ISQLiteManagedModule" />
+        /// interface method if it lack an overridden implementation.
+        /// </summary>
+        /// <param name="methodName">
+        /// The name of the method.  Currently, this method must be part of
+        /// the <see cref="ISQLiteManagedModule" /> interface.
+        /// </param>
+        /// <param name="resultCode">
+        /// The <see cref="SQLiteErrorCode" /> value that should be returned
+        /// by the <see cref="ISQLiteManagedModule" /> interface method.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        protected virtual bool SetMethodResultCode(
+            string methodName,
+            SQLiteErrorCode resultCode
+            )
+        {
+            if ((methodName == null) || (resultCodes == null))
+                return false;
+
+            resultCodes[methodName] = resultCode;
+            return true;
         }
         #endregion
 
@@ -62,7 +202,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Create");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -98,7 +238,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Connect");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -122,7 +262,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("BestIndex");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -142,7 +282,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Disconnect");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -162,7 +302,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Destroy");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -186,7 +326,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Open");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -206,7 +346,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Close");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -238,7 +378,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Filter");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -258,7 +398,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Next");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -278,7 +418,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return true;
+            return ResultCodeToEofResult(GetMethodResultCode("Eof"));
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -306,7 +446,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Column");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -330,7 +470,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("RowId");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -358,7 +498,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Update");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -378,7 +518,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Begin");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -398,7 +538,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Sync");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -418,7 +558,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Commit");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -438,7 +578,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Rollback");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -474,7 +614,8 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return false;
+            return ResultCodeToFindFunctionResult(GetMethodResultCode(
+                "FindFunction"));
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -498,7 +639,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Rename");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -522,7 +663,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Savepoint");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -546,7 +687,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("Release");
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -570,7 +711,7 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            return SQLiteErrorCode.Ok;
+            return GetMethodResultCode("RollbackTo");
         }
         #endregion
 

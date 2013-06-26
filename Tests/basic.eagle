@@ -1824,9 +1824,9 @@ runTest {test data-1.34 {serialization of SQLiteException} -body {
 
   set exception(2) [$serializer -alias Deserialize $stream]
 
-  list [$exception(1) ReturnCode] [$exception(1) Message] \
-      [$exception(2) ReturnCode] [$exception(2) Message] \
-      [expr {[$exception(1) ReturnCode] eq [$exception(2) ReturnCode]}] \
+  list [$exception(1) ResultCode] [$exception(1) Message] \
+      [$exception(2) ResultCode] [$exception(2) Message] \
+      [expr {[$exception(1) ResultCode] eq [$exception(2) ResultCode]}] \
       [expr {[$exception(1) Message] eq [$exception(2) Message]}]
 } -cleanup {
   unset -nocomplain exception stream serializer

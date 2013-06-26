@@ -176,7 +176,7 @@ runTest {test vtab-1.2 {IEnumerable virtual table} -setup {
               }
               catch (SQLiteException e)
               {
-                result.Add(e.ReturnCode.ToString());
+                result.Add(e.ResultCode.ToString());
                 result.Add(e.Message);
               }
             }

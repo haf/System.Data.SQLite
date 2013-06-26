@@ -347,26 +347,6 @@ namespace System.Data.SQLite
 
             return value.GetHashCode();
         }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Converts a <see cref="SQLiteErrorCode" /> into a boolean return
-        /// value for use with the <see cref="ISQLiteManagedModule.Eof" />
-        /// method.
-        /// </summary>
-        /// <param name="returnCode">
-        /// The <see cref="SQLiteErrorCode" /> value to convert.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Boolean" /> value.
-        /// </returns>
-        protected virtual bool CodeToEofResult(
-            SQLiteErrorCode returnCode
-            )
-        {
-            return (returnCode == SQLiteErrorCode.Ok) ? false : true;
-        }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -677,7 +657,7 @@ namespace System.Data.SQLite
                 cursor as SQLiteVirtualTableCursorEnumerable;
 
             if (enumerableCursor == null)
-                return CodeToEofResult(CursorTypeMismatchError(cursor));
+                return ResultCodeToEofResult(CursorTypeMismatchError(cursor));
 
             return enumerableCursor.EndOfEnumerator;
         }

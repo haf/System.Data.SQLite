@@ -115,11 +115,11 @@ namespace System.Data.SQLite
 #endif
 
     /// <summary>
-    /// Gets the associated SQLite return code for this exception as a
+    /// Gets the associated SQLite result code for this exception as a
     /// <see cref="SQLiteErrorCode" />.  This property returns the same
     /// underlying value as the <see cref="ErrorCode" /> property.
     /// </summary>
-    public SQLiteErrorCode ReturnCode
+    public SQLiteErrorCode ResultCode
     {
       get { return _errorCode; }
     }
@@ -130,7 +130,7 @@ namespace System.Data.SQLite
     /// this property overrides the property of the same name within the
     /// <see cref="System.Runtime.InteropServices.ExternalException" />
     /// class.  This property returns the same underlying value as the
-    /// <see cref="ReturnCode" /> property.
+    /// <see cref="ResultCode" /> property.
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK
     public override int ErrorCode
