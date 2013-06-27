@@ -78,6 +78,7 @@ namespace System.Data.SQLite
         public virtual bool MoveNext()
         {
             CheckDisposed();
+            CheckClosed();
 
             if (enumerator == null)
                 return false;
@@ -98,6 +99,7 @@ namespace System.Data.SQLite
             get
             {
                 CheckDisposed();
+                CheckClosed();
 
                 if (enumerator == null)
                     return null;
@@ -116,6 +118,7 @@ namespace System.Data.SQLite
         public virtual void Reset()
         {
             CheckDisposed();
+            CheckClosed();
 
             if (enumerator == null)
                 return;
@@ -131,7 +134,17 @@ namespace System.Data.SQLite
         /// </summary>
         public virtual bool EndOfEnumerator
         {
-            get { CheckDisposed(); return endOfEnumerator; }
+            get { CheckDisposed(); CheckClosed(); return endOfEnumerator; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Returns non-zero if the virtual table cursor is open.
+        /// </summary>
+        public virtual bool IsOpen
+        {
+            get { CheckDisposed(); return (enumerator != null); }
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -143,9 +156,27 @@ namespace System.Data.SQLite
         public virtual void Close()
         {
             // CheckDisposed();
+            // CheckClosed();
 
             if (enumerator != null)
                 enumerator = null;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Throws an <see cref="InvalidOperationException" /> if the virtual
+        /// table cursor has been closed.
+        /// </summary>
+        public virtual void CheckClosed()
+        {
+            CheckDisposed();
+
+            if (!IsOpen)
+            {
+                throw new InvalidOperationException(
+                    "virtual table cursor is closed");
+            }
         }
         #endregion
 
@@ -973,6 +1004,7 @@ namespace System.Data.SQLite.Generic
             get
             {
                 CheckDisposed();
+                CheckClosed();
 
                 if (enumerator == null)
                     return default(T);
@@ -990,6 +1022,7 @@ namespace System.Data.SQLite.Generic
         public override void Close()
         {
             // CheckDisposed();
+            // CheckClosed();
 
             if (enumerator != null)
                 enumerator = null;
