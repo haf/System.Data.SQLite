@@ -309,7 +309,7 @@ namespace System.Data.SQLite
         {
             case SQLiteDateFormats.Ticks:
                 {
-                    return new DateTime(Convert.ToInt64(
+                    return ToDateTime(Convert.ToInt64(
                         dateText, CultureInfo.InvariantCulture), kind);
                 }
             case SQLiteDateFormats.JulianDay:
@@ -319,9 +319,8 @@ namespace System.Data.SQLite
                 }
             case SQLiteDateFormats.UnixEpoch:
                 {
-                    return DateTime.SpecifyKind(
-                        UnixEpoch.AddSeconds(Convert.ToInt32(
-                        dateText, CultureInfo.InvariantCulture)), kind);
+                    return ToDateTime(Convert.ToInt32(
+                        dateText, CultureInfo.InvariantCulture), kind);
                 }
             case SQLiteDateFormats.InvariantCulture:
                 {
@@ -401,6 +400,42 @@ namespace System.Data.SQLite
     {
         return DateTime.SpecifyKind(
             DateTime.FromOADate(julianDay - OleAutomationEpochAsJulianDay), kind);
+    }
+
+    /// <summary>
+    /// Converts the specified number of seconds from the Unix epoch into a
+    /// <see cref="DateTime" /> value.
+    /// </summary>
+    /// <param name="seconds">
+    /// The number of whole seconds since the Unix epoch.
+    /// </param>
+    /// <param name="kind">
+    /// Either Utc or Local time.
+    /// </param>
+    /// <returns>
+    /// The new <see cref="DateTime" /> value.
+    /// </returns>
+    internal static DateTime ToDateTime(int seconds, DateTimeKind kind)
+    {
+        return DateTime.SpecifyKind(UnixEpoch.AddSeconds(seconds), kind);
+    }
+
+    /// <summary>
+    /// Converts the specified number of ticks since the epoch into a
+    /// <see cref="DateTime" /> value.
+    /// </summary>
+    /// <param name="ticks">
+    /// The number of whole ticks since the epoch.
+    /// </param>
+    /// <param name="kind">
+    /// Either Utc or Local time.
+    /// </param>
+    /// <returns>
+    /// The new <see cref="DateTime" /> value.
+    /// </returns>
+    internal static DateTime ToDateTime(long ticks, DateTimeKind kind)
+    {
+        return new DateTime(ticks, kind);
     }
 
     /// <summary>
@@ -490,7 +525,6 @@ namespace System.Data.SQLite
     {
       return ToDateTime(ToString(ptr, len));
     }
-
     #endregion
 
     /// <summary>

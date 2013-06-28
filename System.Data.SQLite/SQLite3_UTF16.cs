@@ -244,6 +244,13 @@ namespace System.Data.SQLite
 
     internal override DateTime GetDateTime(SQLiteStatement stmt, int index)
     {
+      if (_datetimeFormat == SQLiteDateFormats.Ticks)
+        return ToDateTime(GetInt64(stmt, index), _datetimeKind);
+      else if (_datetimeFormat == SQLiteDateFormats.JulianDay)
+        return ToDateTime(GetDouble(stmt, index), _datetimeKind);
+      else if (_datetimeFormat == SQLiteDateFormats.UnixEpoch)
+        return ToDateTime(GetInt32(stmt, index), _datetimeKind);
+
       return ToDateTime(GetText(stmt, index));
     }
 

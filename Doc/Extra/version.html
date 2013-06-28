@@ -48,6 +48,7 @@
       <li>Add all the necessary infrastructure to allow virtual tables to be implemented in managed code. Fix for <a href="http://system.data.sqlite.org/index.html/info/9a544991be">[9a544991be]</a>.</li>
       <li>The DbType to type name translation needs to prioritize the Entity Framework type names. Fix for <a href="http://system.data.sqlite.org/index.html/info/47f4bac575">[47f4bac575]</a>.</li>
       <li>Add DateTimeFormatString connection string property to allow the DateTime format string used for all parsing and formatting to be overridden.</li>
+      <li>When reading a DateTime value, avoid unnecessary string conversions. Fix for <a href="http://system.data.sqlite.org/index.html/info/4d87fbc742">[4d87fbc742]</a>.</li>
       <li>Modify the index introspection code so that it does not treat PRAGMA table_info &quot;pk&quot; column values as boolean. Fix for <a href="http://system.data.sqlite.org/index.html/info/f2c47a01eb">[f2c47a01eb]</a>.</li>
       <li>Disable use of the new connection string parsing algorithm when the No_SQLiteConnectionNewParser environment variable is set. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/bbdda6eae2">[bbdda6eae2]</a>.</li>
       <li>Rename the ReturnCode property of the SQLiteException class to ResultCode.&nbsp;<b>** Potentially Incompatible Change **</b></li>
