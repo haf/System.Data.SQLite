@@ -193,6 +193,8 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Add all the necessary infrastructure to allow virtual tables to be implemented in managed code. Fix for [9a544991be].</li>
     <li>The DbType to type name translation needs to prioritize the Entity Framework type names. Fix for [47f4bac575].</li>
     <li>Add DateTimeFormatString connection string property to allow the DateTime format string used for all parsing and formatting to be overridden.</li>
+    <li>Add NoFunctions connection flag to skip binding functions registered in the application domain.</li>
+    <li>Add several data-types for compatibility purposes. Fix for [fe50b8c2e8].</li>
     <li>When reading a DateTime value, avoid unnecessary string conversions. Fix for [4d87fbc742].</li>
     <li>Modify the index introspection code so that it does not treat PRAGMA table_info &quot;pk&quot; column values as boolean. Fix for [f2c47a01eb].</li>
     <li>Disable use of the new connection string parsing algorithm when the No_SQLiteConnectionNewParser environment variable is set. Pursuant to [bbdda6eae2].</li>

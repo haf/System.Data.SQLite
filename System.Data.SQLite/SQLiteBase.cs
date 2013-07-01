@@ -76,9 +76,11 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract SQLiteErrorCode Shutdown();
     /// <summary>
-    /// Returns non-zero if a database connection is open.
+    /// Determines if the associated native connection handle is open.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>
+    /// Non-zero if a database connection is open.
+    /// </returns>
     internal abstract bool IsOpen();
     /// <summary>
     /// Opens a database.
@@ -149,6 +151,11 @@ namespace System.Data.SQLite
     /// <param name="stmt">The statement to reset</param>
     /// <returns>Returns -1 if the schema changed while resetting, 0 if the reset was sucessful or 6 (SQLITE_LOCKED) if the reset failed due to a lock</returns>
     internal abstract SQLiteErrorCode Reset(SQLiteStatement stmt);
+
+    /// <summary>
+    /// Attempts to interrupt the query currently executing on the associated
+    /// native database connection.
+    /// </summary>
     internal abstract void Cancel();
 
     internal abstract void Bind_Double(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, double value);
@@ -897,6 +904,12 @@ namespace System.Data.SQLite
       /// creating virtual table modules.
       /// </summary>
       NoCreateModule = 0x400,
+
+      /// <summary>
+      /// Skip adding the any functions provided by other managed assemblies
+      /// when opening the connection.
+      /// </summary>
+      NoFunctions = 0x800,
 
       /// <summary>
       /// When binding and returning column values, always treat them as though

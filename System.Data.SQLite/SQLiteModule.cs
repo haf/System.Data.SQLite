@@ -5880,6 +5880,30 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Function Declaration Helper Methods
+        /// <summary>
+        /// Calls the native SQLite core library in order to declare a virtual
+        /// table function in response to a call into the
+        /// <see cref="ISQLiteNativeModule.xCreate" />
+        /// or <see cref="ISQLiteNativeModule.xConnect" /> virtual table
+        /// methods.
+        /// </summary>
+        /// <param name="connection">
+        /// The <see cref="SQLiteConnection" /> object instance to use when
+        /// declaring the schema of the virtual table.
+        /// </param>
+        /// <param name="argumentCount">
+        /// The number of arguments to the function being declared.
+        /// </param>
+        /// <param name="name">
+        /// The name of the function being declared.
+        /// </param>
+        /// <param name="error">
+        /// Upon success, the contents of this parameter are undefined.  Upon
+        /// failure, it should contain an appropriate error message.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
         protected virtual SQLiteErrorCode DeclareFunction(
             SQLiteConnection connection,
             int argumentCount,

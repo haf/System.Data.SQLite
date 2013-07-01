@@ -193,7 +193,12 @@ namespace System.Data.SQLite
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }
-      _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
+
+      // Bind functions to this connection.  If any previous functions of the same name
+      // were already bound, then the new bindings replace the old.
+      if ((connectionFlags & SQLiteConnectionFlags.NoFunctions) != SQLiteConnectionFlags.NoFunctions)
+          _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
+
       SetTimeout(0);
       GC.KeepAlive(_sql);
     }

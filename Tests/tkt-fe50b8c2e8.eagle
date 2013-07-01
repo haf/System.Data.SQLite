@@ -1,0 +1,46 @@
+###############################################################################
+#
+# tkt-fe50b8c2e8.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-fe50b8c2e8-1.1 {compatibility data types} -body {
+  list [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+      TypeNameToDbType VARCHAR2] \
+      [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+      TypeNameToDbType CLOB] \
+      [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+      TypeNameToDbType NUMBER] \
+      [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+      TypeNameToDbType RAW] \
+      [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+      DbTypeToTypeName AnsiString] \
+      [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+      DbTypeToTypeName String] \
+      [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+      DbTypeToTypeName Decimal] \
+      [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+      DbTypeToTypeName Binary]
+} -constraints {eagle System.Data.SQLite} -result \
+{AnsiString String Decimal Binary VARCHAR NVARCHAR DECIMAL BLOB}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

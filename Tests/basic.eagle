@@ -1461,13 +1461,13 @@ runTest {test data-1.26 {LINQ ISQLiteSchemaExtensions.BuildTempSchema} -setup {
 
 runTest {test data-1.27 {VARCHAR / NVARCHAR types with spaces} -body {
   list [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType "VARCHAR"] \
+      TypeNameToDbType VARCHAR] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType "NVARCHAR"] \
+      TypeNameToDbType NVARCHAR] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType "VARCHAR(1)"] \
+      TypeNameToDbType VARCHAR(1)] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType "NVARCHAR(1)"] \
+      TypeNameToDbType NVARCHAR(1)] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
       TypeNameToDbType "VARCHAR (1)"] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \

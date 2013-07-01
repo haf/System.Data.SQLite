@@ -1088,6 +1088,7 @@ namespace System.Data.SQLite
             new SQLiteDbTypeMapping("BOOL", DbType.Boolean, false),
             new SQLiteDbTypeMapping("BOOLEAN", DbType.Boolean, false),
             new SQLiteDbTypeMapping("CHAR", DbType.AnsiStringFixedLength, true),
+            new SQLiteDbTypeMapping("CLOB", DbType.String, false),
             new SQLiteDbTypeMapping("COUNTER", DbType.Int64, false),
             new SQLiteDbTypeMapping("CURRENCY", DbType.Decimal, false),
             new SQLiteDbTypeMapping("DATE", DbType.DateTime, false),
@@ -1119,9 +1120,11 @@ namespace System.Data.SQLite
             new SQLiteDbTypeMapping("NCHAR", DbType.StringFixedLength, true),
             new SQLiteDbTypeMapping("NOTE", DbType.String, false),
             new SQLiteDbTypeMapping("NTEXT", DbType.String, false),
+            new SQLiteDbTypeMapping("NUMBER", DbType.Decimal, false),
             new SQLiteDbTypeMapping("NUMERIC", DbType.Decimal, false),
             new SQLiteDbTypeMapping("NVARCHAR", DbType.String, true),
             new SQLiteDbTypeMapping("OLEOBJECT", DbType.Binary, false),
+            new SQLiteDbTypeMapping("RAW", DbType.Binary, false),
             new SQLiteDbTypeMapping("REAL", DbType.Double, true),
             new SQLiteDbTypeMapping("SINGLE", DbType.Single, true),
             new SQLiteDbTypeMapping("SMALLDATE", DbType.DateTime, false),
@@ -1147,6 +1150,7 @@ namespace System.Data.SQLite
             new SQLiteDbTypeMapping("UNSIGNEDINTEGER64", DbType.UInt64, false),
             new SQLiteDbTypeMapping("VARBINARY", DbType.Binary, false),
             new SQLiteDbTypeMapping("VARCHAR", DbType.AnsiString, true),
+            new SQLiteDbTypeMapping("VARCHAR2", DbType.AnsiString, false),
             new SQLiteDbTypeMapping("YESNO", DbType.Boolean, false)
         });
     }

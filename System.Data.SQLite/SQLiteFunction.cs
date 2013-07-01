@@ -468,7 +468,7 @@ namespace System.Data.SQLite
         // NOTE: This must be done to prevent the core SQLite library from
         //       using our (invalid) result.
         //
-        if (_base != null)
+        if ((_base != null) && _base.IsOpen())
             _base.Cancel();
 
         return 0;
@@ -515,7 +515,7 @@ namespace System.Data.SQLite
         // NOTE: This must be done to prevent the core SQLite library from
         //       using our (invalid) result.
         //
-        if (_base != null)
+        if ((_base != null) && _base.IsOpen())
             _base.Cancel();
 
         return 0;

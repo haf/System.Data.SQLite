@@ -21,7 +21,7 @@ runSQLiteTestPrologue
 ###############################################################################
 
 runTest {test vtab-1.1 {basic virtual table support} -setup {
-  setupDb [set fileName vtab-1.1.db]
+  set fileName vtab-1.1.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getDatabaseDirectory] $fileName]
@@ -100,7 +100,7 @@ runTest {test vtab-1.1 {basic virtual table support} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result code results errors sql dataSource id db fileName
+  unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
 defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
@@ -109,7 +109,7 @@ defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
 ###############################################################################
 
 runTest {test vtab-1.2 {IEnumerable virtual table} -setup {
-  setupDb [set fileName vtab-1.2.db]
+  set fileName vtab-1.2.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getDatabaseDirectory] $fileName]
@@ -205,7 +205,7 @@ runTest {test vtab-1.2 {IEnumerable virtual table} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result code results errors sql dataSource id db fileName
+  unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
 defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
@@ -216,7 +216,7 @@ virtual table "t\d+" is read-only\}\}$}]}
 ###############################################################################
 
 runTest {test vtab-1.3 {IEnumerable<T> virtual table} -setup {
-  setupDb [set fileName vtab-1.3.db]
+  set fileName vtab-1.3.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getDatabaseDirectory] $fileName]
@@ -313,7 +313,7 @@ runTest {test vtab-1.3 {IEnumerable<T> virtual table} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result code results errors sql dataSource id db fileName
+  unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
 defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
@@ -324,7 +324,260 @@ virtual table "t\d+" is read-only\}\}$}]}
 ###############################################################################
 
 runTest {test vtab-1.4 {virtual table function support} -setup {
-  setupDb [set fileName vtab-1.4.db]
+  set fileName vtab-1.4.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql(1) { \
+    CREATE VIRTUAL TABLE t${id} USING mod${id}; \
+  }
+
+  set sql(2) { \
+    SELECT Base64(x, CAST('one' AS BLOB)) FROM t${id}; \
+  }
+
+  set sql(3) { \
+    SELECT Base64(x, CAST('one' AS BLOB), 'two') FROM t${id}; \
+  }
+
+  set sql(4) { \
+    SELECT Base65(x, CAST('one' AS BLOB)) FROM t${id}; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+    using Eagle._Containers.Public;
+
+    namespace _Dynamic${id}
+    {
+      public class SQLiteFunction${id} : SQLiteFunction
+      {
+        public SQLiteFunction${id}()
+          : base(SQLiteDateFormats.Default, DateTimeKind.Unspecified,
+                 null, false)
+        {
+          // do nothing.
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override object Invoke(
+          object\[\] args
+          )
+        {
+          if (args == null)
+            return null;
+
+          if (args.Length != 2)
+            return new ArgumentException(String.Format(
+              "need exactly two arguments, got {0}", args.Length));
+
+          object arg = args\[1\];
+
+          if (arg == null)
+            return String.Empty;
+
+          Type type = arg.GetType();
+
+          if (type == typeof(DBNull))
+            return String.Empty;
+
+          if (type != typeof(byte\[\]))
+            return new ArgumentException(String.Format(
+              "argument must be byte array, got {0}", type));
+
+          return Convert.ToBase64String((byte\[\]) arg);
+        }
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      public sealed class SQLiteModuleTest${id} : SQLiteModuleNoop
+      {
+        public SQLiteModuleTest${id}(string name)
+          : base(name)
+        {
+          // do nothing.
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Create(
+          SQLiteConnection connection,
+          IntPtr pClientData,
+          string\[\] arguments,
+          ref SQLiteVirtualTable table,
+          ref string error
+          )
+        {
+          SQLiteErrorCode rc = DeclareTable(
+            connection, "CREATE TABLE ignored(x);", ref error);
+
+          if (rc != SQLiteErrorCode.Ok)
+            return rc;
+
+          rc = DeclareFunction(connection, -1, "Base64", ref error);
+
+          if (rc != SQLiteErrorCode.Ok)
+            return rc;
+
+          table = new SQLiteVirtualTable(arguments);
+          return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override SQLiteErrorCode Open(
+          SQLiteVirtualTable table,
+          ref SQLiteVirtualTableCursor cursor
+          )
+        {
+          cursor = new SQLiteVirtualTableCursor(table);
+          return SQLiteErrorCode.Ok;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override bool FindFunction(
+          SQLiteVirtualTable table,
+          int argumentCount,
+          string name,
+          ref SQLiteFunction function,
+          ref IntPtr pClientData
+          )
+        {
+          if (argumentCount != 2)
+          {
+            SetTableError(table, String.Format(
+              "no \\"{0}\\" functions accept {1} argument(s)",
+              base.Name, argumentCount));
+
+            return false;
+          }
+
+          if (!String.Equals(name, "Base64",
+              StringComparison.OrdinalIgnoreCase))
+          {
+            SetTableError(table, String.Format(
+              "no \\"{0}\\" functions are named \\"{1}\\"",
+              base.Name, name));
+
+            return false;
+          }
+
+          function = new SQLiteFunction${id}();
+          return true;
+        }
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      public static class Test${id}
+      {
+        public static StringList GetList()
+        {
+          StringList result = new StringList();
+
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};Flags=NoFunctions;"))
+          {
+            connection.Open();
+            connection.CreateModule(new SQLiteModuleTest${id}("mod${id}"));
+
+            try
+            {
+              using (SQLiteCommand command = connection.CreateCommand())
+              {
+                command.CommandText = "[subst ${sql(1)}]";
+                result.Add(String.Format("{0}", command.ExecuteScalar()));
+              }
+            }
+            catch (Exception e)
+            {
+              result.Add(e.Message);
+            }
+
+            try
+            {
+              using (SQLiteCommand command = connection.CreateCommand())
+              {
+                command.CommandText = "[subst ${sql(2)}]";
+                result.Add(String.Format("{0}", command.ExecuteScalar()));
+              }
+            }
+            catch (Exception e)
+            {
+              result.Add(e.Message);
+            }
+
+            try
+            {
+              using (SQLiteCommand command = connection.CreateCommand())
+              {
+                command.CommandText = "[subst ${sql(3)}]";
+                result.Add(String.Format("{0}", command.ExecuteScalar()));
+              }
+            }
+            catch (Exception e)
+            {
+              result.Add(e.Message);
+            }
+
+            try
+            {
+              using (SQLiteCommand command = connection.CreateCommand())
+              {
+                command.CommandText = "[subst ${sql(4)}]";
+                result.Add(String.Format("{0}", command.ExecuteScalar()));
+              }
+            }
+            catch (Exception e)
+            {
+              result.Add(e.Message);
+            }
+
+            connection.Close();
+          }
+
+          return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors [list System.Data.SQLite.dll Eagle.dll]]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetList
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
+[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
+\{\} 0 \{\{\} b25l \{SQL logic error or missing database
+unable to use function Base64 in the requested context\} \{SQL logic error or\
+missing database
+no such function: Base65\}\}$}]}
+
+###############################################################################
+
+runTest {test vtab-1.5 {virtual table function support} -setup {
+  set fileName vtab-1.5.db
 } -body {
   set id [object invoke Interpreter.GetActive NextId]
   set dataSource [file join [getDatabaseDirectory] $fileName]
@@ -564,14 +817,14 @@ runTest {test vtab-1.4 {virtual table function support} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result code results errors sql dataSource id db fileName
+  unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
 defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
 [string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
 \{\} 0 \{\{\} b25l \{SQL logic error or missing database
-unable to use function Base64 in the requested context\} \{SQL logic error or\
-missing database
+(?:unable to use function Base64 in the requested context|need exactly one\
+argument, got 3)\} \{SQL logic error or missing database
 no such function: Base65\}\}$}]}
 
 ###############################################################################

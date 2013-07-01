@@ -236,6 +236,10 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    /// <summary>
+    /// Attempts to interrupt the query currently executing on the associated
+    /// native database connection.
+    /// </summary>
     internal override void Cancel()
     {
       UnsafeNativeMethods.sqlite3_interrupt(_sql);
@@ -413,6 +417,12 @@ namespace System.Data.SQLite
         return rc;
     }
 
+    /// <summary>
+    /// Determines if the associated native connection handle is open.
+    /// </summary>
+    /// <returns>
+    /// Non-zero if the associated native connection handle is open.
+    /// </returns>
     internal override bool IsOpen()
     {
         return (_sql != null) && !_sql.IsInvalid && !_sql.IsClosed;
@@ -478,9 +488,12 @@ namespace System.Data.SQLite
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
       }
+
       // Bind functions to this connection.  If any previous functions of the same name
       // were already bound, then the new bindings replace the old.
-      _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
+      if ((connectionFlags & SQLiteConnectionFlags.NoFunctions) != SQLiteConnectionFlags.NoFunctions)
+          _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
+
       SetTimeout(0);
       GC.KeepAlive(_sql);
     }
