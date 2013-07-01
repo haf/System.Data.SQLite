@@ -237,7 +237,8 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Calls the native SQLite core library in order to declare a virtual table
-    /// in response to a call into the xCreate or xConnect virtual table methods.
+    /// in response to a call into the <see cref="ISQLiteNativeModule.xCreate" />
+    /// or <see cref="ISQLiteNativeModule.xConnect" /> virtual table methods.
     /// </summary>
     /// <param name="module">
     /// The virtual table module that is to be responsible for the virtual table
@@ -255,6 +256,30 @@ namespace System.Data.SQLite
     /// A standard SQLite return code.
     /// </returns>
     internal abstract SQLiteErrorCode DeclareVirtualTable(SQLiteModule module, string strSql, ref string error);
+
+    /// <summary>
+    /// Calls the native SQLite core library in order to declare a virtual table
+    /// function in response to a call into the <see cref="ISQLiteNativeModule.xCreate" />
+    /// or <see cref="ISQLiteNativeModule.xConnect" /> virtual table methods.
+    /// </summary>
+    /// <param name="module">
+    /// The virtual table module that is to be responsible for the virtual table
+    /// function being declared.
+    /// </param>
+    /// <param name="argumentCount">
+    /// The number of arguments to the function being declared.
+    /// </param>
+    /// <param name="name">
+    /// The name of the function being declared.
+    /// </param>
+    /// <param name="error">
+    /// Upon success, the contents of this parameter are undefined.  Upon failure,
+    /// it should contain an appropriate error message.
+    /// </param>
+    /// <returns>
+    /// A standard SQLite return code.
+    /// </returns>
+    internal abstract SQLiteErrorCode DeclareVirtualFunction(SQLiteModule module, int argumentCount, string name, ref string error);
 #endif
 
     /// <summary>

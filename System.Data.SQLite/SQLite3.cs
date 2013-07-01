@@ -1735,7 +1735,8 @@ namespace System.Data.SQLite
 #if INTEROP_VIRTUAL_TABLE
     /// <summary>
     /// Calls the native SQLite core library in order to declare a virtual table
-    /// in response to a call into the xCreate or xConnect virtual table methods.
+    /// in response to a call into the <see cref="ISQLiteNativeModule.xCreate" />
+    /// or <see cref="ISQLiteNativeModule.xConnect" /> virtual table methods.
     /// </summary>
     /// <param name="module">
     /// The virtual table module that is to be responsible for the virtual table
@@ -1786,6 +1787,64 @@ namespace System.Data.SQLite
             {
                 SQLiteMemory.Free(pSql);
                 pSql = IntPtr.Zero;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calls the native SQLite core library in order to declare a virtual table
+    /// function in response to a call into the <see cref="ISQLiteNativeModule.xCreate" />
+    /// or <see cref="ISQLiteNativeModule.xConnect" /> virtual table methods.
+    /// </summary>
+    /// <param name="module">
+    /// The virtual table module that is to be responsible for the virtual table
+    /// function being declared.
+    /// </param>
+    /// <param name="argumentCount">
+    /// The number of arguments to the function being declared.
+    /// </param>
+    /// <param name="name">
+    /// The name of the function being declared.
+    /// </param>
+    /// <param name="error">
+    /// Upon success, the contents of this parameter are undefined.  Upon failure,
+    /// it should contain an appropriate error message.
+    /// </param>
+    /// <returns>
+    /// A standard SQLite return code.
+    /// </returns>
+    internal override SQLiteErrorCode DeclareVirtualFunction(
+        SQLiteModule module,
+        int argumentCount,
+        string name,
+        ref string error
+        )
+    {
+        if (_sql == null)
+        {
+            error = "connection has an invalid handle";
+            return SQLiteErrorCode.Error;
+        }
+
+        IntPtr pName = IntPtr.Zero;
+
+        try
+        {
+            pName = SQLiteString.Utf8IntPtrFromString(name);
+
+            SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_overload_function(
+                _sql, pName, argumentCount);
+
+            if (n != SQLiteErrorCode.Ok) error = GetLastError();
+
+            return n;
+        }
+        finally
+        {
+            if (pName != IntPtr.Zero)
+            {
+                SQLiteMemory.Free(pName);
+                pName = IntPtr.Zero;
             }
         }
     }

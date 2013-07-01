@@ -5178,6 +5178,16 @@ namespace System.Data.SQLite
         /// collection.
         /// </summary>
         private Dictionary<IntPtr, SQLiteVirtualTableCursor> cursors;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// This field is used to store the virtual table function instances
+        /// associated with this module.  The case-insensitive function name
+        /// and the number of arguments (with -1 meaning "any") are used to
+        /// construct the string that is used to key into this collection.
+        /// </summary>
+        private Dictionary<string, SQLiteFunction> functions;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -5197,6 +5207,7 @@ namespace System.Data.SQLite
             this.name = name;
             this.tables = new Dictionary<IntPtr, SQLiteVirtualTable>();
             this.cursors = new Dictionary<IntPtr, SQLiteVirtualTableCursor>();
+            this.functions = new Dictionary<string, SQLiteFunction>();
         }
         #endregion
 
@@ -5789,6 +5800,39 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Function Lookup Methods
+        /// <summary>
+        /// Deterimines the key that should be used to identify and store the
+        /// function instance for the virtual table (i.e. to be returned via
+        /// the <see cref="ISQLiteNativeModule.xFindFunction" /> method).
+        /// </summary>
+        /// <param name="argumentCount">
+        /// The number of arguments to the virtual table function.
+        /// </param>
+        /// <param name="name">
+        /// The name of the virtual table function.
+        /// </param>
+        /// <param name="function">
+        /// The <see cref="SQLiteFunction" /> object instance associated with
+        /// this virtual table function.
+        /// </param>
+        /// <returns>
+        /// The string that should be used to identify and store the virtual
+        /// table function instance.  This method cannot return null.  If null
+        /// is returned from this method, the behavior is undefined.
+        /// </returns>
+        protected virtual string GetFunctionKey(
+            int argumentCount,
+            string name,
+            SQLiteFunction function
+            )
+        {
+            return String.Format("{0}:{1}", argumentCount, name);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Table Declaration Helper Methods
         /// <summary>
         /// Attempts to declare the schema for the virtual table using the
@@ -5830,6 +5874,35 @@ namespace System.Data.SQLite
             }
 
             return sqliteBase.DeclareVirtualTable(this, sql, ref error);
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Function Declaration Helper Methods
+        protected virtual SQLiteErrorCode DeclareFunction(
+            SQLiteConnection connection,
+            int argumentCount,
+            string name,
+            ref string error
+            )
+        {
+            if (connection == null)
+            {
+                error = "invalid connection";
+                return SQLiteErrorCode.Error;
+            }
+
+            SQLiteBase sqliteBase = connection._sql;
+
+            if (sqliteBase == null)
+            {
+                error = "connection has invalid handle";
+                return SQLiteErrorCode.Error;
+            }
+
+            return sqliteBase.DeclareVirtualFunction(
+                this, argumentCount, name, ref error);
         }
         #endregion
 
@@ -7040,16 +7113,19 @@ namespace System.Data.SQLite
 
                 if (table != null)
                 {
+                    string name = SQLiteString.StringFromUtf8IntPtr(zName);
                     SQLiteFunction function = null;
 
                     if (FindFunction(
-                            table, nArg,
-                            SQLiteString.StringFromUtf8IntPtr(zName),
-                            ref function, ref pClientData))
+                            table, nArg, name, ref function, ref pClientData))
                     {
                         if (function != null)
                         {
+                            string key = GetFunctionKey(nArg, name, function);
+
+                            functions[key] = function;
                             callback = function.ScalarCallback;
+
                             return 1;
                         }
                         else
@@ -7794,12 +7870,15 @@ namespace System.Data.SQLite
         {
             if (!disposed)
             {
-                //if (disposing)
-                //{
-                //    ////////////////////////////////////
-                //    // dispose managed resources here...
-                //    ////////////////////////////////////
-                //}
+                if (disposing)
+                {
+                    ////////////////////////////////////
+                    // dispose managed resources here...
+                    ////////////////////////////////////
+
+                    if (functions != null)
+                        functions.Clear();
+                }
 
                 //////////////////////////////////////
                 // release unmanaged resources here...

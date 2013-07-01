@@ -91,6 +91,40 @@ namespace System.Data.SQLite
       _contextDataList = new Dictionary<IntPtr, AggregateData>();
     }
 
+    /// <summary>
+    /// Constructs an instance of this class using the specified data-type
+    /// conversion parameters.
+    /// </summary>
+    /// <param name="format">
+    /// The DateTime format to be used when converting string values to a
+    /// DateTime and binding DateTime parameters.
+    /// </param>
+    /// <param name="kind">
+    /// The <see cref="DateTimeKind" /> to be used when creating DateTime
+    /// values.
+    /// </param>
+    /// <param name="formatString">
+    /// The format string to be used when parsing and formatting DateTime
+    /// values.
+    /// </param>
+    /// <param name="utf16">
+    /// Non-zero to create a UTF-16 data-type conversion context; otherwise,
+    /// a UTF-8 data-type conversion context will be created.
+    /// </param>
+    protected SQLiteFunction(
+        SQLiteDateFormats format,
+        DateTimeKind kind,
+        string formatString,
+        bool utf16
+        )
+        : this()
+    {
+        if (utf16)
+            _base = new SQLite3_UTF16(format, kind, formatString, IntPtr.Zero, null, false);
+        else
+            _base = new SQLite3(format, kind, formatString, IntPtr.Zero, null, false);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     #region IDisposable Members

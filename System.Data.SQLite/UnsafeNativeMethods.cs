@@ -991,6 +991,13 @@ namespace System.Data.SQLite
         IntPtr db, byte[] fileName, byte[] procName, ref IntPtr pError);
 
 #if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_overload_function(IntPtr db, IntPtr zName, int nArgs);
+
+#if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
 #else
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
