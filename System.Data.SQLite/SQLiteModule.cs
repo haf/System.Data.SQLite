@@ -5416,6 +5416,214 @@ namespace System.Data.SQLite
 
             return nativeModule;
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Static Error Handling Helper Methods
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="pVtab">
+        /// The native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="logErrors">
+        /// Non-zero if this error message should also be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        private static bool SetTableError(
+            SQLiteModule module,
+            IntPtr pVtab,
+            bool logErrors,
+            string error
+            )
+        {
+            try
+            {
+                if (logErrors)
+                {
+                    SQLiteLog.LogMessage(SQLiteErrorCode.Error,
+                        String.Format(CultureInfo.CurrentCulture,
+                        "Virtual table error: {0}", error)); /* throw */
+                }
+            }
+            catch
+            {
+                // do nothing.
+            }
+
+            if (pVtab == IntPtr.Zero)
+                return false;
+
+            int offset = IntPtr.Size + sizeof(int);
+            IntPtr pError = SQLiteMarshal.ReadIntPtr(pVtab, offset);
+
+            if (pError != IntPtr.Zero)
+            {
+                SQLiteMemory.Free(pError); pError = IntPtr.Zero;
+                SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
+            }
+
+            if (error == null)
+                return true;
+
+            bool success = false;
+
+            try
+            {
+                pError = SQLiteString.Utf8IntPtrFromString(error);
+                SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
+                success = true;
+            }
+            finally
+            {
+                if (!success && (pError != IntPtr.Zero))
+                {
+                    SQLiteMemory.Free(pError);
+                    pError = IntPtr.Zero;
+                }
+            }
+
+            return success;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="table">
+        /// The <see cref="SQLiteVirtualTable" /> object instance used to
+        /// lookup the native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="logErrors">
+        /// Non-zero if this error message should also be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        private static bool SetTableError(
+            SQLiteModule module,
+            SQLiteVirtualTable table,
+            bool logErrors,
+            string error
+            )
+        {
+            if (table == null)
+                return false;
+
+            IntPtr pVtab = table.NativeHandle;
+
+            if (pVtab == IntPtr.Zero)
+                return false;
+
+            return SetTableError(module, pVtab, logErrors, error);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="pCursor">
+        /// The native pointer to the sqlite3_vtab_cursor derived structure
+        /// used to get the native pointer to the sqlite3_vtab derived
+        /// structure.
+        /// </param>
+        /// <param name="logErrors">
+        /// Non-zero if this error message should also be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        private static bool SetCursorError(
+            SQLiteModule module,
+            IntPtr pCursor,
+            bool logErrors,
+            string error
+            )
+        {
+            if (pCursor == IntPtr.Zero)
+                return false;
+
+            IntPtr pVtab = TableFromCursor(module, pCursor);
+
+            if (pVtab == IntPtr.Zero)
+                return false;
+
+            return SetTableError(module, pVtab, logErrors, error);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Arranges for the specified error message to be placed into the
+        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
+        /// existing error message, if any.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="SQLiteModule" /> object instance to be used.
+        /// </param>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance used to
+        /// lookup the native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="logErrors">
+        /// Non-zero if this error message should also be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
+        /// <param name="error">
+        /// The error message.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        private static bool SetCursorError(
+            SQLiteModule module,
+            SQLiteVirtualTableCursor cursor,
+            bool logErrors,
+            string error
+            )
+        {
+            if (cursor == null)
+                return false;
+
+            IntPtr pCursor = cursor.NativeHandle;
+
+            if (pCursor == IntPtr.Zero)
+                return false;
+
+            return SetCursorError(module, pCursor, logErrors, error);
+        }
+        #endregion
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -6003,214 +6211,6 @@ namespace System.Data.SQLite
             )
         {
             return SetCursorError(this, cursor, LogErrors, error);
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
-        #region Static Error Handling Helper Methods
-        /// <summary>
-        /// Arranges for the specified error message to be placed into the
-        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
-        /// existing error message, if any.
-        /// </summary>
-        /// <param name="module">
-        /// The <see cref="SQLiteModule" /> object instance to be used.
-        /// </param>
-        /// <param name="pVtab">
-        /// The native pointer to the sqlite3_vtab derived structure.
-        /// </param>
-        /// <param name="logErrors">
-        /// Non-zero if this error message should also be logged using the
-        /// <see cref="SQLiteLog" /> class.
-        /// </param>
-        /// <param name="error">
-        /// The error message.
-        /// </param>
-        /// <returns>
-        /// Non-zero upon success.
-        /// </returns>
-        private static bool SetTableError(
-            SQLiteModule module,
-            IntPtr pVtab,
-            bool logErrors,
-            string error
-            )
-        {
-            try
-            {
-                if (logErrors)
-                {
-                    SQLiteLog.LogMessage(SQLiteErrorCode.Error,
-                        String.Format(CultureInfo.CurrentCulture,
-                        "Virtual table error: {0}", error)); /* throw */
-                }
-            }
-            catch
-            {
-                // do nothing.
-            }
-
-            if (pVtab == IntPtr.Zero)
-                return false;
-
-            int offset = IntPtr.Size + sizeof(int);
-            IntPtr pError = SQLiteMarshal.ReadIntPtr(pVtab, offset);
-
-            if (pError != IntPtr.Zero)
-            {
-                SQLiteMemory.Free(pError); pError = IntPtr.Zero;
-                SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
-            }
-
-            if (error == null)
-                return true;
-
-            bool success = false;
-
-            try
-            {
-                pError = SQLiteString.Utf8IntPtrFromString(error);
-                SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
-                success = true;
-            }
-            finally
-            {
-                if (!success && (pError != IntPtr.Zero))
-                {
-                    SQLiteMemory.Free(pError);
-                    pError = IntPtr.Zero;
-                }
-            }
-
-            return success;
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Arranges for the specified error message to be placed into the
-        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
-        /// existing error message, if any.
-        /// </summary>
-        /// <param name="module">
-        /// The <see cref="SQLiteModule" /> object instance to be used.
-        /// </param>
-        /// <param name="table">
-        /// The <see cref="SQLiteVirtualTable" /> object instance used to
-        /// lookup the native pointer to the sqlite3_vtab derived structure.
-        /// </param>
-        /// <param name="logErrors">
-        /// Non-zero if this error message should also be logged using the
-        /// <see cref="SQLiteLog" /> class.
-        /// </param>
-        /// <param name="error">
-        /// The error message.
-        /// </param>
-        /// <returns>
-        /// Non-zero upon success.
-        /// </returns>
-        private static bool SetTableError(
-            SQLiteModule module,
-            SQLiteVirtualTable table,
-            bool logErrors,
-            string error
-            )
-        {
-            if (table == null)
-                return false;
-
-            IntPtr pVtab = table.NativeHandle;
-
-            if (pVtab == IntPtr.Zero)
-                return false;
-
-            return SetTableError(module, pVtab, logErrors, error);
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Arranges for the specified error message to be placed into the
-        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
-        /// existing error message, if any.
-        /// </summary>
-        /// <param name="module">
-        /// The <see cref="SQLiteModule" /> object instance to be used.
-        /// </param>
-        /// <param name="pCursor">
-        /// The native pointer to the sqlite3_vtab_cursor derived structure
-        /// used to get the native pointer to the sqlite3_vtab derived
-        /// structure.
-        /// </param>
-        /// <param name="logErrors">
-        /// Non-zero if this error message should also be logged using the
-        /// <see cref="SQLiteLog" /> class.
-        /// </param>
-        /// <param name="error">
-        /// The error message.
-        /// </param>
-        /// <returns>
-        /// Non-zero upon success.
-        /// </returns>
-        private static bool SetCursorError(
-            SQLiteModule module,
-            IntPtr pCursor,
-            bool logErrors,
-            string error
-            )
-        {
-            if (pCursor == IntPtr.Zero)
-                return false;
-
-            IntPtr pVtab = TableFromCursor(module, pCursor);
-
-            if (pVtab == IntPtr.Zero)
-                return false;
-
-            return SetTableError(module, pVtab, logErrors, error);
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Arranges for the specified error message to be placed into the
-        /// zErrMsg field of a sqlite3_vtab derived structure, freeing the
-        /// existing error message, if any.
-        /// </summary>
-        /// <param name="module">
-        /// The <see cref="SQLiteModule" /> object instance to be used.
-        /// </param>
-        /// <param name="cursor">
-        /// The <see cref="SQLiteVirtualTableCursor" /> object instance used to
-        /// lookup the native pointer to the sqlite3_vtab derived structure.
-        /// </param>
-        /// <param name="logErrors">
-        /// Non-zero if this error message should also be logged using the
-        /// <see cref="SQLiteLog" /> class.
-        /// </param>
-        /// <param name="error">
-        /// The error message.
-        /// </param>
-        /// <returns>
-        /// Non-zero upon success.
-        /// </returns>
-        private static bool SetCursorError(
-            SQLiteModule module,
-            SQLiteVirtualTableCursor cursor,
-            bool logErrors,
-            string error
-            )
-        {
-            if (cursor == null)
-                return false;
-
-            IntPtr pCursor = cursor.NativeHandle;
-
-            if (pCursor == IntPtr.Zero)
-                return false;
-
-            return SetCursorError(module, pCursor, logErrors, error);
         }
         #endregion
 
