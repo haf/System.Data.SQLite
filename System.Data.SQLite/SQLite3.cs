@@ -1658,10 +1658,19 @@ namespace System.Data.SQLite
     /// <param name="module">
     /// The module object to be used when creating the native disposable module.
     /// </param>
-    internal override void CreateModule(SQLiteModule module)
+    /// <param name="flags">
+    /// The flags for the associated <see cref="SQLiteConnection" /> object instance.
+    /// </param>
+    internal override void CreateModule(SQLiteModule module, SQLiteConnectionFlags flags)
     {
         if (module == null)
             throw new ArgumentNullException("module");
+
+        if ((flags & SQLiteConnectionFlags.NoLogModule) != SQLiteConnectionFlags.NoLogModule)
+        {
+            module.LogErrors = ((flags & SQLiteConnectionFlags.LogModuleError) == SQLiteConnectionFlags.LogModuleError);
+            module.LogExceptions = ((flags & SQLiteConnectionFlags.LogModuleException) == SQLiteConnectionFlags.LogModuleException);
+        }
 
         if (_sql == null)
             throw new SQLiteException("connection has an invalid handle");
@@ -1731,7 +1740,10 @@ namespace System.Data.SQLite
     /// The module object previously passed to the <see cref="CreateModule" />
     /// method.
     /// </param>
-    internal override void DisposeModule(SQLiteModule module)
+    /// <param name="flags">
+    /// The flags for the associated <see cref="SQLiteConnection" /> object instance.
+    /// </param>
+    internal override void DisposeModule(SQLiteModule module, SQLiteConnectionFlags flags)
     {
         if (module == null)
             throw new ArgumentNullException("module");

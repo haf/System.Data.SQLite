@@ -230,7 +230,10 @@ namespace System.Data.SQLite
     /// <param name="module">
     /// The module object to be used when creating the native disposable module.
     /// </param>
-    internal abstract void CreateModule(SQLiteModule module);
+    /// <param name="flags">
+    /// The flags for the associated <see cref="SQLiteConnection" /> object instance.
+    /// </param>
+    internal abstract void CreateModule(SQLiteModule module, SQLiteConnectionFlags flags);
 
     /// <summary>
     /// Calls the native SQLite core library in order to cleanup the resources
@@ -240,7 +243,10 @@ namespace System.Data.SQLite
     /// The module object previously passed to the <see cref="CreateModule" />
     /// method.
     /// </param>
-    internal abstract void DisposeModule(SQLiteModule module);
+    /// <param name="flags">
+    /// The flags for the associated <see cref="SQLiteConnection" /> object instance.
+    /// </param>
+    internal abstract void DisposeModule(SQLiteModule module, SQLiteConnectionFlags flags);
 
     /// <summary>
     /// Calls the native SQLite core library in order to declare a virtual table
@@ -912,6 +918,25 @@ namespace System.Data.SQLite
       NoFunctions = 0x800,
 
       /// <summary>
+      /// Skip setting the logging related properties of the
+      /// <see cref="SQLiteModule" /> object instance that was passed to
+      /// the <see cref="SQLiteConnection.CreateModule" /> method.
+      /// </summary>
+      NoLogModule = 0x1000,
+
+      /// <summary>
+      /// Enable logging of all virtual table module errors seen by the
+      /// <see cref="SQLiteModule.SetTableError(IntPtr,String)" /> method.
+      /// </summary>
+      LogModuleError = 0x2000,
+
+      /// <summary>
+      /// Enable logging of certain virtual table module exceptions that cannot
+      /// be easily discovered via other means.
+      /// </summary>
+      LogModuleException = 0x4000,
+
+      /// <summary>
       /// When binding and returning column values, always treat them as though
       /// they were plain text (i.e. no numeric, date/time, or other conversions
       /// should be attempted).
@@ -922,12 +947,13 @@ namespace System.Data.SQLite
       /// Enable all logging.
       /// </summary>
       LogAll = LogPrepare | LogPreBind | LogBind |
-               LogCallbackException | LogBackup,
+               LogCallbackException | LogBackup | LogModuleError |
+               LogModuleException,
 
       /// <summary>
       /// The default extra flags for new connections.
       /// </summary>
-      Default = LogCallbackException
+      Default = LogCallbackException | LogModuleException
   }
 
   // These are the options to the internal sqlite3_config call.

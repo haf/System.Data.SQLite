@@ -1802,7 +1802,7 @@ namespace System.Data.SQLite
         if ((_flags & SQLiteConnectionFlags.NoCreateModule) == SQLiteConnectionFlags.NoCreateModule)
             throw new SQLiteException("Creating modules is disabled for this database connection.");
 
-        _sql.CreateModule(module);
+        _sql.CreateModule(module, _flags);
     }
 #endif
 
