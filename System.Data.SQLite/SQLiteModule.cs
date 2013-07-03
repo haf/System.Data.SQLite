@@ -3454,7 +3454,11 @@ namespace System.Data.SQLite
 #if !SQLITE_STANDARD
             return UnsafeNativeMethods.sqlite3_malloc_size_interop(pMemory);
 #elif TRACK_MEMORY_BYTES
-            return 1; /* HACK: Track number of allocations, not bytes. */
+            //
+            // HACK: Ok, we cannot determine the size of the memory block;
+            //       therefore, just track number of allocations instead.
+            //
+            return (pMemory != IntPtr.Zero) ? 1 : 0;
 #else
             return 0;
 #endif
