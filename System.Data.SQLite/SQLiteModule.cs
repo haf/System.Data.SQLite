@@ -5251,7 +5251,7 @@ namespace System.Data.SQLite
                 //       on what we know:
                 //
                 //       There is one integer member.
-                //       There are 22 function pointers.
+                //       There are 22 function pointer members.
                 //
                 pNativeModule = SQLiteMemory.Allocate(
                     sizeof(int) + (22 * IntPtr.Size));
@@ -5291,7 +5291,7 @@ namespace System.Data.SQLite
             if (module != null)
             {
                 nativeModule.xCreate = new UnsafeNativeMethods.xCreate(
-                    module.xCreate);
+                   module.xCreate);
 
                 nativeModule.xConnect = new UnsafeNativeMethods.xConnect(
                     module.xConnect);
@@ -5415,6 +5415,103 @@ namespace System.Data.SQLite
             }
 
             return nativeModule;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Creates a copy of the specified
+        /// <see cref="UnsafeNativeMethods.sqlite3_module" /> object instance,
+        /// using default implementations for the contained delegates when
+        /// necessary.
+        /// </summary>
+        /// <param name="module">
+        /// The <see cref="UnsafeNativeMethods.sqlite3_module" /> object
+        /// instance to copy.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="UnsafeNativeMethods.sqlite3_module" /> object
+        /// instance.
+        /// </returns>
+        private UnsafeNativeMethods.sqlite3_module CopyNativeModule(
+            UnsafeNativeMethods.sqlite3_module module
+            )
+        {
+            UnsafeNativeMethods.sqlite3_module newModule =
+                new UnsafeNativeMethods.sqlite3_module();
+
+            newModule.iVersion = module.iVersion;
+
+            newModule.xCreate = new UnsafeNativeMethods.xCreate(
+                (module.xCreate != null) ? module.xCreate : xCreate);
+
+            newModule.xConnect = new UnsafeNativeMethods.xConnect(
+                (module.xConnect != null) ? module.xConnect : xConnect);
+
+            newModule.xBestIndex = new UnsafeNativeMethods.xBestIndex(
+                (module.xBestIndex != null) ? module.xBestIndex : xBestIndex);
+
+            newModule.xDisconnect = new UnsafeNativeMethods.xDisconnect(
+                (module.xDisconnect != null) ? module.xDisconnect :
+                xDisconnect);
+
+            newModule.xDestroy = new UnsafeNativeMethods.xDestroy(
+                (module.xDestroy != null) ? module.xDestroy : xDestroy);
+
+            newModule.xOpen = new UnsafeNativeMethods.xOpen(
+                (module.xOpen != null) ? module.xOpen : xOpen);
+
+            newModule.xClose = new UnsafeNativeMethods.xClose(
+                (module.xClose != null) ? module.xClose : xClose);
+
+            newModule.xFilter = new UnsafeNativeMethods.xFilter(
+                (module.xFilter != null) ? module.xFilter : xFilter);
+
+            newModule.xNext = new UnsafeNativeMethods.xNext(
+                (module.xNext != null) ? module.xNext : xNext);
+
+            newModule.xEof = new UnsafeNativeMethods.xEof(
+                (module.xEof != null) ? module.xEof : xEof);
+
+            newModule.xColumn = new UnsafeNativeMethods.xColumn(
+                (module.xColumn != null) ? module.xColumn : xColumn);
+
+            newModule.xRowId = new UnsafeNativeMethods.xRowId(
+                (module.xRowId != null) ? module.xRowId : xRowId);
+
+            newModule.xUpdate = new UnsafeNativeMethods.xUpdate(
+                (module.xUpdate != null) ? module.xUpdate : xUpdate);
+
+            newModule.xBegin = new UnsafeNativeMethods.xBegin(
+                (module.xBegin != null) ? module.xBegin : xBegin);
+
+            newModule.xSync = new UnsafeNativeMethods.xSync(
+                (module.xSync != null) ? module.xSync : xSync);
+
+            newModule.xCommit = new UnsafeNativeMethods.xCommit(
+                (module.xCommit != null) ? module.xCommit : xCommit);
+
+            newModule.xRollback = new UnsafeNativeMethods.xRollback(
+                (module.xRollback != null) ? module.xRollback : xRollback);
+
+            newModule.xFindFunction = new UnsafeNativeMethods.xFindFunction(
+                (module.xFindFunction != null) ? module.xFindFunction :
+                xFindFunction);
+
+            newModule.xRename = new UnsafeNativeMethods.xRename(
+                (module.xRename != null) ? module.xRename : xRename);
+
+            newModule.xSavepoint = new UnsafeNativeMethods.xSavepoint(
+                (module.xSavepoint != null) ? module.xSavepoint : xSavepoint);
+
+            newModule.xRelease = new UnsafeNativeMethods.xRelease(
+                (module.xRelease != null) ? module.xRelease : xRelease);
+
+            newModule.xRollbackTo = new UnsafeNativeMethods.xRollbackTo(
+                (module.xRollbackTo != null) ? module.xRollbackTo :
+                xRollbackTo);
+
+            return newModule;
         }
 
         ///////////////////////////////////////////////////////////////////////
