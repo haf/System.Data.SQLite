@@ -3453,6 +3453,8 @@ namespace System.Data.SQLite
         {
 #if !SQLITE_STANDARD
             return UnsafeNativeMethods.sqlite3_malloc_size_interop(pMemory);
+#elif TRACK_MEMORY_BYTES
+            return 1; /* HACK: Track number of allocations, not bytes. */
 #else
             return 0;
 #endif
