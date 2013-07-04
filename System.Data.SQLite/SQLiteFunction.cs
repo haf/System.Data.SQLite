@@ -706,7 +706,7 @@ namespace System.Data.SQLite
               at = arAtt[y] as SQLiteFunctionAttribute;
               if (at != null)
               {
-                at._instanceType = arTypes[x];
+                at.InstanceType = arTypes[x];
                 _registeredFunctions.Add(at);
               }
             }
@@ -735,7 +735,7 @@ namespace System.Data.SQLite
         at = arAtt[y] as SQLiteFunctionAttribute;
         if (at != null)
         {
-          at._instanceType = typ;
+          at.InstanceType = typ;
           _registeredFunctions.Add(at);
         }
       }
@@ -752,37 +752,91 @@ namespace System.Data.SQLite
     /// </remarks>
     /// <param name="sqlbase">The base object on which the functions are to bind</param>
     /// <param name="flags">The flags associated with the parent connection object</param>
-    /// <returns>Returns an array of functions which the connection object should retain until the connection is closed.</returns>
-    internal static SQLiteFunction[] BindFunctions(SQLiteBase sqlbase, SQLiteConnectionFlags flags)
+    /// <returns>Returns a logical list of functions which the connection should retain until it is closed.</returns>
+    internal static IEnumerable<SQLiteFunction> BindFunctions(SQLiteBase sqlbase, SQLiteConnectionFlags flags)
     {
-      SQLiteFunction f;
-      List<SQLiteFunction> lFunctions = new List<SQLiteFunction>();
+        List<SQLiteFunction> lFunctions = new List<SQLiteFunction>();
 
-      foreach (SQLiteFunctionAttribute pr in _registeredFunctions)
-      {
-        f = (SQLiteFunction)Activator.CreateInstance(pr._instanceType);
+        foreach (SQLiteFunctionAttribute pr in _registeredFunctions)
+        {
+            SQLiteFunction f = (SQLiteFunction)Activator.CreateInstance(pr.InstanceType);
+            BindFunction(sqlbase, pr, f, flags);
+            lFunctions.Add(f);
+        }
 
-        f._base = sqlbase;
-        f._flags = flags;
-        f._InvokeFunc = (pr.FuncType == FunctionType.Scalar) ? new SQLiteCallback(f.ScalarCallback) : null;
-        f._StepFunc = (pr.FuncType == FunctionType.Aggregate) ? new SQLiteCallback(f.StepCallback) : null;
-        f._FinalFunc = (pr.FuncType == FunctionType.Aggregate) ? new SQLiteFinalCallback(f.FinalCallback) : null;
-        f._CompareFunc = (pr.FuncType == FunctionType.Collation) ? new SQLiteCollation(f.CompareCallback) : null;
-        f._CompareFunc16 = (pr.FuncType == FunctionType.Collation) ? new SQLiteCollation(f.CompareCallback16) : null;
+        return lFunctions;
+    }
 
-        if (pr.FuncType != FunctionType.Collation)
-          sqlbase.CreateFunction(pr.Name, pr.Arguments, (f is SQLiteFunctionEx), f._InvokeFunc, f._StepFunc, f._FinalFunc);
+    /// <summary>
+    /// This function binds a user-defined functions to a connection.
+    /// </summary>
+    /// <param name="sqliteBase">
+    /// The <see cref="SQLiteBase" /> object instance associated with the
+    /// <see cref="SQLiteConnection" /> that the function should be bound to.
+    /// </param>
+    /// <param name="functionAttribute">
+    /// The <see cref="SQLiteFunctionAttribute"/> object instance containing
+    /// the metadata for the function to be bound.
+    /// </param>
+    /// <param name="function">
+    /// The <see cref="SQLiteFunction"/> object instance that implements the
+    /// function to be bound.
+    /// </param>
+    /// <param name="flags">
+    /// The flags associated with the parent connection object.
+    /// </param>
+    internal static void BindFunction(
+        SQLiteBase sqliteBase,
+        SQLiteFunctionAttribute functionAttribute,
+        SQLiteFunction function,
+        SQLiteConnectionFlags flags
+        )
+    {
+        if (sqliteBase == null)
+            throw new ArgumentNullException("sqliteBase");
+
+        if (functionAttribute == null)
+            throw new ArgumentNullException("functionAttribute");
+
+        if (function == null)
+            throw new ArgumentNullException("function");
+
+        FunctionType functionType = functionAttribute.FuncType;
+
+        function._base = sqliteBase;
+        function._flags = flags;
+
+        function._InvokeFunc = (functionType == FunctionType.Scalar) ?
+            new SQLiteCallback(function.ScalarCallback) : null;
+
+        function._StepFunc = (functionType == FunctionType.Aggregate) ?
+            new SQLiteCallback(function.StepCallback) : null;
+
+        function._FinalFunc = (functionType == FunctionType.Aggregate) ?
+            new SQLiteFinalCallback(function.FinalCallback) : null;
+
+        function._CompareFunc = (functionType == FunctionType.Collation) ?
+            new SQLiteCollation(function.CompareCallback) : null;
+
+        function._CompareFunc16 = (functionType == FunctionType.Collation) ?
+            new SQLiteCollation(function.CompareCallback16) : null;
+
+        string name = functionAttribute.Name;
+
+        if (functionType != FunctionType.Collation)
+        {
+            bool needCollSeq = (function is SQLiteFunctionEx);
+
+            sqliteBase.CreateFunction(
+                name, functionAttribute.Arguments, needCollSeq,
+                function._InvokeFunc, function._StepFunc,
+                function._FinalFunc);
+        }
         else
-          sqlbase.CreateCollation(pr.Name, f._CompareFunc, f._CompareFunc16);
-
-
-        lFunctions.Add(f);
-      }
-
-      SQLiteFunction[] arFunctions = new SQLiteFunction[lFunctions.Count];
-      lFunctions.CopyTo(arFunctions, 0);
-
-      return arFunctions;
+        {
+            sqliteBase.CreateCollation(
+                name, function._CompareFunc, function._CompareFunc16);
+        }
     }
   }
 

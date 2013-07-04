@@ -8,6 +8,7 @@
 namespace System.Data.SQLite
 {
   using System;
+  using System.Collections.Generic;
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
   using System.Diagnostics;
@@ -197,7 +198,12 @@ namespace System.Data.SQLite
       // Bind functions to this connection.  If any previous functions of the same name
       // were already bound, then the new bindings replace the old.
       if ((connectionFlags & SQLiteConnectionFlags.NoFunctions) != SQLiteConnectionFlags.NoFunctions)
-          _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
+      {
+          if (_functions == null)
+              _functions = new List<SQLiteFunction>();
+
+          _functions.AddRange(new List<SQLiteFunction>(SQLiteFunction.BindFunctions(this, connectionFlags)));
+      }
 
       SetTimeout(0);
       GC.KeepAlive(_sql);

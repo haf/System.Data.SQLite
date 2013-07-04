@@ -834,6 +834,34 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    /// <summary>
+    /// Attempts to bind the specified <see cref="SQLiteFunction" /> object
+    /// instance to this connection.
+    /// </summary>
+    /// <param name="functionAttribute">
+    /// The <see cref="SQLiteFunctionAttribute"/> object instance containing
+    /// the metadata for the function to be bound.
+    /// </param>
+    /// <param name="function">
+    /// The <see cref="SQLiteFunction"/> object instance that implements the
+    /// function to be bound.
+    /// </param>
+    public void BindFunction(
+        SQLiteFunctionAttribute functionAttribute,
+        SQLiteFunction function
+        )
+    {
+        CheckDisposed();
+
+        if (_sql == null)
+            throw new InvalidOperationException(
+                "Database connection not valid for binding functions.");
+
+        _sql.BindFunction(functionAttribute, function, _flags);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     [Conditional("CHECK_STATE")]
     internal static void Check(SQLiteConnection connection)
     {

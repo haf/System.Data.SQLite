@@ -75,7 +75,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The user-defined functions registered on this connection
     /// </summary>
-    protected SQLiteFunction[] _functionsArray;
+    protected List<SQLiteFunction> _functions;
 
 #if INTEROP_VIRTUAL_TABLE
     /// <summary>
@@ -243,6 +243,34 @@ namespace System.Data.SQLite
     internal override void Cancel()
     {
       UnsafeNativeMethods.sqlite3_interrupt(_sql);
+    }
+
+    /// <summary>
+    /// This function binds a user-defined function to the connection.
+    /// </summary>
+    /// <param name="functionAttribute">
+    /// The <see cref="SQLiteFunctionAttribute"/> object instance containing
+    /// the metadata for the function to be bound.
+    /// </param>
+    /// <param name="function">
+    /// The <see cref="SQLiteFunction"/> object instance that implements the
+    /// function to be bound.
+    /// </param>
+    /// <param name="flags">
+    /// The flags associated with the parent connection object.
+    /// </param>
+    internal override void BindFunction(
+        SQLiteFunctionAttribute functionAttribute,
+        SQLiteFunction function,
+        SQLiteConnectionFlags flags
+        )
+    {
+        SQLiteFunction.BindFunction(this, functionAttribute, function, flags);
+
+        if (_functions == null)
+            _functions = new List<SQLiteFunction>();
+
+        _functions.Add(function);
     }
 
     internal override string Version
@@ -492,7 +520,12 @@ namespace System.Data.SQLite
       // Bind functions to this connection.  If any previous functions of the same name
       // were already bound, then the new bindings replace the old.
       if ((connectionFlags & SQLiteConnectionFlags.NoFunctions) != SQLiteConnectionFlags.NoFunctions)
-          _functionsArray = SQLiteFunction.BindFunctions(this, connectionFlags);
+      {
+          if (_functions == null)
+              _functions = new List<SQLiteFunction>();
+
+          _functions.AddRange(new List<SQLiteFunction>(SQLiteFunction.BindFunctions(this, connectionFlags)));
+      }
 
       SetTimeout(0);
       GC.KeepAlive(_sql);

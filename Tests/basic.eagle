@@ -2392,6 +2392,107 @@ runTest {test data-1.49 {BindAllAsText w/DateTime} -setup {
 
 ###############################################################################
 
+runTest {test data-1.50 {bind SQLiteFunction to one SQLiteConnection} -setup {
+  set fileName data-1.50.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql { \
+    SELECT MyRandom(); \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public class Test${id} : SQLiteFunction
+      {
+        private Random random;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public Test${id}()
+        {
+          random = new Random();
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public override object Invoke(
+          object\[\] args
+          )
+        {
+          return random.Next();
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static object DoTest(bool bindFunction)
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            if (bindFunction)
+            {
+              connection.BindFunction(new SQLiteFunctionAttribute(
+                "MyRandom", 0, FunctionType.Scalar), new Test${id}());
+            }
+
+            using (SQLiteCommand command = new SQLiteCommand("${sql}",
+                connection))
+            {
+              return command.ExecuteScalar();
+            }
+          }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} DoTest false
+      } result] : [set result ""]}] $result \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} DoTest true
+      } result] : [set result ""]}] $result \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} DoTest false
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 1\
+\{System\.Reflection\.TargetInvocationException: Exception has been thrown by\
+the target of an invocation\. ---> System\.Data\.SQLite\.SQLiteException: SQL\
+logic error or missing database
+no such function: MyRandom.*\} 0 (?:-)?\d+ 1\
+\{System\.Reflection\.TargetInvocationException: Exception has been thrown by\
+the target of an invocation\. ---> System\.Data\.SQLite\.SQLiteException: SQL\
+logic error or missing database
+no such function: MyRandom.*\}$}]}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 

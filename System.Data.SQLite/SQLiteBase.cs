@@ -158,6 +158,22 @@ namespace System.Data.SQLite
     /// </summary>
     internal abstract void Cancel();
 
+    /// <summary>
+    /// This function binds a user-defined functions to the connection.
+    /// </summary>
+    /// <param name="functionAttribute">
+    /// The <see cref="SQLiteFunctionAttribute"/> object instance containing
+    /// the metadata for the function to be bound.
+    /// </param>
+    /// <param name="function">
+    /// The <see cref="SQLiteFunction"/> object instance that implements the
+    /// function to be bound.
+    /// </param>
+    /// <param name="flags">
+    /// The flags associated with the parent connection object.
+    /// </param>
+    internal abstract void BindFunction(SQLiteFunctionAttribute functionAttribute, SQLiteFunction function, SQLiteConnectionFlags flags);
+
     internal abstract void Bind_Double(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, double value);
     internal abstract void Bind_Int32(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, Int32 value);
     internal abstract void Bind_UInt32(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, UInt32 value);

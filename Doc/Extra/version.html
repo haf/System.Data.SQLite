@@ -50,6 +50,7 @@
       <li>Add DateTimeFormatString connection string property to allow the DateTime format string used for all parsing and formatting to be overridden.</li>
       <li>Add NoFunctions connection flag to skip binding functions registered in the application domain.</li>
       <li>Add several data-types for compatibility purposes. Fix for <a href="http://system.data.sqlite.org/index.html/info/fe50b8c2e8">[fe50b8c2e8]</a>.</li>
+      <li>Add SQLiteConnection.BindFunction method to facilitate adding custom functions on a per-connection basis.</li>
       <li>When reading a DateTime value, avoid unnecessary string conversions. Fix for <a href="http://system.data.sqlite.org/index.html/info/4d87fbc742">[4d87fbc742]</a>.</li>
       <li>Modify the index introspection code so that it does not treat PRAGMA table_info &quot;pk&quot; column values as boolean. Fix for <a href="http://system.data.sqlite.org/index.html/info/f2c47a01eb">[f2c47a01eb]</a>.</li>
       <li>Disable use of the new connection string parsing algorithm when the No_SQLiteConnectionNewParser environment variable is set. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/bbdda6eae2">[bbdda6eae2]</a>.</li>
