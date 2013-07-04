@@ -282,7 +282,7 @@ for {set i 1} {$i < 11} {incr i} {
 
     cleanupDb $fileName
 
-    unset -nocomplain result results errors code sql dataSource id db \
+    unset -nocomplain result results errors code sql dataSource id \
         poolCounts havePoolCounts fileName
 
     rename getPoolCounts ""

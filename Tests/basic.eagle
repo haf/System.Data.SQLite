@@ -465,7 +465,7 @@ runTest {test data-1.7 {properly closed database file (non-query)} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result results errors code sql dataSource id db fileName
+  unset -nocomplain result results errors code sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
@@ -525,7 +525,7 @@ runTest {test data-1.8 {properly closed database file (reader #1)} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result results errors code sql dataSource id db fileName
+  unset -nocomplain result results errors code sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
@@ -587,7 +587,7 @@ runTest {test data-1.9 {properly closed database file (reader #2)} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain result results errors code sql dataSource id db fileName
+  unset -nocomplain result results errors code sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
