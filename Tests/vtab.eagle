@@ -483,7 +483,7 @@ runTest {test vtab-1.4 {virtual table function support} -setup {
           StringList result = new StringList();
 
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};Flags=NoFunctions;"))
+              "Data Source=${dataSource};Flags=NoBindFunctions;"))
           {
             connection.Open();
             connection.CreateModule(new SQLiteModuleTest${id}("mod${id}"));
