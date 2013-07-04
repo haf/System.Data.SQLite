@@ -2066,7 +2066,14 @@ namespace System.Data.SQLite
                 destHandle, zDestName, sourceHandle, zSourceName);
 
             if (backup == IntPtr.Zero)
-                throw new SQLiteException(ResultCode(), GetLastError());
+            {
+                SQLiteErrorCode resultCode = ResultCode();
+
+                if (resultCode != SQLiteErrorCode.Ok)
+                    throw new SQLiteException(resultCode, GetLastError());
+                else
+                    throw new SQLiteException("failed to initialize backup");
+            }
 
             backupHandle = new SQLiteBackupHandle(destHandle, backup);
         }
