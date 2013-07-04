@@ -928,10 +928,10 @@ namespace System.Data.SQLite
       NoCreateModule = 0x400,
 
       /// <summary>
-      /// Skip adding the any functions provided by other managed assemblies
-      /// when opening the connection.
+      /// Skip binding any functions provided by other managed assemblies when
+      /// opening the connection.
       /// </summary>
-      NoFunctions = 0x800,
+      NoBindFunctions = 0x800,
 
       /// <summary>
       /// Skip setting the logging related properties of the

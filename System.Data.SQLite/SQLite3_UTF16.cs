@@ -197,7 +197,7 @@ namespace System.Data.SQLite
 
       // Bind functions to this connection.  If any previous functions of the same name
       // were already bound, then the new bindings replace the old.
-      if ((connectionFlags & SQLiteConnectionFlags.NoFunctions) != SQLiteConnectionFlags.NoFunctions)
+      if ((connectionFlags & SQLiteConnectionFlags.NoBindFunctions) != SQLiteConnectionFlags.NoBindFunctions)
       {
           if (_functions == null)
               _functions = new List<SQLiteFunction>();
