@@ -310,7 +310,7 @@ namespace System.Data.SQLite
         /// <param name="pValue">
         /// The native value handle to use.
         /// </param>
-        internal SQLiteValue(IntPtr pValue)
+        private SQLiteValue(IntPtr pValue)
         {
             this.pValue = pValue;
         }
@@ -326,6 +326,53 @@ namespace System.Data.SQLite
         private void PreventNativeAccess()
         {
             pValue = IntPtr.Zero;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Internal Methods
+        /// <summary>
+        /// Converts a logical array of native pointers to native sqlite3_value
+        /// structures into a managed array of <see cref="SQLiteValue" />
+        /// object instances.
+        /// </summary>
+        /// <param name="argc">
+        /// The number of elements in the logical array of native sqlite3_value
+        /// structures.
+        /// </param>
+        /// <param name="argv">
+        /// The native pointer to the logical array of native sqlite3_value
+        /// structures to convert.
+        /// </param>
+        /// <returns>
+        /// The managed array of <see cref="SQLiteValue" /> object instances or
+        /// null upon failure.
+        /// </returns>
+        internal static SQLiteValue[] ArrayFromSizeAndIntPtr(
+            int argc,
+            IntPtr argv
+            )
+        {
+            if (argc < 0)
+                return null;
+
+            if (argv == IntPtr.Zero)
+                return null;
+
+            SQLiteValue[] result = new SQLiteValue[argc];
+
+            for (int index = 0, offset = 0;
+                    index < result.Length;
+                    index++, offset += IntPtr.Size)
+            {
+                IntPtr pArg = SQLiteMarshal.ReadIntPtr(argv, offset);
+
+                result[index] = (pArg != IntPtr.Zero) ?
+                    new SQLiteValue(pArg) : null;
+            }
+
+            return result;
         }
         #endregion
 
@@ -4083,53 +4130,6 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region SQLiteValue Helper Methods
-        /// <summary>
-        /// Converts a logical array of native pointers to native sqlite3_value
-        /// structures into a managed array of <see cref="SQLiteValue" />
-        /// object instances.
-        /// </summary>
-        /// <param name="argc">
-        /// The number of elements in the logical array of native sqlite3_value
-        /// structures.
-        /// </param>
-        /// <param name="argv">
-        /// The native pointer to the logical array of native sqlite3_value
-        /// structures to convert.
-        /// </param>
-        /// <returns>
-        /// The managed array of <see cref="SQLiteValue" /> object instances or
-        /// null upon failure.
-        /// </returns>
-        public static SQLiteValue[] ValueArrayFromSizeAndIntPtr(
-            int argc,
-            IntPtr argv
-            )
-        {
-            if (argc < 0)
-                return null;
-
-            if (argv == IntPtr.Zero)
-                return null;
-
-            SQLiteValue[] result = new SQLiteValue[argc];
-
-            for (int index = 0, offset = 0;
-                    index < result.Length;
-                    index++, offset += IntPtr.Size)
-            {
-                IntPtr pArg = ReadIntPtr(argv, offset);
-
-                result[index] = (pArg != IntPtr.Zero) ?
-                    new SQLiteValue(pArg) : null;
-            }
-
-            return result;
-        }
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
         #region SQLiteIndex Helper Methods
         /// <summary>
         /// Converts a native pointer to a native sqlite3_index_info structure
@@ -6867,7 +6867,7 @@ namespace System.Data.SQLite
                 {
                     if (Filter(cursor, idxNum,
                             SQLiteString.StringFromUtf8IntPtr(idxStr),
-                            SQLiteMarshal.ValueArrayFromSizeAndIntPtr(argc,
+                            SQLiteValue.ArrayFromSizeAndIntPtr(argc,
                                 argv)) == SQLiteErrorCode.Ok)
                     {
                         return SQLiteErrorCode.Ok;
@@ -7074,9 +7074,9 @@ namespace System.Data.SQLite
 
                 if (table != null)
                 {
-                    return Update(
-                        table, SQLiteMarshal.ValueArrayFromSizeAndIntPtr(
-                        argc, argv), ref rowId);
+                    return Update(table,
+                        SQLiteValue.ArrayFromSizeAndIntPtr(argc, argv),
+                        ref rowId);
                 }
             }
             catch (Exception e) /* NOTE: Must catch ALL. */
