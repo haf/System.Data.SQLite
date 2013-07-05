@@ -9,7 +9,7 @@
 
 #include "../core/sqlite3.c"
 
-#if defined(INTEROP_VIRTUAL_TABLE)
+#if defined(INTEROP_VIRTUAL_TABLE) && SQLITE_VERSION_NUMBER >= 3004001
 #include "../ext/vtshim.c"
 #endif
 
@@ -334,6 +334,7 @@ SQLITE_API int WINAPI sqlite3_prepare16_interop(sqlite3 *db, const void *sql, in
   return n;
 }
 
+#if defined(INTEROP_VIRTUAL_TABLE) && SQLITE_VERSION_NUMBER >= 3004001
 SQLITE_API void *WINAPI sqlite3_create_disposable_module_interop(
   sqlite3 *db,
   const char *zName,
@@ -395,6 +396,7 @@ SQLITE_API void WINAPI sqlite3_dispose_module_interop(void *pModule)
 {
   sqlite3_dispose_module(pModule);
 }
+#endif
 
 SQLITE_API int WINAPI sqlite3_bind_double_interop(sqlite3_stmt *stmt, int iCol, double *val)
 {
