@@ -5522,6 +5522,165 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Calls one of the virtual table initialization methods.
+        /// </summary>
+        /// <param name="create">
+        /// Non-zero to call the <see cref="ISQLiteManagedModule.Create" />
+        /// method; otherwise, the <see cref="ISQLiteManagedModule.Connect" />
+        /// method will be called.
+        /// </param>
+        /// <param name="pDb">
+        /// The native database connection handle.
+        /// </param>
+        /// <param name="pAux">
+        /// The original native pointer value that was provided to the
+        /// sqlite3_create_module(), sqlite3_create_module_v2() or
+        /// sqlite3_create_disposable_module() functions.
+        /// </param>
+        /// <param name="argc">
+        /// The number of arguments from the CREATE VIRTUAL TABLE statement.
+        /// </param>
+        /// <param name="argv">
+        /// The array of string arguments from the CREATE VIRTUAL TABLE
+        /// statement.
+        /// </param>
+        /// <param name="pVtab">
+        /// Upon success, this parameter must be modified to point to the newly
+        /// created native sqlite3_vtab derived structure.
+        /// </param>
+        /// <param name="pError">
+        /// Upon failure, this parameter must be modified to point to the error
+        /// message, with the underlying memory having been obtained from the
+        /// sqlite3_malloc() function.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
+        private SQLiteErrorCode CreateOrConnect(
+            bool create,
+            IntPtr pDb,
+            IntPtr pAux,
+            int argc,
+            IntPtr argv,
+            ref IntPtr pVtab,
+            ref IntPtr pError
+            )
+        {
+            try
+            {
+                string fileName = SQLiteString.StringFromUtf8IntPtr(
+                    UnsafeNativeMethods.sqlite3_db_filename(pDb, IntPtr.Zero));
+
+                using (SQLiteConnection connection = new SQLiteConnection(
+                        pDb, fileName, false))
+                {
+                    SQLiteVirtualTable table = null;
+                    string error = null;
+
+                    if ((create && Create(connection, pAux,
+                            SQLiteString.StringArrayFromUtf8SizeAndIntPtr(argc,
+                            argv), ref table, ref error) == SQLiteErrorCode.Ok) ||
+                        (!create && Connect(connection, pAux,
+                            SQLiteString.StringArrayFromUtf8SizeAndIntPtr(argc,
+                            argv), ref table, ref error) == SQLiteErrorCode.Ok))
+                    {
+                        if (table != null)
+                        {
+                            pVtab = TableToIntPtr(table);
+                            return SQLiteErrorCode.Ok;
+                        }
+                        else
+                        {
+                            pError = SQLiteString.Utf8IntPtrFromString(
+                                "no table was created");
+                        }
+                    }
+                    else
+                    {
+                        pError = SQLiteString.Utf8IntPtrFromString(error);
+                    }
+                }
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                pError = SQLiteString.Utf8IntPtrFromString(e.ToString());
+            }
+
+            return SQLiteErrorCode.Error;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Calls one of the virtual table finalization methods.
+        /// </summary>
+        /// <param name="destroy">
+        /// Non-zero to call the <see cref="ISQLiteManagedModule.Destroy" />
+        /// method; otherwise, the
+        /// <see cref="ISQLiteManagedModule.Disconnect" /> method will be
+        /// called.
+        /// </param>
+        /// <param name="pVtab">
+        /// The native pointer to the sqlite3_vtab derived structure.
+        /// </param>
+        /// <returns>
+        /// A standard SQLite return code.
+        /// </returns>
+        private SQLiteErrorCode DestroyOrDisconnect(
+            bool destroy,
+            IntPtr pVtab
+            )
+        {
+            try
+            {
+                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
+
+                if (table != null)
+                {
+                    if ((destroy && (Destroy(table) == SQLiteErrorCode.Ok)) ||
+                        (!destroy && (Disconnect(table) == SQLiteErrorCode.Ok)))
+                    {
+                        if (tables != null)
+                            tables.Remove(pVtab);
+
+                        return SQLiteErrorCode.Ok;
+                    }
+                }
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                //
+                // NOTE: At this point, there is no way to report the error
+                //       condition back to the caller; therefore, use the
+                //       logging facility instead.
+                //
+                try
+                {
+                    if (LogExceptions)
+                    {
+                        /* throw */
+                        SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                            String.Format(CultureInfo.CurrentCulture,
+                            "Caught exception in \"{0}\" method: {1}",
+                            destroy ? "xDestroy" : "xDisconnect", e));
+                    }
+                }
+                catch
+                {
+                    // do nothing.
+                }
+            }
+            finally
+            {
+                FreeTable(pVtab);
+            }
+
+            return SQLiteErrorCode.Error;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Static Error Handling Helper Methods
         /// <summary>
         /// Arranges for the specified error message to be placed into the
@@ -6114,8 +6273,9 @@ namespace System.Data.SQLite
         #region Function Lookup Methods
         /// <summary>
         /// Deterimines the key that should be used to identify and store the
-        /// function instance for the virtual table (i.e. to be returned via
-        /// the <see cref="ISQLiteNativeModule.xFindFunction" /> method).
+        /// <see cref="SQLiteFunction" /> object instance for the virtual table
+        /// (i.e. to be returned via the
+        /// <see cref="ISQLiteNativeModule.xFindFunction" /> method).
         /// </summary>
         /// <param name="argumentCount">
         /// The number of arguments to the virtual table function.
@@ -6434,44 +6594,8 @@ namespace System.Data.SQLite
             ref IntPtr pError
             )
         {
-            try
-            {
-                string fileName = SQLiteString.StringFromUtf8IntPtr(
-                    UnsafeNativeMethods.sqlite3_db_filename(pDb, IntPtr.Zero));
-
-                using (SQLiteConnection connection = new SQLiteConnection(
-                        pDb, fileName, false))
-                {
-                    SQLiteVirtualTable table = null;
-                    string error = null;
-
-                    if (Create(connection, pAux,
-                            SQLiteString.StringArrayFromUtf8SizeAndIntPtr(argc,
-                            argv), ref table, ref error) == SQLiteErrorCode.Ok)
-                    {
-                        if (table != null)
-                        {
-                            pVtab = TableToIntPtr(table);
-                            return SQLiteErrorCode.Ok;
-                        }
-                        else
-                        {
-                            pError = SQLiteString.Utf8IntPtrFromString(
-                                "no table was created");
-                        }
-                    }
-                    else
-                    {
-                        pError = SQLiteString.Utf8IntPtrFromString(error);
-                    }
-                }
-            }
-            catch (Exception e) /* NOTE: Must catch ALL. */
-            {
-                pError = SQLiteString.Utf8IntPtrFromString(e.ToString());
-            }
-
-            return SQLiteErrorCode.Error;
+            return CreateOrConnect(
+                true, pDb, pAux, argc, argv, ref pVtab, ref pError);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6509,44 +6633,8 @@ namespace System.Data.SQLite
             ref IntPtr pError
             )
         {
-            try
-            {
-                string fileName = SQLiteString.StringFromUtf8IntPtr(
-                    UnsafeNativeMethods.sqlite3_db_filename(pDb, IntPtr.Zero));
-
-                using (SQLiteConnection connection = new SQLiteConnection(
-                        pDb, fileName, false))
-                {
-                    SQLiteVirtualTable table = null;
-                    string error = null;
-
-                    if (Connect(connection, pAux,
-                            SQLiteString.StringArrayFromUtf8SizeAndIntPtr(argc,
-                            argv), ref table, ref error) == SQLiteErrorCode.Ok)
-                    {
-                        if (table != null)
-                        {
-                            pVtab = TableToIntPtr(table);
-                            return SQLiteErrorCode.Ok;
-                        }
-                        else
-                        {
-                            pError = SQLiteString.Utf8IntPtrFromString(
-                                "no table was created");
-                        }
-                    }
-                    else
-                    {
-                        pError = SQLiteString.Utf8IntPtrFromString(error);
-                    }
-                }
-            }
-            catch (Exception e) /* NOTE: Must catch ALL. */
-            {
-                pError = SQLiteString.Utf8IntPtrFromString(e.ToString());
-            }
-
-            return SQLiteErrorCode.Error;
+            return CreateOrConnect(
+                false, pDb, pAux, argc, argv, ref pVtab, ref pError);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6608,49 +6696,7 @@ namespace System.Data.SQLite
             IntPtr pVtab
             )
         {
-            try
-            {
-                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
-
-                if (table != null)
-                {
-                    if (Disconnect(table) == SQLiteErrorCode.Ok)
-                    {
-                        if (tables != null)
-                            tables.Remove(pVtab);
-
-                        return SQLiteErrorCode.Ok;
-                    }
-                }
-            }
-            catch (Exception e) /* NOTE: Must catch ALL. */
-            {
-                //
-                // NOTE: At this point, there is no way to report the error
-                //       condition back to the caller; therefore, use the
-                //       logging facility instead.
-                //
-                try
-                {
-                    if (LogExceptions)
-                    {
-                        SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
-                            String.Format(CultureInfo.CurrentCulture,
-                            "Caught exception in \"xDisconnect\" method: {0}",
-                            e)); /* throw */
-                    }
-                }
-                catch
-                {
-                    // do nothing.
-                }
-            }
-            finally
-            {
-                FreeTable(pVtab);
-            }
-
-            return SQLiteErrorCode.Error;
+            return DestroyOrDisconnect(false, pVtab);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6668,49 +6714,7 @@ namespace System.Data.SQLite
             IntPtr pVtab
             )
         {
-            try
-            {
-                SQLiteVirtualTable table = TableFromIntPtr(pVtab);
-
-                if (table != null)
-                {
-                    if (Destroy(table) == SQLiteErrorCode.Ok)
-                    {
-                        if (tables != null)
-                            tables.Remove(pVtab);
-
-                        return SQLiteErrorCode.Ok;
-                    }
-                }
-            }
-            catch (Exception e) /* NOTE: Must catch ALL. */
-            {
-                //
-                // NOTE: At this point, there is no way to report the error
-                //       condition back to the caller; therefore, use the
-                //       logging facility instead.
-                //
-                try
-                {
-                    if (LogExceptions)
-                    {
-                        SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
-                            String.Format(CultureInfo.CurrentCulture,
-                            "Caught exception in \"xDestroy\" method: {0}",
-                            e)); /* throw */
-                    }
-                }
-                catch
-                {
-                    // do nothing.
-                }
-            }
-            finally
-            {
-                FreeTable(pVtab);
-            }
-
-            return SQLiteErrorCode.Error;
+            return DestroyOrDisconnect(true, pVtab);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6948,7 +6952,7 @@ namespace System.Data.SQLite
                 SetTableError(pVtab, e.ToString());
             }
 
-            return 1;
+            return 1; /* NOTE: On any error, return "no more rows". */
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -7267,7 +7271,7 @@ namespace System.Data.SQLite
                 SetTableError(pVtab, e.ToString());
             }
 
-            return 0;
+            return 0; /* NOTE: On any error, return "no such function". */
         }
 
         ///////////////////////////////////////////////////////////////////////
