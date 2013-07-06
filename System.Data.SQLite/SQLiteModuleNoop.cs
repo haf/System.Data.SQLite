@@ -10,7 +10,16 @@ using System.Collections.Generic;
 namespace System.Data.SQLite
 {
     /// <summary>
-    /// This class implements a virtual table module that does nothing.
+    /// This class implements a virtual table module that does nothing by
+    /// providing "empty" implementations for all of the
+    /// <see cref="ISQLiteManagedModule" /> interface methods.  The result
+    /// codes returned by these "empty" method implementations may be
+    /// controlled on a per-method basis by using and/or overriding the
+    /// <see cref="GetDefaultResultCode" />,
+    /// <see cref="ResultCodeToEofResult" />,
+    /// <see cref="ResultCodeToFindFunctionResult" />,
+    /// <see cref="GetMethodResultCode" />, and
+    /// <see cref="SetMethodResultCode" /> methods from within derived classes.
     /// </summary>
     public class SQLiteModuleNoop : SQLiteModule /* NOT SEALED */
     {
