@@ -3,7 +3,7 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.87.0 - June XX, 2013 <font color="red">(release scheduled)</font></b>
+    <b>1.0.87.0 - July 8, 2013</b>
 </p>
 <ul>
     <li>Add all the necessary infrastructure to allow virtual tables to be implemented in managed code. Fix for [9a544991be].</li>
