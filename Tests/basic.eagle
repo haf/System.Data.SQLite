@@ -2493,6 +2493,46 @@ no such function: MyRandom.*\}$}]}
 
 ###############################################################################
 
+runTest {test data-1.51 {SQLiteConvert TypeNameToDbType} -setup {
+  unset -nocomplain result typeName
+} -body {
+  foreach typeName [list \
+      BIGINT BIGUINT BINARY BIT BLOB BOOL BOOLEAN CHAR CLOB COUNTER CURRENCY \
+      DATE DATETIME DECIMAL DOUBLE FLOAT GENERAL GUID IDENTITY IMAGE INT INT8 \
+      INT16 INT32 INT64 INTEGER INTEGER8 INTEGER16 INTEGER32 INTEGER64 \
+      LOGICAL LONG LONGCHAR LONGTEXT LONGVARCHAR MEMO MONEY NCHAR NOTE NTEXT \
+      NUMBER NUMERIC NVARCHAR OLEOBJECT RAW REAL SINGLE SMALLDATE SMALLINT \
+      SMALLUINT STRING TEXT TIME TIMESTAMP TINYINT TINYSINT UINT UINT8 UINT16 \
+      UINT32 UINT64 ULONG UNIQUEIDENTIFIER UNSIGNEDINTEGER UNSIGNEDINTEGER8 \
+      UNSIGNEDINTEGER16 UNSIGNEDINTEGER32 UNSIGNEDINTEGER64 VARBINARY VARCHAR \
+      VARCHAR2 YESNO] {
+    lappend result [list $typeName [object invoke -flags +NonPublic \
+        System.Data.SQLite.SQLiteConvert TypeNameToDbType $typeName]]
+  }
+  set result
+} -cleanup {
+  unset -nocomplain result typeName
+} -constraints {eagle System.Data.SQLite} -result {{BIGINT Int64} {BIGUINT\
+UInt64} {BINARY Binary} {BIT Boolean} {BLOB Binary} {BOOL Boolean} {BOOLEAN\
+Boolean} {CHAR AnsiStringFixedLength} {CLOB String} {COUNTER Int64} {CURRENCY\
+Decimal} {DATE DateTime} {DATETIME DateTime} {DECIMAL Decimal} {DOUBLE Double}\
+{FLOAT Double} {GENERAL Binary} {GUID Guid} {IDENTITY Int64} {IMAGE Binary}\
+{INT Int32} {INT8 SByte} {INT16 Int16} {INT32 Int32} {INT64 Int64} {INTEGER\
+Int64} {INTEGER8 SByte} {INTEGER16 Int16} {INTEGER32 Int32} {INTEGER64 Int64}\
+{LOGICAL Boolean} {LONG Int64} {LONGCHAR String} {LONGTEXT String} {LONGVARCHAR\
+String} {MEMO String} {MONEY Decimal} {NCHAR StringFixedLength} {NOTE String}\
+{NTEXT String} {NUMBER Decimal} {NUMERIC Decimal} {NVARCHAR String} {OLEOBJECT\
+Binary} {RAW Binary} {REAL Double} {SINGLE Single} {SMALLDATE DateTime}\
+{SMALLINT Int16} {SMALLUINT UInt16} {STRING String} {TEXT String} {TIME\
+DateTime} {TIMESTAMP DateTime} {TINYINT Byte} {TINYSINT SByte} {UINT UInt32}\
+{UINT8 Byte} {UINT16 UInt16} {UINT32 UInt32} {UINT64 UInt64} {ULONG UInt64}\
+{UNIQUEIDENTIFIER Guid} {UNSIGNEDINTEGER UInt64} {UNSIGNEDINTEGER8 Byte}\
+{UNSIGNEDINTEGER16 UInt16} {UNSIGNEDINTEGER32 UInt32} {UNSIGNEDINTEGER64\
+UInt64} {VARBINARY Binary} {VARCHAR AnsiString} {VARCHAR2 AnsiString} {YESNO\
+Boolean}}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 

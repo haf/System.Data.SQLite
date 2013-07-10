@@ -20,7 +20,9 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test tkt-47f4bac575-1.1 {SQLiteConvert DbTypeToTypeName} -body {
+runTest {test tkt-47f4bac575-1.1 {SQLiteConvert DbTypeToTypeName} -setup {
+  unset -nocomplain result dbType
+} -body {
   foreach dbType [list \
       AnsiString Binary Byte Boolean Currency Date DateTime Decimal \
       Double Guid Int16 Int32 Int64 Object SByte Single String Time \
