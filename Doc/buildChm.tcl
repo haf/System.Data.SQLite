@@ -125,19 +125,19 @@ set patterns(.html,2) {System.Collections.Generic.IEnumerable`1}
 set patterns(.html,3) {System.Collections.Generic.IEnumerator`1}
 
 set patterns(.html,4) \
-    {"System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteFunction\.Dispose\.html"}
+    {"(System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteFunction\.Dispose)\.html"}
 
 set patterns(.html,5) \
-    {"System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteModule\.SetEstimatedCost\.html"}
+    {"(System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteModule\.SetEstimatedCost)\.html"}
 
 set patterns(.html,6) \
-    {"System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteModule\.SetTableError\.html"}
+    {"(System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteModule\.SetTableError)\.html"}
 
 set patterns(.html,7) \
-    {"System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteModule\.Dispose\.html"}
+    {"(System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteModule\.Dispose)\.html"}
 
 set patterns(.html,8) \
-    {"System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteVirtualTableCursor\.Dispose\.html"}
+    {"(System\.Data\.SQLite~System\.Data\.SQLite\.SQLiteVirtualTableCursor\.Dispose)\.html"}
 
 set subSpecs(.hhc,1) [readFileAsSubSpec [file join $path SQLite.NET.hhc]]
 
@@ -147,21 +147,11 @@ set subSpecs(.hhp,2) {"welcome.html","welcome.html",,,,,}
 set subSpecs(.html,1) {"System.Data.SQLite~\1.html"}
 set subSpecs(.html,2) {9eekhta0}
 set subSpecs(.html,3) {78dfe2yb}
-
-set subSpecs(.html,4) \
-    {"System.Data.SQLite~System.Data.SQLite.SQLiteFunction.Dispose~Overloads.html"}
-
-set subSpecs(.html,5) \
-    {"System.Data.SQLite~System.Data.SQLite.SQLiteModule.SetEstimatedCost~Overloads.html"}
-
-set subSpecs(.html,6) \
-    {"System.Data.SQLite~System.Data.SQLite.SQLiteModule.SetTableError~Overloads.html"}
-
-set subSpecs(.html,7) \
-    {"System.Data.SQLite~System.Data.SQLite.SQLiteModule.Dispose~Overloads.html"}
-
-set subSpecs(.html,8) \
-    {"System.Data.SQLite~System.Data.SQLite.SQLiteVirtualTableCursor.Dispose~Overloads.html"}
+set subSpecs(.html,4) {"\1~Overloads.html"}
+set subSpecs(.html,5) {"\1~Overloads.html"}
+set subSpecs(.html,6) {"\1~Overloads.html"}
+set subSpecs(.html,7) {"\1~Overloads.html"}
+set subSpecs(.html,8) {"\1~Overloads.html"}
 
 foreach fileName $fileNames {
   set fileName [file join $path $outputPath $fileName]
@@ -197,7 +187,11 @@ foreach fileName $fileNames {
     if {$patternCount > 0} then {
       incr count $patternCount
     } else {
-      puts stdout "*WARNING* File \"$fileName\" does not match: $pattern"
+      #
+      # NOTE: This will emit multiple warnings for each file, making things
+      #       a bit too noisy (by default).
+      #
+      # puts stdout "*WARNING* File \"$fileName\" does not match: $pattern"
     }
   }
 
