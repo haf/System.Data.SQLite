@@ -6320,11 +6320,13 @@ namespace System.Data.SQLite
         /// </summary>
         /// <param name="connection">
         /// The <see cref="SQLiteConnection" /> object instance to use when
-        /// declaring the schema of the virtual table.
+        /// declaring the schema of the virtual table.  This parameter may not
+        /// be null.
         /// </param>
         /// <param name="sql">
         /// The string containing the CREATE TABLE statement that completely
-        /// describes the schema for the virtual table.
+        /// describes the schema for the virtual table.  This parameter may not
+        /// be null.
         /// </param>
         /// <param name="error">
         /// Upon failure, this parameter must be modified to contain an error
@@ -6350,6 +6352,12 @@ namespace System.Data.SQLite
             if (sqliteBase == null)
             {
                 error = "connection has invalid handle";
+                return SQLiteErrorCode.Error;
+            }
+
+            if (sql == null)
+            {
+                error = "invalid SQL statement";
                 return SQLiteErrorCode.Error;
             }
 

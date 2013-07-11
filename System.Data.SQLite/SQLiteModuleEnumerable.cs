@@ -341,6 +341,22 @@ namespace System.Data.SQLite
 
         #region Protected Methods
         /// <summary>
+        /// Determines the SQL statement used to declare the virtual table.
+        /// This method should be overridden in derived classes if they require
+        /// a custom virtual table schema.
+        /// </summary>
+        /// <returns>
+        /// The SQL statement used to declare the virtual table -OR- null if it
+        /// cannot be determined.
+        /// </returns>
+        protected virtual string GetSqlForDeclareTable()
+        {
+            return declareSql;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
         /// Sets the table error message to one that indicates the virtual
         /// table cursor is of the wrong type.
         /// </summary>
@@ -461,7 +477,7 @@ namespace System.Data.SQLite
             CheckDisposed();
 
             if (DeclareTable(
-                    connection, declareSql,
+                    connection, GetSqlForDeclareTable(),
                     ref error) == SQLiteErrorCode.Ok)
             {
                 table = new SQLiteVirtualTable(arguments);
@@ -505,7 +521,7 @@ namespace System.Data.SQLite
             CheckDisposed();
 
             if (DeclareTable(
-                    connection, declareSql,
+                    connection, GetSqlForDeclareTable(),
                     ref error) == SQLiteErrorCode.Ok)
             {
                 table = new SQLiteVirtualTable(arguments);
