@@ -1607,7 +1607,7 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
-    internal static extern void sqlite3_dispose_module(ref sqlite3_module pModule);
+    internal static extern void sqlite3_dispose_module(IntPtr pModule);
 #endif
     #endregion
 
@@ -1661,9 +1661,6 @@ namespace System.Data.SQLite
         xFindFunction xFindFunction, xRename xRename, xSavepoint xSavepoint,
         xRelease xRelease, xRollbackTo xRollbackTo, IntPtr pClientData,
         xDestroyModule xDestroyModule);
-
-    [DllImport(SQLITE_DLL)]
-    internal static extern void sqlite3_dispose_module_interop(IntPtr pModule);
 #endif
     // PLATFORM_COMPACTFRAMEWORK && !SQLITE_STANDARD
     #endregion

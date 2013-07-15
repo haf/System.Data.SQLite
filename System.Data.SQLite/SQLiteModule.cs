@@ -1104,7 +1104,7 @@ namespace System.Data.SQLite
 
             int nConstraint = SQLiteMarshal.ReadInt32(pIndex, offset);
 
-            offset += sizeof(int);
+            offset += SQLiteMarshal.SizeOfStructInt();
 
             IntPtr pConstraint = SQLiteMarshal.ReadIntPtr(pIndex, offset);
 
@@ -1112,38 +1112,43 @@ namespace System.Data.SQLite
 
             int nOrderBy = SQLiteMarshal.ReadInt32(pIndex, offset);
 
-            offset += sizeof(int);
+            offset += SQLiteMarshal.SizeOfStructInt();
 
             IntPtr pOrderBy = SQLiteMarshal.ReadIntPtr(pIndex, offset);
 
             index = new SQLiteIndex(nConstraint, nOrderBy);
 
-            int sizeOfConstraintType = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_index_constraint));
+            Type indexConstraintType = typeof(
+                UnsafeNativeMethods.sqlite3_index_constraint);
+
+            int sizeOfConstraintType = Marshal.SizeOf(indexConstraintType);
 
             for (int iConstraint = 0; iConstraint < nConstraint; iConstraint++)
             {
-                UnsafeNativeMethods.sqlite3_index_constraint constraint =
-                    new UnsafeNativeMethods.sqlite3_index_constraint();
+                IntPtr pOffset = SQLiteMarshal.IntPtrForOffset(
+                    pConstraint, iConstraint * sizeOfConstraintType);
 
-                Marshal.PtrToStructure(SQLiteMarshal.IntPtrForOffset(
-                    pConstraint, iConstraint * sizeOfConstraintType),
-                    constraint);
+                UnsafeNativeMethods.sqlite3_index_constraint constraint =
+                    (UnsafeNativeMethods.sqlite3_index_constraint)
+                        Marshal.PtrToStructure(pOffset, indexConstraintType);
 
                 index.Inputs.Constraints[iConstraint] =
                     new SQLiteIndexConstraint(constraint);
             }
 
-            int sizeOfOrderByType = Marshal.SizeOf(typeof(
-                UnsafeNativeMethods.sqlite3_index_orderby));
+            Type indexOrderByType = typeof(
+                UnsafeNativeMethods.sqlite3_index_orderby);
+
+            int sizeOfOrderByType = Marshal.SizeOf(indexOrderByType);
 
             for (int iOrderBy = 0; iOrderBy < nOrderBy; iOrderBy++)
             {
-                UnsafeNativeMethods.sqlite3_index_orderby orderBy =
-                    new UnsafeNativeMethods.sqlite3_index_orderby();
+                IntPtr pOffset = SQLiteMarshal.IntPtrForOffset(
+                    pOrderBy, iOrderBy * sizeOfOrderByType);
 
-                Marshal.PtrToStructure(SQLiteMarshal.IntPtrForOffset(
-                    pOrderBy, iOrderBy * sizeOfOrderByType), orderBy);
+                UnsafeNativeMethods.sqlite3_index_orderby orderBy =
+                    (UnsafeNativeMethods.sqlite3_index_orderby)
+                        Marshal.PtrToStructure(pOffset, indexOrderByType);
 
                 index.Inputs.OrderBys[iOrderBy] =
                     new SQLiteIndexOrderBy(orderBy);
@@ -1191,7 +1196,8 @@ namespace System.Data.SQLite
             if (nConstraint != index.Outputs.ConstraintUsages.Length)
                 return;
 
-            offset += sizeof(int) + IntPtr.Size + sizeof(int) + IntPtr.Size;
+            offset += SQLiteMarshal.SizeOfStructInt() + IntPtr.Size +
+                SQLiteMarshal.SizeOfStructInt() + IntPtr.Size;
 
             IntPtr pConstraintUsage = SQLiteMarshal.ReadIntPtr(pIndex, offset);
 
@@ -1208,9 +1214,6 @@ namespace System.Data.SQLite
                     constraintUsage, SQLiteMarshal.IntPtrForOffset(
                     pConstraintUsage, iConstraint * sizeOfConstraintUsageType),
                     false);
-
-                index.Outputs.ConstraintUsages[iConstraint] =
-                    new SQLiteIndexConstraintUsage(constraintUsage);
             }
 
             offset += IntPtr.Size;
@@ -1218,7 +1221,7 @@ namespace System.Data.SQLite
             SQLiteMarshal.WriteInt32(pIndex, offset,
                 index.Outputs.IndexNumber);
 
-            offset += sizeof(int);
+            offset += SQLiteMarshal.SizeOfStructInt();
 
             SQLiteMarshal.WriteIntPtr(pIndex, offset,
                 SQLiteString.Utf8IntPtrFromString(index.Outputs.IndexString));
@@ -1231,12 +1234,12 @@ namespace System.Data.SQLite
             //
             SQLiteMarshal.WriteInt32(pIndex, offset, 1);
 
-            offset += sizeof(int);
+            offset += SQLiteMarshal.SizeOfStructInt();
 
             SQLiteMarshal.WriteInt32(pIndex, offset,
                 index.Outputs.OrderByConsumed);
 
-            offset += sizeof(int);
+            offset += SQLiteMarshal.SizeOfStructInt();
 
             SQLiteMarshal.WriteDouble(pIndex, offset,
                 index.Outputs.EstimatedCost);
@@ -4107,6 +4110,21 @@ namespace System.Data.SQLite
         {
             return new IntPtr(pointer.ToInt64() + offset);
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Determines the size of a <see cref="Int32" /> when it resides
+        /// inside of a native structure.
+        /// </summary>
+        /// <returns>
+        /// The size of the <see cref="Int32" /> type, in bytes, when it
+        /// resides inside a native structure.
+        /// </returns>
+        public static int SizeOfStructInt()
+        {
+            return IntPtr.Size;
+        }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -5166,6 +5184,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// This field is used to store a pointer to the native sqlite3_module
+        /// structure returned by the sqlite3_create_disposable_module
+        /// function.
+        /// </summary>
+        private IntPtr disposableModule;
+
+        ///////////////////////////////////////////////////////////////////////
+
 #if PLATFORM_COMPACTFRAMEWORK
         /// <summary>
         /// This field is used to hold the block of native memory that contains
@@ -5230,6 +5257,76 @@ namespace System.Data.SQLite
 
         #region Internal Methods
         /// <summary>
+        /// Calls the native SQLite core library in order to create a new
+        /// disposable module containing the implementation of a virtual table.
+        /// </summary>
+        /// <param name="pDb">
+        /// The native database connection pointer to use.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        internal bool CreateDisposableModule(
+            IntPtr pDb
+            )
+        {
+            if (disposableModule != IntPtr.Zero)
+                return true;
+
+            IntPtr pName = IntPtr.Zero;
+
+            try
+            {
+                pName = SQLiteString.Utf8IntPtrFromString(name);
+
+                UnsafeNativeMethods.sqlite3_module nativeModule =
+                    AllocateNativeModule();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+                disposableModule =
+                    UnsafeNativeMethods.sqlite3_create_disposable_module(
+                        pDb, pName, ref nativeModule, IntPtr.Zero, null);
+
+                return (disposableModule != IntPtr.Zero);
+#elif !SQLITE_STANDARD
+
+
+                disposableModule =
+                    UnsafeNativeMethods.sqlite3_create_disposable_module_interop(
+                       pDb, pName, AllocateNativeModuleInterop(),
+                       nativeModule.iVersion, nativeModule.xCreate,
+                       nativeModule.xConnect, nativeModule.xBestIndex,
+                       nativeModule.xDisconnect, nativeModule.xDestroy,
+                       nativeModule.xOpen, nativeModule.xClose,
+                       nativeModule.xFilter, nativeModule.xNext,
+                       nativeModule.xEof, nativeModule.xColumn,
+                       nativeModule.xRowId, nativeModule.xUpdate,
+                       nativeModule.xBegin, nativeModule.xSync,
+                       nativeModule.xCommit, nativeModule.xRollback,
+                       nativeModule.xFindFunction, nativeModule.xRename,
+                       nativeModule.xSavepoint, nativeModule.xRelease,
+                       nativeModule.xRollbackTo, IntPtr.Zero, null);
+
+                return (disposableModule != IntPtr.Zero);
+#else
+                throw new NotImplementedException();
+#endif
+            }
+            finally
+            {
+                if (pName != IntPtr.Zero)
+                {
+                    SQLiteMemory.Free(pName);
+                    pName = IntPtr.Zero;
+                }
+            }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Private Methods
+        /// <summary>
         /// Creates and returns the native sqlite_module structure using the
         /// configured (or default) <see cref="ISQLiteNativeModule" />
         /// interface implementation.
@@ -5239,9 +5336,9 @@ namespace System.Data.SQLite
         /// default) <see cref="ISQLiteNativeModule" /> interface
         /// implementation.
         /// </returns>
-        internal UnsafeNativeMethods.sqlite3_module CreateNativeModule()
+        private UnsafeNativeMethods.sqlite3_module AllocateNativeModule()
         {
-            return CreateNativeModule(GetNativeModuleImpl());
+            return AllocateNativeModule(GetNativeModuleImpl());
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -5255,7 +5352,7 @@ namespace System.Data.SQLite
         /// <returns>
         /// The native pointer to the native sqlite3_module structure.
         /// </returns>
-        internal IntPtr CreateNativeModuleInterop()
+        private IntPtr AllocateNativeModuleInterop()
         {
             if (pNativeModule == IntPtr.Zero)
             {
@@ -5269,7 +5366,7 @@ namespace System.Data.SQLite
                 //       There are 22 function pointer members.
                 //
                 pNativeModule = SQLiteMemory.Allocate(
-                    sizeof(int) + (22 * IntPtr.Size));
+                    SQLiteMarshal.SizeOfStructInt() + (22 * IntPtr.Size));
 
                 if (pNativeModule == IntPtr.Zero)
                     throw new OutOfMemoryException("sqlite3_module");
@@ -5278,11 +5375,9 @@ namespace System.Data.SQLite
             return pNativeModule;
         }
 #endif
-        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Private Methods
         /// <summary>
         /// Creates and returns the native sqlite_module structure using the
         /// specified <see cref="ISQLiteNativeModule" /> interface
@@ -5296,7 +5391,7 @@ namespace System.Data.SQLite
         /// The native sqlite_module structure using the specified
         /// <see cref="ISQLiteNativeModule" /> interface implementation.
         /// </returns>
-        private UnsafeNativeMethods.sqlite3_module CreateNativeModule(
+        private UnsafeNativeMethods.sqlite3_module AllocateNativeModule(
             ISQLiteNativeModule module
             )
         {
@@ -5666,7 +5761,7 @@ namespace System.Data.SQLite
                 //
                 try
                 {
-                    if (LogExceptions)
+                    if (LogExceptionsNoThrow)
                     {
                         /* throw */
                         SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
@@ -5736,7 +5831,7 @@ namespace System.Data.SQLite
             if (pVtab == IntPtr.Zero)
                 return false;
 
-            int offset = IntPtr.Size + sizeof(int);
+            int offset = IntPtr.Size + SQLiteMarshal.SizeOfStructInt();
             IntPtr pError = SQLiteMarshal.ReadIntPtr(pVtab, offset);
 
             if (pError != IntPtr.Zero)
@@ -5981,7 +6076,7 @@ namespace System.Data.SQLite
 
             SQLiteMarshal.WriteInt32(pVtab, offset, 0);
 
-            offset += sizeof(int);
+            offset += SQLiteMarshal.SizeOfStructInt();
 
             SQLiteMarshal.WriteIntPtr(pVtab, offset, IntPtr.Zero);
         }
@@ -6420,6 +6515,38 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Error Handling Properties
+        private bool logErrors;
+        /// <summary>
+        /// Returns or sets a boolean value indicating whether virtual table
+        /// errors should be logged using the <see cref="SQLiteLog" /> class.
+        /// </summary>
+        protected virtual bool LogErrorsNoThrow
+        {
+            get { return logErrors; }
+            set { logErrors = value; }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private bool logExceptions;
+        /// <summary>
+        /// Returns or sets a boolean value indicating whether exceptions
+        /// caught in the
+        /// <see cref="ISQLiteNativeModule.xDisconnect" /> method,
+        /// <see cref="ISQLiteNativeModule.xDestroy" /> method, and the
+        /// <see cref="Dispose()" /> method should be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </summary>
+        protected virtual bool LogExceptionsNoThrow
+        {
+            get { return logExceptions; }
+            set { logExceptions = value; }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Error Handling Helper Methods
         /// <summary>
         /// Arranges for the specified error message to be placed into the
@@ -6440,7 +6567,7 @@ namespace System.Data.SQLite
             string error
             )
         {
-            return SetTableError(this, pVtab, LogErrors, error);
+            return SetTableError(this, pVtab, LogErrorsNoThrow, error);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6465,7 +6592,7 @@ namespace System.Data.SQLite
             string error
             )
         {
-            return SetTableError(this, table, LogErrors, error);
+            return SetTableError(this, table, LogErrorsNoThrow, error);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6490,7 +6617,7 @@ namespace System.Data.SQLite
             string error
             )
         {
-            return SetCursorError(this, cursor, LogErrors, error);
+            return SetCursorError(this, cursor, LogErrorsNoThrow, error);
         }
         #endregion
 
@@ -6546,20 +6673,18 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Public Properties
-        private bool logErrors;
         /// <summary>
         /// Returns or sets a boolean value indicating whether virtual table
         /// errors should be logged using the <see cref="SQLiteLog" /> class.
         /// </summary>
         public virtual bool LogErrors
         {
-            get { CheckDisposed(); return logErrors; }
-            set { CheckDisposed(); logErrors = value; }
+            get { CheckDisposed(); return LogErrorsNoThrow; }
+            set { CheckDisposed(); LogErrorsNoThrow = value; }
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        private bool logExceptions;
         /// <summary>
         /// Returns or sets a boolean value indicating whether exceptions
         /// caught in the
@@ -6570,8 +6695,8 @@ namespace System.Data.SQLite
         /// </summary>
         public virtual bool LogExceptions
         {
-            get { CheckDisposed(); return logExceptions; }
-            set { CheckDisposed(); logExceptions = value; }
+            get { CheckDisposed(); return LogExceptionsNoThrow; }
+            set { CheckDisposed(); LogExceptionsNoThrow = value; }
         }
         #endregion
 
@@ -8034,31 +8159,14 @@ namespace System.Data.SQLite
 
                 try
                 {
-#if !PLATFORM_COMPACTFRAMEWORK
-                    UnsafeNativeMethods.sqlite3_dispose_module(
-                        ref nativeModule);
-#elif !SQLITE_STANDARD
-                    if (pNativeModule != IntPtr.Zero)
-                    {
-                        try
-                        {
-                            UnsafeNativeMethods.sqlite3_dispose_module_interop(
-                                pNativeModule);
-                        }
-                        finally
-                        {
-                            SQLiteMemory.Free(pNativeModule);
-                        }
-                    }
-#else
-                    throw new NotImplementedException();
-#endif
+                    UnsafeNativeMethods.sqlite3_dispose_module(disposableModule);
+                    disposableModule = IntPtr.Zero;
                 }
                 catch (Exception e)
                 {
                     try
                     {
-                        if (LogExceptions)
+                        if (LogExceptionsNoThrow)
                         {
                             SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
                                 String.Format(CultureInfo.CurrentCulture,
@@ -8071,6 +8179,16 @@ namespace System.Data.SQLite
                         // do nothing.
                     }
                 }
+#if PLATFORM_COMPACTFRAMEWORK
+                finally
+                {
+                    if (pNativeModule == IntPtr.Zero)
+                    {
+                        SQLiteMemory.Free(pNativeModule);
+                        pNativeModule = IntPtr.Zero;
+                    }
+                }
+#endif
 
                 disposed = true;
             }

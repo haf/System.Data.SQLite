@@ -161,24 +161,7 @@ namespace System.Data.SQLite
                 //////////////////////////////////////
 
 #if INTEROP_VIRTUAL_TABLE
-                //
-                // NOTE: If any modules were created, attempt to dispose of
-                //       them now.  This code is designed to avoid throwing
-                //       exceptions unless the Dispose method of the module
-                //       itself throws an exception.
-                //
-                if (_modules != null)
-                {
-                    foreach (KeyValuePair<string, SQLiteModule> pair in _modules)
-                    {
-                        SQLiteModule module = pair.Value;
-
-                        if (module == null)
-                            continue;
-
-                        module.Dispose();
-                    }
-                }
+                DisposeModules();
 #endif
 
                 Close(false); /* Disposing, cannot throw. */
@@ -192,6 +175,36 @@ namespace System.Data.SQLite
         }
     }
     #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+#if INTEROP_VIRTUAL_TABLE
+    /// <summary>
+    /// This method attempts to dispose of all the <see cref="SQLiteModule" /> derived
+    /// object instances currently associated with the native database connection.
+    /// </summary>
+    private void DisposeModules()
+    {
+        //
+        // NOTE: If any modules were created, attempt to dispose of
+        //       them now.  This code is designed to avoid throwing
+        //       exceptions unless the Dispose method of the module
+        //       itself throws an exception.
+        //
+        if (_modules != null)
+        {
+            foreach (KeyValuePair<string, SQLiteModule> pair in _modules)
+            {
+                SQLiteModule module = pair.Value;
+
+                if (module == null)
+                    continue;
+
+                module.Dispose();
+            }
+        }
+    }
+#endif
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -213,6 +226,10 @@ namespace System.Data.SQLite
           {
               if (SQLiteBase.ResetConnection(_sql, _sql, canThrow))
               {
+#if INTEROP_VIRTUAL_TABLE
+                  DisposeModules();
+#endif
+
                   SQLiteConnectionPool.Add(_fileName, _sql, _poolVersion);
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
@@ -1711,57 +1728,16 @@ namespace System.Data.SQLite
         SetLoadExtension(true);
         LoadExtension(UnsafeNativeMethods.SQLITE_DLL, "sqlite3_vtshim_init");
 
-        IntPtr pName = IntPtr.Zero;
-
-        try
+        if (module.CreateDisposableModule(_sql))
         {
-            pName = SQLiteString.Utf8IntPtrFromString(module.Name);
+            if (_modules == null)
+                _modules = new Dictionary<string, SQLiteModule>();
 
-            UnsafeNativeMethods.sqlite3_module nativeModule =
-                module.CreateNativeModule();
-
-#if !PLATFORM_COMPACTFRAMEWORK
-            if (UnsafeNativeMethods.sqlite3_create_disposable_module(
-                    _sql, pName, ref nativeModule, IntPtr.Zero,
-                    null) != IntPtr.Zero)
-#elif !SQLITE_STANDARD
-            if (UnsafeNativeMethods.sqlite3_create_disposable_module_interop(
-                    _sql, pName, module.CreateNativeModuleInterop(),
-                    nativeModule.iVersion, nativeModule.xCreate,
-                    nativeModule.xConnect, nativeModule.xBestIndex,
-                    nativeModule.xDisconnect, nativeModule.xDestroy,
-                    nativeModule.xOpen, nativeModule.xClose,
-                    nativeModule.xFilter, nativeModule.xNext,
-                    nativeModule.xEof, nativeModule.xColumn,
-                    nativeModule.xRowId, nativeModule.xUpdate,
-                    nativeModule.xBegin, nativeModule.xSync,
-                    nativeModule.xCommit, nativeModule.xRollback,
-                    nativeModule.xFindFunction, nativeModule.xRename,
-                    nativeModule.xSavepoint, nativeModule.xRelease,
-                    nativeModule.xRollbackTo, IntPtr.Zero, null) != IntPtr.Zero)
-#else
-            throw new NotImplementedException();
-#endif
-#if !PLATFORM_COMPACTFRAMEWORK || !SQLITE_STANDARD
-            {
-                if (_modules == null)
-                    _modules = new Dictionary<string, SQLiteModule>();
-
-                _modules.Add(module.Name, module);
-            }
-            else
-            {
-                throw new SQLiteException(GetLastError());
-            }
-#endif
+            _modules.Add(module.Name, module);
         }
-        finally
+        else
         {
-            if (pName != IntPtr.Zero)
-            {
-                SQLiteMemory.Free(pName);
-                pName = IntPtr.Zero;
-            }
+            throw new SQLiteException(GetLastError());
         }
     }
 

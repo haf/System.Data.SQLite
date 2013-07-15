@@ -391,11 +391,6 @@ SQLITE_API void *WINAPI sqlite3_create_disposable_module_interop(
   pModule->xRollbackTo = xRollbackTo;
   return sqlite3_create_disposable_module(db, zName, pModule, pClientData, xDestroyModule);
 }
-
-SQLITE_API void WINAPI sqlite3_dispose_module_interop(void *pModule)
-{
-  sqlite3_dispose_module(pModule);
-}
 #endif
 
 SQLITE_API int WINAPI sqlite3_bind_double_interop(sqlite3_stmt *stmt, int iCol, double *val)
