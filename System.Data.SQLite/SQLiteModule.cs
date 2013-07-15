@@ -1241,6 +1241,9 @@ namespace System.Data.SQLite
 
             offset += SQLiteMarshal.SizeOfStructInt();
 
+            if (offset % sizeof(double) != 0)
+                offset += SQLiteMarshal.SizeOfStructInt();
+
             SQLiteMarshal.WriteDouble(pIndex, offset,
                 index.Outputs.EstimatedCost);
         }
