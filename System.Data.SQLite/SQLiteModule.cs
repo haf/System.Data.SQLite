@@ -8185,7 +8185,7 @@ namespace System.Data.SQLite
 #if PLATFORM_COMPACTFRAMEWORK
                 finally
                 {
-                    if (pNativeModule == IntPtr.Zero)
+                    if (pNativeModule != IntPtr.Zero)
                     {
                         SQLiteMemory.Free(pNativeModule);
                         pNativeModule = IntPtr.Zero;
