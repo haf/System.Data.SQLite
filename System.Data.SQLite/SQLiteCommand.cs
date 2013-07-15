@@ -186,6 +186,8 @@ namespace System.Data.SQLite
     /// <param name="disposing">Whether or not the class is being explicitly or implicitly disposed</param>
     protected override void Dispose(bool disposing)
     {
+        bool skippedDispose = false;
+
         try
         {
             if (!disposed)
@@ -213,6 +215,7 @@ namespace System.Data.SQLite
                     {
                         reader._disposeCommand = true;
                         _activeReader = null;
+                        skippedDispose = true;
                         return;
                     }
 
@@ -228,12 +231,15 @@ namespace System.Data.SQLite
         }
         finally
         {
-            base.Dispose(disposing);
+            if (!skippedDispose)
+            {
+                base.Dispose(disposing);
 
-            //
-            // NOTE: Everything should be fully disposed at this point.
-            //
-            disposed = true;
+                //
+                // NOTE: Everything should be fully disposed at this point.
+                //
+                disposed = true;
+            }
         }
     }
     #endregion
