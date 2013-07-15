@@ -387,7 +387,53 @@ namespace System.Data.SQLite
           //
           // BUGBUG: Will this always be reliable?
           //
-          return Environment.GetEnvironmentVariable(PROCESSOR_ARCHITECTURE);
+          processorArchitecture = Environment.GetEnvironmentVariable(
+              PROCESSOR_ARCHITECTURE);
+
+          //
+          // HACK: Check for an "impossible" situation.  If the pointer size
+          //       is 32-bits, the processor architecture cannot be "AMD64".
+          //       In that case, we are almost certainly hitting a bug in the
+          //       operating system and/or Visual Studio that causes the
+          //       PROCESSOR_ARCHITECTURE environment variable to contain the
+          //       wrong value in some circumstances.  Please refer to ticket
+          //       [9ac9862611] for further information.
+          //
+          if ((IntPtr.Size == sizeof(int)) &&
+              String.Equals(processorArchitecture, "AMD64",
+                  StringComparison.OrdinalIgnoreCase))
+          {
+#if !NET_COMPACT_20 && TRACE_PRELOAD
+              //
+              // NOTE: When tracing is enabled, save the originally detected
+              //       processor architecture before changing it.
+              //
+              string savedProcessorArchitecture = processorArchitecture;
+#endif
+
+              //
+              // NOTE: We know that operating systems that return "AMD64" as
+              //       the processor architecture are actually a superset of
+              //       the "x86" processor architecture; therefore, return
+              //       "x86" when the pointer size is 32-bits.
+              //
+              processorArchitecture = "x86";
+
+              //
+              // NOTE: Show that we hit a fairly unusual situation (i.e. the
+              //       "wrong" processor architecture was detected).
+              //
+#if !NET_COMPACT_20 && TRACE_PRELOAD
+              Trace.WriteLine(String.Format(
+                  CultureInfo.CurrentCulture,
+                  "Detected {0}-bit pointer size with processor architecture " +
+                  "\"{1}\", using processor architecture \"{2}\" instead...",
+                  IntPtr.Size * 8 /* bits */, savedProcessorArchitecture,
+                  processorArchitecture));
+#endif
+          }
+
+          return processorArchitecture;
 #else
           //
           // NOTE: On the .NET Compact Framework, attempt to use the native
