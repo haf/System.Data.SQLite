@@ -210,7 +210,7 @@ runTest {test vtab-1.2 {IEnumerable virtual table} -setup {
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
 defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
 [string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{one two three 4 5.0 Error \{SQL logic error or missing database
+\{\} 0 \{one two three 4 5\.0 Error \{SQL logic error or missing database
 virtual table "t\d+" is read-only\}\}$}]}
 
 ###############################################################################
@@ -1002,6 +1002,106 @@ runTest {test vtab-1.6 {virtual table rename support} -setup {
 defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
 [string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
 \{\} 0 \{\{\} t\d+ \{\} x\d+\}$}]}
+
+###############################################################################
+
+runTest {test vtab-1.7 {virtual table xBestIndex marshalling} -setup {
+  set fileName vtab-1.7.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql(1) { \
+    CREATE TABLE t${id}(y CHAR(10) NOT NULL PRIMARY KEY); \
+    CREATE VIRTUAL TABLE u${id} USING mod${id}; \
+  }
+
+  set sql(2) { \
+    INSERT INTO t${id} SELECT x FROM u${id}; \
+  }
+
+  set sql(3) { \
+    SELECT v${id}.y FROM t${id} v${id} LEFT OUTER JOIN \
+    u${id} ON u${id}.x = v${id}.y WHERE u${id}.x IS NOT NULL \
+    ORDER BY v${id}.y DESC; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+    using Eagle._Containers.Public;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static StringList GetList(params string\[\] strings)
+        {
+          StringList result = new StringList();
+
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            connection.CreateModule(new SQLiteModuleEnumerable(
+              "mod${id}", strings));
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(1)}]";
+              result.Add(command.ExecuteNonQuery().ToString());
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(2)}]";
+              result.Add(command.ExecuteNonQuery().ToString());
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(3)}]";
+
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                while (dataReader.Read())
+                  result.Add(dataReader\[0\].ToString());
+              }
+            }
+
+            connection.Close();
+          }
+
+          return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors [list System.Data.SQLite.dll Eagle.dll]]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetList one two three 4 5.0
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
+[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
+\{\} 0 \{0 5 two three one 5\.0 4\}$}]}
 
 ###############################################################################
 
