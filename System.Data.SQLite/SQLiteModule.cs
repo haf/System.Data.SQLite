@@ -5289,8 +5289,6 @@ namespace System.Data.SQLite
 
                 return (disposableModule != IntPtr.Zero);
 #elif !SQLITE_STANDARD
-
-
                 disposableModule =
                     UnsafeNativeMethods.sqlite3_create_disposable_module_interop(
                        pDb, pName, AllocateNativeModuleInterop(),
@@ -8159,8 +8157,13 @@ namespace System.Data.SQLite
 
                 try
                 {
-                    UnsafeNativeMethods.sqlite3_dispose_module(disposableModule);
-                    disposableModule = IntPtr.Zero;
+                    if (disposableModule != IntPtr.Zero)
+                    {
+                        UnsafeNativeMethods.sqlite3_dispose_module(
+                            disposableModule);
+
+                        disposableModule = IntPtr.Zero;
+                    }
                 }
                 catch (Exception e)
                 {

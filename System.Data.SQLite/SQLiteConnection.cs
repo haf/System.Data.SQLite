@@ -978,13 +978,16 @@ namespace System.Data.SQLite
                 //////////////////////////////////////
 
                 Close();
-
-                disposed = true;
             }
         }
         finally
         {
             base.Dispose(disposing);
+
+            //
+            // NOTE: Everything should be fully disposed at this point.
+            //
+            disposed = true;
         }
     }
     #endregion

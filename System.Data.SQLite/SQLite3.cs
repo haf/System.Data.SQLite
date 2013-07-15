@@ -165,13 +165,16 @@ namespace System.Data.SQLite
 #endif
 
                 Close(false); /* Disposing, cannot throw. */
-
-                disposed = true;
             }
         }
         finally
         {
             base.Dispose(disposing);
+
+            //
+            // NOTE: Everything should be fully disposed at this point.
+            //
+            disposed = true;
         }
     }
     #endregion

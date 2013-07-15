@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -66,13 +66,16 @@ namespace System.Data.SQLite
                 //////////////////////////////////////
                 // release unmanaged resources here...
                 //////////////////////////////////////
-
-                disposed = true;
             }
         }
         finally
         {
             base.Dispose(disposing);
+
+            //
+            // NOTE: Everything should be fully disposed at this point.
+            //
+            disposed = true;
         }
     }
     #endregion
@@ -379,7 +382,7 @@ namespace System.Data.SQLite
     private bool HasSchemaPrimaryKey(DataTable schema)
     {
       DataColumn IsKeyColumn = schema.Columns[SchemaTableColumn.IsKey];
-      
+
       foreach (DataRow schemaRow in schema.Rows)
       {
         if ((bool)schemaRow[IsKeyColumn] == true)

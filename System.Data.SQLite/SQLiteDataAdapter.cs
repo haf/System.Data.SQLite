@@ -179,13 +179,16 @@ namespace System.Data.SQLite
                 //////////////////////////////////////
                 // release unmanaged resources here...
                 //////////////////////////////////////
-
-                disposed = true;
             }
         }
         finally
         {
             base.Dispose(disposing);
+
+            //
+            // NOTE: Everything should be fully disposed at this point.
+            //
+            disposed = true;
         }
     }
     #endregion
