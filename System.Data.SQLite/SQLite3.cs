@@ -205,6 +205,8 @@ namespace System.Data.SQLite
 
                 module.Dispose();
             }
+
+            _modules.Clear();
         }
     }
 #endif
@@ -1737,6 +1739,15 @@ namespace System.Data.SQLite
                 _modules = new Dictionary<string, SQLiteModule>();
 
             _modules.Add(module.Name, module);
+
+            if (_usePool)
+            {
+                _usePool = false;
+
+#if !NET_COMPACT_20 && TRACE_CONNECTION
+                Trace.WriteLine(String.Format("CreateModule (Pool) Disabled: {0}", _sql));
+#endif
+            }
         }
         else
         {
