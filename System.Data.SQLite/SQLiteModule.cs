@@ -1104,15 +1104,18 @@ namespace System.Data.SQLite
 
             int nConstraint = SQLiteMarshal.ReadInt32(pIndex, offset);
 
-            offset += SQLiteMarshal.SizeOfStructInt();
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                IntPtr.Size);
 
             IntPtr pConstraint = SQLiteMarshal.ReadIntPtr(pIndex, offset);
 
-            offset += IntPtr.Size;
+            offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
+                sizeof(int));
 
             int nOrderBy = SQLiteMarshal.ReadInt32(pIndex, offset);
 
-            offset += SQLiteMarshal.SizeOfStructInt();
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                IntPtr.Size);
 
             IntPtr pOrderBy = SQLiteMarshal.ReadIntPtr(pIndex, offset);
 
@@ -1196,8 +1199,17 @@ namespace System.Data.SQLite
             if (nConstraint != index.Outputs.ConstraintUsages.Length)
                 return;
 
-            offset += SQLiteMarshal.SizeOfStructInt() + IntPtr.Size +
-                SQLiteMarshal.SizeOfStructInt() + IntPtr.Size;
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                IntPtr.Size);
+
+            offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
+                sizeof(int));
+
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                IntPtr.Size);
+
+            offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
+                sizeof(int));
 
             IntPtr pConstraintUsage = SQLiteMarshal.ReadIntPtr(pIndex, offset);
 
@@ -1216,17 +1228,20 @@ namespace System.Data.SQLite
                     false);
             }
 
-            offset += IntPtr.Size;
+            offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
+                sizeof(int));
 
             SQLiteMarshal.WriteInt32(pIndex, offset,
                 index.Outputs.IndexNumber);
 
-            offset += SQLiteMarshal.SizeOfStructInt();
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                IntPtr.Size);
 
             SQLiteMarshal.WriteIntPtr(pIndex, offset,
                 SQLiteString.Utf8IntPtrFromString(index.Outputs.IndexString));
 
-            offset += IntPtr.Size;
+            offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
+                sizeof(int));
 
             //
             // NOTE: We just allocated the IndexString field; therefore, we
@@ -1234,15 +1249,14 @@ namespace System.Data.SQLite
             //
             SQLiteMarshal.WriteInt32(pIndex, offset, 1);
 
-            offset += SQLiteMarshal.SizeOfStructInt();
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                sizeof(int));
 
             SQLiteMarshal.WriteInt32(pIndex, offset,
                 index.Outputs.OrderByConsumed);
 
-            offset += SQLiteMarshal.SizeOfStructInt();
-
-            if (offset % sizeof(double) != 0)
-                offset += SQLiteMarshal.SizeOfStructInt();
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                sizeof(double));
 
             SQLiteMarshal.WriteDouble(pIndex, offset,
                 index.Outputs.EstimatedCost);
@@ -4117,16 +4131,52 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Determines the size of a <see cref="Int32" /> when it resides
-        /// inside of a native structure.
+        /// Rounds up an integer size to the next multiple of the alignment.
         /// </summary>
+        /// <param name="size">
+        /// The size, in bytes, to be rounded up.
+        /// </param>
+        /// <param name="alignment">
+        /// The required alignment for the return value.
+        /// </param>
         /// <returns>
-        /// The size of the <see cref="Int32" /> type, in bytes, when it
-        /// resides inside a native structure.
+        /// The size, in bytes, rounded up to the next multiple of the
+        /// alignment.  This value may end up being the same as the original
+        /// size.
         /// </returns>
-        public static int SizeOfStructInt()
+        public static int RoundUp(
+            int size,
+            int alignment
+            )
         {
-            return IntPtr.Size;
+            int alignmentMinusOne = alignment - 1;
+            return ((size + alignmentMinusOne) & ~alignmentMinusOne);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Determines the offset, in bytes, of the next structure member.
+        /// </summary>
+        /// <param name="offset">
+        /// The offset, in bytes, of the current structure member.
+        /// </param>
+        /// <param name="size">
+        /// The size, in bytes, of the current structure member.
+        /// </param>
+        /// <param name="alignment">
+        /// The alignment, in bytes, of the next structure member.
+        /// </param>
+        /// <returns>
+        /// The offset, in bytes, of the next structure member.
+        /// </returns>
+        public static int NextOffsetOf(
+            int offset,
+            int size,
+            int alignment
+            )
+        {
+            return RoundUp(offset + size, alignment);
         }
         #endregion
 
@@ -5366,8 +5416,7 @@ namespace System.Data.SQLite
                 //       There is one integer member.
                 //       There are 22 function pointer members.
                 //
-                pNativeModule = SQLiteMemory.Allocate(
-                    SQLiteMarshal.SizeOfStructInt() + (22 * IntPtr.Size));
+                pNativeModule = SQLiteMemory.Allocate(23 * IntPtr.Size);
 
                 if (pNativeModule == IntPtr.Zero)
                     throw new OutOfMemoryException("sqlite3_module");
@@ -5832,7 +5881,14 @@ namespace System.Data.SQLite
             if (pVtab == IntPtr.Zero)
                 return false;
 
-            int offset = IntPtr.Size + SQLiteMarshal.SizeOfStructInt();
+            int offset = 0;
+
+            offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
+                sizeof(int));
+
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                IntPtr.Size);
+
             IntPtr pError = SQLiteMarshal.ReadIntPtr(pVtab, offset);
 
             if (pError != IntPtr.Zero)
@@ -6073,11 +6129,13 @@ namespace System.Data.SQLite
 
             SQLiteMarshal.WriteIntPtr(pVtab, offset, IntPtr.Zero);
 
-            offset += IntPtr.Size;
+            offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
+                sizeof(int));
 
             SQLiteMarshal.WriteInt32(pVtab, offset, 0);
 
-            offset += SQLiteMarshal.SizeOfStructInt();
+            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                IntPtr.Size);
 
             SQLiteMarshal.WriteIntPtr(pVtab, offset, IntPtr.Zero);
         }

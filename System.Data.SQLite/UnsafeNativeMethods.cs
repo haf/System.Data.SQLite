@@ -2097,6 +2097,8 @@ namespace System.Data.SQLite
     #endregion
   }
 
+  /////////////////////////////////////////////////////////////////////////////
+
 #if PLATFORM_COMPACTFRAMEWORK
   internal abstract class CriticalHandle : IDisposable
   {
