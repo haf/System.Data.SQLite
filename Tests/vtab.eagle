@@ -1206,5 +1206,83 @@ defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
 
 ###############################################################################
 
+runTest {test vtab-1.9 {IEnumerable virtual table w/large byte array} -setup {
+  set fileName vtab-1.9.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql(1) { \
+    CREATE VIRTUAL TABLE t${id} USING mod${id}; \
+  }
+
+  set sql(2) { \
+    SELECT SUM(x) FROM t${id}; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static object GetSum()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            byte\[\] bytes = new byte\[1048576\];
+            new Random().NextBytes(bytes);
+
+            connection.CreateModule(new SQLiteModuleEnumerable(
+              "mod${id}", bytes));
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(1)}]";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(2)}]";
+              return command.ExecuteScalar();
+            }
+          }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetSum
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id fileName
+} -time true -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
+[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
+\{\} 0 (?:-)?\d+$}]}
+
+###############################################################################
+
 runSQLiteTestEpilogue
 runTestEpilogue
