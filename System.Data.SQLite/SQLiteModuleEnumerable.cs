@@ -557,8 +557,9 @@ namespace System.Data.SQLite
 
             if (!table.BestIndex(index))
             {
-                SetTableError(table,
-                    "failed to select best index for virtual table");
+                SetTableError(table, String.Format(CultureInfo.CurrentCulture,
+                    "failed to select best index for virtual table \"{0}\"",
+                    table.TableName));
 
                 return SQLiteErrorCode.Error;
             }
