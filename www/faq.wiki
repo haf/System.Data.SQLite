@@ -542,10 +542,10 @@
 <p>
   As of version 1.0.82.0, the native resources for a SQLiteConnection object,
   including any native locks on the underlying file, are not fully released
-  until all SQLiteCommand, SQLiteDataReader, and SQLiteBackup objects associated
-  with that SQLiteConnection object have also been disposed.  These changes were
-  made to allow the SQLite native resource management to integrate better with
-  the
+  until all SQLiteCommand, SQLiteDataReader, SQLiteStatement, and SQLiteBackup
+  objects associated with that SQLiteConnection object have also been disposed.
+  These changes were made to allow the SQLite native resource management to
+  integrate better with the
   <a href="http://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29">garbage collection</a>
   semantics used by the
   <a href="http://en.wikipedia.org/wiki/Common_Language_Runtime">Common Language
