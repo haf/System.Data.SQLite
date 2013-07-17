@@ -1817,8 +1817,8 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Arranges for the integer row sequence number to be adjusted so that
-        /// it refers to the next row.
+        /// Adjusts the integer row sequence number so that it refers to the
+        /// next row.
         /// </summary>
         public virtual void NextRowIndex()
         {
