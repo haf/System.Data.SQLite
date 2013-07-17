@@ -1625,6 +1625,25 @@ namespace System.Data.SQLite
     public class SQLiteVirtualTableCursor :
             ISQLiteNativeHandle, IDisposable /* NOT SEALED */
     {
+        #region Protected Constants
+        /// <summary>
+        /// This value represents an invalid integer row sequence number.
+        /// </summary>
+        protected static readonly int InvalidRowIndex = 0;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Private Data
+        /// <summary>
+        /// The field holds the integer row sequence number for the current row
+        /// pointed to by this cursor object instance.
+        /// </summary>
+        private int rowIndex;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Public Constructors
         /// <summary>
         /// Constructs an instance of this class.
@@ -1636,8 +1655,21 @@ namespace System.Data.SQLite
         public SQLiteVirtualTableCursor(
             SQLiteVirtualTable table
             )
+            : this()
         {
             this.table = table;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Private Constructors
+        /// <summary>
+        /// Constructs an instance of this class.
+        /// </summary>
+        private SQLiteVirtualTableCursor()
+        {
+            rowIndex = InvalidRowIndex;
         }
         #endregion
 
@@ -1766,6 +1798,31 @@ namespace System.Data.SQLite
             this.indexNumber = indexNumber;
             this.indexString = indexString;
             this.values = values;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Determines the integer row sequence number for the current row.
+        /// </summary>
+        /// <returns>
+        /// The integer row sequence number for the current row -OR- zero if
+        /// it cannot be determined.
+        /// </returns>
+        public virtual int GetRowIndex()
+        {
+            return rowIndex;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Arranges for the integer row sequence number to be adjusted so that
+        /// it refers to the next row.
+        /// </summary>
+        public virtual void NextRowIndex()
+        {
+            rowIndex++;
         }
         #endregion
 

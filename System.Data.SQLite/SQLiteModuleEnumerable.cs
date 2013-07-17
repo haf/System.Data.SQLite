@@ -84,6 +84,10 @@ namespace System.Data.SQLite
                 return false;
 
             endOfEnumerator = !enumerator.MoveNext();
+
+            if (!endOfEnumerator)
+                NextRowIndex();
+
             return !endOfEnumerator;
         }
 
@@ -432,7 +436,38 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Determines the unique row identifier for the object instance value.
+        /// Constructs an <see cref="Int64" /> unique row identifier from two
+        /// <see cref="Int32" /> values.  The first <see cref="Int32" /> value
+        /// must contain the row sequence number for the current row and the
+        /// second value must contain the hash code for the enumerator value
+        /// for the current row.
+        /// </summary>
+        /// <param name="rowIndex">
+        /// The integer row sequence number for the current row.
+        /// </param>
+        /// <param name="hashCode">
+        /// The hash code of the enumerator value for the current row.
+        /// </param>
+        /// <returns>
+        /// The unique row identifier or zero upon failure.
+        /// </returns>
+        protected virtual long MakeRowId(
+            int rowIndex,
+            int hashCode
+            )
+        {
+            long result = rowIndex;
+
+            result <<= 32; /* typeof(int) bits */
+            result |= (long)(uint)hashCode;
+
+            return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Determines the unique row identifier for the current row.
         /// </summary>
         /// <param name="cursor">
         /// The <see cref="SQLiteVirtualTableCursor" /> object instance
@@ -450,10 +485,14 @@ namespace System.Data.SQLite
             object value
             )
         {
-            if (value == null)
+            if ((cursor != null) && (value != null))
+                return MakeRowId(cursor.GetRowIndex(), value.GetHashCode());
+            else if (cursor != null)
+                return cursor.GetRowIndex();
+            else if (value != null)
+                return value.GetHashCode();
+            else
                 return 0;
-
-            return value.GetHashCode();
         }
         #endregion
 

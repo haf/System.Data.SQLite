@@ -1284,5 +1284,103 @@ defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
 
 ###############################################################################
 
+runTest {test vtab-1.10 {virtual table xRowId uniqueness} -setup {
+  set fileName vtab-1.10.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql(1) { \
+    CREATE VIRTUAL TABLE t${id} USING mod${id}; \
+  }
+
+  set sql(2) { \
+    SELECT CASE WHEN 0 THEN rowId ELSE rowId END, \
+           CASE WHEN 1 THEN rowId ELSE rowId END FROM t${id}; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+    using Eagle._Containers.Public;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static StringList GetList(params string\[\] strings)
+        {
+          StringList result = new StringList();
+
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            connection.CreateModule(new SQLiteModuleEnumerable(
+              "mod${id}", strings));
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(1)}]";
+              result.Add(command.ExecuteNonQuery().ToString());
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(2)}]";
+
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                //
+                // NOTE: Mask off the hash code portion because it differs
+                //       between framework versions.
+                //
+                long mask = unchecked((long)0xFFFFFFFF00000000);
+
+                while (dataReader.Read())
+                {
+                  result.Add((dataReader.GetInt64(0) & mask).ToString());
+                  result.Add((dataReader.GetInt64(1) & mask).ToString());
+                }
+              }
+            }
+
+            connection.Close();
+          }
+
+          return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors [list System.Data.SQLite.dll Eagle.dll]]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetList one one two one two two
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
+[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
+\{\} 0 \{0 4294967296 4294967296 8589934592 8589934592 12884901888 12884901888\
+17179869184 17179869184 21474836480 21474836480 25769803776 25769803776\}$}]}
+
+###############################################################################
+
 runSQLiteTestEpilogue
 runTestEpilogue
