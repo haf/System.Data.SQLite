@@ -555,9 +555,11 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
 
-            if (!SetEstimatedCost(index))
+            if (!table.BestIndex(index))
             {
-                SetTableError(table, "failed to set estimated cost");
+                SetTableError(table,
+                    "failed to select best index for virtual table");
+
                 return SQLiteErrorCode.Error;
             }
 

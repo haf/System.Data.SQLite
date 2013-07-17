@@ -1032,11 +1032,12 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private double estimatedCost;
+        private double? estimatedCost;
         /// <summary>
-        /// Estimated cost of using this index.
+        /// Estimated cost of using this index.  Using a null value here
+        /// indicates that a default estimated cost value should be used.
         /// </summary>
-        public double EstimatedCost
+        public double? EstimatedCost
         {
             get { return estimatedCost; }
             set { estimatedCost = value; }
@@ -1054,6 +1055,16 @@ namespace System.Data.SQLite
     /// </summary>
     public sealed class SQLiteIndex
     {
+        #region Private Constants
+        /// <summary>
+        /// The default estimated cost for use with the
+        /// <see cref="ISQLiteManagedModule.BestIndex" /> method.
+        /// </summary>
+        internal static readonly double DefaultEstimatedCost = double.MaxValue;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Internal Constructors
         /// <summary>
         /// Constructs an instance of this class.
@@ -1259,7 +1270,7 @@ namespace System.Data.SQLite
                 sizeof(double));
 
             SQLiteMarshal.WriteDouble(pIndex, offset,
-                index.Outputs.EstimatedCost);
+                index.Outputs.EstimatedCost.GetValueOrDefault());
         }
         #endregion
 
@@ -1441,11 +1452,50 @@ namespace System.Data.SQLite
                 }
             }
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private SQLiteIndex index;
+        /// <summary>
+        /// The <see cref="SQLiteIndex" /> object instance containing all the
+        /// data for the inputs and outputs relating to the most recent index
+        /// selection.
+        /// </summary>
+        public virtual SQLiteIndex Index
+        {
+            get { CheckDisposed(); return index; }
+        }
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
         #region Public Methods
+        /// <summary>
+        /// This method should normally be used by the
+        /// <see cref="ISQLiteManagedModule.BestIndex" /> method in order to
+        /// perform index selection based on the constraints provided by the
+        /// SQLite core library.
+        /// </summary>
+        /// <param name="index">
+        /// The <see cref="SQLiteIndex" /> object instance containing all the
+        /// data for the inputs and outputs relating to index selection.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        public virtual bool BestIndex(
+            SQLiteIndex index
+            )
+        {
+            CheckDisposed();
+
+            this.index = index;
+
+            return true;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// Attempts to record the renaming of the virtual table associated
         /// with this object instance.
@@ -5213,14 +5263,6 @@ namespace System.Data.SQLite
 
         #region Private Constants
         /// <summary>
-        /// The default estimated cost for use with the
-        /// <see cref="ISQLiteManagedModule.BestIndex" /> method.
-        /// </summary>
-        private static readonly double DefaultEstimatedCost = double.MaxValue;
-
-        ///////////////////////////////////////////////////////////////////////
-
-        /// <summary>
         /// The default version of the native sqlite3_module structure in use.
         /// </summary>
         private static readonly int DefaultModuleVersion = 2;
@@ -6724,7 +6766,7 @@ namespace System.Data.SQLite
             SQLiteIndex index
             )
         {
-            return SetEstimatedCost(index, DefaultEstimatedCost);
+            return SetEstimatedCost(index, SQLiteIndex.DefaultEstimatedCost);
         }
         #endregion
         #endregion
