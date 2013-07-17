@@ -439,7 +439,7 @@ namespace System.Data.SQLite
         /// Constructs an <see cref="Int64" /> unique row identifier from two
         /// <see cref="Int32" /> values.  The first <see cref="Int32" /> value
         /// must contain the row sequence number for the current row and the
-        /// second value must contain the hash code for the enumerator value
+        /// second value must contain the hash code of the enumerator value
         /// for the current row.
         /// </summary>
         /// <param name="rowIndex">
