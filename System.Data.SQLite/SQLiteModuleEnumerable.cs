@@ -403,6 +403,11 @@ namespace System.Data.SQLite
         /// Determines the string to return as the column value for the object
         /// instance value.
         /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
         /// <param name="value">
         /// The object instance to return a string representation for.
         /// </param>
@@ -411,6 +416,7 @@ namespace System.Data.SQLite
         /// upon failure.
         /// </returns>
         protected virtual string GetStringFromObject(
+            SQLiteVirtualTableCursor cursor,
             object value
             )
         {
@@ -428,6 +434,11 @@ namespace System.Data.SQLite
         /// <summary>
         /// Determines the unique row identifier for the object instance value.
         /// </summary>
+        /// <param name="cursor">
+        /// The <see cref="SQLiteVirtualTableCursor" /> object instance
+        /// associated with the previously opened virtual table cursor to be
+        /// used.
+        /// </param>
         /// <param name="value">
         /// The object instance to return a unique row identifier for.
         /// </param>
@@ -435,6 +446,7 @@ namespace System.Data.SQLite
         /// The unique row identifier or zero upon failure.
         /// </returns>
         protected virtual long GetRowIdFromObject(
+            SQLiteVirtualTableCursor cursor,
             object value
             )
         {
@@ -798,7 +810,7 @@ namespace System.Data.SQLite
             object current = enumeratorCursor.Current;
 
             if (current != null)
-                context.SetString(GetStringFromObject(current));
+                context.SetString(GetStringFromObject(cursor, current));
             else
                 context.SetNull();
 
@@ -837,7 +849,7 @@ namespace System.Data.SQLite
 
             object current = enumeratorCursor.Current;
 
-            rowId = GetRowIdFromObject(current);
+            rowId = GetRowIdFromObject(cursor, current);
             return SQLiteErrorCode.Ok;
         }
 
@@ -1228,7 +1240,7 @@ namespace System.Data.SQLite.Generic
             T current = ((IEnumerator<T>)enumeratorCursor).Current;
 
             if (current != null)
-                context.SetString(GetStringFromObject(current));
+                context.SetString(GetStringFromObject(cursor, current));
             else
                 context.SetNull();
 
