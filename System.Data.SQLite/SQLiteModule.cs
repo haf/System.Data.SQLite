@@ -4208,6 +4208,10 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region SQLiteMarshal Static Class
+    /// <summary>
+    /// This class contains static methods that are used to perform several
+    /// low-level data marshalling tasks between native and managed code.
+    /// </summary>
     internal static class SQLiteMarshal
     {
         #region IntPtr Helper Methods
@@ -4487,6 +4491,14 @@ namespace System.Data.SQLite
             IDisposable /* NOT SEALED */
     {
         #region SQLiteNativeModule Private Class
+        /// <summary>
+        /// This class implements the <see cref="ISQLiteNativeModule" />
+        /// interface by forwarding those method calls to the
+        /// <see cref="SQLiteModule" /> object instance it contains.  If the
+        /// contained <see cref="SQLiteModule" /> object instance is null, all
+        /// the <see cref="ISQLiteNativeModule" /> methods simply generate an
+        /// error.
+        /// </summary>
         private sealed class SQLiteNativeModule :
                 ISQLiteNativeModule, IDisposable
         {
