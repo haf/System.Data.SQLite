@@ -309,8 +309,8 @@
         SP1 runtime for x86 is included.  The .NET Framework 2.0 SP2 is
         required.
         <br />
-        <big><b>This setup package is capable of installing the design-time
-        components for Visual Studio 2005.</b></big>
+        <big><b>This is the only setup package that is capable of installing the
+        design-time components for Visual Studio 2005.</b></big>
         <br />
         (sha1: 282131253520384bf53e862c8dc82c15e2dc7984)
       </td>
@@ -398,8 +398,8 @@
         SP1 runtime for x86 is included.  The .NET Framework 3.5 SP1 is
         required.
         <br />
-        <big><b>This setup package is capable of installing the design-time
-        components for Visual Studio 2008.</b></big>
+        <big><b>This is the only setup package that is capable of installing the
+        design-time components for Visual Studio 2008.</b></big>
         <br />
         (sha1: 86e4953183fa005b4da5c3a2c8c870f92d541eca)
       </td>
@@ -486,8 +486,8 @@
         the System.Data.SQLite 1.0.87.0 (3.7.17) package.  The Visual C++ 2010
         SP1 runtime for x86 is included.  The .NET Framework 4.0 is required.
         <br />
-        <big><b>This setup package is capable of installing the design-time
-        components for Visual Studio 2010.</b></big>
+        <big><b>This is the only setup package that is capable of installing the
+        design-time components for Visual Studio 2010.</b></big>
         <br />
         (sha1: 1c41bba8fa6ff68a47f369405a22f98106b00273)
       </td>
@@ -574,8 +574,8 @@
         Update 1 runtime for x86 is included.  The .NET Framework 4.5 is
         required.
         <br />
-        <big><b>This setup package is capable of installing the design-time
-        components for Visual Studio 2012.</b></big>
+        <big><b>This is the only setup package that is capable of installing the
+        design-time components for Visual Studio 2012.</b></big>
         <br />
         (sha1: 89a414f72d01160779ac65b560ca1336a29dee35)
       </td>
