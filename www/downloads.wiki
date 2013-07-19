@@ -3,15 +3,15 @@
   <h1>System.Data.SQLite Download Page</h1>
 
   <table width="100%" cellpadding="5">
-    <tr>
+    <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantHeader">
         <b>Runtime Library Notes</b>
       </td>
     </tr>
 
-    <tr>
+    <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantNotes">
-        <big>All downloadable packages on this web page that do not include
+        All downloadable packages on this web page that do not include
         the word &quot;<b>static</b>&quot; in their file name require the
         appropriate version (e.g. 2005, 2008, 2010, or 2012) of the Microsoft
         Visual C++ Runtime Library, to be successfully installed on the target
@@ -19,17 +19,17 @@
         should also be noted that the downloadable packages on this web page
         that include the word &quot;<b>setup</b>&quot; (i.e. the setup packages)
         already include and will attempt to automatically install the required
-        version of the Microsoft Visual C++ Runtime Library.</big>
+        version of the Microsoft Visual C++ Runtime Library.
       </td>
     </tr>
 
-    <tr>
+    <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantHeader">
         <b>Support Notes</b>
       </td>
     </tr>
 
-    <tr>
+    <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantNotes">
         This page contains all the downloadable packages (e.g. sources,
         binaries, setups, etc) for the current release version of the official
@@ -40,7 +40,7 @@
         contained files are the same.
       </td>
     </tr>
-    <tr>
+    <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantNotes">
         There are several other projects, with widely varying levels of support
         and compatibility, known to use the similar names.  At least one of
