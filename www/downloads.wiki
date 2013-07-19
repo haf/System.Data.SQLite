@@ -138,7 +138,17 @@
         <a href="http://go.microsoft.com/fwlink/?LinkID=186913">.NET Framework
         4.0</a>; however, this is not ideal.  Furthermore, assemblies compiled
         for the .NET Framework 4.0 cannot be loaded by the .NET Framework 2.0.
-        <br /><br />
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="importantHeader">
+        <b>Using Native Library Pre-Loading</b>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="importantNotes">
         The final step is to identify the target processor architecture on both
         the development and customer machines.  Generally,
         <a href="http://en.wikipedia.org/wiki/X86">x86</a> binaries will work on
@@ -218,7 +228,17 @@
         are several more environment variables that can be used to influence the
         behavior of the native library pre-loading feature, documented
         <a href="/index.html/artifact?ci=trunk&filename=Doc/Extra/environment.html">here</a>.
-        <br /><br />
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="importantHeader">
+        <b>Deployment Guidelines</b>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="importantNotes">
         To summarize the above:
       </td>
     </tr>
