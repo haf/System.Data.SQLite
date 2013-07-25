@@ -11,6 +11,22 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="include"
-	InheritedPropertySheets="$(INTEROP_EXTRA_PROPS_FILE)"
+	InheritedPropertySheets=""
 	>
+  <!--
+      NOTE: The value of the "InheritedPropertySheets" attribute (above)
+            should actually be "$(INTEROP_EXTRA_PROPS_FILE)".
+
+            Unfortunately, due to how Visual Studio 2005/2008 parses the
+            "InheritedPropertySheets" attribute value, it cannot be set to
+            "$(INTEROP_EXTRA_PROPS_FILE)" when the referenced macro should
+            expand to an empty string.
+
+            If a custom Visual Studio properties file is needed, the value
+            of the "InheritedPropertySheets" attribute (above) should be
+            manually changed to "$(INTEROP_EXTRA_PROPS_FILE)".  In addition,
+            the "INTEROP_EXTRA_PROPS_FILE" environment variable should be set
+            to the fully qualified file name of the Visual Studio properties
+            file to include.
+  -->
 </VisualStudioPropertySheet>
