@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!--
+ *
+ * include.vsprops -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="include"
+	InheritedPropertySheets="$(INTEROP_EXTRA_PROPS_FILE)"
+	>
+</VisualStudioPropertySheet>

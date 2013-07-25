@@ -55,6 +55,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="props\sqlite3.props" />
   <Import Project="props\SQLite.Interop.2010.props" />
+  <Import Project="$(INTEROP_EXTRA_PROPS_FILE)"
+          Condition="'$(INTEROP_EXTRA_PROPS_FILE)' != '' And
+                     Exists('$(INTEROP_EXTRA_PROPS_FILE)')" />
   <PropertyGroup Condition="('$(Configuration)' == 'DebugNativeOnly' Or
                              '$(Configuration)' == 'ReleaseNativeOnly') And
                             (('$(Platform)' == 'Win32' And
@@ -144,7 +147,8 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(INTEROP_LIBRARY_DIRECTORIES)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule $(INTEROP_LIBRARY_DEPENDENCIES);%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
@@ -187,7 +191,8 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(INTEROP_LIBRARY_DIRECTORIES)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule $(INTEROP_LIBRARY_DEPENDENCIES);%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
@@ -229,6 +234,8 @@
       <PreprocessorDefinitions>_DEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
+      <AdditionalLibraryDirectories>$(INTEROP_LIBRARY_DIRECTORIES)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(INTEROP_LIBRARY_DEPENDENCIES);%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -265,6 +272,8 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
       <PreprocessorDefinitions>_DEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
+      <AdditionalLibraryDirectories>$(INTEROP_LIBRARY_DIRECTORIES)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(INTEROP_LIBRARY_DEPENDENCIES);%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -305,7 +314,8 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(INTEROP_LIBRARY_DIRECTORIES)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule $(INTEROP_LIBRARY_DEPENDENCIES);%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -350,7 +360,8 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>$(INTEROP_ASSEMBLY_RESOURCES) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(INTEROP_LIBRARY_DIRECTORIES)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(ProjectDir)..\bin\$(ConfigurationYear)\$(Configuration)Module\bin\System.Data.SQLite.netmodule $(INTEROP_LIBRARY_DEPENDENCIES);%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -394,6 +405,8 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
       <PreprocessorDefinitions>NDEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
+      <AdditionalLibraryDirectories>$(INTEROP_LIBRARY_DIRECTORIES)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(INTEROP_LIBRARY_DEPENDENCIES);%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -433,6 +446,8 @@ XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Comman
       <PreprocessorDefinitions>NDEBUG;INTEROP_RC_VERSION=$(INTEROP_RC_VERSION);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
+      <AdditionalLibraryDirectories>$(INTEROP_LIBRARY_DIRECTORIES)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(INTEROP_LIBRARY_DEPENDENCIES);%(AdditionalDependencies)</AdditionalDependencies>
       <Version>$(INTEROP_LINKER_VERSION)</Version>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>

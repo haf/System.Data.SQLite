@@ -34,7 +34,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops;.\props\include.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -83,7 +83,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				AdditionalDependencies="secchk.lib"
+				AdditionalLibraryDirectories="$(INTEROP_LIBRARY_DIRECTORIES)"
+				AdditionalDependencies="secchk.lib $(INTEROP_LIBRARY_DEPENDENCIES)"
 				OutputFile="$(OutDir)/SQLite.Interop.$(INTEROP_BUILD_NUMBER).dll"
 				Version="$(INTEROP_LINKER_VERSION)"
 				LinkIncremental="2"
@@ -132,7 +133,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops;.\props\include.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -181,7 +182,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				AdditionalDependencies="secchk.lib"
+				AdditionalLibraryDirectories="$(INTEROP_LIBRARY_DIRECTORIES)"
+				AdditionalDependencies="secchk.lib $(INTEROP_LIBRARY_DEPENDENCIES)"
 				OutputFile="$(OutDir)/SQLite.Interop.$(INTEROP_BUILD_NUMBER).dll"
 				Version="$(INTEROP_LINKER_VERSION)"
 				LinkIncremental="1"
@@ -232,7 +234,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops;.\props\include.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -280,6 +282,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
+				AdditionalLibraryDirectories="$(INTEROP_LIBRARY_DIRECTORIES)"
+				AdditionalDependencies="$(INTEROP_LIBRARY_DEPENDENCIES)"
 				OutputFile="$(OutDir)/SQLite.Interop.$(INTEROP_BUILD_NUMBER).dll"
 				Version="$(INTEROP_LINKER_VERSION)"
 				LinkIncremental="2"
@@ -327,7 +331,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops;.\props\include.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -375,6 +379,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
+				AdditionalLibraryDirectories="$(INTEROP_LIBRARY_DIRECTORIES)"
+				AdditionalDependencies="$(INTEROP_LIBRARY_DEPENDENCIES)"
 				OutputFile="$(OutDir)/SQLite.Interop.$(INTEROP_BUILD_NUMBER).dll"
 				Version="$(INTEROP_LINKER_VERSION)"
 				LinkIncremental="2"
@@ -422,7 +428,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops;.\props\include.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -470,6 +476,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
+				AdditionalLibraryDirectories="$(INTEROP_LIBRARY_DIRECTORIES)"
+				AdditionalDependencies="$(INTEROP_LIBRARY_DEPENDENCIES)"
 				OutputFile="$(OutDir)/SQLite.Interop.$(INTEROP_BUILD_NUMBER).dll"
 				Version="$(INTEROP_LINKER_VERSION)"
 				LinkIncremental="1"
@@ -519,7 +527,7 @@
 			OutputDirectory="$(ProjectDir)..\bin\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="..\obj\$(ConfigurationYear)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops"
+			InheritedPropertySheets=".\props\sqlite3.vsprops;.\props\SQLite.Interop.2008.vsprops;.\props\include.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -567,6 +575,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
+				AdditionalLibraryDirectories="$(INTEROP_LIBRARY_DIRECTORIES)"
+				AdditionalDependencies="$(INTEROP_LIBRARY_DEPENDENCIES)"
 				OutputFile="$(OutDir)/SQLite.Interop.$(INTEROP_BUILD_NUMBER).dll"
 				Version="$(INTEROP_LINKER_VERSION)"
 				LinkIncremental="1"
@@ -916,6 +926,10 @@
 		<Filter
 			Name="Property Files"
 			>
+			<File
+				RelativePath=".\props\include.vsprops"
+				>
+			</File>
 			<File
 				RelativePath=".\props\SQLite.Interop.2008.vsprops"
 				>
