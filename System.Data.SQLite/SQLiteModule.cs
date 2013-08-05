@@ -5349,6 +5349,15 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// This field is used to store the destructor delegate to be passed to
+        /// the SQLite core library via the sqlite3_create_disposable_module()
+        /// function.
+        /// </summary>
+        private UnsafeNativeMethods.xDestroyModule destroyModule;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
         /// This field is used to store a pointer to the native sqlite3_module
         /// structure returned by the sqlite3_create_disposable_module
         /// function.
@@ -5446,10 +5455,13 @@ namespace System.Data.SQLite
                 UnsafeNativeMethods.sqlite3_module nativeModule =
                     AllocateNativeModule();
 
+                destroyModule = new UnsafeNativeMethods.xDestroyModule(
+                    xDestroyModule);
+
 #if !PLATFORM_COMPACTFRAMEWORK
                 disposableModule =
                     UnsafeNativeMethods.sqlite3_create_disposable_module(
-                        pDb, pName, ref nativeModule, IntPtr.Zero, null);
+                        pDb, pName, ref nativeModule, IntPtr.Zero, destroyModule);
 
                 return (disposableModule != IntPtr.Zero);
 #elif !SQLITE_STANDARD
@@ -5467,7 +5479,7 @@ namespace System.Data.SQLite
                        nativeModule.xCommit, nativeModule.xRollback,
                        nativeModule.xFindFunction, nativeModule.xRename,
                        nativeModule.xSavepoint, nativeModule.xRelease,
-                       nativeModule.xRollbackTo, IntPtr.Zero, null);
+                       nativeModule.xRollbackTo, IntPtr.Zero, destroyModule);
 
                 return (disposableModule != IntPtr.Zero);
 #else
@@ -5488,6 +5500,33 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Methods
+        /// <summary>
+        /// This method is called by the SQLite core library when the native
+        /// module associated with this object instance is being destroyed due
+        /// to its parent connection being closed.  It may also be called by
+        /// the "vtshim" module if/when the sqlite3_dispose_module() function
+        /// is called.
+        /// </summary>
+        /// <param name="pClientData">
+        /// The native user-data pointer associated with this module, as it was
+        /// provided to the SQLite core library when the native module instance
+        /// was created.
+        /// </param>
+        private void xDestroyModule(
+            IntPtr pClientData /* NOT USED */
+            )
+        {
+            //
+            // NOTE: At this point, just make sure that this native module
+            //       handle is not reused, nor passed into the native
+            //       sqlite3_dispose_module() function later (i.e. if/when
+            //       the Dispose() method of this object instance is called).
+            //
+            disposableModule = IntPtr.Zero;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         /// <summary>
         /// Creates and returns the native sqlite_module structure using the
         /// configured (or default) <see cref="ISQLiteNativeModule" />
