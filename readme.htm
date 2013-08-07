@@ -193,6 +193,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Various fixes to managed virtual table integration infrastructure.</li>
     <li>Implement workaround for an incorrect PROCESSOR_ARCHITECTURE being reported. Fix for [9ac9862611].</li>
     <li>Modify classes that implement the IDisposable pattern to set the disposed flag after their base classes have been disposed.</li>
+    <li>When automatically registering custom functions, use the executing assembly (i.e. System.Data.SQLite) for reference detection. Fix for [4e49a58c4c].</li>
 </ul>
 <p>
     <b>1.0.87.0 - July 8, 2013</b>

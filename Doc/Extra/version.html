@@ -48,6 +48,7 @@
       <li>Various fixes to managed virtual table integration infrastructure.</li>
       <li>Implement workaround for an incorrect PROCESSOR_ARCHITECTURE being reported. Fix for <a href="http://system.data.sqlite.org/index.html/info/9ac9862611">[9ac9862611]</a>.</li>
       <li>Modify classes that implement the IDisposable pattern to set the disposed flag after their base classes have been disposed.</li>
+      <li>When automatically registering custom functions, use the executing assembly (i.e. System.Data.SQLite) for reference detection. Fix for <a href="http://system.data.sqlite.org/index.html/info/4e49a58c4c">[4e49a58c4c]</a>.</li>
     </ul>
     <p><b>1.0.87.0 - July 8, 2013</b></p>
     <ul>

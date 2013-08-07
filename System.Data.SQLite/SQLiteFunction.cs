@@ -663,7 +663,7 @@ namespace System.Data.SQLite
         SQLiteFunctionAttribute at;
         System.Reflection.Assembly[] arAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
         int w = arAssemblies.Length;
-        System.Reflection.AssemblyName sqlite = System.Reflection.Assembly.GetCallingAssembly().GetName();
+        System.Reflection.AssemblyName sqlite = System.Reflection.Assembly.GetExecutingAssembly().GetName();
 
         for (int n = 0; n < w; n++)
         {
