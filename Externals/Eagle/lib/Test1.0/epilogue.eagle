@@ -32,6 +32,7 @@ if {![info exists no([file tail [info script]])]} then {
     if {[object invoke -flags +NonPublic \
             Interpreter.GetActive.CurrentFrame Name] ne \
         [appendArgs source " " [file normalize [info script]]]} then {
+      unset -nocomplain test_suite_running
       error "cannot run, current frame is not for this script"
     }
   }
@@ -46,7 +47,32 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Show when the tests actually ended (now).
   #
   tputs $test_channel [appendArgs "---- tests ended at " \
-      [clock format [clock seconds]] \n]
+      [formatTimeStamp [set test_timestamp(endSeconds) \
+      [clock seconds]]] \n]
+
+  #
+  # NOTE: We can only calculate the elapsed seconds for the tests if
+  #       the necessary variables exist and contain valid values.
+  #
+  if {[info exists test_timestamp(startSeconds)] && \
+      [string is integer -strict $test_timestamp(startSeconds)] && \
+      [info exists test_timestamp(endSeconds)] && \
+      [string is integer -strict $test_timestamp(endSeconds)]} then {
+    #
+    # NOTE: First, figure out how many whole seconds elapsed during
+    #       roughly the entire testing process (which is rougly the
+    #       same time taken to just run the tests themselves).
+    #
+    set test_timestamp(elapsedSeconds) [expr \
+        {$test_timestamp(endSeconds) - $test_timestamp(startSeconds)}]
+
+    #
+    # NOTE: Show (and log) the number of elapsed seconds and possibly
+    #       a human readable elapsed time string as well.
+    #
+    tputs $test_channel [appendArgs "---- tests took approximately " \
+        [formatElapsedTime $test_timestamp(elapsedSeconds)] \n]
+  }
 
   #
   # NOTE: Show the ending command count (for both Tcl and Eagle).
@@ -55,6 +81,33 @@ if {![info exists no([file tail [info script]])]} then {
       [info cmdcount] \n]
 
   if {[isEagle]} then {
+    #
+    # NOTE: We can only calculate the elapsed microseconds for the tests
+    #       if the necessary variables exist and contain valid values.
+    #
+    if {[info exists test_timestamp(startCount)] && \
+        [string is wideinteger -strict $test_timestamp(startCount)]} then {
+      #
+      # NOTE: First, figure out how many microseconds elapsed during
+      #       roughly the entire testing process (which is rougly the
+      #       same time taken to just run the tests themselves).
+      #
+      catch {
+        set test_timestamp(elapsedMicroseconds) \
+            [clock stop $test_timestamp(startCount)]
+      }
+
+      #
+      # NOTE: Show the approximate number of elapsed microseconds.
+      #
+      if {[info exists test_timestamp(elapsedMicroseconds)] && [string \
+          is double -strict $test_timestamp(elapsedMicroseconds)]} then {
+        tputs $test_channel [appendArgs "---- tests took approximately " \
+            [formatDecimal $test_timestamp(elapsedMicroseconds)] \
+            " microseconds\n"]
+      }
+    }
+
     #
     # NOTE: Show the ending operation count (for Eagle only).
     #
@@ -89,7 +142,7 @@ if {![info exists no([file tail [info script]])]} then {
     #       the test statistics and/or restarting Eagle; however, duplicate
     #       test names must be avoided and this is considered a good trade-off.
     #
-    foreach {name count} $eagle_tests(counts) {
+    foreach {name count} $eagle_tests(Counts) {
       if {$count > 1} then {
         tputs $test_channel [appendArgs \
             "==== test name \"" $name "\" DUPLICATED (" $count ")\n"]
@@ -103,30 +156,30 @@ if {![info exists no([file tail [info script]])]} then {
 
     tputs $test_channel \n; # NOTE: Blank line.
 
-    if {$eagle_tests(passed) > 0} then {
-      tresult Ok [appendArgs "PASSED: " $eagle_tests(passed) \n]
+    if {$eagle_tests(Passed) > 0} then {
+      tresult Ok [appendArgs "PASSED: " $eagle_tests(Passed) \n]
     }
 
-    if {$eagle_tests(failed) > 0} then {
-      tresult Error [appendArgs "FAILED: " $eagle_tests(failed) \n]
+    if {$eagle_tests(Failed) > 0} then {
+      tresult Error [appendArgs "FAILED: " $eagle_tests(Failed) \n]
 
-      if {[llength $eagle_tests(failedNames)] > 0} then {
-        tresult Error [appendArgs "FAILED: " $eagle_tests(failedNames) \n]
+      if {[llength $eagle_tests(FailedNames)] > 0} then {
+        tresult Error [appendArgs "FAILED: " $eagle_tests(FailedNames) \n]
       }
     }
 
-    if {$eagle_tests(skipped) > 0} then {
-      tresult Break [appendArgs "SKIPPED: " $eagle_tests(skipped) \n]
+    if {$eagle_tests(Skipped) > 0} then {
+      tresult Break [appendArgs "SKIPPED: " $eagle_tests(Skipped) \n]
 
-      if {[llength $eagle_tests(skippedNames)] > 0} then {
-        tresult Break [appendArgs "SKIPPED: " $eagle_tests(skippedNames) \n]
+      if {[llength $eagle_tests(SkippedNames)] > 0} then {
+        tresult Break [appendArgs "SKIPPED: " $eagle_tests(SkippedNames) \n]
       }
     }
 
-    if {$eagle_tests(total) > 0} then {
-      tresult Return [appendArgs "TOTAL: " $eagle_tests(total) \n]
+    if {$eagle_tests(Total) > 0} then {
+      tresult Return [appendArgs "TOTAL: " $eagle_tests(Total) \n]
 
-      if {$eagle_tests(skipped) > 0} then {
+      if {$eagle_tests(Skipped) > 0} then {
         set percent [getSkipPercentage]
 
         tresult Break [appendArgs \
@@ -154,13 +207,13 @@ if {![info exists no([file tail [info script]])]} then {
       #       Check to make sure that all tests pass and then set the
       #       exit code to success; otherwise, we set it to failure.
       #
-      set passedOrSkipped [expr {$eagle_tests(passed) + \
-          $eagle_tests(skipped)}]
+      set passedOrSkipped [expr {$eagle_tests(Passed) + \
+          $eagle_tests(Skipped)}]
 
-      if {$passedOrSkipped == $eagle_tests(total)} then {
+      if {$passedOrSkipped == $eagle_tests(Total)} then {
         set exitCode Success
 
-        if {$eagle_tests(total) > 0} then {
+        if {$eagle_tests(Total) > 0} then {
           tresult Ok "OVERALL RESULT: SUCCESS\n"
         } else {
           tresult Ok "OVERALL RESULT: NONE\n"
@@ -181,7 +234,7 @@ if {![info exists no([file tail [info script]])]} then {
       if {$percent >= $test_threshold} then {
         set exitCode Success
 
-        if {$eagle_tests(total) > 0} then {
+        if {$eagle_tests(Total) > 0} then {
           tresult Ok [appendArgs \
               "OVERALL RESULT: SUCCESS (" $percent "% >= " $test_threshold %)\n]
         } else {
@@ -299,13 +352,13 @@ if {![info exists no([file tail [info script]])]} then {
     unset percent
 
     tputs $test_channel \n; # NOTE: Blank line.
-
-    #
-    # NOTE: Call the Tcl test cleanup procedure now to give it a chance to do
-    #       any custom cleanup that has been registered.
-    #
-    ::tcltest::cleanupTests
   }
+
+  #
+  # NOTE: Call the Tcl test cleanup procedure now to give it a chance to do
+  #       any custom cleanup that has been registered.
+  #
+  ::tcltest::cleanupTests
 
   #
   # NOTE: Check for and process any custom test epilogue script that may
@@ -341,9 +394,17 @@ if {![info exists no([file tail [info script]])]} then {
         #       the error now that we are sure it has been recorded in the
         #       test log file.
         #
+        unset -nocomplain test_suite_running
         error $test_script(post,result)
       }
     }
+  }
+
+  #
+  # NOTE: Indicate that the test suite is no longer running.
+  #
+  if {[info exists test_suite_running] && $test_suite_running} then {
+    set test_suite_running false
   }
 
   #

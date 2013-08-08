@@ -935,6 +935,23 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForTip426 { channel } {
+    tputs $channel "---- checking for TIP #426... "
+
+    #
+    # NOTE: Is the interpreter TIP #426 ready?
+    #
+    catch {info cmdtype} error
+
+    if {$error eq {wrong # args: should be "info cmdtype commandName"}} then {
+      addConstraint tip426
+
+      tputs $channel yes\n
+    } else {
+      tputs $channel no\n
+    }
+  }
+
   proc checkForTiming {
           channel threshold {constraint ""} {tries 1} {delay 1000}
           {asynchronous false} } {
@@ -1359,12 +1376,26 @@ namespace eval ::Eagle {
     proc checkForHost { channel } {
       tputs $channel "---- checking for host... "
 
-      if {[set code [catch {host isopen} result]] == 0 && $result} then {
-        addConstraint hostIsOpen
+      if {[catch {host isopen} result] == 0} then {
+        if {$result} then {
+          addConstraint hostIsOpen
 
-        tputs $channel open\n
-      } elseif {$code == 0} then {
-        tputs $channel closed\n
+          tputs $channel open\n
+        } else {
+          if {[catch {host redirected Input} result] == 0} then {
+            if {$result} then {
+              addConstraint hostInputRedirected
+
+              tputs $channel redirected\n
+            } else {
+              addConstraint hostIsClosed
+
+              tputs $channel closed\n
+            }
+          } else {
+            tlog $result; tputs $channel error\n]
+          }
+        }
       } else {
         tlog $result; tputs $channel error\n]
       }
@@ -2274,6 +2305,35 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForNativeUtility { channel } {
+      tputs $channel "---- checking for native utility... "
+
+      if {[info exists ::eagle_platform(nativeUtility)] && \
+          [string length $::eagle_platform(nativeUtility)] > 0} then {
+        set name [lindex $::eagle_platform(nativeUtility) 0]
+
+        if {[string length $name] > 0} then {
+          set version [lindex $::eagle_platform(nativeUtility) 1]
+
+          if {[string length $version] > 0} then {
+            set nativeUtility [appendArgs \
+                $name . [join [lrange [split $version .] 0 1] .]]
+          } else {
+            set nativeUtility $name
+          }
+
+          addConstraint [appendArgs nativeUtility. $nativeUtility]
+
+          tputs $channel [appendArgs $::eagle_platform(nativeUtility) \
+              " " ( $nativeUtility ) \n]
+        } else {
+          tputs $channel unknown\n
+        }
+      } else {
+        tputs $channel no\n
+      }
+    }
+
     proc checkForNetFx45 { channel } {
       tputs $channel "---- checking for .NET Framework 4.5... "
 
@@ -2510,7 +2570,7 @@ namespace eval ::Eagle {
         checkForTestMachine checkForTestPlatform checkForTestConfiguration \
         checkForTestSuffix checkForFile checkForPathFile checkForNativeCode \
         checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
-        checkForTip405 checkForTiming checkForPerformance \
+        checkForTip405 checkForTip426 checkForTiming checkForPerformance \
         checkForStackIntensive checkForInteractive checkForInteractiveCommand \
         checkForUserInteraction checkForNetwork checkForCompileOption] false \
         false

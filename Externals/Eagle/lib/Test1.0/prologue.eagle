@@ -24,7 +24,14 @@ if {![info exists no([file tail [info script]])]} then {
   #
   unset -nocomplain pkg_dir pattern exec dummy directory name value expr \
       publicKeyToken encoding memory stack drive server database timeout \
-      user password percent checkout timeStamp
+      user password percent checkout timeStamp loaded
+
+  #
+  # NOTE: Indicate that the test suite is currently running.
+  #
+  if {![info exists test_suite_running] || !$test_suite_running} then {
+    set test_suite_running true
+  }
 
   #
   # NOTE: Set the location of the test suite, if necessary.
@@ -231,6 +238,7 @@ if {![info exists no([file tail [info script]])]} then {
     if {[object invoke -flags +NonPublic \
             Interpreter.GetActive.CurrentFrame Name] ne \
         [appendArgs source " " [file normalize [info script]]]} then {
+      unset -nocomplain test_suite_running
       error "cannot run, current frame is not for this script"
     }
   }
@@ -412,6 +420,28 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: When running in Eagle, check for any non-core plugins loaded into
+  #       the interpreter and issue warnings if any are found.  The warning
+  #       may be used to explain subsequent test failures due to the extra
+  #       plugins being loaded (i.e. there are some tests are sensitive to
+  #       having "unexpected" plugins loaded).
+  #
+  if {[isEagle]} then {
+    foreach loaded [info loaded] {
+      #
+      # HACK: This code assumes that all plugins in the "Eagle._Plugins"
+      #       namespace belong to the Eagle core library itself.
+      #
+      if {![string match Eagle._Plugins.* [lindex $loaded 1]]} then {
+        tputs $test_channel [appendArgs \
+            "==== WARNING: extra plugin found: " $loaded \n]
+      }
+    }
+
+    unset -nocomplain loaded
+  }
+
+  #
   # NOTE: Show both the pre-test and post-test scripts now, prior to actually
   #       evaluating either of them (even if their use has been disabled).
   #
@@ -453,6 +483,7 @@ if {![info exists no([file tail [info script]])]} then {
         #       the error now that we are sure it has been recorded in the
         #       test log file.
         #
+        unset -nocomplain test_suite_running
         error $test_script(pre,result)
       }
     }
@@ -557,6 +588,12 @@ if {![info exists no([file tail [info script]])]} then {
         $encoding \n]
 
     unset encoding
+    catch {host query} host
+
+    tputs $test_channel [appendArgs "---- host query: " \
+        [formatListAsDict $host] \n]
+
+    unset host
     catch {debug memory} memory
 
     tputs $test_channel [appendArgs "---- starting memory: " \
@@ -667,7 +704,7 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Initialize the Eagle test constraints.
   #
   if {[isEagle]} then {
-    initializeTests
+    initializeTests; configureTcltest [list] [list] false
 
     #
     # NOTE: If the "no(mono)" variable is set (to anything) then any
@@ -927,6 +964,16 @@ if {![info exists no([file tail [info script]])]} then {
         # NOTE: For test "commands-1.4".
         #
         checkForCompileOption $test_channel CALLBACK_QUEUE
+      }
+
+      #
+      # NOTE: Has legacy CAS policy support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileCasPolicy)]} then {
+        #
+        # NOTE: For tests "load-1.6" and "load-1.7".
+        #
+        checkForCompileOption $test_channel CAS_POLICY
       }
 
       #
@@ -1223,6 +1270,14 @@ if {![info exists no([file tail [info script]])]} then {
             *TestScriptStream*
       }
 
+      if {![info exists no(testLoad)]} then {
+        #
+        # NOTE: For tests "load-1.6" and "load-1.7".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestLoadPluginViaBytes*
+      }
+
       #
       # NOTE: Has DateTime testing support been disabled?
       #
@@ -1418,6 +1473,12 @@ if {![info exists no([file tail [info script]])]} then {
 
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestNestedArray*
+
+        #
+        # NOTE: For test "object-2.11".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestObjectAsArray*
 
         #
         # NOTE: For tests "object-3.6" and "object-3.7".
@@ -1635,6 +1696,13 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has native utility testing support been disabled?
+    #
+    if {![info exists no(nativeUtility)]} then {
+      checkForNativeUtility $test_channel
+    }
+
+    #
     # NOTE: Has Visual Studio testing support been disabled?
     #
     if {![info exists no(visualStudio)]} then {
@@ -1809,11 +1877,11 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {![info exists no(checkForFile)]} then {
     #
-    # NOTE: For test "package-1.0".
+    # NOTE: For test "garuda-1.1".
     #
     if {![info exists no(pkgAll.tcl)]} then {
-      checkForFile $test_channel [file join $base_path Package Tests all.tcl] \
-          pkgAll.tcl
+      checkForFile $test_channel [file join $base_path Native Package \
+          Tests all.tcl] pkgAll.tcl
     }
 
     #
@@ -2141,6 +2209,10 @@ if {![info exists no([file tail [info script]])]} then {
     checkForTip405 $test_channel
   }
 
+  if {![info exists no(tip426)]} then {
+    checkForTip426 $test_channel
+  }
+
   #
   # NOTE: Has performance testing been disabled?
   #
@@ -2318,7 +2390,7 @@ if {![info exists no([file tail [info script]])]} then {
         #
         set timeStamp [lindex $timeStamp 0]
       } else {
-        set timeStamp [clock format [clock scan $timeStamp] -iso -isotimezone]
+        set timeStamp [formatTimeStamp [clock scan $timeStamp]]
       }
     } else {
       set timeStamp <none>
@@ -2386,11 +2458,18 @@ if {![info exists no([file tail [info script]])]} then {
     tputs $test_channel [appendArgs "---- starting operation count: " \
         [object invoke -flags +NonPublic Interpreter.GetActive \
             OperationCount] \n]
+
+    #
+    # NOTE: Record the raw starting performance count, for later use in
+    #       calculating the approximate number of microseconds elapsed.
+    #
+    catch {set test_timestamp(startCount) [clock start]}
   }
 
   #
   # NOTE: Show when the tests actually began (now).
   #
-  tputs $test_channel [appendArgs "---- tests began at " \
-      [clock format [clock seconds]] \n]
+  tputs $test_channel [appendArgs "---- tests started at " \
+      [formatTimeStamp [set test_timestamp(startSeconds) \
+      [clock seconds]]] \n]
 }

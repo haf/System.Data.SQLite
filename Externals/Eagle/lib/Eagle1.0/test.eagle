@@ -101,8 +101,8 @@ namespace eval ::Eagle {
   proc haveConstraint { name } {
     if {[isEagle]} then {
       return [expr {
-          [info exists ::eagle_tests(constraints)] && \
-          [lsearch -exact $::eagle_tests(constraints) $name] != -1}]
+          [info exists ::eagle_tests(Constraints)] && \
+          [lsearch -exact $::eagle_tests(Constraints) $name] != -1}]
     } else {
       return [expr {
           [info exists ::tcltest::testConstraints($name)] && \
@@ -112,10 +112,10 @@ namespace eval ::Eagle {
 
   proc addConstraint { name {value 1} } {
     if {[isEagle]} then {
-      if {[info exists ::eagle_tests(constraints)] && \
-          [lsearch -exact $::eagle_tests(constraints) $name] == -1 && \
+      if {[info exists ::eagle_tests(Constraints)] && \
+          [lsearch -exact $::eagle_tests(Constraints) $name] == -1 && \
           $value} then {
-        lappend ::eagle_tests(constraints) $name
+        lappend ::eagle_tests(Constraints) $name
       }
     } else {
       ::tcltest::testConstraint $name $value
@@ -140,7 +140,7 @@ namespace eval ::Eagle {
     set result [list]
 
     if {[isEagle]} then {
-      if {[catch {set ::eagle_tests(constraints)} constraints] == 0} then {
+      if {[catch {set ::eagle_tests(Constraints)} constraints] == 0} then {
         eval lappend result $constraints
       }
     } else {
@@ -156,12 +156,12 @@ namespace eval ::Eagle {
 
   proc removeConstraint { name } {
     if {[isEagle]} then {
-      if {[info exists ::eagle_tests(constraints)]} then {
-        set index [lsearch -exact $::eagle_tests(constraints) $name]
+      if {[info exists ::eagle_tests(Constraints)]} then {
+        set index [lsearch -exact $::eagle_tests(Constraints) $name]
 
         if {$index != -1} then {
-          set ::eagle_tests(constraints) [lreplace \
-              $::eagle_tests(constraints) $index $index]
+          set ::eagle_tests(Constraints) [lreplace \
+              $::eagle_tests(Constraints) $index $index]
         }
       }
     } else {
@@ -201,12 +201,35 @@ namespace eval ::Eagle {
     return $result
   }
 
+  proc testArrayGet { varName {integer false} } {
+    #
+    # NOTE: Returns the results of [array get] in a well-defined order.
+    #
+    upvar 1 $varName array
+
+    #
+    # NOTE: Build the command that will sort the array names into order.
+    #
+    set command [list lsort]
+    if {$integer} then {lappend command -integer}
+    lappend command [array names array]
+
+    set result [list]
+
+    foreach name [eval $command] {
+      lappend result $name $array($name)
+    }
+
+    return $result
+  }
+
   proc calculateBogoCops { {milliseconds 2000} {legacy false} } {
     #
     # NOTE: Verify that the number of milliseconds requested is greater than
     #       zero.
     #
     if {$milliseconds <= 0} then {
+      unset -nocomplain ::test_suite_running
       error "number of milliseconds must be greater than zero"
     }
 
@@ -354,6 +377,40 @@ namespace eval ::Eagle {
     return $value
   }
 
+  proc formatTimeStamp { seconds {gmt false} } {
+    if {[isEagle]} then {
+      return [clock format $seconds -gmt $gmt -iso -isotimezone]
+    } else {
+      return [clock format $seconds -gmt $gmt -format "%Y-%m-%dT%H:%M:%S %Z"]
+    }
+  }
+
+  proc formatElapsedTime { seconds } {
+    if {[isEagle]} then {
+      #
+      # NOTE: Create a TimeSpan instance based on the number of whole
+      #       seconds.
+      #
+      set timeSpan [object invoke -create -alias TimeSpan FromSeconds \
+          $seconds]
+
+      #
+      # NOTE: Return the number of seconds and a human readable string
+      #       representing the TimeSpan instance created based on that
+      #       same number of seconds.
+      #
+      return [appendArgs $seconds " seconds (" [$timeSpan ToString] \
+          " elapsed time)"]
+    } else {
+      #
+      # NOTE: Unfortunately, there is no built-in native Tcl command
+      #       that can correctly format an elapsed time; therefore,
+      #       just return the number of whole seconds.
+      #
+      return [appendArgs $seconds " seconds"]
+    }
+  }
+
   proc sourceIfValid { type fileName } {
     if {[string length $fileName] > 0} then {
       if {[file exists $fileName]} then {
@@ -367,6 +424,7 @@ namespace eval ::Eagle {
           #
           # NOTE: The error has been logged, now re-throw it.
           #
+          unset -nocomplain ::test_suite_running
           error $error $::errorInfo $::errorCode
         }
       } else {
@@ -976,6 +1034,7 @@ namespace eval ::Eagle {
       if {$code != 0 && [isStopOnFailure]} then {
         tresult Error "OVERALL RESULT: STOP-ON-FAILURE\n"
 
+        unset -nocomplain ::test_suite_running
         error ""; # no message
       }
     } else {
@@ -1038,6 +1097,7 @@ namespace eval ::Eagle {
     #       just return the result.
     #
     if {$error} then {
+      unset -nocomplain ::test_suite_running
       error $result
     } else {
       return $result
@@ -1154,49 +1214,57 @@ namespace eval ::Eagle {
   }
 
   proc formatList { list {default ""} {columns 1} } {
-    set count 1
-    set result ""
+    if {[catch {
+      set result ""
+      set count 1
 
-    foreach item $list {
-      if {[incr count -1] == 0} then {
-        set count $columns
-        append result \n
+      foreach item $list {
+        if {[incr count -1] == 0} then {
+          set count $columns
+          append result \n
+        }
+
+        append result \t
+
+        if {[string length $item] > 0} then {
+          append result $item
+        } else {
+          append result <noItem>
+        }
       }
-
-      append result \t
-
-      if {[string length $item] > 0} then {
-        append result $item
-      } else {
-        append result <noItem>
-      }
+    }] == 0} then {
+      return [expr {[string length $result] > 0 ? $result : $default}]
+    } else {
+      return ""
     }
-
-    return [expr {[string length $result] > 0 ? $result : $default}]
   }
 
   proc formatListAsDict { list {default ""} } {
-    set result ""
+    if {[catch {
+      set result ""
 
-    foreach {name value} $list {
-      append result \n\t
+      foreach {name value} $list {
+        append result \n\t
 
-      if {[string length $name] > 0} then {
-        append result $name
-      } else {
-        append result <noName>
+        if {[string length $name] > 0} then {
+          append result $name
+        } else {
+          append result <noName>
+        }
+
+        append result ": "
+
+        if {[string length $value] > 0} then {
+          append result $value
+        } else {
+          append result <noValue>
+        }
       }
-
-      append result ": "
-
-      if {[string length $value] > 0} then {
-        append result $value
-      } else {
-        append result <noValue>
-      }
+    }] == 0} then {
+      return [expr {[string length $result] > 0 ? $result : $default}]
+    } else {
+      return ""
     }
-
-    return [expr {[string length $result] > 0 ? $result : $default}]
   }
 
   proc pathToRegexp { path {list false} } {
@@ -1279,9 +1347,21 @@ namespace eval ::Eagle {
     }
   }
 
-  proc reportTestPercent { channel percent failed leaked } {
-    set status [appendArgs "---- test suite running, about " $percent \
-        "% complete (" $failed " failed, " $leaked " leaked)..."]
+  proc reportTestPercent {
+          channel percent totalFiles failedFiles leakedFiles } {
+    if {[isEagle]} then {
+      set totalTests $::eagle_tests(Total)
+      set failedTests $::eagle_tests(Failed)
+    } else {
+      set totalTests $::tcltest::numTests(Total)
+      set failedTests $::tcltest::numTests(Failed)
+    }
+
+    set status [appendArgs \
+        "---- test suite running, about " $percent "% complete (" \
+        $totalTests " tests total, " $failedTests " tests failed, " \
+        $totalFiles " files total, " $failedFiles " files failed, " \
+        $leakedFiles " files leaked)..."]
 
     tputs $channel [appendArgs $status \n]
 
@@ -1374,7 +1454,7 @@ namespace eval ::Eagle {
 
       if {$percent != $lastPercent} then {
         reportTestPercent $channel $percent \
-            [llength $failed] [llength $leaked]
+            $total [llength $failed] [llength $leaked]
 
         set lastPercent $percent
       }
@@ -1451,7 +1531,7 @@ namespace eval ::Eagle {
           # NOTE: Record failed test count before this file.
           #
           if {[isEagle]} then {
-            set before $::eagle_tests(failed)
+            set before $::eagle_tests(Failed)
           } else {
             set before $::tcltest::numTests(Failed)
           }
@@ -1481,6 +1561,27 @@ namespace eval ::Eagle {
               #       file cleanup code (i.e. at the bottom of the loop).
               #
               set stop true
+
+              #
+              # BUGFIX: If there are no actual test failures recorded yet,
+              #         make sure there is one now.  This is necessary to
+              #         handle the case where an error occurs in a test
+              #         file that does not directly cause at least one of
+              #         its contained tests to fail.  Otherwise, the test
+              #         suite will still be stopped; however, an overall
+              #         result of success will be returned by the process.
+              #
+              if {[isEagle]} then {
+                if {$::eagle_tests(Failed) == 0} then {
+                  incr ::eagle_tests(Total)
+                  incr ::eagle_tests(Failed)
+                }
+              } else {
+                if {$::tcltest::numTests(Failed) == 0} then {
+                  incr ::tcltest::numTests(Total)
+                  incr ::tcltest::numTests(Failed)
+                }
+              }
             }
           }
 
@@ -1493,7 +1594,7 @@ namespace eval ::Eagle {
           # NOTE: Record failed test count after this file.
           #
           if {[isEagle]} then {
-            set after $::eagle_tests(failed)
+            set after $::eagle_tests(Failed)
           } else {
             set after $::tcltest::numTests(Failed)
           }
@@ -1513,7 +1614,7 @@ namespace eval ::Eagle {
 
           if {$percent != $lastPercent} then {
             reportTestPercent $channel $percent \
-                [llength $failed] [llength $leaked]
+                $total [llength $failed] [llength $leaked]
 
             set lastPercent $percent
           }
@@ -1561,7 +1662,7 @@ namespace eval ::Eagle {
 
         if {$percent != $lastPercent} then {
           reportTestPercent $channel $percent \
-              [llength $failed] [llength $leaked]
+              $total [llength $failed] [llength $leaked]
 
           set lastPercent $percent
         }
@@ -1596,7 +1697,7 @@ namespace eval ::Eagle {
 
       if {$percent != $lastPercent} then {
         reportTestPercent $channel $percent \
-            [llength $failed] [llength $leaked]
+            $total [llength $failed] [llength $leaked]
 
         set lastPercent $percent
       }
@@ -1627,6 +1728,14 @@ namespace eval ::Eagle {
     reportTestStatisticCounts $channel leaks
   }
 
+  proc isTestSuiteRunning {} {
+    #
+    # NOTE: Return non-zero if the test suite appears to be running.
+    #
+    return [expr {[info exists ::test_suite_running] && \
+        $::test_suite_running}]
+  }
+
   proc configureTcltest { constraints imports force } {
     if {[isEagle]} then {
       #
@@ -1640,25 +1749,9 @@ namespace eval ::Eagle {
       #         debug procedureflags test +ScriptLocation
       #         debug procedureflags runTest +ScriptLocation
       #
-      # HACK: Compatibility shim(s) for use with various tests in the Tcl
-      #       test suite.  Make sure these commands do not already exist
-      #       prior to attempt to adding them.
+      # NOTE: Setup the necessary compatibility shims for the test suite.
       #
-      if {[llength [info commands testConstraint]] == 0} then {
-        interp alias {} testConstraint {} haveOrAddConstraint
-      }
-
-      if {[llength [info commands ::tcltest::testConstraint]] == 0} then {
-        interp alias {} ::tcltest::testConstraint {} haveOrAddConstraint
-      }
-
-      #
-      # NOTE: This is needed by most tests in the Tcl test suite.  Make
-      #       sure this command does not already exist prior to adding it.
-      #
-      if {[llength [info commands ::tcltest::cleanupTests]] == 0} then {
-        proc ::tcltest::cleanupTests { args } {}
-      }
+      setupTestShims true [expr {![isTestSuiteRunning]}]
 
       #
       # NOTE: Fake having the tcltest package.
@@ -1744,10 +1837,10 @@ namespace eval ::Eagle {
         #       used to interface with the internal test tracking information
         #       in the interpreter via a variable trace.
         #
-        set eagle_tests(total) 0
-        set eagle_tests(skipped) 0
-        set eagle_tests(passed) 0
-        set eagle_tests(failed) 0
+        set eagle_tests(Total) 0
+        set eagle_tests(Skipped) 0
+        set eagle_tests(Passed) 0
+        set eagle_tests(Failed) 0
 
         #
         # NOTE: Setup the lists of patterns to match test names against.  In
@@ -1755,35 +1848,116 @@ namespace eval ::Eagle {
         #       passed to the interpreter via this virtual array.
         #
         if {[info exists test_flags(-match)]} then {
-          set eagle_tests(matchNames) $test_flags(-match); # run these tests.
+          set eagle_tests(MatchNames) $test_flags(-match); # run these tests.
         } else {
-          set eagle_tests(matchNames) [list *]; # default to running all tests.
+          set eagle_tests(MatchNames) [list *]; # default to running all tests.
         }
 
         if {[info exists test_flags(-skip)]} then {
-          set eagle_tests(skipNames) $test_flags(-skip); # skip these tests.
+          set eagle_tests(SkipNames) $test_flags(-skip); # skip these tests.
         } else {
-          set eagle_tests(skipNames) [list]; # default to skipping no tests.
+          set eagle_tests(SkipNames) [list]; # default to skipping no tests.
         }
 
         #
         # NOTE: What tests have been skipped, if any?
         #
-        set eagle_tests(skippedNames) [list]
+        set eagle_tests(SkippedNames) [list]
 
         #
         # NOTE: What tests have failed, if any?
         #
-        set eagle_tests(failedNames) [list]
+        set eagle_tests(FailedNames) [list]
 
         #
         # NOTE: Initialize the list of active test constraints from the
         #       environment variable and/or the test flags.
         #
-        set eagle_tests(constraints) [getEnvironmentVariable testConstraints]
+        set eagle_tests(Constraints) [getEnvironmentVariable testConstraints]
 
         if {[info exists test_flags(-constraints)]} then {
-            eval lappend eagle_tests(constraints) $test_flags(-constraints)
+            eval lappend eagle_tests(Constraints) $test_flags(-constraints)
+        }
+      }
+    }
+
+    proc getTestChannelOrDefault {} {
+      if {[info exists ::test_channel]} then {
+        return $::test_channel
+      }
+
+      return stdout; # TODO: Good default?
+    }
+
+    proc setupTestShims { setup {quiet false} } {
+      if {$setup} then {
+        #
+        # HACK: Compatibility shim(s) for use with various tests in the Tcl
+        #       test suite.  Make sure these commands do not already exist
+        #       prior to attempt to adding them.
+        #
+        if {[llength [info commands testConstraint]] == 0} then {
+          interp alias {} testConstraint {} haveOrAddConstraint
+
+          if {!$quiet} then {
+            tqputs [getTestChannelOrDefault] [appendArgs \
+                "---- added \"testConstraint\" alias\n"]
+          }
+        }
+
+        if {[llength [info commands ::tcltest::testConstraint]] == 0} then {
+          interp alias {} ::tcltest::testConstraint {} haveOrAddConstraint
+
+          if {!$quiet} then {
+            tqputs [getTestChannelOrDefault] [appendArgs \
+                "---- added \"::tcltest::testConstraint\" alias\n"]
+          }
+        }
+
+        #
+        # NOTE: This is needed by most tests in the Tcl test suite.  Make
+        #       sure this command does not already exist prior to adding it.
+        #
+        if {[llength [info commands ::tcltest::cleanupTests]] == 0} then {
+          proc ::tcltest::cleanupTests { args } {}
+
+          if {!$quiet} then {
+            tqputs [getTestChannelOrDefault] [appendArgs \
+                "---- added \"::tcltest::cleanupTests\" procedure\n"]
+          }
+        }
+      } else {
+        #
+        # NOTE: Remove the compatibility shim command aliases that we setup
+        #       earlier.
+        #
+        if {[lsearch -exact [info commands] \
+            ::tcltest::cleanupTests] != -1} then {
+          rename ::tcltest::cleanupTests ""
+
+          if {!$quiet} then {
+            tqputs $::test_channel [appendArgs \
+                "---- removed \"::tcltest::cleanupTests\" procedure\n"]
+          }
+        }
+
+        if {[lsearch -exact [interp aliases] \
+            ::tcltest::testConstraint] != -1} then {
+          interp alias {} ::tcltest::testConstraint {} {}
+
+          if {!$quiet} then {
+            tqputs $::test_channel [appendArgs \
+                "---- removed \"::tcltest::testConstraint\" alias\n"]
+          }
+        }
+
+        if {[lsearch -exact [interp aliases] testConstraint] != -1} then {
+          interp alias {} testConstraint {} {}
+
+          if {!$quiet} then {
+            tqputs $::test_channel [appendArgs \
+                "---- removed \"testConstraint\" alias\n"]
+          }
         }
       }
     }
@@ -1793,21 +1967,21 @@ namespace eval ::Eagle {
     }
 
     proc getPassPercentage {} {
-      if {$::eagle_tests(total) > 0} then {
+      if {$::eagle_tests(Total) > 0} then {
         return [expr \
-            {100.0 * (($::eagle_tests(passed) + \
-            $::eagle_tests(skipped)) / \
-            double($::eagle_tests(total)))}]
+            {100.0 * (($::eagle_tests(Passed) + \
+            $::eagle_tests(Skipped)) / \
+            double($::eagle_tests(Total)))}]
       }
 
       return 0; # no tests were run, etc.
     }
 
     proc getSkipPercentage {} {
-      if {$::eagle_tests(total) > 0} then {
+      if {$::eagle_tests(Total) > 0} then {
         return [expr \
-            {100.0 * ($::eagle_tests(skipped) / \
-            double($::eagle_tests(total)))}]
+            {100.0 * ($::eagle_tests(Skipped) / \
+            double($::eagle_tests(Total)))}]
       }
 
       return 0; # no tests were run, etc.
@@ -1864,6 +2038,18 @@ namespace eval ::Eagle {
       }
 
       return false; # still alive (or error).
+    }
+
+    proc purgeAndCleanup { channel name } {
+      catch {uplevel 1 [list debug purge]} result
+
+      tputs $channel [appendArgs \
+          "---- purge \"" $name "\" results: " $result \n]
+
+      catch {uplevel 1 [list debug cleanup]} result
+
+      tputs $channel [appendArgs \
+          "---- cleanup \"" $name "\" results: " $result \n]
     }
 
     proc evalWithTimeout { script {milliseconds 2000} {resultVarName ""} } {
@@ -2225,17 +2411,19 @@ namespace eval ::Eagle {
     exportAndImportPackageCommands [namespace current] [list \
         tputs tlog getSoftwareRegistryKey haveConstraint addConstraint \
         haveOrAddConstraint getConstraints removeConstraint fixConstraints \
-        calculateBogoCops calculateRelativePerformance sourceIfValid \
-        processTestArguments getTclShellFileName getTemporaryPath getFiles \
-        getTestFiles getTestRunId getTestLogId getTestLog getTestSuite \
-        getTestMachine getTestPlatform getTestConfiguration getTestSuffix \
-        testExec testClrExec execTestShell isRandomOrder isStopOnFailure \
+        calculateBogoCops calculateRelativePerformance formatTimeStamp \
+        formatElapsedTime sourceIfValid processTestArguments \
+        getTclShellFileName getTemporaryPath getFiles getTestFiles \
+        getTestRunId getTestLogId getTestLog getTestSuite getTestMachine \
+        getTestPlatform getTestConfiguration getTestSuffix testExec \
+        testClrExec execTestShell isRandomOrder isStopOnFailure \
         isExitOnComplete returnInfoScript runTestPrologue runTestEpilogue \
-        hookPuts unhookPuts runTest testShim tsource recordTestStatistics \
-        reportTestStatistics formatList formatListAsDict pathToRegexp \
-        inverseLsearchGlob removePathFromFileNames formatDecimal \
-        clearTestPercent reportTestPercent runAllTests configureTcltest \
-        machineToPlatform getPassPercentage getSkipPercentage] false false
+        hookPuts unhookPuts runTest testArrayGet testShim tsource \
+        recordTestStatistics reportTestStatistics formatList formatListAsDict \
+        pathToRegexp inverseLsearchGlob removePathFromFileNames formatDecimal \
+        clearTestPercent reportTestPercent runAllTests isTestSuiteRunning \
+        configureTcltest machineToPlatform getPassPercentage \
+        getSkipPercentage] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

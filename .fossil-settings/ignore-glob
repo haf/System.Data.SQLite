@@ -1,6 +1,8 @@
 *.mistachkin.eagle
 *.sln
 Externals/Eagle/bin/Eagle*.pdb
+Externals/Eagle/bin/x64/Spilornis.pdb
+Externals/Eagle/bin/x86/Spilornis.pdb
 SQLite.Interop/*.vcxproj
 SQLite.Interop/*.vcxproj.filters
 System.Data.SQLite/*.csproj

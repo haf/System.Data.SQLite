@@ -59,6 +59,28 @@ namespace eval ::Eagle {
     }
   }
 
+  proc isTclThread { name } {
+    #
+    # NOTE: For now, this check only works in Eagle.
+    #
+    set result false
+
+    if {[isEagle]} then {
+      catch {
+        if {[llength [info commands tcl]] > 0 && [tcl ready] && \
+            [lsearch -exact -- [tcl threads] $name] != -1} then {
+          #
+          # NOTE: The name specified by the caller appears in the
+          #       list of Tcl threads for this Eagle interpreter.
+          #
+          set result true
+        }
+      }
+    }
+
+    return $result
+  }
+
   #
   # NOTE: This is the procedure that detects whether or not we are
   #       running in Eagle on Mono (otherwise, we are running in Tcl
@@ -1387,7 +1409,7 @@ namespace eval ::Eagle {
         return ""
       }
 
-      set type [object invoke -alias Type GetType $typeName]
+      set type [object invoke -create -alias Type GetType $typeName]
 
       if {[string length $type] == 0} then {
         return ""
@@ -1710,6 +1732,17 @@ namespace eval ::Eagle {
       return $result
     }
 
+    proc loadWordTcl { directory } {
+      uplevel 1 [list source [file join $directory word.tcl]]
+    }
+
+    #
+    # NOTE: Add script library files borrowed from native Tcl.
+    #
+    if {![interp issafe]} then {
+      loadWordTcl [file dirname [info script]]
+    }
+
     ###########################################################################
     ############################# END Eagle ONLY ##############################
     ###########################################################################
@@ -1853,15 +1886,15 @@ namespace eval ::Eagle {
     #       into the global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        isEagle haveGaruda isMono getEnvironmentVariable combineFlags \
-        getCompileInfo getPlatformInfo getPluginPath appendArgs lappendArgs \
-        getDictionaryValue getColumnValue getRowColumnValue tqputs tqlog \
-        readFile readSharedFile writeFile appendFile appendLogFile \
-        appendSharedFile appendSharedLogFile readAsciiFile writeAsciiFile \
-        readUnicodeFile writeUnicodeFile getDirResultPath addToPath \
-        removeFromPath execShell lshuffle ldifference filter map reduce \
-        getLengthModifier debug findDirectories findFiles findFilesRecursive \
-        exportAndImportPackageCommands] false false
+        isEagle haveGaruda isTclThread isMono getEnvironmentVariable \
+        combineFlags getCompileInfo getPlatformInfo getPluginPath appendArgs \
+        lappendArgs getDictionaryValue getColumnValue getRowColumnValue \
+        tqputs tqlog readFile readSharedFile writeFile appendFile \
+        appendLogFile appendSharedFile appendSharedLogFile readAsciiFile \
+        writeAsciiFile readUnicodeFile writeUnicodeFile getDirResultPath \
+        addToPath removeFromPath execShell lshuffle ldifference filter map \
+        reduce getLengthModifier debug findDirectories findFiles \
+        findFilesRecursive exportAndImportPackageCommands] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
