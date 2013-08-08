@@ -3,7 +3,7 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.88.0 - August XX, 2013 <font color="red">(release scheduled)</font></b>
+    <b>1.0.88.0 - August 7, 2013</b>
 </p>
 <ul>
     <li>Various fixes to managed virtual table integration infrastructure.</li>
