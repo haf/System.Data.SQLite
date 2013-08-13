@@ -52,11 +52,11 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns true
+    /// Returns false
     /// </summary>
     public override bool IsSynchronized
     {
-      get { return true; }
+      get { return false; }
     }
 
     /// <summary>

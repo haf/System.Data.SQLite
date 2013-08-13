@@ -1221,9 +1221,16 @@ namespace System.Data.SQLite
     {
 #if !SQLITE_STANDARD
       int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_name_interop(stmt._sqlite_stmt, index, out len), len);
+      IntPtr p = UnsafeNativeMethods.sqlite3_column_name_interop(stmt._sqlite_stmt, index, out len);
 #else
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_name(stmt._sqlite_stmt, index), -1);
+      IntPtr p = UnsafeNativeMethods.sqlite3_column_name(stmt._sqlite_stmt, index);
+#endif
+      if (p == IntPtr.Zero)
+        throw new SQLiteException(SQLiteErrorCode.NoMem, GetLastError());
+#if !SQLITE_STANDARD
+      return UTF8ToString(p, len);
+#else
+      return UTF8ToString(p, -1);
 #endif
     }
 
