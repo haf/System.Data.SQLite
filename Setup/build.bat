@@ -268,8 +268,8 @@ IF ERRORLEVEL 1 (
 GOTO no_errors
 
 :fn_UnquoteVariable
-  SETLOCAL
   IF NOT DEFINED %1 GOTO :EOF
+  SETLOCAL
   SET __ECHO_CMD=ECHO %%%1%%
   FOR /F "delims=" %%V IN ('%__ECHO_CMD%') DO (
     SET VALUE=%%V
