@@ -3,6 +3,12 @@
 <b>Version History</b>
 
 <p>
+    <b>1.0.89.0 - September XX, 2013 <font color="red">(release scheduled)</font></b>
+</p>
+<ul>
+    <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.8.0].</li>
+</ul>
+<p>
     <b>1.0.88.0 - August 7, 2013</b>
 </p>
 <ul>
@@ -229,11 +235,11 @@
 <ul>
     <li>Updated to [http://www.sqlite.org/releaselog/3_7_8.html|SQLite 3.7.8]
     <li>More enhancements to the build system.</li>
-    <li>Add official <a href="http://www.nuget.org/">NuGet</a> packages for x86 and x64.</li>
+    <li>Add official [http://www.nuget.org/|NuGet] packages for x86 and x64.</li>
     <li>Add Changes and LastInsertRowId properties to the connection class.</li>
     <li>Support more formats when converting data from/to the DateTime type.</li>
     <li>Make all the assembly versioning attributes consistent.</li>
-    <li>Add unit testing infrastructure using <a href="http://eagle.to/">Eagle</a>.</li>
+    <li>Add unit testing infrastructure using [http://eagle.to/|Eagle].</li>
     <li>Integrate all legacy unit tests, including the &quot;testlinq&quot; project, into the new test suite.</li>
     <li>Add projects to build the interop assembly statically linked to the Visual C++ runtime. Fix for [53f0c5cbf6].</li>
     <li>Add SQLITE_ENABLE_STAT2 compile-time option to the interop assembly. Fix for [74807fbf27].</li>
