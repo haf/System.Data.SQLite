@@ -25,6 +25,32 @@
 
     <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantHeader">
+        <b>Latest Microsoft Visual C++ Runtime Library Downloads</b>
+      </td>
+    </tr>
+
+    <tr bgcolor="#fff1c8">
+      <td colspan="3" class="importantNotes">
+        For detailed information about the latest downloads for each Microsoft
+        Visual C++ Runtime Library release, please refer to the following page:
+      </td>
+    </tr>
+
+    <tr bgcolor="#fff1c8">
+      <td class="importantNotes">
+        &nbsp;
+      </td>
+      <td class="importantNotes" align="center">
+        <a href="https://support.microsoft.com/kb/2019667">Latest Supported
+        Visual C++ Downloads</a>
+      </td>
+      <td class="importantNotes">
+        &nbsp;
+      </td>
+    </tr>
+
+    <tr bgcolor="#fff1c8">
+      <td colspan="3" class="importantHeader">
         <b>Support Notes</b>
       </td>
     </tr>
