@@ -1299,14 +1299,19 @@ namespace System.Data.SQLite
       NewCommand = 7,
 
       /// <summary>
+      /// A data reader was created using the connection.
+      /// </summary>
+      NewDataReader = 8,
+
+      /// <summary>
       /// The connection is being closed.
       /// </summary>
-      Closing = 8,
+      Closing = 9,
 
       /// <summary>
       /// The connection was closed.
       /// </summary>
-      Closed = 9
+      Closed = 10
   }
 
   /// <summary>

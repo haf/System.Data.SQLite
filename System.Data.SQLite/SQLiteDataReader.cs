@@ -105,7 +105,13 @@ namespace System.Data.SQLite
       _rowsAffected = -1;
 
       if (_command != null)
-        NextResult();
+      {
+          SQLiteConnection.OnChanged(_command.Connection,
+              new ConnectionEventArgs(SQLiteConnectionEventType.NewDataReader,
+                  null, null, _command, null, new object[] { this, behave }));
+
+          NextResult();
+      }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
