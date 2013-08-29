@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -311,7 +311,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// SQLite is inherently un-typed.  All datatypes in SQLite are natively strings.  The definition of the columns of a table
     /// and the affinity of returned types are all we have to go on to type-restrict data in the reader.
-    /// 
+    ///
     /// This function attempts to verify that the type of data being requested of a column matches the datatype of the column.  In
     /// the case of columns that are not backed into a table definition, we attempt to match up the affinity of a column (int, double, string or blob)
     /// to a set of known types that closely match that affinity.  It's not an exact science, but its the best we can do.
@@ -919,9 +919,11 @@ namespace System.Data.SQLite
 
       for (int n = 0; n < _fieldCount; n++)
       {
+        SQLiteType sqlType = GetSQLiteType(n);
+
         row = tbl.NewRow();
 
-        DbType typ = GetSQLiteType(n).Type;
+        DbType typ = sqlType.Type;
 
         // Default settings for the column
         row[SchemaTableColumn.ColumnName] = GetName(n);
@@ -929,7 +931,7 @@ namespace System.Data.SQLite
         row[SchemaTableColumn.ColumnSize] = SQLiteConvert.DbTypeToColumnSize(typ);
         row[SchemaTableColumn.NumericPrecision] = SQLiteConvert.DbTypeToNumericPrecision(typ);
         row[SchemaTableColumn.NumericScale] = SQLiteConvert.DbTypeToNumericScale(typ);
-        row[SchemaTableColumn.ProviderType] = GetSQLiteType(n).Type;
+        row[SchemaTableColumn.ProviderType] = sqlType.Type;
         row[SchemaTableColumn.IsLong] = false;
         row[SchemaTableColumn.AllowDBNull] = true;
         row[SchemaTableOptionalColumn.IsReadOnly] = false;
@@ -985,7 +987,8 @@ namespace System.Data.SQLite
             if (arSize.Length > 1)
             {
               arSize = arSize[0].Split(',', '.');
-              if (GetSQLiteType(n).Type == DbType.String || GetSQLiteType(n).Type == DbType.Binary)
+              if (sqlType.Type == DbType.Binary || sqlType.Type == DbType.String ||
+                  sqlType.Type == DbType.AnsiStringFixedLength || sqlType.Type == DbType.StringFixedLength)
               {
                 row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
               }
@@ -1335,7 +1338,7 @@ namespace System.Data.SQLite
 
       typ = _fieldTypeArray[i];
 
-      // If not initialized, then fetch the declared column datatype and attempt to convert it 
+      // If not initialized, then fetch the declared column datatype and attempt to convert it
       // to a known DbType.
       if (typ.Affinity == TypeAffinity.Uninitialized)
         typ.Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity));

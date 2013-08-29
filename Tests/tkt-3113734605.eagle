@@ -1,0 +1,64 @@
+###############################################################################
+#
+# tkt-3113734605.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-3113734605-1.1 {ColumnSize and NumericPrecision} -setup {
+  setupDb [set fileName tkt-3113734605-1.1.db]
+} -body {
+  set connection [getDbConnection]
+
+  set result [list]
+
+  sql execute $db "CREATE TABLE t1 (x CHAR(3));"
+  sql execute $db "CREATE VIEW v1 AS SELECT * FROM t1;"
+
+  foreach collectionName [list TABLECOLUMNS VIEWCOLUMNS] {
+    set dataTable [object invoke -alias $connection GetSchema $collectionName]
+
+    if {[string length $dataTable] > 0} then {
+      set dataRows [$dataTable Rows]
+
+      object foreach -alias dataRow $dataRows {
+        lappend result [set value [$dataRow get_Item TABLE_NAME]]
+        lappend result [set value [$dataRow get_Item COLUMN_NAME]]
+        lappend result [set value [$dataRow get_Item CHARACTER_MAXIMUM_LENGTH]]
+        lappend result [set value [$dataRow get_Item NUMERIC_PRECISION]]
+      }
+    }
+  }
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  freeDbConnection
+
+  unset -nocomplain value dataRow dataRows dataTable collectionName result \
+      connection db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
+regexp -result {^t1 x 3 System#DBNull#\d+ v1 x 3 System#DBNull#\d+ t1 x 3\
+System#DBNull#\d+$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
