@@ -108,7 +108,7 @@ namespace System.Data.SQLite
       {
           SQLiteConnection.OnChanged(_command.Connection,
               new ConnectionEventArgs(SQLiteConnectionEventType.NewDataReader,
-                  null, null, _command, null, new object[] { this, behave }));
+              null, null, _command, this, null, null, new object[] { behave }));
 
           NextResult();
       }

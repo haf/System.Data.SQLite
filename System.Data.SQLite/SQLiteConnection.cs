@@ -46,6 +46,16 @@ namespace System.Data.SQLite
       public readonly IDbCommand Command;
 
       /// <summary>
+      /// The data reader associated with this event, if any.
+      /// </summary>
+      public readonly IDataReader DataReader;
+
+      /// <summary>
+      /// The critical handle associated with this event, if any.
+      /// </summary>
+      public readonly CriticalHandle CriticalHandle;
+
+      /// <summary>
       /// Command or message text associated with this event, if any.
       /// </summary>
       public readonly string Text;
@@ -63,6 +73,8 @@ namespace System.Data.SQLite
       /// with this event, if any.</param>
       /// <param name="transaction">The transaction associated with this event, if any.</param>
       /// <param name="command">The command associated with this event, if any.</param>
+      /// <param name="dataReader">The data reader associated with this event, if any.</param>
+      /// <param name="criticalHandle">The critical handle associated with this event, if any.</param>
       /// <param name="text">The command or message text, if any.</param>
       /// <param name="data">The extra data, if any.</param>
       internal ConnectionEventArgs(
@@ -70,6 +82,8 @@ namespace System.Data.SQLite
           StateChangeEventArgs eventArgs,
           IDbTransaction transaction,
           IDbCommand command,
+          IDataReader dataReader,
+          CriticalHandle criticalHandle,
           string text,
           object data
           )
@@ -78,6 +92,8 @@ namespace System.Data.SQLite
           EventArgs = eventArgs;
           Transaction = transaction;
           Command = command;
+          DataReader = dataReader;
+          CriticalHandle = criticalHandle;
           Text = text;
           Data = data;
       }
@@ -491,6 +507,8 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Initializes the connection with a pre-existing native connection handle.
+    /// This constructor overload is intended to be used only by the private
+    /// <see cref="SQLiteModule.CreateOrConnect" /> method.
     /// </summary>
     /// <param name="db">
     /// The native connection handle to use.
@@ -617,7 +635,9 @@ namespace System.Data.SQLite
     /// Raises the <see cref="Changed" /> event.
     /// </summary>
     /// <param name="connection">
-    /// The connection associated with this event.
+    /// The connection associated with this event.  If this parameter is not
+    /// null and the specified connection cannot raise events, then the
+    /// registered event handlers will not be invoked.
     /// </param>
     /// <param name="e">
     /// A <see cref="ConnectionEventArgs" /> that contains the event data.
@@ -627,11 +647,8 @@ namespace System.Data.SQLite
         ConnectionEventArgs e
         )
     {
-        if (connection == null)
-            return;
-
 #if !PLATFORM_COMPACTFRAMEWORK
-        if (!connection.CanRaiseEvents)
+        if ((connection != null) && !connection.CanRaiseEvents)
             return;
 #endif
 
@@ -712,8 +729,26 @@ namespace System.Data.SQLite
         IntPtr nativeHandle
         )
     {
-        if (nativeHandle == IntPtr.Zero) return null;
-        return new SQLiteConnectionHandle(nativeHandle, true);
+        SQLiteConnectionHandle result;
+
+        try
+        {
+            // do nothing.
+        }
+        finally /* NOTE: Thread.Abort() protection. */
+        {
+            result = (nativeHandle != IntPtr.Zero) ?
+                new SQLiteConnectionHandle(nativeHandle, true) : null;
+        }
+
+        if (result != null)
+        {
+            SQLiteConnection.OnChanged(null, new ConnectionEventArgs(
+                SQLiteConnectionEventType.NewCriticalHandle, null, null,
+                null, null, result, null, new object[] { nativeHandle }));
+        }
+
+        return result;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1137,7 +1172,8 @@ namespace System.Data.SQLite
           new SQLiteTransaction(this, isolationLevel != IsolationLevel.Serializable);
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.NewTransaction, null, transaction, null, null, null));
+          SQLiteConnectionEventType.NewTransaction, null, transaction,
+          null, null, null, null, null));
 
       return transaction;
     }
@@ -1152,7 +1188,8 @@ namespace System.Data.SQLite
       CheckDisposed();
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.ChangeDatabase, null, null, null, databaseName, null));
+          SQLiteConnectionEventType.ChangeDatabase, null, null, null, null,
+          null, databaseName, null));
 
       throw new NotImplementedException(); // NOTE: For legacy compatibility.
     }
@@ -1165,7 +1202,8 @@ namespace System.Data.SQLite
       CheckDisposed();
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.Closing, null, null, null, null, null));
+          SQLiteConnectionEventType.Closing, null, null, null, null, null,
+          null, null));
 
       if (_sql != null)
       {
@@ -1201,7 +1239,8 @@ namespace System.Data.SQLite
       OnStateChange(ConnectionState.Closed, ref eventArgs);
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.Closed, eventArgs, null, null, null, null));
+          SQLiteConnectionEventType.Closed, eventArgs, null, null, null,
+          null, null, null));
     }
 
     /// <summary>
@@ -1663,7 +1702,8 @@ namespace System.Data.SQLite
       _enlistment = new SQLiteEnlistment(this, transaction);
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.EnlistTransaction, null, null, null, null, _enlistment));
+          SQLiteConnectionEventType.EnlistTransaction, null, null, null, null,
+          null, null, new object[] { _enlistment }));
     }
 #endif
 
@@ -1952,7 +1992,8 @@ namespace System.Data.SQLite
       CheckDisposed();
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.Opening, null, null, null, null, null));
+          SQLiteConnectionEventType.Opening, null, null, null, null, null,
+          null, null));
 
       if (_connectionState != ConnectionState.Closed)
         throw new InvalidOperationException();
@@ -1963,7 +2004,8 @@ namespace System.Data.SQLite
           _connectionString, _parseViaFramework);
 
       OnChanged(this, new ConnectionEventArgs(
-          SQLiteConnectionEventType.ConnectionString, null, null, null, _connectionString, opts));
+          SQLiteConnectionEventType.ConnectionString, null, null, null, null,
+          null, _connectionString, new object[] { opts }));
 
       object enumValue;
 
@@ -2193,7 +2235,8 @@ namespace System.Data.SQLite
           OnStateChange(ConnectionState.Open, ref eventArgs);
 
           OnChanged(this, new ConnectionEventArgs(
-              SQLiteConnectionEventType.Opened, eventArgs, null, null, null, null));
+              SQLiteConnectionEventType.Opened, eventArgs, null, null, null,
+              null, null, null));
         }
         catch
         {
