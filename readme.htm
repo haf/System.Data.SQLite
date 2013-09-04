@@ -191,6 +191,9 @@ it to extend its functionality, but the core engine's source is not changed.</p>
 </p>
 <ul>
     <li>Updated to <a href="http://www.sqlite.org/src/info/trunk">SQLite 3.8.1</a>.</li>
+    <li>Use declared column sizes for the AnsiStringFixedLength and StringFixedLength mapped database types. Fix for [3113734605].</li>
+    <li>Check the result of sqlite3_column_name function against NULL.</li>
+    <li>Return false for the SQLiteParameterCollection.IsSynchronized property because it is not thread-safe.</li>
 </ul>
 <p>
     <b>1.0.88.0 - August 7, 2013</b>
