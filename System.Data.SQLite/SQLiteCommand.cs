@@ -281,6 +281,24 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    private void DisposeStatements()
+    {
+        if (_statementList == null) return;
+
+        int x = _statementList.Count;
+
+        for (int n = 0; n < x; n++)
+        {
+            SQLiteStatement stmt = _statementList[n];
+            if (stmt == null) continue;
+            stmt.Dispose();
+        }
+
+        _statementList = null;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Clears and destroys all statements currently prepared
     /// </summary>
@@ -303,13 +321,7 @@ namespace System.Data.SQLite
         _activeReader = null;
       }
 
-      if (_statementList == null) return;
-
-      int x = _statementList.Count;
-      for (int n = 0; n < x; n++)
-        _statementList[n].Dispose();
-
-      _statementList = null;
+      DisposeStatements();
 
       _parameterCollection.Unbind();
     }
