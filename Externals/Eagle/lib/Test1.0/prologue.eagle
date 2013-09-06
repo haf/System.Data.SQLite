@@ -1416,7 +1416,7 @@ if {![info exists no([file tail [info script]])]} then {
         #       "basic-1.42", and "basic-1.43".
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
-            *get_SimpleProperty*
+            *get_SimpleIntProperty*
 
         #
         # NOTE: For test "object-3.1".

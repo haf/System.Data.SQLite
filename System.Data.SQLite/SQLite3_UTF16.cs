@@ -196,6 +196,11 @@ namespace System.Data.SQLite
           _sql = new SQLiteConnectionHandle(db, true);
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
+
+        SQLiteConnection.OnChanged(null, new ConnectionEventArgs(
+            SQLiteConnectionEventType.NewCriticalHandle, null, null,
+            null, null, _sql, strFilename, new object[] { strFilename,
+            connectionFlags, openFlags, maxPoolSize, usePool }));
       }
 
       // Bind functions to this connection.  If any previous functions of the same name

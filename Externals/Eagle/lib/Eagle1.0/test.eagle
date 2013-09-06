@@ -2204,6 +2204,12 @@ namespace eval ::Eagle {
         }
 
         #
+        # NOTE: Get the effective test suffix.  This is allowed to be an
+        #       empty string.
+        #
+        set suffix [getTestSuffix]
+
+        #
         # NOTE: Build the full path and file name of the Garuda DLL, using
         #       the Eagle base path.  Currently, this will only work
         #       correctly if the test suite is being run from inside the
@@ -2211,7 +2217,8 @@ namespace eval ::Eagle {
         #
         return [file join $::base_path bin \
             [machineToPlatform [getMachineForTclShell]] [appendArgs \
-            $configuration Dll] [appendArgs Garuda [info sharedlibextension]]]
+            $configuration Dll $suffix] [appendArgs Garuda [info \
+            sharedlibextension]]]
       } else {
         #
         # NOTE: We are missing the base path, return nothing.

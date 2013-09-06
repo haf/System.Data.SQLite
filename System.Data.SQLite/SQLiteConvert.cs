@@ -1299,28 +1299,46 @@ namespace System.Data.SQLite
       NewCommand = 7,
 
       /// <summary>
+      /// A data reader was created using the connection.
+      /// </summary>
+      NewDataReader = 8,
+
+      /// <summary>
+      /// An instance of a <see cref="CriticalHandle" /> derived class has
+      /// been created to wrap a native resource.
+      /// </summary>
+      NewCriticalHandle = 9,
+
+      /// <summary>
       /// The connection is being closed.
       /// </summary>
-      Closing = 8,
+      Closing = 10,
 
       /// <summary>
       /// The connection was closed.
       /// </summary>
-      Closed = 9
+      Closed = 11
   }
 
   /// <summary>
-  /// This implementation of SQLite for ADO.NET can process date/time fields in databases in only one of three formats.  Ticks, ISO8601
-  /// and JulianDay.
+  /// This implementation of SQLite for ADO.NET can process date/time fields in
+  /// databases in one of six formats.
   /// </summary>
   /// <remarks>
-  /// ISO8601 is more compatible, readable, fully-processable, but less accurate as it doesn't provide time down to fractions of a second.
-  /// JulianDay is the numeric format the SQLite uses internally and is arguably the most compatible with 3rd party tools.  It is
-  /// not readable as text without post-processing.
-  /// Ticks less compatible with 3rd party tools that query the database, and renders the DateTime field unreadable as text without post-processing.
+  /// ISO8601 format is more compatible, readable, fully-processable, but less
+  /// accurate as it does not provide time down to fractions of a second.
+  /// JulianDay is the numeric format the SQLite uses internally and is arguably
+  /// the most compatible with 3rd party tools.  It is not readable as text
+  /// without post-processing.  Ticks less compatible with 3rd party tools that
+  /// query the database, and renders the DateTime field unreadable as text
+  /// without post-processing.  UnixEpoch is more compatible with Unix systems.
+  /// InvariantCulture allows the configured format for the invariant culture
+  /// format to be used and is human readable.  CurrentCulture allows the
+  /// configured format for the current culture to be used and is also human
+  /// readable.
   ///
-  /// The preferred order of choosing a datetime format is JulianDay, ISO8601, and then Ticks.  Ticks is mainly present for legacy
-  /// code support.
+  /// The preferred order of choosing a DateTime format is JulianDay, ISO8601,
+  /// and then Ticks.  Ticks is mainly present for legacy code support.
   /// </remarks>
   public enum SQLiteDateFormats
   {

@@ -126,6 +126,11 @@ namespace System.Data.SQLite
         {
             _sql = new SQLiteConnectionHandle(db, ownHandle);
             _fileName = fileName;
+
+            SQLiteConnection.OnChanged(null, new ConnectionEventArgs(
+                SQLiteConnectionEventType.NewCriticalHandle, null, null,
+                null, null, _sql, fileName, new object[] { fmt, kind,
+                fmtString, db, fileName, ownHandle }));
         }
     }
 
@@ -537,6 +542,11 @@ namespace System.Data.SQLite
           _sql = new SQLiteConnectionHandle(db, true);
         }
         lock (_sql) { /* HACK: Force the SyncBlock to be "created" now. */ }
+
+        SQLiteConnection.OnChanged(null, new ConnectionEventArgs(
+            SQLiteConnectionEventType.NewCriticalHandle, null, null,
+            null, null, _sql, strFilename, new object[] { strFilename,
+            connectionFlags, openFlags, maxPoolSize, usePool }));
       }
 
       // Bind functions to this connection.  If any previous functions of the same name
@@ -574,7 +584,9 @@ namespace System.Data.SQLite
 
     internal override void SetTimeout(int nTimeoutMS)
     {
-      SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_busy_timeout(_sql, nTimeoutMS);
+      IntPtr db = _sql;
+      if (db == IntPtr.Zero) throw new SQLiteException("no connection handle available");
+      SQLiteErrorCode n = UnsafeNativeMethods.sqlite3_busy_timeout(db, nTimeoutMS);
       if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
     }
 
@@ -743,7 +755,18 @@ namespace System.Data.SQLite
 #endif
 
             if ((n == SQLiteErrorCode.Ok) && (stmt != IntPtr.Zero))
+            {
+              if (statementHandle != null) statementHandle.Dispose();
               statementHandle = new SQLiteStatementHandle(_sql, stmt);
+            }
+          }
+
+          if (statementHandle != null)
+          {
+            SQLiteConnection.OnChanged(null, new ConnectionEventArgs(
+              SQLiteConnectionEventType.NewCriticalHandle, null, null,
+              null, null, statementHandle, strSql, new object[] { cnn,
+              strSql, previous, timeoutMS }));
           }
 
           if (n == SQLiteErrorCode.Schema)
@@ -2107,6 +2130,11 @@ namespace System.Data.SQLite
 
             backupHandle = new SQLiteBackupHandle(destHandle, backup);
         }
+
+        SQLiteConnection.OnChanged(null, new ConnectionEventArgs(
+            SQLiteConnectionEventType.NewCriticalHandle, null, null,
+            null, null, backupHandle, null, new object[] { destCnn,
+            destName, sourceName }));
 
         return new SQLiteBackup(
             this, backupHandle, destHandle, zDestName, sourceHandle,

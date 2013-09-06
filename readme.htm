@@ -194,6 +194,8 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Use declared column sizes for the AnsiStringFixedLength and StringFixedLength mapped database types. Fix for [3113734605].</li>
     <li>Check the result of sqlite3_column_name function against NULL.</li>
     <li>Return false for the SQLiteParameterCollection.IsSynchronized property because it is not thread-safe.</li>
+    <li>Raise the static SQLiteConnection.Changed event when any SQLiteCommand, SQLiteDataReader, or CriticalHandle derived object instance is created. Fix for [aba4549801].</li>
+    <li>Revise how the extra object data is passed to the static SQLiteConnection.Changed event.&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>
     <b>1.0.88.0 - August 7, 2013</b>
