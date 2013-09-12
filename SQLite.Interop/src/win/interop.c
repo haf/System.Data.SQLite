@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -124,7 +124,7 @@ SQLITE_PRIVATE void sqlite3DbFree_interop(sqlite3 *db, void *p)
     So, here we have a problem ... .NET has a pointer to any number of sqlite3_stmt objects.  We can't call sqlite3_finalize() on these because
     their memory is freed and can be used for something else.  The GC thread could potentially try and call finalize again on the statement after
     that memory was deallocated.  BAD.  So, what we need to do is make a copy of each statement, and call finalize() on the copy -- so that the original
-    statement's memory is preserved, and marked as BAD, but we can still manage to finalize everything and forcibly close the database.  Later when the 
+    statement's memory is preserved, and marked as BAD, but we can still manage to finalize everything and forcibly close the database.  Later when the
     GC gets around to calling finalize_interop() on the "bad" statement, we detect that and finish deallocating the pointer.
 */
 SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
@@ -162,7 +162,7 @@ SQLITE_API int WINAPI sqlite3_close_interop(sqlite3 *db)
       Vdbe *p = (Vdbe *)sqlite3DbMallocZero_interop(db, sizeof(Vdbe));
       Vdbe *po = db->pVdbe;
 
-      if (!p) 
+      if (!p)
       {
         ret = SQLITE_NOMEM;
         break;
@@ -581,7 +581,11 @@ SQLITE_API int WINAPI sqlite3_create_function_interop(sqlite3 *psql, const char 
       FuncDef *pFunc = sqlite3FindFunction(psql, zFunctionName, strlen(zFunctionName), nArg, eTextRep, 0);
       if( pFunc )
       {
+#if SQLITE_VERSION_NUMBER >= 3008001
+        pFunc->funcFlags |= SQLITE_FUNC_NEEDCOLL;
+#else
         pFunc->flags |= SQLITE_FUNC_NEEDCOLL;
+#endif
       }
     }
   }
@@ -625,7 +629,11 @@ SQLITE_API void WINAPI sqlite3_result_int64_interop(sqlite3_context *pctx, sqlit
 
 SQLITE_API int WINAPI sqlite3_context_collcompare_interop(sqlite3_context *ctx, const void *p1, int p1len, const void *p2, int p2len)
 {
+#if SQLITE_VERSION_NUMBER >= 3008001
+  if ((ctx->pFunc->funcFlags & SQLITE_FUNC_NEEDCOLL) == 0) return 2;
+#else
   if ((ctx->pFunc->flags & SQLITE_FUNC_NEEDCOLL) == 0) return 2;
+#endif
   return ctx->pColl->xCmp(ctx->pColl->pUser, p1len, p1, p2len, p2);
 }
 
@@ -636,7 +644,11 @@ SQLITE_API const char * WINAPI sqlite3_context_collseq_interop(sqlite3_context *
   *plen = 0;
   *enc = 0;
 
+#if SQLITE_VERSION_NUMBER >= 3008001
+  if ((ctx->pFunc->funcFlags & SQLITE_FUNC_NEEDCOLL) == 0) return NULL;
+#else
   if ((ctx->pFunc->flags & SQLITE_FUNC_NEEDCOLL) == 0) return NULL;
+#endif
 
   if (pColl)
   {
@@ -696,7 +708,7 @@ SQLITE_API const void * WINAPI sqlite3_column_origin_name16_interop(sqlite3_stmt
 SQLITE_API int WINAPI sqlite3_table_column_metadata_interop(sqlite3 *db, const char *zDbName, const char *zTableName, const char *zColumnName, char **pzDataType, char **pzCollSeq, int *pNotNull, int *pPrimaryKey, int *pAutoinc, int *pdtLen, int *pcsLen)
 {
   int n;
-  
+
   n = sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc);
   *pdtLen = (*pzDataType != 0) ? strlen(*pzDataType) : 0;
   *pcsLen = (*pzCollSeq != 0) ? strlen(*pzCollSeq) : 0;

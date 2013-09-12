@@ -1698,7 +1698,7 @@ static void lastRowsFunc(sqlite3_context *context, int argc, sqlite3_value **arg
 ** external linkage.
 */
 int RegisterExtensionFunctions(sqlite3 *db){
-  static const struct FuncDefs {
+  static const struct {
      char *zName;
      signed char nArg;
      u8 argType;           /* 0: none.  1: db  2: (-1) */
@@ -1766,7 +1766,7 @@ int RegisterExtensionFunctions(sqlite3 *db){
 
   };
   /* Aggregate functions */
-  static const struct FuncDefAgg {
+  static const struct {
     char *zName;
     signed char nArg;
     u8 argType;
@@ -1798,7 +1798,11 @@ int RegisterExtensionFunctions(sqlite3 *db){
       struct FuncDef *pFunc = sqlite3FindFunction(db, aFuncs[i].zName,
           strlen(aFuncs[i].zName), aFuncs[i].nArg, aFuncs[i].eTextRep, 0);
       if( pFunc && aFuncs[i].needCollSeq ){
+#if SQLITE_VERSION_NUMBER >= 3008001
+        pFunc->funcFlags |= SQLITE_FUNC_NEEDCOLL;
+#else
         pFunc->flags |= SQLITE_FUNC_NEEDCOLL;
+#endif
       }
     }
 #endif
@@ -1816,10 +1820,14 @@ int RegisterExtensionFunctions(sqlite3 *db){
         pArg, 0, aAggs[i].xStep, aAggs[i].xFinalize);
 #if 0
     if( aAggs[i].needCollSeq ){
-      struct FuncDefAgg *pFunc = sqlite3FindFunction( db, aAggs[i].zName,
+      struct FuncDef *pFunc = sqlite3FindFunction( db, aAggs[i].zName,
           strlen(aAggs[i].zName), aAggs[i].nArg, SQLITE_UTF8, 0);
       if( pFunc && aAggs[i].needCollSeq ){
-        pFunc->needCollSeq = 1;
+#if SQLITE_VERSION_NUMBER >= 3008001
+        pFunc->funcFlags |= SQLITE_FUNC_NEEDCOLL;
+#else
+        pFunc->flags |= SQLITE_FUNC_NEEDCOLL;
+#endif
       }
     }
 #endif
