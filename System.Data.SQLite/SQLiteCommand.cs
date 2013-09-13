@@ -24,8 +24,10 @@ namespace System.Data.SQLite
   {
     /// <summary>
     /// The default connection string to be used when creating a temporary
-    /// connection to execute a command via the static <see cref="Execute" />
-    /// method.
+    /// connection to execute a command via the static
+    /// <see cref="Execute(string,SQLiteExecuteType,string,object[])" /> or
+    /// <see cref="Execute(string,SQLiteExecuteType,CommandBehavior,string,object[])" />
+    /// methods.
     /// </summary>
     private static readonly string DefaultConnectionString = "Data Source=:memory:;";
 
@@ -693,6 +695,48 @@ namespace System.Data.SQLite
         params object[] args
         )
     {
+        return Execute(
+            commandText, executeType, CommandBehavior.Default,
+            connectionString, args);
+    }
+
+    /// <summary>
+    /// This method creates a new connection, executes the query using the given
+    /// execution type and command behavior, closes the connection, and returns
+    /// the results.  If the connection string is null, a temporary in-memory
+    /// database connection will be used.
+    /// </summary>
+    /// <param name="commandText">
+    /// The text of the command to be executed.
+    /// </param>
+    /// <param name="executeType">
+    /// The execution type for the command.  This is used to determine which method
+    /// of the command object to call, which then determines the type of results
+    /// returned, if any.
+    /// </param>
+    /// <param name="commandBehavior">
+    /// The command behavior flags for the command.
+    /// </param>
+    /// <param name="connectionString">
+    /// The connection string to the database to be opened, used, and closed.  If
+    /// this parameter is null, a temporary in-memory databse will be used.
+    /// </param>
+    /// <param name="args">
+    /// The SQL parameter values to be used when building the command object to be
+    /// executed, if any.
+    /// </param>
+    /// <returns>
+    /// The results of the query -OR- null if no results were produced from the
+    /// given execution type.
+    /// </returns>
+    public static object Execute(
+        string commandText,
+        SQLiteExecuteType executeType,
+        CommandBehavior commandBehavior,
+        string connectionString,
+        params object[] args
+        )
+    {
         if (connectionString == null)
             connectionString = DefaultConnectionString;
 
@@ -726,15 +770,15 @@ namespace System.Data.SQLite
                         }
                     case SQLiteExecuteType.NonQuery:
                         {
-                            return command.ExecuteNonQuery();
+                            return command.ExecuteNonQuery(commandBehavior);
                         }
                     case SQLiteExecuteType.Scalar:
                         {
-                            return command.ExecuteScalar();
+                            return command.ExecuteScalar(commandBehavior);
                         }
                     case SQLiteExecuteType.Reader:
                         {
-                            return command.ExecuteReader();
+                            return command.ExecuteReader(commandBehavior);
                         }
                 }
             }
@@ -746,7 +790,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Overrides the default behavior to return a SQLiteDataReader specialization class
     /// </summary>
-    /// <param name="behavior">The flags to be associated with the reader</param>
+    /// <param name="behavior">The flags to be associated with the reader.</param>
     /// <returns>A SQLiteDataReader</returns>
     public new SQLiteDataReader ExecuteReader(CommandBehavior behavior)
     {
@@ -782,13 +826,28 @@ namespace System.Data.SQLite
     /// <summary>
     /// Execute the command and return the number of rows inserted/updated affected by it.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The number of rows inserted/updated affected by it.</returns>
     public override int ExecuteNonQuery()
+    {
+        CheckDisposed();
+        SQLiteConnection.Check(_cnn);
+        return ExecuteNonQuery(CommandBehavior.Default);
+    }
+
+    /// <summary>
+    /// Execute the command and return the number of rows inserted/updated affected by it.
+    /// </summary>
+    /// <param name="behavior">The flags to be associated with the reader.</param>
+    /// <returns>The number of rows inserted/updated affected by it.</returns>
+    public int ExecuteNonQuery(
+        CommandBehavior behavior
+        )
     {
       CheckDisposed();
       SQLiteConnection.Check(_cnn);
 
-      using (SQLiteDataReader reader = ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
+      using (SQLiteDataReader reader = ExecuteReader(behavior |
+          CommandBehavior.SingleRow | CommandBehavior.SingleResult))
       {
         while (reader.NextResult()) ;
         return reader.RecordsAffected;
@@ -799,13 +858,29 @@ namespace System.Data.SQLite
     /// Execute the command and return the first column of the first row of the resultset
     /// (if present), or null if no resultset was returned.
     /// </summary>
-    /// <returns>The first column of the first row of the first resultset from the query</returns>
+    /// <returns>The first column of the first row of the first resultset from the query.</returns>
     public override object ExecuteScalar()
     {
       CheckDisposed();
       SQLiteConnection.Check(_cnn);
+      return ExecuteScalar(CommandBehavior.Default);
+    }
 
-      using (SQLiteDataReader reader = ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
+    /// <summary>
+    /// Execute the command and return the first column of the first row of the resultset
+    /// (if present), or null if no resultset was returned.
+    /// </summary>
+    /// <param name="behavior">The flags to be associated with the reader.</param>
+    /// <returns>The first column of the first row of the first resultset from the query.</returns>
+    public object ExecuteScalar(
+        CommandBehavior behavior
+        )
+    {
+      CheckDisposed();
+      SQLiteConnection.Check(_cnn);
+
+      using (SQLiteDataReader reader = ExecuteReader(behavior |
+          CommandBehavior.SingleRow | CommandBehavior.SingleResult))
       {
         if (reader.Read())
           return reader[0];
