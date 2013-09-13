@@ -51,6 +51,7 @@
       <li>Return false for the SQLiteParameterCollection.IsSynchronized property because it is not thread-safe.</li>
       <li>Raise the static SQLiteConnection.Changed event when any SQLiteCommand, SQLiteDataReader, or CriticalHandle derived object instance is created. Fix for <a href="http://system.data.sqlite.org/index.html/info/aba4549801">[aba4549801]</a>.</li>
       <li>Revise how the extra object data is passed to the static SQLiteConnection.Changed event.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>Make sure the database cannot be changed by a query when the CommandBehavior.SchemaOnly flag is used. Fix for <a href="http://system.data.sqlite.org/index.html/info/f8dbab8baf">[f8dbab8baf]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Include the XML documentation files in the NuGet packages. Fix for <a href="http://system.data.sqlite.org/index.html/info/5970d5b0a6">[5970d5b0a6]</a>.</li>
     </ul>
     <p><b>1.0.88.0 - August 7, 2013</b></p>

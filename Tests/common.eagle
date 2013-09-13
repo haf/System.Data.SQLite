@@ -920,6 +920,24 @@ namespace eval ::Eagle {
           [string range $fileName 0 12] eq "file::memory:"}]
     }
 
+    proc isTableInDb { name {varName db} } {
+      #
+      # NOTE: Refer to the specified variable (e.g. "db") in the context of our
+      #       caller.  It contains the database connection handle that will be
+      #       used to execute the query used to determine if the named table is
+      #       present in that database.
+      #
+      upvar 1 $varName db
+
+      #
+      # NOTE: Execute the SQL query against the sqlite_master table to check if
+      #       the named table is present and return non-zero if it is.
+      #
+      return [expr {[sql execute -execute scalar $db \
+          "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?;" \
+          [list param1 String $name]] > 0}]
+    }
+
     proc executeSql { sql {execute none} {fileName ""} } {
       if {[string length $fileName] == 0} then {set fileName :memory:}
       setupDb $fileName "" "" "" "" "" false false false false memDb

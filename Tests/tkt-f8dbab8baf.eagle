@@ -1,0 +1,121 @@
+###############################################################################
+#
+# tkt-f8dbab8baf.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-f8dbab8baf-1.1 {SchemaOnly with CREATE TABLE} -setup {
+  setupDb [set fileName tkt-f8dbab8baf-1.1.db]
+} -body {
+  sql execute -execute reader -format none -behavior SchemaOnly $db \
+      "CREATE TABLE t1(x);"
+
+  isTableInDb t1
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{False}}
+
+###############################################################################
+
+runTest {test tkt-f8dbab8baf-1.2 {SchemaOnly with ALTER TABLE} -setup {
+  setupDb [set fileName tkt-f8dbab8baf-1.2.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+
+  sql execute -execute reader -format none -behavior SchemaOnly $db \
+      "ALTER TABLE t1 RENAME TO t2;"
+
+  list [isTableInDb t1] [isTableInDb t2]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{True False}}
+
+###############################################################################
+
+runTest {test tkt-f8dbab8baf-1.3 {SchemaOnly with DROP TABLE} -setup {
+  setupDb [set fileName tkt-f8dbab8baf-1.3.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+
+  sql execute -execute reader -format none -behavior SchemaOnly $db \
+      "DROP TABLE t1;"
+
+  isTableInDb t1
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{True}}
+
+###############################################################################
+
+runTest {test tkt-f8dbab8baf-1.4 {SchemaOnly CREATE/SELECT success} -setup {
+  setupDb [set fileName tkt-f8dbab8baf-1.4.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUEs(1);"
+  sql execute -execute reader -behavior SchemaOnly $db "SELECT x FROM t1;"
+
+  list [isTableInDb t1] \
+      [expr {[info exists rows(count)] ? $rows(count) : -1}] \
+      [expr {[info exists rows(names)] ? $rows(names) : ""}]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain rows db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{True 0 x}}
+
+###############################################################################
+
+runTest {test tkt-f8dbab8baf-1.5 {SchemaOnly CREATE/SELECT failure} -setup {
+  setupDb [set fileName tkt-f8dbab8baf-1.5.db]
+} -body {
+  sql execute -execute reader -format none -behavior SchemaOnly $db \
+      "CREATE TABLE t1(x); SELECT x FROM t1;"
+
+  list [isTableInDb t1] \
+      [expr {[info exists rows(count)] ? $rows(count) : -1}] \
+      [expr {[info exists rows(names)] ? $rows(names) : ""}]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain rows db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
+-returnCodes 1 -match regexp -result [string map [list \n \r\n] \
+{^System\.Data\.SQLite\.SQLiteException \(0x80004005\): SQL logic error or\
+missing database
+no such table: t1.*$}]}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
