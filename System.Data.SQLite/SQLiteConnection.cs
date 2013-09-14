@@ -53,7 +53,11 @@ namespace System.Data.SQLite
       /// <summary>
       /// The critical handle associated with this event, if any.
       /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
       public readonly CriticalHandle CriticalHandle;
+#else
+      public readonly object CriticalHandle;
+#endif
 
       /// <summary>
       /// Command or message text associated with this event, if any.
@@ -83,7 +87,11 @@ namespace System.Data.SQLite
           IDbTransaction transaction,
           IDbCommand command,
           IDataReader dataReader,
+#if !PLATFORM_COMPACTFRAMEWORK
           CriticalHandle criticalHandle,
+#else
+          object criticalHandle,
+#endif
           string text,
           object data
           )
