@@ -1240,13 +1240,14 @@ namespace System.Data.SQLite
 
       SQLiteStatement stmt = null;
       int fieldCount;
+      bool schemaOnly = ((_commandBehavior & CommandBehavior.SchemaOnly) != 0);
 
       while (true)
       {
         if (stmt == null && _activeStatement != null && _activeStatement._sql != null && _activeStatement._sql.IsOpen())
         {
           // Reset the previously-executed statement
-          _activeStatement._sql.Reset(_activeStatement);
+          if (!schemaOnly) _activeStatement._sql.Reset(_activeStatement);
 
           // If we're only supposed to return a single rowset, step through all remaining statements once until
           // they are all done and return false to indicate no more resultsets exist.
@@ -1258,7 +1259,7 @@ namespace System.Data.SQLite
               if (stmt == null) break;
               _activeStatementIndex++;
 
-              stmt._sql.Step(stmt);
+              if (!schemaOnly) stmt._sql.Step(stmt);
               if (stmt._sql.ColumnCount(stmt) == 0)
               {
                 if (_rowsAffected == -1) _rowsAffected = 0;
@@ -1268,7 +1269,7 @@ namespace System.Data.SQLite
                 else
                     return false;
               }
-              stmt._sql.Reset(stmt); // Gotta reset after every step to release any locks and such!
+              if (!schemaOnly) stmt._sql.Reset(stmt); // Gotta reset after every step to release any locks and such!
             }
             return false;
           }
@@ -1290,9 +1291,9 @@ namespace System.Data.SQLite
         fieldCount = stmt._sql.ColumnCount(stmt);
 
         // If the statement is not a select statement or we're not retrieving schema only, then perform the initial step
-        if ((_commandBehavior & CommandBehavior.SchemaOnly) == 0 || fieldCount == 0)
+        if (!schemaOnly || (fieldCount == 0))
         {
-          if (stmt._sql.Step(stmt))
+          if (!schemaOnly && stmt._sql.Step(stmt))
           {
             _readingState = -1;
           }
@@ -1301,10 +1302,10 @@ namespace System.Data.SQLite
             if (_rowsAffected == -1) _rowsAffected = 0;
             int changes = 0;
             if (stmt.TryGetChanges(ref changes))
-                _rowsAffected += changes;
+              _rowsAffected += changes;
             else
-                return false;
-            stmt._sql.Reset(stmt);
+              return false;
+            if (!schemaOnly) stmt._sql.Reset(stmt);
             continue; // Skip this command and move to the next, it was not a row-returning resultset
           }
           else // No rows, fieldCount is non-zero so stop here
@@ -1363,6 +1364,9 @@ namespace System.Data.SQLite
       CheckDisposed();
       CheckClosed();
       if (_throwOnDisposed) SQLiteCommand.Check(_command);
+
+      if ((_commandBehavior & CommandBehavior.SchemaOnly) != 0)
+        return false;
 
       if (_readingState == -1) // First step was already done at the NextResult() level, so don't step again, just return true.
       {
