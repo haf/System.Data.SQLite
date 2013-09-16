@@ -248,6 +248,17 @@ SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREF
 
 :skip_setLogging
 
+IF EXIST Externals\Eagle\bin\EagleShell.exe (
+  %__ECHO% Externals\Eagle\bin\EagleShell.exe -file Setup\sourceTag.eagle SourceIdMode System.Data.SQLite\SQLitePatchLevel.cs
+
+  IF ERRORLEVEL 1 (
+    ECHO Source tagging failed.
+    GOTO errors
+  )
+) ELSE (
+  ECHO WARNING: Source tagging skipped, Eagle binaries are not available.
+)
+
 %_VECHO% Logging = '%LOGGING%'
 %_VECHO% MsBuildArgs = '%MSBUILD_ARGS%'
 

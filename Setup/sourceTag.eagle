@@ -1,0 +1,145 @@
+###############################################################################
+#
+# sourceTag.eagle -- Source Version Tag Tool
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+
+proc usage { error } {
+  if {[string length $error] > 0} then {puts stdout $error}
+
+  puts stdout "usage:\
+[file tail [info nameofexecutable]]\
+[file tail [info script]] <SourceIdMode> <fileName>"
+
+  #
+  # NOTE: Indicate to the caller, if any, that we have failed.
+  #
+  exit 1
+}
+
+set modes [list \"SourceIdMode\"]
+set argc [llength $argv]
+
+if {$argc == 2} then {
+  #
+  # NOTE: Are we updating the "PatchLevel.cs" file?
+  #
+  set mode [lindex $argv 0]
+
+  if {[string length $mode] > 0} then {
+    #
+    # NOTE: Get the file name to read/update/write.
+    #
+    set fileName [lindex $argv 1]
+
+    #
+    # NOTE: Make sure the file name provided is not obviously
+    #       invalid.
+    #
+    if {[string length $fileName] > 0} then {
+      #
+      # NOTE: Read all the data out of the text file.
+      #
+      set data [readFile $fileName]
+
+      #
+      # NOTE: Normalize to Unix line-endings.
+      #
+      set data [string map [list \r\n \n] $data]; # Unix.
+
+      #
+      # NOTE: Figure out what mode we are in.
+      #
+      switch -exact -nocase -- $mode {
+        SourceIdMode {
+          #
+          # NOTE: Query the source identifier from Fossil, if available.
+          #       If we are not within an active checkout, this will fail.
+          #
+          set pattern {^checkout:\s+([^\s]+)\s+(.*)\s+$}
+
+          if {[catch {set exec [exec -success Success -directory \
+                  [file dirname $fileName] -- fossil info]}] || \
+              [regexp -line -- $pattern $exec dummy id timeStamp] == 0} then {
+            #
+            # NOTE: We could not query the source identifier(s); therefore,
+            #       use obviously invalid ones.  We would also be able to
+            #       use null values here except that these values end up in
+            #       native C header files as well (i.e. not just managed
+            #       assembly attribute values).
+            #
+            set id 0000000000000000000000000000000000000000
+            set timeStamp "0000-00-00 00:00:00 UTC"
+          }
+
+          #
+          # NOTE: Match against this pattern in the "PatchLevel.cs"
+          #       file (this pattern is fairly strict to prevent
+          #       false-positives).
+          #
+          set pattern1 {AssemblySourceId\(.*?\)}
+          set pattern2 {AssemblySourceTimeStamp\(.*?\)}
+          set pattern3 {SOURCE_ID\t\t".*?"}
+          set pattern4 {SOURCE_TIMESTAMP\t".*?"}
+
+          #
+          # NOTE: Build the final replacement specification string.
+          #
+          set subSpec1 [appendArgs AssemblySourceId(\" $id \" )]
+          set subSpec2 [appendArgs AssemblySourceTimeStamp(\" $timeStamp \" )]
+          set subSpec3 [appendArgs SOURCE_ID\t\t \" $id \"]
+          set subSpec4 [appendArgs SOURCE_TIMESTAMP\t \" $timeStamp \"]
+
+          #
+          # NOTE: Perform the replacements in the original data
+          #       (first match only).
+          #
+          set count 0
+
+          incr count [regsub -nocase -- $pattern1 $data $subSpec1 data]
+          incr count [regsub -nocase -- $pattern2 $data $subSpec2 data]
+          incr count [regsub -nocase -- $pattern3 $data $subSpec3 data]
+          incr count [regsub -nocase -- $pattern4 $data $subSpec4 data]
+
+          #
+          # NOTE: If we actually replaced anything, we need to write back
+          #       to the original file; otherwise, leave it alone.
+          #
+          if {$count > 0} then {
+            #
+            # NOTE: Show how we tagged it.
+            #
+            puts stdout [appendArgs "tagged \"" $fileName "\" " $mode \
+                " " $id " " $timeStamp]
+
+            #
+            # NOTE: Re-write the original file with the modified data.
+            #
+            writeFile $fileName [string map [list \n \r\n] $data]; # DOS.
+          } else {
+            #
+            # NOTE: We could not replace the string.  This is considered
+            #       an overall failure.
+            #
+            usage [appendArgs "pattern \"" $pattern "\" not found in \"" \
+                $fileName \"]
+          }
+        }
+        default {
+          usage [appendArgs "unknown mode, must be " [join $modes " "]]
+        }
+      }
+    } else {
+      usage "invalid file name"
+    }
+  } else {
+    usage [appendArgs "invalid mode, must be " [join $modes " "]]
+  }
+} else {
+  usage ""
+}

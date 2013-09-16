@@ -129,6 +129,7 @@ set sds_manifests(source) {
   Setup/set_x86_2008.bat
   Setup/set_x86_2010.bat
   Setup/set_x86_2012.bat
+  Setup/sourceTag.eagle
   Setup/SQLite.iss
   Setup/test_all.bat
   Setup/test_ce.bat
@@ -261,6 +262,8 @@ set sds_manifests(source) {
   SQLite.x86.nuspec
   System.Data.SQLite/
   System.Data.SQLite/AssemblyInfo.cs
+  System.Data.SQLite/AssemblySourceIdAttribute.cs
+  System.Data.SQLite/AssemblySourceTimeStampAttribute.cs
   System.Data.SQLite/DataTypes.xml
   System.Data.SQLite/LINQ/
   System.Data.SQLite/LINQ/SQLiteConnection_Linq.cs
@@ -295,6 +298,7 @@ set sds_manifests(source) {
   System.Data.SQLite/SQLiteModuleNoop.cs
   System.Data.SQLite/SQLiteParameter.cs
   System.Data.SQLite/SQLiteParameterCollection.cs
+  System.Data.SQLite/SQLitePatchLevel.cs
   System.Data.SQLite/SQLiteStatement.cs
   System.Data.SQLite/SQLiteTransaction.cs
   System.Data.SQLite/SR.Designer.cs
@@ -424,6 +428,7 @@ set sds_manifests(source) {
   Tests/tkt-201128cc88.eagle
   Tests/tkt-2c630bffa7.eagle
   Tests/tkt-2ce0870fad.eagle
+  Tests/tkt-3113734605.eagle
   Tests/tkt-343d392b51.eagle
   Tests/tkt-3567020edf.eagle
   Tests/tkt-393d954be0.eagle
@@ -443,6 +448,7 @@ set sds_manifests(source) {
   Tests/tkt-8b7d179c3c.eagle
   Tests/tkt-8c3bee31c8.eagle
   Tests/tkt-996d13cd87.eagle
+  Tests/tkt-aba4549801.eagle
   Tests/tkt-ac47dd230a.eagle
   Tests/tkt-ae5267b863.eagle
   Tests/tkt-b4a7ddc83f.eagle
@@ -454,6 +460,7 @@ set sds_manifests(source) {
   Tests/tkt-e30b820248.eagle
   Tests/tkt-e47b3d8346.eagle
   Tests/tkt-f2c47a01eb.eagle
+  Tests/tkt-f8dbab8baf.eagle
   Tests/tkt-fe50b8c2e8.eagle
   Tests/Uninstaller_Test_Vs2005.log
   Tests/Uninstaller_Test_Vs2008.log

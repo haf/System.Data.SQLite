@@ -14,6 +14,7 @@ namespace System.Data.SQLite
   using System.Collections.Generic;
   using System.Globalization;
   using System.ComponentModel;
+  using System.Reflection;
   using System.Runtime.InteropServices;
   using System.IO;
   using System.Text;
@@ -377,10 +378,15 @@ namespace System.Data.SQLite
 
     #region Private Static Data
     /// <summary>
+    /// The managed assembly containing this type.
+    /// </summary>
+    private static readonly Assembly _assembly = typeof(SQLiteConnection).Assembly;
+
+    /// <summary>
     /// Object used to synchronize access to the static instance data
     /// for this class.
     /// </summary>
-    private static object _syncRoot = new object();
+    private static readonly object _syncRoot = new object();
 
     /// <summary>
     /// Static variable to store the connection event handlers to call.
@@ -2470,6 +2476,73 @@ namespace System.Data.SQLite
     public static string SQLiteSourceId
     {
       get { return SQLite3.SQLiteSourceId; }
+    }
+
+    /// <summary>
+    /// This method returns the version of the managed components used
+    /// to interact with the SQLite core library.  If the necessary
+    /// information cannot be obtained for any reason, a null value may
+    /// be returned.
+    /// </summary>
+    public static string ManagedVersion
+    {
+        get
+        {
+            return (_assembly != null) ?
+                _assembly.GetName().Version.ToString() : null;
+        }
+    }
+
+    /// <summary>
+    /// This method returns the string whose value contains the unique
+    /// identifier for the source checkout used to build the managed
+    /// components currently executing.  If the necessary information
+    /// cannot be obtained for any reason, a null value may be returned.
+    /// </summary>
+    public static string ManagedSourceId
+    {
+        get
+        {
+            if (_assembly == null)
+                return null;
+
+            string sourceId = null;
+
+            if (_assembly.IsDefined(typeof(AssemblySourceIdAttribute), false))
+            {
+                AssemblySourceIdAttribute attribute =
+                    (AssemblySourceIdAttribute)_assembly.GetCustomAttributes(
+                        typeof(AssemblySourceIdAttribute), false)[0];
+
+                sourceId = attribute.SourceId;
+            }
+
+            string sourceTimeStamp = null;
+
+            if (_assembly.IsDefined(typeof(AssemblySourceTimeStampAttribute), false))
+            {
+                AssemblySourceTimeStampAttribute attribute =
+                    (AssemblySourceTimeStampAttribute)_assembly.GetCustomAttributes(
+                        typeof(AssemblySourceTimeStampAttribute), false)[0];
+
+                sourceTimeStamp = attribute.SourceTimeStamp;
+            }
+
+            if ((sourceId != null) || (sourceTimeStamp != null))
+            {
+                if (sourceId == null)
+                    sourceId = "0000000000000000000000000000000000000000";
+
+                if (sourceTimeStamp == null)
+                    sourceTimeStamp = "0000-00-00 00:00:00 UTC";
+
+                return String.Format("{0} {1}", sourceId, sourceTimeStamp);
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 
     /// <summary>

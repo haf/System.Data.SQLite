@@ -18,6 +18,8 @@ Externals/Eagle/bin/EagleShell.exe
 Externals/Eagle/bin/SQLite.Interop.*
 Externals/Eagle/bin/sqlite3.*
 Externals/Eagle/bin/System.*
+Externals/Eagle/bin/x64/*
+Externals/Eagle/bin/x86/*
 Externals/Eagle/lib/Eagle1.0/embed.eagle
 Externals/Eagle/lib/Eagle1.0/init.eagle
 Externals/Eagle/lib/Eagle1.0/pkgIndex.eagle
@@ -25,6 +27,7 @@ Externals/Eagle/lib/Eagle1.0/pkgIndex.tcl
 Externals/Eagle/lib/Eagle1.0/safe.eagle
 Externals/Eagle/lib/Eagle1.0/shell.eagle
 Externals/Eagle/lib/Eagle1.0/test.eagle
+Externals/Eagle/lib/Eagle1.0/word.tcl
 Externals/Eagle/lib/Test1.0/constraints.eagle
 Externals/Eagle/lib/Test1.0/epilogue.eagle
 Externals/Eagle/lib/Test1.0/pkgIndex.eagle

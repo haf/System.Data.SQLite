@@ -1935,7 +1935,39 @@ namespace eval ::Eagle {
                   System.Data.SQLite.SQLite3 DefineConstants} \
                   defineConstants] == 0} then {
             tputs $::test_channel [appendArgs [formatList [lsort \
-                $defineConstants]] \n]
+                $defineConstants] <none>] \n]
+          } else {
+            tputs $::test_channel unknown\n
+          }
+        }
+
+        catch {
+          tputs $::test_channel \
+              "---- source version of \"System.Data.SQLite\"... "
+
+          if {[catch {object invoke -flags +NonPublic \
+                  System.Data.SQLite.SQLiteConnection ManagedVersion} \
+                  sourceVersion] == 0} then {
+            if {[string length $sourceVersion] == 0} then {
+              set sourceVersion <none>
+            }
+            tputs $::test_channel [appendArgs $sourceVersion \n]
+          } else {
+            tputs $::test_channel unknown\n
+          }
+        }
+
+        catch {
+          tputs $::test_channel \
+              "---- source checkout of \"System.Data.SQLite\"... "
+
+          if {[catch {object invoke -flags +NonPublic \
+                  System.Data.SQLite.SQLiteConnection ManagedSourceId} \
+                  sourceId] == 0} then {
+            if {[string length $sourceId] == 0} then {
+              set sourceId <none>
+            }
+            tputs $::test_channel [appendArgs $sourceId \n]
           } else {
             tputs $::test_channel unknown\n
           }
@@ -2043,7 +2075,7 @@ namespace eval ::Eagle {
         # NOTE: Show the active test constraints.
         #
         tputs $::test_channel [appendArgs "---- constraints: " \
-            [formatList [lsort [getConstraints]]] \n]
+            [formatList [lsort [getConstraints]] <none>] \n]
 
         #
         # NOTE: Save the test constraints for use by threads created in this
