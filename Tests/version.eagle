@@ -168,6 +168,46 @@ runTest {test version-1.10 {'testlinq' assembly version} -body {
 
 ###############################################################################
 
+runTest {test version-1.11 {SQLiteVersion} -body {
+  object invoke System.Data.SQLite.SQLiteConnection SQLiteVersion
+} -constraints {eagle SQLite System.Data.SQLite} -match regexp -result \
+{^\d+\.\d+\.\d+(?:\.\d+)?$}}
+
+###############################################################################
+
+runTest {test version-1.12 {SQLiteSourceId} -body {
+  object invoke System.Data.SQLite.SQLiteConnection SQLiteSourceId
+} -constraints {eagle SQLite System.Data.SQLite} -match regexp -result \
+{^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [0-9a-f]{40}$}}
+
+###############################################################################
+
+runTest {test version-1.13 {InteropVersion} -body {
+  object invoke System.Data.SQLite.SQLiteConnection InteropVersion
+} -constraints {eagle SQLiteInterop System.Data.SQLite} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.14 {InteropSourceId} -body {
+  object invoke System.Data.SQLite.SQLiteConnection InteropSourceId
+} -constraints {eagle SQLiteInterop System.Data.SQLite} -match regexp -result \
+{^[0-9a-f]{40} \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC$}}
+
+###############################################################################
+
+runTest {test version-1.15 {ProviderVersion} -body {
+  object invoke System.Data.SQLite.SQLiteConnection ProviderVersion
+} -constraints {eagle System.Data.SQLite} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.16 {ProviderSourceId} -body {
+  object invoke System.Data.SQLite.SQLiteConnection ProviderSourceId
+} -constraints {eagle System.Data.SQLite} -match regexp -result \
+{^[0-9a-f]{40} \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC$}}
+
+###############################################################################
+
 set patterns [list \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs <version> [string map [list . \\.] $version(full)] \
@@ -292,7 +332,7 @@ for {set i 1} {$i <= [llength $fileNames]} {incr i} {
     checkForFile $test_channel $fileName $constraint
   }
 
-  runTest {test [appendArgs version-1.11. $i] \
+  runTest {test [appendArgs version-1.17. $i] \
       [appendArgs "pattern {" $pattern "} in file \"" $fileName \"] -body {
     regexp -- $pattern [readFile $fileName]
   } -constraints [list eagle [appendArgs file_ $constraint]] -result {1}}
