@@ -84,16 +84,16 @@ if {$argc == 2} then {
           #
           set pattern1 {AssemblySourceId\(.*?\)}
           set pattern2 {AssemblySourceTimeStamp\(.*?\)}
-          set pattern3 {SOURCE_ID\t\t".*?"}
-          set pattern4 {SOURCE_TIMESTAMP\t".*?"}
+          set pattern3 {INTEROP_SOURCE_ID\s+".*?"}
+          set pattern4 {INTEROP_SOURCE_TIMESTAMP\s+".*?"}
 
           #
           # NOTE: Build the final replacement specification string.
           #
           set subSpec1 [appendArgs AssemblySourceId(\" $id \" )]
           set subSpec2 [appendArgs AssemblySourceTimeStamp(\" $timeStamp \" )]
-          set subSpec3 [appendArgs SOURCE_ID\t\t \" $id \"]
-          set subSpec4 [appendArgs SOURCE_TIMESTAMP\t \" $timeStamp \"]
+          set subSpec3 [appendArgs INTEROP_SOURCE_ID "        \"" $id \"]
+          set subSpec4 [appendArgs INTEROP_SOURCE_TIMESTAMP " \"" $timeStamp \"]
 
           #
           # NOTE: Perform the replacements in the original data

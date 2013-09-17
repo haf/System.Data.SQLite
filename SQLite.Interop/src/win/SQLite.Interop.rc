@@ -56,6 +56,7 @@ BEGIN
             VALUE "OriginalFilename", "SQLite.Interop.dll"
             VALUE "ProductName", "System.Data.SQLite"
             VALUE "ProductVersion", INTEROP_VERSION
+            VALUE "SourceId", INTEROP_SOURCE_ID " " INTEROP_SOURCE_TIMESTAMP
             VALUE "SQLiteCompanyName", "D. Richard Hipp, et al."
             VALUE "SQLiteDescription", "SQLite Database Engine"
             VALUE "SQLiteCopyright", "http://www.sqlite.org/copyright.html"

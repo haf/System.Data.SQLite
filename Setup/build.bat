@@ -248,15 +248,26 @@ SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREF
 
 :skip_setLogging
 
-IF EXIST Externals\Eagle\bin\EagleShell.exe (
-  %__ECHO% Externals\Eagle\bin\EagleShell.exe -file Setup\sourceTag.eagle SourceIdMode System.Data.SQLite\SQLitePatchLevel.cs
+IF NOT DEFINED NOTAG (
+  IF EXIST Externals\Eagle\bin\EagleShell.exe (
+    %__ECHO% Externals\Eagle\bin\EagleShell.exe -file Setup\sourceTag.eagle SourceIdMode SQLite.Interop\src\win\interop.h
 
-  IF ERRORLEVEL 1 (
-    ECHO Source tagging failed.
-    GOTO errors
+    IF ERRORLEVEL 1 (
+      ECHO Source tagging of interop assembly failed.
+      GOTO errors
+    )
+
+    %__ECHO% Externals\Eagle\bin\EagleShell.exe -file Setup\sourceTag.eagle SourceIdMode System.Data.SQLite\SQLitePatchLevel.cs
+
+    IF ERRORLEVEL 1 (
+      ECHO Source tagging of provider assembly failed.
+      GOTO errors
+    )
+  ) ELSE (
+    ECHO WARNING: Source tagging skipped, Eagle binaries are not available.
   )
 ) ELSE (
-  ECHO WARNING: Source tagging skipped, Eagle binaries are not available.
+  ECHO WARNING: Source tagging skipped, disabled via NOTAG environment variable.
 )
 
 %_VECHO% Logging = '%LOGGING%'

@@ -365,6 +365,30 @@ namespace System.Data.SQLite
       }
     }
 
+    internal static string InteropVersion
+    {
+        get
+        {
+#if !SQLITE_STANDARD
+            return UTF8ToString(UnsafeNativeMethods.sqlite3_libversion_interop(), -1);
+#else
+            return null;
+#endif
+        }
+    }
+
+    internal static string InteropSourceId
+    {
+        get
+        {
+#if !SQLITE_STANDARD
+            return UTF8ToString(UnsafeNativeMethods.sqlite3_sourceid_interop(), -1);
+#else
+            return null;
+#endif
+        }
+    }
+
     internal override bool AutoCommit
     {
       get

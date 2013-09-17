@@ -23,6 +23,8 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 #include "crypt.c"
 #endif
 
+#include "interop.h"
+
 #define INTEROP_DEBUG_NONE           (0x0000)
 #define INTEROP_DEBUG_CLOSE          (0x0001)
 #define INTEROP_DEBUG_FINALIZE       (0x0002)
@@ -216,6 +218,16 @@ SQLITE_API int WINAPI sqlite3_config_log_interop()
   return ret;
 }
 #endif
+
+SQLITE_API const char *sqlite3_libversion_interop(void)
+{
+  return INTEROP_VERSION;
+}
+
+SQLITE_API const char *sqlite3_sourceid_interop(void)
+{
+  return INTEROP_SOURCE_ID " " INTEROP_SOURCE_TIMESTAMP;
+}
 
 SQLITE_API int WINAPI sqlite3_open_interop(const char *filename, int flags, sqlite3 **ppdb)
 {

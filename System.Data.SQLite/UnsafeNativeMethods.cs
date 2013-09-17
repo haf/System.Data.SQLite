@@ -772,6 +772,12 @@ namespace System.Data.SQLite
 #if !SQLITE_STANDARD
 
     [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_libversion_interop();
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr sqlite3_sourceid_interop();
+
+    [DllImport(SQLITE_DLL)]
     internal static extern SQLiteErrorCode sqlite3_close_interop(IntPtr db);
 
     [DllImport(SQLITE_DLL)]

@@ -2461,7 +2461,7 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Returns the version of the underlying SQLite database engine
+    /// Returns the version of the underlying SQLite core library.
     /// </summary>
     public static string SQLiteVersion
     {
@@ -2479,12 +2479,35 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// This method returns the version of the interop SQLite assembly
+    /// used.  If the SQLite interop assembly is not in use or the
+    /// necessary information cannot be obtained for any reason, a null
+    /// value may be returned.
+    /// </summary>
+    public static string InteropVersion
+    {
+      get { return SQLite3.InteropVersion; }
+    }
+
+    /// <summary>
+    /// This method returns the string whose value contains the unique
+    /// identifier for the source checkout used to build the interop
+    /// assembly.  If the SQLite interop assembly is not in use or the
+    /// necessary information cannot be obtained for any reason, a null
+    /// value may be returned.
+    /// </summary>
+    public static string InteropSourceId
+    {
+      get { return SQLite3.InteropSourceId; }
+    }
+
+    /// <summary>
     /// This method returns the version of the managed components used
     /// to interact with the SQLite core library.  If the necessary
     /// information cannot be obtained for any reason, a null value may
     /// be returned.
     /// </summary>
-    public static string ManagedVersion
+    public static string ProviderVersion
     {
         get
         {
@@ -2499,7 +2522,7 @@ namespace System.Data.SQLite
     /// components currently executing.  If the necessary information
     /// cannot be obtained for any reason, a null value may be returned.
     /// </summary>
-    public static string ManagedSourceId
+    public static string ProviderSourceId
     {
         get
         {

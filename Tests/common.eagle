@@ -742,12 +742,20 @@ namespace eval ::Eagle {
       }
     }
 
-    proc checkForSQLite { channel } {
-      tputs $channel "---- checking for core SQLite library... "
+    proc checkForSQLiteLibrary { channel } {
+      tputs $channel "---- checking for SQLite core library... "
 
       if {[catch {
               object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
               SQLiteVersion} version] == 0} then {
+        #
+        # NOTE: Check if the returned version was null.  If so, make it easy
+        #       to spot.
+        #
+        if {[string length $version] == 0} then {
+          set version null
+        }
+
         #
         # NOTE: Attempt to query the Fossil source identifier for the SQLite
         #       core library.
@@ -762,9 +770,63 @@ namespace eval ::Eagle {
         }
 
         #
+        # NOTE: Check if the returned Fossil source identifier was null.  If
+        #       so, make it easy to spot.
+        #
+        if {[string length $sourceId] == 0} then {
+          set sourceId null
+        }
+
+        #
         # NOTE: Yes, the SQLite core library appears to be available.
         #
         addConstraint SQLite
+
+        tputs $channel [appendArgs "yes (" $version " " $sourceId ")\n"]
+      } else {
+        tputs $channel no\n
+      }
+    }
+
+    proc checkForSQLiteInterop { channel } {
+      tputs $channel "---- checking for SQLite interop assembly... "
+
+      if {[catch {
+              object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
+              InteropVersion} version] == 0} then {
+        #
+        # NOTE: Check if the returned version was null.  If so, make it easy
+        #       to spot.
+        #
+        if {[string length $version] == 0} then {
+          set version null
+        }
+
+        #
+        # NOTE: Attempt to query the Fossil source identifier for the SQLite
+        #       core library.
+        #
+        if {[catch {
+                object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
+                InteropSourceId} sourceId]} then {
+          #
+          # NOTE: We failed to query the Fossil source identifier.
+          #
+          set sourceId unknown
+        }
+
+        #
+        # NOTE: Check if the returned Fossil source identifier was null.  If
+        #       so, make it easy to spot.
+        #
+        if {[string length $sourceId] == 0} then {
+          set sourceId null
+        }
+
+        #
+        # NOTE: Yes, the SQLite interop assembly appears to be available.
+        #
+        addConstraint SQLiteInterop
 
         tputs $channel [appendArgs "yes (" $version " " $sourceId ")\n"]
       } else {
@@ -1943,15 +2005,15 @@ namespace eval ::Eagle {
 
         catch {
           tputs $::test_channel \
-              "---- source version of \"System.Data.SQLite\"... "
+              "---- source version of \"System.Data.SQLite.dll\"... "
 
           if {[catch {object invoke -flags +NonPublic \
-                  System.Data.SQLite.SQLiteConnection ManagedVersion} \
-                  sourceVersion] == 0} then {
-            if {[string length $sourceVersion] == 0} then {
-              set sourceVersion <none>
+                  System.Data.SQLite.SQLiteConnection ProviderVersion} \
+                  version] == 0} then {
+            if {[string length $version] == 0} then {
+              set version null
             }
-            tputs $::test_channel [appendArgs $sourceVersion \n]
+            tputs $::test_channel [appendArgs $version \n]
           } else {
             tputs $::test_channel unknown\n
           }
@@ -1959,13 +2021,13 @@ namespace eval ::Eagle {
 
         catch {
           tputs $::test_channel \
-              "---- source checkout of \"System.Data.SQLite\"... "
+              "---- source checkout of \"System.Data.SQLite.dll\"... "
 
           if {[catch {object invoke -flags +NonPublic \
-                  System.Data.SQLite.SQLiteConnection ManagedSourceId} \
+                  System.Data.SQLite.SQLiteConnection ProviderSourceId} \
                   sourceId] == 0} then {
             if {[string length $sourceId] == 0} then {
-              set sourceId <none>
+              set sourceId null
             }
             tputs $::test_channel [appendArgs $sourceId \n]
           } else {
@@ -1985,7 +2047,12 @@ namespace eval ::Eagle {
         #       it).  If we are using the mixed-mode assembly and we already
         #       found it (above), this should always succeed.
         #
-        checkForSQLite $::test_channel
+        checkForSQLiteLibrary $::test_channel
+
+        #
+        # NOTE: Check if the SQLite interop assembly is available.
+        #
+        checkForSQLiteInterop $::test_channel
 
         #
         # NOTE: Check the SQLite database and temporary directories.
