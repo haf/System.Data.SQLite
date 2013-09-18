@@ -478,11 +478,13 @@ namespace System.Data.SQLite
 
     internal long _version;
 
+    private event SQLiteAuthorizerEventHandler _authorizerHandler;
     private event SQLiteUpdateEventHandler _updateHandler;
     private event SQLiteCommitHandler _commitHandler;
     private event SQLiteTraceEventHandler _traceHandler;
     private event EventHandler _rollbackHandler;
 
+    private SQLiteAuthorizerCallback _authorizerCallback;
     private SQLiteUpdateCallback _updateCallback;
     private SQLiteCommitCallback _commitCallback;
     private SQLiteTraceCallback _traceCallback;
@@ -2224,6 +2226,9 @@ namespace System.Data.SQLite
               }
           }
 
+          if (_authorizerHandler != null)
+              _sql.SetAuthorizerHook(_authorizerCallback);
+
           if (_commitHandler != null)
             _sql.SetCommitHook(_commitCallback);
 
@@ -3939,6 +3944,40 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// This event is raised whenever SQLite encounters an action covered by the
+    /// authorizer during query preparation.  Changing the value of the
+    /// <see cref="AuthorizerEventArgs.ReturnCode" /> property will determine if
+    /// the specific action will be allowed, ignored, or denied.  For the entire
+    /// duration of the event, the associated connection and statement objects
+    /// must not be modified, either directly or indirectly, by the called code.
+    /// </summary>
+    public event SQLiteAuthorizerEventHandler Authorize
+    {
+        add
+        {
+            CheckDisposed();
+
+            if (_authorizerHandler == null)
+            {
+                _authorizerCallback = new SQLiteAuthorizerCallback(AuthorizerCallback);
+                if (_sql != null) _sql.SetAuthorizerHook(_authorizerCallback);
+            }
+            _authorizerHandler += value;
+        }
+        remove
+        {
+            CheckDisposed();
+
+            _authorizerHandler -= value;
+            if (_authorizerHandler == null)
+            {
+                if (_sql != null) _sql.SetAuthorizerHook(null);
+                _authorizerCallback = null;
+            }
+        }
+    }
+
+    /// <summary>
     /// This event is raised whenever SQLite makes an update/delete/insert into the database on
     /// this connection.  It only applies to the given connection.
     /// </summary>
@@ -3966,6 +4005,25 @@ namespace System.Data.SQLite
           _updateCallback = null;
         }
       }
+    }
+
+    private SQLiteAuthorizerReturnCode AuthorizerCallback(
+        IntPtr pUserData,
+        SQLiteAuthorizerActionCode actionCode,
+        IntPtr pArgument1,
+        IntPtr pArgument2,
+        IntPtr pDatabase,
+        IntPtr pAuthContext)
+    {
+        AuthorizerEventArgs eventArgs = new AuthorizerEventArgs(pUserData, actionCode,
+            SQLiteBase.UTF8ToString(pArgument1, -1), SQLiteBase.UTF8ToString(pArgument2, -1),
+            SQLiteBase.UTF8ToString(pDatabase, -1), SQLiteBase.UTF8ToString(pAuthContext, -1),
+            SQLiteAuthorizerReturnCode.Ok);
+
+        if (_authorizerHandler != null)
+            _authorizerHandler(this, eventArgs);
+
+        return eventArgs.ReturnCode;
     }
 
     private void UpdateCallback(IntPtr puser, int type, IntPtr database, IntPtr table, Int64 rowid)
@@ -4109,6 +4167,18 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
+  internal delegate SQLiteAuthorizerReturnCode SQLiteAuthorizerCallback(
+    IntPtr pUserData,
+    SQLiteAuthorizerActionCode actionCode,
+    IntPtr pArgument1,
+    IntPtr pArgument2,
+    IntPtr pDatabase,
+    IntPtr pAuthContext
+    );
+
+#if !PLATFORM_COMPACTFRAMEWORK
+  [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+#endif
   internal delegate void SQLiteUpdateCallback(IntPtr puser, int type, IntPtr database, IntPtr table, Int64 rowid);
 
 #if !PLATFORM_COMPACTFRAMEWORK
@@ -4125,6 +4195,15 @@ namespace System.Data.SQLite
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 #endif
   internal delegate void SQLiteRollbackCallback(IntPtr puser);
+
+  /// <summary>
+  /// Raised when authorization is required to perform an action contained
+  /// within a SQL query.
+  /// </summary>
+  /// <param name="sender">The connection performing the action.</param>
+  /// <param name="e">A <see cref="AuthorizerEventArgs" /> that contains the
+  /// event data.</param>
+  public delegate void SQLiteAuthorizerEventHandler(object sender, AuthorizerEventArgs e);
 
   /// <summary>
   /// Raised when a transaction is about to be committed.  To roll back a transaction, set the
@@ -4194,6 +4273,123 @@ namespace System.Data.SQLite
     bool retry
   );
   #endregion
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+
+  /// <summary>
+  /// The data associated with a call into the authorizer.
+  /// </summary>
+  public class AuthorizerEventArgs : EventArgs
+  {
+      /// <summary>
+      /// The user-defined native data associated with this event.  Currently,
+      /// this will always contain the value of <see cref="IntPtr.Zero" />.
+      /// </summary>
+      public readonly IntPtr UserData;
+
+      /// <summary>
+      /// The action code responsible for the current call into the authorizer.
+      /// </summary>
+      public readonly SQLiteAuthorizerActionCode ActionCode;
+
+      /// <summary>
+      /// The first string argument for the current call into the authorizer.
+      /// The exact value will vary based on the action code, see the
+      /// <see cref="SQLiteAuthorizerActionCode" /> enumeration for possible
+      /// values.
+      /// </summary>
+      public readonly string Argument1;
+
+      /// <summary>
+      /// The second string argument for the current call into the authorizer.
+      /// The exact value will vary based on the action code, see the
+      /// <see cref="SQLiteAuthorizerActionCode" /> enumeration for possible
+      /// values.
+      /// </summary>
+      public readonly string Argument2;
+
+      /// <summary>
+      /// The database name for the current call into the authorizer, if
+      /// applicable.
+      /// </summary>
+      public readonly string Database;
+
+      /// <summary>
+      /// The name of the inner-most trigger or view that is responsible for
+      /// the access attempt or a null value if this access attempt is directly
+      /// from top-level SQL code.
+      /// </summary>
+      public readonly string Context;
+
+      /// <summary>
+      /// The return code for the current call into the authorizer.
+      /// </summary>
+      public SQLiteAuthorizerReturnCode ReturnCode;
+
+      ///////////////////////////////////////////////////////////////////////////////////////////
+
+      /// <summary>
+      /// Constructs an instance of this class with default property values.
+      /// </summary>
+      private AuthorizerEventArgs()
+      {
+          this.UserData = IntPtr.Zero;
+          this.ActionCode = SQLiteAuthorizerActionCode.None;
+          this.Argument1 = null;
+          this.Argument2 = null;
+          this.Database = null;
+          this.Context = null;
+          this.ReturnCode = SQLiteAuthorizerReturnCode.Ok;
+      }
+
+      ///////////////////////////////////////////////////////////////////////////////////////////
+
+      /// <summary>
+      /// Constructs an instance of this class with specific property values.
+      /// </summary>
+      /// <param name="pUserData">
+      /// The user-defined native data associated with this event.
+      /// </param>
+      /// <param name="actionCode">
+      /// The authorizer action code.
+      /// </param>
+      /// <param name="argument1">
+      /// The first authorizer argument.
+      /// </param>
+      /// <param name="argument2">
+      /// The second authorizer argument.
+      /// </param>
+      /// <param name="database">
+      /// The database name, if applicable.
+      /// </param>
+      /// <param name="context">
+      /// The name of the inner-most trigger or view that is responsible for
+      /// the access attempt or a null value if this access attempt is directly
+      /// from top-level SQL code.
+      /// </param>
+      /// <param name="returnCode">
+      /// The authorizer return code.
+      /// </param>
+      internal AuthorizerEventArgs(
+          IntPtr pUserData,
+          SQLiteAuthorizerActionCode actionCode,
+          string argument1,
+          string argument2,
+          string database,
+          string context,
+          SQLiteAuthorizerReturnCode returnCode
+          )
+          : this()
+      {
+          this.UserData = pUserData;
+          this.ActionCode = actionCode;
+          this.Argument1 = argument1;
+          this.Argument2 = argument2;
+          this.Database = database;
+          this.Context = context;
+          this.ReturnCode = returnCode;
+      }
+  }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
 

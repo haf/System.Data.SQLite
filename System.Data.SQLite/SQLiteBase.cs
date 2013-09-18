@@ -363,6 +363,7 @@ namespace System.Data.SQLite
     internal abstract void ChangePassword(byte[] newPasswordBytes);
 #endif
 
+    internal abstract void SetAuthorizerHook(SQLiteAuthorizerCallback func);
     internal abstract void SetUpdateHook(SQLiteUpdateCallback func);
     internal abstract void SetCommitHook(SQLiteCommitCallback func);
     internal abstract void SetTraceCallback(SQLiteTraceCallback func);

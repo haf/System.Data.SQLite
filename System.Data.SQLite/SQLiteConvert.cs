@@ -1504,6 +1504,243 @@ namespace System.Data.SQLite
   }
 
   /// <summary>
+  /// The action code responsible for the current call into the authorizer.
+  /// </summary>
+  public enum SQLiteAuthorizerActionCode
+  {
+      /// <summary>
+      /// No action is being performed.  This value should not be used from
+      /// external code.
+      /// </summary>
+      None = -1,
+
+      /// <summary>
+      /// No longer used.
+      /// </summary>
+      Copy = 0,
+
+      /// <summary>
+      /// An index will be created.  The action-specific arguments are the
+      /// index name and the table name.
+      /// 
+      /// </summary>
+      CreateIndex = 1,
+
+      /// <summary>
+      /// A table will be created.  The action-specific arguments are the
+      /// table name and a null value.
+      /// </summary>
+      CreateTable = 2,
+
+      /// <summary>
+      /// A temporary index will be created.  The action-specific arguments
+      /// are the index name and the table name.
+      /// </summary>
+      CreateTempIndex = 3,
+
+      /// <summary>
+      /// A temporary table will be created.  The action-specific arguments
+      /// are the table name and a null value.
+      /// </summary>
+      CreateTempTable = 4,
+
+      /// <summary>
+      /// A temporary trigger will be created.  The action-specific arguments
+      /// are the trigger name and the table name.
+      /// </summary>
+      CreateTempTrigger = 5,
+
+      /// <summary>
+      /// A temporary view will be created.  The action-specific arguments are
+      /// the view name and a null value.
+      /// </summary>
+      CreateTempView = 6,
+
+      /// <summary>
+      /// A trigger will be created.  The action-specific arguments are the
+      /// trigger name and the table name.
+      /// </summary>
+      CreateTrigger = 7,
+
+      /// <summary>
+      /// A view will be created.  The action-specific arguments are the view
+      /// name and a null value.
+      /// </summary>
+      CreateView = 8,
+
+      /// <summary>
+      /// A DELETE statement will be executed.  The action-specific arguments
+      /// are the table name and a null value.
+      /// </summary>
+      Delete = 9,
+
+      /// <summary>
+      /// An index will be dropped.  The action-specific arguments are the
+      /// index name and the table name.
+      /// </summary>
+      DropIndex = 10,
+
+      /// <summary>
+      /// A table will be dropped.  The action-specific arguments are the tables
+      /// name and a null value.
+      /// </summary>
+      DropTable = 11,
+
+      /// <summary>
+      /// A temporary index will be dropped.  The action-specific arguments are
+      /// the index name and the table name.
+      /// </summary>
+      DropTempIndex = 12,
+
+      /// <summary>
+      /// A temporary table will be dropped.  The action-specific arguments are
+      /// the table name and a null value.
+      /// </summary>
+      DropTempTable = 13,
+
+      /// <summary>
+      /// A temporary trigger will be dropped.  The action-specific arguments
+      /// are the trigger name and the table name.
+      /// </summary>
+      DropTempTrigger = 14,
+
+      /// <summary>
+      /// A temporary view will be dropped.  The action-specific arguments are
+      /// the view name and a null value.
+      /// </summary>
+      DropTempView = 15,
+
+      /// <summary>
+      /// A trigger will be dropped.  The action-specific arguments are the
+      /// trigger name and the table name.
+      /// </summary>
+      DropTrigger = 16,
+
+      /// <summary>
+      /// A view will be dropped.  The action-specific arguments are the view
+      /// name and a null value.
+      /// </summary>
+      DropView = 17,
+
+      /// <summary>
+      /// An INSERT statement will be executed.  The action-specific arguments
+      /// are the table name and a null value.
+      /// </summary>
+      Insert = 18,
+
+      /// <summary>
+      /// A PRAGMA statement will be executed.  The action-specific arguments
+      /// are the name of the PRAGMA and the new value or a null value.
+      /// </summary>
+      Pragma = 19,
+
+      /// <summary>
+      /// A table column will be read.  The action-specific arguments are the
+      /// table name and the column name.
+      /// </summary>
+      Read = 20,
+
+      /// <summary>
+      /// A SELECT statement will be executed.  The action-specific arguments
+      /// are both null values.
+      /// </summary>
+      Select = 21,
+
+      /// <summary>
+      /// A transaction will be started, committed, or rolled back.  The
+      /// action-specific arguments are the name of the operation (BEGIN,
+      /// COMMIT, or ROLLBACK) and a null value.
+      /// </summary>
+      Transaction = 22,
+
+      /// <summary>
+      /// An UPDATE statement will be executed.  The action-specific arguments
+      /// are the table name and the column name.
+      /// </summary>
+      Update = 23,
+
+      /// <summary>
+      /// A database will be attached to the connection.  The action-specific
+      /// arguments are the database file name and a null value.
+      /// </summary>
+      Attach = 24,
+
+      /// <summary>
+      /// A database will be detached from the connection.  The action-specific
+      /// arguments are the database name and a null value.
+      /// </summary>
+      Detach = 25,
+
+      /// <summary>
+      /// The schema of a table will be altered.  The action-specific arguments
+      /// are the database name and the table name.
+      /// </summary>
+      AlterTable = 26,
+
+      /// <summary>
+      /// An index will be deleted and then recreated.  The action-specific
+      /// arguments are the index name and a null value.
+      /// </summary>
+      Reindex = 27,
+
+      /// <summary>
+      /// A table will be analyzed to gathers statistics about it.  The
+      /// action-specific arguments are the table name and a null value.
+      /// </summary>
+      Analyze = 28,
+
+      /// <summary>
+      /// A virtual table will be created.  The action-specific arguments are
+      /// the table name and the module name.
+      /// </summary>
+      CreateVtable = 29,
+
+      /// <summary>
+      /// A virtual table will be dropped.  The action-specific arguments are
+      /// the table name and the module name.
+      /// </summary>
+      DropVtable = 30,
+
+      /// <summary>
+      /// A SQL function will be called.  The action-specific arguments are a
+      /// null value and the function name.
+      /// </summary>
+      Function = 31,
+
+      /// <summary>
+      /// A savepoint will be created, released, or rolled back.  The
+      /// action-specific arguments are the name of the operation (BEGIN,
+      /// RELEASE, or ROLLBACK) and the savepoint name.
+      /// </summary>
+      Savepoint = 32
+  }
+
+  /// <summary>
+  /// The return code for the current call into the authorizer.
+  /// </summary>
+  public enum SQLiteAuthorizerReturnCode
+  {
+      /// <summary>
+      /// The action will be allowed.
+      /// </summary>
+      Ok = 0,
+
+      /// <summary>
+      /// The overall action will be disallowed and an error message will be
+      /// returned from the query preparation method.
+      /// </summary>
+      Deny = 1,
+
+      /// <summary>
+      /// The specific action will be disallowed; however, the overall action
+      /// will continue.  The exact effects of this return code vary depending
+      /// on the specific action, please refer to the SQLite core library
+      /// documentation for futher details.
+      /// </summary>
+      Ignore = 2
+  }
+
+  /// <summary>
   /// Class used internally to determine the datatype of a column in a resultset
   /// </summary>
   internal sealed class SQLiteType

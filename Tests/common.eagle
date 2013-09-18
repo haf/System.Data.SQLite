@@ -1000,6 +1000,16 @@ namespace eval ::Eagle {
           [list param1 String $name]] > 0}]
     }
 
+    proc trimSql { sql } {
+      set result [string map [list \r\n " " \r " " \n " "] $sql]
+
+      while {[string first "  " $result] != -1} {
+        set result [string map [list "  " " "] $result]
+      }
+
+      return $result
+    }
+
     proc executeSql { sql {execute none} {fileName ""} } {
       if {[string length $fileName] == 0} then {set fileName :memory:}
       setupDb $fileName "" "" "" "" "" false false false false memDb

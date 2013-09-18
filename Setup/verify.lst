@@ -407,6 +407,7 @@ set sds_manifests(source) {
   testlinq/testlinq.2012.csproj
   Tests/
   Tests/all.eagle
+  Tests/authorizer.eagle
   Tests/backup.eagle
   Tests/basic.eagle
   Tests/common.eagle

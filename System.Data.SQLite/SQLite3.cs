@@ -2046,6 +2046,11 @@ namespace System.Data.SQLite
     }
 #endif
 
+    internal override void SetAuthorizerHook(SQLiteAuthorizerCallback func)
+    {
+      UnsafeNativeMethods.sqlite3_set_authorizer(_sql, func, IntPtr.Zero);
+    }
+
     internal override void SetUpdateHook(SQLiteUpdateCallback func)
     {
       UnsafeNativeMethods.sqlite3_update_hook(_sql, func, IntPtr.Zero);

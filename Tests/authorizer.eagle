@@ -1,0 +1,160 @@
+###############################################################################
+#
+# authorizer.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test authorizer-1.1 {SQLiteConnection Authorize event} -setup {
+  proc onAuthorize { sender e } {
+    #
+    # NOTE: Filter out the "noise" by allowing all standard
+    #       events on the "sqlite_*" tables.
+    #
+    set noiseActionCodes [list \
+        CreateTable CreateIndex Read Insert Update Delete]
+
+    if {[$e ActionCode] in $noiseActionCodes && \
+        [string match "sqlite_*" [$e Argument1]]} then {
+      return
+    }
+
+    lappend ::data [list \
+        [$e UserData] [$e ActionCode] [$e Argument1] \
+        [$e Argument2] [$e Database] [$e Context]]
+
+    if {[$e ActionCode] eq "CreateTable" && \
+        [$e Argument1] eq "tDeny"} then {
+      $e ReturnCode Deny
+    }
+  }
+
+  setupDb [set fileName authorizer-1.1.db]
+} -body {
+  set connection [getDbConnection]
+
+  set callback onAuthorize
+  object invoke $connection add_Authorize $callback
+
+  set results [list]
+
+  set sql [list \
+    CreateTable       {CREATE TABLE t1(x);} \
+    CreateIndex       {CREATE INDEX i1 ON t1(x);} \
+    CreateTrigger     {CREATE TRIGGER tr1 BEFORE INSERT ON t1
+                       BEGIN
+                         SELECT RAISE(IGNORE);
+                       END;} \
+    CreateView        {CREATE VIEW v1 AS SELECT * FROM t1;} \
+    CreateTempTable   {CREATE TEMPORARY TABLE t2(x);} \
+    CreateTempIndex   {CREATE INDEX i2 ON t2(x);} \
+    CreateTempTrigger {CREATE TEMPORARY TRIGGER tr2 BEFORE INSERT ON t2
+                       BEGIN
+                         SELECT RAISE(IGNORE);
+                       END;} \
+    CreateTempView    {CREATE TEMPORARY VIEW v2 AS SELECT * FROM t2;} \
+    Pragma            {PRAGMA journal_mode=WAL;} \
+    Function          {SELECT julianday('now');} \
+    Read              {SELECT x FROM t1;} \
+    Select            {SELECT * FROM t1;} \
+    Insert            {INSERT INTO t1(x) VALUES(1);} \
+    Update            {UPDATE t1 SET x = x - 1;} \
+    Delete            {DELETE FROM t1;} \
+    AlterTable        {ALTER TABLE t1 ADD COLUMN y;} \
+    Reindex           {REINDEX t1;} \
+    Analyze           {ANALYZE t1;} \
+    DropTempView      {DROP VIEW v2;} \
+    DropTempTrigger   {DROP TRIGGER tr2;} \
+    DropTempIndex     {DROP INDEX i2;} \
+    DropTempTable     {DROP TABLE t2;} \
+    DropView          {DROP VIEW v1;} \
+    DropTrigger       {DROP TRIGGER tr1;} \
+    DropIndex         {DROP INDEX i1;} \
+    DropTable         {DROP TABLE t1;} \
+    Transaction       {BEGIN; SELECT 0; COMMIT;} \
+    Savepoint         {SAVEPOINT s1; RELEASE SAVEPOINT s1;} \
+    Attach            {ATTACH DATABASE ':memory:' AS d1;} \
+    Detach            {DETACH DATABASE d1;} \
+    CreateVtable      {CREATE VIRTUAL TABLE t3 USING fts4(x TEXT);} \
+    DropVtable        {DROP TABLE t3;} \
+    CreateTable       {CREATE TABLE tDeny(x);}]
+
+  foreach {name value} $sql {
+    set data [list]; set code [catch {sql execute $db $value} result]
+    set result [lindex [split [string map [list \r\n \n] $result] \n] 0]
+    lappend results [list $name $data $code $result]
+  }
+  lappend results [isTableInDb tDeny]
+
+  set results
+} -cleanup {
+  catch {object invoke $connection remove_Authorize $callback}
+  catch {object removecallback $callback}
+
+  cleanupDb $fileName
+
+  freeDbConnection
+
+  unset -nocomplain data result code value name sql results callback \
+      connection db fileName
+
+  rename onAuthorize ""
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{{CreateTable {{0 CreateTable t1 {} main {}}} 0 0} {CreateIndex {{0 CreateIndex\
+i1 t1 main {}} {0 Reindex i1 {} main {}}} 0 0} {CreateTrigger {{0 CreateTrigger\
+tr1 t1 main {}}} 0 0} {CreateView {{0 CreateView v1 {} main {}}} 0 0}\
+{CreateTempTable {{0 CreateTempTable t2 {} temp {}}} 0 0} {CreateTempIndex {{0\
+CreateTempIndex i2 t2 temp {}} {0 Reindex i2 {} temp {}}} 0 0}\
+{CreateTempTrigger {{0 CreateTempTrigger tr2 t2 temp {}}} 0 0} {CreateTempView\
+{{0 CreateTempView v2 {} temp {}}} 0 0} {Pragma {{0 Pragma journal_mode WAL {}\
+{}}} 0 0} {Function {{0 Select {} {} {} {}} {0 Function {} julianday {} {}}} 0\
+0} {Read {{0 Select {} {} {} {}} {0 Read t1 x main {}}} 0 0} {Select {{0 Select\
+{} {} {} {}} {0 Read t1 x main {}}} 0 0} {Insert {{0 Insert t1 {} main {}} {0\
+Select {} {} {} tr1}} 0 0} {Update {{0 Read t1 x main {}} {0 Update t1 x main\
+{}}} 0 0} {Delete {{0 Delete t1 {} main {}}} 0 0} {AlterTable {{0 AlterTable\
+main t1 {} {}} {0 Function {} substr {} {}} {0 Function {} substr {} {}}} 0 0}\
+{Reindex {{0 Reindex i1 {} main {}}} 0 0} {Analyze {{0 Analyze t1 {} main {}}\
+{0 Select {} {} {} {}} {0 Select {} {} {} {}} {0 Function {} count {} {}} {0\
+Select {} {} {} {}}} 0 0} {DropTempView {{0 DropTempView v2 {} temp {}} {0\
+Delete v2 {} temp {}}} 0 0} {DropTempTrigger {{0 DropTempTrigger tr2 t2 temp\
+{}}} 0 0} {DropTempIndex {{0 DropTempIndex i2 t2 temp {}}} 0 0} {DropTempTable\
+{{0 DropTempTable t2 {} temp {}} {0 Delete t2 {} temp {}}} 0 0} {DropView {{0\
+DropView v1 {} main {}} {0 Delete v1 {} main {}}} 0 0} {DropTrigger {{0\
+DropTrigger tr1 t1 main {}}} 0 0} {DropIndex {{0 DropIndex i1 t1 main {}}} 0 0}\
+{DropTable {{0 DropTable t1 {} main {}} {0 Delete t1 {} main {}}} 0 0}\
+{Transaction {{0 Transaction BEGIN {} {} {}} {0 Select {} {} {} {}} {0\
+Transaction COMMIT {} {} {}}} 0 0} {Savepoint {{0 Savepoint BEGIN s1 {} {}} {0\
+Savepoint RELEASE s1 {} {}}} 0 0} {Attach {{0 Attach :memory: {} {} {}}} 0 0}\
+{Detach {{0 Detach d1 {} {} {}}} 0 0} {CreateVtable {{0 CreateVtable t3 fts4\
+main {}} {0 CreateTable t3_content {} main {}} {0 CreateTable t3_segments {}\
+main {}} {0 CreateTable t3_segdir {} main {}} {0 CreateTable t3_docsize {} main\
+{}} {0 CreateTable t3_stat {} main {}} {0 Pragma page_size {} main {}}} 0 0}\
+{DropVtable {{0 DropVtable t3 fts4 main {}} {0 Delete t3 {} main {}} {0\
+DropTable t3_content {} main {}} {0 Delete t3_content {} main {}} {0 DropTable\
+t3_segments {} main {}} {0 Delete t3_segments {} main {}} {0 DropTable\
+t3_segdir {} main {}} {0 Delete t3_segdir {} main {}} {0 DropTable t3_docsize\
+{} main {}} {0 Delete t3_docsize {} main {}} {0 DropTable t3_stat {} main {}}\
+{0 Delete t3_stat {} main {}}} 0 0} {CreateTable {{0 CreateTable tDeny {} main\
+{}}} 1 {System.Data.SQLite.SQLiteException (0x80004005): authorization denied}}\
+False}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
