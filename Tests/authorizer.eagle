@@ -34,10 +34,26 @@ runTest {test authorizer-1.1 {SQLiteConnection Authorize event} -setup {
       return
     }
 
+    #
+    # NOTE: Filter out all "non-primary" events to make the test
+    #       results more deterministic in the face of different
+    #       query plans.
+    #
+    if {[$e ActionCode] ne $::filter} then {
+      return
+    }
+
+    #
+    # NOTE: Record the authorizer arguments exactly as we received
+    #       them.
+    #
     lappend ::data [list \
         [$e UserData] [$e ActionCode] [$e Argument1] \
         [$e Argument2] [$e Database] [$e Context]]
 
+    #
+    # NOTE: Deny all attempts to create a table named "tDeny".
+    #
     if {[$e ActionCode] eq "CreateTable" && \
         [$e Argument1] eq "tDeny"} then {
       $e ReturnCode Deny
@@ -95,7 +111,8 @@ runTest {test authorizer-1.1 {SQLiteConnection Authorize event} -setup {
     CreateTable       {CREATE TABLE tDeny(x);}]
 
   foreach {name value} $sql {
-    set data [list]; set code [catch {sql execute $db $value} result]
+    set filter $name; set data [list]
+    set code [catch {sql execute $db $value} result]
     set result [lindex [split [string map [list \r\n \n] $result] \n] 0]
     lappend results [list $name $data $code $result]
   }
@@ -110,49 +127,35 @@ runTest {test authorizer-1.1 {SQLiteConnection Authorize event} -setup {
 
   freeDbConnection
 
-  unset -nocomplain data result code value name sql results callback \
+  unset -nocomplain result code data filter value name sql results callback \
       connection db fileName
 
   rename onAuthorize ""
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
 {{CreateTable {{0 CreateTable t1 {} main {}}} 0 0} {CreateIndex {{0 CreateIndex\
-i1 t1 main {}} {0 Reindex i1 {} main {}}} 0 0} {CreateTrigger {{0 CreateTrigger\
-tr1 t1 main {}}} 0 0} {CreateView {{0 CreateView v1 {} main {}}} 0 0}\
-{CreateTempTable {{0 CreateTempTable t2 {} temp {}}} 0 0} {CreateTempIndex {{0\
-CreateTempIndex i2 t2 temp {}} {0 Reindex i2 {} temp {}}} 0 0}\
-{CreateTempTrigger {{0 CreateTempTrigger tr2 t2 temp {}}} 0 0} {CreateTempView\
-{{0 CreateTempView v2 {} temp {}}} 0 0} {Pragma {{0 Pragma journal_mode WAL {}\
-{}}} 0 0} {Function {{0 Select {} {} {} {}} {0 Function {} julianday {} {}}} 0\
-0} {Read {{0 Select {} {} {} {}} {0 Read t1 x main {}}} 0 0} {Select {{0 Select\
-{} {} {} {}} {0 Read t1 x main {}}} 0 0} {Insert {{0 Insert t1 {} main {}} {0\
-Select {} {} {} tr1}} 0 0} {Update {{0 Read t1 x main {}} {0 Update t1 x main\
-{}}} 0 0} {Delete {{0 Delete t1 {} main {}}} 0 0} {AlterTable {{0 AlterTable\
-main t1 {} {}} {0 Function {} substr {} {}} {0 Function {} substr {} {}}} 0 0}\
-{Reindex {{0 Reindex i1 {} main {}}} 0 0} {Analyze {{0 Analyze t1 {} main {}}\
-{0 Select {} {} {} {}} {0 Select {} {} {} {}} {0 Function {} count {} {}} {0\
-Select {} {} {} {}}} 0 0} {DropTempView {{0 DropTempView v2 {} temp {}} {0\
-Delete v2 {} temp {}}} 0 0} {DropTempTrigger {{0 DropTempTrigger tr2 t2 temp\
-{}}} 0 0} {DropTempIndex {{0 DropTempIndex i2 t2 temp {}}} 0 0} {DropTempTable\
-{{0 DropTempTable t2 {} temp {}} {0 Delete t2 {} temp {}}} 0 0} {DropView {{0\
-DropView v1 {} main {}} {0 Delete v1 {} main {}}} 0 0} {DropTrigger {{0\
+i1 t1 main {}}} 0 0} {CreateTrigger {{0 CreateTrigger tr1 t1 main {}}} 0 0}\
+{CreateView {{0 CreateView v1 {} main {}}} 0 0} {CreateTempTable {{0\
+CreateTempTable t2 {} temp {}}} 0 0} {CreateTempIndex {{0 CreateTempIndex i2 t2\
+temp {}}} 0 0} {CreateTempTrigger {{0 CreateTempTrigger tr2 t2 temp {}}} 0 0}\
+{CreateTempView {{0 CreateTempView v2 {} temp {}}} 0 0} {Pragma {{0 Pragma\
+journal_mode WAL {} {}}} 0 0} {Function {{0 Function {} julianday {} {}}} 0 0}\
+{Read {{0 Read t1 x main {}}} 0 0} {Select {{0 Select {} {} {} {}}} 0 0}\
+{Insert {{0 Insert t1 {} main {}}} 0 0} {Update {{0 Update t1 x main {}}} 0 0}\
+{Delete {{0 Delete t1 {} main {}}} 0 0} {AlterTable {{0 AlterTable main t1 {}\
+{}}} 0 0} {Reindex {{0 Reindex i1 {} main {}}} 0 0} {Analyze {{0 Analyze t1 {}\
+main {}}} 0 0} {DropTempView {{0 DropTempView v2 {} temp {}}} 0 0}\
+{DropTempTrigger {{0 DropTempTrigger tr2 t2 temp {}}} 0 0} {DropTempIndex {{0\
+DropTempIndex i2 t2 temp {}}} 0 0} {DropTempTable {{0 DropTempTable t2 {} temp\
+{}}} 0 0} {DropView {{0 DropView v1 {} main {}}} 0 0} {DropTrigger {{0\
 DropTrigger tr1 t1 main {}}} 0 0} {DropIndex {{0 DropIndex i1 t1 main {}}} 0 0}\
-{DropTable {{0 DropTable t1 {} main {}} {0 Delete t1 {} main {}}} 0 0}\
-{Transaction {{0 Transaction BEGIN {} {} {}} {0 Select {} {} {} {}} {0\
-Transaction COMMIT {} {} {}}} 0 0} {Savepoint {{0 Savepoint BEGIN s1 {} {}} {0\
-Savepoint RELEASE s1 {} {}}} 0 0} {Attach {{0 Attach :memory: {} {} {}}} 0 0}\
-{Detach {{0 Detach d1 {} {} {}}} 0 0} {CreateVtable {{0 CreateVtable t3 fts4\
-main {}} {0 CreateTable t3_content {} main {}} {0 CreateTable t3_segments {}\
-main {}} {0 CreateTable t3_segdir {} main {}} {0 CreateTable t3_docsize {} main\
-{}} {0 CreateTable t3_stat {} main {}} {0 Pragma page_size {} main {}}} 0 0}\
-{DropVtable {{0 DropVtable t3 fts4 main {}} {0 Delete t3 {} main {}} {0\
-DropTable t3_content {} main {}} {0 Delete t3_content {} main {}} {0 DropTable\
-t3_segments {} main {}} {0 Delete t3_segments {} main {}} {0 DropTable\
-t3_segdir {} main {}} {0 Delete t3_segdir {} main {}} {0 DropTable t3_docsize\
-{} main {}} {0 Delete t3_docsize {} main {}} {0 DropTable t3_stat {} main {}}\
-{0 Delete t3_stat {} main {}}} 0 0} {CreateTable {{0 CreateTable tDeny {} main\
-{}}} 1 {System.Data.SQLite.SQLiteException (0x80004005): authorization denied}}\
-False}}
+{DropTable {{0 DropTable t1 {} main {}}} 0 0} {Transaction {{0 Transaction\
+BEGIN {} {} {}} {0 Transaction COMMIT {} {} {}}} 0 0} {Savepoint {{0 Savepoint\
+BEGIN s1 {} {}} {0 Savepoint RELEASE s1 {} {}}} 0 0} {Attach {{0 Attach\
+:memory: {} {} {}}} 0 0} {Detach {{0 Detach d1 {} {} {}}} 0 0} {CreateVtable\
+{{0 CreateVtable t3 fts4 main {}}} 0 0} {DropVtable {{0 DropVtable t3 fts4 main\
+{}}} 0 0} {CreateTable {{0 CreateTable tDeny {} main {}}} 1\
+{System.Data.SQLite.SQLiteException (0x80004005): authorization denied}} False}}
 
 ###############################################################################
 

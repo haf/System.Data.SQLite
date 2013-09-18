@@ -1001,13 +1001,7 @@ namespace eval ::Eagle {
     }
 
     proc trimSql { sql } {
-      set result [string map [list \r\n " " \r " " \n " "] $sql]
-
-      while {[string first "  " $result] != -1} {
-        set result [string map [list "  " " "] $result]
-      }
-
-      return $result
+      return [regsub -all -- {\s+} [string trim $sql] " "]
     }
 
     proc executeSql { sql {execute none} {fileName ""} } {
