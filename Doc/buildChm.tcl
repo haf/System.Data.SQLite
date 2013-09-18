@@ -45,9 +45,11 @@ proc getFileHash { fileName } {
 #
 # HACK: Copy our local [fixed] copy of the MSDN documenter assembly into the
 #       installed location of NDoc3, if necessary.  Actually copying the file
-#       will require elevated administrator privileges; otherwise, it would
+#       will require elevated administrator privileges; otherwise, it will
 #       fail.  Any errors encountered while copying the file are reported via
-#       the console; however, they will not halt processing.
+#       the console; however, they will not halt further processing (i.e. the
+#       CHM file will probably still get built, but it may contain some links
+#       to built-in types that are blank).
 #
 proc copyMsdnDocumenter { sourceDirectory destinationDirectory } {
   set fileNameOnly NDoc3.Documenter.Msdn.dll
