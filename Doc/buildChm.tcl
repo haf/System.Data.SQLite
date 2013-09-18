@@ -33,12 +33,59 @@ proc readFileAsSubSpec { fileName } {
   return $data
 }
 
-set path [file dirname [info script]]
+proc getFileHash { fileName } {
+  if {[catch {
+    exec fossil.exe sha1sum [file nativename $fileName]
+  } result] == 0} then {
+    return [string trim [lindex [split $result " "] 0]]
+  }
+  return ""
+}
+
+#
+# HACK: Copy our local [fixed] copy of the MSDN documenter assembly into the
+#       installed location of NDoc3, if necessary.  Actually copying the file
+#       will require elevated administrator privileges; otherwise, it would
+#       fail.  Any errors encountered while copying the file are reported via
+#       the console; however, they will not halt processing.
+#
+proc copyMsdnDocumenter { sourceDirectory destinationDirectory } {
+  set fileNameOnly NDoc3.Documenter.Msdn.dll
 
-set nDocPath [file join $env(ProgramFiles) NDoc3]
+  set sourceFileName [file join $sourceDirectory bin $fileNameOnly]
+  set destinationFileName [file join $destinationDirectory bin $fileNameOnly]
 
-if {![file isdirectory $nDocPath]} then {
-  puts stdout "NDoc3 must be installed to: $nDocPath"
+  set sourceFileHash [getFileHash $sourceFileName]
+  # puts stdout "Hashed \"$sourceFileName\" ==> \"$sourceFileHash\""
+
+  set destinationFileHash [getFileHash $destinationFileName]
+  # puts stdout "Hashed \"$destinationFileName\" ==> \"$destinationFileHash\""
+
+  if {[string length $sourceFileHash] > 0 && \
+      [string length $destinationFileHash] > 0 && \
+      $sourceFileHash ne $destinationFileHash} then {
+    if {[catch {
+      file copy -force $destinationFileName $destinationFileName.bak
+      file copy -force $sourceFileName $destinationFileName
+    } result] == 0} then {
+      puts stdout \
+          "finished copying \"$sourceFileName\" to \"$destinationFileName\""
+    } else {
+      puts stdout $result
+    }
+  } else {
+    puts stdout \
+        "skipped copying \"$sourceFileName\" to \"$destinationFileName\""
+  }
+}
+
+set path [file normalize [file dirname [info script]]]
+
+set nDocExtPath [file join [file dirname $path] Externals NDoc3]
+set nDocInstPath [file join $env(ProgramFiles) NDoc3]
+
+if {![file isdirectory $nDocInstPath]} then {
+  puts stdout "NDoc3 must be installed to: $nDocInstPath"
   exit 1
 }
 
@@ -97,16 +144,21 @@ if {$count > 0} then {
 # TODO: If the NDoc version number ever changes, the next line of code will
 #       probably need to be updated.
 #
-set outputPath [file join Output ndoc3_msdn_temp]
+set outputPath [file join Output]
+set temporaryPath [file join $outputPath ndoc3_msdn_temp]
 
-set code [catch {exec [file join $nDocPath bin NDoc3Console.exe] \
+if {[file isdirectory $nDocExtPath]} then {
+  copyMsdnDocumenter $nDocExtPath $nDocInstPath
+}
+
+set code [catch {exec [file join $nDocInstPath bin NDoc3Console.exe] \
     "-project=[file nativename $projectFile]"} result]
 
 puts stdout $result; if {$code != 0} then {exit $code}
 
 set fileNames [list SQLite.NET.hhp SQLite.NET.hhc]
 
-foreach fileName [glob -nocomplain [file join $outputPath *.html]] {
+foreach fileName [glob -nocomplain [file join $temporaryPath *.html]] {
   lappend fileNames [file tail $fileName]
 }
 
@@ -154,7 +206,7 @@ set subSpecs(.html,7) {"\1~Overloads.html"}
 set subSpecs(.html,8) {"\1~Overloads.html"}
 
 foreach fileName $fileNames {
-  set fileName [file join $path $outputPath $fileName]
+  set fileName [file join $path $temporaryPath $fileName]
 
   #
   # NOTE: Make sure the file we need actually exists.
@@ -204,14 +256,14 @@ foreach fileName $fileNames {
 }
 
 set code [catch {exec [file join $hhcPath hhc.exe] \
-    [file nativename [file join $path $outputPath SQLite.NET.hhp]]} result]
+    [file nativename [file join $path $temporaryPath SQLite.NET.hhp]]} result]
 
 #
 # NOTE: For hhc.exe, zero means failure.
 #
 puts stdout $result; if {$code == 0} then {exit 1}
 
-file copy -force [file join $path $outputPath SQLite.NET.chm] \
+file copy -force [file join $path $temporaryPath SQLite.NET.chm] \
     [file join $path SQLite.NET.chm]
 
 puts stdout SUCCESS
