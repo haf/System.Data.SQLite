@@ -253,14 +253,14 @@ IF NOT DEFINED NOTAG (
     %__ECHO% Externals\Eagle\bin\EagleShell.exe -file Setup\sourceTag.eagle SourceIdMode SQLite.Interop\src\win\interop.h
 
     IF ERRORLEVEL 1 (
-      ECHO Source tagging of interop assembly failed.
+      ECHO Source tagging of "SQLite.Interop\src\win\interop.h" failed.
       GOTO errors
     )
 
     %__ECHO% Externals\Eagle\bin\EagleShell.exe -file Setup\sourceTag.eagle SourceIdMode System.Data.SQLite\SQLitePatchLevel.cs
 
     IF ERRORLEVEL 1 (
-      ECHO Source tagging of provider assembly failed.
+      ECHO Source tagging of "System.Data.SQLite\SQLitePatchLevel.cs" failed.
       GOTO errors
     )
   ) ELSE (
