@@ -9,9 +9,20 @@ using System;
 
 namespace System.Data.SQLite
 {
+    /// <summary>
+    /// Defines a source code time-stamp custom attribute for an assembly
+    /// manifest.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     public sealed class AssemblySourceTimeStampAttribute : Attribute
     {
+        /// <summary>
+        /// Constructs an instance of this attribute class using the specified
+        /// source code time-stamp value.
+        /// </summary>
+        /// <param name="value">
+        /// The source code time-stamp value to use.
+        /// </param>
         public AssemblySourceTimeStampAttribute(string value)
         {
             sourceTimeStamp = value;
@@ -20,6 +31,9 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private string sourceTimeStamp;
+        /// <summary>
+        /// Gets the source code time-stamp value.
+        /// </summary>
         public string SourceTimeStamp
         {
             get { return sourceTimeStamp; }
