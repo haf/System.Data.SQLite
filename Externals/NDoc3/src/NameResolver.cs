@@ -11,6 +11,7 @@ namespace NDoc3.Documenter.Msdn {
 	public class NameResolver {
 		public const string EXT = ".html";
 
+		public MsdnXsltUtilities utilities;
 		private readonly bool mergeAssemblies;
 		private readonly StringDictionary fileNames = new StringDictionary();
 		private readonly StringDictionary elemNames = new StringDictionary();
@@ -457,7 +458,21 @@ namespace NDoc3.Documenter.Msdn {
 
 			//			Debug.Assert(filename != null, string.Format("Filename for assembly:memberId [{0}:{1}] not found", currentAssemblyName, memberId));
 			//			Debug.WriteLine(string.Format("GetFilenameForIdInternal('{0}','{1}') => {2}", currentAssemblyName, memberId, filename));
-			return filename ?? string.Empty;
+			if (filename != null)
+				return filename;
+
+			if (utilities != null)
+			{
+				if (memberId.Length > 2 && memberId[1] == ':')
+					memberId = memberId.Substring(2);
+
+				filename = utilities.FormatOnlineSDKLink(memberId);
+
+				if (filename != null)
+					return filename;
+			}
+
+			return String.Empty;
 		}
 
 		private string GetFilenameForIdSpecial(string assemblyName, string memberId, string postfix) {
