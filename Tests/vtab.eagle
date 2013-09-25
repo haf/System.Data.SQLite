@@ -103,8 +103,8 @@ runTest {test vtab-1.1 {basic virtual table support} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-{^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
 
 ###############################################################################
 
@@ -208,9 +208,10 @@ runTest {test vtab-1.2.1 {IEnumerable virtual table} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{one two three 4 5\.0 Error \{SQL logic error or missing database
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{one two three 4 5\.0 Error\
+\{SQL logic error or missing database
 virtual table "t\d+" is read-only\}\}$}]}
 
 ###############################################################################
@@ -318,9 +319,10 @@ runTest {test vtab-1.2.2 {IEnumerable virtual table} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{one two three 4 5\.0 Error \{SQL logic error or missing database
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{one two three 4 5\.0 Error\
+\{SQL logic error or missing database
 virtual table "t\d+" is read-only\}\}$}]}
 
 ###############################################################################
@@ -426,9 +428,10 @@ runTest {test vtab-1.3.1 {IEnumerable<T> virtual table} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{1 2 3 4 5 Error \{SQL logic error or missing database
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{1 2 3 4 5 Error \{SQL\
+logic error or missing database
 virtual table "t\d+" is read-only\}\}$}]}
 
 ###############################################################################
@@ -537,9 +540,10 @@ runTest {test vtab-1.3.2 {IEnumerable<T> virtual table} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{1 2 3 4 5 Error \{SQL logic error or missing database
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{1 2 3 4 5 Error \{SQL\
+logic error or missing database
 virtual table "t\d+" is read-only\}\}$}]}
 
 ###############################################################################
@@ -788,9 +792,10 @@ runTest {test vtab-1.4 {virtual table function support} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{\{\} b25l \{SQL logic error or missing database
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\{\} b25l \{SQL logic\
+error or missing database
 unable to use function Base64 in the requested context\} \{SQL logic error or\
 missing database
 no such function: Base65\}\}$}]}
@@ -1041,9 +1046,10 @@ runTest {test vtab-1.5 {virtual table function support} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{\{\} b25l \{SQL logic error or missing database
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\{\} b25l \{SQL logic\
+error or missing database
 (?:unable to use function Base64 in the requested context|need exactly one\
 argument, got 3)\} \{SQL logic error or missing database
 no such function: Base65\}\}$}]}
@@ -1220,9 +1226,9 @@ runTest {test vtab-1.6 {virtual table rename support} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{\{\} t\d+ \{\} x\d+\}$}]}
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\{\} t\d+ \{\} x\d+\}$}]}
 
 ###############################################################################
 
@@ -1320,9 +1326,10 @@ runTest {test vtab-1.7 {virtual table xBestIndex marshalling (1)} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{0 5 two three one 5\.0 4\}$}]}
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{0 5 two three one 5\.0\
+4\}$}]}
 
 ###############################################################################
 
@@ -1421,9 +1428,9 @@ runTest {test vtab-1.8 {virtual table xBestIndex marshalling (2)} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{0 5 one three\}$}]}
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{0 5 one three\}$}]}
 
 ###############################################################################
 
@@ -1499,9 +1506,9 @@ runTest {test vtab-1.9 {IEnumerable virtual table w/large byte array} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -time true -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 (?:-)?\d+$}]}
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 (?:-)?\d+$}]}
 
 ###############################################################################
 
@@ -1596,10 +1603,11 @@ runTest {test vtab-1.10 {virtual table xRowId uniqueness} -setup {
   unset -nocomplain result code results errors sql dataSource id fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
-defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE} -match regexp -result \
-[string map [list \n \r\n] {^Ok System#CodeDom#Compiler#CompilerResults#\d+\
-\{\} 0 \{0 4294967296 4294967296 8589934592 8589934592 12884901888 12884901888\
-17179869184 17179869184 21474836480 21474836480 25769803776 25769803776\}$}]}
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{0 4294967296 4294967296\
+8589934592 8589934592 12884901888 12884901888 17179869184 17179869184\
+21474836480 21474836480 25769803776 25769803776\}$}]}
 
 ###############################################################################
 

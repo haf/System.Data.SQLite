@@ -209,7 +209,7 @@ namespace eval ::Eagle {
   }
 
   proc checkForTclOptions { channel } {
-    tputs $channel "---- checking for Tcl options..."
+    tputs $channel "---- checking for Tcl options... "
 
     if {![isEagle]} then {
       set result [list]
@@ -654,6 +654,18 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForTestExec { channel } {
+    tputs $channel "---- checking for test use of \"exec\" command... "
+
+    if {![info exists ::no(testExec)]} then {
+      addConstraint testExec
+
+      tputs $channel yes\n
+    } else {
+      tputs $channel no\n
+    }
+  }
+
   proc checkForTestMachine { channel } {
     tputs $channel "---- checking for test machine... "
 
@@ -954,20 +966,21 @@ namespace eval ::Eagle {
 
   proc checkForTiming {
           channel threshold {constraint ""} {tries 1} {delay 1000}
-          {asynchronous false} } {
+          {average false} {asynchronous false} } {
     tputs $channel [appendArgs \
         "---- checking for precision timing (threshold of " $threshold \
-        " milliseconds, delay of " $delay " milliseconds)... "]
+        " milliseconds" [expr {$average ? " average" : ""}] ", delay of " \
+        $delay " milliseconds)... "]
 
     #
     # HACK: Sometimes the first try takes quite a bit longer than subsequent
     #       tries.  We attempt to bypass this problem by retrying a set number
     #       of times (which can be overridden by the caller) before giving up.
     #
-    set try 0
+    set total 0
     set difference unknown
 
-    for {} {$try < $tries} {incr try} {
+    for {set try 0} {$try < $tries} {incr try} {
       #
       # NOTE: Create a script that will set the final clicks value.  This must
       #       use a global variable due to the nature of [after].
@@ -1001,21 +1014,36 @@ namespace eval ::Eagle {
       set difference [expr {abs($stop - $start - $delay)}]
 
       #
+      # NOTE: Keep track of the total number of milliseconds elapsed for
+      #       all iterations of this loop.
+      #
+      incr total $difference
+
+      #
+      # NOTE: If we are using the average difference, handle that now.
+      #
+      if {$average && $tries > 1} then {
+        set difference [expr {$total / $tries}]
+      }
+
+      #
       # NOTE: Are we within the threshold specified by the caller?
       #
       if {$difference >= 0 && $difference <= $threshold} then {
         #
         # NOTE: We appear to be capable of fairly precise timing.
         #
-        if {[string length $constraint] > 0} then {
-          addConstraint $constraint
-        } else {
-          addConstraint timing
+        if {[string length $constraint] == 0} then {
+          set constraint timing
         }
 
-        tputs $channel [appendArgs "yes (0 <= " $difference " <= " \
-            $threshold " milliseconds, tried " [expr {$try + 1}] \
-            " " [expr {$try + 1 > 1 ? "times" : "time"}] ")\n"]
+        addConstraint $constraint
+
+        tputs $channel [appendArgs \
+            "yes (0 <= " $difference " <= " $threshold " milliseconds" \
+            [expr {$average ? " average" : ""}] ", tried " [expr {$try + 1}] \
+            " out of " $tries " " [expr {$tries > 1 ? "times" : "time"}] \
+            ", \"" $constraint "\")\n"]
 
         #
         # NOTE: We are done here, return now.
@@ -1024,9 +1052,10 @@ namespace eval ::Eagle {
       }
     }
 
-    tputs $channel [appendArgs "no (0 <= " $difference " > " \
-        $threshold " milliseconds, tried " $try " " \
-        [expr {$try > 1 ? "times" : "time"}] ")\n"]
+    tputs $channel [appendArgs \
+        "no (0 <= " $difference " > " $threshold " milliseconds" \
+        [expr {$average ? " average" : ""}] ", tried " $try " out of " \
+        $tries " " [expr {$tries > 1 ? "times" : "time"}] ")\n"]
   }
 
   proc checkForPerformance { channel } {
@@ -1356,6 +1385,18 @@ namespace eval ::Eagle {
 
         tputs $channel [appendArgs "yes (" \
             [object invoke $certificate Subject] ")\n"]
+      } else {
+        tputs $channel no\n
+      }
+    }
+
+    proc checkForCompileCSharp { channel } {
+      tputs $channel "---- checking for test use of C# compiler... "
+
+      if {![info exists ::no(compileCSharp)]} then {
+        addConstraint compileCSharp
+
+        tputs $channel yes\n
       } else {
         tputs $channel no\n
       }
@@ -2045,22 +2086,27 @@ namespace eval ::Eagle {
 
     proc checkForTclShell { channel } {
       #
-      # HACK: We do not care about the machine type returned from this
-      #       procedure, we only care if it returns "error" because that
-      #       would indicate an error was caught during [exec] (i.e. the
-      #       native Tcl shell could not be executed).
+      # HACK: If this returns "error" that normally indicates an error was
+      #       caught during [exec] (i.e. the native Tcl shell could not be
+      #       executed).
       #
-      if {[catch {getMachineForTclShell} result] == 0 && \
+      set prefix "---- checking for Tcl shell version... "
+
+      if {[catch {getTclVersionForTclShell} result] == 0 && \
           $result ne "error"} then {
         #
         # NOTE: Yes, a native Tcl shell appears to be available.
         #
         addConstraint tclShell
 
-        tputs $channel [appendArgs "---- checking for Tcl shell... yes (" \
-            $result ")\n"]
+        #
+        # NOTE: Now, add the version specific test constraint.
+        #
+        addConstraint [appendArgs tclShell [string map [list . ""] $result]]
+
+        tputs $channel [appendArgs $prefix "yes (" $result ")\n"]
       } else {
-        tputs $channel "---- checking for Tcl shell... no\n"
+        tputs $channel [appendArgs $prefix no\n]
       }
     }
 
@@ -2071,17 +2117,18 @@ namespace eval ::Eagle {
       #       would indicate an error was caught during [exec] (i.e. the
       #       native Tcl shell could not be executed).
       #
-      if {[catch {getTkVersion} result] == 0 && \
+      set prefix "---- checking for Tk package version... "
+
+      if {[catch {getTkVersionForTclShell} result] == 0 && \
           $result ne "error"} then {
         #
         # NOTE: Yes, a native Tk package appears to be available.
         #
         addConstraint tkPackage
 
-        tputs $channel [appendArgs "---- checking for Tk package... yes (" \
-            $result ")\n"]
+        tputs $channel [appendArgs $prefix "yes (" $result ")\n"]
       } else {
-        tputs $channel "---- checking for Tk package... no\n"
+        tputs $channel [appendArgs $prefix no\n]
       }
     }
 
@@ -2567,11 +2614,12 @@ namespace eval ::Eagle {
         checkForWindowsCommandProcessor checkForFossil checkForEagle \
         checkForSymbols checkForLogFile checkForGaruda checkForShell \
         checkForDebug checkForTk checkForVersion checkForCommand \
-        checkForTestMachine checkForTestPlatform checkForTestConfiguration \
-        checkForTestSuffix checkForFile checkForPathFile checkForNativeCode \
-        checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
-        checkForTip405 checkForTip426 checkForTiming checkForPerformance \
-        checkForStackIntensive checkForInteractive checkForInteractiveCommand \
+        checkForTestExec checkForTestMachine checkForTestPlatform \
+        checkForTestConfiguration checkForTestSuffix checkForFile \
+        checkForPathFile checkForNativeCode checkForTip127 checkForTip194 \
+        checkForTip241 checkForTip285 checkForTip405 checkForTip426 \
+        checkForTiming checkForPerformance checkForStackIntensive \
+        checkForInteractive checkForInteractiveCommand \
         checkForUserInteraction checkForNetwork checkForCompileOption] false \
         false
 

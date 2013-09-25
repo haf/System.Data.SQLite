@@ -78,9 +78,9 @@ runTest {test tkt-48a6b8e4ca-1.1 {SQLiteTypeToType with NULL values} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors sql dataSource id db fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
 
 ###############################################################################
 

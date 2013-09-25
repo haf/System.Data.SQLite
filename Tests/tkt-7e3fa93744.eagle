@@ -128,9 +128,9 @@ runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors sql dataSource id db fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 8$}}
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 8$}}
 
 ###############################################################################
 

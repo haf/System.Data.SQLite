@@ -80,8 +80,8 @@ namespace eval ::Eagle {
   }
 
   proc getSoftwareRegistryKey { wow64 } {
-    if {$wow64 && [info exists ::tcl_platform(machine)] && \
-        $::tcl_platform(machine) eq "amd64"} then {
+    if {$wow64 && [info exists ::tcl_platform(machine)] && [lsearch -exact \
+        [list ia64 amd64] $::tcl_platform(machine)] != -1} then {
       #
       # NOTE: Return the WoW64 registry key name because we are running on a
       #       64-bit operating system and the caller specifically requested
@@ -839,9 +839,16 @@ namespace eval ::Eagle {
 
     if {[llength $args] > 0} then {eval lappend command $args}
 
-    tputs $::test_channel [appendArgs "---- running command: " $command \n]
+    if {[info exists ::no(exec)]} then {
+      tputs $::test_channel [appendArgs "---- skipping command: " $command \n]
 
-    return [uplevel 1 $command]
+      set procName [lindex [info level [info level]] 0]
+      error "test use of \[$procName\] has been disabled"
+    } else {
+      tputs $::test_channel [appendArgs "---- running command: " $command \n]
+
+      return [uplevel 1 $command]
+    }
   }
 
   proc testClrExec { commandName options args } {
@@ -863,18 +870,33 @@ namespace eval ::Eagle {
 
     if {[llength $args] > 0} then {eval lappend command $args}
 
-    tputs $::test_channel [appendArgs "---- running command: " $command \n]
+    if {[info exists ::no(exec)]} then {
+      tputs $::test_channel [appendArgs "---- skipping command: " $command \n]
 
-    return [uplevel 1 $command]
+      set procName [lindex [info level [info level]] 0]
+      error "test use of \[$procName\] has been disabled"
+    } else {
+      tputs $::test_channel [appendArgs "---- running command: " $command \n]
+
+      return [uplevel 1 $command]
+    }
   }
 
   proc execTestShell { options args } {
-    tputs $::test_channel [appendArgs \
-        "---- running nested shell: exec " \
-        [string trim [appendArgs $options " " -- " \"" \
-        [info nameofexecutable] "\" " $args]] \n]
+    if {[info exists ::no(exec)]} then {
+      tputs $::test_channel [appendArgs \
+          "---- skipping nested shell: exec " [string trim [appendArgs \
+          $options " " -- " \"" [info nameofexecutable] "\" " $args]] \n]
 
-    return [uplevel 1 execShell [list $options] $args]
+      set procName [lindex [info level [info level]] 0]
+      error "test use of \[$procName\] has been disabled"
+    } else {
+      tputs $::test_channel [appendArgs \
+          "---- running nested shell: exec " [string trim [appendArgs \
+          $options " " -- " \"" [info nameofexecutable] "\" " $args]] \n]
+
+      return [uplevel 1 execShell [list $options] $args]
+    }
   }
 
   proc isRandomOrder {} {
@@ -2166,6 +2188,12 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getTclVersionForTclShell {} {
+      return [testExecTclScript {
+        puts -nonewline stdout [info tclversion]
+      }]
+    }
+
     proc getCommandsForTclShell {} {
       return [testExecTclScript {
         puts -nonewline stdout [info commands]
@@ -2178,7 +2206,7 @@ namespace eval ::Eagle {
       }]
     }
 
-    proc getTkVersion {} {
+    proc getTkVersionForTclShell {} {
       return [testExecTclScript {
         puts -nonewline stdout [package require Tk]; exit
       }]
@@ -2265,21 +2293,48 @@ namespace eval ::Eagle {
       object unimport -importpattern System.Windows.Forms.VisualStyles
     }
 
+    proc getTestLibraryDirectory {} {
+      #
+      # NOTE: First, query the location of the script library.
+      #
+      set result [info library]
+
+      #
+      # NOTE: Next, If the script library is embedded within the core
+      #       library itself (i.e. the script library location refers
+      #       to a file, not a directory), strip off the file name.
+      #
+      if {[file exists $result] && [file isfile $result]} then {
+        set result [file dirname $result]
+      }
+
+      #
+      # NOTE: Finally, return the resulting script library directory.
+      #
+      return $result
+    }
+
     #
     # NOTE: Setup the test path relative to the library path.
     #
     if {![interp issafe] && ![info exists ::test_path]} then {
       #
-      # NOTE: Try the source release directory structure.
+      # NOTE: Try the source release directory structure.  For this case,
+      #       the final test path would be:
+      #
+      #           $library/../../Library/Tests
       #
       set ::test_path [file join [file normalize [file dirname \
-          [file dirname [info library]]]] Library Tests]
+          [file dirname [getTestLibraryDirectory]]]] Library Tests]
 
       if {![file exists $::test_path] || \
           ![file isdirectory $::test_path]} then {
         #
         # NOTE: Try the source release directory structure again; this time,
-        #       assume only the embedded script library was used.
+        #       assume only the embedded script library was used.  For this
+        #       case, the final test path would be:
+        #
+        #           $base/Library/Tests
         #
         set ::test_path [file join [info base] Library Tests]
       }
@@ -2287,7 +2342,10 @@ namespace eval ::Eagle {
       if {![file exists $::test_path] || \
           ![file isdirectory $::test_path]} then {
         #
-        # NOTE: Try for the test package directory.
+        # NOTE: Try for the test package directory.  For this case, the final
+        #       test path would be:
+        #
+        #           $script/../Test1.0
         #
         set ::test_path [file join [file normalize [file dirname \
             [file dirname [info script]]]] [appendArgs Test \
@@ -2299,6 +2357,9 @@ namespace eval ::Eagle {
         #
         # NOTE: Try for the test package directory again; this time, use the
         #       base path and assume the source release directory structure.
+        #       For this case, the final test path would be:
+        #
+        #           $base/lib/Test1.0
         #
         set ::test_path [file join [info base] lib [appendArgs Test \
             [info engine Version]]]
@@ -2308,7 +2369,9 @@ namespace eval ::Eagle {
           ![file isdirectory $::test_path]} then {
         #
         # NOTE: Try for the test package directory again; this time, use the
-        #       base path.
+        #       base path.  For this case, the final test path would be:
+        #
+        #           $base/Test1.0
         #
         set ::test_path [file join [info base] [appendArgs Test \
             [info engine Version]]]
@@ -2320,17 +2383,23 @@ namespace eval ::Eagle {
         # NOTE: This must be a binary release, no "Library" directory then.
         #       Also, binary releases have an upper-case "Tests" directory
         #       name that originates from the "update.bat" tool.  This must
-        #       match the casing used in "update.bat".
+        #       match the casing used in "update.bat".  For this case, the
+        #       final test path would be:
+        #
+        #           $library/../../Tests
         #
         set ::test_path [file join [file normalize [file dirname \
-            [file dirname [info library]]]] Tests]
+            [file dirname [getTestLibraryDirectory]]]] Tests]
       }
 
       if {![file exists $::test_path] || \
           ![file isdirectory $::test_path]} then {
         #
         # NOTE: Fallback to using the base directory and checking for a
-        #       "Tests" directory beneath it.
+        #       "Tests" directory beneath it.  For this case, the final
+        #       test path would be:
+        #
+        #           $base/Tests
         #
         set ::test_path [file join [info base] Tests]
       }

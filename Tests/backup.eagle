@@ -222,9 +222,8 @@ for {set i 0} {$i < [llength $params(pages)]} {incr i} {
 
     unset -nocomplain result results errors code index memSource dataSource \
         id memDb db fileName callbackResults
-  } -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
--match regexp -result [appendArgs \
+  } -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result [appendArgs \
 "^Ok System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} " \
 [lindex $params(results) $i]]}
 }

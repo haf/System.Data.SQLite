@@ -71,10 +71,9 @@ runTest {test tkt-6c6ecccc5f-1.1 {CloseConnection with extensions} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result results errors code sql dataSource id db fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
--match regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0\
-\{\}$}}
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
 
 ###############################################################################
 

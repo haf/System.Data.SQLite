@@ -91,7 +91,8 @@ if {![info exists no([file tail [info script]])]} then {
   #       or whatever project the Eagle binaries are being used by) using a
   #       Fossil binary in the PATH, if available.
   #
-  if {![info exists root_path] && ![info exists no(fossil)]} then {
+  if {![info exists root_path] && \
+      ![info exists no(exec)] && ![info exists no(fossil)]} then {
     set pattern {^local-root:\s+(.*?)\s+$}
 
     if {[catch {set exec [exec -- fossil info]}] || \
@@ -802,6 +803,8 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(machine)]} then {
       checkForMachine $test_channel 32 intel; # (i.e. x86)
+      checkForMachine $test_channel 32 arm;   # (i.e. arm)
+      checkForMachine $test_channel 64 ia64;  # (i.e. ia64)
       checkForMachine $test_channel 64 amd64; # (i.e. x64)
     }
 
@@ -950,6 +953,13 @@ if {![info exists no([file tail [info script]])]} then {
       #       and "object-98.*".
       #
       checkForReferenceCountTracking $test_channel
+    }
+
+    #
+    # NOTE: Has testing using the C# compiler been disabled?
+    #
+    if {![info exists no(checkForCompileCSharp)]} then {
+      checkForCompileCSharp $test_channel
     }
 
     #
@@ -1611,6 +1621,21 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has MSBuild testing support been disabled?
+    #
+    if {![info exists no(msBuild)]} then {
+      #
+      # NOTE: For test "object-4.13".
+      #
+      checkForAssembly $test_channel Microsoft.Build.Framework
+
+      #
+      # NOTE: For test "object-6.1".
+      #
+      checkForAssembly $test_channel Microsoft.Build.Engine
+    }
+
+    #
     # NOTE: Has Excel testing support been disabled?
     #
     if {![info exists no(excel)]} then {
@@ -1842,6 +1867,13 @@ if {![info exists no([file tail [info script]])]} then {
 
   tputs $test_channel [appendArgs \
       "---- start of common (Tcl & Eagle) test constraints...\n"]
+
+  #
+  # NOTE: Has all use of [exec] for tests been disabled?
+  #
+  if {![info exists no(checkForTestExec)]} then {
+    checkForTestExec $test_channel
+  }
 
   #
   # NOTE: Has checking for the test machine been disabled?
@@ -2221,15 +2253,18 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Have precise timing tests been disabled?
+  # NOTE: Have any timing related constraints been disabled?
+  #
+  # BUGBUG: In Eagle, these checks for "precision" timing are not overly
+  #         reliable.  This may be due to the semi-random nature of the
+  #         garbage collection.  More research into the precise cause of
+  #         timing issues is certainly warranted.
+  #
   #
   if {![info exists no(timing)]} then {
     checkForTiming $test_channel 50; # 1/20th second.
   }
 
-  #
-  # NOTE: Have very precise timing tests been disabled?
-  #
   if {![info exists no(preciseTiming)]} then {
     checkForTiming $test_channel 25 preciseTiming; # 1/40th second.
   }
@@ -2331,7 +2366,7 @@ if {![info exists no([file tail [info script]])]} then {
     #       project the Eagle binaries are being used by) using a Fossil
     #       binary in the PATH, if available.
     #
-    if {![info exists no(fossil)]} then {
+    if {![info exists no(exec)] && ![info exists no(fossil)]} then {
       if {[catch {set exec [exec -- fossil info]}] == 0} then {
         set pattern {^checkout:\s+(.*?)\s+$}
 

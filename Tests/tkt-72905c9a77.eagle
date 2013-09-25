@@ -274,8 +274,8 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
   unset -nocomplain result code results errors dataSource fileName
 } -constraints [fixConstraints {eagle monoBug28 configuration.Release\
 !defineConstant.System.Data.SQLite.INTEROP_LOG command.sql compile.DATA\
-SQLite System.Data.SQLite}] -match regexp -result [appendArgs "^Ok\
-System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{" [string repeat \
+SQLite System.Data.SQLite compileCSharp}] -match regexp -result [appendArgs \
+"^Ok System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{" [string repeat \
 "SQLite message \\(0\\): TEST $id
 " [expr {4 * [info processors]}]] "\\}\$"]}
 

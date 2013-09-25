@@ -83,7 +83,7 @@ runTest {test tkt-59edc1018b-1.1 {LINQ with EndsWith} -body {
   unset -nocomplain code output error result value
 } -constraints \
 {eagle monoToDo defineConstant.System.Data.SQLite.USE_INTEROP_DLL\
-defineConstant.System.Data.SQLite.INTEROP_EXTENSION_FUNCTIONS SQLite\
+defineConstant.System.Data.SQLite.INTEROP_EXTENSION_FUNCTIONS SQLite testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll file_testlinq.exe\
 file_northwindEF.db} -result {0 {} 0 {FURIB GALED GODOS LAZYK LINOD PRINI REGGC\
 WOLZA} 0 {} 0 ERNSH 0 {} 0 {AROUT BSBEV CONSH EASTC NORTS SEVES} 0 {}}}

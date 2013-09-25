@@ -1428,7 +1428,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       logListener event timeout connection indicators iterations exitOnFail \
       coTaskMem noTrace failures status
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
-System.Data.SQLite} -result {0}}
+System.Data.SQLite compileCSharp} -result {0}}
 
 ###############################################################################
 

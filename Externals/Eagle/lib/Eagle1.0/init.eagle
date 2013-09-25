@@ -1168,21 +1168,10 @@ namespace eval ::Eagle {
       eval $command &; exit -force
     }
 
-    #
-    # NOTE: This proc is used to check for new versions of the runtime
-    #       when the user executes the interactive "#check" command.  To
-    #       disable that functionality, redefine this proc to do nothing.
-    #
-    proc checkForUpdate {} {
+    proc getUpdateData { uri } {
       #
-      # NOTE: This should work properly in Eagle only.
-      #
-      set uri [appendArgs [info engine Uri] [info engine UpdateFile]]
-      set fileName [file tempname]; # unique local temp file name.
-
-      #
-      # NOTE: Temporarily start trusting ONLY our self-signed certificate
-      #       which is used primarily for "software updates".
+      # NOTE: Temporarily start trusting ONLY our own self-signed
+      #       certificate which is used primarily for updates.
       #
       uri softwareupdates true
 
@@ -1190,35 +1179,64 @@ namespace eval ::Eagle {
         #
         # NOTE: Download the tag file from the web site.
         #
-        uri download $uri $fileName; # synchronous.
+        return [uri download -inline $uri]; # synchronous.
       } finally {
         #
-        # NOTE: Stop trusting ONLY our self-signed certificate which is
-        #       used primarily for "software updates".
+        # NOTE: Stop trusting ONLY our own self-signed certificate
+        #       which is used primarily for updates.
         #
         uri softwareupdates false
       }
+    }
+
+    proc getUpdateScriptData { uri } {
+      #
+      # NOTE: Temporarily start trusting ONLY our own self-signed
+      #       certificate which is used primarily for updates.
+      #
+      uri softwareupdates true
+
+      try {
+        #
+        # NOTE: Download the script file from the web site.
+        #
+        return [interp readorgetscriptfile $uri]; # synchronous.
+      } finally {
+        #
+        # NOTE: Stop trusting ONLY our own self-signed certificate
+        #       which is used primarily for updates.
+        #
+        uri softwareupdates false
+      }
+    }
+
+    #
+    # NOTE: This proc is used to check for new versions -OR- new update
+    #       scripts for the runtime when a user executes the interactive
+    #       "#check" command.  To disable this functionality, simply
+    #       redefine this procedure to do nothing.
+    #
+    proc checkForUpdate { {wantScripts false} } {
+      #
+      # NOTE: This should work properly in Eagle only.
+      #
+      set updateUri [appendArgs [info engine Uri] [info engine UpdateFile]]
 
       #
-      # NOTE: Read all the data out of the downloaded text file.
+      # NOTE: Fetch the master update data from the distribution site
+      #       and normalize to Unix-style line-endings.
       #
-      set data [readFile $fileName]
-
-      #
-      # NOTE: Remove the downloaded temporary file.  We no longer need
-      #       it because we just read all the data from it.
-      #
-      file delete $fileName
-
-      #
-      # NOTE: Normalize to Unix line-endings.
-      #
-      set data [string map [list \r\n \n] $data]; # Unix.
+      set updateData [string map [list \r\n \n] [getUpdateData $updateUri]]
 
       #
       # NOTE: Split the data into lines.
       #
-      set lines [split $data \n]
+      set lines [split $updateData \n]
+
+      #
+      # NOTE: Keep track of how many update scripts are processed.
+      #
+      set scriptCount 0
 
       #
       # NOTE: Check each line to find the build information...
@@ -1240,11 +1258,12 @@ namespace eval ::Eagle {
               [string index $line 0] ne ";"} then {
             #
             # NOTE: Split the tab-delimited line into fields.  The format
-            #       of the lines must be as follows:
+            #       of all lines in the data must be as follows:
             #
-            # protocolId <tab> publicKeyToken <tab> name <tab> culture
-            # <tab> patchLevel <tab> timeStamp <tab> uri <tab> md5Hash
-            # <tab> sha1Hash <tab> sha512Hash <tab> notes <newLine>
+            #       <startLine> protocolId <tab> publicKeyToken <tab> name
+            #       <tab> culture <tab> patchLevel <tab> timeStamp <tab>
+            #       baseUri <tab> md5Hash <tab> sha1Hash <tab> sha512Hash
+            #       <tab> notes <newLine>
             #
             set fields [split $line \t]
 
@@ -1269,6 +1288,16 @@ namespace eval ::Eagle {
             set culture [lindex $fields 3]
 
             #
+            # NOTE: Figure out which protocol is in use for this line.
+            #       The value "1" means this line specifies a build of
+            #       the script engine.  The value "2" means this line
+            #       specifies an update script (via a URI) to evaluate.
+            #       All other values are currently reserved and ignored.
+            #
+            set checkBuild [expr {!$wantScripts && $protocolId eq "1"}]
+            set checkScript [expr {$wantScripts && $protocolId eq "2"}]
+
+            #
             # NOTE: We only want to find the first line that matches our
             #       engine.  The public key token is being used here to
             #       make sure we get the same "flavor" of the engine.
@@ -1277,7 +1306,7 @@ namespace eval ::Eagle {
             #       token), followed by development builds, experimental
             #       builds, etc.
             #
-            if {$protocolId eq "1" && \
+            if {($checkBuild || $checkScript) && \
                 [matchEnginePublicKeyToken $publicKeyToken] && \
                 [matchEngineName $name] && \
                 [matchEngineCulture $culture]} then {
@@ -1301,7 +1330,8 @@ namespace eval ::Eagle {
               #
               set compare [package vcompare $patchLevel $enginePatchLevel]
 
-              if {$compare > 0} then {
+              if {($checkBuild && $compare > 0) || \
+                  ($checkScript && $compare == 0)} then {
                 #
                 # NOTE: Grab the time-stamp field.
                 #
@@ -1317,7 +1347,7 @@ namespace eval ::Eagle {
                 #
                 set baseUri [lindex $fields 6]
 
-                if {[string length $baseUri] == 0} then {
+                if {$checkBuild && [string length $baseUri] == 0} then {
                   set baseUri [info engine Uri]; # primary site.
                 }
 
@@ -1341,20 +1371,211 @@ namespace eval ::Eagle {
                 }
 
                 #
-                # NOTE: The patch level from the line is greater, we are
-                #       out-of-date.
+                # NOTE: The engine patch level from the line is greater,
+                #       we are out-of-date.  Return the result of our
+                #       checking now.
                 #
-                return [list [appendArgs "newer build " $patchLevel \
-                    " is available as of " $dateTime] [list $baseUri \
-                    $patchLevel] [list $notes]]
-              } elseif {$compare < 0} then {
+                if {$checkBuild} then {
+                  return [list [appendArgs "newer build " $patchLevel \
+                      " is available as of " $dateTime] [list $baseUri \
+                      $patchLevel] [list $notes]]
+                }
+
+                #
+                # NOTE: The script patch level from the line matches the
+                #       current engine patch level exactly, this script
+                #       should be evaluated if it can be authenticated.
+                #
+                if {$checkScript} then {
+                  #
+                  # NOTE: First, set the default channel for update script
+                  #       status messages.  If the test channel has been
+                  #       set (i.e. by the test suite), it will be used
+                  #       instead.
+                  #
+                  if {![info exists channel]} then {
+                    set channel [expr {[info exists ::test_channel] ? \
+                        $::test_channel : "stdout"}]
+                  }
+
+                  #
+                  # NOTE: Next, verify the script has a valid base URI.
+                  #       For update scripts, this must be the location
+                  #       where the update script data can be downloaded.
+                  #
+                  if {[string length $baseUri] == 0} then {
+                    tqputs $channel [appendArgs \
+                        "---- invalid baseUri value for update script line: " \
+                        $line \"\n]
+
+                    continue
+                  }
+
+                  #
+                  # NOTE: Next, grab the md5 field and see if it looks valid.
+                  #       Below, the value of this field will be compared to
+                  #       that of the actual MD5 hash of the downloaded script
+                  #       data.
+                  #
+                  set lineMd5 [lindex $fields 7]
+
+                  if {[string length $lineMd5] == 0} then {
+                    tqputs $channel [appendArgs \
+                        "---- invalid md5 value for update script line: " \
+                        $line \"\n]
+
+                    continue
+                  }
+
+                  #
+                  # NOTE: Next, grab the sha1 field and see if it looks valid.
+                  #       Below, the value of this field will be compared to
+                  #       that of the actual SHA1 hash of the downloaded script
+                  #       data.
+                  #
+                  set lineSha1 [lindex $fields 8]
+
+                  if {[string length $lineSha1] == 0} then {
+                    tqputs $channel [appendArgs \
+                        "---- invalid sha1 value for update script line: " \
+                        $line \"\n]
+
+                    continue
+                  }
+
+                  #
+                  # NOTE: Next, grab the sha512 field and see if it looks
+                  #       valid.  Below, the value of this field will be
+                  #       compared to that of the actual SHA512 hash of the
+                  #       downloaded script data.
+                  #
+                  set lineSha512 [lindex $fields 9]
+
+                  if {[string length $lineSha512] == 0} then {
+                    tqputs $channel [appendArgs \
+                        "---- invalid sha512 value for update script line: " \
+                        $line \"\n]
+
+                    continue
+                  }
+
+                  #
+                  # NOTE: Next, show the extra information associated with
+                  #       this update script, if any.
+                  #
+                  tqputs $channel [appendArgs \
+                      "---- fetching update script from \"" $baseUri "\" (" \
+                      $dateTime ") with notes:\n"]
+
+                  set trimNotes [string trim $notes]
+
+                  tqputs $channel [appendArgs \
+                      [expr {[string length $trimNotes] > 0 ? $trimNotes : \
+                      "<none>"}] "\n---- end of update script notes\n"]
+
+                  #
+                  # NOTE: Next, attempt to fetch the update script data.
+                  #
+                  set code [catch {getUpdateScriptData $baseUri} result]
+
+                  if {$code == 0} then {
+                    #
+                    # NOTE: Success, set the script data from the result.
+                    #
+                    set scriptData $result
+                  } else {
+                    #
+                    # NOTE: Failure, report the error message to the log.
+                    #
+                    tqputs $channel [appendArgs \
+                        "---- failed to fetch update script: " $result \n]
+
+                    continue
+                  }
+
+                  #
+                  # NOTE: Next, verify that the md5, sha1, and sha512
+                  #       hashes of the raw script data match what was
+                  #       specified in the md5, sha1, and sha512 fields.
+                  #
+                  set scriptMd5 [hash normal md5 $scriptData]
+
+                  if {![string equal -nocase $lineMd5 $scriptMd5]} then {
+                    tqputs $channel [appendArgs \
+                        "---- wrong md5 value \"" $scriptMd5 \
+                        "\" for update script line: " $line \"\n]
+
+                    continue
+                  }
+
+                  set scriptSha1 [hash normal sha1 $scriptData]
+
+                  if {![string equal -nocase $lineSha1 $scriptSha1]} then {
+                    tqputs $channel [appendArgs \
+                        "---- wrong sha1 value \"" $scriptSha1 \
+                        "\" for update script line: " $line \"\n]
+
+                    continue
+                  }
+
+                  set scriptSha512 [hash normal sha512 $scriptData]
+
+                  if {![string equal -nocase $lineSha512 $scriptSha512]} then {
+                    tqputs $channel [appendArgs \
+                        "---- wrong sha512 value \"" $scriptSha512 \
+                        "\" for update script line: " $line \"\n]
+
+                    continue
+                  }
+
+                  #
+                  # NOTE: Finally, everything looks good.  Therefore, just
+                  #       evaluate the update script and print the result.
+                  #
+                  tqputs $channel [appendArgs \
+                      "---- evaluating update script from \"" $baseUri \
+                      \"...\n]
+
+                  #
+                  # NOTE: Reset the variables that will be used to contain
+                  #       the result of the update script.
+                  #
+                  set code 0; set result ""
+
+                  #
+                  # NOTE: Manually override file name to be returned by
+                  #       [info script] to refer back to the originally
+                  #       read script base URI.
+                  #
+                  object invoke -flags +NonPublic Interpreter.GetActive \
+                      PushScriptLocation $baseUri true
+
+                  try {
+                    #
+                    # NOTE: Evaluate the update script in the context of
+                    #       the caller.
+                    #
+                    set code [catch {uplevel 1 $scriptData} result]
+                  } finally {
+                    #
+                    # NOTE: Reset manual override of the script file name
+                    #       to be returned by [info script].
+                    #
+                    object invoke -flags +NonPublic Interpreter.GetActive \
+                        PopScriptLocation true
+                  }
+
+                  host result $code $result; incr scriptCount
+                  tqputs $channel "\n---- end of update script results\n"
+                }
+              } elseif {$checkBuild && $compare < 0} then {
                 #
                 # NOTE: The patch level from the line is less, we are more
                 #       up-to-date than the latest version?
                 #
                 return [list [appendArgs "running build " $enginePatchLevel \
                     " is newer than the latest build " $patchLevel]]
-              } else {
+              } elseif {$checkBuild} then {
                 #
                 # NOTE: The patch levels are equal, we are up-to-date.
                 #
@@ -1365,7 +1586,22 @@ namespace eval ::Eagle {
         }
       }
 
-      return [list "cannot determine if running build is the latest"]
+      #
+      # NOTE: Figure out what the final result should be.  If we get
+      #       to this point when checking for a new build, something
+      #       must have gone awry.  Otherwise, report the number of
+      #       update scripts that were successfully processed.
+      #
+      if {$wantScripts} then {
+        if {$scriptCount > 0} then {
+          return [list [appendArgs \
+              "processed " $scriptCount " update scripts"]]
+        } else {
+          return [list "no update scripts were processed"]
+        }
+      } else {
+        return [list "cannot determine if running build is the latest"]
+      }
     }
 
     proc getReturnType { object member } {

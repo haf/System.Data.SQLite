@@ -94,9 +94,9 @@ runTest {test tkt-201128cc88-1.1 {custom function with byte[] arg} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors id db fileName
-} -constraints \
-{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^Ok System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}\
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}\
 System#Data#SQLite#SQLiteConnection#\d+ \{\} \{\} Zm9v$}}
 
 ###############################################################################

@@ -81,7 +81,7 @@ runTest {test tkt-ccfa69fc32-1.1 {Entity Framework / Transaction Scope} -body {
   set result
 } -cleanup {
   unset -nocomplain code output error result add
-} -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll\
+} -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll testExec\
 file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db} -match \
 glob -result {0 {1581 1730 1833 2116 2139} 0 {System.Data.UpdateException: *\
 ---> System.Data.SQLite.SQLiteException: constraint failed

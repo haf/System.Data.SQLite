@@ -108,9 +108,8 @@ runTest {test tkt-e30b820248-1.1 {disposal ordering} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors sql name dataSource id fileName
-} -constraints \
-{eagle logFile monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
--match regexp -result [appendArgs "^Ok\
+} -constraints {eagle logFile monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result [appendArgs "^Ok\
 System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{\\} " $memory_used \$]}
 
 ###############################################################################
@@ -263,7 +262,7 @@ for {set i 2} {$i < 5} {incr i} {
     unset -nocomplain result code results errors sql name dataSource id \
         fileName
   } -constraints {eagle logFile monoBug28 command.sql compile.DATA SQLite\
-System.Data.SQLite} -match regexp -result [appendArgs "^Ok\
+System.Data.SQLite compileCSharp} -match regexp -result [appendArgs "^Ok\
 System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{\\} " $memory_used \$]}
 }
 

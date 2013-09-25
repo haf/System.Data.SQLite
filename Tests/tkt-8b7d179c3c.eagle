@@ -81,7 +81,7 @@ runTest {test tkt-8b7d179c3c-1.1 {LINQ with Skip and Take} -body {
   set result
 } -cleanup {
   unset -nocomplain code output error result pageSize
-} -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll\
+} -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll testExec\
 file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db} \
 -result {0 {} 0 {DRACD RATTC OLDWO GALED LILAS MAGAA ALFKI CHOPS SAVEA KOENE\
 MAISD FOLKO CACTU OCEAN RANCH THECR GOURL GROSR SUPRD HUNGO ISLAT QUICK HUNGC\
