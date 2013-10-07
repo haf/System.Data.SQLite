@@ -2954,7 +2954,7 @@ namespace System.Data.SQLite
 
     private static DataTable Schema_ReservedWords()
     {
-      DataTable tbl = new DataTable("MetaDataCollections");
+      DataTable tbl = new DataTable("ReservedWords");
 
       tbl.Locale = CultureInfo.InvariantCulture;
       tbl.Columns.Add("ReservedWord", typeof(string));
