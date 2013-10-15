@@ -13,6 +13,10 @@
 #include "../ext/vtshim.c"
 #endif
 
+#if defined(INTEROP_TOTYPE_EXTENSION)
+#include "../ext/totype.c"
+#endif
+
 #if defined(INTEROP_EXTENSION_FUNCTIONS)
 #include "../contrib/extension-functions.c"
 extern int RegisterExtensionFunctions(sqlite3 *db);
