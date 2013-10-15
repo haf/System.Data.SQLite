@@ -2406,6 +2406,27 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns non-zero if the given database connection is in autocommit mode.
+    /// Autocommit mode is on by default.  Autocommit mode is disabled by a BEGIN
+    /// statement.  Autocommit mode is re-enabled by a COMMIT or ROLLBACK.
+    /// </summary>
+#if !PLATFORM_COMPACTFRAMEWORK
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#endif
+    public bool AutoCommit
+    {
+        get
+        {
+            CheckDisposed();
+
+            if (_sql == null)
+                throw new InvalidOperationException("Database connection not valid for getting autocommit mode.");
+
+            return _sql.AutoCommit;
+        }
+    }
+
+    /// <summary>
     /// Returns the amount of memory (in bytes) currently in use by the SQLite core library.
     /// </summary>
 #if !PLATFORM_COMPACTFRAMEWORK

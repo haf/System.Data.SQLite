@@ -384,6 +384,11 @@ namespace System.Data.SQLite
 
     internal abstract object GetValue(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, SQLiteType typ);
 
+    /// <summary>
+    /// Returns non-zero if the given database connection is in autocommit mode.
+    /// Autocommit mode is on by default.  Autocommit mode is disabled by a BEGIN
+    /// statement.  Autocommit mode is re-enabled by a COMMIT or ROLLBACK.
+    /// </summary>
     internal abstract bool AutoCommit
     {
       get;

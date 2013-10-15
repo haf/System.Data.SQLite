@@ -1,0 +1,61 @@
+###############################################################################
+#
+# tkt-9ba9346f75.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-9ba9346f75-1.1 {AutoCommit property} -setup {
+  setupDb [set fileName tkt-9ba9346f75-1.1.db]
+} -body {
+  set connection [getDbConnection]
+
+  set result [list]
+
+  lappend result [object invoke $connection AutoCommit]; # True
+
+  sql execute $db "CREATE TABLE t1(x);"
+  lappend result [object invoke $connection AutoCommit]; # True
+
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+  lappend result [object invoke $connection AutoCommit]; # True
+
+  sql execute $db "BEGIN TRANSACTION;"
+  lappend result [object invoke $connection AutoCommit]; # False
+
+  sql execute $db "INSERT INTO t1 (x) VALUES(1);"
+  lappend result [object invoke $connection AutoCommit]; # False
+
+  sql execute $db "COMMIT;"
+  lappend result [object invoke $connection AutoCommit]; # True
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  freeDbConnection
+
+  unset -nocomplain result connection db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{True True True False False True}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
