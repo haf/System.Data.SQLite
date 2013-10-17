@@ -2531,6 +2531,7 @@ runTest {test data-1.52 {totype extension} -setup {
   setupDb [set fileName data-1.52.db]
 } -body {
   set connection [getDbConnection]
+  set result [list]
 
   $connection EnableExtensions true
   $connection LoadExtension [getCoreBinaryFileName] sqlite3_totype_init
