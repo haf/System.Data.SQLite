@@ -2527,6 +2527,34 @@ Boolean}}}
 
 ###############################################################################
 
+runTest {test data-1.52 {totype extension} -setup {
+  setupDb [set fileName data-1.52.db]
+} -body {
+  set connection [getDbConnection]
+
+  $connection EnableExtensions true
+  $connection LoadExtension [getCoreBinaryFileName] sqlite3_totype_init
+
+  lappend result [sql execute -execute scalar $db "SELECT tointeger('1');"]
+  lappend result [sql execute -execute scalar $db "SELECT tointeger('1x');"]
+  lappend result [sql execute -execute scalar $db "SELECT toreal('1.01');"]
+  lappend result [sql execute -execute scalar $db "SELECT toreal('1.0x');"]
+
+  set result
+} -cleanup {
+  freeDbConnection
+
+  unset -nocomplain result connection
+
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{1 {} 1.01 {}}}
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 
