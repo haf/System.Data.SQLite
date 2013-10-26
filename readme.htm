@@ -199,6 +199,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Add SQLiteCommand.Execute, SQLiteCommand.ExecuteNonQuery, and SQLiteCommand.ExecuteScalar method overloads that take a CommandBehavior parameter.</li>
     <li>Revise how the extra object data is passed to the static SQLiteConnection.Changed event.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Make sure the database cannot be changed by a query when the CommandBehavior.SchemaOnly flag is used. Fix for [f8dbab8baf].&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>Fix bug in <a href="http://sourceforge.net/projects/ndoc3/">NDoc3</a> that was preventing some of the MSDN documentation links from working.</li>
     <li>Include the XML documentation files in the NuGet packages. Fix for [5970d5b0a6].</li>
     <li>Add InteropVersion, InteropSourceId, ProviderVersion, and ProviderSourceId properties to the SQLiteConnection class.</li>
     <li>Add experimental support for interfacing with the authorizer callback in the SQLite core library.</li>
