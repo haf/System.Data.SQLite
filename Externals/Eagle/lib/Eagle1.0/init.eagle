@@ -1654,6 +1654,17 @@ namespace eval ::Eagle {
       return [expr {[$type IsValueType] ? 0 : "null"}]
     }
 
+    proc getHostSize {} {
+      #
+      # NOTE: Attempt to query the size from the host; failing that,
+      #       return a reasonable default value.
+      #
+      if {[catch {host size} result] == 0} then {
+        return $result
+      }
+      return [list 80 25]; # TODO: Good default?
+    }
+
     proc parray { a args } {
       if {[llength $args] > 2} then {
         error "wrong # args: should be \"parray a ?pattern?\""
@@ -1677,7 +1688,7 @@ namespace eval ::Eagle {
       }
 
       set maxLength [expr {$maxLength + [string length $a] + 2}]
-      set hostLength [lindex [host size] 0]
+      set hostLength [lindex [getHostSize] 0]
       set valueLength [expr {$hostLength - $maxLength - 5}]; # " ... "
 
       foreach name $names {
@@ -1725,7 +1736,7 @@ namespace eval ::Eagle {
         }
       }
 
-      set hostLength [lindex [host size] 0]
+      set hostLength [lindex [getHostSize] 0]
       set valueLength [expr {$hostLength - $maxLength - 5}]; # " ... "
 
       foreach {name value} $d {

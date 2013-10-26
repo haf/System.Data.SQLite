@@ -31,6 +31,110 @@ namespace eval ::Eagle {
         [list 3 4] [list 3 5] [list 3 6]]
   }
 
+  proc checkForTestSuiteFiles { channel } {
+    tputs $channel "---- checking for test suite files... "
+
+    #
+    # NOTE: Start out with no test suite files to check.
+    #
+    set fileNames [list]
+
+    #
+    # NOTE: Check if the base package path is available.
+    #
+    if {[info exists ::test_package_path]} then {
+      #
+      # TODO: If additional test suite files are added within the base
+      #       package path, add them here as well.
+      #
+      foreach fileNameOnly [list \
+          embed.eagle init.eagle pkgIndex.eagle pkgIndex.tcl \
+          safe.eagle shell.eagle test.eagle vendor.eagle word.tcl] {
+        #
+        # NOTE: First, check if the file resides in the Eagle-specific
+        #       package sub-directory.  Failing that, fallback to using
+        #       the base package path itself.
+        #
+        set fileName [file join \
+            $::test_package_path Eagle1.0 $fileNameOnly]
+
+        if {![file exists $fileName]} then {
+          set fileName [file join $::test_package_path $fileNameOnly]
+        }
+
+        #
+        # NOTE: If the test suite file exists, add it to the list of file
+        #       names to process.
+        #
+        if {[file exists $fileName]} then {
+          lappend fileNames $fileName
+        }
+      }
+    }
+
+    #
+    # NOTE: Check if the test package path is available.
+    #
+    if {[info exists ::test_path]} then {
+      #
+      # TODO: If additional test suite files are added within the test
+      #       package path, add them here as well.
+      #
+      foreach fileNameOnly [list \
+          all.eagle constraints.eagle epilogue.eagle pkgIndex.eagle \
+          pkgIndex.tcl prologue.eagle] {
+        #
+        # NOTE: Check if the file resides in the test package directory.
+        #
+        set fileName [file join $::test_path $fileNameOnly]
+
+        #
+        # NOTE: If the test suite file exists, add it to the list of file
+        #       names to process.
+        #
+        if {[file exists $fileName]} then {
+          lappend fileNames $fileName
+        }
+      }
+    }
+
+    #
+    # NOTE: Did we find any test suite files?
+    #
+    if {[llength $fileNames] > 0} then {
+      #
+      # NOTE: Eagle has a built-in hashing command; however, Tcl requires
+      #       a package.  Make sure we can hash content before proceeding.
+      #
+      if {[isEagle] || [catch {package require sha1}] == 0} then {
+        tputs $channel yes\n
+
+        foreach fileName $fileNames {
+          if {[isEagle]} then {
+            set sha1 [hash normal sha1 [readFile $fileName]]
+          } else {
+            #
+            # BUGBUG: Apparently, the ActiveState tcllib sha1 package may
+            #         have a bug that produces the wrong values here.  No
+            #         attempt is made here to work around any such bug.
+            #
+            set sha1 [sha1::sha1 -hex -filename $fileName]
+          }
+
+          tputs $channel [appendArgs \
+              "---- file \"" $fileName "\"... sha1 (" $sha1 ")\n"]
+        }
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
+      }
+    }
+
+    tputs $channel no\n
+  }
+
   proc checkForPlatform { channel } {
     tputs $channel "---- checking for platform... "
 
@@ -1080,9 +1184,28 @@ namespace eval ::Eagle {
     # NOTE: Are we allowed to do stack intensive testing?
     #
     if {![info exists ::no(stackIntensive)]} then {
-      addConstraint stackIntensive
+      if {[isEagle]} then {
+        #
+        # NOTE: Attempt to query for native stack checking in Eagle.
+        #
+        if {[catch {object invoke -flags +NonPublic \
+                Eagle._Components.Private.NativeStack CanQueryThread} \
+                canQueryThread] == 0 && \
+            $canQueryThread} then {
+          #
+          # NOTE: Yes, it appears that it is available.
+          #
+          addConstraint stackIntensive
 
-      tputs $channel yes\n
+          tputs $channel yes\n
+        } else {
+          tputs $channel no\n
+        }
+      } else {
+        addConstraint stackIntensive
+
+        tputs $channel yes\n
+      }
     } else {
       tputs $channel no\n
     }
@@ -1157,28 +1280,36 @@ namespace eval ::Eagle {
 
     if {[isEagle]} then {
       #
-      # BUGBUG: Tcl 8.4 does not like this expression (and Tcl tries to
-      #         compile it even though it will only actually ever be
-      #         evaluated in Eagle).
+      # NOTE: Running this check on the Mono 3.3.0 release build will lock
+      #       up the process; therefore, attempt to skip it in that case.
       #
-      set expr {[llength [info commands uri]] > 0 && \
-          [catch {uri ping $host $timeout} response] == 0 && \
-          [lindex $response 0] in [list Success TimedOut] && \
-          [string is integer -strict [lindex $response 1]] && \
-          [lindex $response 1] <= $timeout}
-
-      #
-      # NOTE: Does it look like we are able to contact the network host?
-      #
-      if {[expr $expr]} then {
+      if {![isMono] || ![haveConstraint mono33]} then {
         #
-        # NOTE: Yes, it appears that it is available.
+        # BUGBUG: Tcl 8.4 does not like this expression (and Tcl tries to
+        #         compile it even though it will only actually ever be
+        #         evaluated in Eagle).
         #
-        addConstraint [appendArgs network_ $host]
+        set expr {[llength [info commands uri]] > 0 && \
+            [catch {uri ping $host $timeout} response] == 0 && \
+            [lindex $response 0] in [list Success TimedOut] && \
+            [string is integer -strict [lindex $response 1]] && \
+            [lindex $response 1] <= $timeout}
 
-        tputs $channel [appendArgs "yes (" $response ")\n"]
+        #
+        # NOTE: Does it look like we are able to contact the network host?
+        #
+        if {[expr $expr]} then {
+          #
+          # NOTE: Yes, it appears that it is available.
+          #
+          addConstraint [appendArgs network_ $host]
+
+          tputs $channel [appendArgs "yes (" $response ")\n"]
+        } else {
+          tputs $channel no\n
+        }
       } else {
-        tputs $channel no\n
+        tputs $channel "skipped, broken on Mono 3.3.0\n"
       }
     } else {
       #
@@ -1710,13 +1841,13 @@ namespace eval ::Eagle {
       #       number of bits for this operating system?
       #
       if {[info exists ::tcl_platform(machine)] && \
-          [info exists ::tcl_platform(osBits)]} then {
+          [info exists ::tcl_platform(processBits)]} then {
         #
         # NOTE: Does the machine and number of bits match
         #       what the caller specified?
         #
         if {$::tcl_platform(machine) eq $machine && \
-            $::tcl_platform(osBits) eq $bits} then {
+            $::tcl_platform(processBits) eq $bits} then {
           #
           # NOTE: Yes, it matches.
           #
@@ -1727,8 +1858,8 @@ namespace eval ::Eagle {
           set result no
         }
 
-        tputs $channel [appendArgs $result ", " $::tcl_platform(osBits) -bit \
-            " " $::tcl_platform(machine) \n]
+        tputs $channel [appendArgs $result ", " $::tcl_platform(processBits) \
+            -bit " " $::tcl_platform(machine) \n]
       } else {
         tputs $channel "no, unknown\n"
       }
@@ -2609,17 +2740,17 @@ namespace eval ::Eagle {
     #       global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        getKnownMonoVersions checkForPlatform checkForWindowsVersion \
-        checkForScriptLibrary checkForVariable checkForTclOptions \
-        checkForWindowsCommandProcessor checkForFossil checkForEagle \
-        checkForSymbols checkForLogFile checkForGaruda checkForShell \
-        checkForDebug checkForTk checkForVersion checkForCommand \
-        checkForTestExec checkForTestMachine checkForTestPlatform \
-        checkForTestConfiguration checkForTestSuffix checkForFile \
-        checkForPathFile checkForNativeCode checkForTip127 checkForTip194 \
-        checkForTip241 checkForTip285 checkForTip405 checkForTip426 \
-        checkForTiming checkForPerformance checkForStackIntensive \
-        checkForInteractive checkForInteractiveCommand \
+        getKnownMonoVersions checkForTestSuiteFiles checkForPlatform \
+        checkForWindowsVersion checkForScriptLibrary checkForVariable \
+        checkForTclOptions checkForWindowsCommandProcessor checkForFossil \
+        checkForEagle checkForSymbols checkForLogFile checkForGaruda \
+        checkForShell checkForDebug checkForTk checkForVersion \
+        checkForCommand checkForTestExec checkForTestMachine \
+        checkForTestPlatform checkForTestConfiguration checkForTestSuffix \
+        checkForFile checkForPathFile checkForNativeCode checkForTip127 \
+        checkForTip194 checkForTip241 checkForTip285 checkForTip405 \
+        checkForTip426 checkForTiming checkForPerformance \
+        checkForStackIntensive checkForInteractive checkForInteractiveCommand \
         checkForUserInteraction checkForNetwork checkForCompileOption] false \
         false
 

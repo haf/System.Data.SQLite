@@ -592,25 +592,25 @@ if {![info exists no([file tail [info script]])]} then {
     catch {host query} host
 
     tputs $test_channel [appendArgs "---- host query: " \
-        [formatListAsDict $host] \n]
+        [formatListAsDict $host <none>] \n]
 
     unset host
     catch {debug memory} memory
 
     tputs $test_channel [appendArgs "---- starting memory: " \
-        [formatListAsDict $memory] \n]
+        [formatListAsDict $memory <none>] \n]
 
     unset memory
     catch {debug stack true} stack
 
     tputs $test_channel [appendArgs "---- starting stack: " \
-        [formatListAsDict $stack] \n]
+        [formatListAsDict $stack <none>] \n]
 
     unset stack
     catch {file drive} drive
 
     tputs $test_channel [appendArgs "---- system drive: " \
-        [formatListAsDict $drive] \n]
+        [formatListAsDict $drive <none>] \n]
 
     unset drive
   }
@@ -1084,9 +1084,19 @@ if {![info exists no([file tail [info script]])]} then {
       #
       if {![info exists no(compileWindows)]} then {
         #
-        # NOTE: For test "garuda-1.1".
+        # NOTE: For tests "garuda-1.1" and "garuda-1.2".
         #
         checkForCompileOption $test_channel WINDOWS
+      }
+
+      #
+      # NOTE: Has Windows Forms support been enabled (at compile-time)?
+      #
+      if {![info exists no(compileWinForms)]} then {
+        #
+        # NOTE: For tests "object-10.21", "tclLoad-1.2", "winForms-*.*".
+        #
+        checkForCompileOption $test_channel WINFORMS
       }
 
       #
@@ -1104,7 +1114,7 @@ if {![info exists no([file tail [info script]])]} then {
       #
       if {![info exists no(compileNativePackage)]} then {
         #
-        # NOTE: For test "garuda-1.1".
+        # NOTE: For tests "garuda-1.1" and "garuda-1.2".
         #
         checkForCompileOption $test_channel NATIVE_PACKAGE
       }
@@ -1807,7 +1817,7 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(garudaDll)]} then {
       #
-      # NOTE: For test "garuda-1.1".
+      # NOTE: For tests "garuda-1.1" and "garuda-1.2".
       #
       checkForGarudaDll $test_channel
     }
@@ -1867,6 +1877,13 @@ if {![info exists no([file tail [info script]])]} then {
 
   tputs $test_channel [appendArgs \
       "---- start of common (Tcl & Eagle) test constraints...\n"]
+
+  #
+  # NOTE: Check for the test suite infrastructure files...
+  #
+  if {![info exists no(testSuiteFiles)]} then {
+    checkForTestSuiteFiles $test_channel
+  }
 
   #
   # NOTE: Has all use of [exec] for tests been disabled?
@@ -2478,7 +2495,7 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Show the active test constraints.
   #
   tputs $test_channel [appendArgs "---- constraints: " \
-      [formatList [lsort [getConstraints]]] \n]
+      [formatList [lsort [getConstraints]] <none>] \n]
 
   #
   # NOTE: Show the starting command count (for both Tcl and Eagle).

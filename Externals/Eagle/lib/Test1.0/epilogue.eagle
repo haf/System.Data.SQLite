@@ -121,7 +121,7 @@ if {![info exists no([file tail [info script]])]} then {
     catch {debug memory} memory
 
     tputs $test_channel [appendArgs "---- ending memory: " \
-        [formatListAsDict $memory] \n]
+        [formatListAsDict $memory <none>] \n]
 
     unset memory
 
@@ -131,7 +131,7 @@ if {![info exists no([file tail [info script]])]} then {
     catch {debug stack true} stack
 
     tputs $test_channel [appendArgs "---- ending stack: " \
-        [formatListAsDict $stack] \n]
+        [formatListAsDict $stack <none>] \n]
 
     unset stack
 

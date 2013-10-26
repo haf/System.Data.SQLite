@@ -1342,15 +1342,15 @@ namespace eval ::Eagle {
     return $result
   }
 
-  proc formatDecimal { value {places 4} } {
+  proc formatDecimal { value {places 4} {zeros false} } {
     if {[isEagle] && [llength [info commands object]] > 0} then {
       #
       # HACK: This works; however, in order to do this kind of thing cleanly,
       #       we really need the Tcl [format] command.
       #
       set result [object invoke String Format [appendArgs "{0:0." \
-          [string repeat # $places] "}"] [set object [object invoke \
-          -create Double Parse $value]]]
+          [string repeat [expr {$zeros ? "0" : "#"}] $places] "}"] \
+          [set object [object invoke -create Double Parse $value]]]
 
       unset object; # dispose
     } else {
