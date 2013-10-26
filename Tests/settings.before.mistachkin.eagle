@@ -1,0 +1,12 @@
+###############################################################################
+#
+# settings.before.mistachkin.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+if {[info exists ::env(TEST_ALL)]} then {
+  object invoke Interpreter.GetActive AddRuntimeOption noPoolCounts
+}

@@ -1,0 +1,15 @@
+###############################################################################
+#
+# settings.stress.mistachkin.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+# set count(1) 10;        # Workload iteration count (i.e. within a run).
+# set count(2) 200;       # Workload iteration delay, in milliseconds.
+# set count(3) 10000;     # Workload "small" data chunk size, in bytes.
+# set count(5) 209715200; # Maximum heap memory to exclude at one time.
+# set exitOnFail true;    # Halt testing and exit process on test failure?
+# set noTrace true;       # Disable SQLite trace logging to a file?
