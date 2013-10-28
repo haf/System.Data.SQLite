@@ -17,6 +17,10 @@
 #include "../ext/totype.c"
 #endif
 
+#if defined(INTEROP_REGEXP_EXTENSION)
+#include "../ext/regexp.c"
+#endif
+
 #if defined(INTEROP_EXTENSION_FUNCTIONS)
 #include "../contrib/extension-functions.c"
 extern int RegisterExtensionFunctions(sqlite3 *db);

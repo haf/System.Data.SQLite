@@ -10,7 +10,7 @@
 <package>
   <metadata>
     <id>System.Data.SQLite.x86</id>
-    <version>1.0.89.0</version>
+    <version>1.0.90.0</version>
     <authors>SQLite Development Team</authors>
     <description>The official SQLite database engine combined with a complete ADO.NET provider all rolled into a single mixed-mode assembly for x86.</description>
     <language>en-US</language>
