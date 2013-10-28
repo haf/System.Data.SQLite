@@ -673,7 +673,7 @@ namespace System.Data.SQLite
     //       System.Data.SQLite functionality (e.g. being able to bind
     //       parameters and handle column values of types Int64 and Double).
     //
-    internal const string SQLITE_DLL = "SQLite.Interop.089.dll";
+    internal const string SQLITE_DLL = "SQLite.Interop.090.dll";
 #elif SQLITE_STANDARD
     //
     // NOTE: Otherwise, if the standard SQLite library is enabled, use it.
