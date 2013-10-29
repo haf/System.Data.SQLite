@@ -1445,7 +1445,7 @@ namespace eval ::Eagle {
               # NOTE: Attempt to cancel any SQL queries in progress on this
               #       database connection.
               #
-              if {[catch {$pair Value.Cancel} error] != 0} then {
+              if {[catch {$pair Value.Cancel} error]} then {
                 tputs $::test_channel [appendArgs \n \
                     "==== WARNING: failed to cancel query for connection \"" \
                     [$pair Key] "\", error: " \n\t $error \n]
