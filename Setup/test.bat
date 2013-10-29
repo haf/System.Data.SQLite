@@ -41,7 +41,7 @@ IF ERRORLEVEL 1 (
 
 IF NOT DEFINED PREARGS (
   %_AECHO% No pre-arguments specified, using default...
-  SET PREARGS=-interactive -noExit
+  SET PREARGS=-interactive -noExit -initialize -runtimeOption autoSelect
 )
 
 %_VECHO% PreArgs = '%PREARGS%'

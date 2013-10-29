@@ -715,7 +715,30 @@ namespace eval ::Eagle {
           [haveConstraint SQLite]}]
     }
 
-    proc checkForSQLiteBuilds { channel } {
+    proc matchMachine { platform } {
+      #
+      # NOTE: An empty string for the platform means that the build is not
+      #       [primarily] a native build; therefore, it always matches.
+      #
+      if {[string length $platform] == 0} then {
+        return true
+      }
+
+      #
+      # NOTE: Does the specified platform match up to the current process?
+      #
+      if {$platform eq [machineToPlatform $::tcl_platform(machine)]} then {
+        return true
+      }
+
+      #
+      # NOTE: The specified platform does not match up with the platform
+      #       for the current process.
+      #
+      return false
+    }
+
+    proc checkForSQLiteBuilds { channel {select false} } {
       #
       # NOTE: Check for every possible valid combination of values used when
       #       locating out the build output directory, showing each available
@@ -724,16 +747,63 @@ namespace eval ::Eagle {
       foreach native [list false true] {
         foreach year [getBuildYears] {
           foreach configuration [getBuildConfigurations] {
+            #
+            # NOTE: Figure out the effective build platform.  This is
+            #       based on whether or not a [primarily] native build
+            #       is being used.  For [primarily] non-native builds,
+            #       this will be an empty string.
+            #
+            set platform [getBuildPlatform $native]
+
             tputs $channel [appendArgs \
                 "---- checking for System.Data.SQLite build \"" [expr \
-                {$native ? "native/" : ""}] $year / $configuration "\"... "]
+                {$native ? "native/" : ""}] [expr {[string length \
+                $platform] > 0 ? [appendArgs $platform /] : ""}] $year \
+                / $configuration "\"... "]
 
-            set fileName [file nativename [file join [joinBuildDirectory \
-                $native [getBuildBaseDirectory] $year [getBuildPlatform \
-                $native] $configuration] System.Data.SQLite.dll]]
+            #
+            # NOTE: Build the fully qualified file name for the primary
+            #       assembly containing the System.Data.SQLite managed
+            #       components.  It should be noted that this assembly
+            #       file may also contain the native components, if a
+            #       native build is in use.
+            #
+            set fileName [file nativename [file join \
+                [joinBuildDirectory $native [getBuildBaseDirectory] $year \
+                $platform $configuration] System.Data.SQLite.dll]]
 
+            #
+            # NOTE: Does the file exist?  Currently, no other steps are
+            #       taken to verify this build is actually viable.
+            #
             if {[file exists $fileName]} then {
-              tputs $channel yes\n
+              #
+              # NOTE: When in "select" mode, automatically select the first
+              #       available build of System.Data.SQLite and then return
+              #       immediately.
+              #
+              if {$select && [matchMachine $platform]} then {
+                #
+                # NOTE: Manually override all the build directory selection
+                #       related test settings in order to force this build
+                #       of System.Data.SQLite to be used.
+                #
+                object invoke Interpreter.GetActive [expr {$native ? \
+                    "AddRuntimeOption" : "RemoveRuntimeOption"}]  native
+
+                set ::test_year $year
+                set ::test_platform $platform
+                set ::test_configuration $configuration
+
+                tputs $channel [appendArgs \
+                    "yes, selected (" [expr {$native ? "native/" : ""}] \
+                    [expr {[string length $platform] > 0 ? [appendArgs \
+                    $platform /] : ""}] $year / $configuration ")\n"]
+
+                return
+              } else {
+                tputs $channel yes\n
+              }
             } else {
               tputs $channel no\n
             }
@@ -1883,6 +1953,15 @@ namespace eval ::Eagle {
 
             tryDeleteAssembly System.Data.SQLite.Linq.dll
             removeConstraint file_System.Data.SQLite.Linq.dll
+          }
+
+          #
+          # NOTE: Check for the "autoSelect" runtime option.  If present,
+          #       attempt to automatically select the first available
+          #       build of System.Data.SQLite for use with the test suite.
+          #
+          if {[hasRuntimeOption autoSelect]} then {
+            checkForSQLiteBuilds $::test_channel true
           }
 
           #
