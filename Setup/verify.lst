@@ -131,6 +131,7 @@ set sds_manifests(source) {
   Setup/set_x86_2012.bat
   Setup/sourceTag.eagle
   Setup/SQLite.iss
+  Setup/test.bat
   Setup/test_all.bat
   Setup/test_ce.bat
   Setup/updateFileInfo.tcl
