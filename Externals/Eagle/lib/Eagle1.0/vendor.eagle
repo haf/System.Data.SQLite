@@ -184,7 +184,7 @@ namespace eval ::Eagle {
     checkForTestOverrides stdout [expr {[info exists test_overrides] ? \
         $test_overrides : [list binary_directory build_base_directory \
         build_directory common_directory connection_flags database_directory \
-        datetime_format scratch_directory temporary_directory \
+        datetime_format release_version scratch_directory temporary_directory \
         test_configuration test_configurations test_constraints \
         test_machine test_overrides test_platform test_suite test_year \
         test_years test_year_clr_v2 test_year_clr_v4 vendor_directory]}] false

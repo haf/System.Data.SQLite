@@ -318,6 +318,26 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getReleaseVersion {} {
+      #
+      # NOTE: Figure out the release version for use with the build directory
+      #       when checking for available releases.
+      #
+      if {[info exists ::release_version] && \
+          [string length $::release_version] > 0} then {
+        #
+        # NOTE: The release version has been overridden; therefore, use it
+        #       verbatim.
+        #
+        return $::release_version
+      } else {
+        #
+        # NOTE: No release version is available, return an empty string.
+        #
+        return ""
+      }
+    }
+
     proc getBuildFileName { fileName } {
       #
       # NOTE: Returns the specified file name as if it were located in the
@@ -822,7 +842,8 @@ namespace eval ::Eagle {
       #
       if {[info exists ::env(System.Data.SQLite)] && \
           [string length $::env(System.Data.SQLite)] > 0} then {
-        set directory $::env(System.Data.SQLite)
+        set directory [file nativename [file join \
+            $::env(System.Data.SQLite) [getReleaseVersion]]]
 
         set fileName [file nativename [file join $directory \
             System.Data.SQLite.dll]]
