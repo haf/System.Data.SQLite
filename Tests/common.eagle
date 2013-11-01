@@ -800,7 +800,7 @@ namespace eval ::Eagle {
                     [expr {[string length $platform] > 0 ? [appendArgs \
                     $platform /] : ""}] $year / $configuration ")\n"]
 
-                return
+                return true
               } else {
                 tputs $channel yes\n
               }
@@ -810,6 +810,68 @@ namespace eval ::Eagle {
           }
         }
       }
+
+      return false
+    }
+
+    proc checkForSQLiteReleases { channel {select false} } {
+      #
+      # NOTE: Check for past releases of System.Data.SQLite in the directory
+      #       contained in the "System.Data.SQLite" environment variable, if
+      #       present.
+      #
+      if {[info exists ::env(System.Data.SQLite)] && \
+          [string length $::env(System.Data.SQLite)] > 0} then {
+        set directory $::env(System.Data.SQLite)
+
+        set fileName [file nativename [file join $directory \
+            System.Data.SQLite.dll]]
+
+        tputs $channel [appendArgs \
+            "---- checking for System.Data.SQLite release \"" \
+            $fileName "\"... "]
+
+        if {[file exists $fileName]} then {
+          if {$select} then {
+            set ::build_directory $directory
+
+            tputs $channel [appendArgs "yes (" $directory ")\n"]
+
+            return true
+          } else {
+            tputs $channel yes\n
+          }
+        } else {
+          tputs $channel no\n
+
+          foreach path [lsort -decreasing [file list $directory *]] {
+            if {[file exists $path] && [file isdirectory $path]} then {
+              set fileName [file nativename [file join $path \
+                  System.Data.SQLite.dll]]
+
+              tputs $channel [appendArgs \
+                  "---- checking for System.Data.SQLite release \"" \
+                  $fileName "\"... "]
+
+              if {[file exists $fileName]} then {
+                if {$select} then {
+                  set ::build_directory $path
+
+                  tputs $channel [appendArgs "yes, selected (" $path ")\n"]
+
+                  return true
+                } else {
+                  tputs $channel yes\n
+                }
+              } else {
+                tputs $channel no\n
+              }
+            }
+          }
+        }
+      }
+
+      return false
     }
 
     proc checkForSQLiteLibrary { channel } {
@@ -1958,10 +2020,13 @@ namespace eval ::Eagle {
           #
           # NOTE: Check for the "autoSelect" runtime option.  If present,
           #       attempt to automatically select the first available
-          #       build of System.Data.SQLite for use with the test suite.
+          #       build (or "release") of SQLite and System.Data.SQLite
+          #       for use with the test suite.
           #
           if {[hasRuntimeOption autoSelect]} then {
-            checkForSQLiteBuilds $::test_channel true
+            if {![checkForSQLiteBuilds $::test_channel true]} then {
+              checkForSQLiteReleases $::test_channel true
+            }
           }
 
           #
@@ -2119,9 +2184,11 @@ namespace eval ::Eagle {
         }
 
         #
-        # NOTE: Check the available builds of SQLite and System.Data.SQLite.
+        # NOTE: Check the available builds (and "releases") of SQLite and
+        #       System.Data.SQLite.
         #
         checkForSQLiteBuilds $::test_channel
+        checkForSQLiteReleases $::test_channel
 
         #
         # NOTE: Now, we need to know if the SQLite core library is available
