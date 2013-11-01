@@ -869,6 +869,10 @@ namespace eval ::Eagle {
             }
           }
         }
+      } else {
+        tputs $channel [appendArgs \
+            "---- environment variable \"System.Data.SQLite\" is not " \
+            "set, skipping check for releases...\n"]
       }
 
       return false
