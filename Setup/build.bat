@@ -248,6 +248,31 @@ SET LOGGING="/logger:FileLogger,Microsoft.Build.Engine;Logfile=%LOGDIR%\%LOGPREF
 
 :skip_setLogging
 
+IF NOT DEFINED NOPROPS (
+  IF EXIST Externals\Eagle\bin\EagleShell.exe (
+    IF DEFINED INTEROP_EXTRA_PROPS_FILE (
+      REM
+      REM HACK: This is used to work around a limitation of Visual Studio 2005
+      REM       and 2008 that prevents the "InheritedPropertySheets" attribute
+      REM       value from working correctly when it refers to a property that
+      REM       evaluates to an empty string.
+      REM
+      %__ECHO% Externals\Eagle\bin\EagleShell.exe -evaluate "set fileName {SQLite.Interop/props/include.vsprops}; set data [readFile $fileName]; regsub -- {	InheritedPropertySheets=\"\"} $data {	InheritedPropertySheets=\"$^(INTEROP_EXTRA_PROPS_FILE^)\"} data; writeFile $fileName $data"
+
+      IF ERRORLEVEL 1 (
+        ECHO Property file modification of "SQLite.Interop\props\include.vsprops" failed.
+        GOTO errors
+      ) ELSE (
+        ECHO Property file modification successful.
+      )
+    )
+  ) ELSE (
+    ECHO WARNING: Property file modification skipped, Eagle binaries are not available.
+  )
+) ELSE (
+  ECHO WARNING: Property file modification skipped, disabled via NOPROPS environment variable.
+)
+
 IF NOT DEFINED NOTAG (
   IF EXIST Externals\Eagle\bin\EagleShell.exe (
     %__ECHO% Externals\Eagle\bin\EagleShell.exe -file Setup\sourceTag.eagle SourceIdMode SQLite.Interop\src\win\interop.h
