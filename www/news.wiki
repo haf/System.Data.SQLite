@@ -10,6 +10,7 @@
     <li>Never create a new connection wrapper in the SQLiteConnection.Shutdown method.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Add experimental GetMemoryStatistics, ReleaseMemory, and Shutdown methods to the SQLiteConnection class.</li>
     <li>Add memory leak detection to the test project for the .NET Compact Framework.</li>
+    <li>Add SQLITE_ENABLE_MEMORY_MANAGEMENT compile-time option to the interop assembly.</li>
 </ul>
 <p>
     <b>1.0.89.0 - October 28, 2013</b>
