@@ -71,6 +71,11 @@ namespace System.Data.SQLite
     /// <returns>A standard SQLite return code (i.e. zero for success and non-zero for failure).</returns>
     internal abstract SQLiteErrorCode SetMemoryStatus(bool value);
     /// <summary>
+    /// Attempts to free as much heap memory as possible for the database connection.
+    /// </summary>
+    /// <returns>A standard SQLite return code (i.e. zero for success and non-zero for failure).</returns>
+    internal abstract SQLiteErrorCode ReleaseMemory();
+    /// <summary>
     /// Shutdown the SQLite engine so that it can be restarted with different config options.
     /// We depend on auto initialization to recover.
     /// </summary>
@@ -114,6 +119,18 @@ namespace System.Data.SQLite
     /// </summary>
     /// <returns></returns>
     internal abstract string GetLastError();
+
+    /// <summary>
+    /// Returns the text of the last error issued by SQLite -OR- the specified default error text if
+    /// none is available from the SQLite core library.
+    /// </summary>
+    /// <param name="defValue">
+    /// The error text to return in the event that one is not available from the SQLite core library.
+    /// </param>
+    /// <returns>
+    /// The error text.
+    /// </returns>
+    internal abstract string GetLastError(string defValue);
 
     /// <summary>
     /// When pooling is enabled, force this connection to be disposed rather than returned to the pool

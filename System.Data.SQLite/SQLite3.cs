@@ -427,34 +427,50 @@ namespace System.Data.SQLite
 
     internal override long MemoryUsed
     {
-      get
-      {
+        get
+        {
+            return StaticMemoryUsed;
+        }
+    }
+
+    internal static long StaticMemoryUsed
+    {
+        get
+        {
 #if !PLATFORM_COMPACTFRAMEWORK
-        return UnsafeNativeMethods.sqlite3_memory_used();
+            return UnsafeNativeMethods.sqlite3_memory_used();
 #elif !SQLITE_STANDARD
-        long bytes = 0;
-        UnsafeNativeMethods.sqlite3_memory_used_interop(ref bytes);
-        return bytes;
+            long bytes = 0;
+            UnsafeNativeMethods.sqlite3_memory_used_interop(ref bytes);
+            return bytes;
 #else
-        throw new NotImplementedException();
+            throw new NotImplementedException();
 #endif
-      }
+        }
     }
 
     internal override long MemoryHighwater
     {
-      get
-      {
+        get
+        {
+            return StaticMemoryHighwater;
+        }
+    }
+
+    internal static long StaticMemoryHighwater
+    {
+        get
+        {
 #if !PLATFORM_COMPACTFRAMEWORK
-        return UnsafeNativeMethods.sqlite3_memory_highwater(0);
+            return UnsafeNativeMethods.sqlite3_memory_highwater(0);
 #elif !SQLITE_STANDARD
-        long bytes = 0;
-        UnsafeNativeMethods.sqlite3_memory_highwater_interop(0, ref bytes);
-        return bytes;
+            long bytes = 0;
+            UnsafeNativeMethods.sqlite3_memory_highwater_interop(0, ref bytes);
+            return bytes;
 #else
-        throw new NotImplementedException();
+            throw new NotImplementedException();
 #endif
-      }
+        }
     }
 
     /// <summary>
@@ -486,13 +502,78 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Shutdown the SQLite engine so that it can be restarted with different config options.
-    /// We depend on auto initialization to recover.
+    /// Attempts to free as much heap memory as possible for the database connection.
     /// </summary>
-    /// <returns>Returns a result code</returns>
+    /// <returns>A standard SQLite return code (i.e. zero for success and non-zero for failure).</returns>
+    internal override SQLiteErrorCode ReleaseMemory()
+    {
+        SQLiteErrorCode rc = UnsafeNativeMethods.sqlite3_db_release_memory(_sql);
+        return rc;
+    }
+
+    /// <summary>
+    /// Attempts to free N bytes of heap memory by deallocating non-essential memory
+    /// allocations held by the database library. Memory used to cache database pages
+    /// to improve performance is an example of non-essential memory.  This is a no-op
+    /// returning zero if the SQLite core library was not compiled with the compile-time
+    /// option SQLITE_ENABLE_MEMORY_MANAGEMENT.
+    /// </summary>
+    /// <param name="nBytes">
+    /// The requested number of bytes to free.
+    /// </param>
+    /// <returns>
+    /// The number of bytes actually freed.  This value may be zero.
+    /// </returns>
+    internal static int StaticReleaseMemory(int nBytes)
+    {
+        return UnsafeNativeMethods.sqlite3_release_memory(nBytes);
+    }
+
+    /// <summary>
+    /// Shutdown the SQLite engine so that it can be restarted with different
+    /// configuration options.  We depend on auto initialization to recover.
+    /// </summary>
+    /// <returns>Returns a standard SQLite result code.</returns>
     internal override SQLiteErrorCode Shutdown()
     {
-        SQLiteErrorCode rc = UnsafeNativeMethods.sqlite3_shutdown();
+        return StaticShutdown(false);
+    }
+
+    /// <summary>
+    /// Shutdown the SQLite engine so that it can be restarted with different
+    /// configuration options.  We depend on auto initialization to recover.
+    /// </summary>
+    /// <param name="directories">
+    /// Non-zero to reset the database and temporary directories to their
+    /// default values, which should be null for both.  This parameter has no
+    /// effect on non-Windows operating systems.
+    /// </param>
+    /// <returns>Returns a standard SQLite result code.</returns>
+    internal static SQLiteErrorCode StaticShutdown(
+        bool directories
+        )
+    {
+        SQLiteErrorCode rc = SQLiteErrorCode.Ok;
+
+        if (directories)
+        {
+#if WINDOWS
+            if (rc == SQLiteErrorCode.Ok)
+                rc = UnsafeNativeMethods.sqlite3_win32_set_directory(1, null);
+
+            if (rc == SQLiteErrorCode.Ok)
+                rc = UnsafeNativeMethods.sqlite3_win32_set_directory(2, null);
+#else
+#if !NET_COMPACT_20 && TRACE_CONNECTION
+            Trace.WriteLine(
+                "Shutdown: Cannot reset directories on this operating system.");
+#endif
+#endif
+        }
+
+        if (rc == SQLiteErrorCode.Ok)
+            rc = UnsafeNativeMethods.sqlite3_shutdown();
+
         return rc;
     }
 
@@ -700,7 +781,14 @@ namespace System.Data.SQLite
 
     internal override string GetLastError()
     {
-      return SQLiteBase.GetLastError(_sql, _sql);
+        return GetLastError(null);
+    }
+
+    internal override string GetLastError(string defValue)
+    {
+        string result = SQLiteBase.GetLastError(_sql, _sql);
+        if (String.IsNullOrEmpty(result)) result = defValue;
+        return result;
     }
 
     internal override SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, uint timeoutMS, out string strRemain)

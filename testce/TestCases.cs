@@ -6,6 +6,7 @@
  ********************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Data;
 using System.Data.SQLite;
@@ -73,6 +74,7 @@ namespace test
   internal sealed class TestCases
   {
     internal Form1 frm;
+    internal IDictionary<string, long> statistics;
 
     private string connectionString;
     private DbConnection cnn;
@@ -100,7 +102,13 @@ namespace test
 
     internal bool Succeeded()
     {
-        return (failed == 0) && (passed == total);
+        //
+        // NOTE: Did all tests pass [without leaking any memory]?
+        //
+        long sqlBytes;
+
+        return (failed == 0) && (passed == total) && ((statistics == null) ||
+            !statistics.TryGetValue("MemoryUsed", out sqlBytes) || (sqlBytes == 0));
     }
 
     private static string FormatString(string value)
@@ -115,6 +123,68 @@ namespace test
             return "(whitespace)";
 
         return value;
+    }
+
+    private void WriteMemoryStatistics(
+        bool forceFullCollection
+        )
+    {
+        long clrBytes = GC.GetTotalMemory(false);
+        SQLiteConnection.GetMemoryStatistics(ref statistics);
+        if (statistics != null) statistics["ClrUsedBefore"] = clrBytes;
+
+        if (frm != null)
+        {
+            frm.WriteLine("\r\nMemory in use by the CLR before collection: " +
+                clrBytes.ToString() + " bytes");
+
+            if (statistics != null)
+            {
+                long sqlBytes;
+
+                if (statistics.TryGetValue("MemoryUsed", out sqlBytes))
+                {
+                    frm.WriteLine("Current SQLite memory usage before collection: " +
+                        sqlBytes.ToString() + " bytes");
+                }
+
+                if (statistics.TryGetValue("MemoryHighwater", out sqlBytes))
+                {
+                    frm.WriteLine("Maximum SQLite memory usage before collection: " +
+                        sqlBytes.ToString() + " bytes");
+                }
+            }
+        }
+
+        if (forceFullCollection)
+        {
+            clrBytes = GC.GetTotalMemory(true);
+            SQLiteConnection.GetMemoryStatistics(ref statistics);
+            if (statistics != null) statistics["ClrUsedAfter"] = clrBytes;
+
+            if (frm != null)
+            {
+                frm.WriteLine("\r\nMemory in use by the CLR after collection: " +
+                    clrBytes.ToString() + " bytes");
+
+                if (statistics != null)
+                {
+                    long sqlBytes;
+
+                    if (statistics.TryGetValue("MemoryUsed", out sqlBytes))
+                    {
+                        frm.WriteLine("Current SQLite memory usage after collection: " +
+                            sqlBytes.ToString() + " bytes");
+                    }
+
+                    if (statistics.TryGetValue("MemoryHighwater", out sqlBytes))
+                    {
+                        frm.WriteLine("Maximum SQLite memory usage after collection: " +
+                            sqlBytes.ToString() + " bytes");
+                    }
+                }
+            }
+        }
     }
 
     internal void Run()
@@ -132,11 +202,14 @@ namespace test
       frm.WriteLine("\r\nBeginning Test on " + type.ToString());
 
       SQLiteConnection cnn2 = cnn as SQLiteConnection;
+
       if (cnn2 != null)
       {
-          cnn2 = null;
           frm.WriteLine("SQLite v" + SQLiteConnection.SQLiteVersion +
               " [" + SQLiteConnection.SQLiteSourceId + "]");
+
+          WriteMemoryStatistics(false);
+          frm.WriteLine(String.Empty);
       }
 
       total++;
@@ -232,6 +305,12 @@ namespace test
       catch (Exception) { frm.WriteLine("FAIL - DropTable"); failed++; }
 
       frm.WriteLine("\r\nTests Finished.");
+
+      if (cnn2 != null)
+          cnn2.Close();
+
+      WriteMemoryStatistics(true);
+
       frm.WriteLine(String.Format("\r\nCounts: {0} total, {1} passed, {2} failed", total, passed, failed));
       frm.WriteLine(String.Format("Result: {0}", Succeeded() ? "SUCCESS" : "FAILURE"));
 

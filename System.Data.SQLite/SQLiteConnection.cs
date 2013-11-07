@@ -2465,6 +2465,65 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns various global memory statistics for the SQLite core library via
+    /// a dictionary of key/value pairs.  Currently, only the "MemoryUsed" and
+    /// "MemoryHighwater" keys are returned and they have values that correspond
+    /// to the values that could be obtained via the <see cref="MemoryUsed" />
+    /// and <see cref="MemoryHighwater" /> connection properties.
+    /// </summary>
+    /// <param name="statistics">
+    /// This dictionary will be populated with the global memory statistics.  It
+    /// will be created if necessary.
+    /// </param>
+    public static void GetMemoryStatistics(
+        ref IDictionary<string, long> statistics
+        )
+    {
+        if (statistics == null)
+            statistics = new Dictionary<string, long>();
+
+        statistics["MemoryUsed"] = SQLite3.StaticMemoryUsed;
+        statistics["MemoryHighwater"] = SQLite3.StaticMemoryHighwater;
+    }
+
+    /// <summary>
+    /// Attempts to free as much heap memory as possible for this database connection.
+    /// </summary>
+    public void ReleaseMemory()
+    {
+        CheckDisposed();
+
+        if (_sql == null)
+            throw new InvalidOperationException("Database connection not valid for releasing memory.");
+
+        SQLiteErrorCode rc = _sql.ReleaseMemory();
+
+        if (rc != SQLiteErrorCode.Ok)
+        {
+            throw new SQLiteException(rc,
+                _sql.GetLastError("Could not release connection memory."));
+        }
+    }
+
+    /// <summary>
+    /// Attempts to free N bytes of heap memory by deallocating non-essential memory
+    /// allocations held by the database library. Memory used to cache database pages
+    /// to improve performance is an example of non-essential memory.  This is a no-op
+    /// returning zero if the SQLite core library was not compiled with the compile-time
+    /// option SQLITE_ENABLE_MEMORY_MANAGEMENT.
+    /// </summary>
+    /// <param name="nBytes">
+    /// The requested number of bytes to free.
+    /// </param>
+    /// <returns>
+    /// The number of bytes actually freed.  This value may be zero.
+    /// </returns>
+    public static int ReleaseMemory(int nBytes)
+    {
+        return SQLite3.StaticReleaseMemory(nBytes);
+    }
+
+    /// <summary>
     /// Sets the status of the memory usage tracking subsystem in the SQLite core library.  By default, this is enabled.
     /// If this is disabled, memory usage tracking will not be performed.  This is not really a per-connection value, it is
     /// global to the process.
@@ -2609,21 +2668,60 @@ namespace System.Data.SQLite
       }
     }
 
-    /// Passes a shutdown request off to SQLite.
+    /// <summary>
+    /// Passes a shutdown request to the SQLite core library.  Does not throw
+    /// an exception if the shutdown request fails.
+    /// </summary>
+    /// <returns>
+    /// A standard SQLite return code (i.e. zero for success and non-zero for
+    /// failure).
+    /// </returns>
     public SQLiteErrorCode Shutdown()
     {
         CheckDisposed();
 
-        // make sure we have an instance of the base class
         if (_sql == null)
-        {
-            SortedList<string, string> opts = ParseConnectionString(
-                _connectionString, _parseViaFramework);
+            throw new InvalidOperationException("Database connection not valid for shutdown.");
 
-            SetupSQLiteBase(opts);
+        _sql.Close(true); /* NOTE: MUST be closed before shutdown. */
+        SQLiteErrorCode rc = _sql.Shutdown();
+
+#if !NET_COMPACT_20 && TRACE_CONNECTION
+        if (rc != SQLiteErrorCode.Ok)
+            Trace.WriteLine(String.Format("Shutdown (Instance) Failed: {0}", rc));
+#endif
+
+        return rc;
+    }
+
+    /// <summary>
+    /// Passes a shutdown request to the SQLite core library.  Throws an
+    /// exception if the shutdown request fails and the no-throw parameter
+    /// is non-zero.
+    /// </summary>
+    /// <param name="directories">
+    /// Non-zero to reset the database and temporary directories to their
+    /// default values, which should be null for both.
+    /// </param>
+    /// <param name="noThrow">
+    /// When non-zero, throw an exception if the shutdown request fails.
+    /// </param>
+    public static void Shutdown(
+        bool directories,
+        bool noThrow
+        )
+    {
+        SQLiteErrorCode rc = SQLite3.StaticShutdown(directories);
+
+        if (rc != SQLiteErrorCode.Ok)
+        {
+#if !NET_COMPACT_20 && TRACE_CONNECTION
+            Trace.WriteLine(String.Format("Shutdown (Static) Failed: {0}", rc));
+#endif
+
+            if (!noThrow)
+                throw new SQLiteException(rc, null);
         }
-        if (_sql != null) return _sql.Shutdown();
-        throw new InvalidOperationException("Database connection not active.");
     }
 
     /// Enables or disabled extended result codes returned by SQLite
