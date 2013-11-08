@@ -2510,17 +2510,43 @@ namespace System.Data.SQLite
     /// allocations held by the database library. Memory used to cache database pages
     /// to improve performance is an example of non-essential memory.  This is a no-op
     /// returning zero if the SQLite core library was not compiled with the compile-time
-    /// option SQLITE_ENABLE_MEMORY_MANAGEMENT.
+    /// option SQLITE_ENABLE_MEMORY_MANAGEMENT.  Optionally, attempts to reset and/or
+    /// compact the Win32 native heap, if applicable.
     /// </summary>
     /// <param name="nBytes">
     /// The requested number of bytes to free.
     /// </param>
-    /// <returns>
+    /// <param name="reset">
+    /// Non-zero to attempt a heap reset.
+    /// </param>
+    /// <param name="compact">
+    /// Non-zero to attempt heap compaction.
+    /// </param>
+    /// <param name="nFree">
     /// The number of bytes actually freed.  This value may be zero.
+    /// </param>
+    /// <param name="resetOk">
+    /// This value will be non-zero if the heap reset was successful.
+    /// </param>
+    /// <param name="nLargest">
+    /// The size of the largest committed free block in the heap, in bytes.
+    /// This value will be zero unless heap compaction is enabled.
+    /// </param>
+    /// <returns>
+    /// A standard SQLite return code (i.e. zero for success and non-zero
+    /// for failure).
     /// </returns>
-    public static int ReleaseMemory(int nBytes)
+    public static SQLiteErrorCode ReleaseMemory(
+        int nBytes,
+        bool reset,
+        bool compact,
+        ref int nFree,
+        ref bool resetOk,
+        ref uint nLargest
+        )
     {
-        return SQLite3.StaticReleaseMemory(nBytes);
+        return SQLite3.StaticReleaseMemory(
+            nBytes, reset, compact, ref nFree, ref resetOk, ref nLargest);
     }
 
     /// <summary>

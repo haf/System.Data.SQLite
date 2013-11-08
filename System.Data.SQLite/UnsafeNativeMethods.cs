@@ -1056,6 +1056,20 @@ namespace System.Data.SQLite
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
 #endif
     internal static extern SQLiteErrorCode sqlite3_win32_set_directory(uint type, string value);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_win32_reset_heap();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern SQLiteErrorCode sqlite3_win32_compact_heap(ref uint largest);
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK
