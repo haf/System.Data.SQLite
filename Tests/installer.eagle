@@ -155,7 +155,8 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2005} -setup {
   unset -nocomplain wow64 is64 code output error fileName
 } -constraints {eagle administrator buildYear.2005 visualStudio2005\
 System.Data.SQLite.dll_v2.0.50727 file_Installer.exe testExec\
-file_System.Data.SQLite.dll file_Installer_Test_Vs2005.log} -result {0 True}}
+file_System.Data.SQLite.dll file_SQLite.Designer.dll\
+file_Installer_Test_Vs2005.log} -result {0 True}}
 
 ###############################################################################
 
@@ -192,7 +193,8 @@ runTest {test installer-1.2 {uninstaller tool / Visual Studio 2005} -setup {
   unset -nocomplain wow64 is64 code output error fileName
 } -constraints {eagle administrator buildYear.2005 visualStudio2005\
 System.Data.SQLite.dll_v2.0.50727 file_Installer.exe testExec\
-file_System.Data.SQLite.dll file_Uninstaller_Test_Vs2005.log} -result {0 True}}
+file_System.Data.SQLite.dll file_SQLite.Designer.dll\
+file_Uninstaller_Test_Vs2005.log} -result {0 True}}
 
 ###############################################################################
 
@@ -230,7 +232,7 @@ runTest {test installer-1.3 {installer tool / Visual Studio 2008} -setup {
 } -constraints {eagle administrator buildYear.2008 visualStudio2008\
 System.Data.SQLite.dll_v2.0.50727 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_Installer_Test_Vs2008.log} -result {0 True}}
+file_SQLite.Designer.dll file_Installer_Test_Vs2008.log} -result {0 True}}
 
 ###############################################################################
 
@@ -268,7 +270,7 @@ runTest {test installer-1.4 {uninstaller tool / Visual Studio 2008} -setup {
 } -constraints {eagle administrator buildYear.2008 visualStudio2008\
 System.Data.SQLite.dll_v2.0.50727 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_Uninstaller_Test_Vs2008.log} -result {0 True}}
+file_SQLite.Designer.dll file_Uninstaller_Test_Vs2008.log} -result {0 True}}
 
 ###############################################################################
 
@@ -306,7 +308,7 @@ runTest {test installer-1.5 {installer tool / Visual Studio 2010} -setup {
 } -constraints {eagle administrator buildYear.2010 visualStudio2010\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_Installer_Test_Vs2010.log} -result {0 True}}
+file_SQLite.Designer.dll file_Installer_Test_Vs2010.log} -result {0 True}}
 
 ###############################################################################
 
@@ -344,7 +346,7 @@ runTest {test installer-1.6 {uninstaller tool / Visual Studio 2010} -setup {
 } -constraints {eagle administrator buildYear.2010 visualStudio2010\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_Uninstaller_Test_Vs2010.log} -result {0 True}}
+file_SQLite.Designer.dll file_Uninstaller_Test_Vs2010.log} -result {0 True}}
 
 ###############################################################################
 
@@ -382,7 +384,7 @@ runTest {test installer-1.7 {installer tool / Visual Studio 2012} -setup {
 } -constraints {eagle administrator buildYear.2012 visualStudio2012\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_Installer_Test_Vs2012.log} -result {0 True}}
+file_SQLite.Designer.dll file_Installer_Test_Vs2012.log} -result {0 True}}
 
 ###############################################################################
 
@@ -420,7 +422,7 @@ runTest {test installer-1.8 {uninstaller tool / Visual Studio 2012} -setup {
 } -constraints {eagle administrator buildYear.2012 visualStudio2012\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_Uninstaller_Test_Vs2012.log} -result {0 True}}
+file_SQLite.Designer.dll file_Uninstaller_Test_Vs2012.log} -result {0 True}}
 
 ###############################################################################
 
