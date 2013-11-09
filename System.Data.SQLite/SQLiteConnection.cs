@@ -2714,7 +2714,7 @@ namespace System.Data.SQLite
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
         if (rc != SQLiteErrorCode.Ok)
-            Trace.WriteLine(String.Format("Shutdown (Instance) Failed: {0}", rc));
+            System.Diagnostics.Trace.WriteLine(String.Format("Shutdown (Instance) Failed: {0}", rc));
 #endif
 
         return rc;
@@ -2742,7 +2742,7 @@ namespace System.Data.SQLite
         if (rc != SQLiteErrorCode.Ok)
         {
 #if !NET_COMPACT_20 && TRACE_CONNECTION
-            Trace.WriteLine(String.Format("Shutdown (Static) Failed: {0}", rc));
+            System.Diagnostics.Trace.WriteLine(String.Format("Shutdown (Static) Failed: {0}", rc));
 #endif
 
             if (!noThrow)
