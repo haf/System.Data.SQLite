@@ -109,7 +109,7 @@ extern "C" {
 */
 #define SQLITE_VERSION        "3.8.2"
 #define SQLITE_VERSION_NUMBER 3008002
-#define SQLITE_SOURCE_ID      "2013-11-08 20:10:57 fbf8c3828327d19bbce0d7f6735e7577abfd54b3"
+#define SQLITE_SOURCE_ID      "2013-11-09 22:08:10 d06d9fdb6e6ac369035c825d9c30970115b3ba71"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -1787,19 +1787,21 @@ SQLITE_API int sqlite3_extended_result_codes(sqlite3*, int onoff);
 /*
 ** CAPI3REF: Last Insert Rowid
 **
-** ^Each entry in an SQLite table has a unique 64-bit signed
+** ^Each entry in most SQLite tables (except for [WITHOUT ROWID] tables)
+** has a unique 64-bit signed
 ** integer key called the [ROWID | "rowid"]. ^The rowid is always available
 ** as an undeclared column named ROWID, OID, or _ROWID_ as long as those
 ** names are not also used by explicitly declared columns. ^If
 ** the table has a column of type [INTEGER PRIMARY KEY] then that column
 ** is another alias for the rowid.
 **
-** ^This routine returns the [rowid] of the most recent
-** successful [INSERT] into the database from the [database connection]
-** in the first argument.  ^As of SQLite version 3.7.7, this routines
-** records the last insert rowid of both ordinary tables and [virtual tables].
-** ^If no successful [INSERT]s
-** have ever occurred on that database connection, zero is returned.
+** ^The sqlite3_last_insert_rowid(D) interface returns the [rowid] of the 
+** most recent successful [INSERT] into a rowid table or [virtual table]
+** on database connection D.
+** ^Inserts into [WITHOUT ROWID] tables are not recorded.
+** ^If no successful [INSERT]s into rowid tables
+** have ever occurred on the database connection D, 
+** then sqlite3_last_insert_rowid(D) returns zero.
 **
 ** ^(If an [INSERT] occurs within a trigger or within a [virtual table]
 ** method, then this routine will return the [rowid] of the inserted
@@ -4816,12 +4818,13 @@ SQLITE_API void *sqlite3_rollback_hook(sqlite3*, void(*)(void *), void*);
 **
 ** ^The sqlite3_update_hook() interface registers a callback function
 ** with the [database connection] identified by the first argument
-** to be invoked whenever a row is updated, inserted or deleted.
+** to be invoked whenever a row is updated, inserted or deleted in
+** a rowid table.
 ** ^Any callback set by a previous call to this function
 ** for the same database connection is overridden.
 **
 ** ^The second argument is a pointer to the function to invoke when a
-** row is updated, inserted or deleted.
+** row is updated, inserted or deleted in a rowid table.
 ** ^The first argument to the callback is a copy of the third argument
 ** to sqlite3_update_hook().
 ** ^The second callback argument is one of [SQLITE_INSERT], [SQLITE_DELETE],
@@ -4834,6 +4837,7 @@ SQLITE_API void *sqlite3_rollback_hook(sqlite3*, void(*)(void *), void*);
 **
 ** ^(The update hook is not invoked when internal system tables are
 ** modified (i.e. sqlite_master and sqlite_sequence).)^
+** ^The update hook is not invoked when [WITHOUT ROWID] tables are modified.
 **
 ** ^In the current implementation, the update hook
 ** is not invoked when duplication rows are deleted because of an
@@ -5522,6 +5526,9 @@ typedef struct sqlite3_blob sqlite3_blob;
 ** the opened blob.  ^The size of a blob may not be changed by this
 ** interface.  Use the [UPDATE] SQL command to change the size of a
 ** blob.
+**
+** ^The [sqlite3_blob_open()] interface will fail for a [WITHOUT ROWID]
+** table.  Incremental BLOB I/O is not possible on [WITHOUT ROWID] tables.
 **
 ** ^The [sqlite3_bind_zeroblob()] and [sqlite3_result_zeroblob()] interfaces
 ** and the built-in [zeroblob] SQL function can be used, if desired,

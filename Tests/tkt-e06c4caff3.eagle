@@ -35,7 +35,7 @@ runTest {test tkt-e06c4caff3-1.1 {NaN to NULL constraint failure} -setup {
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} \
 -returnCodes 1 -match regexp -result [string map [list \n \r\n] \
 {^System\.Data\.SQLite\.SQLiteException \(0x80004005\): constraint failed
-t1\.x may not be NULL
+NOT NULL constraint failed: t1\.x
 .*$}]}
 
 ###############################################################################
