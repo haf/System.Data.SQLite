@@ -965,6 +965,24 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Determines if the native estimatedRows field can be used, based on
+        /// the available version of the SQLite core library.
+        /// </summary>
+        /// <returns>
+        /// Non-zero if the <see cref="EstimatedRows" /> property is supported
+        /// by the SQLite core library.
+        /// </returns>
+        public bool CanUseEstimatedRows()
+        {
+            if (UnsafeNativeMethods.sqlite3_libversion_number() >= 3008002)
+                return true;
+
+            return false;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Public Properties
         private SQLiteIndexConstraintUsage[] constraintUsages;
         /// <summary>
@@ -1042,6 +1060,19 @@ namespace System.Data.SQLite
             get { return estimatedCost; }
             set { estimatedCost = value; }
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private long? estimatedRows;
+        /// <summary>
+        /// Estimated number of rows returned.  Using a null value here
+        /// indicates that a default estimated rows value should be used.
+        /// </summary>
+        public long? EstimatedRows
+        {
+            get { return estimatedRows; }
+            set { estimatedRows = value; }
+        }
         #endregion
     }
     #endregion
@@ -1055,16 +1086,6 @@ namespace System.Data.SQLite
     /// </summary>
     public sealed class SQLiteIndex
     {
-        #region Private Constants
-        /// <summary>
-        /// The default estimated cost for use with the
-        /// <see cref="ISQLiteManagedModule.BestIndex" /> method.
-        /// </summary>
-        internal static readonly double DefaultEstimatedCost = double.MaxValue;
-        #endregion
-
-        ///////////////////////////////////////////////////////////////////////
-
         #region Internal Constructors
         /// <summary>
         /// Constructs an instance of this class.
@@ -1269,8 +1290,18 @@ namespace System.Data.SQLite
             offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
                 sizeof(double));
 
-            SQLiteMarshal.WriteDouble(pIndex, offset,
-                index.Outputs.EstimatedCost.GetValueOrDefault());
+            if (index.Outputs.EstimatedCost.HasValue)
+            {
+                SQLiteMarshal.WriteDouble(pIndex, offset,
+                    index.Outputs.EstimatedCost.GetValueOrDefault());
+            }
+
+            if (index.Outputs.CanUseEstimatedRows() &&
+                index.Outputs.EstimatedRows.HasValue)
+            {
+                SQLiteMarshal.WriteInt64(pIndex, offset,
+                    index.Outputs.EstimatedRows.GetValueOrDefault());
+            }
         }
         #endregion
 
@@ -4416,6 +4447,36 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// Writes an <see cref="Int64" /> value to the specified memory
+        /// location.
+        /// </summary>
+        /// <param name="pointer">
+        /// The <see cref="IntPtr" /> object instance representing the base
+        /// memory location.
+        /// </param>
+        /// <param name="offset">
+        /// The integer offset from the base memory location where the
+        /// <see cref="Int64" /> value to be written is located.
+        /// </param>
+        /// <param name="value">
+        /// The <see cref="Int64" /> value to write.
+        /// </param>
+        public static void WriteInt64(
+            IntPtr pointer,
+            int offset,
+            long value
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            Marshal.WriteInt64(pointer, offset, value);
+#else
+            Marshal.WriteInt64(IntPtrForOffset(pointer, offset), value);
+#endif
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
         /// Writes a <see cref="Double" /> value to the specified memory
         /// location.
         /// </summary>
@@ -6841,14 +6902,15 @@ namespace System.Data.SQLite
         /// The <see cref="SQLiteIndex" /> object instance to modify.
         /// </param>
         /// <param name="estimatedCost">
-        /// The estimated cost value to use.
+        /// The estimated cost value to use.  Using a null value means that the
+        /// default value provided by the SQLite core library should be used.
         /// </param>
         /// <returns>
         /// Non-zero upon success.
         /// </returns>
         protected virtual bool SetEstimatedCost(
             SQLiteIndex index,
-            double estimatedCost
+            double? estimatedCost
             )
         {
             if ((index == null) || (index.Outputs == null))
@@ -6874,7 +6936,54 @@ namespace System.Data.SQLite
             SQLiteIndex index
             )
         {
-            return SetEstimatedCost(index, SQLiteIndex.DefaultEstimatedCost);
+            return SetEstimatedCost(index, null);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Modifies the specified <see cref="SQLiteIndex" /> object instance
+        /// to contain the specified estimated rows.
+        /// </summary>
+        /// <param name="index">
+        /// The <see cref="SQLiteIndex" /> object instance to modify.
+        /// </param>
+        /// <param name="estimatedRows">
+        /// The estimated rows value to use.  Using a null value means that the
+        /// default value provided by the SQLite core library should be used.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        protected virtual bool SetEstimatedRows(
+            SQLiteIndex index,
+            long? estimatedRows
+            )
+        {
+            if ((index == null) || (index.Outputs == null))
+                return false;
+
+            index.Outputs.EstimatedRows = estimatedRows;
+            return true;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Modifies the specified <see cref="SQLiteIndex" /> object instance
+        /// to contain the default estimated rows.
+        /// </summary>
+        /// <param name="index">
+        /// The <see cref="SQLiteIndex" /> object instance to modify.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success.
+        /// </returns>
+        protected virtual bool SetEstimatedRows(
+            SQLiteIndex index
+            )
+        {
+            return SetEstimatedRows(index, null);
         }
         #endregion
         #endregion
