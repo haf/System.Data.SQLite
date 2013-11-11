@@ -1055,7 +1055,41 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL, CharSet = CharSet.Unicode)]
 #endif
+    //
+    // NOTE: The "sqlite3_win32_set_directory" SQLite core library function is
+    //       only supported on Windows.
+    //
     internal static extern SQLiteErrorCode sqlite3_win32_set_directory(uint type, string value);
+
+#if !DEBUG // NOTE: Should be "WIN32HEAP && !MEMDEBUG"
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    //
+    // NOTE: The "sqlite3_win32_reset_heap" SQLite core library function is
+    //       only supported on Windows when the Win32 native allocator is in
+    //       use (i.e. by default, in "Release" builds of System.Data.SQLite
+    //       only).  By default, in "Debug" builds of System.Data.SQLite, the
+    //       MEMDEBUG allocator is used.
+    //
+    internal static extern SQLiteErrorCode sqlite3_win32_reset_heap();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    //
+    // NOTE: The "sqlite3_win32_compact_heap" SQLite core library function is
+    //       only supported on Windows when the Win32 native allocator is in
+    //       use (i.e. by default, in "Release" builds of System.Data.SQLite
+    //       only).  By default, in "Debug" builds of System.Data.SQLite, the
+    //       MEMDEBUG allocator is used.
+    //
+    internal static extern SQLiteErrorCode sqlite3_win32_compact_heap(ref uint largest);
+#endif
 #endif
 
 #if !PLATFORM_COMPACTFRAMEWORK

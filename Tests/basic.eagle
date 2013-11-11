@@ -2618,6 +2618,61 @@ runTest {test data-1.53 {regexp extension} -setup {
 
 ###############################################################################
 
+reportSQLiteResources $test_channel
+
+###############################################################################
+
+runTest {test data-1.54 {SQLiteConnection.ReleaseMemory method} -setup {
+  setupDb [set fileName data-1.54.db]
+} -body {
+  set result [list]
+
+  set nFree 0; set resetOk false; set nLargest 0
+  set code [object invoke \
+      System.Data.SQLite.SQLiteConnection ReleaseMemory \
+      -1 true true nFree resetOk nLargest]
+
+  lappend result [list $code $nFree $resetOk $nLargest]
+
+  sql execute $db "CREATE TABLE t1(x);"
+  sql execute $db "INSERT INTO t1 (x) VALUES(RANDOMBLOB(1048576));"
+
+  set nFree 0; set resetOk false; set nLargest 0
+  set code [object invoke \
+      System.Data.SQLite.SQLiteConnection ReleaseMemory \
+      -1 true true nFree resetOk nLargest]
+
+  tputs $test_channel [appendArgs \
+      "---- memory released by SQLite... " $nFree " bytes\n"]
+
+  lappend result [list $code $nFree $resetOk $nLargest]
+
+  cleanupDb $fileName
+  checkForSQLiteDirectories $test_channel true
+
+  set nFree 0; set resetOk false; set nLargest 0
+  set code [object invoke \
+      System.Data.SQLite.SQLiteConnection ReleaseMemory \
+      -1 true true nFree resetOk nLargest]
+
+  tputs $test_channel [appendArgs \
+      "---- largest free SQLite heap block... " $nLargest " bytes\n"]
+
+  lappend result [list $code $nFree $resetOk $nLargest]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain nLargest resetOk nFree code result db fileName
+} -constraints {eagle monoBug28 configuration.Release command.sql compile.DATA\
+SQLite System.Data.SQLite} -match regexp -result {^\{Busy 0 False 0\} \{Busy\
+\d+ False 0\} \{Ok 0 True \d+\}$}}
+
+###############################################################################
+
+reportSQLiteResources $test_channel
+
+###############################################################################
+
 unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
     testExeFile testLinqExeFile northwindEfDbFile testLinqOutFile
 

@@ -516,17 +516,68 @@ namespace System.Data.SQLite
     /// allocations held by the database library. Memory used to cache database pages
     /// to improve performance is an example of non-essential memory.  This is a no-op
     /// returning zero if the SQLite core library was not compiled with the compile-time
-    /// option SQLITE_ENABLE_MEMORY_MANAGEMENT.
+    /// option SQLITE_ENABLE_MEMORY_MANAGEMENT.  Optionally, attempts to reset and/or
+    /// compact the Win32 native heap, if applicable.
     /// </summary>
     /// <param name="nBytes">
     /// The requested number of bytes to free.
     /// </param>
-    /// <returns>
+    /// <param name="reset">
+    /// Non-zero to attempt a heap reset.
+    /// </param>
+    /// <param name="compact">
+    /// Non-zero to attempt heap compaction.
+    /// </param>
+    /// <param name="nFree">
     /// The number of bytes actually freed.  This value may be zero.
+    /// </param>
+    /// <param name="resetOk">
+    /// This value will be non-zero if the heap reset was successful.
+    /// </param>
+    /// <param name="nLargest">
+    /// The size of the largest committed free block in the heap, in bytes.
+    /// This value will be zero unless heap compaction is enabled.
+    /// </param>
+    /// <returns>
+    /// A standard SQLite return code (i.e. zero for success and non-zero
+    /// for failure).
     /// </returns>
-    internal static int StaticReleaseMemory(int nBytes)
+    internal static SQLiteErrorCode StaticReleaseMemory(
+        int nBytes,
+        bool reset,
+        bool compact,
+        ref int nFree,
+        ref bool resetOk,
+        ref uint nLargest
+        )
     {
-        return UnsafeNativeMethods.sqlite3_release_memory(nBytes);
+        SQLiteErrorCode rc = SQLiteErrorCode.Ok;
+
+        int nFreeLocal = UnsafeNativeMethods.sqlite3_release_memory(nBytes);
+        uint nLargestLocal = 0;
+        bool resetOkLocal = false;
+
+#if !DEBUG && WINDOWS // NOTE: Should be "WIN32HEAP && !MEMDEBUG && WINDOWS"
+        if ((rc == SQLiteErrorCode.Ok) && reset)
+        {
+            rc = UnsafeNativeMethods.sqlite3_win32_reset_heap();
+
+            if (rc == SQLiteErrorCode.Ok)
+                resetOkLocal = true;
+        }
+
+        if ((rc == SQLiteErrorCode.Ok) && compact)
+            rc = UnsafeNativeMethods.sqlite3_win32_compact_heap(ref nLargestLocal);
+#else
+        if (reset || compact)
+            rc = SQLiteErrorCode.NotFound;
+#endif
+
+        nFree = nFreeLocal;
+        nLargest = nLargestLocal;
+        resetOk = resetOkLocal;
+
+        return rc;
     }
 
     /// <summary>
@@ -566,7 +617,7 @@ namespace System.Data.SQLite
 #else
 #if !NET_COMPACT_20 && TRACE_CONNECTION
             Trace.WriteLine(
-                "Shutdown: Cannot reset directories on this operating system.");
+                "Shutdown: Cannot reset directories on this platform.");
 #endif
 #endif
         }
