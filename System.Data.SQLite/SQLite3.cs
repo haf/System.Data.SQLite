@@ -557,7 +557,7 @@ namespace System.Data.SQLite
         uint nLargestLocal = 0;
         bool resetOkLocal = false;
 
-#if WINDOWS
+#if !DEBUG && WINDOWS // NOTE: Should be "WIN32HEAP && !MEMDEBUG && WINDOWS"
         if ((rc == SQLiteErrorCode.Ok) && reset)
         {
             rc = UnsafeNativeMethods.sqlite3_win32_reset_heap();
@@ -617,7 +617,7 @@ namespace System.Data.SQLite
 #else
 #if !NET_COMPACT_20 && TRACE_CONNECTION
             Trace.WriteLine(
-                "Shutdown: Cannot reset directories on this operating system.");
+                "Shutdown: Cannot reset directories on this platform.");
 #endif
 #endif
         }
