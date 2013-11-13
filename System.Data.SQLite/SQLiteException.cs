@@ -328,6 +328,10 @@ namespace System.Data.SQLite
     /// <summary>
     /// sqlite3_step() has finished executing
     /// </summary>
-    Done /* 101 */
+    Done, /* 101 */
+    /// <summary>
+    /// Used to mask off extended result codes
+    /// </summary>
+    NonExtendedMask = 0xFF
   }
 }

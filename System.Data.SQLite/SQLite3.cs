@@ -2168,6 +2168,12 @@ namespace System.Data.SQLite
     /// Add a log message via the SQLite sqlite3_log interface.
     internal override void LogMessage(SQLiteErrorCode iErrCode, string zMessage)
     {
+      StaticLogMessage(iErrCode, zMessage);
+    }
+
+    /// Add a log message via the SQLite sqlite3_log interface.
+    internal static void StaticLogMessage(SQLiteErrorCode iErrCode, string zMessage)
+    {
       UnsafeNativeMethods.sqlite3_log(iErrCode, ToUTF8(zMessage));
     }
 

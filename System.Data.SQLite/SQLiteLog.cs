@@ -520,16 +520,36 @@ namespace System.Data.SQLite
             }
 
             object errorCode = e.ErrorCode;
-            bool success = false;
+            string type = "error";
 
-            if (errorCode is SQLiteErrorCode)
-                success = ((SQLiteErrorCode)errorCode == SQLiteErrorCode.Ok);
-            else if (errorCode is int)
-                success = ((int)errorCode == 0);
+            if ((errorCode is SQLiteErrorCode) || (errorCode is int))
+            {
+                SQLiteErrorCode rc = (SQLiteErrorCode)(int)errorCode;
+
+                rc &= SQLiteErrorCode.NonExtendedMask;
+
+                if (rc == SQLiteErrorCode.Ok)
+                {
+                    type = "message";
+                }
+                else if (rc == SQLiteErrorCode.Notice)
+                {
+                    type = "notice";
+                }
+                else if (rc == SQLiteErrorCode.Warning)
+                {
+                    type = "warning";
+                }
+                else if ((rc == SQLiteErrorCode.Row) ||
+                    (rc == SQLiteErrorCode.Done))
+                {
+                    type = "data";
+                }
+            }
 
             Trace.WriteLine(String.Format(
                 CultureInfo.CurrentCulture, "SQLite {0} ({1}): {2}",
-                success ? "message" : "error", errorCode, message));
+                type, errorCode, message));
 #endif
         }
     }

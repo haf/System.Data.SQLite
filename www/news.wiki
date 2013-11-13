@@ -3,7 +3,7 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.90.0 - December XX, 2013 <font color="red">(release scheduled)</font></b>
+    <b>1.0.90.0 - January XX, 2014 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.8.2].</li>
@@ -12,6 +12,7 @@
     <li>Add experimental GetMemoryStatistics, ReleaseMemory, and Shutdown methods to the SQLiteConnection class.</li>
     <li>Add memory leak detection to the test project for the .NET Compact Framework.</li>
     <li>Add SQLITE_ENABLE_MEMORY_MANAGEMENT compile-time option to the interop assembly.</li>
+    <li>Better handling of non-error log messages from the SQLite core library. Pursuant to [44df10ea90].</li>
 </ul>
 <p>
     <b>1.0.89.0 - October 28, 2013</b>
