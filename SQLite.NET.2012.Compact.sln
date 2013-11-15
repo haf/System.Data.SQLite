@@ -1,0 +1,72 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SQLite.Compact.2012", "System.Data.SQLite\System.Data.SQLite.Compact.2012.csproj", "{AC139951-261A-4463-B6FA-AEBC25283A66}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6} = {9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testce.2012", "testce\testce.2012.csproj", "{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite.Interop.CE.2012", "SQLite.Interop\SQLite.Interop.CE.2012.vcxproj", "{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|CEPC DevPlatform = Debug|CEPC DevPlatform
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|WCE80_ARMV7TIEVM3730 = Debug|WCE80_ARMV7TIEVM3730
+		Release|Any CPU = Release|Any CPU
+		Release|CEPC DevPlatform = Release|CEPC DevPlatform
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|WCE80_ARMV7TIEVM3730 = Release|WCE80_ARMV7TIEVM3730
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|CEPC DevPlatform.ActiveCfg = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Debug|WCE80_ARMV7TIEVM3730.ActiveCfg = Debug|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|CEPC DevPlatform.ActiveCfg = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AC139951-261A-4463-B6FA-AEBC25283A66}.Release|WCE80_ARMV7TIEVM3730.ActiveCfg = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|CEPC DevPlatform.ActiveCfg = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Debug|WCE80_ARMV7TIEVM3730.ActiveCfg = Debug|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|CEPC DevPlatform.ActiveCfg = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
+		{B86CE504-C4E4-496F-A0F0-E613BCFD3DF7}.Release|WCE80_ARMV7TIEVM3730.ActiveCfg = Release|Any CPU
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Debug|Any CPU.ActiveCfg = Debug|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Debug|Any CPU.Build.0 = Debug|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Debug|CEPC DevPlatform.ActiveCfg = Debug|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Debug|CEPC DevPlatform.Build.0 = Debug|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Debug|Mixed Platforms.ActiveCfg = Debug|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Debug|Mixed Platforms.Build.0 = Debug|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Debug|WCE80_ARMV7TIEVM3730.ActiveCfg = Debug|WCE80_ARMV7TIEVM3730
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Debug|WCE80_ARMV7TIEVM3730.Build.0 = Debug|WCE80_ARMV7TIEVM3730
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Release|Any CPU.ActiveCfg = Release|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Release|Any CPU.Build.0 = Release|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Release|CEPC DevPlatform.ActiveCfg = Release|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Release|CEPC DevPlatform.Build.0 = Release|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Release|Mixed Platforms.ActiveCfg = Release|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Release|Mixed Platforms.Build.0 = Release|CEPC DevPlatform
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Release|WCE80_ARMV7TIEVM3730.ActiveCfg = Release|WCE80_ARMV7TIEVM3730
+		{9E5A8F20-5F04-4629-B2E1-27B5E30F2AF6}.Release|WCE80_ARMV7TIEVM3730.Build.0 = Release|WCE80_ARMV7TIEVM3730
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
