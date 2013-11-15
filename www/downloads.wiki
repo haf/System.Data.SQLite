@@ -82,6 +82,32 @@
         is probably the best way to get an answer.
       </td>
     </tr>
+
+    <tr bgcolor="#fff1c8">
+      <td colspan="3" class="importantHeader">
+        <b>Windows Embedded Compact</b>
+      </td>
+    </tr>
+
+    <tr bgcolor="#fff1c8">
+      <td colspan="3" class="importantNotes">
+        Further information on integrating SQLite into Windows Embedded Compact
+        can be found at the following web site:
+      </td>
+    </tr>
+
+    <tr bgcolor="#fff1c8">
+      <td class="importantNotes">
+        &nbsp;
+      </td>
+      <td class="importantNotes" align="center">
+        <a href="https://cesqlite2013.codeplex.com/">SQLite for Windows
+        Embedded Compact 2013</a>
+      </td>
+      <td class="importantNotes">
+        &nbsp;
+      </td>
+    </tr>
   </table>
 
   <table width="100%" cellpadding="5">
