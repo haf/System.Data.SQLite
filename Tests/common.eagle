@@ -233,6 +233,165 @@ namespace eval ::Eagle {
       }
     }
 
+    proc isMixedModeAssembly { fileName {varName ""} } {
+      #
+      # NOTE: First, make sure the test suite infrastructure is allowed to
+      #       use the [exec] command.
+      #
+      if {![info exists ::no(exec)] && ![info exists ::no(corFlags)]} then {
+        #
+        # NOTE: If the location of CorFlags is present in the environment,
+        #       use it; otherwise assume it is in the PATH.
+        #
+        set corFlags [expr {
+          [info exists ::env(CorFlags)] ? $::env(CorFlags) : "CorFlags"
+        }]
+
+        #
+        # NOTE: Attempt to execute CorFlags on the specified file.
+        #
+        if {[catch {
+          exec -- $corFlags [file nativename $fileName]
+        } exec] == 0} then {
+          #
+          # NOTE: If requested by our caller, attempt to determine the
+          #       platform for the specified file as well.
+          #
+          if {[string length $varName] > 0} then {
+            #
+            # NOTE: Store the platform in the named variable in the
+            #       context of our caller.
+            #
+            upvar 1 $varName platform
+
+            #
+            # NOTE: Attempt to extract the PE line from the captured
+            #       output.  If this value is "PE32" or "PE32+", the
+            #       assembly file is 32-bit or 64-bit, respectively;
+            #       otherwise, its type is unknown.
+            #
+            set pattern {^PE        : (PE32|PE32\+)\s+$}
+
+            if {[regexp -line -- $pattern $exec dummy pe32]} then {
+              #
+              # HACK: This [switch] assumes that 32-bit executables are
+              #       always x86 and that 64-bit executables are always
+              #       x64.
+              #
+              switch -exact -- $pe32 {
+                PE32 {
+                  set platform Win32
+                }
+                PE32+ {
+                  set platform x64
+                }
+                default {
+                  set platform ""
+                }
+              }
+            } else {
+              set platform ""
+            }
+          }
+
+          #
+          # NOTE: Attempt to extract the ILONLY line from the captured
+          #       output.  If this value is zero, the specified file must
+          #       be a mixed-mode assembly; otherwise, it contains only
+          #       managed components.
+          #
+          set pattern {^ILONLY    : (0|1)\s+$}
+
+          if {![regexp -line -- $pattern $exec dummy ilOnly]} then {
+            return false
+          }
+
+          if {!$ilOnly} then {
+            return true
+          }
+        }
+      }
+
+      #
+      # NOTE: If the test suite cannot use [exec] or execution of CorFlags
+      #       failed, return false.
+      #
+      return false
+    }
+
+    proc isBuildAvailable { native directory {varName ""} } {
+      #
+      # NOTE: Build the fully qualified file name for the primary assembly
+      #       containing the System.Data.SQLite managed components.  It
+      #       should be noted that this assembly file may also contain the
+      #       native components, if a native build is in use.
+      #
+      set fileName [file nativename [file join $directory \
+          System.Data.SQLite.dll]]
+
+      if {![file exists $fileName]} then {
+        return false
+      }
+
+      #
+      # NOTE: Attempt to automatically detect if the primary assembly
+      #       contains any native components, if necessary.
+      #
+      if {[string length $native] == 0} then {
+        if {[string length $varName] > 0} then {
+          upvar 1 $varName $varName
+        }
+
+        set native [isMixedModeAssembly $fileName $varName]
+      }
+
+      #
+      # NOTE: If the primary assembly also contains the native components,
+      #       we have everything we need.
+      #
+      if {$native} then {
+        return true
+      }
+
+      #
+      # NOTE: Build the fully qualified file name for the interop assembly
+      #       containing the System.Data.SQLite native components.  If this
+      #       file exists, we should have everything we need.
+      #
+      set fileName [file nativename [file join $directory \
+          SQLite.Interop.dll]]
+
+      if {[file exists $fileName]} then {
+        return true
+      }
+
+      #
+      # NOTE: Build the fully qualified file name for the SQLite core
+      #       library.  If this file exists, we should have everything we
+      #       need.
+      #
+      set fileName [file nativename [file join $directory \
+          sqlite3.dll]]
+
+      if {[file exists $fileName]} then {
+        return true
+      }
+
+      #
+      # NOTE: One or more native components needed by System.Data.SQLite
+      #       are missing.
+      #
+      return false
+    }
+
+    proc isReleaseAvailable { directory {varName ""} } {
+      if {[string length $varName] > 0} then {
+        upvar 1 $varName $varName
+      }
+
+      return [isBuildAvailable "" $directory $varName]
+    }
+
     proc joinBuildDirectory { native path year platform configuration } {
       #
       # NOTE: Figure out and then return the fully qualified path to the build
@@ -782,21 +941,17 @@ namespace eval ::Eagle {
                 / $configuration "\"... "]
 
             #
-            # NOTE: Build the fully qualified file name for the primary
-            #       assembly containing the System.Data.SQLite managed
-            #       components.  It should be noted that this assembly
-            #       file may also contain the native components, if a
-            #       native build is in use.
+            # NOTE: Build the fully qualified directory where the necessary
+            #       components for System.Data.SQLite should be found.
             #
-            set fileName [file nativename [file join \
-                [joinBuildDirectory $native [getBuildBaseDirectory] $year \
-                $platform $configuration] System.Data.SQLite.dll]]
+            set directory [joinBuildDirectory $native \
+                [getBuildBaseDirectory] $year $platform $configuration]
 
             #
-            # NOTE: Does the file exist?  Currently, no other steps are
-            #       taken to verify this build is actually viable.
+            # NOTE: Do the necessary files exist?  Currently, no other steps
+            #       are taken to verify this build is actually viable.
             #
-            if {[file exists $fileName]} then {
+            if {[isBuildAvailable $native $directory]} then {
               #
               # NOTE: When in "select" mode, automatically select the first
               #       available build of System.Data.SQLite and then return
@@ -842,47 +997,53 @@ namespace eval ::Eagle {
       #
       if {[info exists ::env(System.Data.SQLite)] && \
           [string length $::env(System.Data.SQLite)] > 0} then {
+        #
+        # NOTE: Build the fully qualified directory where the necessary
+        #       components for System.Data.SQLite should be found.
+        #
         set directory [file nativename [file join \
             $::env(System.Data.SQLite) [getReleaseVersion]]]
 
-        set fileName [file nativename [file join $directory \
-            System.Data.SQLite.dll]]
-
         tputs $channel [appendArgs \
             "---- checking for System.Data.SQLite release \"" \
-            $fileName "\"... "]
+            $directory "\"... "]
 
-        if {[file exists $fileName]} then {
-          if {$select} then {
+        if {[isReleaseAvailable $directory platform]} then {
+          if {[string length $platform] == 0} then {
+            set platform unknown
+          }
+
+          if {$select && [matchMachine $platform]} then {
             set ::build_directory $directory
 
-            tputs $channel [appendArgs "yes (" $directory ")\n"]
+            tputs $channel [appendArgs "yes, selected (" $platform ")\n"]
 
             return true
           } else {
-            tputs $channel yes\n
+            tputs $channel [appendArgs "yes (" $platform ")\n"]
           }
         } else {
           tputs $channel no\n
 
           foreach path [lsort -decreasing [file list $directory *]] {
             if {[file exists $path] && [file isdirectory $path]} then {
-              set fileName [file nativename [file join $path \
-                  System.Data.SQLite.dll]]
-
               tputs $channel [appendArgs \
                   "---- checking for System.Data.SQLite release \"" \
-                  $fileName "\"... "]
+                  $path "\"... "]
 
-              if {[file exists $fileName]} then {
-                if {$select} then {
+              if {[isReleaseAvailable $path platform]} then {
+                if {[string length $platform] == 0} then {
+                  set platform unknown
+                }
+
+                if {$select && [matchMachine $platform]} then {
                   set ::build_directory $path
 
-                  tputs $channel [appendArgs "yes, selected (" $path ")\n"]
+                  tputs $channel [appendArgs "yes, selected (" $platform ")\n"]
 
                   return true
                 } else {
-                  tputs $channel yes\n
+                  tputs $channel [appendArgs "yes (" $platform ")\n"]
                 }
               } else {
                 tputs $channel no\n
