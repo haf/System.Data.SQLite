@@ -7,6 +7,7 @@
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.8.2].</li>
+    <li>Add support for Windows Embedded Compact 2013.</li>
     <li>Add experimental support for the native regexp extension.</li>
     <li>Never create a new connection wrapper in the SQLiteConnection.Shutdown method.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Add experimental GetMemoryStatistics, ReleaseMemory, and Shutdown methods to the SQLiteConnection class.</li>

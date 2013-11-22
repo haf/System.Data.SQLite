@@ -64,7 +64,17 @@
 
   <li>
     Enter the following command to build all the binaries available for Windows
-    CE:&nbsp;<b>build_ce.bat</b><br />
+    CE:&nbsp;<b>build_ce_200x.bat</b><br /><i>This assumes that Visual Studio
+    2005 and/or Visual Studio 2008, &quot;<b>Professional</b>&quot; edition or
+    &quot;better&quot; and the bundled Pocket PC 2003 SDK are installed.</i>
+  </li>
+
+  <li>
+    Enter the following command to build all the binaries available for Windows
+    Embedded Compact 2013:&nbsp;<b>build_ce_2013.bat</b><br /><i>This assumes
+    that Visual Studio 2012, &quot;<b>Professional</b>&quot; edition or
+    &quot;better&quot; and the Windows Embedded Compact 2013 Toolkit are
+    installed.</i>
   </li>
 </ol>
 
@@ -84,7 +94,7 @@
 
   <li>
     Enter the following command to test all the binaries available for Windows
-    CE:&nbsp;<b>test_ce.bat</b><br />
+    CE:&nbsp;<b>test_ce_200x.bat</b><br />
   </li>
 </ol>
 
@@ -232,7 +242,12 @@
 
   <li>
     Enter the following command to build all the binary release packages for
-    Windows CE:&nbsp;<b>release_ce.bat</b><br />
+    Windows CE:&nbsp;<b>release_ce_200x.bat</b><br />
+  </li>
+
+  <li>
+    Enter the following command to build all the binary release packages for
+    Windows Embedded Compact 2013:&nbsp;<b>release_ce_2013.bat</b><br />
   </li>
 </ol>
 

@@ -22,13 +22,13 @@
       <Configuration>Release</Configuration>
       <Platform>CEPC DevPlatform</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|WCE80_ARMV7TIEVM3730">
+    <ProjectConfiguration Include="Debug|ARMV7">
       <Configuration>Debug</Configuration>
-      <Platform>WCE80_ARMV7TIEVM3730</Platform>
+      <Platform>ARMV7</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|WCE80_ARMV7TIEVM3730">
+    <ProjectConfiguration Include="Release|ARMV7">
       <Configuration>Release</Configuration>
-      <Platform>WCE80_ARMV7TIEVM3730</Platform>
+      <Platform>ARMV7</Platform>
     </ProjectConfiguration>
   </ItemGroup>
 
@@ -64,14 +64,14 @@
     <PlatformToolset>CE800</PlatformToolset>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|WCE80_ARMV7TIEVM3730'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARMV7'" Label="Configuration">
     <TargetName>SQLite.Interop.$(INTEROP_BUILD_NUMBER)</TargetName>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>CE800</PlatformToolset>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|WCE80_ARMV7TIEVM3730'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARMV7'" Label="Configuration">
     <TargetName>SQLite.Interop.$(INTEROP_BUILD_NUMBER)</TargetName>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -130,7 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
 
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|WCE80_ARMV7TIEVM3730'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARMV7'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>Disabled</Optimization>
@@ -150,7 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
 
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|WCE80_ARMV7TIEVM3730'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARMV7'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>

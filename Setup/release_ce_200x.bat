@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: release_ce.bat --
+:: release_ce_200x.bat --
 ::
 :: WinCE Binary Release Tool
 ::
@@ -33,9 +33,9 @@ SET TOOLS=%TOOLS:~0,-1%
 SET RELEASE_CONFIGURATIONS=Release
 SET BASE_CONFIGURATIONSUFFIX=Compact
 SET PLATFORMS="Pocket PC 2003 (ARMV4)"
-SET PROCESSORS=arm
 SET YEARS=2008
-SET BASE_PLATFORM=PocketPC-ARM
+SET BASE_PLATFORM=PocketPC
+SET EXTRA_PLATFORM_Pocket_PC_2003_ARMV4=ARM
 SET TYPE=binary
 
 CALL :fn_ResetErrorLevel
@@ -43,7 +43,7 @@ CALL :fn_ResetErrorLevel
 %__ECHO3% CALL "%TOOLS%\release_all.bat"
 
 IF ERRORLEVEL 1 (
-  ECHO Failed to build PocketPC release files.
+  ECHO Failed to build WinCE release files.
   GOTO errors
 )
 

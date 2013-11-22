@@ -1382,7 +1382,7 @@
 
     <tr>
       <td colspan="4">
-        <b>Precompiled Binaries for Windows CE (.NET Compact Framework 3.5)</b>
+        <b>Precompiled Binaries for Windows CE (.NET Compact Framework)</b>
       </td>
     </tr>
 
@@ -1396,10 +1396,46 @@
       <td width="5"></td>
       <td valign="top">
         This binary package contains all the binaries for the PocketPC version
-        of the System.Data.SQLite 1.0.89.0 (3.8.1) package.  The .NET Compact
-        Framework 3.5 is required.
+        of the System.Data.SQLite 1.0.89.0 (3.8.1) package.  The included native
+        binaries should work on all supported ARM versions of Windows CE prior
+        to Windows Embedded Compact 2013.  The .NET Compact Framework 3.5 is
+        required.
         <br />
         (sha1: bb812fa516ff21f41b9104e6f85f5e2ae6e619de)
+      </td>
+    </tr>
+
+    <tr>
+      <td width="10">&nbsp;</td>
+      <td width="30%" valign="top" align="right">
+        <a href="/downloads/1.0.89.0/sqlite-netFx39-binary-WinCE-ARM-2012-1.0.89.0.zip">sqlite-netFx39-binary-WinCE-ARM-2012-1.0.89.0.zip</a>
+        <br />
+        (1.11 MiB)
+      </td>
+      <td width="5"></td>
+      <td valign="top">
+        This binary package contains all the binaries for the Windows Embedded
+        Compact 2013 (ARM) version of the System.Data.SQLite 1.0.89.0 (3.8.1)
+        package.  The .NET Compact Framework 3.9 is required.
+        <br />
+        (sha1: 0b74d8ae4d93d7cf3c0e326543e717763bc76e48)
+      </td>
+    </tr>
+
+    <tr>
+      <td width="10">&nbsp;</td>
+      <td width="30%" valign="top" align="right">
+        <a href="/downloads/1.0.89.0/sqlite-netFx39-binary-WinCE-x86-2012-1.0.89.0.zip">sqlite-netFx39-binary-WinCE-x86-2012-1.0.89.0.zip</a>
+        <br />
+        (1.16 MiB)
+      </td>
+      <td width="5"></td>
+      <td valign="top">
+        This binary package contains all the binaries for the Windows Embedded
+        Compact 2013 (x86) version of the System.Data.SQLite 1.0.89.0 (3.8.1)
+        package.  The .NET Compact Framework 3.9 is required.
+        <br />
+        (sha1: 5b0aee9f8fc8b60ed031b2b5a42203871c3d213e)
       </td>
     </tr>
 
@@ -1558,7 +1594,7 @@
 
   <p>
     The <b>platform</b> in templates (5), (6), (7), and (8) will be one of
-    Win32, x64, PocketPC, PocketPC-ARM, PocketPC-x86.
+    Win32, x64, PocketPC, PocketPC-ARM, PocketPC-x86, WinCE-ARM, WinCE-x86.
   </p>
 
   <p>

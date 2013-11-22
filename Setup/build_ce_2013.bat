@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: build_ce.bat --
+:: build_ce_2013.bat --
 ::
 :: WinCE Wrapper Tool for MSBuild
 ::
@@ -32,17 +32,16 @@ SET TOOLS=%TOOLS:~0,-1%
 
 SET BUILD_CONFIGURATIONS=Debug Release
 SET BASE_CONFIGURATIONSUFFIX=Compact
-SET PLATFORMS="Pocket PC 2003 (ARMV4)"
-SET PROCESSORS=arm
-SET YEARS=2005 2008
-SET BASE_PLATFORM=PocketPC-ARM
+SET PLATFORMS="CEPC DevPlatform" ARMV7
+SET YEARS=2012
+SET SOLUTION=%TOOLS%\..\SQLite.NET.2012.Compact.sln
 
 CALL :fn_ResetErrorLevel
 
 %__ECHO3% CALL "%TOOLS%\build_all.bat"
 
 IF ERRORLEVEL 1 (
-  ECHO Failed to build PocketPC binaries.
+  ECHO Failed to build WinCE binaries.
   GOTO errors
 )
 

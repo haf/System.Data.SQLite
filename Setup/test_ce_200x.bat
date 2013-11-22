@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: test_ce.bat --
+:: test_ce_200x.bat --
 ::
 :: WinCE Testing Tool
 ::
