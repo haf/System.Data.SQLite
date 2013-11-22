@@ -1410,7 +1410,7 @@
       <td width="30%" valign="top" align="right">
         <a href="/downloads/1.0.89.0/sqlite-netFx39-binary-WinCE-ARM-2012-1.0.89.0.zip">sqlite-netFx39-binary-WinCE-ARM-2012-1.0.89.0.zip</a>
         <br />
-        (0.00 MiB)
+        (1.11 MiB)
       </td>
       <td width="5"></td>
       <td valign="top">
@@ -1418,7 +1418,7 @@
         Compact 2013 (ARM) version of the System.Data.SQLite 1.0.89.0 (3.8.1)
         package.  The .NET Compact Framework 3.9 is required.
         <br />
-        (sha1: 0000000000000000000000000000000000000000)
+        (sha1: 0b74d8ae4d93d7cf3c0e326543e717763bc76e48)
       </td>
     </tr>
 
@@ -1427,7 +1427,7 @@
       <td width="30%" valign="top" align="right">
         <a href="/downloads/1.0.89.0/sqlite-netFx39-binary-WinCE-x86-2012-1.0.89.0.zip">sqlite-netFx39-binary-WinCE-x86-2012-1.0.89.0.zip</a>
         <br />
-        (0.00 MiB)
+        (1.16 MiB)
       </td>
       <td width="5"></td>
       <td valign="top">
@@ -1435,7 +1435,7 @@
         Compact 2013 (x86) version of the System.Data.SQLite 1.0.89.0 (3.8.1)
         package.  The .NET Compact Framework 3.9 is required.
         <br />
-        (sha1: 0000000000000000000000000000000000000000)
+        (sha1: 5b0aee9f8fc8b60ed031b2b5a42203871c3d213e)
       </td>
     </tr>
 
