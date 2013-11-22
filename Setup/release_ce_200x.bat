@@ -34,7 +34,8 @@ SET RELEASE_CONFIGURATIONS=Release
 SET BASE_CONFIGURATIONSUFFIX=Compact
 SET PLATFORMS="Pocket PC 2003 (ARMV4)"
 SET YEARS=2008
-SET BASE_PLATFORM=PocketPC-ARM
+SET BASE_PLATFORM=PocketPC
+SET EXTRA_PLATFORM_Pocket_PC_2003_ARMV4=ARM
 SET TYPE=binary
 
 CALL :fn_ResetErrorLevel
@@ -42,7 +43,7 @@ CALL :fn_ResetErrorLevel
 %__ECHO3% CALL "%TOOLS%\release_all.bat"
 
 IF ERRORLEVEL 1 (
-  ECHO Failed to build PocketPC release files.
+  ECHO Failed to build WinCE release files.
   GOTO errors
 )
 

@@ -40,7 +40,7 @@ CALL :fn_ResetErrorLevel
 %__ECHO3% CALL "%TOOLS%\build_all.bat"
 
 IF ERRORLEVEL 1 (
-  ECHO Failed to build PocketPC binaries.
+  ECHO Failed to build WinCE binaries.
   GOTO errors
 )
 

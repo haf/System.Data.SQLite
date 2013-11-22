@@ -550,8 +550,8 @@ set sds_manifests(binaryInterop) {
 ###############################################################################
 #
 # NOTE: This is the list of interop and other files that should be present in
-#       the standard "PocketPC" binary archives (i.e. for the .NET Compact
-#       Framework).
+#       the standard "PocketPC" / "WinCE" binary archives (i.e. for the .NET
+#       Compact Framework).
 #
 set sds_manifests(binaryCompact) {
   [appendArgs SQLite.Interop. [format %03d $build] .dll]
@@ -867,7 +867,7 @@ set manifests(sqlite-netFx35-setup-bundle-x64-2008-.exe) [list sds \
     setupCore setupLinqCore setupBundle setupLinqBundle setupX64Vs2008]
 
 ###############################################################################
-################# Visual Studio 2008 / .NET Compact Framework #################
+############### Visual Studio 2008 / .NET Compact Framework 3.5 ###############
 ###############################################################################
 
 set manifests(sqlite-netFx35-binary-PocketPC-ARM-2008-.zip) [list sds \
@@ -998,6 +998,22 @@ set manifests(sqlite-netFx45-setup-bundle-x86-2012-.exe) [list sds \
 
 set manifests(sqlite-netFx45-setup-bundle-x64-2012-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupLinqBundle setupX64Vs2012]
+
+###############################################################################
+############### Visual Studio 2012 / .NET Compact Framework 3.9 ###############
+###############################################################################
+
+set manifests(sqlite-netFx39-binary-WinCE-ARM-2012-.zip) [list sds \
+    binaryCore binaryCompact]
+
+set manifests(sqlite-netFx39-binary-WinCE-ARM-2012-.zip,subst) ""; # dynamic
+
+###############################################################################
+
+set manifests(sqlite-netFx39-binary-WinCE-x86-2012-.zip) [list sds \
+    binaryCore binaryCompact]
+
+set manifests(sqlite-netFx39-binary-WinCE-x86-2012-.zip,subst) ""; # dynamic
 
 ###############################################################################
 # end of file
