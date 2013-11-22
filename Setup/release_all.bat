@@ -67,6 +67,8 @@ IF NOT DEFINED YEARS (
 FOR %%C IN (%RELEASE_CONFIGURATIONS%) DO (
   FOR %%P IN (%PLATFORMS%) DO (
     FOR %%Y IN (%YEARS%) DO (
+      CALL :fn_SetExtraPlatform "%%~P"
+
       %__ECHO3% CALL "%TOOLS%\release.bat" %%C %%P %%Y
 
       IF ERRORLEVEL 1 (
@@ -85,6 +87,38 @@ GOTO no_errors
 
 :fn_SetErrorLevel
   VERIFY MAYBE 2> NUL
+  GOTO :EOF
+
+:fn_CopyVariable
+  IF NOT DEFINED %1 GOTO :EOF
+  IF "%2" == "" GOTO :EOF
+  SETLOCAL
+  SET __ECHO_CMD=ECHO %%%1%%
+  FOR /F "delims=" %%V IN ('%__ECHO_CMD%') DO (
+    SET VALUE=%%V
+  )
+  ENDLOCAL && SET %2=%VALUE%
+  GOTO :EOF
+
+:fn_UnsetVariable
+  IF NOT "%1" == "" (
+    SET %1=
+    CALL :fn_ResetErrorLevel
+  )
+  GOTO :EOF
+
+:fn_SetExtraPlatform
+  IF "%~1" == "" GOTO :EOF
+  SETLOCAL
+  SET VALUE=%~1
+  SET VALUE=%VALUE: =_%
+  ECHO Value=%VALUE%
+  IF NOT DEFINED EXTRA_PLATFORM_%VALUE% (
+    ENDLOCAL && CALL :fn_UnsetVariable EXTRA_PLATFORM
+    GOTO :EOF
+  )
+  CALL :fn_CopyVariable EXTRA_PLATFORM_%VALUE% EXTRA_PLATFORM
+  ENDLOCAL && SET EXTRA_PLATFORM=-%EXTRA_PLATFORM%
   GOTO :EOF
 
 :usage

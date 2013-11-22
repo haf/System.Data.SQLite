@@ -78,6 +78,7 @@ IF NOT DEFINED BASE_PLATFORM (
 )
 
 %_VECHO% BasePlatform = '%BASE_PLATFORM%'
+%_VECHO% ExtraPlatform = '%EXTRA_PLATFORM%'
 
 IF NOT DEFINED TYPE (
   IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
@@ -169,21 +170,21 @@ IF DEFINED BASE_CONFIGURATIONSUFFIX (
   FOR /F "delims=" %%F IN ('DIR /B /S /AD "bin\%YEAR%\%BASE_CONFIGURATION%%BASE_CONFIGURATIONSUFFIX%\bin" 2^> NUL') DO (
     %__ECHO% RMDIR /S /Q "%%F"
   )
-  %__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%BASE_CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
+  %__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%%EXTRA_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%%BASE_CONFIGURATIONSUFFIX%\bin" -x @exclude_bin.txt
 ) ELSE (
   FOR /F "delims=" %%F IN ('DIR /B /S /AD "bin\%YEAR%\%BASE_CONFIGURATION%\bin" 2^> NUL') DO (
     %__ECHO% RMDIR /S /Q "%%F"
   )
-  %__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
+  %__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%%EXTRA_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%BASE_CONFIGURATION%\bin" -x @exclude_bin.txt
 )
 
 IF /I "%CONFIGURATION%" == "%BASE_CONFIGURATION%" (
   IF NOT DEFINED BASE_CONFIGURATIONSUFFIX (
-    %__ECHO% zip -v -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
+    %__ECHO% zip -v -d "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%%EXTRA_PLATFORM%-%YEAR%-%VERSION%.zip" SQLite.Interop.*
   )
 )
 
-%__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%%CONFIGURATIONSUFFIX%" -x @exclude_bin.txt
+%__ECHO% zip.exe -v -j -r "Setup\Output\sqlite-%FRAMEWORK%-%TYPE%-%BASE_PLATFORM%%EXTRA_PLATFORM%-%YEAR%-%VERSION%.zip" "bin\%YEAR%\%PLATFORM%\%CONFIGURATION%%CONFIGURATIONSUFFIX%" -x @exclude_bin.txt
 
 IF ERRORLEVEL 1 (
   ECHO Failed to archive binary files.

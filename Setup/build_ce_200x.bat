@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: build_ce.bat --
+:: build_ce_200x.bat --
 ::
 :: WinCE Wrapper Tool for MSBuild
 ::
@@ -33,9 +33,7 @@ SET TOOLS=%TOOLS:~0,-1%
 SET BUILD_CONFIGURATIONS=Debug Release
 SET BASE_CONFIGURATIONSUFFIX=Compact
 SET PLATFORMS="Pocket PC 2003 (ARMV4)"
-SET PROCESSORS=arm
 SET YEARS=2005 2008
-SET BASE_PLATFORM=PocketPC-ARM
 
 CALL :fn_ResetErrorLevel
 
