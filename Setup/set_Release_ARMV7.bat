@@ -1,10 +1,10 @@
 @ECHO OFF
 
 ::
-:: set_ReleaseNativeOnly_WCE80_ARMV7TIEVM3730.bat --
+:: set_Release_ARMV7.bat --
 ::
 :: Written by Joe Mistachkin.
 :: Released to the public domain, use at your own risk!
 ::
 
-CALL "%~dp0\set_ReleaseNativeOnly.bat"
+CALL "%~dp0\set_Release.bat"

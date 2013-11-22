@@ -103,7 +103,7 @@ set sds_manifests(source) {
   Setup/set_ReleaseNativeOnly.bat
   "Setup/set_ReleaseNativeOnly_CEPC DevPlatform.bat"
   "Setup/set_ReleaseNativeOnly_Pocket PC 2003 (ARMV4).bat"
-  "Setup/set_ReleaseNativeOnly_WCE80_ARMV7TIEVM3730.bat"
+  "Setup/set_ReleaseNativeOnly_ARMV7.bat"
   Setup/set_ReleaseNativeOnly_Win32.bat
   Setup/set_ReleaseNativeOnly_x64.bat
   Setup/set_ReleaseNativeOnly_x64_2005.bat
@@ -116,7 +116,7 @@ set sds_manifests(source) {
   Setup/set_ReleaseNativeOnly_x86_2012.bat
   "Setup/set_Release_CEPC DevPlatform.bat"
   "Setup/set_Release_Pocket PC 2003 (ARMV4).bat"
-  "Setup/set_Release_WCE80_ARMV7TIEVM3730.bat"
+  "Setup/set_Release_ARMV7.bat"
   Setup/set_Release_Win32.bat
   Setup/set_Release_x64.bat
   Setup/set_Release_x64_2005.bat

@@ -73,7 +73,7 @@
     Enter the following command to build all the binaries available for Windows
     Embedded Compact 2013:&nbsp;<b>build_ce_2013.bat</b><br /><i>This assumes
     that Visual Studio 2012, &quot;<b>Professional</b>&quot; edition or
-    &quot;better&quot; and the Windows Embedded Compact 2013 tools are
+    &quot;better&quot; and the Windows Embedded Compact 2013 Toolkit are
     installed.</i>
   </li>
 </ol>
