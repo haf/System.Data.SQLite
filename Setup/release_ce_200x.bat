@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::
-:: release_ce.bat --
+:: release_ce_200x.bat --
 ::
 :: WinCE Binary Release Tool
 ::
