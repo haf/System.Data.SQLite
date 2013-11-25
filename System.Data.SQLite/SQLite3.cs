@@ -2544,8 +2544,8 @@ namespace System.Data.SQLite
     /// <returns>Returns the data in the column</returns>
     internal override object GetValue(SQLiteStatement stmt, SQLiteConnectionFlags flags, int index, SQLiteType typ)
     {
-      if (IsNull(stmt, index)) return DBNull.Value;
       TypeAffinity aff = typ.Affinity;
+      if (aff == TypeAffinity.Null) return DBNull.Value;
       Type t = null;
 
       if (typ.Type != DbType.Object)
