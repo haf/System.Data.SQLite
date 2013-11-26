@@ -23,9 +23,9 @@ namespace eval ::Eagle {
       # NOTE: See if the "year" setting has been overridden by the user (e.g.
       #       on the command line).  This helps control exactly which set of
       #       binaries we are testing, those produced using the Visual Studio
-      #       2005, 2008, 2010, or 2012 build systems.  To override this value
-      #       via the command line, enter a command similar to one of the
-      #       following (all on one line):
+      #       2005, 2008, 2010, 2012, or 2013 build systems.  To override this
+      #       value via the command line, enter a command similar to one of
+      #       the following (all on one line):
       #
       #       EagleShell.exe -preInitialize "set test_year 2005"
       #         -file .\path\to\all.eagle
@@ -37,6 +37,9 @@ namespace eval ::Eagle {
       #         -file .\path\to\all.eagle
       #
       #       EagleShell.exe -preInitialize "set test_year 2012"
+      #         -file .\path\to\all.eagle
+      #
+      #       EagleShell.exe -preInitialize "set test_year 2013"
       #         -file .\path\to\all.eagle
       #
       #       EagleShell.exe -preInitialize "unset -nocomplain test_year"
@@ -52,13 +55,14 @@ namespace eval ::Eagle {
       } else {
         #
         # NOTE: If Eagle has been compiled against the CLR v4.0, use "2010" by
-        #       default (we could use "2012" in that case as well) as the test
-        #       year; otherwise, use "2008" by default (we could use "2005" in
-        #       that case as well).  If another major [incompatible] version of
-        #       the CLR is released, this check will have to be changed.  The
-        #       default test year to use for a particular CLR version may be
-        #       overridden by setting the global variable "test_year_clr_v$X",
-        #       where "$X" may [currently] be either "2" or "4".
+        #       default (we could use "2012" or "2013" in that case as well) as
+        #       the test year; otherwise, use "2008" by default (we could use
+        #       "2005" in that case as well).  If another major [incompatible]
+        #       version of the CLR is released, this check will have to be
+        #       changed.  The default test year to use for a particular CLR
+        #       version may be overridden by setting the global variable
+        #       "test_year_clr_v$X", where "$X" may [currently] be either "2"
+        #       or "4".
         #
         if {[haveConstraint imageRuntime40]} then {
           if {[info exists ::test_year_clr_v4] && \
@@ -104,7 +108,7 @@ namespace eval ::Eagle {
         #
         # NOTE: Use the default list of test years.
         #
-        return [list 2005 2008 2010 2012]
+        return [list 2005 2008 2010 2012 2013]
       }
     }
 
