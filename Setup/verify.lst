@@ -426,6 +426,7 @@ set sds_manifests(source) {
   Tests/Installer_Test_Vs2008.log
   Tests/Installer_Test_Vs2010.log
   Tests/Installer_Test_Vs2012.log
+  Tests/Installer_Test_Vs2013.log
   Tests/nonWal.db
   Tests/pkgIndex.eagle
   Tests/stress.eagle
@@ -477,6 +478,7 @@ set sds_manifests(source) {
   Tests/Uninstaller_Test_Vs2008.log
   Tests/Uninstaller_Test_Vs2010.log
   Tests/Uninstaller_Test_Vs2012.log
+  Tests/Uninstaller_Test_Vs2013.log
   Tests/version.eagle
   Tests/vtab.eagle
   Tests/wal.db
