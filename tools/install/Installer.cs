@@ -153,7 +153,7 @@ namespace System.Data.SQLite
     ///////////////////////////////////////////////////////////////////////////
 
     #region Installer Class
-#if NET_40 || NET_45
+#if NET_40 || NET_45 || NET_451
     [SecurityCritical()]
 #else
     [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]

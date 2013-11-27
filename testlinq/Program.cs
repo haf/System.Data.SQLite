@@ -255,7 +255,7 @@ namespace testlinq
 
                       try
                       {
-#if NET_40 || NET_45
+#if NET_40 || NET_45 || NET_451
                           db.SaveChanges(SaveOptions.None);
 #else
                           db.SaveChanges(false);
@@ -278,7 +278,7 @@ namespace testlinq
               using (northwindEFEntities db = new northwindEFEntities())
               {
                   bool once = false;
-#if NET_40 || NET_45
+#if NET_40 || NET_45 || NET_451
                   var query = from t in db.Territories
                     where territoryIds.AsQueryable<long>().Contains<long>(t.TerritoryID)
                     orderby t.TerritoryID
