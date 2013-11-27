@@ -29,7 +29,11 @@ namespace eval ::Eagle {
     # NOTE: Commands specific to initializing the Eagle interactive shell
     #       environment should be placed here.
     #
-
+    proc help { args } {
+      eval lappend command #help $args; debug icommand $command
+      error "for interactive help please use: #help $args"
+    }
+
     ###########################################################################
     ############################# END Eagle ONLY ##############################
     ###########################################################################

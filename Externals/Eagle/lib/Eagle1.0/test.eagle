@@ -476,9 +476,14 @@ namespace eval ::Eagle {
     tlog ""
   }
 
-  proc getTclShellFileName {} {
+  proc getTclShellFileName { automatic } {
     #
-    # NOTE: Check the environment variables we know about that
+    # NOTE: Start out with an empty list of candiate Tcl shells.
+    #
+    set shells [list]
+
+    #
+    # NOTE: Check all environment variables we know about that
     #       may contain the path where the Tcl shell is located.
     #
     foreach name [list Eagle_Tcl_Shell Tcl_Shell] {
@@ -490,15 +495,91 @@ namespace eval ::Eagle {
       #
       if {[string length $value] > 0} then {
         #
-        # NOTE: *EXTERNAL* Return verbatim, no normalization.
+        # NOTE: *EXTERNAL* Use verbatim, no normalization.
         #
-        return $value
+        if {$automatic} then {
+          #
+          # NOTE: In automatic mode, the environment variable
+          #       value simply represents another candidate
+          #       Tcl shell (i.e. it does not halt the search
+          #       for other candidate Tcl shells).
+          #
+          lappend shells $value
+        } else {
+          #
+          # NOTE: In manual mode, the environment variable
+          #       value represents an "override" and halts
+          #       the search for other candidate Tcl shells.
+          #
+          return $value
+        }
       }
     }
 
     #
-    # NOTE: None of the environment variables returned anything
-    #       valid, return the fallback default.
+    # NOTE: The automatic Tcl shell detection is only available when
+    #       running in Eagle.
+    #
+    if {[isEagle]} then {
+      #
+      # NOTE: Attempt to check for the "best" available dynamically
+      #       loadable Tcl library and then attempt to use its
+      #       "associated" Tcl shell.  A very similar block of code
+      #       is also used by the [checkForTclInstalls] procedure
+      #       in the constraints package.
+      #
+      if {[catch {tcl select -architecture} tcl] == 0} then {
+        #
+        # NOTE: Did we find one?  Attempt to grab the index of the
+        #       version field from the returned dictionary value.
+        #
+        set dotVersion [getDictionaryValue $tcl version]
+
+        #
+        # NOTE: Verify that the version we found is valid and that
+        #       it conforms to the pattern we expect.
+        #
+        if {[string length $dotVersion] > 0 && \
+            [regexp -- {^\d+\.\d+$} $dotVersion]} then {
+          #
+          # NOTE: Gather the list of candidate Tcl shells to check
+          #       using the range of versions we are interested in,
+          #       starting with the "best" available version and
+          #       ending with the absolute minimum version supported
+          #       by the Eagle core library.  A very similar block
+          #       of code is also used by the [checkForTclShell]
+          #       procedure in the constraints package.
+          #
+          foreach version [lsort -real -decreasing [tcl \
+              versionrange -maximumversion $dotVersion]] {
+            lappend shells [appendArgs \
+                tclsh [string map [list . ""] $version]]
+
+            lappend shells [appendArgs tclsh $version]
+          }
+        }
+      }
+
+      #
+      # NOTE: Check each candidate Tcl shell and query its fully
+      #       qualified path from it.  If it cannot be executed,
+      #       we know that candidate Tcl shell is not available.
+      #
+      foreach shell $shells {
+        if {[catch {
+          getTclExecutableForTclShell $shell
+        } executable] == 0 && $executable ne "error"} then {
+          #
+          # NOTE: It looks like this Tcl shell is available.
+          #       Return the fully qualified path to it now.
+          #
+          return $executable
+        }
+      }
+    }
+
+    #
+    # NOTE: Return the fallback default.
     #
     return tclsh
   }
@@ -1343,6 +1424,18 @@ namespace eval ::Eagle {
   }
 
   proc formatDecimal { value {places 4} {zeros false} } {
+    #
+    # NOTE: If the value is an empty string, do nothing and return an empty
+    #       string.
+    #
+    if {[string length $value] == 0} then {
+      return ""
+    }
+
+    #
+    # NOTE: For now, use slightly different methods for formatting floating
+    #       pointer numbers for native Tcl and Eagle.
+    #
     if {[isEagle] && [llength [info commands object]] > 0} then {
       #
       # HACK: This works; however, in order to do this kind of thing cleanly,
@@ -1358,6 +1451,19 @@ namespace eval ::Eagle {
       # NOTE: See, nice and clean when done in Tcl?
       #
       set result [format [appendArgs %. $places f] $value]
+
+      #
+      # HACK: Since native Tcl does not appear to expose a method to only
+      #       preserve non-zero trailing digits, we may need to manually
+      #       remove extra trailing zeros.
+      #
+      if {!$zeros} then {
+        #
+        # NOTE: Remove all trailing zeros and the trailing decimal point,
+        #       if necessary.
+        #
+        set result [string trimright [string trimright $result 0] .]
+      }
     }
 
     return $result
@@ -1922,8 +2028,8 @@ namespace eval ::Eagle {
           interp alias {} testConstraint {} haveOrAddConstraint
 
           if {!$quiet} then {
-            tqputs [getTestChannelOrDefault] [appendArgs \
-                "---- added \"testConstraint\" alias\n"]
+            tqputs [getTestChannelOrDefault] \
+                "---- added \"testConstraint\" alias\n"
           }
         }
 
@@ -1931,8 +2037,8 @@ namespace eval ::Eagle {
           interp alias {} ::tcltest::testConstraint {} haveOrAddConstraint
 
           if {!$quiet} then {
-            tqputs [getTestChannelOrDefault] [appendArgs \
-                "---- added \"::tcltest::testConstraint\" alias\n"]
+            tqputs [getTestChannelOrDefault] \
+                "---- added \"::tcltest::testConstraint\" alias\n"
           }
         }
 
@@ -1944,8 +2050,8 @@ namespace eval ::Eagle {
           proc ::tcltest::cleanupTests { args } {}
 
           if {!$quiet} then {
-            tqputs [getTestChannelOrDefault] [appendArgs \
-                "---- added \"::tcltest::cleanupTests\" procedure\n"]
+            tqputs [getTestChannelOrDefault] \
+                "---- added \"::tcltest::cleanupTests\" procedure\n"
           }
         }
       } else {
@@ -1958,8 +2064,8 @@ namespace eval ::Eagle {
           rename ::tcltest::cleanupTests ""
 
           if {!$quiet} then {
-            tqputs $::test_channel [appendArgs \
-                "---- removed \"::tcltest::cleanupTests\" procedure\n"]
+            tqputs $::test_channel \
+                "---- removed \"::tcltest::cleanupTests\" procedure\n"
           }
         }
 
@@ -1968,8 +2074,8 @@ namespace eval ::Eagle {
           interp alias {} ::tcltest::testConstraint {} {}
 
           if {!$quiet} then {
-            tqputs $::test_channel [appendArgs \
-                "---- removed \"::tcltest::testConstraint\" alias\n"]
+            tqputs $::test_channel \
+                "---- removed \"::tcltest::testConstraint\" alias\n"
           }
         }
 
@@ -1977,8 +2083,8 @@ namespace eval ::Eagle {
           interp alias {} testConstraint {} {}
 
           if {!$quiet} then {
-            tqputs $::test_channel [appendArgs \
-                "---- removed \"testConstraint\" alias\n"]
+            tqputs $::test_channel \
+                "---- removed \"testConstraint\" alias\n"
           }
         }
       }
@@ -2138,7 +2244,7 @@ namespace eval ::Eagle {
       }
     }
 
-    proc testExecTclScript { script } {
+    proc testExecTclScript { script {shell ""} } {
       try {
         #
         # NOTE: Get a temporary file name for the script we are going to
@@ -2154,12 +2260,33 @@ namespace eval ::Eagle {
         writeFile $fileName $script
 
         #
+        # NOTE: Use the specified shell, if it is valid; otherwise, use
+        #       the configured Tcl shell.
+        #
+        if {[string length $shell] == 0} then {
+          #
+          # NOTE: Before attempting to use the configured Tcl shell, make
+          #       sure it has actually been set.
+          #
+          if {[info exists ::test_tclsh] && \
+              [string length $::test_tclsh] > 0} then {
+            set shell $::test_tclsh
+          } else {
+            #
+            # NOTE: We cannot execute the native Tcl shell because one
+            #       has not been specified, nor configured.
+            #
+            return error
+          }
+        }
+
+        #
         # NOTE: Evaluate the script using the native Tcl shell, trim the
         #       excess whitespace from the output, and return it to the
         #       caller.
         #
         if {[catch {string trim \
-            [testExec $::test_tclsh [list -success Success] \
+            [testExec $shell [list -success Success] \
             [appendArgs \" $fileName \"]]} result] == 0} then {
           #
           # NOTE: Success, return the result to the caller.
@@ -2188,28 +2315,34 @@ namespace eval ::Eagle {
       }
     }
 
-    proc getTclVersionForTclShell {} {
+    proc getTclVersionForTclShell { {shell ""} } {
       return [testExecTclScript {
         puts -nonewline stdout [info tclversion]
-      }]
+      } $shell]
     }
 
-    proc getCommandsForTclShell {} {
+    proc getCommandsForTclShell { {shell ""} } {
       return [testExecTclScript {
         puts -nonewline stdout [info commands]
-      }]
+      } $shell]
     }
 
-    proc getMachineForTclShell {} {
+    proc getMachineForTclShell { {shell ""} } {
       return [testExecTclScript {
         puts -nonewline stdout $tcl_platform(machine)
-      }]
+      } $shell]
     }
 
-    proc getTkVersionForTclShell {} {
+    proc getTclExecutableForTclShell { {shell ""} } {
+      return [testExecTclScript {
+        puts -nonewline stdout [info nameofexecutable]
+      } $shell]
+    }
+
+    proc getTkVersionForTclShell { {shell ""} } {
       return [testExecTclScript {
         puts -nonewline stdout [package require Tk]; exit
-      }]
+      } $shell]
     }
 
     proc getGarudaDll {} {

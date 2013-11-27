@@ -51,8 +51,8 @@ namespace eval ::Eagle {
     #
     if {[isEagle]} then {
       return [expr {[llength [info commands tcl]] > 0 && [tcl ready] && \
-          [catch {tcl eval [tcl master] package present Garuda}] == 0 && \
-          [catch {tcl eval [tcl master] garuda packageid} packageId] == 0}]
+          [catch {tcl eval [tcl master] {package present Garuda}}] == 0 && \
+          [catch {tcl eval [tcl master] {garuda packageid}} packageId] == 0}]
     } else {
       return [expr {[catch {package present Garuda}] == 0 && \
           [catch {garuda packageid} packageId] == 0}]
@@ -300,10 +300,10 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    set file_id [open $fileName RDONLY]
-    fconfigure $file_id -encoding binary -translation binary; # BINARY DATA
-    set result [read $file_id]
-    close $file_id
+    set channel [open $fileName RDONLY]
+    fconfigure $channel -encoding binary -translation binary; # BINARY DATA
+    set result [read $channel]
+    close $channel
     return $result
   }
 
@@ -326,10 +326,10 @@ namespace eval ::Eagle {
     # NOTE: Open the file using the command constructed above, configure
     #       the channel for binary data, and output the data to it.
     #
-    set file_id [eval $command]
-    fconfigure $file_id -encoding binary -translation binary; # BINARY DATA
-    set result [read $file_id]
-    close $file_id
+    set channel [eval $command]
+    fconfigure $channel -encoding binary -translation binary; # BINARY DATA
+    set result [read $channel]
+    close $channel
     return $result
   }
 
@@ -337,10 +337,10 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    set file_id [open $fileName {WRONLY CREAT TRUNC}]
-    fconfigure $file_id -encoding binary -translation binary; # BINARY DATA
-    puts -nonewline $file_id $data
-    close $file_id
+    set channel [open $fileName {WRONLY CREAT TRUNC}]
+    fconfigure $channel -encoding binary -translation binary; # BINARY DATA
+    puts -nonewline $channel $data
+    close $channel
     return ""
   }
 
@@ -348,10 +348,10 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    set file_id [open $fileName {WRONLY CREAT APPEND}]
-    fconfigure $file_id -encoding binary -translation binary; # BINARY DATA
-    puts -nonewline $file_id $data
-    close $file_id
+    set channel [open $fileName {WRONLY CREAT APPEND}]
+    fconfigure $channel -encoding binary -translation binary; # BINARY DATA
+    puts -nonewline $channel $data
+    close $channel
     return ""
   }
 
@@ -359,11 +359,11 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    set file_id [open $fileName {WRONLY CREAT APPEND}]
-    fconfigure $file_id -encoding binary -translation \
+    set channel [open $fileName {WRONLY CREAT APPEND}]
+    fconfigure $channel -encoding binary -translation \
         [expr {[isEagle] ? "protocol" : "auto"}]; # LOG DATA
-    puts -nonewline $file_id $data
-    close $file_id
+    puts -nonewline $channel $data
+    close $channel
     return ""
   }
 
@@ -386,10 +386,10 @@ namespace eval ::Eagle {
     # NOTE: Open the file using the command constructed above, configure
     #       the channel for binary data, and output the data to it.
     #
-    set file_id [eval $command]
-    fconfigure $file_id -encoding binary -translation binary; # BINARY DATA
-    puts -nonewline $file_id $data; flush $file_id
-    close $file_id
+    set channel [eval $command]
+    fconfigure $channel -encoding binary -translation binary; # BINARY DATA
+    puts -nonewline $channel $data; flush $channel
+    close $channel
     return ""
   }
 
@@ -412,11 +412,11 @@ namespace eval ::Eagle {
     # NOTE: Open the file using the command constructed above, configure
     #       the channel for binary data, and output the data to it.
     #
-    set file_id [eval $command]
-    fconfigure $file_id -encoding binary -translation \
+    set channel [eval $command]
+    fconfigure $channel -encoding binary -translation \
         [expr {[isEagle] ? "protocol" : "auto"}]; # LOG DATA
-    puts -nonewline $file_id $data; flush $file_id
-    close $file_id
+    puts -nonewline $channel $data; flush $channel
+    close $channel
     return ""
   }
 
@@ -424,10 +424,10 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    set file_id [open $fileName RDONLY]
-    fconfigure $file_id -encoding ascii -translation auto; # ASCII TEXT
-    set result [read $file_id]
-    close $file_id
+    set channel [open $fileName RDONLY]
+    fconfigure $channel -encoding ascii -translation auto; # ASCII TEXT
+    set result [read $channel]
+    close $channel
     return $result
   }
 
@@ -435,10 +435,10 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    set file_id [open $fileName {WRONLY CREAT TRUNC}]
-    fconfigure $file_id -encoding ascii -translation auto; # ASCII TEXT
-    puts -nonewline $file_id $data
-    close $file_id
+    set channel [open $fileName {WRONLY CREAT TRUNC}]
+    fconfigure $channel -encoding ascii -translation auto; # ASCII TEXT
+    puts -nonewline $channel $data
+    close $channel
     return ""
   }
 
@@ -446,10 +446,10 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    set file_id [open $fileName RDONLY]
-    fconfigure $file_id -encoding unicode -translation auto; # UNICODE TEXT
-    set result [read $file_id]
-    close $file_id
+    set channel [open $fileName RDONLY]
+    fconfigure $channel -encoding unicode -translation auto; # UNICODE TEXT
+    set result [read $channel]
+    close $channel
     return $result
   }
 
@@ -457,10 +457,10 @@ namespace eval ::Eagle {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
     #
-    set file_id [open $fileName {WRONLY CREAT TRUNC}]
-    fconfigure $file_id -encoding unicode -translation auto; # UNICODE TEXT
-    puts -nonewline $file_id $data
-    close $file_id
+    set channel [open $fileName {WRONLY CREAT TRUNC}]
+    fconfigure $channel -encoding unicode -translation auto; # UNICODE TEXT
+    puts -nonewline $channel $data
+    close $channel
     return ""
   }
 
@@ -1162,7 +1162,7 @@ namespace eval ::Eagle {
     proc runUpdateAndExit {} {
       set directory [file dirname [info nameofexecutable]]
 
-      set command [list exec -- \
+      set command [list exec -shell -- \
           [file join $directory Hippogriff.exe] -delay 2000]
 
       eval $command &; exit -force
@@ -1216,7 +1216,7 @@ namespace eval ::Eagle {
     #       "#check" command.  To disable this functionality, simply
     #       redefine this procedure to do nothing.
     #
-    proc checkForUpdate { {wantScripts false} } {
+    proc checkForUpdate { {wantScripts false} {quiet false} } {
       #
       # NOTE: This should work properly in Eagle only.
       #
@@ -1236,7 +1236,10 @@ namespace eval ::Eagle {
       #
       # NOTE: Keep track of how many update scripts are processed.
       #
-      set scriptCount 0
+      array set scriptCount {
+        invalid            0 fail               0 bad                0
+        ok                 0 error              0
+      }
 
       #
       # NOTE: Check each line to find the build information...
@@ -1320,27 +1323,91 @@ namespace eval ::Eagle {
               }
 
               #
+              # NOTE: Grab the time-stamp field.
+              #
+              set timeStamp [lindex $fields 5]
+
+              if {[string length $timeStamp] == 0} then {
+                set timeStamp 0; #never?
+              }
+
+              #
+              # NOTE: Does it look like the number of seconds since the epoch
+              #       or some kind of date/time string?
+              #
+              if {[string is integer -strict $timeStamp]} then {
+                set dateTime [clock format $timeStamp]
+              } else {
+                set dateTime [clock format [clock scan $timeStamp]]
+              }
+
+              #
               # NOTE: Grab the patch level for the running engine.
               #
               set enginePatchLevel [info engine PatchLevel]
 
               #
-              # NOTE: Compare the patch level from the line to the one we
-              #       are currently using.
+              # NOTE: Grab the time-stamp for the running engine.
               #
-              set compare [package vcompare $patchLevel $enginePatchLevel]
+              set engineTimeStamp [info engine TimeStamp]
 
-              if {($checkBuild && $compare > 0) || \
-                  ($checkScript && $compare == 0)} then {
-                #
-                # NOTE: Grab the time-stamp field.
-                #
-                set timeStamp [lindex $fields 5]
+              if {[string length $engineTimeStamp] == 0} then {
+                set engineTimeStamp 0; #never?
+              }
 
-                if {[string length $timeStamp] == 0} then {
-                  set timeStamp 0; #never?
+              #
+              # NOTE: Does it look like the number of seconds since the epoch
+              #       or some kind of date/time string?
+              #
+              if {[string is integer -strict $engineTimeStamp]} then {
+                set engineDateTime [clock format $engineTimeStamp]
+              } else {
+                set engineDateTime [clock format [clock scan $engineTimeStamp]]
+              }
+
+              #
+              # NOTE: For build lines, compare the patch level from the line
+              #       to the one we are currently using using a simple patch
+              #       level comparison.
+              #
+              if {$checkBuild} then {
+                set compare [package vcompare $patchLevel $enginePatchLevel]
+              } else {
+                #
+                # NOTE: This is not a build line, no match.
+                #
+                set compare -1
+              }
+
+              #
+              # NOTE: For script lines, use regular expression matching.
+              #
+              if {$checkScript} then {
+                #
+                # NOTE: Use [catch] here to prevent raising a script error
+                #       due to a malformed patch level regular expression.
+                #
+                if {[catch {
+                  regexp -nocase -- $patchLevel $enginePatchLevel
+                } match]} then {
+                  #
+                  # NOTE: The patch level from the script line was most
+                  #       likely not a valid regular expression.
+                  #
+                  set match false
                 }
+              } else {
+                #
+                # NOTE: This is not a script line, no match.
+                #
+                set match false
+              }
 
+              #
+              # NOTE: Are we interested in further processing this line?
+              #
+              if {($checkBuild && $compare > 0) ||
+                  ($checkScript && $match)} then {
                 #
                 # NOTE: Grab the base URI field (i.e. it may be a mirror
                 #       site).
@@ -1361,23 +1428,15 @@ namespace eval ::Eagle {
                 }
 
                 #
-                # NOTE: Does it look like the number of seconds since the
-                #       epoch or some kind of date/time string?
-                #
-                if {[string is integer -strict $timeStamp]} then {
-                  set dateTime [clock format $timeStamp]
-                } else {
-                  set dateTime [clock format [clock scan $timeStamp]]
-                }
-
-                #
                 # NOTE: The engine patch level from the line is greater,
                 #       we are out-of-date.  Return the result of our
                 #       checking now.
                 #
                 if {$checkBuild} then {
-                  return [list [appendArgs "newer build " $patchLevel \
-                      " is available as of " $dateTime] [list $baseUri \
+                  return [list [appendArgs \
+                      "latest build " $patchLevel ", dated " $dateTime \
+                      ", is newer than running build " $enginePatchLevel \
+                      ", dated " $engineDateTime] [list $baseUri \
                       $patchLevel] [list $notes]]
                 }
 
@@ -1404,11 +1463,12 @@ namespace eval ::Eagle {
                   #       where the update script data can be downloaded.
                   #
                   if {[string length $baseUri] == 0} then {
-                    tqputs $channel [appendArgs \
-                        "---- invalid baseUri value for update script line: " \
-                        $line \"\n]
-
-                    continue
+                    if {!$quiet} then {
+                      tqputs $channel [appendArgs \
+                          "---- invalid baseUri value for update script " \
+                          "line: " $line \"\n]
+                    }
+                    incr scriptCount(invalid); continue
                   }
 
                   #
@@ -1420,11 +1480,12 @@ namespace eval ::Eagle {
                   set lineMd5 [lindex $fields 7]
 
                   if {[string length $lineMd5] == 0} then {
-                    tqputs $channel [appendArgs \
-                        "---- invalid md5 value for update script line: " \
-                        $line \"\n]
-
-                    continue
+                    if {!$quiet} then {
+                      tqputs $channel [appendArgs \
+                          "---- invalid md5 value for update script " \
+                          "line: " $line \"\n]
+                    }
+                    incr scriptCount(invalid); continue
                   }
 
                   #
@@ -1436,11 +1497,12 @@ namespace eval ::Eagle {
                   set lineSha1 [lindex $fields 8]
 
                   if {[string length $lineSha1] == 0} then {
-                    tqputs $channel [appendArgs \
-                        "---- invalid sha1 value for update script line: " \
-                        $line \"\n]
-
-                    continue
+                    if {!$quiet} then {
+                      tqputs $channel [appendArgs \
+                          "---- invalid sha1 value for update script " \
+                          "line: " $line \"\n]
+                    }
+                    incr scriptCount(invalid); continue
                   }
 
                   #
@@ -1452,26 +1514,29 @@ namespace eval ::Eagle {
                   set lineSha512 [lindex $fields 9]
 
                   if {[string length $lineSha512] == 0} then {
-                    tqputs $channel [appendArgs \
-                        "---- invalid sha512 value for update script line: " \
-                        $line \"\n]
-
-                    continue
+                    if {!$quiet} then {
+                      tqputs $channel [appendArgs \
+                          "---- invalid sha512 value for update script " \
+                          "line: " $line \"\n]
+                    }
+                    incr scriptCount(invalid); continue
                   }
 
                   #
                   # NOTE: Next, show the extra information associated with
                   #       this update script, if any.
                   #
-                  tqputs $channel [appendArgs \
-                      "---- fetching update script from \"" $baseUri "\" (" \
-                      $dateTime ") with notes:\n"]
+                  if {!$quiet} then {
+                    tqputs $channel [appendArgs \
+                        "---- fetching update script from \"" $baseUri \
+                        "\" (" $dateTime ") with notes:\n"]
 
-                  set trimNotes [string trim $notes]
+                    set trimNotes [string trim $notes]
 
-                  tqputs $channel [appendArgs \
-                      [expr {[string length $trimNotes] > 0 ? $trimNotes : \
-                      "<none>"}] "\n---- end of update script notes\n"]
+                    tqputs $channel [appendArgs \
+                        [expr {[string length $trimNotes] > 0 ? $trimNotes : \
+                        "<none>"}] "\n---- end of update script notes\n"]
+                  }
 
                   #
                   # NOTE: Next, attempt to fetch the update script data.
@@ -1487,10 +1552,11 @@ namespace eval ::Eagle {
                     #
                     # NOTE: Failure, report the error message to the log.
                     #
-                    tqputs $channel [appendArgs \
-                        "---- failed to fetch update script: " $result \n]
-
-                    continue
+                    if {!$quiet} then {
+                      tqputs $channel [appendArgs \
+                          "---- failed to fetch update script: " $result \n]
+                    }
+                    incr scriptCount(fail); continue
                   }
 
                   #
@@ -1501,40 +1567,45 @@ namespace eval ::Eagle {
                   set scriptMd5 [hash normal md5 $scriptData]
 
                   if {![string equal -nocase $lineMd5 $scriptMd5]} then {
-                    tqputs $channel [appendArgs \
-                        "---- wrong md5 value \"" $scriptMd5 \
-                        "\" for update script line: " $line \"\n]
-
-                    continue
+                    if {!$quiet} then {
+                      tqputs $channel [appendArgs \
+                          "---- wrong md5 value \"" $scriptMd5 \
+                          "\" for update script line: " $line \"\n]
+                    }
+                    incr scriptCount(bad); continue
                   }
 
                   set scriptSha1 [hash normal sha1 $scriptData]
 
                   if {![string equal -nocase $lineSha1 $scriptSha1]} then {
-                    tqputs $channel [appendArgs \
-                        "---- wrong sha1 value \"" $scriptSha1 \
-                        "\" for update script line: " $line \"\n]
-
-                    continue
+                    if {!$quiet} then {
+                      tqputs $channel [appendArgs \
+                          "---- wrong sha1 value \"" $scriptSha1 \
+                          "\" for update script line: " $line \"\n]
+                    }
+                    incr scriptCount(bad); continue
                   }
 
                   set scriptSha512 [hash normal sha512 $scriptData]
 
                   if {![string equal -nocase $lineSha512 $scriptSha512]} then {
-                    tqputs $channel [appendArgs \
-                        "---- wrong sha512 value \"" $scriptSha512 \
-                        "\" for update script line: " $line \"\n]
-
-                    continue
+                    if {!$quiet} then {
+                      tqputs $channel [appendArgs \
+                          "---- wrong sha512 value \"" $scriptSha512 \
+                          "\" for update script line: " $line \"\n]
+                    }
+                    incr scriptCount(bad); continue
                   }
 
                   #
                   # NOTE: Finally, everything looks good.  Therefore, just
                   #       evaluate the update script and print the result.
                   #
-                  tqputs $channel [appendArgs \
-                      "---- evaluating update script from \"" $baseUri \
-                      \"...\n]
+                  if {!$quiet} then {
+                    tqputs $channel [appendArgs \
+                        "---- evaluating update script from \"" $baseUri \
+                        \"...\n]
+                  }
 
                   #
                   # NOTE: Reset the variables that will be used to contain
@@ -1565,21 +1636,37 @@ namespace eval ::Eagle {
                         PopScriptLocation true
                   }
 
-                  host result $code $result; incr scriptCount
-                  tqputs $channel "\n---- end of update script results\n"
+                  #
+                  # NOTE: Keep track of the number of update scripts that
+                  #       generate Ok and Error return codes.
+                  #
+                  if {$code == 0} then {
+                    incr scriptCount(ok)
+                  } else {
+                    incr scriptCount(error)
+                  }
+
+                  if {!$quiet} then {
+                    host result $code $result
+                    tqputs $channel "\n---- end of update script results\n"
+                  }
                 }
               } elseif {$checkBuild && $compare < 0} then {
                 #
                 # NOTE: The patch level from the line is less, we are more
                 #       up-to-date than the latest version?
                 #
-                return [list [appendArgs "running build " $enginePatchLevel \
-                    " is newer than the latest build " $patchLevel]]
+                return [list [appendArgs \
+                    "running build " $enginePatchLevel ", dated " \
+                    $engineDateTime ", is newer than latest build " \
+                    $patchLevel ", dated " $dateTime]]
               } elseif {$checkBuild} then {
                 #
                 # NOTE: The patch levels are equal, we are up-to-date.
                 #
-                return [list "running build is the latest"]
+                return [list [appendArgs \
+                    "running build " $enginePatchLevel ", dated " \
+                    $engineDateTime ", is the latest build"]]
               }
             }
           }
@@ -1593,14 +1680,17 @@ namespace eval ::Eagle {
       #       update scripts that were successfully processed.
       #
       if {$wantScripts} then {
-        if {$scriptCount > 0} then {
+        set scriptCount(total) [expr [join [array values scriptCount] +]]
+
+        if {$scriptCount(total) > 0} then {
           return [list [appendArgs \
-              "processed " $scriptCount " update scripts"]]
+              "processed " $scriptCount(total) " update scripts: " \
+              [array get scriptCount]]]
         } else {
           return [list "no update scripts were processed"]
         }
       } else {
-        return [list "cannot determine if running build is the latest"]
+        return [list "could not determine if running build is the latest"]
       }
     }
 
