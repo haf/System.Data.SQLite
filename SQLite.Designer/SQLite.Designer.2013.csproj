@@ -160,6 +160,7 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="SQLiteDataObjectSupport2013.xml" />
     <EmbeddedResource Include="SQLiteDataViewSupport2013.xml" />
     <EmbeddedResource Include="VSPackage.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -184,7 +185,6 @@
       <SubType>Designer</SubType>
       <DependentUpon>SQLiteConnectionUIControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SQLiteDataObjectSupport.xml" />
     <EmbeddedResource Include="TableNameDialog.resx">
       <DependentUpon>TableNameDialog.cs</DependentUpon>
     </EmbeddedResource>
