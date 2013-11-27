@@ -55,7 +55,8 @@
       <DependentUpon>NorthwindModel2008.edmx</DependentUpon>
     </Compile>
     <Compile Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
-                        '$(TargetFrameworkVersion)' == 'v4.5'"
+                        '$(TargetFrameworkVersion)' == 'v4.5' Or
+                        '$(TargetFrameworkVersion)' == 'v4.5.1'"
              Include="NorthwindModel2013.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -68,7 +69,8 @@
     <None Condition="'$(TargetFrameworkVersion)' == 'v3.5'"
           Include="2008\App.Config" />
     <None Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
-                     '$(TargetFrameworkVersion)' == 'v4.5'"
+                     '$(TargetFrameworkVersion)' == 'v4.5' Or
+                     '$(TargetFrameworkVersion)' == 'v4.5.1'"
           Include="2013\App.Config" />
     <None Include="northwindEF.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -79,7 +81,8 @@
       <LastGenOutput>NorthwindModel2008.Designer.cs</LastGenOutput>
     </EntityDeploy>
     <EntityDeploy Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
-                             '$(TargetFrameworkVersion)' == 'v4.5'"
+                             '$(TargetFrameworkVersion)' == 'v4.5' Or
+                             '$(TargetFrameworkVersion)' == 'v4.5.1'"
                   Include="NorthwindModel2013.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>NorthwindModel2013.Designer.cs</LastGenOutput>
