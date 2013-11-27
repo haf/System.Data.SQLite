@@ -10,6 +10,7 @@ namespace SQLite.Designer
   using System;
   using System.Collections.Generic;
   using System.Text;
+  using System.Globalization;
   using Microsoft.VisualStudio.Data;
   using Microsoft.VisualStudio.OLE.Interop;
   using Microsoft.VisualStudio.Data.AdoDotNet;

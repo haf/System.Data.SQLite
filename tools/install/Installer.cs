@@ -3157,7 +3157,7 @@ namespace System.Data.SQLite
                         TraceOps.DebugAndTrace(TracePriority.Medium,
                             debugCallback, traceCallback, String.Format(
                             "Assembly is compiled for the .NET Framework {0}, " +
-                            "support for .NET Framework {1} is now disabled.",
+                            "support for the .NET Framework {1} is now disabled.",
                             CLRv2ImageRuntimeVersion, CLRv4ImageRuntimeVersion),
                             traceCategory);
                     }
@@ -3178,7 +3178,7 @@ namespace System.Data.SQLite
                         TraceOps.DebugAndTrace(TracePriority.Medium,
                             debugCallback, traceCallback, String.Format(
                             "Assembly is compiled for the .NET Framework {0}, " +
-                            "support for .NET Framework {1} is now disabled.",
+                            "support for the .NET Framework {1} is now disabled.",
                             ForDisplay(CLRv4ImageRuntimeVersion),
                             ForDisplay(CLRv2ImageRuntimeVersion)),
                             traceCategory);
@@ -4513,9 +4513,9 @@ namespace System.Data.SQLite
                             platformName, perUser, wow64, whatIf, verbose))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
-                            debugCallback, traceCallback,
-                            ".NET Framework directory not found, skipping...",
-                            traceCategory);
+                            debugCallback, traceCallback, String.Format(
+                            ".NET Framework v{0} directory not found, " +
+                            "skipping...", frameworkVersion), traceCategory);
 
                         continue;
                     }
@@ -4710,9 +4710,9 @@ namespace System.Data.SQLite
                             platformName, perUser, wow64, whatIf, verbose))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
-                            debugCallback, traceCallback,
-                            ".NET Framework registry not found, skipping...",
-                            traceCategory);
+                            debugCallback, traceCallback, String.Format(
+                            ".NET Framework v{0} registry not found, " +
+                            "skipping...", frameworkVersion), traceCategory);
 
                         continue;
                     }
@@ -4879,9 +4879,9 @@ namespace System.Data.SQLite
                         verbose))
                 {
                     TraceOps.DebugAndTrace(TracePriority.Low,
-                        debugCallback, traceCallback,
-                        "Visual Studio version not found, skipping...",
-                        traceCategory);
+                        debugCallback, traceCallback, String.Format(
+                        "Visual Studio v{0} not found, skipping...",
+                        vsVersion), traceCategory);
 
                     continue;
                 }
