@@ -19,7 +19,7 @@ namespace System.Data.SQLite
     static SqlChecker()
     {
         string version =
-#if NET_40 || NET_45
+#if NET_40 || NET_45 || NET_451
             "4.0.0.0";
 #else
             "3.5.0.0";

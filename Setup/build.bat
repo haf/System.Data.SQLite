@@ -140,6 +140,13 @@ IF DEFINED NETFX45ONLY (
   GOTO skip_netFxCheck
 )
 
+IF DEFINED NETFX451ONLY (
+  %_AECHO% Forcing the use of the .NET Framework 4.5.1...
+  SET YEAR=2013
+  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v4.0.30319
+  GOTO skip_netFxCheck
+)
+
 IF DEFINED FRAMEWORKDIR (
   IF NOT EXIST "%FRAMEWORKDIR%" (
     CALL :fn_UnsetVariable FRAMEWORKDIR

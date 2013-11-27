@@ -44,13 +44,13 @@ using System.Runtime.ConstrainedExecution;
 [assembly: NeutralResourcesLanguage("en")]
 
 #if !PLATFORM_COMPACTFRAMEWORK
-#if !NET_40 && !NET_45
+#if !NET_40 && !NET_45 && !NET_451
 [assembly: AllowPartiallyTrustedCallers]
 #endif
 
 [assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 
-#if NET_40 || NET_45
+#if NET_40 || NET_45 || NET_451
 //
 // NOTE: This attribute is only available in .NET Framework 4.0 or higher.
 //

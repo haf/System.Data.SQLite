@@ -426,6 +426,7 @@ set sds_manifests(source) {
   Tests/Installer_Test_Vs2008.log
   Tests/Installer_Test_Vs2010.log
   Tests/Installer_Test_Vs2012.log
+  Tests/Installer_Test_Vs2013.log
   Tests/nonWal.db
   Tests/pkgIndex.eagle
   Tests/stress.eagle
@@ -477,6 +478,7 @@ set sds_manifests(source) {
   Tests/Uninstaller_Test_Vs2008.log
   Tests/Uninstaller_Test_Vs2010.log
   Tests/Uninstaller_Test_Vs2012.log
+  Tests/Uninstaller_Test_Vs2013.log
   Tests/version.eagle
   Tests/vtab.eagle
   Tests/wal.db
@@ -709,6 +711,24 @@ set sds_manifests(setupX86Vs2012) {
 #
 set sds_manifests(setupX64Vs2012) {
   {{tmp}\vcredist_x64_2012_VSU3.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 4.5.1 for x86.
+#
+set sds_manifests(setupX86Vs2013) {
+  {{tmp}\vcredist_x86_2013_RTM.exe}
+}
+
+###############################################################################
+#
+# NOTE: This is the list of files that should be present in all setup archives
+#       supporting the .NET Framework 4.5.1 for x64.
+#
+set sds_manifests(setupX64Vs2013) {
+  {{tmp}\vcredist_x64_2013_VSU3.exe}
 }
 
 ###############################################################################
@@ -1014,6 +1034,68 @@ set manifests(sqlite-netFx39-binary-WinCE-x86-2012-.zip) [list sds \
     binaryCore binaryCompact]
 
 set manifests(sqlite-netFx39-binary-WinCE-x86-2012-.zip,subst) ""; # dynamic
+
+###############################################################################
+################## Visual Studio 2013 / .NET Framework 4.5.1 ##################
+###############################################################################
+
+set manifests(sqlite-netFx451-binary-Win32-2013-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-binary-x64-2013-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-binary-bundle-Win32-2013-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-binary-bundle-x64-2013-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-static-binary-Win32-2013-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-static-binary-x64-2013-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra binaryInterop]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-static-binary-bundle-Win32-2013-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-static-binary-bundle-x64-2013-.zip) [list sds \
+    binaryCore binaryLinq binaryExtra]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-setup-x86-2013-.exe) [list sds \
+    setupCore setupInterop setupLinqCore setupLinqInterop setupX86Vs2013]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-setup-x64-2013-.exe) [list sds \
+    setupCore setupInterop setupLinqCore setupLinqInterop setupX64Vs2013]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-setup-bundle-x86-2013-.exe) [list sds \
+    setupCore setupBundle setupLinqCore setupLinqBundle setupX86Vs2013]
+
+###############################################################################
+
+set manifests(sqlite-netFx451-setup-bundle-x64-2013-.exe) [list sds \
+    setupCore setupBundle setupLinqCore setupLinqBundle setupX64Vs2013]
 
 ###############################################################################
 # end of file

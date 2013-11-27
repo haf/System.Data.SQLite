@@ -111,12 +111,19 @@ namespace eval ::Eagle {
 
         foreach fileName $fileNames {
           if {[isEagle]} then {
-            set sha1 [hash normal sha1 [readFile $fileName]]
+            #
+            # NOTE: Use the relatively new -filename option to the Eagle
+            #       [hash] command.
+            #
+            set sha1 [hash normal -filename sha1 $fileName]
           } else {
             #
             # BUGBUG: Apparently, the ActiveState tcllib sha1 package may
             #         have a bug that produces the wrong values here.  No
             #         attempt is made here to work around any such bug.
+            #         For further information, please see:
+            #
+            #         http://core.tcl.tk/tcllib/info/ad20454023
             #
             set sha1 [sha1::sha1 -hex -filename $fileName]
           }
@@ -399,7 +406,7 @@ namespace eval ::Eagle {
   proc checkForFossil { channel } {
     tputs $channel "---- checking for Fossil... "
 
-    if {[catch {set version [exec -- fossil version]}] == 0} then {
+    if {[catch {exec -- fossil version} version] == 0} then {
       set version [string trim $version]
       set pattern {^This is fossil version (.*) \[([0-9a-f]+)\]\
           \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC$}
@@ -416,7 +423,7 @@ namespace eval ::Eagle {
         #
         append result version " " $version " \[" $sourceId \]
 
-        if {[catch {set remote [exec -- fossil remote]}] == 0} then {
+        if {[catch {exec -- fossil remote} remote] == 0} then {
           set remote [string trim $remote]; set valid false
 
           if {[isEagle]} then {
@@ -1177,6 +1184,40 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForBigLists { channel } {
+    tputs $channel "---- checking for big list testing... "
+
+    #
+    # NOTE: Are we allowed to do big list testing?
+    #
+    if {![info exists ::no(bigLists)]} then {
+      if {[isEagle]} then {
+        #
+        # MONO: Using the native utility library when running on Mono to
+        #       join big lists seems to cause StackOverflowException to
+        #       be thrown.
+        #
+        if {[info exists ::no(mono)] || ![isMono] || \
+            ![haveConstraint nativeUtility]} then {
+          #
+          # NOTE: Yes, it appears that it is available.
+          #
+          addConstraint bigLists
+
+          tputs $channel yes\n
+        } else {
+          tputs $channel "no, broken on Mono with native utility\n"
+        }
+      } else {
+        addConstraint bigLists
+
+        tputs $channel yes\n
+      }
+    } else {
+      tputs $channel no\n
+    }
+  }
+
   proc checkForStackIntensive { channel } {
     tputs $channel "---- checking for stack intensive testing... "
 
@@ -1283,7 +1324,8 @@ namespace eval ::Eagle {
       # NOTE: Running this check on the Mono 3.3.0 release build will lock
       #       up the process; therefore, attempt to skip it in that case.
       #
-      if {![isMono] || ![haveConstraint mono33]} then {
+      if {[info exists ::no(mono)] || ![isMono] || \
+          ![haveConstraint mono33]} then {
         #
         # BUGBUG: Tcl 8.4 does not like this expression (and Tcl tries to
         #         compile it even though it will only actually ever be
@@ -1378,8 +1420,8 @@ namespace eval ::Eagle {
       tputs $channel "---- checking for software update trust... "
 
       if {[llength [info commands uri]] > 0 && \
-          [catch {uri softwareupdates} result] == 0 && \
-          $result eq "software update certificate is trusted"} then {
+          [catch {uri softwareupdates} trust] == 0 && \
+          $trust eq "software update certificate is trusted"} then {
         #
         # NOTE: Yes, it appears that we trust our software updates.
         #       Since this setting is off by default, the user (or
@@ -1548,14 +1590,14 @@ namespace eval ::Eagle {
     proc checkForHost { channel } {
       tputs $channel "---- checking for host... "
 
-      if {[catch {host isopen} result] == 0} then {
-        if {$result} then {
+      if {[catch {host isopen} open] == 0} then {
+        if {$open} then {
           addConstraint hostIsOpen
 
           tputs $channel open\n
         } else {
-          if {[catch {host redirected Input} result] == 0} then {
-            if {$result} then {
+          if {[catch {host redirected Input} redirected] == 0} then {
+            if {$redirected} then {
               addConstraint hostInputRedirected
 
               tputs $channel redirected\n
@@ -1565,11 +1607,11 @@ namespace eval ::Eagle {
               tputs $channel closed\n
             }
           } else {
-            tlog $result; tputs $channel error\n]
+            tlog $redirected; tputs $channel error\n
           }
         }
       } else {
-        tlog $result; tputs $channel error\n]
+        tlog $open; tputs $channel error\n
       }
     }
 
@@ -1629,7 +1671,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Are we running inside Mono (regardless of operating system)?
       #
-      if {[isMono]} then {
+      if {![info exists ::no(mono)] && [isMono]} then {
         #
         # NOTE: Yes, it appears that we are running inside Mono.
         #
@@ -1736,7 +1778,7 @@ namespace eval ::Eagle {
         #
         set version [string map [list . ""] $dotVersion]
 
-        if {[isMono]} then {
+        if {![info exists ::no(mono)] && [isMono]} then {
           #
           # NOTE: If the runtime version was found, add a test constraint
           #       for it now.
@@ -1889,7 +1931,7 @@ namespace eval ::Eagle {
 
         tputs $channel [appendArgs $culture \n]
       } else {
-        tputs $channel [appendArgs unknown \n]
+        tputs $channel unknown\n
       }
     }
 
@@ -1912,7 +1954,7 @@ namespace eval ::Eagle {
 
         tputs $channel [appendArgs $culture \n]
       } else {
-        tputs $channel [appendArgs unknown \n]
+        tputs $channel unknown\n
       }
     }
 
@@ -2203,14 +2245,63 @@ namespace eval ::Eagle {
     proc checkForTclReady { channel } {
       tputs $channel "---- checking for Tcl readiness... "
 
-      if {[catch {tcl ready} result] == 0 && $result} then {
+      if {[catch {tcl ready} ready] == 0 && $ready} then {
         #
         # NOTE: Yes, native Tcl is loaded and ready.
         #
         addConstraint tclReady
 
-        tputs $channel yes\n
+        #
+        # NOTE: Yes, native Tcl is ready -OR- available.
+        #
+        addConstraint tclReadyOrLibrary
+
+        #
+        # NOTE: Ok, attempt to determine the loaded Tcl version.
+        #
+        if {[catch {
+          tcl eval [tcl master] {info tclversion}
+        } version] == 0 && [regexp -- {^\d+\.\d+$} $version]} then {
+          addConstraint [appendArgs \
+              tclReady [string map [list . ""] $version]]
+
+          #
+          # NOTE: The Tcl library is ready; however, we need to add the
+          #       appropriate test constraint to indicate that a specific
+          #       version of Tcl is "either ready or available".
+          #
+          if {[haveConstraint tclLibrary86] && $version >= 8.6} then {
+            addConstraint tclReadyOrLibrary86
+          } elseif {[haveConstraint tclLibrary85] && $version >= 8.5} then {
+            addConstraint tclReadyOrLibrary85
+          } elseif {[haveConstraint tclLibrary84] && $version >= 8.4} then {
+            addConstraint tclReadyOrLibrary84
+          }
+
+          tputs $channel [appendArgs "yes (" $version ")\n"]
+        } else {
+          #
+          # NOTE: The Tcl library is ready; however, we have no idea what
+          #       version it actually is; therefore, skip adding the test
+          #       constraint to indicate that a specific version of Tcl
+          #       is "either ready or available".
+          #
+          tputs $channel yes\n
+        }
       } else {
+        #
+        # NOTE: The Tcl library is not ready; however, we still need to add
+        #       the appropriate test constraint to indicate that a specific
+        #       version of Tcl is "either ready or available".
+        #
+        if {[haveConstraint tclLibrary86]} then {
+          addConstraint tclReadyOrLibrary86
+        } elseif {[haveConstraint tclLibrary85]} then {
+          addConstraint tclReadyOrLibrary85
+        } elseif {[haveConstraint tclLibrary84]} then {
+          addConstraint tclReadyOrLibrary84
+        }
+
         tputs $channel no\n
       }
     }
@@ -2223,8 +2314,8 @@ namespace eval ::Eagle {
       #
       set prefix "---- checking for Tcl shell version... "
 
-      if {[catch {getTclVersionForTclShell} result] == 0 && \
-          $result ne "error"} then {
+      if {[catch {getTclVersionForTclShell} version] == 0 && \
+          $version ne "error"} then {
         #
         # NOTE: Yes, a native Tcl shell appears to be available.
         #
@@ -2233,9 +2324,10 @@ namespace eval ::Eagle {
         #
         # NOTE: Now, add the version specific test constraint.
         #
-        addConstraint [appendArgs tclShell [string map [list . ""] $result]]
+        addConstraint [appendArgs \
+            tclShell [string map [list . ""] $version]]
 
-        tputs $channel [appendArgs $prefix "yes (" $result ")\n"]
+        tputs $channel [appendArgs $prefix "yes (" $version ")\n"]
       } else {
         tputs $channel [appendArgs $prefix no\n]
       }
@@ -2250,14 +2342,14 @@ namespace eval ::Eagle {
       #
       set prefix "---- checking for Tk package version... "
 
-      if {[catch {getTkVersionForTclShell} result] == 0 && \
-          $result ne "error"} then {
+      if {[catch {getTkVersionForTclShell} version] == 0 && \
+          $version ne "error"} then {
         #
         # NOTE: Yes, a native Tk package appears to be available.
         #
         addConstraint tkPackage
 
-        tputs $channel [appendArgs $prefix "yes (" $result ")\n"]
+        tputs $channel [appendArgs $prefix "yes (" $version ")\n"]
       } else {
         tputs $channel [appendArgs $prefix no\n]
       }
@@ -2500,6 +2592,7 @@ namespace eval ::Eagle {
             set nativeUtility $name
           }
 
+          addConstraint nativeUtility
           addConstraint [appendArgs nativeUtility. $nativeUtility]
 
           tputs $channel [appendArgs $::eagle_platform(nativeUtility) \
@@ -2543,12 +2636,27 @@ namespace eval ::Eagle {
           #
           # NOTE: Yes, it appears that it is available.
           #
-          addConstraint dotNet45
+          addConstraint dotNet45OrHigher
+
+          #
+          # NOTE: If the "release" value is greater than or equal to 378758,
+          #       then the .NET Framework 4.5.1 is installed.
+          #
+          if {$release >= 378758} then {
+            addConstraint dotNet451
+            addConstraint dotNet451OrHigher
+
+            set version 4.5.1
+          } else {
+            addConstraint dotNet45
+
+            set version 4.5
+          }
 
           #
           # NOTE: Show the "release" value we found in the registry.
           #
-          tputs $channel [appendArgs "yes (" $release ")\n"]
+          tputs $channel [appendArgs "yes (" $release ", " $version ")\n"]
 
           #
           # NOTE: We are done here, return now.
@@ -2583,7 +2691,7 @@ namespace eval ::Eagle {
         # NOTE: The versions of Visual Studio that we support.
         #
         set versions [list [list 8.0 2005] [list 9.0 2008] \
-            [list 10.0 2010] [list 11.0 2012]]
+            [list 10.0 2010] [list 11.0 2012] [list 12.0 2013]]
 
         #
         # NOTE: Check each version and keep track of the ones we find.
@@ -2749,7 +2857,7 @@ namespace eval ::Eagle {
         checkForTestPlatform checkForTestConfiguration checkForTestSuffix \
         checkForFile checkForPathFile checkForNativeCode checkForTip127 \
         checkForTip194 checkForTip241 checkForTip285 checkForTip405 \
-        checkForTip426 checkForTiming checkForPerformance \
+        checkForTip426 checkForTiming checkForPerformance checkForBigLists \
         checkForStackIntensive checkForInteractive checkForInteractiveCommand \
         checkForUserInteraction checkForNetwork checkForCompileOption] false \
         false

@@ -95,8 +95,8 @@ if {![info exists no([file tail [info script]])]} then {
       ![info exists no(exec)] && ![info exists no(fossil)]} then {
     set pattern {^local-root:\s+(.*?)\s+$}
 
-    if {[catch {set exec [exec -- fossil info]}] || \
-        [regexp -line -- $pattern $exec dummy directory] == 0} then {
+    if {[catch {exec -- fossil info} exec] || \
+        ![regexp -line -- $pattern $exec dummy directory]} then {
       #
       # NOTE: We could not query local root directory of the source checkout
       #       from Fossil; therefore, attempt to make an educated guess.  This
@@ -379,35 +379,6 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Set the Tcl shell executable to use for those specialized tests that
-  #       may require it, if necessary.
-  #
-  if {![info exists test_tclsh]} then {
-    #
-    # NOTE: When running in Eagle, more complex logic is required to determine
-    #       the Tcl shell to use for the various tests that require it.  Also,
-    #       this same logic is used with Tcl when it is not running from an
-    #       instance of the Tcl shell executable.
-    #
-    if {[isEagle] || ![string match tclsh* $bin_file]} then {
-      if {[info exists test_flags(-tclsh)] && \
-          [string length $test_flags(-tclsh)] > 0} then {
-        #
-        # NOTE: Use the Tcl shell specified via the command line.
-        #
-        set test_tclsh $test_flags(-tclsh)
-      } else {
-        #
-        # NOTE: Check for a Tcl shell specified via the environment.
-        #
-        set test_tclsh [getTclShellFileName]
-      }
-    } else {
-      set test_tclsh $bin_file
-    }
-  }
-
-  #
   # NOTE: Has automatic log file naming been disabled?
   #
   if {![info exists no(logFileName)]} then {
@@ -417,6 +388,50 @@ if {![info exists no([file tail [info script]])]} then {
     if {![info exists test_log]} then {
       set test_log [file join [getTemporaryPath] [appendArgs [file tail [info \
           nameofexecutable]] [getTestLogId] .test. [pid] .log]]
+    }
+  }
+
+  #
+  # NOTE: Has native Tcl shell detection and use been disabled?
+  #
+  if {![info exists no(tclsh)]} then {
+    #
+    # NOTE: Set the Tcl shell executable to use for those specialized
+    #       tests that may require it, if necessary.
+    #
+    if {![info exists test_tclsh]} then {
+      #
+      # NOTE: When running in Eagle, more complex logic is required to
+      #       determine the Tcl shell to use for the various tests that
+      #       require it.  Also, this same logic is used with Tcl when it
+      #       is not running from an instance of the Tcl shell executable.
+      #
+      if {[isEagle] || ![string match tclsh* $bin_file]} then {
+        if {[info exists test_flags(-tclsh)] && \
+            [string length $test_flags(-tclsh)] > 0} then {
+          #
+          # NOTE: Use the Tcl shell specified via the command line.
+          #
+          set test_tclsh $test_flags(-tclsh)
+        } else {
+          if {![info exists no(getTclShellFileName)]} then {
+            #
+            # NOTE: Attempt to automatically select a Tcl shell to use.
+            #
+            tputs $test_channel \
+                "==== WARNING: attempting automatic Tcl shell selection...\n"
+
+            set test_tclsh [getTclShellFileName true]
+          } else {
+            #
+            # NOTE: Skip detection and use the fallback default.
+            #
+            set test_tclsh tclsh
+          }
+        }
+      } else {
+        set test_tclsh $bin_file
+      }
     }
   }
 
@@ -541,8 +556,8 @@ if {![info exists no([file tail [info script]])]} then {
       #       should be reported to the user and noted in the test suite log
       #       file.
       #
-      tputs $test_channel [appendArgs \
-          "==== WARNING: running without any strong name signature...\n"]
+      tputs $test_channel \
+          "==== WARNING: running without any strong name signature...\n"
     } else {
       #
       # BUGBUG: Tcl 8.4 does not like this expression because it contains the
@@ -695,8 +710,9 @@ if {![info exists no([file tail [info script]])]} then {
   tputs $test_channel [appendArgs "---- temporary files stored in: \"" \
       [getTemporaryPath] \"\n]
 
-  tputs $test_channel [appendArgs "---- native Tcl shell: \"" \
-      $test_tclsh \"\n]
+  tputs $test_channel [appendArgs "---- native Tcl shell: " \
+      [expr {[info exists test_tclsh] && [string length $test_tclsh] > 0 ? \
+          [appendArgs \" $test_tclsh \"] : "<none>"}] \n]
 
   tputs $test_channel [appendArgs "---- disabled options: " \
       [formatList [lsort [array names no]] <none>] \n]
@@ -778,7 +794,7 @@ if {![info exists no([file tail [info script]])]} then {
     # NOTE: Check the variant and/or version of the CLR that we are
     #       currently running on.
     #
-    if {![info exists no(runtimeVersion)]} then {
+    if {![info exists no(checkForRuntimeVersion)]} then {
       checkForRuntimeVersion $test_channel
     }
 
@@ -1860,7 +1876,7 @@ if {![info exists no([file tail [info script]])]} then {
       #
       if {![info exists no(compileTest)]} then {
         #
-        # NOTE: For test "tclLoad-1.16.1".
+        # NOTE: For tests "tclLoad-1.17.1" and "tclLoad-1.17.2".
         #
         checkForCompileOption $test_channel TEST
       }
@@ -2149,7 +2165,11 @@ if {![info exists no([file tail [info script]])]} then {
     checkForTclOptions $test_channel
   }
 
-  if {![info exists no(stackIntensive)]} then {
+  if {![info exists no(checkForBigLists)]} then {
+    checkForBigLists $test_channel
+  }
+
+  if {![info exists no(checkForStackIntensive)]} then {
     checkForStackIntensive $test_channel
   }
 
@@ -2265,7 +2285,7 @@ if {![info exists no([file tail [info script]])]} then {
   #
   # NOTE: Has performance testing been disabled?
   #
-  if {![info exists no(performance)]} then {
+  if {![info exists no(checkForPerformance)]} then {
     checkForPerformance $test_channel
   }
 
@@ -2384,10 +2404,10 @@ if {![info exists no([file tail [info script]])]} then {
     #       binary in the PATH, if available.
     #
     if {![info exists no(exec)] && ![info exists no(fossil)]} then {
-      if {[catch {set exec [exec -- fossil info]}] == 0} then {
+      if {[catch {exec -- fossil info} exec] == 0} then {
         set pattern {^checkout:\s+(.*?)\s+$}
 
-        if {[regexp -line -- $pattern $exec dummy checkout] == 0} then {
+        if {![regexp -line -- $pattern $exec dummy checkout]} then {
           #
           # NOTE: We could not query the source checkout from Fossil.
           #
@@ -2396,7 +2416,7 @@ if {![info exists no([file tail [info script]])]} then {
 
         set pattern {^tags:\s+(.*?)\s+$}
 
-        if {[regexp -line -- $pattern $exec dummy tags] == 0} then {
+        if {![regexp -line -- $pattern $exec dummy tags]} then {
           #
           # NOTE: We could not query the tags from Fossil.
           #

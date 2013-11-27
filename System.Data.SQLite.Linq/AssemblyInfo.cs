@@ -32,7 +32,7 @@ using System.Runtime.ConstrainedExecution;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 
-#if !NET_40 && !NET_45
+#if !NET_40 && !NET_45 && !NET_451
 [assembly: AllowPartiallyTrustedCallers]
 #endif
 

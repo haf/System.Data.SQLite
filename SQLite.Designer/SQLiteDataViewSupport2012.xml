@@ -4,7 +4,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 -->
@@ -25,7 +25,7 @@
           <CommandBinding name="Rekey"    guid="814658EE-A28E-4b97-BC33-4B1BC81EBECB" cmdid="263" handler="SQLite.Designer.SQLiteCommandHandler"/>
         </CommandBindings>
 				<Children>
-          
+
 					<StaticNode nid="Tables">
             <DisplayName>Tables</DisplayName>
 						<CommandBindings>
@@ -78,15 +78,15 @@
 								</SelectionNode>
 							</Selection>
 						</Children>
-					</StaticNode>   
-          
+					</StaticNode>
+
 				</Children>
 			</StaticConnectionNode>
 		</DataView>
 	</DataViews>
-  
+
   <SubHierarchies>
-    <SubHierarchy name="table children">      
+    <SubHierarchy name="table children">
       <StaticNode nid="Columns">
         <DisplayName>Columns</DisplayName>
         <CommandBindings>
@@ -105,7 +105,7 @@
           </Selection>
         </Children>
       </StaticNode>
-      
+
       <StaticNode nid="Indexes">
         <DisplayName>Indexes</DisplayName>
         <CommandBindings>
@@ -147,8 +147,8 @@
         </Children>
       </StaticNode>
     </SubHierarchy>
-    
-    <SubHierarchy name="view children">      
+
+    <SubHierarchy name="view children">
       <StaticNode nid="Columns">
         <DisplayName>Columns</DisplayName>
         <CommandBindings>
@@ -162,7 +162,7 @@
           </Selection>
         </Children>
       </StaticNode>
-      
+
       <StaticNode nid="Triggers">
         <DisplayName>Triggers</DisplayName>
         <Children>
@@ -174,10 +174,10 @@
         </Children>
       </StaticNode>
     </SubHierarchy>
-    
+
   </SubHierarchies>
   <TypeExtensions>
-    
+
     <TypeExtension name="Table">
       <Identifier>
         <Part name="Name">
@@ -201,7 +201,7 @@
         </CommandBinding>
       </CommandBindings>
     </TypeExtension>
-    
+
     <TypeExtension name="View">
       <Identifier>
         <Part name="Name">
@@ -230,7 +230,7 @@
         </CommandBinding>
       </CommandBindings>
     </TypeExtension>
-    
+
     <TypeExtension name="ViewColumn">
       <Identifier>
         <Part name="Name">
@@ -261,7 +261,7 @@
         <CommandBinding name="NewQuery" guid="501822E1-B5AF-11d0-B4DC-00A0C91506EF" cmdid="13608" handler="884DD964-5327-461f-9F06-6484DD540F8F"/>
       </CommandBindings>
     </TypeExtension>
-    
+
     <TypeExtension name="Index">
       <Identifier>
         <Part name="Name">

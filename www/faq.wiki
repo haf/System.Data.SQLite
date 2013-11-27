@@ -200,9 +200,9 @@
 </p>
 
 <p>
-  Currently, Visual Studio 2005, 2008, 2010, and 2012 are supported, including
-  the &quot;Express&quot; editions; however, in order to build the entire
-  solution, including the necessary native code, the &quot;Professional&quot;
+  Currently, Visual Studio 2005, 2008, 2010, 2012, and 2013 are supported,
+  including the &quot;Express&quot; editions; however, in order to build the
+  entire solution, including the necessary native code, the &quot;Professional&quot;
   edition (or higher) is required.  It may be possible to install both Visual C#
   Express and Visual C++ Express and then build the corresponding sub-projects
   via their respective integrated development environments (IDE); however, this

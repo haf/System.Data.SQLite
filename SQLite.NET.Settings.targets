@@ -51,6 +51,11 @@
                      ('$(NetFx45Settings)' == '' Or '$(NetFx45Settings)' != 'false') And
                      Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx45')" />
 
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx451"
+          Condition="'$(NetFx451)' != '' And '$(NetFx451)' != 'false' And
+                     ('$(NetFx451Settings)' == '' Or '$(NetFx451Settings)' != 'false') And
+                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx451')" />
+
   <!--
   ******************************************************************************
   **                       [Fairly] Generic Properties                        **
@@ -131,6 +136,15 @@
     <NetFx45 Condition="'$(NetFx45)' == ''">false</NetFx45>
 
     <!--
+        NOTE: Only use functionality available in the .NET Framework 4.5.1?  By
+              default, this is disabled.  This must be enabled to successfully
+              build the project using Visual Studio 2013 and/or the .NET
+              Framework 4.5.1 (if necessary, it will typically be enabled from
+              within the project file itself).
+    -->
+    <NetFx451 Condition="'$(NetFx451)' == ''">false</NetFx451>
+
+    <!--
         NOTE: Load the version-specific settings for the .NET Framework 2.0?
               By default, this is disabled.  If this is enabled when compiling
               for the .NET Framework 2.0, the version-specific settings file
@@ -169,6 +183,16 @@
               processed.
     -->
     <NetFx45Settings Condition="'$(NetFx45Settings)' == ''">false</NetFx45Settings>
+
+    <!--
+        NOTE: Load the version-specific settings for the .NET Framework 4.5.1?
+              By default, this is disabled.  If this is enabled when compiling
+              for the .NET Framework 4.5.1, the version-specific settings file
+              "SQLite.NET.Settings.targets.netFx451" will be loaded if it is
+              actually present, before any other settings in this file are
+              processed.
+    -->
+    <NetFx451Settings Condition="'$(NetFx451Settings)' == ''">false</NetFx451Settings>
   </PropertyGroup>
 
   <!--

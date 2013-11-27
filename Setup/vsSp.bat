@@ -104,6 +104,26 @@ FOR /F "eol=; tokens=1,2,3*" %%I IN ('%GET_SP_CMD% 2^> NUL') DO (
   )
 )
 
+REM
+REM NOTE: Build the command that we will use to query for Visual Studio 2013.
+REM       Visual Studio 2013 is 32-bit only; therefore, when not running on an
+REM       x86 platform, look in the WoW64 registry hive.
+REM
+IF "%PROCESSOR_ARCHITECTURE%" == "x86" (
+  SET GET_SP_CMD=reg.exe QUERY "HKLM\SOFTWARE\Microsoft\DevDiv\VS\Servicing\12.0" /v SP
+) ELSE (
+  SET GET_SP_CMD=reg.exe QUERY "HKLM\SOFTWARE\Wow6432Node\Microsoft\DevDiv\VS\Servicing\12.0" /v SP
+)
+
+FOR /F "eol=; tokens=1,2,3*" %%I IN ('%GET_SP_CMD% 2^> NUL') DO (
+  IF {%%I} == {SP} (
+    IF {%%J} == {REG_DWORD} (
+      %_AECHO% Found Visual Studio 2013 Service Pack "%%K".
+      SET VS2013SP=%%K
+    )
+  )
+)
+
 GOTO no_errors
 
 :fn_ResetErrorLevel
