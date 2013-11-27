@@ -93,16 +93,23 @@ Original code 2006 June 05 by relicoder.
 #include <windows.h>
 
 /* #define COMPILE_SQLITE_EXTENSIONS_AS_LOADABLE_MODULE */
-/* #define HAVE_ACOSH 1 */
-/* #define HAVE_ASINH 1 */
-/* #define HAVE_ATANH 1 */
-#define HAVE_SINH 1
-#define HAVE_COSH 1
-#define HAVE_TANH 1
-#define HAVE_LOG10 1
-/* #define HAVE_ISBLANK 1 */
-#define SQLITE_SOUNDEX 1
-#define HAVE_TRIM 1		/* LMH 2007-03-25 if sqlite has trim functions */
+
+/* NOTE: More functions are available with MSVC 2013. */
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+#  define HAVE_ACOSH		1
+#  define HAVE_ASINH		1
+#  define HAVE_ATANH		1
+#  define HAVE_ISBLANK		1
+#endif
+
+#define HAVE_SINH		1
+#define HAVE_COSH		1
+#define HAVE_TANH		1
+#define HAVE_LOG10		1
+#define SQLITE_SOUNDEX		1
+
+/* LMH 2007-03-25 if SQLite has trim functions */
+#define HAVE_TRIM		1
 
 #ifdef COMPILE_SQLITE_EXTENSIONS_AS_LOADABLE_MODULE
 #include "../core/sqlite3ext.h"
@@ -121,7 +128,7 @@ SQLITE_EXTENSION_INIT1
 #include <errno.h>		/* LMH 2007-03-25 */
 #else
 int errno;
-#define strerror(x) ""
+#define strerror(x)		""
 #endif
 
 #include <stdlib.h>
