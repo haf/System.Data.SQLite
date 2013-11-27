@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * testlinq.2013.csproj -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9D3CF7A6-092A-4B05-B0E4-BEF6944525B3}</ProjectGuid>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>testlinq</RootNamespace>
+    <AssemblyName>testlinq</AssemblyName>
+    <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+    <NetFx451>true</NetFx451>
+    <ConfigurationYear>2013</ConfigurationYear>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
+  <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
+    <OutputPath>$(BinaryOutputPath)</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Condition="'$(TargetFrameworkVersion)' == 'v3.5'"
+             Include="NorthwindModel2008.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NorthwindModel2008.edmx</DependentUpon>
+    </Compile>
+    <Compile Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
+                        '$(TargetFrameworkVersion)' == 'v4.5'"
+             Include="NorthwindModel2013.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NorthwindModel2013.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Condition="'$(TargetFrameworkVersion)' == 'v3.5'"
+          Include="2008\App.Config" />
+    <None Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
+                     '$(TargetFrameworkVersion)' == 'v4.5'"
+          Include="2013\App.Config" />
+    <None Include="northwindEF.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <EntityDeploy Condition="'$(TargetFrameworkVersion)' == 'v3.5'"
+                  Include="NorthwindModel2008.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>NorthwindModel2008.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <EntityDeploy Condition="'$(TargetFrameworkVersion)' == 'v4.0' Or
+                             '$(TargetFrameworkVersion)' == 'v4.5'"
+                  Include="NorthwindModel2013.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>NorthwindModel2013.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{C8F2D6AC-F9F4-4E40-A399-22F9A9A5CBD2}" />
+  </ItemGroup>
+  <Import Project="$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.Properties.targets" />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

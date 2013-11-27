@@ -7,6 +7,8 @@
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.8.2].</li>
+    <li>Add Visual Studio 2013 support to all the applicable solution/project files, their associated supporting files, and the test suite.</li>
+    <li>Add Visual Studio 2013 support to the redesigned designer support installer.</li>
     <li>Add support for Windows Embedded Compact 2013.</li>
     <li>Add experimental support for the native regexp extension.</li>
     <li>Never create a new connection wrapper in the SQLiteConnection.Shutdown method.&nbsp;<b>** Potentially Incompatible Change **</b></li>
