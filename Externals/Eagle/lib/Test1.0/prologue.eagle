@@ -1771,6 +1771,13 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has native debugger testing support been disabled?
+    #
+    if {![info exists no(nativeDebugger)]} then {
+      checkForNativeDebugger $test_channel
+    }
+
+    #
     # NOTE: Has managed debugger testing support been disabled?
     #
     if {![info exists no(managedDebugger)]} then {

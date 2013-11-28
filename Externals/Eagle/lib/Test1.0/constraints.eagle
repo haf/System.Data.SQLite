@@ -2743,6 +2743,26 @@ namespace eval ::Eagle {
       }
     }
 
+    proc checkForNativeDebugger { channel } {
+      tputs $channel "---- checking for native debugger... "
+
+      #
+      # NOTE: Is the native debugger present?
+      #
+      if {[catch {object invoke -flags +NonPublic \
+              Eagle._Components.Private.NativeOps+SafeNativeMethods \
+              IsDebuggerPresent} present] == 0 && $present} then {
+        #
+        # NOTE: Yes, it appears that it is present.
+        #
+        addConstraint nativeDebugger
+
+        tputs $channel yes\n
+      } else {
+        tputs $channel no\n
+      }
+    }
+
     proc checkForManagedDebugger { channel } {
       tputs $channel "---- checking for managed debugger... "
 

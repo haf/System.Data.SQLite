@@ -4514,8 +4514,9 @@ namespace System.Data.SQLite
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback, String.Format(
-                            ".NET Framework v{0} directory not found, " +
-                            "skipping...", frameworkVersion), traceCategory);
+                            ".NET Framework {0} directory not found, " +
+                            "skipping...", ForDisplay(frameworkVersion)),
+                            traceCategory);
 
                         continue;
                     }
@@ -4711,8 +4712,9 @@ namespace System.Data.SQLite
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback, String.Format(
-                            ".NET Framework v{0} registry not found, " +
-                            "skipping...", frameworkVersion), traceCategory);
+                            ".NET Framework {0} registry not found, " +
+                            "skipping...", ForDisplay(frameworkVersion)),
+                            traceCategory);
 
                         continue;
                     }
@@ -4880,8 +4882,8 @@ namespace System.Data.SQLite
                 {
                     TraceOps.DebugAndTrace(TracePriority.Low,
                         debugCallback, traceCallback, String.Format(
-                        "Visual Studio v{0} not found, skipping...",
-                        vsVersion), traceCategory);
+                        "Visual Studio {0} not found, skipping...",
+                        ForDisplay(vsVersion)), traceCategory);
 
                     continue;
                 }
