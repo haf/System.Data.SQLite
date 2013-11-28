@@ -2592,7 +2592,10 @@ namespace eval ::Eagle {
             set nativeUtility $name
           }
 
-          addConstraint nativeUtility
+          if {$nativeUtility ni "disabled unavailable"} then {
+            addConstraint nativeUtility
+          }
+
           addConstraint [appendArgs nativeUtility. $nativeUtility]
 
           tputs $channel [appendArgs $::eagle_platform(nativeUtility) \
