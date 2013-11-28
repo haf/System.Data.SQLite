@@ -234,7 +234,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       #       .NET Framework 4.5.  The second argument went from being of
       #       type UInt to type UIntPtr.
       #
-      if {[haveConstraint dotNet40] && [haveConstraint dotNet45]} then {
+      if {[haveConstraint dotNet40] && \
+          [haveConstraint dotNet45OrHigher]} then {
         set newSize [object create UIntPtr $size]
       } else {
         set newSize $size

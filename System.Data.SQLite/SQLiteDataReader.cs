@@ -663,7 +663,10 @@ namespace System.Data.SQLite
       //       If not, do it now.
       //
       if (_fieldIndexes == null)
-          _fieldIndexes = new Dictionary<string, int>(new ColumnNameComparer());
+      {
+          _fieldIndexes = new Dictionary<string, int>(
+              StringComparer.OrdinalIgnoreCase);
+      }
 
       //
       // NOTE: Next, see if the index for the requested column name has been
@@ -698,41 +701,6 @@ namespace System.Data.SQLite
       CheckDisposed();
       return GetSchemaTable(true, false);
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    #region ColumnNameComparer Class
-    private sealed class ColumnNameComparer : IEqualityComparer<string>
-    {
-        #region IEqualityComparer<string> Members
-        public bool Equals(string x, string y)
-        {
-            if ((x == null) && (y == null))
-            {
-                return true;
-            }
-            else if ((x == null) || (y == null))
-            {
-                return false;
-            }
-            else
-            {
-                return String.Equals(x, y, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-
-        public int GetHashCode(string obj)
-        {
-            if (obj == null)
-                return 0;
-
-            return obj.GetHashCode();
-        }
-        #endregion
-    }
-    #endregion
 
     ///////////////////////////////////////////////////////////////////////////
 
