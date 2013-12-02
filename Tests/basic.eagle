@@ -2669,6 +2669,37 @@ SQLite System.Data.SQLite} -match regexp -result {^\{Busy 0 False 0\} \{Busy\
 
 ###############################################################################
 
+runTest {test data-1.54 {percentile extension} -setup {
+  setupDb [set fileName data-1.54.db]
+} -body {
+  set connection [getDbConnection]
+  set result [list]
+
+  $connection EnableExtensions true
+  $connection LoadExtension [getCoreBinaryFileName] sqlite3_percentile_init
+
+  lappend result [sql execute $db "CREATE TABLE t1(x);"]
+  lappend result [sql execute $db "INSERT INTO t1 VALUES(1),(2),(3),(4);"]
+  lappend result [sql execute $db "SELECT percentile(x,25) FROM t1"]
+
+  lappend result [sql execute -execute scalar $db \
+      "SELECT percentile(x,25) FROM t1"]
+
+  set result
+} -cleanup {
+  freeDbConnection
+
+  unset -nocomplain result connection
+
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{0 4 0 1.75}}
+
+###############################################################################
+
 reportSQLiteResources $test_channel
 
 ###############################################################################

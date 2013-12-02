@@ -184,6 +184,9 @@
     <ClCompile Include="src\contrib\extension-functions.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\ext\percentile.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\ext\regexp.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>

@@ -13,6 +13,10 @@
 #include "../ext/vtshim.c"
 #endif
 
+#if defined(INTEROP_PERCENTILE_EXTENSION)
+#include "../ext/percentile.c"
+#endif
+
 #if defined(INTEROP_TOTYPE_EXTENSION)
 #include "../ext/totype.c"
 #endif
