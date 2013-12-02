@@ -41,7 +41,14 @@ IF ERRORLEVEL 1 (
 
 IF NOT DEFINED PREARGS (
   %_AECHO% No pre-arguments specified, using default...
-  SET PREARGS=-interactive -noExit -initialize -runtimeOption autoSelect
+  SET PREARGS=-interactive -noExit -initialize
+
+  IF DEFINED NOAUTOSELECT (
+    %_AECHO% Skipping automatic build selection...
+  ) ELSE (
+    %_AECHO% Enabling automatic build selection...
+    CALL :fn_AppendVariable PREARGS " -runtimeOption autoSelect"
+  )
 )
 
 %_VECHO% PreArgs = '%PREARGS%'
@@ -76,6 +83,19 @@ IF ERRORLEVEL 1 (
 )
 
 GOTO no_errors
+
+:fn_AppendVariable
+  SET __ECHO_CMD=ECHO %%%1%%
+  IF DEFINED %1 (
+    FOR /F "delims=" %%V IN ('%__ECHO_CMD%') DO (
+      SET %1=%%V%~2
+    )
+  ) ELSE (
+    SET %1=%~2
+  )
+  SET __ECHO_CMD=
+  CALL :fn_ResetErrorLevel
+  GOTO :EOF
 
 :fn_ResetErrorLevel
   VERIFY > NUL
