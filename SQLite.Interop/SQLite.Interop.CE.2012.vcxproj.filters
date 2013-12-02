@@ -35,6 +35,12 @@
     <ClCompile Include="src\contrib\extension-functions.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ext\regexp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ext\totype.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\ext\vtshim.c">
       <Filter>Source Files</Filter>
     </ClCompile>

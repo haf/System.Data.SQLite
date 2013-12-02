@@ -184,6 +184,12 @@
     <ClCompile Include="src\contrib\extension-functions.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\ext\regexp.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ext\totype.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\ext\vtshim.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
