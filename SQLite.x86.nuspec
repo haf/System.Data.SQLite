@@ -27,8 +27,11 @@
     <file src="bin\2010\Release\bin\System.Data.SQLite.xml" target="lib\net40" />
     <file src="bin\2012\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib\net45" />
     <file src="bin\2012\Release\bin\System.Data.SQLite.xml" target="lib\net45" />
+    <file src="bin\2013\Win32\ReleaseStatic\System.Data.SQLite.dll" target="lib\net451" />
+    <file src="bin\2013\Release\bin\System.Data.SQLite.xml" target="lib\net451" />
     <file src="bin\2008\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net20" />
     <file src="bin\2010\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net40" />
     <file src="bin\2012\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net45" />
+    <file src="bin\2013\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net451" />
   </files>
 </package>
