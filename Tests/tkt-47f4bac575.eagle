@@ -29,7 +29,7 @@ runTest {test tkt-47f4bac575-1.1 {SQLiteConvert DbTypeToTypeName} -setup {
       UInt16 UInt32 UInt64 VarNumeric AnsiStringFixedLength \
       StringFixedLength Xml DateTime2 DateTimeOffset] {
     lappend result [list $dbType [object invoke -flags +NonPublic \
-        System.Data.SQLite.SQLiteConvert DbTypeToTypeName $dbType]]
+        System.Data.SQLite.SQLiteConvert DbTypeToTypeName $dbType None]]
   }
   set result
 } -cleanup {

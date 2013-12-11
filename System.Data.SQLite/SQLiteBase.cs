@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -162,7 +162,7 @@ namespace System.Data.SQLite
     /// <returns>True if a row was returned, False if not.</returns>
     internal abstract bool Step(SQLiteStatement stmt);
     /// <summary>
-    /// Resets a prepared statement so it can be executed again.  If the error returned is SQLITE_SCHEMA, 
+    /// Resets a prepared statement so it can be executed again.  If the error returned is SQLITE_SCHEMA,
     /// transparently attempt to rebuild the SQL statement and throw an error if that was not possible.
     /// </summary>
     /// <param name="stmt">The statement to reset</param>
@@ -353,14 +353,14 @@ namespace System.Data.SQLite
     /// <returns></returns>
     internal abstract void SetExtendedResultCodes(bool bOnOff);
     /// <summary>
-    /// Returns the numeric result code for the most recent failed SQLite API call 
-    /// associated with the database connection. 
+    /// Returns the numeric result code for the most recent failed SQLite API call
+    /// associated with the database connection.
     /// </summary>
     /// <returns>Result code</returns>
     internal abstract SQLiteErrorCode ResultCode();
     /// <summary>
-    /// Returns the extended numeric result code for the most recent failed SQLite API call 
-    /// associated with the database connection. 
+    /// Returns the extended numeric result code for the most recent failed SQLite API call
+    /// associated with the database connection.
     /// </summary>
     /// <returns>Extended result code</returns>
     internal abstract SQLiteErrorCode ExtendedResultCode();
@@ -369,8 +369,8 @@ namespace System.Data.SQLite
     /// Add a log message via the SQLite sqlite3_log interface.
     /// </summary>
     /// <param name="iErrCode">Error code to be logged with the message.</param>
-    /// <param name="zMessage">String to be logged.  Unlike the SQLite sqlite3_log() 
-    /// interface, this should be pre-formatted.  Consider using the 
+    /// <param name="zMessage">String to be logged.  Unlike the SQLite sqlite3_log()
+    /// interface, this should be pre-formatted.  Consider using the
     /// String.Format() function.</param>
     /// <returns></returns>
     internal abstract void LogMessage(SQLiteErrorCode iErrCode, string zMessage);
@@ -557,7 +557,9 @@ namespace System.Data.SQLite
         /* SQLITE_AUTH        */ "authorization denied",
         /* SQLITE_FORMAT      */ "auxiliary database format error",
         /* SQLITE_RANGE       */ "bind or column index out of range",
-        /* SQLITE_NOTADB      */ "file is encrypted or is not a database"
+        /* SQLITE_NOTADB      */ "file is encrypted or is not a database",
+        /* SQLITE_NOTICE      */ "notification message",
+        /* SQLITE_WARNING     */ "warning message"
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -976,6 +978,12 @@ namespace System.Data.SQLite
       LogModuleException = 0x4000,
 
       /// <summary>
+      /// Enable tracing of potentially important [non-fatal] error conditions
+      /// that cannot be easily reported through other means.
+      /// </summary>
+      TraceWarning = 0x8000,
+
+      /// <summary>
       /// When binding and returning column values, always treat them as though
       /// they were plain text (i.e. no numeric, date/time, or other conversions
       /// should be attempted).
@@ -998,23 +1006,29 @@ namespace System.Data.SQLite
   // These are the options to the internal sqlite3_config call.
   internal enum SQLiteConfigOpsEnum
   {
-    SQLITE_CONFIG_NONE = 0, // nil 
-    SQLITE_CONFIG_SINGLETHREAD = 1, // nil 
-    SQLITE_CONFIG_MULTITHREAD = 2, // nil 
-    SQLITE_CONFIG_SERIALIZED = 3, // nil 
-    SQLITE_CONFIG_MALLOC = 4, // sqlite3_mem_methods* 
-    SQLITE_CONFIG_GETMALLOC = 5, // sqlite3_mem_methods* 
-    SQLITE_CONFIG_SCRATCH = 6, // void*, int sz, int N 
-    SQLITE_CONFIG_PAGECACHE = 7, // void*, int sz, int N 
-    SQLITE_CONFIG_HEAP = 8, // void*, int nByte, int min 
-    SQLITE_CONFIG_MEMSTATUS = 9, // boolean 
-    SQLITE_CONFIG_MUTEX = 10, // sqlite3_mutex_methods* 
-    SQLITE_CONFIG_GETMUTEX = 11, // sqlite3_mutex_methods* 
+    SQLITE_CONFIG_NONE = 0, // nil
+    SQLITE_CONFIG_SINGLETHREAD = 1, // nil
+    SQLITE_CONFIG_MULTITHREAD = 2, // nil
+    SQLITE_CONFIG_SERIALIZED = 3, // nil
+    SQLITE_CONFIG_MALLOC = 4, // sqlite3_mem_methods*
+    SQLITE_CONFIG_GETMALLOC = 5, // sqlite3_mem_methods*
+    SQLITE_CONFIG_SCRATCH = 6, // void*, int sz, int N
+    SQLITE_CONFIG_PAGECACHE = 7, // void*, int sz, int N
+    SQLITE_CONFIG_HEAP = 8, // void*, int nByte, int min
+    SQLITE_CONFIG_MEMSTATUS = 9, // boolean
+    SQLITE_CONFIG_MUTEX = 10, // sqlite3_mutex_methods*
+    SQLITE_CONFIG_GETMUTEX = 11, // sqlite3_mutex_methods*
     // previously SQLITE_CONFIG_CHUNKALLOC 12 which is now unused
-    SQLITE_CONFIG_LOOKASIDE = 13, // int int 
-    SQLITE_CONFIG_PCACHE = 14, // sqlite3_pcache_methods* 
-    SQLITE_CONFIG_GETPCACHE = 15, // sqlite3_pcache_methods* 
-    SQLITE_CONFIG_LOG = 16, // xFunc, void* 
+    SQLITE_CONFIG_LOOKASIDE = 13, // int int
+    SQLITE_CONFIG_PCACHE = 14, // sqlite3_pcache_methods*
+    SQLITE_CONFIG_GETPCACHE = 15, // sqlite3_pcache_methods*
+    SQLITE_CONFIG_LOG = 16, // xFunc, void*
+    SQLITE_CONFIG_URI = 17, // int
+    SQLITE_CONFIG_PCACHE2 = 18, // sqlite3_pcache_methods2*
+    SQLITE_CONFIG_GETPCACHE2 = 19, // sqlite3_pcache_methods2*
+    SQLITE_CONFIG_COVERING_INDEX_SCAN = 20, // int
+    SQLITE_CONFIG_SQLLOG = 21, // xSqllog, void*
+    SQLITE_CONFIG_MMAP_SIZE = 22, // sqlite3_int64, sqlite3_int64
+    SQLITE_CONFIG_WIN32_HEAPSIZE = 23 // int nByte
   }
-
 }

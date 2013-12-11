@@ -22,21 +22,21 @@ runSQLiteTestPrologue
 
 runTest {test tkt-fe50b8c2e8-1.1 {compatibility data types} -body {
   list [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType VARCHAR2] \
+      TypeNameToDbType VARCHAR2 None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType CLOB] \
+      TypeNameToDbType CLOB None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType NUMBER] \
+      TypeNameToDbType NUMBER None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType RAW] \
+      TypeNameToDbType RAW None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      DbTypeToTypeName AnsiString] \
+      DbTypeToTypeName AnsiString None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      DbTypeToTypeName String] \
+      DbTypeToTypeName String None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      DbTypeToTypeName Decimal] \
+      DbTypeToTypeName Decimal None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      DbTypeToTypeName Binary]
+      DbTypeToTypeName Binary None]
 } -constraints {eagle System.Data.SQLite} -result \
 {AnsiString String Decimal Binary VARCHAR NVARCHAR DECIMAL BLOB}}
 

@@ -1456,17 +1456,17 @@ runTest {test data-1.26 {LINQ ISQLiteSchemaExtensions.BuildTempSchema} -setup {
 
 runTest {test data-1.27 {VARCHAR / NVARCHAR types with spaces} -body {
   list [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType VARCHAR] \
+      TypeNameToDbType VARCHAR None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType NVARCHAR] \
+      TypeNameToDbType NVARCHAR None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType VARCHAR(1)] \
+      TypeNameToDbType VARCHAR(1) None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType NVARCHAR(1)] \
+      TypeNameToDbType NVARCHAR(1) None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType "VARCHAR (1)"] \
+      TypeNameToDbType "VARCHAR (1)" None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType "NVARCHAR (1)"] \
+      TypeNameToDbType "NVARCHAR (1)" None] \
 } -constraints {eagle System.Data.SQLite} -result \
 {AnsiString String AnsiString String AnsiString String}}
 
@@ -2501,7 +2501,7 @@ runTest {test data-1.51 {SQLiteConvert TypeNameToDbType} -setup {
       UNSIGNEDINTEGER16 UNSIGNEDINTEGER32 UNSIGNEDINTEGER64 VARBINARY VARCHAR \
       VARCHAR2 YESNO] {
     lappend result [list $typeName [object invoke -flags +NonPublic \
-        System.Data.SQLite.SQLiteConvert TypeNameToDbType $typeName]]
+        System.Data.SQLite.SQLiteConvert TypeNameToDbType $typeName None]]
   }
   set result
 } -cleanup {

@@ -251,8 +251,8 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// This method attempts to query the flags associated with the database
-    /// connection in use.  If the database connection is disposed or any other
-    /// error occurs, the default flags will be returned.
+    /// connection in use.  If the database connection is disposed, the default
+    /// flags will be returned.
     /// </summary>
     /// <param name="command">
     /// The command containing the databse connection to query the flags from.

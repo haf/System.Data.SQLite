@@ -1296,6 +1296,39 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// This method attempts to query the flags associated with the database
+    /// connection in use.  If the database connection is disposed, the default
+    /// flags will be returned.
+    /// </summary>
+    /// <param name="dataReader">
+    /// The data reader containing the databse connection to query the flags from.
+    /// </param>
+    /// <returns>
+    /// The connection flags value.
+    /// </returns>
+    internal static SQLiteConnectionFlags GetFlags(
+        SQLiteDataReader dataReader
+        )
+    {
+        try
+        {
+            if (dataReader != null)
+            {
+                SQLiteCommand command = dataReader._command;
+
+                if (command != null)
+                    return SQLiteCommand.GetFlags(command);
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // do nothing.
+        }
+
+        return SQLiteConnectionFlags.Default;
+    }
+
+    /// <summary>
     /// Retrieves the SQLiteType for a given column, and caches it to avoid repetetive interop calls.
     /// </summary>
     /// <param name="i">The index of the column to retrieve</param>
@@ -1316,7 +1349,7 @@ namespace System.Data.SQLite
       // If not initialized, then fetch the declared column datatype and attempt to convert it
       // to a known DbType.
       if (typ.Affinity == TypeAffinity.Uninitialized)
-        typ.Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity));
+        typ.Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity), GetFlags(this));
       else
         typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
 

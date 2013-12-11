@@ -3285,7 +3285,7 @@ namespace System.Data.SQLite
                     row["COLUMN_DEFAULT"] = schemaRow[SchemaTableOptionalColumn.DefaultValue];
                     row["IS_NULLABLE"] = schemaRow[SchemaTableColumn.AllowDBNull];
                     row["DATA_TYPE"] = schemaRow["DataTypeName"].ToString().ToLower(CultureInfo.InvariantCulture);
-                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)schemaRow[SchemaTableColumn.ProviderType]).ToString().ToLower(CultureInfo.InvariantCulture);
+                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)schemaRow[SchemaTableColumn.ProviderType], _flags).ToString().ToLower(CultureInfo.InvariantCulture);
                     row["CHARACTER_MAXIMUM_LENGTH"] = schemaRow[SchemaTableColumn.ColumnSize];
                     row["TABLE_SCHEMA"] = schemaRow[SchemaTableColumn.BaseSchemaName];
                     row["PRIMARY_KEY"] = schemaRow[SchemaTableColumn.IsKey];
@@ -3976,7 +3976,7 @@ namespace System.Data.SQLite
                     row["ORDINAL_POSITION"] = viewRow[SchemaTableColumn.ColumnOrdinal];
                     row["IS_NULLABLE"] = viewRow[SchemaTableColumn.AllowDBNull];
                     row["DATA_TYPE"] = viewRow["DataTypeName"]; // SQLiteConvert.DbTypeToType((DbType)viewRow[SchemaTableColumn.ProviderType]).ToString();
-                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)viewRow[SchemaTableColumn.ProviderType]).ToString().ToLower(CultureInfo.InvariantCulture);
+                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)viewRow[SchemaTableColumn.ProviderType], _flags).ToString().ToLower(CultureInfo.InvariantCulture);
                     row["CHARACTER_MAXIMUM_LENGTH"] = viewRow[SchemaTableColumn.ColumnSize];
                     row["TABLE_SCHEMA"] = viewRow[SchemaTableColumn.BaseSchemaName];
                     row["PRIMARY_KEY"] = viewRow[SchemaTableColumn.IsKey];

@@ -365,10 +365,11 @@ namespace System.Data.SQLite
       {
         sql.AppendFormat(CultureInfo.InvariantCulture, "CREATE TEMP TABLE {0} (", builder.QuoteIdentifier(dest));
         string separator = String.Empty;
+        SQLiteConnectionFlags flags = cnn.Flags;
         foreach (DataColumn dc in table.Columns)
         {
           DbType dbtypeName = SQLiteConvert.TypeToDbType(dc.DataType);
-          string typeName = SQLiteConvert.DbTypeToTypeName(dbtypeName);
+          string typeName = SQLiteConvert.DbTypeToTypeName(dbtypeName, flags);
 
           sql.AppendFormat(CultureInfo.InvariantCulture, "{2}{0} {1} COLLATE NOCASE", builder.QuoteIdentifier(dc.ColumnName), typeName, separator);
           separator = ", ";

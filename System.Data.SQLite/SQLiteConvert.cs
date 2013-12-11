@@ -780,17 +780,6 @@ namespace System.Data.SQLite
 
     #region Type Conversions
     /// <summary>
-    /// Determines the data type of a column in a statement
-    /// </summary>
-    /// <param name="stmt">The statement to retrieve information for</param>
-    /// <param name="i">The column to retrieve type information on</param>
-    /// <param name="typ">The SQLiteType to receive the affinity for the given column</param>
-    internal static void ColumnToType(SQLiteStatement stmt, int i, SQLiteType typ)
-    {
-      typ.Type = TypeNameToDbType(stmt._sql.ColumnType(stmt, i, out typ.Affinity));
-    }
-
-    /// <summary>
     /// Converts a SQLiteType to a .NET Type object
     /// </summary>
     /// <param name="t">The SQLiteType to convert</param>
@@ -964,8 +953,9 @@ namespace System.Data.SQLite
     /// Determines the type name for the given database value type.
     /// </summary>
     /// <param name="typ">The database value type.</param>
+    /// <param name="flags">The flags associated with the parent connection object.</param>
     /// <returns>The type name or an empty string if it cannot be determined.</returns>
-    internal static string DbTypeToTypeName(DbType typ)
+    internal static string DbTypeToTypeName(DbType typ, SQLiteConnectionFlags flags)
     {
         lock (_syncRoot)
         {
@@ -981,10 +971,13 @@ namespace System.Data.SQLite
         string defaultTypeName = String.Empty;
 
 #if !NET_COMPACT_20 && TRACE_WARNING
-        Trace.WriteLine(String.Format(
-            CultureInfo.CurrentCulture,
-            "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
-            defaultTypeName, typ));
+        if ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning)
+        {
+            Trace.WriteLine(String.Format(
+                CultureInfo.CurrentCulture,
+                "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
+                defaultTypeName, typ));
+        }
 #endif
 
         return defaultTypeName;
@@ -1159,8 +1152,9 @@ namespace System.Data.SQLite
     /// For a given type name, return a closest-match .NET type
     /// </summary>
     /// <param name="Name">The name of the type to match</param>
+    /// <param name="flags">The flags associated with the parent connection object.</param>
     /// <returns>The .NET DBType the text evaluates to.</returns>
-    internal static DbType TypeNameToDbType(string Name)
+    internal static DbType TypeNameToDbType(string Name, SQLiteConnectionFlags flags)
     {
         lock (_syncRoot)
         {
@@ -1190,10 +1184,13 @@ namespace System.Data.SQLite
         DbType defaultDbType = DbType.Object;
 
 #if !NET_COMPACT_20 && TRACE_WARNING
-        Trace.WriteLine(String.Format(
-            CultureInfo.CurrentCulture,
-            "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
-            defaultDbType, Name));
+        if ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning)
+        {
+            Trace.WriteLine(String.Format(
+                CultureInfo.CurrentCulture,
+                "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
+                defaultDbType, Name));
+        }
 #endif
 
         return defaultDbType;
