@@ -1435,7 +1435,7 @@ namespace eval ::Eagle {
                 if {$checkBuild} then {
                   return [list [appendArgs \
                       "latest build " $patchLevel ", dated " $dateTime \
-                      ", is newer than running build " $enginePatchLevel \
+                      ", is newer than the running build " $enginePatchLevel \
                       ", dated " $engineDateTime] [list $baseUri \
                       $patchLevel] [list $notes]]
                 }
@@ -1658,7 +1658,7 @@ namespace eval ::Eagle {
                 #
                 return [list [appendArgs \
                     "running build " $enginePatchLevel ", dated " \
-                    $engineDateTime ", is newer than latest build " \
+                    $engineDateTime ", is newer than the latest build " \
                     $patchLevel ", dated " $dateTime]]
               } elseif {$checkBuild} then {
                 #
@@ -1690,7 +1690,8 @@ namespace eval ::Eagle {
           return [list "no update scripts were processed"]
         }
       } else {
-        return [list "could not determine if running build is the latest"]
+        return [list \
+            "could not determine if running build is the latest build"]
       }
     }
 

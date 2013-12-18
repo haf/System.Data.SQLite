@@ -1,0 +1,70 @@
+###############################################################################
+#
+# all.eagle --
+#
+# This file contains a top-level script to run all of the Eagle tests.
+# Execute it by invoking "source all.eagle".
+#
+# Extensible Adaptable Generalized Logic Engine (Eagle)
+# Test Suite File
+#
+# Copyright (c) 2007-2012 by Joe Mistachkin.  All rights reserved.
+#
+# See the file "license.terms" for information on usage and redistribution of
+# this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: $
+#
+###############################################################################
+
+#
+# NOTE: *WARNING* This file must be capable of being evaluated in both Tcl and
+#       Eagle in a completely "clean" interpreter; therefore, no script library
+#       procedures provided by the Eagle.Library or Eagle.Test packages may be
+#       used, including [isEagle], until after the test prologue has been
+#       evaluated (below).  Unfortunately, this makes it somewhat impractical
+#       to evaluate the test prologue using the abstracted [runTestPrologue]
+#       script library procedure from the Eagle.Test package.  Instead, we must
+#       assume that the test prologue file exists in the same directory as this
+#       file and evaluate it using [source].  For third-party applications and
+#       plugins that are Eagle-specific (i.e. they cannot be used in Tcl), the
+#       following code snippet may be used instead of setting the "test_path"
+#       variable and then evaluating the "prologue.eagle" file directly:
+#
+#           package require Eagle.Library
+#           package require Eagle.Test
+#
+#           runTestPrologue
+#
+#       When using the above code snippet, the following code snippet may also
+#       be used at the very end of the corresponding "all.eagle" file instead
+#       of evaluating the "epilogue.eagle" file directly:
+#
+#           runTestEpilogue
+#
+if {![info exists test_path]} then {
+  set test_path [file normalize [file dirname [info script]]]
+}
+
+source [file join $test_path prologue.eagle]
+
+set no(prologue.eagle) true
+set no(epilogue.eagle) true
+
+set test_time [time {
+  runAllTests $test_channel $test_path \
+      [getTestFiles [list $test_path] $test_flags(-file) \
+          $test_flags(-notFile)] \
+      [list [file tail [info script]] *.tcl pkgIndex.eagle \
+          constraints.eagle epilogue.eagle prologue.eagle]
+}]
+
+tputs $test_channel [appendArgs "---- all tests completed in " $test_time \n]
+unset test_time
+
+unset no(epilogue.eagle)
+unset no(prologue.eagle)
+
+if {[array size no] == 0} then {unset no}
+
+source [file join $test_path epilogue.eagle]

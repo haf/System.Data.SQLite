@@ -402,24 +402,28 @@ if {![info exists no([file tail [info script]])]} then {
     if {![info exists test_tclsh]} then {
       #
       # NOTE: When running in Eagle, more complex logic is required to
-      #       determine the Tcl shell to use for the various tests that
-      #       require it.  Also, this same logic is used with Tcl when it
-      #       is not running from an instance of the Tcl shell executable.
+      #       determine the native Tcl shell to use for the various tests
+      #       that require it.  Also, this same logic is used with Tcl
+      #       when it is not running from an instance of the Tcl shell
+      #       executable.
       #
       if {[isEagle] || ![string match tclsh* $bin_file]} then {
         if {[info exists test_flags(-tclsh)] && \
             [string length $test_flags(-tclsh)] > 0} then {
           #
-          # NOTE: Use the Tcl shell specified via the command line.
+          # NOTE: Use the native Tcl shell specified via the command line.
           #
           set test_tclsh $test_flags(-tclsh)
         } else {
           if {![info exists no(getTclShellFileName)]} then {
             #
-            # NOTE: Attempt to automatically select a Tcl shell to use.
+            # NOTE: Attempt to automatically select the native Tcl shell
+            #       to use.
             #
-            tputs $test_channel \
-                "==== WARNING: attempting automatic Tcl shell selection...\n"
+            if {![info exists no(warningForTclShell)]} then {
+              tputs $test_channel \
+                  "==== WARNING: attempting automatic Tcl shell selection...\n"
+            }
 
             set test_tclsh [getTclShellFileName true]
           } else {
@@ -442,7 +446,7 @@ if {![info exists no([file tail [info script]])]} then {
   #       plugins being loaded (i.e. there are some tests are sensitive to
   #       having "unexpected" plugins loaded).
   #
-  if {[isEagle]} then {
+  if {[isEagle] && ![info exists no(warningForPlugin)]} then {
     foreach loaded [info loaded] {
       #
       # HACK: This code assumes that all plugins in the "Eagle._Plugins"
@@ -546,7 +550,7 @@ if {![info exists no([file tail [info script]])]} then {
       [expr {[info exists test_suffix] ? \
           $test_suffix : "<none>"}] \n]
 
-  if {[isEagle]} then {
+  if {[isEagle] && ![info exists no(warningForStrongName)]} then {
     catch {info engine PublicKeyToken} publicKeyToken
 
     if {[string length $publicKeyToken] == 0} then {
@@ -1402,12 +1406,28 @@ if {![info exists no([file tail [info script]])]} then {
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestShellMainCore*
+      }
 
+      #
+      # NOTE: Has quiet property testing support been disabled?
+      #
+      if {![info exists no(testSetQuiet)]} then {
         #
         # NOTE: For tests "basic-1.36" and "debug-1.3".
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestSetQuiet*
+      }
+
+      #
+      # NOTE: Has complaint testing support been disabled?
+      #
+      if {![info exists no(testSetComplain)]} then {
+        #
+        # NOTE: This is not currently used by any tests.
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestSetComplain*
       }
 
       #
