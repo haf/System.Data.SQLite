@@ -27,22 +27,22 @@ namespace eval ::Eagle {
       #       value via the command line, enter a command similar to one of
       #       the following (all on one line):
       #
-      #       EagleShell.exe -preInitialize "set test_year 2005"
+      #       EagleShell.exe -anyInitialize "set test_year 2005"
       #         -file .\path\to\all.eagle
       #
-      #       EagleShell.exe -preInitialize "set test_year 2008"
+      #       EagleShell.exe -anyInitialize "set test_year 2008"
       #         -file .\path\to\all.eagle
       #
-      #       EagleShell.exe -preInitialize "set test_year 2010"
+      #       EagleShell.exe -anyInitialize "set test_year 2010"
       #         -file .\path\to\all.eagle
       #
-      #       EagleShell.exe -preInitialize "set test_year 2012"
+      #       EagleShell.exe -anyInitialize "set test_year 2012"
       #         -file .\path\to\all.eagle
       #
-      #       EagleShell.exe -preInitialize "set test_year 2013"
+      #       EagleShell.exe -anyInitialize "set test_year 2013"
       #         -file .\path\to\all.eagle
       #
-      #       EagleShell.exe -preInitialize "unset -nocomplain test_year"
+      #       EagleShell.exe -anyInitialize "unset -nocomplain test_year"
       #         -file .\path\to\all.eagle
       #
       if {[info exists ::test_year] && [string length $::test_year] > 0} then {
@@ -152,10 +152,10 @@ namespace eval ::Eagle {
       #       value via the command line, enter a command similar to one of
       #       the following (all on one line):
       #
-      #       EagleShell.exe -preInitialize "set test_configuration Debug"
+      #       EagleShell.exe -anyInitialize "set test_configuration Debug"
       #         -file .\path\to\all.eagle
       #
-      #       EagleShell.exe -preInitialize "set test_configuration Release"
+      #       EagleShell.exe -anyInitialize "set test_configuration Release"
       #         -file .\path\to\all.eagle
       #
       #       EagleShell.exe -file .\path\to\all.eagle -preTest

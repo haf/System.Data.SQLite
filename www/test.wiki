@@ -95,7 +95,7 @@
     2010) add the following command line argument right after
     &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
     command lines:
-    <b>-preInitialize&nbsp;&quot;set&nbsp;test_year&nbsp;2008&quot;</b>
+    <b>-anyInitialize&nbsp;&quot;set&nbsp;test_year&nbsp;2008&quot;</b>
   </li>
 
   <li>
@@ -104,7 +104,7 @@
     build configuration) add the following command line argument right after
     &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
     command lines:
-    <b>-preInitialize&nbsp;&quot;set&nbsp;test_configuration&nbsp;Debug&quot;</b>
+    <b>-anyInitialize&nbsp;&quot;set&nbsp;test_configuration&nbsp;Debug&quot;</b>
   </li>
 
   <li>

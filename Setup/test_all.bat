@@ -109,7 +109,7 @@ SET TEST_ALL=1
 FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
   FOR %%Y IN (%YEARS%) DO (
     IF NOT DEFINED NOMANAGEDONLY (
-      %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}; set test_configuration {%%C}" -file "%TEST_FILE%"
+      %__ECHO% Externals\Eagle\bin\EagleShell.exe -anyInitialize "set test_year {%%Y}; set test_configuration {%%C}" -file "%TEST_FILE%"
 
       IF ERRORLEVEL 1 (
         ECHO Testing of "%%Y/%%C" managed-only assembly failed.
