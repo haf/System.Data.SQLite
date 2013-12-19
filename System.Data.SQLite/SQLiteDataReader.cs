@@ -866,8 +866,8 @@ namespace System.Data.SQLite
       tbl.Columns.Add(SchemaTableColumn.ColumnName, typeof(String));
       tbl.Columns.Add(SchemaTableColumn.ColumnOrdinal, typeof(int));
       tbl.Columns.Add(SchemaTableColumn.ColumnSize, typeof(int));
-      tbl.Columns.Add(SchemaTableColumn.NumericPrecision, typeof(short));
-      tbl.Columns.Add(SchemaTableColumn.NumericScale, typeof(short));
+      tbl.Columns.Add(SchemaTableColumn.NumericPrecision, typeof(int));
+      tbl.Columns.Add(SchemaTableColumn.NumericScale, typeof(int));
       tbl.Columns.Add(SchemaTableColumn.IsUnique, typeof(Boolean));
       tbl.Columns.Add(SchemaTableColumn.IsKey, typeof(Boolean));
       tbl.Columns.Add(SchemaTableOptionalColumn.BaseServerName, typeof(string));

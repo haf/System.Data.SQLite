@@ -1,0 +1,89 @@
+###############################################################################
+#
+# tkt-ef2216192d.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-ef2216192d-1.1 {GetSchemaTable w/large VARCHAR} -setup {
+  setupDb [set fileName tkt-ef2216192d-1.1.db]
+} -body {
+  sql execute $db "CREATE TABLE t1(x INTEGER PRIMARY KEY, y VARCHAR(32768));"
+
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql { \
+    SELECT x, y FROM t1; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static void Main()
+        {
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};"))
+          {
+            connection.Open();
+
+            using (SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(
+                "${sql}", connection))
+            {
+              using (SQLiteCommandBuilder commandBuilder =
+                  new SQLiteCommandBuilder(dataAdapter))
+              {
+                dataAdapter.InsertCommand = commandBuilder.GetInsertCommand();
+                dataAdapter.UpdateCommand = commandBuilder.GetUpdateCommand();
+                dataAdapter.DeleteCommand = commandBuilder.GetDeleteCommand();
+
+                //
+                // NOTE: If we get to this point without an exception being
+                //       thrown, this test has succeeded.
+                //
+              }
+            }
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\}$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

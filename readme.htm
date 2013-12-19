@@ -201,6 +201,8 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Add SQLITE_ENABLE_MEMORY_MANAGEMENT compile-time option to the interop assembly.</li>
     <li>Use current isolation level when enlisting into an existing transaction. Fix for [56b42d99c1].</li>
     <li>Better handling of non-error log messages from the SQLite core library. Pursuant to [44df10ea90].</li>
+    <li>Add TraceWarning connection flag to enable tracing of type mapping failures and disable tracing of them by default. Pursuant to [6d45c782e4].</li>
+    <li>Use 32-bit values to keep track of numeric precision and scale when building the schema table for a query. Fix for [ef2216192d].</li>
 </ul>
 <p>
     <b>1.0.89.0 - October 28, 2013</b>
