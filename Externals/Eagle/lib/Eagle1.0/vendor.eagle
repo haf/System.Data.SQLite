@@ -229,15 +229,6 @@ namespace eval ::Eagle {
     if {[string length $vendor_directory] > 0} then {
       setupInterpreterTestPath stdout $vendor_directory false
     }
-
-    #
-    # HACK: Prevent the Eagle core test suite infrastructure from doing
-    #       things that require beta 29 (or later) binaries.  This section
-    #       should be removed when the Eagle beta 29 binaries are checked
-    #       into the System.Data.SQLite repository.
-    #
-    set ::no(getTclShellFileName) 1; # NOTE: Lack of [tcl versionrange].
-    set ::no(testSuiteFiles) 1; # NOTE: Lack of [hash -filename].
   }
 }
 
