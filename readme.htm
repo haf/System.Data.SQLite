@@ -199,6 +199,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <li>Add experimental GetMemoryStatistics, ReleaseMemory, and Shutdown methods to the SQLiteConnection class.</li>
     <li>Add memory leak detection to the test project for the .NET Compact Framework.</li>
     <li>Add SQLITE_ENABLE_MEMORY_MANAGEMENT compile-time option to the interop assembly.</li>
+    <li>Use current isolation level when enlisting into an existing transaction. Fix for [56b42d99c1].</li>
     <li>Better handling of non-error log messages from the SQLite core library. Pursuant to [44df10ea90].</li>
 </ul>
 <p>
