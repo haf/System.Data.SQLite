@@ -1267,8 +1267,10 @@ namespace eval ::Eagle {
       #       that are almost always needed by our unit tests (i.e. the System
       #       and System.Data assembly references).
       #
-      set command [list compileCSharp $text $memory $symbols $strict results \
-          errors $add System.dll $add System.Data.dll $add System.Xml.dll]
+      set command [list \
+          compileCSharp $text $memory $symbols $strict results errors \
+          $add System.dll $add System.Data.dll $add System.Transactions.dll \
+          $add System.Xml.dll]
 
       #
       # NOTE: Add all the provided file names as assembly references.
