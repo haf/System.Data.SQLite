@@ -10,7 +10,7 @@ namespace System.Data.SQLite
 {
   using System.Transactions;
 
-  internal sealed class SQLiteEnlistment : IEnlistmentNotification, IDisposable
+  internal sealed class SQLiteEnlistment : IDisposable, IEnlistmentNotification
   {
     internal SQLiteTransaction _transaction;
     internal Transaction _scope;
@@ -18,13 +18,76 @@ namespace System.Data.SQLite
 
     internal SQLiteEnlistment(SQLiteConnection cnn, Transaction scope)
     {
-      _transaction = cnn.BeginTransaction();
+      _transaction = cnn.BeginTransaction(GetSystemDataIsolationLevel(
+          cnn, scope));
+
       _scope = scope;
 
       _scope.EnlistVolatile(this, System.Transactions.EnlistmentOptions.None);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+
+    #region Private Methods
+    private System.Data.IsolationLevel GetSystemDataIsolationLevel(
+        SQLiteConnection connection,
+        Transaction transaction
+        )
+    {
+        if (transaction == null)
+        {
+            //
+            // TODO: Perhaps throw an exception here if the connection
+            //       is null?
+            //
+            return (connection != null) ?
+                connection.GetDefaultIsolationLevel() :
+                SQLiteConnection.GetFallbackDefaultIsolationLevel();
+        }
+
+        System.Transactions.IsolationLevel isolationLevel =
+            transaction.IsolationLevel;
+
+        //
+        // TODO: Are these isolation level mappings actually correct?
+        //
+        switch (isolationLevel)
+        {
+            case IsolationLevel.Chaos:
+                return System.Data.IsolationLevel.Chaos;
+            case IsolationLevel.ReadCommitted:
+                return System.Data.IsolationLevel.ReadCommitted;
+            case IsolationLevel.ReadUncommitted:
+                return System.Data.IsolationLevel.ReadUncommitted;
+            case IsolationLevel.RepeatableRead:
+                return System.Data.IsolationLevel.RepeatableRead;
+            case IsolationLevel.Serializable:
+                return System.Data.IsolationLevel.Serializable;
+            case IsolationLevel.Snapshot:
+                return System.Data.IsolationLevel.Snapshot;
+            case IsolationLevel.Unspecified:
+                return System.Data.IsolationLevel.Unspecified;
+        }
+
+        //
+        // TODO: Perhaps throw an exception here?
+        //
+        return SQLiteConnection.GetFallbackDefaultIsolationLevel();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    private void Cleanup(SQLiteConnection cnn)
+    {
+        if (_disposeConnection)
+            cnn.Dispose();
+
+        _transaction = null;
+        _scope = null;
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
 
     #region IDisposable Members
     public void Dispose()
@@ -34,7 +97,7 @@ namespace System.Data.SQLite
     }
     #endregion
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     #region IDisposable "Pattern" Members
     private bool disposed;
@@ -46,7 +109,7 @@ namespace System.Data.SQLite
 #endif
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     private /* protected virtual */ void Dispose(bool disposing)
     {
@@ -80,7 +143,7 @@ namespace System.Data.SQLite
     }
     #endregion
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     #region Destructor
     ~SQLiteEnlistment()
@@ -89,19 +152,9 @@ namespace System.Data.SQLite
     }
     #endregion
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void Cleanup(SQLiteConnection cnn)
-    {
-      if (_disposeConnection)
-        cnn.Dispose();
-
-      _transaction = null;
-      _scope = null;
-    }
+    ///////////////////////////////////////////////////////////////////////////
 
     #region IEnlistmentNotification Members
-
     public void Commit(Enlistment enlistment)
     {
       CheckDisposed();
@@ -123,11 +176,15 @@ namespace System.Data.SQLite
       }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+
     public void InDoubt(Enlistment enlistment)
     {
       CheckDisposed();
       enlistment.Done();
     }
+
+    ///////////////////////////////////////////////////////////////////////////
 
     public void Prepare(PreparingEnlistment preparingEnlistment)
     {
@@ -138,6 +195,8 @@ namespace System.Data.SQLite
       else
         preparingEnlistment.Prepared();
     }
+
+    ///////////////////////////////////////////////////////////////////////////
 
     public void Rollback(Enlistment enlistment)
     {
@@ -156,7 +215,6 @@ namespace System.Data.SQLite
         Cleanup(cnn);
       }
     }
-
     #endregion
   }
 }

@@ -1109,6 +1109,33 @@ namespace System.Data.SQLite
         }
     }
 
+#if !PLATFORM_COMPACTFRAMEWORK
+    /// <summary>
+    /// Determines and returns the fallback default isolation level when one cannot be
+    /// obtained from an existing connection instance.
+    /// </summary>
+    /// <returns>
+    /// The fallback default isolation level for this connection instance -OR-
+    /// <see cref="IsolationLevel.Unspecified" /> if it cannot be determined.
+    /// </returns>
+    internal static IsolationLevel GetFallbackDefaultIsolationLevel()
+    {
+        return DefaultIsolationLevel;
+    }
+
+    /// <summary>
+    /// Determines and returns the default isolation level for this connection instance.
+    /// </summary>
+    /// <returns>
+    /// The default isolation level for this connection instance -OR-
+    /// <see cref="IsolationLevel.Unspecified" /> if it cannot be determined.
+    /// </returns>
+    internal IsolationLevel GetDefaultIsolationLevel()
+    {
+        return _defaultIsolation;
+    }
+#endif
+
     /// <summary>
     /// OBSOLETE.  Creates a new SQLiteTransaction if one isn't already active on the connection.
     /// </summary>

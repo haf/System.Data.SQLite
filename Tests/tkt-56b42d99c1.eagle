@@ -1,0 +1,109 @@
+###############################################################################
+#
+# tkt-56b42d99c1.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-56b42d99c1-1.1 {enlisted transaction isolation} -setup {
+  setupDb [set fileName tkt-56b42d99c1-1.1.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+    using System.Reflection;
+    using System.Transactions;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static bool TryEnlistInTransaction()
+        {
+          TransactionOptions transactionOptions = new TransactionOptions();
+          transactionOptions.IsolationLevel = IsolationLevel.ReadCommitted;
+
+          using (TransactionScope transactionScope = new TransactionScope(
+              TransactionScopeOption.Required, transactionOptions))
+          {
+            using (SQLiteConnection connection1 = new SQLiteConnection(
+                "Data Source=${dataSource};"))
+            {
+              connection1.Open();
+
+              using (SQLiteConnection connection2 = new SQLiteConnection(
+                  "Data Source=${dataSource};"))
+              {
+                connection2.Open();
+
+                BindingFlags bindingFlags = BindingFlags.Instance |
+                  BindingFlags.NonPublic | BindingFlags.GetField;
+
+                FieldInfo fieldInfo1 = connection1.GetType().GetField(
+                  "_enlistment", bindingFlags);
+
+                object enlistment1 = fieldInfo1.GetValue(connection1);
+                object enlistment2 = fieldInfo1.GetValue(connection2);
+
+                FieldInfo fieldInfo2 = enlistment1.GetType().GetField(
+                  "_transaction", bindingFlags);
+
+                SQLiteTransaction transaction1 =
+                  (SQLiteTransaction)fieldInfo2.GetValue(enlistment1);
+
+                SQLiteTransaction transaction2 =
+                  (SQLiteTransaction)fieldInfo2.GetValue(enlistment2);
+
+                return (transaction1.IsolationLevel ==
+                        transaction2.IsolationLevel);
+              }
+            }
+          }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} TryEnlistInTransaction
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 True$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
