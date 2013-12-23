@@ -725,7 +725,7 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Initialize the Eagle test constraints.
   #
   if {[isEagle]} then {
-    initializeTests; configureTcltest [list] [list] false
+    initializeTests; configureTcltest [list] [list] [list] [list] false
 
     #
     # NOTE: If the "no(mono)" variable is set (to anything) then any
@@ -1872,7 +1872,8 @@ if {![info exists no([file tail [info script]])]} then {
     #
     # NOTE: Make sure that Tcl honors the Eagle test constraints.
     #
-    configureTcltest $test_flags(-constraints) [list] false
+    configureTcltest $test_flags(-match) $test_flags(-skip) \
+        $test_flags(-constraints) [list] false
 
     #
     # HACK: Reset the test counts for tcltest.
@@ -1968,6 +1969,13 @@ if {![info exists no([file tail [info script]])]} then {
   #       disabled?
   #
   if {![info exists no(checkForFile)]} then {
+    #
+    # NOTE: For tests "benchmark-1.38" and "benchmark-1.39".
+    #
+    if {![info exists no(benchmark.txt)]} then {
+      checkForFile $test_channel [file join $test_path benchmark.txt]
+    }
+
     #
     # NOTE: For test "garuda-1.1".
     #
