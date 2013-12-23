@@ -151,6 +151,7 @@ GOTO no_errors
     SET VS2008SP=%VS2008SP%
     SET VS2010SP=%VS2010SP%
     SET VS2012SP=%VS2012SP%
+    SET VS2013SP=%VS2013SP%
   )
   CALL :fn_ResetErrorLevel
   GOTO end_of_file
