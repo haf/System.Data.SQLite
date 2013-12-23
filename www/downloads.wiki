@@ -13,13 +13,13 @@
       <td colspan="3" class="importantNotes">
         All downloadable packages on this web page that do not include
         the word &quot;<b>static</b>&quot; in their file name require the
-        appropriate version (e.g. 2005, 2008, 2010, or 2012) of the Microsoft
-        Visual C++ Runtime Library, to be successfully installed on the target
-        machine, prior to making use of the executables contained therein.  It
-        should also be noted that the downloadable packages on this web page
-        that include the word &quot;<b>setup</b>&quot; (i.e. the setup packages)
-        already include and will attempt to automatically install the required
-        version of the Microsoft Visual C++ Runtime Library.
+        appropriate version (e.g. 2005, 2008, 2010, 2012, or 2013) of the
+        Microsoft Visual C++ Runtime Library, to be successfully installed on
+        the target machine, prior to making use of the executables contained
+        therein.  It should also be noted that the downloadable packages on this
+        web page that include the word &quot;<b>setup</b>&quot; (i.e. the setup
+        packages) already include and will attempt to automatically install the
+        required version of the Microsoft Visual C++ Runtime Library.
       </td>
     </tr>
 
@@ -71,8 +71,8 @@
         There are several other projects, with widely varying levels of support
         and compatibility, known to use the similar names.  At least one of
         those projects is an unofficial fork of the legacy 1.0.66.0 release,
-        modified (by a third-party) to work with Visual Studio 2010.  Only the
-        software contained on this page is directly
+        modified (by a third-party) to work with Visual Studio 2010 (or higher).
+        Only the software contained on this page is directly
         <a href="support.wiki">supported</a> by the maintainers of this project
         (i.e. the <a href="http://www.sqlite.org">SQLite Development Team</a>)
         as we do not necessarily have any knowledge of the other projects that
