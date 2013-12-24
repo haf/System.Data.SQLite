@@ -303,9 +303,10 @@ IF NOT DEFINED NOTAG (
 )
 
 %_VECHO% Logging = '%LOGGING%'
+%_VECHO% BuildArgs = '%BUILD_ARGS%'
 %_VECHO% MsBuildArgs = '%MSBUILD_ARGS%'
 
-%__ECHO% MSBuild.exe "%SOLUTION%" "/target:%TARGET%" "/property:Configuration=%CONFIGURATION%" "/property:Platform=%PLATFORM%" %LOGGING% %MSBUILD_ARGS%
+%__ECHO% MSBuild.exe "%SOLUTION%" "/target:%TARGET%" "/property:Configuration=%CONFIGURATION%" "/property:Platform=%PLATFORM%" %LOGGING% %BUILD_ARGS% %MSBUILD_ARGS%
 
 IF ERRORLEVEL 1 (
   ECHO Build failed.

@@ -485,6 +485,7 @@ set sds_manifests(source) {
   Tests/tkt-48a6b8e4ca.eagle
   Tests/tkt-4a791e70ab.eagle
   Tests/tkt-544dba0a2f.eagle
+  Tests/tkt-56b42d99c1.eagle
   Tests/tkt-59edc1018b.eagle
   Tests/tkt-6434e23a0f.eagle
   Tests/tkt-6c6ecccc5f.eagle
@@ -507,6 +508,7 @@ set sds_manifests(source) {
   Tests/tkt-e1b2e0f769.eagle
   Tests/tkt-e30b820248.eagle
   Tests/tkt-e47b3d8346.eagle
+  Tests/tkt-ef2216192d.eagle
   Tests/tkt-f2c47a01eb.eagle
   Tests/tkt-f8dbab8baf.eagle
   Tests/tkt-fe50b8c2e8.eagle
@@ -765,7 +767,7 @@ set sds_manifests(setupX86Vs2013) {
 #       supporting the .NET Framework 4.5.1 for x64.
 #
 set sds_manifests(setupX64Vs2013) {
-  {{tmp}\vcredist_x64_2013_VSU3.exe}
+  {{tmp}\vcredist_x64_2013_RTM.exe}
 }
 
 ###############################################################################

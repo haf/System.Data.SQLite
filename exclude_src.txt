@@ -28,6 +28,7 @@ Externals/Eagle/lib/Eagle1.0/safe.eagle
 Externals/Eagle/lib/Eagle1.0/shell.eagle
 Externals/Eagle/lib/Eagle1.0/test.eagle
 Externals/Eagle/lib/Eagle1.0/word.tcl
+Externals/Eagle/lib/Test1.0/all.eagle
 Externals/Eagle/lib/Test1.0/constraints.eagle
 Externals/Eagle/lib/Test1.0/epilogue.eagle
 Externals/Eagle/lib/Test1.0/pkgIndex.eagle

@@ -3,7 +3,7 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.90.0 - January XX, 2014 <font color="red">(release scheduled)</font></b>
+    <b>1.0.90.0 - December 23, 2013</b>
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/releaselog/3_8_2.html|SQLite 3.8.2].</li>

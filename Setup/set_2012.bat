@@ -13,4 +13,10 @@ SET NETFX40ONLY=
 SET NETFX45ONLY=1
 SET NETFX451ONLY=
 
+REM
+REM HACK: Evidently, installing Visual Studio 2013 breaks using MSBuild to
+REM       build native projects that specify a platform toolset of "v110".
+REM
+SET BUILD_ARGS=/property:VisualStudioVersion=11.0
+
 VERIFY > NUL

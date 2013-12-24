@@ -1864,7 +1864,7 @@ namespace eval ::Eagle {
         $::test_suite_running}]
   }
 
-  proc configureTcltest { constraints imports force } {
+  proc configureTcltest { match skip constraints imports force } {
     if {[isEagle]} then {
       #
       # HACK: Flag the "test" and "runTest" script library procedures so
@@ -1904,11 +1904,32 @@ namespace eval ::Eagle {
       }
 
       #
+      # NOTE: We need to copy the Eagle test names to match over to Tcl.
+      #
+      if {[llength $match] > 0} then {
+        ::tcltest::configure -match $match
+      }
+
+      #
+      # NOTE: We need to copy the Eagle test names to skip over to Tcl.
+      #
+      if {[llength $skip] > 0} then {
+        ::tcltest::configure -skip $skip
+      }
+
+      #
       # NOTE: We need to copy the Eagle test constraints over to Tcl.
       #
       if {[llength $constraints] > 0} then {
         ::tcltest::configure -constraints $constraints
       }
+
+      #
+      # NOTE: For the benefit of the Eagle test suite, always add the
+      #       pseudo-constraints "fail.false" and "fail.true".
+      #
+      ::tcltest::testConstraint fail.false 1
+      ::tcltest::testConstraint fail.true 1
 
       #
       # NOTE: We need the [test] command in the global namespace.
@@ -2542,7 +2563,7 @@ namespace eval ::Eagle {
     # NOTE: Fake having the tcltest package unless we are prevented.
     #
     if {![info exists ::no(configureTcltest)]} then {
-      configureTcltest [list] [list] false
+      configureTcltest [list] [list] [list] [list] false
     }
 
     ###########################################################################
@@ -2610,7 +2631,7 @@ namespace eval ::Eagle {
     # NOTE: Load and configure the tcltest package unless we are prevented.
     #
     if {![interp issafe] && ![info exists ::no(configureTcltest)]} then {
-      configureTcltest [list] [list test testConstraint] false
+      configureTcltest [list] [list] [list] [list test testConstraint] false
     }
 
     #
