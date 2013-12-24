@@ -767,7 +767,7 @@ set sds_manifests(setupX86Vs2013) {
 #       supporting the .NET Framework 4.5.1 for x64.
 #
 set sds_manifests(setupX64Vs2013) {
-  {{tmp}\vcredist_x64_2013_VSU3.exe}
+  {{tmp}\vcredist_x64_2013_RTM.exe}
 }
 
 ###############################################################################
