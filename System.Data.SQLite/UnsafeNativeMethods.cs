@@ -85,7 +85,7 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
 
-      private static readonly string XmlConfigurationFileName =
+      private static readonly string XmlConfigFileName =
           typeof(UnsafeNativeMethods).Namespace + ".config";
 
       /////////////////////////////////////////////////////////////////////////
@@ -210,7 +210,7 @@ namespace System.Data.SQLite
           // NOTE: If the "No_PreLoadSQLite" environment variable is set (to
           //       anything), skip all our special code and simply return.
           //
-          if (GetVariableValue("No_PreLoadSQLite") != null)
+          if (GetSettingValue("No_PreLoadSQLite") != null)
               return;
 
           lock (staticSyncRoot)
@@ -251,26 +251,28 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
-      /// 
+      /// Queries and returns the XML configuration file name for the assembly
+      /// containing the managed System.Data.SQLite components.
       /// </summary>
       /// <returns>
-      /// 
+      /// The XML configuration file name -OR- null if it cannot be determined
+      /// or does not exist.
       /// </returns>
-      private static string GetXmlConfigurationFileName()
+      private static string GetXmlConfigFileName()
       {
           string directory;
           string fileName;
 
 #if !PLATFORM_COMPACTFRAMEWORK
           directory = AppDomain.CurrentDomain.BaseDirectory;
-          fileName = Path.Combine(directory, XmlConfigurationFileName);
+          fileName = Path.Combine(directory, XmlConfigFileName);
 
           if (File.Exists(fileName))
               return fileName;
 #endif
 
           directory = GetAssemblyDirectory();
-          fileName = Path.Combine(directory, XmlConfigurationFileName);
+          fileName = Path.Combine(directory, XmlConfigFileName);
 
           if (File.Exists(fileName))
               return fileName;
@@ -295,7 +297,7 @@ namespace System.Data.SQLite
       /// or "No_Expand_<paramref name="name" />" environment variables are
       /// set.
       /// </returns>
-      internal static string GetVariableValue(
+      internal static string GetSettingValue(
           string name
           )
       {
@@ -328,7 +330,7 @@ namespace System.Data.SQLite
 
           try
           {
-              string fileName = GetXmlConfigurationFileName();
+              string fileName = GetXmlConfigFileName();
 
               if (fileName == null)
                   return value;
@@ -342,12 +344,11 @@ namespace System.Data.SQLite
 
               if (element != null)
               {
-                  value = element.GetAttribute("value");
+                  if (element.HasAttribute("value"))
+                      value = element.GetAttribute("value");
 
-                  if (String.IsNullOrEmpty(value))
-                      value = null;
 #if !PLATFORM_COMPACTFRAMEWORK
-                  else if (expand)
+                  if (expand && !String.IsNullOrEmpty(value))
                       value = Environment.ExpandEnvironmentVariables(value);
 #endif
               }
@@ -456,7 +457,7 @@ namespace System.Data.SQLite
           // NOTE: If the "PreLoadSQLite_BaseDirectory" environment variable
           //       is set, use it verbatim for the base directory.
           //
-          string directory = GetVariableValue("PreLoadSQLite_BaseDirectory");
+          string directory = GetSettingValue("PreLoadSQLite_BaseDirectory");
 
           if (directory != null)
               return directory;
@@ -469,7 +470,7 @@ namespace System.Data.SQLite
           //       System.Data.SQLite) intsead of the application domain base
           //       directory.
           //
-          if (GetVariableValue("PreLoadSQLite_UseAssemblyDirectory") != null)
+          if (GetSettingValue("PreLoadSQLite_UseAssemblyDirectory") != null)
           {
               directory = GetAssemblyDirectory();
 
@@ -543,7 +544,7 @@ namespace System.Data.SQLite
           //       variable is set, use it verbatim for the current processor
           //       architecture.
           //
-          string processorArchitecture = GetVariableValue(
+          string processorArchitecture = GetSettingValue(
               "PreLoadSQLite_ProcessorArchitecture");
 
           if (processorArchitecture != null)
@@ -552,7 +553,7 @@ namespace System.Data.SQLite
           //
           // BUGBUG: Will this always be reliable?
           //
-          processorArchitecture = GetVariableValue(PROCESSOR_ARCHITECTURE);
+          processorArchitecture = GetSettingValue(PROCESSOR_ARCHITECTURE);
 
           /////////////////////////////////////////////////////////////////////
 

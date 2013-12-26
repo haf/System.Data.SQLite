@@ -14,6 +14,9 @@
   -->
 
   <ItemGroup>
+    <None Include="System.Data.SQLite.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblySourceIdAttribute.cs" />
     <Compile Include="AssemblySourceTimeStampAttribute.cs" />
