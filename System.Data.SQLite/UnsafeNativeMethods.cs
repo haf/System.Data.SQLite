@@ -30,6 +30,8 @@ namespace System.Data.SQLite
   using System.Threading;
 #endif
 
+  using System.Xml;
+
 #if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
   [SuppressUnmanagedCodeSecurity]
 #endif
@@ -70,18 +72,21 @@ namespace System.Data.SQLite
       //       has been enabled for this build.
       //
 #if PRELOAD_NATIVE_LIBRARY
-#if !PLATFORM_COMPACTFRAMEWORK
       /// <summary>
       /// The name of the environment variable containing the processor
       /// architecture of the current process.
       /// </summary>
       private static readonly string PROCESSOR_ARCHITECTURE =
           "PROCESSOR_ARCHITECTURE";
-#endif
 
       /////////////////////////////////////////////////////////////////////////
 
       private static readonly string DllFileExtension = ".dll";
+
+      /////////////////////////////////////////////////////////////////////////
+
+      private static readonly string XmlConfigurationFileName =
+          typeof(UnsafeNativeMethods).Namespace + ".config";
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
@@ -201,14 +206,12 @@ namespace System.Data.SQLite
       /// </summary>
       internal static void Initialize()
       {
-#if !PLATFORM_COMPACTFRAMEWORK
           //
           // NOTE: If the "No_PreLoadSQLite" environment variable is set (to
           //       anything), skip all our special code and simply return.
           //
-          if (Environment.GetEnvironmentVariable("No_PreLoadSQLite") != null)
+          if (GetVariableValue("No_PreLoadSQLite") != null)
               return;
-#endif
 
           lock (staticSyncRoot)
           {
@@ -248,6 +251,198 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
+      /// 
+      /// </summary>
+      /// <returns>
+      /// 
+      /// </returns>
+      private static string GetXmlConfigurationFileName()
+      {
+          string directory;
+          string fileName;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+          directory = AppDomain.CurrentDomain.BaseDirectory;
+          fileName = Path.Combine(directory, XmlConfigurationFileName);
+
+          if (File.Exists(fileName))
+              return fileName;
+#endif
+
+          directory = GetAssemblyDirectory();
+          fileName = Path.Combine(directory, XmlConfigurationFileName);
+
+          if (File.Exists(fileName))
+              return fileName;
+
+          return null;
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Queries and returns the value of the specified "configuration"
+      /// variable, using the XML configuration file and/or the environment
+      /// variables for the current process and/or the current system, when
+      /// available.
+      /// </summary>
+      /// <param name="name">
+      /// The name of the configuration variable.
+      /// </param>
+      /// <returns>
+      /// The value of the configuration variable -OR- null if it cannot be
+      /// determined.  By default, references to existing environment will
+      /// be expanded within the returned value unless either the "No_Expand"
+      /// or "No_Expand_<paramref name="name" />" environment variables are
+      /// set.
+      /// </returns>
+      internal static string GetVariableValue(
+          string name
+          )
+      {
+          string value = null;
+
+          if (name == null)
+              return value;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+          bool expand = true;
+
+          if (Environment.GetEnvironmentVariable("No_Expand") != null)
+          {
+              expand = false;
+          }
+          else if (Environment.GetEnvironmentVariable(String.Format(
+                  "No_Expand_{0}", name)) != null)
+          {
+              expand = false;
+          }
+
+          value = Environment.GetEnvironmentVariable(name);
+
+          if (expand && !String.IsNullOrEmpty(value))
+              value = Environment.ExpandEnvironmentVariables(value);
+
+          if (value != null)
+              return value;
+#endif
+
+          try
+          {
+              string fileName = GetXmlConfigurationFileName();
+
+              if (fileName == null)
+                  return value;
+
+              XmlDocument document = new XmlDocument();
+
+              document.Load(fileName);
+
+              XmlElement element = document.SelectSingleNode(String.Format(
+                  "/configuration/appSettings/add[@key='{0}']")) as XmlElement;
+
+              if (element != null)
+              {
+                  value = element.GetAttribute("value");
+
+                  if (String.IsNullOrEmpty(value))
+                      value = null;
+#if !PLATFORM_COMPACTFRAMEWORK
+                  else if (expand)
+                      value = Environment.ExpandEnvironmentVariables(value);
+#endif
+              }
+          }
+#if !NET_COMPACT_20 && TRACE_PRELOAD
+          catch (Exception e)
+#else
+          catch (Exception)
+#endif
+          {
+#if !NET_COMPACT_20 && TRACE_PRELOAD
+              try
+              {
+                  Trace.WriteLine(String.Format(
+                      CultureInfo.CurrentCulture,
+                      "Native library pre-loader failed to get variable " +
+                      "\"{0}\" value: {1}", name, e)); /* throw */
+              }
+              catch
+              {
+                  // do nothing.
+              }
+#endif
+          }
+
+          return value;
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Queries and returns the directory for the assembly currently being
+      /// executed.
+      /// </summary>
+      /// <returns>
+      /// The directory for the assembly currently being executed -OR- null if
+      /// it cannot be determined.
+      /// </returns>
+      private static string GetAssemblyDirectory()
+      {
+          try
+          {
+              Assembly assembly = Assembly.GetExecutingAssembly();
+
+              if (assembly == null)
+                  return null;
+
+              string fileName;
+
+#if PLATFORM_COMPACTFRAMEWORK
+              AssemblyName assemblyName = assembly.GetName();
+
+              if (assemblyName == null)
+                  return null;
+
+              fileName = assemblyName.CodeBase;
+#else
+              fileName = assembly.Location;
+#endif
+
+              if (String.IsNullOrEmpty(fileName))
+                  return null;
+
+              string directory = Path.GetDirectoryName(fileName);
+
+              if (String.IsNullOrEmpty(directory))
+                  return null;
+
+              return directory;
+          }
+#if !NET_COMPACT_20 && TRACE_PRELOAD
+          catch (Exception e)
+#else
+          catch (Exception)
+#endif
+          {
+#if !NET_COMPACT_20 && TRACE_PRELOAD
+              try
+              {
+                  Trace.WriteLine(String.Format(
+                      CultureInfo.CurrentCulture,
+                      "Native library pre-loader failed to get directory " +
+                      "for currently executing assembly: {0}", e)); /* throw */
+              }
+              catch
+              {
+                  // do nothing.
+              }
+#endif
+          }
+
+          return null;
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
       /// Queries and returns the base directory of the current application
       /// domain.
       /// </summary>
@@ -257,17 +452,16 @@ namespace System.Data.SQLite
       /// </returns>
       private static string GetBaseDirectory()
       {
-#if !PLATFORM_COMPACTFRAMEWORK
           //
           // NOTE: If the "PreLoadSQLite_BaseDirectory" environment variable
           //       is set, use it verbatim for the base directory.
           //
-          string directory = Environment.GetEnvironmentVariable(
-              "PreLoadSQLite_BaseDirectory");
+          string directory = GetVariableValue("PreLoadSQLite_BaseDirectory");
 
           if (directory != null)
               return directory;
 
+#if !PLATFORM_COMPACTFRAMEWORK
           //
           // NOTE: If the "PreLoadSQLite_UseAssemblyDirectory" environment
           //       variable is set (to anything), attempt to use the directory
@@ -275,25 +469,12 @@ namespace System.Data.SQLite
           //       System.Data.SQLite) intsead of the application domain base
           //       directory.
           //
-          if (Environment.GetEnvironmentVariable(
-                "PreLoadSQLite_UseAssemblyDirectory") != null)
+          if (GetVariableValue("PreLoadSQLite_UseAssemblyDirectory") != null)
           {
-              try
-              {
-                  Assembly assembly = Assembly.GetExecutingAssembly();
+              directory = GetAssemblyDirectory();
 
-                  if (assembly != null)
-                  {
-                      directory = Path.GetDirectoryName(assembly.Location);
-
-                      if (!String.IsNullOrEmpty(directory))
-                          return directory;
-                  }
-              }
-              catch
-              {
-                  // do nothing.
-              }
+              if (directory != null)
+                  return directory;
           }
 
           //
@@ -302,26 +483,11 @@ namespace System.Data.SQLite
           //
           return AppDomain.CurrentDomain.BaseDirectory;
 #else
-          Assembly assembly = Assembly.GetExecutingAssembly();
-
-          if (assembly == null)
-              return null;
-
-          AssemblyName assemblyName = assembly.GetName();
-
-          if (assemblyName == null)
-              return null;
-
-          try
-          {
-              return Path.GetDirectoryName(assemblyName.CodeBase);
-          }
-          catch
-          {
-              // do nothing.
-          }
-
-          return null;
+          //
+          // NOTE: Otherwise, fallback on using the directory containing
+          //       the currently executing assembly.
+          //
+          return GetAssemblyDirectory();
 #endif
       }
 
@@ -372,13 +538,12 @@ namespace System.Data.SQLite
       /// </returns>
       private static string GetProcessorArchitecture()
       {
-#if !PLATFORM_COMPACTFRAMEWORK
           //
           // NOTE: If the "PreLoadSQLite_ProcessorArchitecture" environment
           //       variable is set, use it verbatim for the current processor
           //       architecture.
           //
-          string processorArchitecture = Environment.GetEnvironmentVariable(
+          string processorArchitecture = GetVariableValue(
               "PreLoadSQLite_ProcessorArchitecture");
 
           if (processorArchitecture != null)
@@ -387,9 +552,11 @@ namespace System.Data.SQLite
           //
           // BUGBUG: Will this always be reliable?
           //
-          processorArchitecture = Environment.GetEnvironmentVariable(
-              PROCESSOR_ARCHITECTURE);
+          processorArchitecture = GetVariableValue(PROCESSOR_ARCHITECTURE);
 
+          /////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
           //
           // HACK: Check for an "impossible" situation.  If the pointer size
           //       is 32-bits, the processor architecture cannot be "AMD64".
@@ -419,22 +586,32 @@ namespace System.Data.SQLite
               //
               processorArchitecture = "x86";
 
-              //
-              // NOTE: Show that we hit a fairly unusual situation (i.e. the
-              //       "wrong" processor architecture was detected).
-              //
 #if !NET_COMPACT_20 && TRACE_PRELOAD
-              Trace.WriteLine(String.Format(
-                  CultureInfo.CurrentCulture,
-                  "Detected {0}-bit pointer size with processor architecture " +
-                  "\"{1}\", using processor architecture \"{2}\" instead...",
-                  IntPtr.Size * 8 /* bits */, savedProcessorArchitecture,
-                  processorArchitecture));
+              try
+              {
+                  //
+                  // NOTE: Show that we hit a fairly unusual situation (i.e. the
+                  //       "wrong" processor architecture was detected).
+                  //
+                  Trace.WriteLine(String.Format(
+                      CultureInfo.CurrentCulture,
+                      "Native library pre-loader detected {0}-bit pointer " +
+                      "size with processor architecture \"{1}\", using " +
+                      "processor architecture \"{2}\" instead...",
+                      IntPtr.Size * 8 /* bits */, savedProcessorArchitecture,
+                      processorArchitecture)); /* throw */
+              }
+              catch
+              {
+                  // do nothing.
+              }
 #endif
           }
+#endif
 
-          return processorArchitecture;
-#else
+          /////////////////////////////////////////////////////////////////////
+
+#if PLATFORM_COMPACTFRAMEWORK
           //
           // NOTE: On the .NET Compact Framework, attempt to use the native
           //       Win32 API function (via P/Invoke) that can provide us with
@@ -458,7 +635,8 @@ namespace System.Data.SQLite
               //
               // NOTE: Return the processor architecture value as a string.
               //
-              return systemInfo.wProcessorArchitecture.ToString();
+              processorArchitecture =
+                  systemInfo.wProcessorArchitecture.ToString();
           }
           catch
           {
@@ -468,8 +646,10 @@ namespace System.Data.SQLite
           //
           // NOTE: Upon failure, return an empty string.
           //
-          return String.Empty;
+          processorArchitecture = String.Empty;
 #endif
+
+          return processorArchitecture;
       }
 
       /////////////////////////////////////////////////////////////////////////
@@ -532,7 +712,8 @@ namespace System.Data.SQLite
           )
       {
           //
-          // NOTE: If the specified base directory is null, use the default.
+          // NOTE: If the specified base directory is null, use the default
+          //       (i.e. attempt to automatically detect it).
           //
           if (directory == null)
               directory = GetBaseDirectory();
@@ -607,15 +788,22 @@ namespace System.Data.SQLite
 
           try
           {
-              //
-              // NOTE: Show exactly where we are trying to load the native
-              //       SQLite library from.
-              //
 #if !NET_COMPACT_20 && TRACE_PRELOAD
-              Trace.WriteLine(String.Format(
-                  CultureInfo.CurrentCulture,
-                  "Trying to load native SQLite library \"{0}\"...",
-                  fileName));
+              try
+              {
+                  //
+                  // NOTE: Show exactly where we are trying to load the native
+                  //       SQLite library from.
+                  //
+                  Trace.WriteLine(String.Format(
+                      CultureInfo.CurrentCulture,
+                      "Native library pre-loader is trying to load native " +
+                      "SQLite library \"{0}\"...", fileName)); /* throw */
+              }
+              catch
+              {
+                  // do nothing.
+              }
 #endif
 
               //
@@ -637,7 +825,7 @@ namespace System.Data.SQLite
                   //
                   // NOTE: First, grab the last Win32 error number.
                   //
-                  int lastError = Marshal.GetLastWin32Error();
+                  int lastError = Marshal.GetLastWin32Error(); /* throw */
 
                   //
                   // NOTE: Show where we failed to load the native SQLite
@@ -646,8 +834,8 @@ namespace System.Data.SQLite
                   //
                   Trace.WriteLine(String.Format(
                       CultureInfo.CurrentCulture,
-                      "Failed to load native SQLite library \"{0}\" " +
-                      "(getLastError = {1}): {2}",
+                      "Native library pre-loader failed to load native " +
+                      "SQLite library \"{0}\" (getLastError = {1}): {2}",
                       fileName, lastError, e)); /* throw */
               }
               catch
@@ -2329,7 +2517,7 @@ namespace System.Data.SQLite
                 try
                 {
                     Trace.WriteLine(String.Format(
-                        "CloseConnection: {0}", localHandle));
+                        "CloseConnection: {0}", localHandle)); /* throw */
                 }
                 catch
                 {
@@ -2364,7 +2552,7 @@ namespace System.Data.SQLite
                 {
                     Trace.WriteLine(String.Format(
                         "CloseConnection: {0}, exception: {1}",
-                        handle, e));
+                        handle, e)); /* throw */
                 }
                 catch
                 {
@@ -2515,7 +2703,7 @@ namespace System.Data.SQLite
                 try
                 {
                     Trace.WriteLine(String.Format(
-                        "FinalizeStatement: {0}", localHandle));
+                        "FinalizeStatement: {0}", localHandle)); /* throw */
                 }
                 catch
                 {
@@ -2550,7 +2738,7 @@ namespace System.Data.SQLite
                 {
                     Trace.WriteLine(String.Format(
                         "FinalizeStatement: {0}, exception: {1}",
-                        handle, e));
+                        handle, e)); /* throw */
                 }
                 catch
                 {
@@ -2686,7 +2874,7 @@ namespace System.Data.SQLite
                 try
                 {
                     Trace.WriteLine(String.Format(
-                        "FinishBackup: {0}", localHandle));
+                        "FinishBackup: {0}", localHandle)); /* throw */
                 }
                 catch
                 {
@@ -2721,7 +2909,7 @@ namespace System.Data.SQLite
                 {
                     Trace.WriteLine(String.Format(
                         "FinishBackup: {0}, exception: {1}",
-                        handle, e));
+                        handle, e)); /* throw */
                 }
                 catch
                 {

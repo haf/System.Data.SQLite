@@ -1623,11 +1623,9 @@ namespace System.Data.SQLite
       string error = null;
       string[] arParts;
 
-#if !PLATFORM_COMPACTFRAMEWORK
-      if (Environment.GetEnvironmentVariable("No_SQLiteConnectionNewParser") != null)
+      if (UnsafeNativeMethods.GetVariableValue("No_SQLiteConnectionNewParser") != null)
           arParts = SQLiteConvert.Split(s, ';');
       else
-#endif
           arParts = SQLiteConvert.NewSplit(s, ';', true, ref error);
 
       if (arParts == null)
