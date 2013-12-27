@@ -1930,6 +1930,7 @@ namespace System.Data.SQLite
                 bool noNetFx35,
                 bool noNetFx40,
                 bool noNetFx45,
+                bool noNetFx451,
                 bool noVs2005,
                 bool noVs2008,
                 bool noVs2010,
@@ -1969,6 +1970,7 @@ namespace System.Data.SQLite
                 this.noNetFx35 = noNetFx35;
                 this.noNetFx40 = noNetFx40;
                 this.noNetFx45 = noNetFx45;
+                this.noNetFx451 = noNetFx451;
                 this.noVs2005 = noVs2005;
                 this.noVs2008 = noVs2008;
                 this.noVs2010 = noVs2010;
@@ -2132,8 +2134,8 @@ namespace System.Data.SQLite
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, false, true, false, false, false,
                     false, false, false, false, false, false, false, false,
-                    false, false, false, false, false, true, true, false,
-                    false, false);
+                    false, false, false, false, false, false, true, true,
+                    false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2550,6 +2552,27 @@ namespace System.Data.SQLite
                             }
 
                             configuration.noNetFx40 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noNetFx451"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noNetFx451 = (bool)value;
                         }
                         else if (MatchOption(newArg, "noNetFx45"))
                         {
@@ -3150,6 +3173,7 @@ namespace System.Data.SQLite
                         //
                         configuration.noNetFx40 = true;
                         configuration.noNetFx45 = true;
+                        configuration.noNetFx451 = true;
                         configuration.noVs2010 = true;
                         configuration.noVs2012 = true;
                         configuration.noVs2013 = true;
@@ -3232,7 +3256,7 @@ namespace System.Data.SQLite
                 //       processed during the install.  If the target is
                 //       Visual Studio 2005, this should return zero.
                 //
-                return !noNetFx35 || !noNetFx40 || !noNetFx45;
+                return !noNetFx35 || !noNetFx40 || !noNetFx45 || !noNetFx451;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3337,6 +3361,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "NoNetFx45", ForDisplay(noNetFx45)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoNetFx451", ForDisplay(noNetFx451)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3624,6 +3652,15 @@ namespace System.Data.SQLite
             {
                 get { return noNetFx45; }
                 set { noNetFx45 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private bool noNetFx451;
+            public bool NoNetFx451
+            {
+                get { return noNetFx451; }
+                set { noNetFx451 = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -4263,11 +4300,35 @@ namespace System.Data.SQLite
                     if ((configuration == null) || !configuration.NoNetFx20)
                         desktopVersionList.Add(new Version(2, 0, 50727));
 
+                    /*
+                    //
+                    // NOTE: The .NET Framework 3.5 does not have its own
+                    //       directory.
+                    //
+                    if ((configuration == null) || !configuration.NoNetFx35)
+                        desktopVersionList.Add(new Version(3, 5, 21022));
+                    */
+
                     if ((configuration == null) || !configuration.NoNetFx40)
                         desktopVersionList.Add(new Version(4, 0, 30319));
 
+                    /*
+                    //
+                    // NOTE: The .NET Framework 4.5 does not have its own
+                    //       directory.
+                    //
                     if ((configuration == null) || !configuration.NoNetFx45)
                         desktopVersionList.Add(new Version(4, 5, 50709));
+                    */
+
+                    /*
+                    //
+                    // NOTE: The .NET Framework 4.5.1 does not have its own
+                    //       directory.
+                    //
+                    if ((configuration == null) || !configuration.NoNetFx451)
+                        desktopVersionList.Add(new Version(4, 5, 50938));
+                    */
 
                     frameworkList.Versions.Add(".NETFramework",
                         desktopVersionList);
