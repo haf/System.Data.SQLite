@@ -4300,35 +4300,32 @@ namespace System.Data.SQLite
                     if ((configuration == null) || !configuration.NoNetFx20)
                         desktopVersionList.Add(new Version(2, 0, 50727));
 
-                    /*
                     //
                     // NOTE: The .NET Framework 3.5 does not have its own
-                    //       directory.
+                    //       directory; however, it still may have assembly
+                    //       folders for use in Visual Studio, etc.
                     //
                     if ((configuration == null) || !configuration.NoNetFx35)
-                        desktopVersionList.Add(new Version(3, 5, 21022));
-                    */
+                        desktopVersionList.Add(new Version(3, 5));
 
                     if ((configuration == null) || !configuration.NoNetFx40)
                         desktopVersionList.Add(new Version(4, 0, 30319));
 
-                    /*
                     //
                     // NOTE: The .NET Framework 4.5 does not have its own
-                    //       directory.
+                    //       directory; however, it still may have assembly
+                    //       folders for use in Visual Studio, etc.
                     //
                     if ((configuration == null) || !configuration.NoNetFx45)
                         desktopVersionList.Add(new Version(4, 5, 50709));
-                    */
 
-                    /*
                     //
                     // NOTE: The .NET Framework 4.5.1 does not have its own
-                    //       directory.
+                    //       directory; however, it still may have assembly
+                    //       folders for use in Visual Studio, etc.
                     //
                     if ((configuration == null) || !configuration.NoNetFx451)
-                        desktopVersionList.Add(new Version(4, 5, 50938));
-                    */
+                        desktopVersionList.Add(new Version(4, 5, 1));
 
                     frameworkList.Versions.Add(".NETFramework",
                         desktopVersionList);
