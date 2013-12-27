@@ -2553,27 +2553,6 @@ namespace System.Data.SQLite
 
                             configuration.noNetFx40 = (bool)value;
                         }
-                        else if (MatchOption(newArg, "noNetFx451"))
-                        {
-                            bool? value = ParseBoolean(text);
-
-                            if (value == null)
-                            {
-                                error = TraceOps.DebugAndTrace(
-                                    TracePriority.Lowest, debugCallback,
-                                    traceCallback, String.Format(
-                                    "Invalid {0} boolean value: {1}",
-                                    ForDisplay(arg), ForDisplay(text)),
-                                    traceCategory);
-
-                                if (strict)
-                                    return false;
-
-                                continue;
-                            }
-
-                            configuration.noNetFx451 = (bool)value;
-                        }
                         else if (MatchOption(newArg, "noNetFx45"))
                         {
                             bool? value = ParseBoolean(text);
@@ -2594,6 +2573,27 @@ namespace System.Data.SQLite
                             }
 
                             configuration.noNetFx45 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noNetFx451"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noNetFx451 = (bool)value;
                         }
                         else if (MatchOption(newArg, "noRuntimeVersion"))
                         {
