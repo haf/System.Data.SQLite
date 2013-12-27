@@ -119,7 +119,7 @@ namespace System.Data.SQLite
       /// <paramref name="default" /> if it has not been set explicitly or
       /// cannot be determined.  By default, all references to existing
       /// environment variables will be expanded to their corresponding values
-      /// within returned value to be returned unless either the "No_Expand" or
+      /// within the value to be returned unless either the "No_Expand" or
       /// "No_Expand_<paramref name="name" />" environment variable is set [to
       /// anything].
       /// </returns>
