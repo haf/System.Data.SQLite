@@ -396,10 +396,16 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
+      /// The native module file name for the native SQLite library or null.
+      /// </summary>
+      private static string _SQLiteNativeModuleFileName = null;
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
       /// The native module handle for the native SQLite library or the value
       /// IntPtr.Zero.
       /// </summary>
-      private static IntPtr _SQLiteModule = IntPtr.Zero;
+      private static IntPtr _SQLiteNativeModuleHandle = IntPtr.Zero;
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
@@ -455,8 +461,18 @@ namespace System.Data.SQLite
               //
               // BUGBUG: What about other application domains?
               //
-              if (_SQLiteModule == IntPtr.Zero)
-                  _SQLiteModule = PreLoadSQLiteDll(null, null);
+              if (_SQLiteNativeModuleHandle == IntPtr.Zero)
+              {
+                  //
+                  // NOTE: Attempt to pre-load the SQLite core library (or
+                  //       interop assembly) and store both the file name
+                  //       and native module handle for later usage.
+                  //
+                  /* IGNORED */
+                  PreLoadSQLiteDll(
+                      null, null, ref _SQLiteNativeModuleFileName,
+                      ref _SQLiteNativeModuleHandle);
+              }
           }
       }
 
@@ -721,13 +737,24 @@ namespace System.Data.SQLite
       /// processor architecture of the current process).  This caller should
       /// almost always specify null for this parameter.
       /// </param>
+      /// <param name="nativeModuleFileName">
+      /// The candidate native module file name to load will be stored here,
+      /// if necessary.
+      /// </param>
+      /// <param name="nativeModuleHandle">
+      /// The native module handle as returned by LoadLibrary will be stored
+      /// here, if necessary.  This value will be IntPtr.Zero if the call to
+      /// LoadLibrary fails.
+      /// </param>
       /// <returns>
-      /// The native module handle as returned by LoadLibrary -OR- IntPtr.Zero
-      /// if the loading fails for any reason.
+      /// Non-zero if the native module was loaded successfully; otherwise,
+      /// zero.
       /// </returns>
-      private static IntPtr PreLoadSQLiteDll(
+      private static bool PreLoadSQLiteDll(
           string directory,
-          string processorArchitecture
+          string processorArchitecture,
+          ref string nativeModuleFileName,
+          ref IntPtr nativeModuleHandle
           )
       {
           //
@@ -741,7 +768,7 @@ namespace System.Data.SQLite
           // NOTE: If we failed to query the base directory, stop now.
           //
           if (directory == null)
-              return IntPtr.Zero;
+              return false;
 
           //
           // NOTE: If the native SQLite library exists in the base directory
@@ -751,7 +778,7 @@ namespace System.Data.SQLite
               SQLITE_DLL));
 
           if (File.Exists(fileName))
-              return IntPtr.Zero;
+              return false;
 
           //
           // NOTE: If the specified processor architecture is null, use the
@@ -764,7 +791,7 @@ namespace System.Data.SQLite
           // NOTE: If we failed to query the processor architecture, stop now.
           //
           if (processorArchitecture == null)
-              return IntPtr.Zero;
+              return false;
 
           //
           // NOTE: Build the full path and file name for the native SQLite
@@ -789,7 +816,7 @@ namespace System.Data.SQLite
               // NOTE: If we failed to translate the platform name, stop now.
               //
               if (platformName == null)
-                  return IntPtr.Zero;
+                  return false;
 
               //
               // NOTE: Build the full path and file name for the native SQLite
@@ -802,7 +829,7 @@ namespace System.Data.SQLite
               // NOTE: If the file does not exist, skip trying to load it.
               //
               if (!File.Exists(fileName))
-                  return IntPtr.Zero;
+                  return false;
           }
 
           try
@@ -830,7 +857,10 @@ namespace System.Data.SQLite
               //       return a valid native module handle, return IntPtr.Zero,
               //       or throw an exception.
               //
-              return LoadLibrary(fileName);
+              nativeModuleFileName = fileName;
+              nativeModuleHandle = LoadLibrary(fileName);
+
+              return (nativeModuleHandle != IntPtr.Zero);
           }
 #if !NET_COMPACT_20 && TRACE_PRELOAD
           catch (Exception e)
@@ -864,7 +894,7 @@ namespace System.Data.SQLite
 #endif
           }
 
-          return IntPtr.Zero;
+          return false;
       }
 #endif
 #endif

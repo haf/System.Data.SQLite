@@ -543,9 +543,24 @@ namespace eval ::Eagle {
 
     proc getCoreBinaryFileName { {platform ""} {standard false} } {
       #
-      # NOTE: Returns the full path for the file containing the core SQLite
-      #       library code for this platform.
+      # NOTE: Returns the full path for the file containing the SQLite core
+      #       native library code for this platform.  First, check and see if
+      #       the SQLite core native library has already been loaded.  Next,
+      #       fallback to what the full path should be, based on whether the
+      #       mixed-mode assembly is being used and the name of the current
+      #       platform.
       #
+      if {[catch {object invoke -flags +NonPublic \
+              System.Data.SQLite.UnsafeNativeMethods \
+              _SQLiteNativeModuleFileName} fileName] == 0 && \
+          [string length $fileName] > 0} then {
+        #
+        # NOTE: The SQLite core native library has already been loaded via
+        #       the native library pre-loader.  Return that file name now.
+        #
+        return $fileName
+      }
+
       if {[hasRuntimeOption native]} then {
         #
         # NOTE: Return the mixed-mode assembly file name.
@@ -2197,7 +2212,15 @@ namespace eval ::Eagle {
           #
           # NOTE: Determine the name for the current native platform.
           #
-          set platform [getBuildPlatform true]
+          set platform [architectureForPlatform [getBuildPlatform true]]
+
+          #
+          # NOTE: Show the platform that will be used to help locate native
+          #       build files.
+          #
+          tputs $::test_channel [appendArgs \
+              "---- platform for locating native build files is \"" \
+              $platform \"\n]
 
           #
           # NOTE: Skip trying to delete any files if we are so instructed.
@@ -2324,8 +2347,7 @@ namespace eval ::Eagle {
             #       Debugging Assistants configured.
             #
             foreach mdaConfigFileName $mdaConfigFileNames {
-              tryCopyBinaryFile \
-                  EagleShell.exe.mda.config "" $mdaConfigFileName
+              tryCopyBinaryFile EagleShell.exe.mda.config "" $mdaConfigFileName
             }
           }
         }
