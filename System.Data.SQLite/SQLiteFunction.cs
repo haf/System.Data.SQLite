@@ -657,7 +657,7 @@ namespace System.Data.SQLite
         // NOTE: If the "No_SQLiteFunctions" environment variable is set,
         //       skip all our special code and simply return.
         //
-        if (UnsafeNativeMethods.GetSettingValue("No_SQLiteFunctions") != null)
+        if (UnsafeNativeMethods.GetSettingValue("No_SQLiteFunctions", null) != null)
           return;
 
         SQLiteFunctionAttribute at;

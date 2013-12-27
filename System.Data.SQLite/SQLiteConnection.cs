@@ -1623,7 +1623,7 @@ namespace System.Data.SQLite
       string error = null;
       string[] arParts;
 
-      if (UnsafeNativeMethods.GetSettingValue("No_SQLiteConnectionNewParser") != null)
+      if (UnsafeNativeMethods.GetSettingValue("No_SQLiteConnectionNewParser", null) != null)
           arParts = SQLiteConvert.Split(s, ';');
       else
           arParts = SQLiteConvert.NewSplit(s, ';', true, ref error);
