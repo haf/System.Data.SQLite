@@ -2669,8 +2669,8 @@ SQLite System.Data.SQLite} -match regexp -result {^\{Busy 0 False 0\} \{Busy\
 
 ###############################################################################
 
-runTest {test data-1.54 {percentile extension} -setup {
-  setupDb [set fileName data-1.54.db]
+runTest {test data-1.55 {percentile extension} -setup {
+  setupDb [set fileName data-1.55.db]
 } -body {
   set connection [getDbConnection]
   set result [list]
