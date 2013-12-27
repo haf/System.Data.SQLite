@@ -112,6 +112,10 @@ namespace System.Data.SQLite
             "TRACE_PRELOAD",
 #endif
 
+#if TRACE_SHARED
+            "TRACE_SHARED",
+#endif
+
 #if TRACE_STATEMENT
             "TRACE_STATEMENT",
 #endif

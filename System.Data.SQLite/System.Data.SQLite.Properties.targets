@@ -221,6 +221,10 @@
     <DefineConstants>$(DefineConstants);TRACE_PRELOAD</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TraceShared)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACE_SHARED</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TraceStatement)' != 'false'">
     <DefineConstants>$(DefineConstants);TRACE_STATEMENT</DefineConstants>
   </PropertyGroup>

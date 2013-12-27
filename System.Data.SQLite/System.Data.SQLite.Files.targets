@@ -14,7 +14,7 @@
   -->
 
   <ItemGroup>
-    <None Include="System.Data.SQLite.config">
+    <None Include="System.Data.SQLite.dll.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Compile Include="AssemblyInfo.cs" />

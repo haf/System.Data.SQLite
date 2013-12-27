@@ -56,6 +56,216 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
 
+      #region Shared Native SQLite Library Pre-Loading Code
+      private static readonly string DllFileExtension = ".dll";
+      private static readonly string ConfigFileExtension = ".config";
+
+      /////////////////////////////////////////////////////////////////////////
+
+      //
+      // NOTE: This is the name of the XML configuration file specific to the
+      //       System.Data.SQLite assembly.
+      //
+      private static readonly string XmlConfigFileName =
+          typeof(UnsafeNativeMethods).Namespace + DllFileExtension +
+          ConfigFileExtension;
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Queries and returns the XML configuration file name for the assembly
+      /// containing the managed System.Data.SQLite components.
+      /// </summary>
+      /// <returns>
+      /// The XML configuration file name -OR- null if it cannot be determined
+      /// or does not exist.
+      /// </returns>
+      private static string GetXmlConfigFileName()
+      {
+          string directory;
+          string fileName;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+          directory = AppDomain.CurrentDomain.BaseDirectory;
+          fileName = Path.Combine(directory, XmlConfigFileName);
+
+          if (File.Exists(fileName))
+              return fileName;
+#endif
+
+          directory = GetAssemblyDirectory();
+          fileName = Path.Combine(directory, XmlConfigFileName);
+
+          if (File.Exists(fileName))
+              return fileName;
+
+          return null;
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Queries and returns the value of the specified "configuration"
+      /// variable, using the XML configuration file and/or the environment
+      /// variables for the current process and/or the current system, when
+      /// available.
+      /// </summary>
+      /// <param name="name">
+      /// The name of the configuration variable.
+      /// </param>
+      /// <returns>
+      /// The value of the configuration variable -OR- null if it cannot be
+      /// determined.  By default, references to existing environment will
+      /// be expanded within the returned value unless either the "No_Expand"
+      /// or "No_Expand_<paramref name="name" />" environment variables are
+      /// set.
+      /// </returns>
+      internal static string GetSettingValue(
+          string name
+          )
+      {
+          string value = null;
+
+          if (name == null)
+              return value;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+          bool expand = true;
+
+          if (Environment.GetEnvironmentVariable("No_Expand") != null)
+          {
+              expand = false;
+          }
+          else if (Environment.GetEnvironmentVariable(String.Format(
+                  "No_Expand_{0}", name)) != null)
+          {
+              expand = false;
+          }
+
+          value = Environment.GetEnvironmentVariable(name);
+
+          if (expand && !String.IsNullOrEmpty(value))
+              value = Environment.ExpandEnvironmentVariables(value);
+
+          if (value != null)
+              return value;
+#endif
+
+          try
+          {
+              string fileName = GetXmlConfigFileName();
+
+              if (fileName == null)
+                  return value;
+
+              XmlDocument document = new XmlDocument();
+
+              document.Load(fileName);
+
+              XmlElement element = document.SelectSingleNode(String.Format(
+                  "/configuration/appSettings/add[@key='{0}']")) as XmlElement;
+
+              if (element != null)
+              {
+                  if (element.HasAttribute("value"))
+                      value = element.GetAttribute("value");
+
+#if !PLATFORM_COMPACTFRAMEWORK
+                  if (expand && !String.IsNullOrEmpty(value))
+                      value = Environment.ExpandEnvironmentVariables(value);
+#endif
+              }
+          }
+#if !NET_COMPACT_20 && TRACE_SHARED
+          catch (Exception e)
+#else
+          catch (Exception)
+#endif
+          {
+#if !NET_COMPACT_20 && TRACE_SHARED
+              try
+              {
+                  Trace.WriteLine(String.Format(
+                      CultureInfo.CurrentCulture,
+                      "Native library pre-loader failed to get variable " +
+                      "\"{0}\" value: {1}", name, e)); /* throw */
+              }
+              catch
+              {
+                  // do nothing.
+              }
+#endif
+          }
+
+          return value;
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Queries and returns the directory for the assembly currently being
+      /// executed.
+      /// </summary>
+      /// <returns>
+      /// The directory for the assembly currently being executed -OR- null if
+      /// it cannot be determined.
+      /// </returns>
+      private static string GetAssemblyDirectory()
+      {
+          try
+          {
+              Assembly assembly = Assembly.GetExecutingAssembly();
+
+              if (assembly == null)
+                  return null;
+
+              string fileName;
+
+#if PLATFORM_COMPACTFRAMEWORK
+              AssemblyName assemblyName = assembly.GetName();
+
+              if (assemblyName == null)
+                  return null;
+
+              fileName = assemblyName.CodeBase;
+#else
+              fileName = assembly.Location;
+#endif
+
+              if (String.IsNullOrEmpty(fileName))
+                  return null;
+
+              string directory = Path.GetDirectoryName(fileName);
+
+              if (String.IsNullOrEmpty(directory))
+                  return null;
+
+              return directory;
+          }
+#if !NET_COMPACT_20 && TRACE_SHARED
+          catch (Exception e)
+#else
+          catch (Exception)
+#endif
+          {
+#if !NET_COMPACT_20 && TRACE_SHARED
+              try
+              {
+                  Trace.WriteLine(String.Format(
+                      CultureInfo.CurrentCulture,
+                      "Native library pre-loader failed to get directory " +
+                      "for currently executing assembly: {0}", e)); /* throw */
+              }
+              catch
+              {
+                  // do nothing.
+              }
+#endif
+          }
+
+          return null;
+      }
+      #endregion
+
+      /////////////////////////////////////////////////////////////////////////
+
       #region Optional Native SQLite Library Pre-Loading Code
       //
       // NOTE: If we are looking for the standard SQLite DLL ("sqlite3.dll"),
@@ -78,15 +288,6 @@ namespace System.Data.SQLite
       /// </summary>
       private static readonly string PROCESSOR_ARCHITECTURE =
           "PROCESSOR_ARCHITECTURE";
-
-      /////////////////////////////////////////////////////////////////////////
-
-      private static readonly string DllFileExtension = ".dll";
-
-      /////////////////////////////////////////////////////////////////////////
-
-      private static readonly string XmlConfigFileName =
-          typeof(UnsafeNativeMethods).Namespace + ".config";
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
@@ -247,199 +448,6 @@ namespace System.Data.SQLite
               if (_SQLiteModule == IntPtr.Zero)
                   _SQLiteModule = PreLoadSQLiteDll(null, null);
           }
-      }
-
-      /////////////////////////////////////////////////////////////////////////
-      /// <summary>
-      /// Queries and returns the XML configuration file name for the assembly
-      /// containing the managed System.Data.SQLite components.
-      /// </summary>
-      /// <returns>
-      /// The XML configuration file name -OR- null if it cannot be determined
-      /// or does not exist.
-      /// </returns>
-      private static string GetXmlConfigFileName()
-      {
-          string directory;
-          string fileName;
-
-#if !PLATFORM_COMPACTFRAMEWORK
-          directory = AppDomain.CurrentDomain.BaseDirectory;
-          fileName = Path.Combine(directory, XmlConfigFileName);
-
-          if (File.Exists(fileName))
-              return fileName;
-#endif
-
-          directory = GetAssemblyDirectory();
-          fileName = Path.Combine(directory, XmlConfigFileName);
-
-          if (File.Exists(fileName))
-              return fileName;
-
-          return null;
-      }
-
-      /////////////////////////////////////////////////////////////////////////
-      /// <summary>
-      /// Queries and returns the value of the specified "configuration"
-      /// variable, using the XML configuration file and/or the environment
-      /// variables for the current process and/or the current system, when
-      /// available.
-      /// </summary>
-      /// <param name="name">
-      /// The name of the configuration variable.
-      /// </param>
-      /// <returns>
-      /// The value of the configuration variable -OR- null if it cannot be
-      /// determined.  By default, references to existing environment will
-      /// be expanded within the returned value unless either the "No_Expand"
-      /// or "No_Expand_<paramref name="name" />" environment variables are
-      /// set.
-      /// </returns>
-      internal static string GetSettingValue(
-          string name
-          )
-      {
-          string value = null;
-
-          if (name == null)
-              return value;
-
-#if !PLATFORM_COMPACTFRAMEWORK
-          bool expand = true;
-
-          if (Environment.GetEnvironmentVariable("No_Expand") != null)
-          {
-              expand = false;
-          }
-          else if (Environment.GetEnvironmentVariable(String.Format(
-                  "No_Expand_{0}", name)) != null)
-          {
-              expand = false;
-          }
-
-          value = Environment.GetEnvironmentVariable(name);
-
-          if (expand && !String.IsNullOrEmpty(value))
-              value = Environment.ExpandEnvironmentVariables(value);
-
-          if (value != null)
-              return value;
-#endif
-
-          try
-          {
-              string fileName = GetXmlConfigFileName();
-
-              if (fileName == null)
-                  return value;
-
-              XmlDocument document = new XmlDocument();
-
-              document.Load(fileName);
-
-              XmlElement element = document.SelectSingleNode(String.Format(
-                  "/configuration/appSettings/add[@key='{0}']")) as XmlElement;
-
-              if (element != null)
-              {
-                  if (element.HasAttribute("value"))
-                      value = element.GetAttribute("value");
-
-#if !PLATFORM_COMPACTFRAMEWORK
-                  if (expand && !String.IsNullOrEmpty(value))
-                      value = Environment.ExpandEnvironmentVariables(value);
-#endif
-              }
-          }
-#if !NET_COMPACT_20 && TRACE_PRELOAD
-          catch (Exception e)
-#else
-          catch (Exception)
-#endif
-          {
-#if !NET_COMPACT_20 && TRACE_PRELOAD
-              try
-              {
-                  Trace.WriteLine(String.Format(
-                      CultureInfo.CurrentCulture,
-                      "Native library pre-loader failed to get variable " +
-                      "\"{0}\" value: {1}", name, e)); /* throw */
-              }
-              catch
-              {
-                  // do nothing.
-              }
-#endif
-          }
-
-          return value;
-      }
-
-      /////////////////////////////////////////////////////////////////////////
-      /// <summary>
-      /// Queries and returns the directory for the assembly currently being
-      /// executed.
-      /// </summary>
-      /// <returns>
-      /// The directory for the assembly currently being executed -OR- null if
-      /// it cannot be determined.
-      /// </returns>
-      private static string GetAssemblyDirectory()
-      {
-          try
-          {
-              Assembly assembly = Assembly.GetExecutingAssembly();
-
-              if (assembly == null)
-                  return null;
-
-              string fileName;
-
-#if PLATFORM_COMPACTFRAMEWORK
-              AssemblyName assemblyName = assembly.GetName();
-
-              if (assemblyName == null)
-                  return null;
-
-              fileName = assemblyName.CodeBase;
-#else
-              fileName = assembly.Location;
-#endif
-
-              if (String.IsNullOrEmpty(fileName))
-                  return null;
-
-              string directory = Path.GetDirectoryName(fileName);
-
-              if (String.IsNullOrEmpty(directory))
-                  return null;
-
-              return directory;
-          }
-#if !NET_COMPACT_20 && TRACE_PRELOAD
-          catch (Exception e)
-#else
-          catch (Exception)
-#endif
-          {
-#if !NET_COMPACT_20 && TRACE_PRELOAD
-              try
-              {
-                  Trace.WriteLine(String.Format(
-                      CultureInfo.CurrentCulture,
-                      "Native library pre-loader failed to get directory " +
-                      "for currently executing assembly: {0}", e)); /* throw */
-              }
-              catch
-              {
-                  // do nothing.
-              }
-#endif
-          }
-
-          return null;
       }
 
       /////////////////////////////////////////////////////////////////////////

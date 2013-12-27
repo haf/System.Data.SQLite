@@ -501,14 +501,14 @@ namespace eval ::Eagle {
       }
     }
 
-    proc getBuildFileName { fileName } {
+    proc getBuildFileName { fileName {platform ""} } {
       #
       # NOTE: Returns the specified file name as if it were located in the
       #       build directory, discarding any directory information present
       #       in the file name as provided by our caller.
       #
       return [file nativename \
-          [file join [getBuildDirectory] [file tail $fileName]]]
+          [file join [getBuildDirectory] $platform [file tail $fileName]]]
     }
 
     proc getBinaryDirectory {} {
@@ -531,17 +531,17 @@ namespace eval ::Eagle {
       }
     }
 
-    proc getBinaryFileName { fileName } {
+    proc getBinaryFileName { fileName {platform ""} } {
       #
       # NOTE: Returns the specified file name as if it were located in the
       #       binary directory, discarding any directory information present
       #       in the file name as provided by our caller.
       #
       return [file nativename \
-          [file join [getBinaryDirectory] [file tail $fileName]]]
+          [file join [getBinaryDirectory] $platform [file tail $fileName]]]
     }
 
-    proc getCoreBinaryFileName { {standard false} } {
+    proc getCoreBinaryFileName { {platform ""} {standard false} } {
       #
       # NOTE: Returns the full path for the file containing the core SQLite
       #       library code for this platform.
@@ -551,19 +551,19 @@ namespace eval ::Eagle {
         # NOTE: Return the mixed-mode assembly file name.
         #
         return [file nativename \
-            [file join [getBinaryDirectory] System.Data.SQLite.dll]]
+            [file join [getBinaryDirectory] $platform System.Data.SQLite.dll]]
       } elseif {$standard} then {
         #
         # NOTE: Return the native-only standard SQLite library file name.
         #
         return [file nativename \
-            [file join [getBinaryDirectory] sqlite3.dll]]
+            [file join [getBinaryDirectory] $platform sqlite3.dll]]
       } else {
         #
         # NOTE: Return the native-only interop assembly file name.
         #
         return [file nativename \
-            [file join [getBinaryDirectory] SQLite.Interop.dll]]
+            [file join [getBinaryDirectory] $platform SQLite.Interop.dll]]
       }
     }
 
@@ -743,8 +743,8 @@ namespace eval ::Eagle {
       } [getTestOverridesPreamble [list path test_channel]] $suffix]]]
     }
 
-    proc tryCopyBinaryFile { fileName {newFileName ""} } {
-      set sourceFileName [getBinaryFileName $fileName]
+    proc tryCopyBinaryFile { fileName {platform ""} {newFileName ""} } {
+      set sourceFileName [getBinaryFileName $fileName $platform]
 
       if {![file exists $sourceFileName]} then {
         tputs $::test_channel [appendArgs \
@@ -755,9 +755,9 @@ namespace eval ::Eagle {
       }
 
       if {[string length $newFileName] > 0} then {
-        set targetFileName [getBuildFileName $newFileName]
+        set targetFileName [getBuildFileName $newFileName $platform]
       } else {
-        set targetFileName [getBuildFileName $fileName]
+        set targetFileName [getBuildFileName $fileName $platform]
       }
 
       if {[catch {
@@ -772,8 +772,8 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryCopyBuildFile { fileName {newFileName ""} } {
-      set sourceFileName [getBuildFileName $fileName]
+    proc tryCopyBuildFile { fileName {platform ""} {newFileName ""} } {
+      set sourceFileName [getBuildFileName $fileName $platform]
 
       if {![file exists $sourceFileName]} then {
         tputs $::test_channel [appendArgs \
@@ -784,9 +784,9 @@ namespace eval ::Eagle {
       }
 
       if {[string length $newFileName] > 0} then {
-        set targetFileName [getBinaryFileName $newFileName]
+        set targetFileName [getBinaryFileName $newFileName $platform]
       } else {
-        set targetFileName [getBinaryFileName $fileName]
+        set targetFileName [getBinaryFileName $fileName $platform]
       }
 
       if {[catch {
@@ -801,8 +801,8 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryDeleteBinaryFile { fileName } {
-      set fileName [getBinaryFileName $fileName]
+    proc tryDeleteBinaryFile { fileName {platform ""} } {
+      set fileName [getBinaryFileName $fileName $platform]
 
       if {![file exists $fileName]} then {
         tputs $::test_channel [appendArgs \
@@ -821,8 +821,8 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryDeleteBuildFile { fileName } {
-      set fileName [getBuildFileName $fileName]
+    proc tryDeleteBuildFile { fileName {platform ""} } {
+      set fileName [getBuildFileName $fileName $platform]
 
       if {![file exists $fileName]} then {
         tputs $::test_channel [appendArgs \
@@ -841,24 +841,26 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryCopyAssembly { fileName {pdb true} } {
-      tryCopyBuildFile $fileName
+    proc tryCopyAssembly { fileName {platform ""} {pdb true} } {
+      tryCopyBuildFile $fileName $platform
 
       if {$pdb} then {
-        tryCopyBuildFile [appendArgs [file rootname $fileName] .pdb]
+        tryCopyBuildFile [appendArgs \
+            [file rootname $fileName] .pdb] $platform
       }
     }
 
-    proc tryDeleteAssembly { fileName {pdb true} } {
-      tryDeleteBinaryFile $fileName
+    proc tryDeleteAssembly { fileName {platform ""} {pdb true} } {
+      tryDeleteBinaryFile $fileName $platform
 
       if {$pdb} then {
-        tryDeleteBinaryFile [appendArgs [file rootname $fileName] .pdb]
+        tryDeleteBinaryFile [appendArgs \
+            [file rootname $fileName] .pdb] $platform
       }
     }
 
-    proc tryLoadAssembly { fileName } {
-      set fileName [getBinaryFileName $fileName]
+    proc tryLoadAssembly { fileName {platform ""} } {
+      set fileName [getBinaryFileName $fileName $platform]
 
       if {[catch {set assembly \
               [object load -loadtype File -alias $fileName]}] == 0} then {
@@ -2193,19 +2195,28 @@ namespace eval ::Eagle {
         #
         if {![info exists ::no(sqliteFiles)]} then {
           #
+          # NOTE: Determine the name for the current native platform.
+          #
+          set platform [getBuildPlatform true]
+
+          #
           # NOTE: Skip trying to delete any files if we are so instructed.
           #
           if {![info exists ::no(deleteSqliteFiles)]} then {
             tryDeleteAssembly sqlite3.dll
-            removeConstraint file_sqlite3.dll
-
             tryDeleteAssembly SQLite.Interop.dll
-            removeConstraint file_SQLite.Interop.dll
-
             tryDeleteAssembly System.Data.SQLite.dll
-            removeConstraint file_System.Data.SQLite.dll
-
             tryDeleteAssembly System.Data.SQLite.Linq.dll
+
+            if {[string length $platform] > 0} then {
+              tryDeleteAssembly sqlite3.dll $platform
+              tryDeleteAssembly SQLite.Interop.dll $platform
+              tryDeleteAssembly System.Data.SQLite.dll $platform
+            }
+
+            removeConstraint file_sqlite3.dll
+            removeConstraint file_SQLite.Interop.dll
+            removeConstraint file_System.Data.SQLite.dll
             removeConstraint file_System.Data.SQLite.Linq.dll
           }
 
@@ -2257,10 +2268,18 @@ namespace eval ::Eagle {
           # NOTE: Skip trying to copy any files if we are so instructed.
           #
           if {![info exists ::no(copySqliteFiles)]} then {
+            tryCopyBuildFile System.Data.SQLite.dll.config
+
             tryCopyAssembly sqlite3.dll
             tryCopyAssembly SQLite.Interop.dll
             tryCopyAssembly System.Data.SQLite.dll
             tryCopyAssembly System.Data.SQLite.Linq.dll
+
+            if {[string length $platform] > 0} then {
+              tryCopyAssembly sqlite3.dll $platform
+              tryCopyAssembly SQLite.Interop.dll $platform
+              tryCopyAssembly System.Data.SQLite.dll $platform
+            }
           }
 
           #
@@ -2269,15 +2288,27 @@ namespace eval ::Eagle {
           if {![info exists ::no(loadSqliteFiles)]} then {
             tryLoadAssembly System.Data.SQLite.dll
             tryLoadAssembly System.Data.SQLite.Linq.dll
+
+            if {[string length $platform] > 0} then {
+              tryLoadAssembly System.Data.SQLite.dll $platform
+            }
           }
+
+          #
+          # NOTE: Build a list of auxiliary Managed Debugging Assistants (MDA)
+          #       configuration files that may need to be deleted or copied.
+          #
+          set mdaConfigFileNames [list \
+              Installer.exe.mda.config test.exe.mda.config \
+              testlinq.exe.mda.config]
 
           #
           # NOTE: Skip trying to delete external files if we are so instructed.
           #
           if {![info exists ::no(deleteSqliteExternalFiles)]} then {
-            tryDeleteBuildFile Installer.exe.mda.config
-            tryDeleteBuildFile test.exe.mda.config
-            tryDeleteBuildFile testlinq.exe.mda.config
+            foreach mdaConfigFileName $mdaConfigFileNames {
+              tryDeleteBuildFile $mdaConfigFileName
+            }
           }
 
           #
@@ -2285,14 +2316,17 @@ namespace eval ::Eagle {
           #
           if {![info exists ::no(copySqliteExternalFiles)]} then {
             #
-            # NOTE: Copy the MDA configuration file for the Eagle shell to the
-            #       build output directory; however, use the name of the legacy
-            #       test executable.  This will make sure that the legacy tests
-            #       run with the same set of MDAs configured.
+            # NOTE: Copy the Managed Debugging Assistants (MDA) configuration
+            #       file for the Eagle shell to the build output directory,
+            #       while using each of the names of the various legacy test
+            #       executables.  This will help to make sure that all the
+            #       legacy tests run with exactly the same set of Managed
+            #       Debugging Assistants configured.
             #
-            tryCopyBinaryFile EagleShell.exe.mda.config Installer.exe.mda.config
-            tryCopyBinaryFile EagleShell.exe.mda.config test.exe.mda.config
-            tryCopyBinaryFile EagleShell.exe.mda.config testlinq.exe.mda.config
+            foreach mdaConfigFileName $mdaConfigFileNames {
+              tryCopyBinaryFile \
+                  EagleShell.exe.mda.config "" $mdaConfigFileName
+            }
           }
         }
 
@@ -2318,6 +2352,29 @@ namespace eval ::Eagle {
           tputs $::test_channel [appendArgs \
               "---- file version of \"System.Data.SQLite.Linq.dll\"... " \
               [file version [getBinaryFileName System.Data.SQLite.Linq.dll]] \n]
+        }
+
+        if {[string length $platform] > 0} then {
+          catch {
+            tputs $::test_channel [appendArgs \
+                "---- file version of \"" $platform \
+                "/sqlite3.dll\"... " [file version \
+                [getBinaryFileName sqlite3.dll $platform]] \n]
+          }
+
+          catch {
+            tputs $::test_channel [appendArgs \
+                "---- file version of \"" $platform \
+                "/SQLite.Interop.dll\"... " [file version \
+                [getBinaryFileName SQLite.Interop.dll $platform]] \n]
+          }
+
+          catch {
+            tputs $::test_channel [appendArgs \
+                "---- file version of \"" $platform \
+                "/System.Data.SQLite.dll\"... " [file version \
+                [getBinaryFileName System.Data.SQLite.dll $platform]] \n]
+          }
         }
 
         set assemblies [object invoke AppDomain.CurrentDomain GetAssemblies]
@@ -2416,8 +2473,8 @@ namespace eval ::Eagle {
             NET_40 NET_45 NET_451 NET_COMPACT_20 PLATFORM_COMPACTFRAMEWORK \
             PRELOAD_NATIVE_LIBRARY RETARGETABLE SQLITE_STANDARD \
             THROW_ON_DISPOSED TRACE TRACE_CONNECTION TRACE_HANDLE \
-            TRACE_PRELOAD TRACE_STATEMENT TRACE_WARNING TRACK_MEMORY_BYTES \
-            USE_INTEROP_DLL USE_PREPARE_V2 WINDOWS] {
+            TRACE_PRELOAD TRACE_SHARED TRACE_STATEMENT TRACE_WARNING \
+            TRACK_MEMORY_BYTES USE_INTEROP_DLL USE_PREPARE_V2 WINDOWS] {
           #
           # NOTE: Check if the compile-time option is listed in the list of
           #       "define constants" kept track of by the managed assembly.
