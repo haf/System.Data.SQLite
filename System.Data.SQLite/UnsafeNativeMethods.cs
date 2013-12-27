@@ -124,8 +124,8 @@ namespace System.Data.SQLite
       /// environment variables are set [to anything].
       /// </returns>
       internal static string GetSettingValue(
-          string name,
-          string @default
+          string name,    /* in */
+          string @default /* in */
           )
       {
           if (name == null)
@@ -539,7 +539,7 @@ namespace System.Data.SQLite
       /// extension.
       /// </returns>
       private static string FixUpDllFileName(
-          string fileName
+          string fileName /* in */
           )
       {
           if (!String.IsNullOrEmpty(fileName))
@@ -642,47 +642,50 @@ namespace System.Data.SQLite
               }
 #endif
           }
+#else
+          if (processorArchitecture == null)
+          {
+              //
+              // NOTE: On the .NET Compact Framework, attempt to use the native
+              //       Win32 API function (via P/Invoke) that can provide us
+              //       with the processor architecture.
+              //
+              try
+              {
+                  //
+                  // NOTE: The output of the GetSystemInfo function will be
+                  //       placed here.  Only the processor architecture field
+                  //       is used by this method.
+                  //
+                  SYSTEM_INFO systemInfo;
+
+                  //
+                  // NOTE: Query the system information via P/Invoke, thus
+                  //       filling the structure.
+                  //
+                  GetSystemInfo(out systemInfo);
+
+                  //
+                  // NOTE: Return the processor architecture value as a string.
+                  //
+                  processorArchitecture =
+                      systemInfo.wProcessorArchitecture.ToString();
+              }
+              catch
+              {
+                  // do nothing.
+              }
+
+              //
+              // NOTE: Upon failure, return an empty string.  This will prevent
+              //       the calling method from considering this method call a
+              //       "failure".
+              //
+              processorArchitecture = String.Empty;
+          }
 #endif
 
           /////////////////////////////////////////////////////////////////////
-
-#if PLATFORM_COMPACTFRAMEWORK
-          //
-          // NOTE: On the .NET Compact Framework, attempt to use the native
-          //       Win32 API function (via P/Invoke) that can provide us with
-          //       the processor architecture.
-          //
-          try
-          {
-              //
-              // NOTE: The output of the GetSystemInfo function will be placed
-              //       here.  Only the processor architecture field is used by
-              //       this method.
-              //
-              SYSTEM_INFO systemInfo;
-
-              //
-              // NOTE: Query the system information via P/Invoke, thus filling
-              //       the structure.
-              //
-              GetSystemInfo(out systemInfo);
-
-              //
-              // NOTE: Return the processor architecture value as a string.
-              //
-              processorArchitecture =
-                  systemInfo.wProcessorArchitecture.ToString();
-          }
-          catch
-          {
-              // do nothing.
-          }
-
-          //
-          // NOTE: Upon failure, return an empty string.
-          //
-          processorArchitecture = String.Empty;
-#endif
 
           return processorArchitecture;
       }
@@ -699,7 +702,7 @@ namespace System.Data.SQLite
       /// if it cannot be determined.
       /// </returns>
       private static string GetPlatformName(
-          string processorArchitecture
+          string processorArchitecture /* in */
           )
       {
           if (String.IsNullOrEmpty(processorArchitecture))
@@ -751,10 +754,10 @@ namespace System.Data.SQLite
       /// zero.
       /// </returns>
       private static bool PreLoadSQLiteDll(
-          string directory,
-          string processorArchitecture,
-          ref string nativeModuleFileName,
-          ref IntPtr nativeModuleHandle
+          string directory,                /* in */
+          string processorArchitecture,    /* in */
+          ref string nativeModuleFileName, /* out */
+          ref IntPtr nativeModuleHandle    /* out */
           )
       {
           //
