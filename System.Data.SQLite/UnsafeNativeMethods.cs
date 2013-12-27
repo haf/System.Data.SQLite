@@ -103,25 +103,25 @@ namespace System.Data.SQLite
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
-      /// Queries and returns the value of the specified "configuration"
-      /// variable, using the XML configuration file and/or the environment
-      /// variables for the current process and/or the current system, when
-      /// available.
+      /// Queries and returns the value of the specified setting, using the XML
+      /// configuration file and/or the environment variables for the current
+      /// process and/or the current system, when available.
       /// </summary>
       /// <param name="name">
-      /// The name of the configuration variable.
+      /// The name of the setting.
       /// </param>
       /// <param name="default">
-      /// The value to be returned if the configuration variable has not been
-      /// set explicitly or cannot be determined.
+      /// The value to be returned if the setting has not been set explicitly
+      /// or cannot be determined.
       /// </param>
       /// <returns>
-      /// The value of the configuration variable -OR- the default value
-      /// specified by <paramref name="default" /> if it has not been set
-      /// explicitly or cannot be determined.  By default, all references to
-      /// existing environment will be expanded within the value to be returned
-      /// unless either the "No_Expand" or "No_Expand_<paramref name="name" />"
-      /// environment variables are set [to anything].
+      /// The value of the setting -OR- the default value specified by
+      /// <paramref name="default" /> if it has not been set explicitly or
+      /// cannot be determined.  By default, all references to existing
+      /// environment variables will be expanded to their corresponding values
+      /// within returned value to be returned unless either the "No_Expand" or
+      /// "No_Expand_<paramref name="name" />" environment variable is set [to
+      /// anything].
       /// </returns>
       internal static string GetSettingValue(
           string name,    /* in */
@@ -463,6 +463,13 @@ namespace System.Data.SQLite
               //
               if (_SQLiteNativeModuleHandle == IntPtr.Zero)
               {
+                  string baseDirectory = null;
+                  string processorArchitecture = null;
+
+                  /* IGNORED */
+                  SearchForDirectory(
+                      ref baseDirectory, ref processorArchitecture);
+
                   //
                   // NOTE: Attempt to pre-load the SQLite core library (or
                   //       interop assembly) and store both the file name
@@ -470,10 +477,89 @@ namespace System.Data.SQLite
                   //
                   /* IGNORED */
                   PreLoadSQLiteDll(
-                      null, null, ref _SQLiteNativeModuleFileName,
+                      baseDirectory, processorArchitecture,
+                      ref _SQLiteNativeModuleFileName,
                       ref _SQLiteNativeModuleHandle);
               }
           }
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Searches for the native SQLite library in the directory containing
+      /// the assembly currently being executed as well as the base directory
+      /// for the current application domain.
+      /// </summary>
+      /// <param name="baseDirectory">
+      /// Upon success, this parameter will be modified to refer to the base
+      /// directory containing the native SQLite library.
+      /// </param>
+      /// <param name="processorArchitecture">
+      /// Upon success, this parameter will be modified to refer to the name
+      /// of the immediate directory (i.e. the offset from the base directory)
+      /// containing the native SQLite library.
+      /// </param>
+      /// <returns>
+      /// Non-zero (success) if the native SQLite library was found; otherwise,
+      /// zero (failure).
+      /// </returns>
+      private static bool SearchForDirectory(
+          ref string baseDirectory,        /* out */
+          ref string processorArchitecture /* out */
+          )
+      {
+          if (GetSettingValue(
+                "PreLoadSQLite_SearchForDirectory", null) == null)
+          {
+              return false; /* DISABLED */
+          }
+
+          //
+          // NOTE: Build the list of base directories and processor/platform
+          //       names.  These lists will be used to help locate the native
+          //       SQLite core library (or interop assembly) to pre-load into
+          //       this process.
+          //
+          string[] directories = {
+              GetAssemblyDirectory(),
+#if !PLATFORM_COMPACTFRAMEWORK
+              AppDomain.CurrentDomain.BaseDirectory,
+#endif
+          };
+
+          string[] subDirectories = {
+              GetProcessorArchitecture(), GetPlatformName(null)
+          };
+
+          foreach (string directory in directories)
+          {
+              if (directory == null)
+                  continue;
+
+              foreach (string subDirectory in subDirectories)
+              {
+                  if (subDirectory == null)
+                      continue;
+
+                  string fileName = Path.Combine(Path.Combine(
+                      directory, subDirectory), SQLITE_DLL);
+
+                  //
+                  // NOTE: If the SQLite DLL file exists, return success.
+                  //       Prior to returning, set the base directory and
+                  //       processor architecture to reflect the location
+                  //       where it was found.
+                  //
+                  if (File.Exists(fileName))
+                  {
+                      baseDirectory = directory;
+                      processorArchitecture = subDirectory;
+                      return true; /* FOUND */
+                  }
+              }
+          }
+
+          return false; /* NOT FOUND */
       }
 
       /////////////////////////////////////////////////////////////////////////
@@ -491,7 +577,8 @@ namespace System.Data.SQLite
           // NOTE: If the "PreLoadSQLite_BaseDirectory" environment variable
           //       is set, use it verbatim for the base directory.
           //
-          string directory = GetSettingValue("PreLoadSQLite_BaseDirectory", null);
+          string directory = GetSettingValue("PreLoadSQLite_BaseDirectory",
+              null);
 
           if (directory != null)
               return directory;
@@ -499,12 +586,13 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
           //
           // NOTE: If the "PreLoadSQLite_UseAssemblyDirectory" environment
-          //       variable is set (to anything), attempt to use the directory
-          //       containing the currently executing assembly (i.e.
-          //       System.Data.SQLite) intsead of the application domain base
-          //       directory.
+          //       variable is set (to anything), then attempt to use the
+          //       directory containing the currently executing assembly
+          //       (i.e. System.Data.SQLite) intsead of the application
+          //       domain base directory.
           //
-          if (GetSettingValue("PreLoadSQLite_UseAssemblyDirectory", null) != null)
+          if (GetSettingValue(
+                  "PreLoadSQLite_UseAssemblyDirectory", null) != null)
           {
               directory = GetAssemblyDirectory();
 
@@ -705,6 +793,9 @@ namespace System.Data.SQLite
           string processorArchitecture /* in */
           )
       {
+          if (processorArchitecture == null)
+              processorArchitecture = GetProcessorArchitecture();
+
           if (String.IsNullOrEmpty(processorArchitecture))
               return null;
 
@@ -730,7 +821,7 @@ namespace System.Data.SQLite
       /// Attempts to load the native SQLite library based on the specified
       /// directory and processor architecture.
       /// </summary>
-      /// <param name="directory">
+      /// <param name="baseDirectory">
       /// The base directory to use, null for default (the base directory of
       /// the current application domain).  This directory should contain the
       /// processor architecture specific sub-directories.
@@ -754,7 +845,7 @@ namespace System.Data.SQLite
       /// zero.
       /// </returns>
       private static bool PreLoadSQLiteDll(
-          string directory,                /* in */
+          string baseDirectory,            /* in */
           string processorArchitecture,    /* in */
           ref string nativeModuleFileName, /* out */
           ref IntPtr nativeModuleHandle    /* out */
@@ -764,20 +855,20 @@ namespace System.Data.SQLite
           // NOTE: If the specified base directory is null, use the default
           //       (i.e. attempt to automatically detect it).
           //
-          if (directory == null)
-              directory = GetBaseDirectory();
+          if (baseDirectory == null)
+              baseDirectory = GetBaseDirectory();
 
           //
           // NOTE: If we failed to query the base directory, stop now.
           //
-          if (directory == null)
+          if (baseDirectory == null)
               return false;
 
           //
           // NOTE: If the native SQLite library exists in the base directory
           //       itself, stop now.
           //
-          string fileName = FixUpDllFileName(Path.Combine(directory,
+          string fileName = FixUpDllFileName(Path.Combine(baseDirectory,
               SQLITE_DLL));
 
           if (File.Exists(fileName))
@@ -800,7 +891,7 @@ namespace System.Data.SQLite
           // NOTE: Build the full path and file name for the native SQLite
           //       library using the processor architecture name.
           //
-          fileName = FixUpDllFileName(Path.Combine(Path.Combine(directory,
+          fileName = FixUpDllFileName(Path.Combine(Path.Combine(baseDirectory,
               processorArchitecture), SQLITE_DLL));
 
           //
@@ -825,8 +916,8 @@ namespace System.Data.SQLite
               // NOTE: Build the full path and file name for the native SQLite
               //       library using the platform name.
               //
-              fileName = FixUpDllFileName(Path.Combine(Path.Combine(directory,
-                  platformName), SQLITE_DLL));
+              fileName = FixUpDllFileName(Path.Combine(Path.Combine(
+                  baseDirectory, platformName), SQLITE_DLL));
 
               //
               // NOTE: If the file does not exist, skip trying to load it.
@@ -913,7 +1004,7 @@ namespace System.Data.SQLite
     //       System.Data.SQLite functionality (e.g. being able to bind
     //       parameters and handle column values of types Int64 and Double).
     //
-    internal const string SQLITE_DLL = "SQLite.Interop.090.dll";
+    internal const string SQLITE_DLL = "SQLite.Interop.091.dll";
 #elif SQLITE_STANDARD
     //
     // NOTE: Otherwise, if the standard SQLite library is enabled, use it.

@@ -42,15 +42,37 @@
     </div>
     <div id="mainSection">
     <div id="mainBody">
-      <p>These environment variables are used to control several features of
+      <p>
+        These environment variables are used to control several features of
         the System.Data.SQLite library.  All of these environment variables
-        are optional.
+        are optional.  If a particular environment variable is not present,
+        the XML configuration file &quot;System.Data.SQLite.dll.config&quot;
+        in the directory containing the currently executing assembly (i.e.
+        the one containing all the managed components for System.Data.SQLite)
+        will also be consulted.  If present, the XML configuration file should
+        be structured as follows:
+        <pre>
+        &lt;?xml version=&quot;1.0&quot;?&gt;
+        &lt;configuration&gt;
+          &lt;appSettings&gt;
+            &lt;add key=&quot;A_Setting&quot; value=&quot;String Value&quot; /&gt;
+            &lt;add key=&quot;Another_Setting&quot; value=&quot;%ENV_VALUE%&quot; /&gt;
+          &lt;/appSettings&gt;
+        &lt;/configuration&gt;
+        </pre>
+      </p>
+      <p>
+        All references to existing environment variables will be expanded to
+        their corresponding values within the returned settings values unless
+        either the &quot;No_Expand&quot; or &quot;No_Expand_&lt;name&gt;&quot;
+        environment variable is set [to anything].
       </p>
       <p>
         <font color="red">
           None of these environment variables are supported by the Compact
           Framework builds of System.Data.SQLite, due to limitations imposed
-          by the platform itself.
+          by the platform itself; however, the XML configuration file mentioned
+          above may be used instead.
         </font>
       </p>
       <table width="80%" cellpadding="0" cellspacing="0">
@@ -68,9 +90,9 @@
         <tr valign="top">
           <td>No_PreLoadSQLite</td>
           <td>If this environment variable is set [to anything], the native
-          library pre-loading functionality will be disabled.  By default,
-          the native library pre-loading will attempt to load the native
-          SQLite library from architecture-specific (e.g. &quot;x86&quot;,
+          library pre-loading code will be disabled.  By default, the native
+          library pre-loading code will attempt to load the native SQLite
+          library from architecture-specific (e.g. &quot;x86&quot;,
           &quot;amd64&quot;, &quot;x64&quot;) or platform-specific (e.g.
           &quot;Win32&quot;) directories that reside underneath the application
           base directory.</td>
@@ -105,6 +127,15 @@
           used instead of the processor architecture value contained in the
           PROCESSOR_ARCHITECTURE environment variable to help build the path
           of the native library to pre-load.</td>
+        </tr>
+        <tr valign="top">
+          <td>PreLoadSQLite_SearchForDirectory</td>
+          <td>If this environment variable is set [to anything], the native
+          library pre-loading code will conduct a search for the native library
+          to pre-load, starting in the location of the currently executing
+          assembly (i.e. the one containing all the managed components for
+          System.Data.SQLite) and then falling back to the application domain
+          base directory.</td>
         </tr>
         <tr valign="top">
           <td>PreLoadSQLite_UseAssemblyDirectory</td>

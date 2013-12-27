@@ -19,7 +19,7 @@
 	/>
 	<UserMacro
 		Name="INTEROP_BUILD_NUMBER"
-		Value="090"
+		Value="091"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro
@@ -29,12 +29,12 @@
 	/>
 	<UserMacro
 		Name="INTEROP_MANIFEST_VERSION"
-		Value="1.0.90.0"
+		Value="1.0.91.0"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro
 		Name="INTEROP_RC_VERSION"
-		Value="1,0,90,0"
+		Value="1,0,91,0"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro
