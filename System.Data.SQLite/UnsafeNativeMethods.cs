@@ -195,7 +195,7 @@ namespace System.Data.SQLite
               {
                   Trace.WriteLine(String.Format(
                       CultureInfo.CurrentCulture,
-                      "Native library pre-loader failed to get variable " +
+                      "Native library pre-loader failed to get setting " +
                       "\"{0}\" value: {1}", name, e)); /* throw */
               }
               catch
@@ -713,8 +713,8 @@ namespace System.Data.SQLite
               try
               {
                   //
-                  // NOTE: Show that we hit a fairly unusual situation (i.e. the
-                  //       "wrong" processor architecture was detected).
+                  // NOTE: Show that we hit a fairly unusual situation (i.e.
+                  //       the "wrong" processor architecture was detected).
                   //
                   Trace.WriteLine(String.Format(
                       CultureInfo.CurrentCulture,
