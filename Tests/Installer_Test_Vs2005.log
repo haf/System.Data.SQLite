@@ -61,6 +61,7 @@ Installer.exe: #60: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\S
 Installer.exe: #61: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataConnectionSupport"
 Installer.exe: #62: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataObjectSupport"
 Installer.exe: #63: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataViewSupport"
-Installer.exe: #64: Installer.Main: subKeysCreated = 12, subKeysDeleted = 1, keyValuesSet = 23, keyValuesDeleted = 0
-Installer.exe: #65: Installer.Main: filesCreated = 1, filesModified = 2, filesDeleted = 0
-Installer.exe: #66: Installer.Main: Success.
+Installer.exe: #65: Installer.AddVsDevEnvSetup: fileName = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 8} Common7 IDE devenv.exe]]", arguments = "/setup", workingDirectory = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 8} Common7 IDE]]\", useShellExecute = False, redirectStandardOutput = True, redirectStandardError = True
+Installer.exe: #66: Installer.Main: subKeysCreated = 12, subKeysDeleted = 1, keyValuesSet = 23, keyValuesDeleted = 0
+Installer.exe: #67: Installer.Main: filesCreated = 1, filesModified = 2, filesDeleted = 0
+Installer.exe: #68: Installer.Main: Success.
