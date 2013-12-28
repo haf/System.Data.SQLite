@@ -164,7 +164,7 @@ runTest {test installer-1.1 {installer tool / Visual Studio 2005} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2005LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -203,7 +203,7 @@ runTest {test installer-1.2 {uninstaller tool / Visual Studio 2005} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2005LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -242,7 +242,7 @@ runTest {test installer-1.3 {installer tool / Visual Studio 2008} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2008LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -281,7 +281,7 @@ runTest {test installer-1.4 {uninstaller tool / Visual Studio 2008} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2008LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -306,9 +306,9 @@ runTest {test installer-1.5 {installer tool / Visual Studio 2010} -setup {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
         -success 0] -debugPriority Lowest -tracePriority MediumHigh \
         -noRuntimeVersion true -noCompact true -noNetFx20 true \
-        -noNetFx45 true -noNetFx451 true -noVs2005 true -noVs2008 true \
-        -noVs2012 true -noVs2013 true -whatIf true -verbose true \
-        -confirm true -install true -debug true -wow64 true \
+        -noNetFx35 true -noNetFx45 true -noNetFx451 true -noVs2005 true \
+        -noVs2008 true -noVs2012 true -noVs2013 true -whatIf true \
+        -verbose true -confirm true -install true -debug true -wow64 true \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
         -traceFormat [appendArgs \" "#{0}: {2}" \"]
   } error]
@@ -320,7 +320,7 @@ runTest {test installer-1.5 {installer tool / Visual Studio 2010} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2010LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -345,9 +345,9 @@ runTest {test installer-1.6 {uninstaller tool / Visual Studio 2010} -setup {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
         -success 0] -debugPriority Lowest -tracePriority MediumHigh \
         -noRuntimeVersion true -noCompact true -noNetFx20 true \
-        -noNetFx45 true -noNetFx451 true -noVs2005 true -noVs2008 true \
-        -noVs2012 true -noVs2013 true -whatIf true -verbose true \
-        -confirm true -install false -debug true -wow64 true \
+        -noNetFx35 true -noNetFx45 true -noNetFx451 true -noVs2005 true \
+        -noVs2008 true -noVs2012 true -noVs2013 true -whatIf true \
+        -verbose true -confirm true -install false -debug true -wow64 true \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
         -traceFormat [appendArgs \" "#{0}: {2}" \"]
   } error]
@@ -359,7 +359,7 @@ runTest {test installer-1.6 {uninstaller tool / Visual Studio 2010} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2010LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -384,9 +384,9 @@ runTest {test installer-1.7 {installer tool / Visual Studio 2012} -setup {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
         -success 0] -debugPriority Lowest -tracePriority MediumHigh \
         -noRuntimeVersion true -noCompact true -noNetFx20 true \
-        -noNetFx40 true -noNetFx451 true -noVs2005 true -noVs2008 true \
-        -noVs2010 true -noVs2013 true -whatIf true -verbose true \
-        -confirm true -install true -debug true -wow64 true \
+        -noNetFx35 true -noNetFx40 true -noNetFx451 true -noVs2005 true \
+        -noVs2008 true -noVs2010 true -noVs2013 true -whatIf true \
+        -verbose true -confirm true -install true -debug true -wow64 true \
         -configVersion 4.0.30319 \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
         -traceFormat [appendArgs \" "#{0}: {2}" \"]
@@ -399,7 +399,7 @@ runTest {test installer-1.7 {installer tool / Visual Studio 2012} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2012LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -424,9 +424,9 @@ runTest {test installer-1.8 {uninstaller tool / Visual Studio 2012} -setup {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
         -success 0] -debugPriority Lowest -tracePriority MediumHigh \
         -noRuntimeVersion true -noCompact true -noNetFx20 true \
-        -noNetFx40 true -noNetFx451 true -noVs2005 true -noVs2008 true \
-        -noVs2010 true -noVs2013 true -whatIf true -verbose true \
-        -confirm true -install false -debug true -wow64 true \
+        -noNetFx35 true -noNetFx40 true -noNetFx451 true -noVs2005 true \
+        -noVs2008 true -noVs2010 true -noVs2013 true -whatIf true \
+        -verbose true -confirm true -install false -debug true -wow64 true \
         -configVersion 4.0.30319 \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
         -traceFormat [appendArgs \" "#{0}: {2}" \"]
@@ -439,7 +439,7 @@ runTest {test installer-1.8 {uninstaller tool / Visual Studio 2012} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2012LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -464,9 +464,9 @@ runTest {test installer-1.9 {installer tool / Visual Studio 2013} -setup {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
         -success 0] -debugPriority Lowest -tracePriority MediumHigh \
         -noRuntimeVersion true -noCompact true -noNetFx20 true \
-        -noNetFx40 true -noNetFx45 true -noVs2005 true -noVs2008 true \
-        -noVs2010 true -noVs2012 true -whatIf true -verbose true \
-        -confirm true -install true -debug true -wow64 true \
+        -noNetFx35 true -noNetFx40 true -noNetFx45 true -noVs2005 true \
+        -noVs2008 true -noVs2010 true -noVs2012 true -whatIf true \
+        -verbose true -confirm true -install true -debug true -wow64 true \
         -configVersion 4.0.30319 \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
         -traceFormat [appendArgs \" "#{0}: {2}" \"]
@@ -479,7 +479,7 @@ runTest {test installer-1.9 {installer tool / Visual Studio 2013} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testInstallVs2013LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName
@@ -504,9 +504,9 @@ runTest {test installer-1.10 {uninstaller tool / Visual Studio 2013} -setup {
     testClrExec $installerExeFile [list -eventflags Wait -stdout output \
         -success 0] -debugPriority Lowest -tracePriority MediumHigh \
         -noRuntimeVersion true -noCompact true -noNetFx20 true \
-        -noNetFx40 true -noNetFx45 true -noVs2005 true -noVs2008 true \
-        -noVs2010 true -noVs2012 true -whatIf true -verbose true \
-        -confirm true -install false -debug true -wow64 true \
+        -noNetFx35 true -noNetFx40 true -noNetFx45 true -noVs2005 true \
+        -noVs2008 true -noVs2010 true -noVs2012 true -whatIf true \
+        -verbose true -confirm true -install false -debug true -wow64 true \
         -configVersion 4.0.30319 \
         -logFileName [appendArgs \" [file nativename $fileName] \"] \
         -traceFormat [appendArgs \" "#{0}: {2}" \"]
@@ -519,7 +519,7 @@ runTest {test installer-1.10 {uninstaller tool / Visual Studio 2013} -setup {
   set is64 [haveConstraint amd64.64bit]
   set wow64 [expr {$is64 ? "\\Wow6432Node" : ""}]
 
-  list $code [expr {$code == 0 ? [string equal [readFile $fileName] \
+  list $code [expr {$code == 0 ? [string equal -nocase [readFile $fileName] \
       [subst -nobackslashes [readFile $testUninstallVs2013LogFile]]] : $error}]
 } -cleanup {
   cleanupFile $fileName

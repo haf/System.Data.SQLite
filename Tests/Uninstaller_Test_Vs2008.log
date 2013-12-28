@@ -34,8 +34,8 @@ Installer.exe: #33: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software$
 Installer.exe: #34: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\9.0", writable = False
 Installer.exe: #35: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\9.0", subKeyName = "DataProviders", writable = True
 Installer.exe: #36: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\9.0\DataProviders", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}"
-Installer.exe: #37: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\9.0", writable = False
-Installer.exe: #38: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\9.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #37: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\9.0", writable = False
+Installer.exe: #38: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\9.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #39: Installer.AddVsDevEnvSetup: fileName = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 9.0} Common7 IDE devenv.exe]]", arguments = "/setup", workingDirectory = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 9.0} Common7 IDE]]\", useShellExecute = False, redirectStandardOutput = True, redirectStandardError = True
 Installer.exe: #40: Installer.Main: subKeysCreated = 0, subKeysDeleted = 6, keyValuesSet = 0, keyValuesDeleted = 1
 Installer.exe: #41: Installer.Main: filesCreated = 1, filesModified = 1, filesDeleted = 0

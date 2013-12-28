@@ -69,8 +69,8 @@ Installer.exe: #68: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\S
 Installer.exe: #69: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\9.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataConnectionSupport"
 Installer.exe: #70: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\9.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataObjectSupport"
 Installer.exe: #71: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\9.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", subKeyName = "SupportedObjects\DataViewSupport"
-Installer.exe: #72: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software\Microsoft\VisualStudio\9.0", writable = False
-Installer.exe: #73: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\9.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #72: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\9.0", writable = False
+Installer.exe: #73: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\9.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #74: Installer.AddVsDevEnvSetup: fileName = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 9.0} Common7 IDE devenv.exe]]", arguments = "/setup", workingDirectory = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 9.0} Common7 IDE]]\", useShellExecute = False, redirectStandardOutput = True, redirectStandardError = True
 Installer.exe: #75: Installer.Main: subKeysCreated = 13, subKeysDeleted = 2, keyValuesSet = 24, keyValuesDeleted = 0
 Installer.exe: #76: Installer.Main: filesCreated = 1, filesModified = 2, filesDeleted = 0
