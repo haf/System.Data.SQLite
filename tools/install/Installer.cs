@@ -4102,6 +4102,30 @@ namespace System.Data.SQLite
 
                 result = String.Format("v{0}", version);
             }
+            else if (type == typeof(ProcessStartInfo))
+            {
+                ProcessStartInfo startInfo = (ProcessStartInfo)value;
+
+                result = String.Format(
+                    "fileName = {0}, arguments = {1}, workingDirectory = {2}, " +
+                    "useShellExecute = {3}, redirectStandardOutput = {4}, " +
+                    "redirectStandardError = {5}", startInfo.FileName,
+                    startInfo.Arguments, startInfo.WorkingDirectory,
+                    startInfo.UseShellExecute, startInfo.RedirectStandardOutput,
+                    startInfo.RedirectStandardError);
+            }
+            else if (type == typeof(Process))
+            {
+                Process process = (Process)value;
+
+                result = process.Id.ToString();
+            }
+            else if (type == typeof(DataReceivedEventArgs))
+            {
+                DataReceivedEventArgs eventArgs = (DataReceivedEventArgs)value;
+
+                result = eventArgs.Data;
+            }
             else
             {
                 result = value.ToString();
@@ -6189,8 +6213,8 @@ namespace System.Data.SQLite
 
             TraceOps.DebugAndTrace(TracePriority.Medium,
                 debugCallback, traceCallback, String.Format(
-                VsDevEnvSetupFormat, process.Id, e.Data),
-                traceCategory);
+                VsDevEnvSetupFormat, ForDisplay(process),
+                ForDisplay(e)), traceCategory);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6204,8 +6228,8 @@ namespace System.Data.SQLite
 
             TraceOps.DebugAndTrace(TracePriority.Medium,
                 debugCallback, traceCallback, String.Format(
-                VsDevEnvSetupFormat, process.Id, e.Data),
-                traceCategory);
+                VsDevEnvSetupFormat, ForDisplay(process),
+                ForDisplay(e)), traceCategory);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6259,6 +6283,8 @@ namespace System.Data.SQLite
 
             Process process = new Process();
 
+            process.StartInfo = startInfo;
+
             process.OutputDataReceived += new DataReceivedEventHandler(
                 VsDevEnvSetupOutputDataReceived);
 
@@ -6267,16 +6293,8 @@ namespace System.Data.SQLite
 
             if (verbose)
                 TraceOps.DebugAndTrace(TracePriority.Highest,
-                    debugCallback, traceCallback, String.Format(
-                    "fileName = {0}, arguments = {1}, " +
-                    "workingDirectory = {2}, useShellExecute = {3}, " +
-                    "redirectStandardOutput = {4}, " +
-                    "redirectStandardError = {5}", ForDisplay(
-                    startInfo.FileName), ForDisplay(startInfo.Arguments),
-                    ForDisplay(startInfo.WorkingDirectory), ForDisplay(
-                    startInfo.UseShellExecute), ForDisplay(
-                    startInfo.RedirectStandardOutput), ForDisplay(
-                    startInfo.RedirectStandardError)), traceCategory);
+                    debugCallback, traceCallback, ForDisplay(startInfo),
+                    traceCategory);
 
             //
             // NOTE: In 'what-if' mode, do not actually start the process.
@@ -6284,6 +6302,13 @@ namespace System.Data.SQLite
             if (!whatIf)
             {
                 process.Start();
+
+                if (verbose)
+                    TraceOps.DebugAndTrace(TracePriority.Highest,
+                        debugCallback, traceCallback, String.Format(
+                        "process = {0}", ForDisplay(process)),
+                        traceCategory);
+
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
                 process.WaitForExit();
