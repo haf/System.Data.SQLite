@@ -6226,7 +6226,7 @@ namespace System.Data.SQLite
                 //       mode on a per-user basis; therefore, skip running
                 //       it in that case.
                 //
-                TraceOps.DebugAndTrace(TracePriority.Higher,
+                TraceOps.DebugAndTrace(TracePriority.Medium,
                     debugCallback, traceCallback, String.Format(
                     "Visual Studio {0} 'setup' mode is per-machine only, " +
                     "skipping...", ForDisplay(vsVersion)), traceCategory);
@@ -6310,7 +6310,7 @@ namespace System.Data.SQLite
             //       packages and their associated resources (i.e. this will
             //       effectively 'remove' the package being processed since
             //       this is being done after all the other changes for the
-            //       package removal have already been completed).
+            //       package removal have been completed).
             //
             return AddVsDevEnvSetup(
                 vsVersion, directory, perUser, whatIf, verbose, ref error);
