@@ -308,8 +308,8 @@ namespace System.Data.SQLite
         private static class TraceOps
         {
             #region Private Constants
-            private const string DefaultDebugFormat = "#{0} @ {1}: {2}";
-            private const string DefaultTraceFormat = "#{0} @ {1}: {2}";
+            private const string DefaultDebugFormat = "#{0:000} @ {1}: {2}";
+            private const string DefaultTraceFormat = "#{0:000} @ {1}: {2}";
 
             private const string Iso8601DateTimeOutputFormat =
                 "yyyy.MM.ddTHH:mm:ss.fffffff";
@@ -4109,10 +4109,12 @@ namespace System.Data.SQLite
                 result = String.Format(
                     "fileName = {0}, arguments = {1}, workingDirectory = {2}, " +
                     "useShellExecute = {3}, redirectStandardOutput = {4}, " +
-                    "redirectStandardError = {5}", startInfo.FileName,
-                    startInfo.Arguments, startInfo.WorkingDirectory,
-                    startInfo.UseShellExecute, startInfo.RedirectStandardOutput,
-                    startInfo.RedirectStandardError);
+                    "redirectStandardError = {5}", ForDisplay(
+                    startInfo.FileName), ForDisplay(startInfo.Arguments),
+                    ForDisplay(startInfo.WorkingDirectory), ForDisplay(
+                    startInfo.UseShellExecute), ForDisplay(
+                    startInfo.RedirectStandardOutput), ForDisplay(
+                    startInfo.RedirectStandardError)); /* RECURSIVE */
             }
             else if (type == typeof(Process))
             {
@@ -4124,7 +4126,7 @@ namespace System.Data.SQLite
             {
                 DataReceivedEventArgs eventArgs = (DataReceivedEventArgs)value;
 
-                result = eventArgs.Data;
+                result = ForDisplay(eventArgs.Data); /* RECURSIVE */
             }
             else
             {
