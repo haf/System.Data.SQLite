@@ -45,6 +45,7 @@ namespace System.Data.SQLite
         string description,        /* in */
         string typeName,           /* in */
         AssemblyName assemblyName, /* in */
+        string directory,          /* in */
         object clientData,         /* in */
         bool perUser,              /* in */
         bool wow64,                /* in */
@@ -62,6 +63,7 @@ namespace System.Data.SQLite
         string frameworkName,              /* in */
         Version frameworkVersion,          /* in */
         string platformName,               /* in */
+        string directory,                  /* in */
         object clientData,                 /* in */
         bool perUser,                      /* in */
         bool wow64,                        /* in */
@@ -78,6 +80,7 @@ namespace System.Data.SQLite
         Version vsVersion,                 /* in */
         string suffix,                     /* in, optional */
         Installer.Package package,         /* in */
+        string directory,                  /* in */
         object clientData,                 /* in */
         bool perUser,                      /* in */
         bool wow64,                        /* in */
@@ -103,6 +106,7 @@ namespace System.Data.SQLite
         VsPackageGlobalAssemblyCache = 0x10,
         VsDataSource = 0x20,
         VsDataProvider = 0x40,
+        VsDevEnvSetup = 0x80,
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -114,7 +118,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         Vs = VsPackage | VsPackageGlobalAssemblyCache | VsDataSource |
-             VsDataProvider,
+             VsDataProvider | VsDevEnvSetup,
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -304,8 +308,8 @@ namespace System.Data.SQLite
         private static class TraceOps
         {
             #region Private Constants
-            private const string DefaultDebugFormat = "#{0} @ {1}: {2}";
-            private const string DefaultTraceFormat = "#{0} @ {1}: {2}";
+            private const string DefaultDebugFormat = "#{0:000} @ {1}: {2}";
+            private const string DefaultTraceFormat = "#{0:000} @ {1}: {2}";
 
             private const string Iso8601DateTimeOutputFormat =
                 "yyyy.MM.ddTHH:mm:ss.fffffff";
@@ -1930,6 +1934,7 @@ namespace System.Data.SQLite
                 bool noNetFx35,
                 bool noNetFx40,
                 bool noNetFx45,
+                bool noNetFx451,
                 bool noVs2005,
                 bool noVs2008,
                 bool noVs2010,
@@ -1969,6 +1974,7 @@ namespace System.Data.SQLite
                 this.noNetFx35 = noNetFx35;
                 this.noNetFx40 = noNetFx40;
                 this.noNetFx45 = noNetFx45;
+                this.noNetFx451 = noNetFx451;
                 this.noVs2005 = noVs2005;
                 this.noVs2008 = noVs2008;
                 this.noVs2010 = noVs2010;
@@ -2132,8 +2138,8 @@ namespace System.Data.SQLite
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, false, true, false, false, false,
                     false, false, false, false, false, false, false, false,
-                    false, false, false, false, false, true, true, false,
-                    false, false);
+                    false, false, false, false, false, false, true, true,
+                    false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2571,6 +2577,27 @@ namespace System.Data.SQLite
                             }
 
                             configuration.noNetFx45 = (bool)value;
+                        }
+                        else if (MatchOption(newArg, "noNetFx451"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.noNetFx451 = (bool)value;
                         }
                         else if (MatchOption(newArg, "noRuntimeVersion"))
                         {
@@ -3150,6 +3177,7 @@ namespace System.Data.SQLite
                         //
                         configuration.noNetFx40 = true;
                         configuration.noNetFx45 = true;
+                        configuration.noNetFx451 = true;
                         configuration.noVs2010 = true;
                         configuration.noVs2012 = true;
                         configuration.noVs2013 = true;
@@ -3232,7 +3260,7 @@ namespace System.Data.SQLite
                 //       processed during the install.  If the target is
                 //       Visual Studio 2005, this should return zero.
                 //
-                return !noNetFx35 || !noNetFx40 || !noNetFx45;
+                return !noNetFx35 || !noNetFx40 || !noNetFx45 || !noNetFx451;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3337,6 +3365,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "NoNetFx45", ForDisplay(noNetFx45)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "NoNetFx451", ForDisplay(noNetFx451)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3628,6 +3660,15 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            private bool noNetFx451;
+            public bool NoNetFx451
+            {
+                get { return noNetFx451; }
+                set { noNetFx451 = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             private bool noVs2005;
             public bool NoVs2005
             {
@@ -3858,6 +3899,10 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        private const string VsDevEnvSetupFormat = "{0}: {1}";
+
+        ///////////////////////////////////////////////////////////////////////
+
         private const string RootKeyName = "Software";
         private const string Wow64SubKeyName = "Wow6432Node";
 
@@ -4056,6 +4101,32 @@ namespace System.Data.SQLite
                 Version version = (Version)value;
 
                 result = String.Format("v{0}", version);
+            }
+            else if (type == typeof(ProcessStartInfo))
+            {
+                ProcessStartInfo startInfo = (ProcessStartInfo)value;
+
+                result = String.Format(
+                    "fileName = {0}, arguments = {1}, workingDirectory = {2}, " +
+                    "useShellExecute = {3}, redirectStandardOutput = {4}, " +
+                    "redirectStandardError = {5}", ForDisplay(
+                    startInfo.FileName), ForDisplay(startInfo.Arguments),
+                    ForDisplay(startInfo.WorkingDirectory), ForDisplay(
+                    startInfo.UseShellExecute), ForDisplay(
+                    startInfo.RedirectStandardOutput), ForDisplay(
+                    startInfo.RedirectStandardError)); /* RECURSIVE */
+            }
+            else if (type == typeof(Process))
+            {
+                Process process = (Process)value;
+
+                result = process.Id.ToString();
+            }
+            else if (type == typeof(DataReceivedEventArgs))
+            {
+                DataReceivedEventArgs eventArgs = (DataReceivedEventArgs)value;
+
+                result = ForDisplay(eventArgs.Data); /* RECURSIVE */
             }
             else
             {
@@ -4263,11 +4334,32 @@ namespace System.Data.SQLite
                     if ((configuration == null) || !configuration.NoNetFx20)
                         desktopVersionList.Add(new Version(2, 0, 50727));
 
+                    //
+                    // NOTE: The .NET Framework 3.5 does not have its own
+                    //       directory; however, it still may have assembly
+                    //       folders for use in Visual Studio, etc.
+                    //
+                    if ((configuration == null) || !configuration.NoNetFx35)
+                        desktopVersionList.Add(new Version(3, 5));
+
                     if ((configuration == null) || !configuration.NoNetFx40)
                         desktopVersionList.Add(new Version(4, 0, 30319));
 
+                    //
+                    // NOTE: The .NET Framework 4.5 does not have its own
+                    //       directory; however, it still may have assembly
+                    //       folders for use in Visual Studio, etc.
+                    //
                     if ((configuration == null) || !configuration.NoNetFx45)
                         desktopVersionList.Add(new Version(4, 5, 50709));
+
+                    //
+                    // NOTE: The .NET Framework 4.5.1 does not have its own
+                    //       directory; however, it still may have assembly
+                    //       folders for use in Visual Studio, etc.
+                    //
+                    if ((configuration == null) || !configuration.NoNetFx451)
+                        desktopVersionList.Add(new Version(4, 5, 1));
 
                     frameworkList.Versions.Add(".NETFramework",
                         desktopVersionList);
@@ -4310,7 +4402,8 @@ namespace System.Data.SQLite
             bool perUser,
             bool wow64,
             bool whatIf,
-            bool verbose
+            bool verbose,
+            ref string installDirectory
             )
         {
             string keyName = GetFrameworkKeyName(
@@ -4342,6 +4435,7 @@ namespace System.Data.SQLite
                     ForDisplay(frameworkVersion), ForDisplay(directory)),
                     traceCategory);
 
+                installDirectory = directory;
                 return true;
             }
         }
@@ -4508,9 +4602,12 @@ namespace System.Data.SQLite
                         ForDisplay(frameworkVersion),
                         ForDisplay(platformName)), traceCategory);
 
+                    string installDirectory = null;
+
                     if (!HaveFrameworkDirectory(
                             rootKey, frameworkName, frameworkVersion,
-                            platformName, perUser, wow64, whatIf, verbose))
+                            platformName, perUser, wow64, whatIf, verbose,
+                            ref installDirectory))
                     {
                         TraceOps.DebugAndTrace(TracePriority.Low,
                             debugCallback, traceCallback, String.Format(
@@ -4524,9 +4621,7 @@ namespace System.Data.SQLite
                     if (callback == null)
                         continue;
 
-                    string directory = GetFrameworkDirectory(
-                        rootKey, frameworkVersion, perUser, wow64, whatIf,
-                        verbose);
+                    string directory = installDirectory;
 
                     if (String.IsNullOrEmpty(directory))
                     {
@@ -4569,9 +4664,9 @@ namespace System.Data.SQLite
 
                     if (!callback(
                             fileName, invariant, name, description, typeName,
-                            assemblyName, clientData, perUser, wow64,
-                            throwOnMissing, whatIf, verbose, ref localSaved,
-                            ref error))
+                            assemblyName, installDirectory, clientData,
+                            perUser, wow64, throwOnMissing, whatIf, verbose,
+                            ref localSaved, ref error))
                     {
                         return false;
                     }
@@ -4724,8 +4819,9 @@ namespace System.Data.SQLite
 
                     if (!callback(
                             rootKey, frameworkName, frameworkVersion,
-                            platformName, clientData, perUser, wow64,
-                            throwOnMissing, whatIf, verbose, ref error))
+                            platformName, null, clientData, perUser,
+                            wow64, throwOnMissing, whatIf, verbose,
+                            ref error))
                     {
                         return false;
                     }
@@ -4774,14 +4870,15 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private static bool HaveVsVersion(
+        private static bool HaveVsVersionDirectory(
             MockRegistryKey rootKey,
             Version vsVersion,
             string suffix,
             bool perUser,
             bool wow64,
             bool whatIf,
-            bool verbose
+            bool verbose,
+            ref string installDirectory
             )
         {
             if (vsVersion == null)
@@ -4815,6 +4912,7 @@ namespace System.Data.SQLite
                     ForDisplay(vsVersion), ForDisplay(directory)),
                     traceCategory);
 
+                installDirectory = directory;
                 return true;
             }
         }
@@ -4876,9 +4974,11 @@ namespace System.Data.SQLite
                     "vsVersion = {0}", ForDisplay(vsVersion)),
                     traceCategory);
 
-                if (!HaveVsVersion(
+                string installDirectory = null;
+
+                if (!HaveVsVersionDirectory(
                         rootKey, vsVersion, suffix, perUser, wow64, whatIf,
-                        verbose))
+                        verbose, ref installDirectory))
                 {
                     TraceOps.DebugAndTrace(TracePriority.Low,
                         debugCallback, traceCallback, String.Format(
@@ -4892,9 +4992,9 @@ namespace System.Data.SQLite
                     continue;
 
                 if (!callback(
-                        rootKey, vsVersion, suffix, package, clientData,
-                        perUser, wow64, throwOnMissing, whatIf, verbose,
-                        ref error))
+                        rootKey, vsVersion, suffix, package, installDirectory,
+                        clientData, perUser, wow64, throwOnMissing, whatIf,
+                        verbose, ref error))
                 {
                     return false;
                 }
@@ -5078,6 +5178,7 @@ namespace System.Data.SQLite
             string description,
             string typeName,
             AssemblyName assemblyName,
+            string directory,
             object clientData,
             bool perUser,
             bool wow64,
@@ -5236,6 +5337,7 @@ namespace System.Data.SQLite
             string frameworkName,
             Version frameworkVersion,
             string platformName,
+            string directory,
             object clientData,
             bool perUser,
             bool wow64,
@@ -5462,6 +5564,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             string suffix,
             Package package,
+            string directory,
             object clientData,
             bool perUser,
             bool wow64,
@@ -5700,6 +5803,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             string suffix,
             Package package,
+            string directory,
             object clientData,
             bool perUser,
             bool wow64,
@@ -6066,6 +6170,7 @@ namespace System.Data.SQLite
             Version vsVersion,
             string suffix,
             Package package,
+            string directory,
             object clientData,
             bool perUser,
             bool wow64,
@@ -6094,6 +6199,184 @@ namespace System.Data.SQLite
                 return RemoveVsPackage(
                     rootKey, vsVersion, suffix, package, perUser, wow64,
                     throwOnMissing, whatIf, verbose, ref error);
+            }
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Visual Studio Setup Handling
+        private static void VsDevEnvSetupOutputDataReceived(
+            object sender,
+            DataReceivedEventArgs e
+            )
+        {
+            Process process = sender as Process;
+
+            TraceOps.DebugAndTrace(TracePriority.Medium,
+                debugCallback, traceCallback, String.Format(
+                VsDevEnvSetupFormat, ForDisplay(process),
+                ForDisplay(e)), traceCategory);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static void VsDevEnvSetupErrorDataReceived(
+            object sender,
+            DataReceivedEventArgs e
+            )
+        {
+            Process process = sender as Process;
+
+            TraceOps.DebugAndTrace(TracePriority.Medium,
+                debugCallback, traceCallback, String.Format(
+                VsDevEnvSetupFormat, ForDisplay(process),
+                ForDisplay(e)), traceCategory);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static bool AddVsDevEnvSetup(
+            Version vsVersion,
+            string directory,
+            bool perUser,
+            bool whatIf,
+            bool verbose,
+            ref string error
+            )
+        {
+            if (perUser)
+            {
+                //
+                // NOTE: Visual Studio does not support running in 'setup'
+                //       mode on a per-user basis; therefore, skip running
+                //       it in that case.
+                //
+                TraceOps.DebugAndTrace(TracePriority.Medium,
+                    debugCallback, traceCallback, String.Format(
+                    "Visual Studio {0} 'setup' mode is per-machine only, " +
+                    "skipping...", ForDisplay(vsVersion)), traceCategory);
+
+                return true;
+            }
+
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+
+            //
+            // NOTE: Set the core properties for the process to start.  In this
+            //       case, we are starting the primary Visual Studio executable
+            //       (devenv.exe) in "setup" mode, so that it can refresh its
+            //       list of installed packages and their associated resources.
+            //
+            startInfo.FileName = Path.Combine(directory, "devenv.exe");
+            startInfo.Arguments = "/setup";
+            startInfo.WorkingDirectory = directory;
+
+            //
+            // NOTE: Set the boolean flag properties that require non-default
+            //       values for the process to start.  In this case, we do not
+            //       want the shell to be used for starting the process.  In
+            //       addition, both standard output and error data should be
+            //       redirected, so it can be logged properly.
+            //
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+
+            Process process = new Process();
+
+            process.StartInfo = startInfo;
+
+            process.OutputDataReceived += new DataReceivedEventHandler(
+                VsDevEnvSetupOutputDataReceived);
+
+            process.ErrorDataReceived += new DataReceivedEventHandler(
+                VsDevEnvSetupErrorDataReceived);
+
+            if (verbose)
+                TraceOps.DebugAndTrace(TracePriority.Highest,
+                    debugCallback, traceCallback, ForDisplay(startInfo),
+                    traceCategory);
+
+            //
+            // NOTE: In 'what-if' mode, do not actually start the process.
+            //
+            if (!whatIf)
+            {
+                process.Start();
+
+                if (verbose)
+                    TraceOps.DebugAndTrace(TracePriority.Highest,
+                        debugCallback, traceCallback, String.Format(
+                        "process = {0}", ForDisplay(process)),
+                        traceCategory);
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+                process.WaitForExit();
+            }
+
+            return true;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static bool RemoveVsDevEnvSetup(
+            Version vsVersion,
+            string directory,
+            bool perUser,
+            bool whatIf,
+            bool verbose,
+            ref string error
+            )
+        {
+            //
+            // NOTE: Since Visual Studio does not have an 'undo' operation for
+            //       its 'setup' mode, simply execute the same command again.
+            //       This should force it to refresh its list of installed
+            //       packages and their associated resources (i.e. this will
+            //       effectively 'remove' the package being processed since
+            //       this is being done after all the other changes for the
+            //       package removal have been completed).
+            //
+            return AddVsDevEnvSetup(
+                vsVersion, directory, perUser, whatIf, verbose, ref error);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static bool ProcessVsDevEnvSetup(
+            MockRegistryKey rootKey,
+            Version vsVersion,
+            string suffix,
+            Package package,
+            string directory,
+            object clientData,
+            bool perUser,
+            bool wow64,
+            bool throwOnMissing,
+            bool whatIf,
+            bool verbose,
+            ref string error
+            )
+        {
+            AnyPair<string, bool> pair = clientData as AnyPair<string, bool>;
+
+            if (pair == null)
+            {
+                error = "invalid VS callback data";
+                return false;
+            }
+
+            if (pair.Y)
+            {
+                return AddVsDevEnvSetup(
+                    vsVersion, directory, perUser, whatIf, verbose, ref error);
+            }
+            else
+            {
+                return RemoveVsDevEnvSetup(
+                    vsVersion, directory, perUser, whatIf, verbose, ref error);
             }
         }
         #endregion
@@ -6461,6 +6744,35 @@ namespace System.Data.SQLite
                     {
                         if (!ForEachVsVersionRegistry(registry,
                                 vsList, ProcessVsDataProvider,
+                                configuration.VsVersionSuffix, package,
+                                fileNameData, configuration.PerUser,
+                                VsIs32BitOnly || configuration.Wow64,
+                                configuration.ThrowOnMissing,
+                                configuration.WhatIf, configuration.Verbose,
+                                ref error))
+                        {
+                            TraceOps.ShowMessage(TracePriority.Highest,
+                                debugCallback, traceCallback, thisAssembly,
+                                error, traceCategory, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+
+                            TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                                debugCallback, traceCallback, "Failure.",
+                                traceCategory);
+
+                            return 1; /* FAILURE */
+                        }
+                    }
+                    #endregion
+
+                    ///////////////////////////////////////////////////////////
+
+                    #region VS DevEnv Setup
+                    if (configuration.HasFlags(
+                            InstallFlags.VsDevEnvSetup, true))
+                    {
+                        if (!ForEachVsVersionRegistry(registry,
+                                vsList, ProcessVsDevEnvSetup,
                                 configuration.VsVersionSuffix, package,
                                 fileNameData, configuration.PerUser,
                                 VsIs32BitOnly || configuration.Wow64,

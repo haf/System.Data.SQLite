@@ -7,28 +7,29 @@ Installer.exe: #6: RegistryHelper.DeleteSubKey: rootKey = "HKEY_LOCAL_MACHINE\So
 Installer.exe: #7: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework\v2.0.50727", writable = False
 Installer.exe: #8: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework", writable = False
 Installer.exe: #9: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
-Installer.exe: #10: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework", writable = False
-Installer.exe: #11: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
-Installer.exe: #12: Installer.RemoveDbProviderFactory: addElement = <null>, removeElement = <null>
+Installer.exe: #10: Installer.RemoveDbProviderFactory: addElement = <null>, removeElement = <null>
+Installer.exe: #11: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #12: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #13: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
-Installer.exe: #14: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
-Installer.exe: #15: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
-Installer.exe: #16: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Packages", writable = True
-Installer.exe: #17: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Packages", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
-Installer.exe: #18: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Menus", writable = True
-Installer.exe: #19: RegistryHelper.DeleteValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Menus", name = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
-Installer.exe: #20: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Services", writable = True
-Installer.exe: #21: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Services", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9d}"
+Installer.exe: #14: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Packages", writable = True
+Installer.exe: #15: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Packages", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
+Installer.exe: #16: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Menus", writable = True
+Installer.exe: #17: RegistryHelper.DeleteValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Menus", name = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9c}"
+Installer.exe: #18: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "Services", writable = True
+Installer.exe: #19: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\Services", subKeyName = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9d}"
+Installer.exe: #20: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #21: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #22: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
-Installer.exe: #23: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
-Installer.exe: #24: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
-Installer.exe: #25: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "DataSources", writable = True
-Installer.exe: #26: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataSources", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c71}"
+Installer.exe: #23: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "DataSources", writable = True
+Installer.exe: #24: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataSources", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c71}"
+Installer.exe: #25: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #26: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #27: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
-Installer.exe: #28: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
-Installer.exe: #29: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
-Installer.exe: #30: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "DataProviders", writable = True
-Installer.exe: #31: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataProviders", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}"
-Installer.exe: #32: Installer.Main: subKeysCreated = 0, subKeysDeleted = 5, keyValuesSet = 0, keyValuesDeleted = 1
-Installer.exe: #33: Installer.Main: filesCreated = 1, filesModified = 1, filesDeleted = 0
-Installer.exe: #34: Installer.Main: Success.
+Installer.exe: #28: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", subKeyName = "DataProviders", writable = True
+Installer.exe: #29: RegistryHelper.DeleteSubKeyTree: rootKey = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0\DataProviders", subKeyName = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}"
+Installer.exe: #30: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
+Installer.exe: #31: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
+Installer.exe: #32: Installer.AddVsDevEnvSetup: fileName = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 8} Common7 IDE devenv.exe]]", arguments = "/setup", workingDirectory = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 8} Common7 IDE]]\", useShellExecute = False, redirectStandardOutput = True, redirectStandardError = True
+Installer.exe: #33: Installer.Main: subKeysCreated = 0, subKeysDeleted = 5, keyValuesSet = 0, keyValuesDeleted = 1
+Installer.exe: #34: Installer.Main: filesCreated = 1, filesModified = 1, filesDeleted = 0
+Installer.exe: #35: Installer.Main: Success.
