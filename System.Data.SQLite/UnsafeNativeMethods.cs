@@ -541,8 +541,8 @@ namespace System.Data.SQLite
                   if (subDirectory == null)
                       continue;
 
-                  string fileName = Path.Combine(Path.Combine(
-                      directory, subDirectory), SQLITE_DLL);
+                  string fileName = FixUpDllFileName(Path.Combine(
+                      Path.Combine(directory, subDirectory), SQLITE_DLL));
 
                   //
                   // NOTE: If the SQLite DLL file exists, return success.
