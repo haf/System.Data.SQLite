@@ -201,6 +201,23 @@ namespace eval ::Eagle {
     return $result
   }
 
+  proc testDebugBreak {} {
+    if {[isEagle]} then {
+      #
+      # NOTE: In Eagle, simply break into the interactive loop using the
+      #       integrated script debugger.
+      #
+      debug break
+    } else {
+      #
+      # NOTE: In native Tcl, attempt to use the TclPro Debugger interface.
+      #       This requires that the TclPro Debugger interface package be
+      #       present somewhere along the auto-path.
+      #
+      package require tcldebugger_attach; debugger_init; debugger_break
+    }
+  }
+
   proc testArrayGet { varName {integer false} } {
     #
     # NOTE: Returns the results of [array get] in a well-defined order.
@@ -445,7 +462,8 @@ namespace eval ::Eagle {
     #
     # TODO: Add more support for standard tcltest options here.
     #
-    set options [list -configuration -constraints -exitOnComplete -file \
+    set options [list \
+        -breakOnLeak -configuration -constraints -exitOnComplete -file \
         -logFile -machine -match -no -notFile -platform -postTest -preTest \
         -randomOrder -skip -stopOnFailure -suffix -suite -tclsh -threshold]
 
@@ -986,6 +1004,12 @@ namespace eval ::Eagle {
                   $::test_random_order}]
   }
 
+  proc isBreakOnLeak {} {
+    return [expr {[info exists ::test_break_on_leak] && \
+                  [string is boolean -strict $::test_break_on_leak] && \
+                  $::test_break_on_leak}]
+  }
+
   proc isStopOnFailure {} {
     return [expr {[info exists ::test_stop_on_failure] && \
                   [string is boolean -strict $::test_stop_on_failure] && \
@@ -1313,6 +1337,14 @@ namespace eval ::Eagle {
     if {$count > 0 && \
         [lsearch -exact $fileNames [file tail $fileName]] == -1} then {
       lappend fileNames [file tail $fileName]
+    }
+
+    #
+    # NOTE: If we are supposed to break into the debugger whenever a leak is
+    #       detected, do it now.
+    #
+    if {$count > 0 && [isBreakOnLeak]} then {
+      testDebugBreak
     }
   }
 
@@ -2694,14 +2726,14 @@ namespace eval ::Eagle {
         getTclShellFileName getTemporaryPath getFiles getTestFiles \
         getTestRunId getTestLogId getTestLog getTestSuite getTestMachine \
         getTestPlatform getTestConfiguration getTestSuffix testExec \
-        testClrExec execTestShell isRandomOrder isStopOnFailure \
+        testClrExec execTestShell isRandomOrder isBreakOnLeak isStopOnFailure \
         isExitOnComplete returnInfoScript runTestPrologue runTestEpilogue \
-        hookPuts unhookPuts runTest testArrayGet testShim tsource \
-        recordTestStatistics reportTestStatistics formatList formatListAsDict \
-        pathToRegexp inverseLsearchGlob removePathFromFileNames formatDecimal \
-        clearTestPercent reportTestPercent runAllTests isTestSuiteRunning \
-        configureTcltest machineToPlatform getPassPercentage \
-        getSkipPercentage] false false
+        hookPuts unhookPuts runTest testDebugBreak testArrayGet testShim \
+        tsource recordTestStatistics reportTestStatistics formatList \
+        formatListAsDict pathToRegexp inverseLsearchGlob \
+        removePathFromFileNames formatDecimal clearTestPercent \
+        reportTestPercent runAllTests isTestSuiteRunning configureTcltest \
+        machineToPlatform getPassPercentage getSkipPercentage] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

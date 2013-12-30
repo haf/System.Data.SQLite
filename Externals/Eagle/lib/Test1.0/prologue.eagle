@@ -262,6 +262,7 @@ if {![info exists no([file tail [info script]])]} then {
   set test_flags(-logFile) ""; # default to using standard log file naming.
   set test_flags(-threshold) ""; # default to requiring all tests to pass.
   set test_flags(-randomOrder) ""; # default to deterministic order.
+  set test_flags(-breakOnLeak) ""; # default to continue on leak.
   set test_flags(-stopOnFailure) ""; # default to continue on failure.
   set test_flags(-exitOnComplete) ""; # default to not exit after complete.
   set test_flags(-preTest) ""; # default to not evaluating anything.
@@ -312,6 +313,15 @@ if {![info exists no([file tail [info script]])]} then {
       #       command line.
       #
       set test_random_order $test_flags(-randomOrder)
+    }
+
+    if {[info exists test_flags(-breakOnLeak)] && \
+        [string is boolean -strict $test_flags(-breakOnLeak)]} then {
+      #
+      # NOTE: Set the test break-on-leak flag to the one provided by the
+      #       command line.
+      #
+      set test_break_on_leak $test_flags(-breakOnLeak)
     }
 
     if {[info exists test_flags(-stopOnFailure)] && \
@@ -654,6 +664,11 @@ if {![info exists no([file tail [info script]])]} then {
       [expr {[info exists test_random_order] && \
           [string is boolean -strict $test_random_order] ? \
               $test_random_order : "<none>"}] \n]
+
+  tputs $test_channel [appendArgs "---- break on leak: " \
+      [expr {[info exists test_break_on_leak] && \
+          [string is boolean -strict $test_break_on_leak] ? \
+              $test_break_on_leak : "<none>"}] \n]
 
   tputs $test_channel [appendArgs "---- stop on failure: " \
       [expr {[info exists test_stop_on_failure] && \
