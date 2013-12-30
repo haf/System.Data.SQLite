@@ -354,6 +354,7 @@ set sds_manifests(source) {
   System.Data.SQLite/System.Data.SQLite.Module.2013.csproj
   System.Data.SQLite/System.Data.SQLite.Properties.targets
   System.Data.SQLite/System.Data.SQLite.References.targets
+  System.Data.SQLite/System.Data.SQLite.dll.config
   System.Data.SQLite/System.Data.SQLite.snk
   System.Data.SQLite/UnsafeNativeMethods.cs
   System.Data.SQLite.Linq/
@@ -541,6 +542,7 @@ set sds_manifests(source) {
 #
 set sds_manifests(binaryCore) {
   System.Data.SQLite.dll
+  System.Data.SQLite.dll.config
   System.Data.SQLite.pdb
   System.Data.SQLite.xml
 }
@@ -614,6 +616,7 @@ set sds_manifests(setupCore) {
   {{app}\doc\SQLite.NET.chm}
   {{app}\bin\SQLite.Designer.dll}
   {{app}\bin\SQLite.Designer.pdb}
+  {{app}\bin\System.Data.SQLite.dll.config}
   {{app}\bin\Installer.exe}
   {{app}\bin\Installer.pdb}
   {{app}\bin\test.exe}

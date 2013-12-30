@@ -446,6 +446,12 @@
     <TracePreLoad Condition="'$(TracePreLoad)' == ''">true</TracePreLoad>
 
     <!--
+        NOTE: Enable tracing of events related to the shared native library
+              pre-loading code?  By default, this is enabled.
+    -->
+    <TraceShared Condition="'$(TraceShared)' == ''">true</TraceShared>
+
+    <!--
         NOTE: Enable tracing of events related to the prepared statements?  By
               default, this is disabled.
     -->

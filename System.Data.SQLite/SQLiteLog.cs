@@ -152,7 +152,7 @@ namespace System.Data.SQLite
             //         variable is used to manually override this safety check.
             //
             if (!AppDomain.CurrentDomain.IsDefaultAppDomain() &&
-                Environment.GetEnvironmentVariable("Force_SQLiteLog") == null)
+                UnsafeNativeMethods.GetSettingValue("Force_SQLiteLog", null) == null)
             {
                 return;
             }

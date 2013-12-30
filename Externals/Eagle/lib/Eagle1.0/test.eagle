@@ -1956,9 +1956,6 @@ namespace eval ::Eagle {
     #       support it (i.e. because it is pre-TIP #241).
     #
     switch -exact -- [string tolower $machine] {
-      amd64 {
-        return x64
-      }
       intel {
         if {!$architecture && \
             [info exists ::tcl_platform(platform)] && \
@@ -1967,6 +1964,57 @@ namespace eval ::Eagle {
         } else {
           return x86
         }
+      }
+      arm {
+        return arm
+      }
+      ia64 {
+        return itanium
+      }
+      msil {
+        return clr
+      }
+      amd64 {
+        return x64
+      }
+      ia32_on_win64 {
+        return wow64
+      }
+      default {
+        return unknown
+      }
+    }
+  }
+
+  proc architectureForPlatform { platform } {
+    #
+    # NOTE: Cannot use "-nocase" option here because Tcl 8.4 does not
+    #       support it (i.e. because it is pre-TIP #241).
+    #
+    switch -exact -- [string tolower $platform] {
+      intel -
+      win32 -
+      x86 {
+        return x86
+      }
+      arm {
+        return arm
+      }
+      ia64 -
+      itanium {
+        return ia64
+      }
+      msil -
+      clr {
+        return msil
+      }
+      amd64 -
+      x64 {
+        return x64
+      }
+      ia32_on_win64 -
+      wow64 {
+        return ia32_on_win64
       }
       default {
         return unknown

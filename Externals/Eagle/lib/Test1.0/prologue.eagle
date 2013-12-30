@@ -1970,7 +1970,7 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {![info exists no(checkForFile)]} then {
     #
-    # NOTE: For tests "benchmark-1.38" and "benchmark-1.39".
+    # NOTE: For tests "benchmark-1.3[89]" and "benchmark-1.40".
     #
     if {![info exists no(benchmark.txt)]} then {
       checkForFile $test_channel [file join $test_path benchmark.txt]
