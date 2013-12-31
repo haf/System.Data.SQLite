@@ -775,7 +775,12 @@ namespace eval ::Eagle {
         set targetFileName [getBuildFileName $fileName $platform]
       }
 
+      set targetDirectory [file dirname $targetFileName]
+
       if {[catch {
+              if {![file exists $targetDirectory]} then {
+                file mkdir $targetDirectory
+              }
               file copy -force $sourceFileName $targetFileName}] == 0} then {
         tputs $::test_channel [appendArgs \
             "---- copied binary file from \"" $sourceFileName "\" to \"" \
@@ -804,7 +809,12 @@ namespace eval ::Eagle {
         set targetFileName [getBinaryFileName $fileName $platform]
       }
 
+      set targetDirectory [file dirname $targetFileName]
+
       if {[catch {
+              if {![file exists $targetDirectory]} then {
+                file mkdir $targetDirectory
+              }
               file copy -force $sourceFileName $targetFileName}] == 0} then {
         tputs $::test_channel [appendArgs \
             "---- copied build file from \"" $sourceFileName "\" to \"" \
@@ -911,8 +921,9 @@ namespace eval ::Eagle {
       #       the SQLite native library; otherwise, this procedure will simply
       #       always return zero.
       #
-      return [expr {[haveConstraint System.Data.SQLite] && \
-          [haveConstraint SQLite]}]
+      return [expr {
+          [haveConstraint System.Data.SQLite] && [haveConstraint SQLite]
+      }]
     }
 
     proc matchMachine { platform } {
@@ -2205,42 +2216,116 @@ namespace eval ::Eagle {
         uplevel 1 [list loadSQLiteTestSettings $::test_channel .before]
 
         #
+        # NOTE: Determine the names of the native platform and architecture.
+        #
+        set platform [getBuildPlatform true]
+        set architecture [architectureForPlatform $platform]
+
+        #
+        # NOTE: Show the platform and architecture used to help locate the
+        #       native build files.
+        #
+        tputs $::test_channel [appendArgs \
+            "---- platform for locating native build files is \"" \
+            $platform \"\n]
+
+        tputs $::test_channel [appendArgs \
+            "---- architecture for locating native build files is \"" \
+            $architecture \"\n]
+
+        #
+        # NOTE: Build a list of configuration files that we handle.
+        #
+        set configFileNames [list \
+            System.Data.SQLite.dll.config]
+
+        #
+        # NOTE: Build a list of auxiliary Managed Debugging Assistants (MDA)
+        #       configuration files that we handle.
+        #
+        set mdaConfigFileNames [list \
+            Installer.exe.mda.config test.exe.mda.config \
+            testlinq.exe.mda.config]
+
+        #
+        # NOTE: Build the list of native assembly files that we handle.  The
+        #       reason the "System.Data.SQLite.dll" file is included here is
+        #       because it could be the mixed-mode assembly.
+        #
+        set nativeFileNames [list \
+            sqlite3.dll SQLite.Interop.dll System.Data.SQLite.dll]
+
+        #
+        # NOTE: Build the list of managed assembly files that we handle.
+        #
+        set managedFileNames [list \
+            System.Data.SQLite.dll System.Data.SQLite.Linq.dll]
+
+        #
+        # NOTE: Remove any test constraints that refer to the native and/or
+        #       managed assembly files that we handle unless forbidden from
+        #       doing so.
+        #
+        if {![info exists ::no(sqliteRemoveConstraints)]} then {
+          foreach fileName $configFileNames {
+            removeConstraint [appendArgs file_ $fileName]
+          }
+
+          foreach fileName $mdaConfigFileNames {
+            removeConstraint [appendArgs file_ $fileName]
+          }
+
+          foreach fileName $nativeFileNames {
+            removeConstraint [appendArgs file_ $fileName]
+          }
+
+          foreach fileName $managedFileNames {
+            removeConstraint [appendArgs file_ $fileName]
+          }
+        }
+
+        #
         # NOTE: Skip all System.Data.SQLite related file handling (deleting,
-        #       copying, and loading) if we are so instructed.
+        #       copying, and loading) if instructed.
         #
         if {![info exists ::no(sqliteFiles)]} then {
           #
-          # NOTE: Determine the name for the current native platform.
-          #
-          set platform [architectureForPlatform [getBuildPlatform true]]
-
-          #
-          # NOTE: Show the platform that will be used to help locate native
-          #       build files.
-          #
-          tputs $::test_channel [appendArgs \
-              "---- platform for locating native build files is \"" \
-              $platform \"\n]
-
-          #
-          # NOTE: Skip trying to delete any files if we are so instructed.
+          # NOTE: Skip trying to delete any files if instructed.
           #
           if {![info exists ::no(deleteSqliteFiles)]} then {
-            tryDeleteAssembly sqlite3.dll
-            tryDeleteAssembly SQLite.Interop.dll
-            tryDeleteAssembly System.Data.SQLite.dll
-            tryDeleteAssembly System.Data.SQLite.Linq.dll
-
-            if {[string length $platform] > 0} then {
-              tryDeleteAssembly sqlite3.dll $platform
-              tryDeleteAssembly SQLite.Interop.dll $platform
-              tryDeleteAssembly System.Data.SQLite.dll $platform
+            if {![info exists ::no(deleteSqliteConfigFiles)]} then {
+              foreach fileName $configFileNames {
+                tryDeleteBinaryFile $fileName
+              }
             }
 
-            removeConstraint file_sqlite3.dll
-            removeConstraint file_SQLite.Interop.dll
-            removeConstraint file_System.Data.SQLite.dll
-            removeConstraint file_System.Data.SQLite.Linq.dll
+            if {![info exists ::no(deleteSqliteNativeFiles)]} then {
+              if {![info exists ::no(deleteSqliteImplicitFiles)]} then {
+                foreach fileName $nativeFileNames {
+                  tryDeleteAssembly $fileName
+                }
+              }
+
+              if {![info exists ::no(deleteSqlitePlatformFiles)] && \
+                  [string length $platform] > 0} then {
+                foreach fileName $nativeFileNames {
+                  tryDeleteAssembly $fileName $platform
+                }
+              }
+
+              if {![info exists ::no(deleteSqliteArchitectureFiles)] && \
+                  [string length $architecture] > 0} then {
+                foreach fileName $nativeFileNames {
+                  tryDeleteAssembly $fileName $architecture
+                }
+              }
+            }
+
+            if {![info exists ::no(deleteSqliteManagedFiles)]} then {
+              foreach fileName $managedFileNames {
+                tryDeleteAssembly $fileName
+              }
+            }
           }
 
           #
@@ -2256,9 +2341,9 @@ namespace eval ::Eagle {
           }
 
           #
-          # NOTE: Skip trying to verify the build directory if we are so
-          #       instructed; otherwise, make sure it actually exists or
-          #       halt the entire testing process if it does not exist.
+          # NOTE: Skip trying to verify the build directory if instructed;
+          #       otherwise, make sure it actually exists or halt the entire
+          #       testing process if it does not exist.
           #
           if {![info exists ::no(verifyBuildDirectory)]} then {
             #
@@ -2288,54 +2373,73 @@ namespace eval ::Eagle {
           }
 
           #
-          # NOTE: Skip trying to copy any files if we are so instructed.
+          # NOTE: Skip trying to copy any files if instructed.
           #
           if {![info exists ::no(copySqliteFiles)]} then {
-            tryCopyBuildFile System.Data.SQLite.dll.config
+            if {![info exists ::no(copySqliteConfigFiles)]} then {
+              foreach fileName $configFileNames {
+                tryCopyBuildFile $fileName
+              }
+            }
 
-            tryCopyAssembly sqlite3.dll
-            tryCopyAssembly SQLite.Interop.dll
-            tryCopyAssembly System.Data.SQLite.dll
-            tryCopyAssembly System.Data.SQLite.Linq.dll
+            if {![info exists ::no(copySqliteNativeFiles)]} then {
+              if {![info exists ::no(copySqliteImplicitFiles)]} then {
+                foreach fileName $nativeFileNames {
+                  tryCopyAssembly $fileName
+                }
+              }
 
-            if {[string length $platform] > 0} then {
-              tryCopyAssembly sqlite3.dll $platform
-              tryCopyAssembly SQLite.Interop.dll $platform
-              tryCopyAssembly System.Data.SQLite.dll $platform
+              if {![info exists ::no(copySqlitePlatformFiles)] && \
+                  [string length $platform] > 0} then {
+                foreach fileName $nativeFileNames {
+                  tryCopyAssembly $fileName $platform
+                }
+              }
+
+              if {![info exists ::no(copySqliteArchitectureFiles)] && \
+                  [string length $architecture] > 0} then {
+                foreach fileName $nativeFileNames {
+                  tryCopyAssembly $fileName $architecture
+                }
+              }
+            }
+
+            if {![info exists ::no(copySqliteManagedFiles)]} then {
+              foreach fileName $managedFileNames {
+                tryCopyAssembly $fileName
+              }
             }
           }
 
           #
-          # NOTE: Skip trying to load any files if we are so instructed.
+          # NOTE: Skip trying to load any files if instructed.
           #
           if {![info exists ::no(loadSqliteFiles)]} then {
             tryLoadAssembly System.Data.SQLite.dll
             tryLoadAssembly System.Data.SQLite.Linq.dll
 
-            if {[string length $platform] > 0} then {
+            if {![info exists ::no(loadSqlitePlatformFiles)] && \
+                [string length $platform] > 0} then {
               tryLoadAssembly System.Data.SQLite.dll $platform
             }
-          }
 
-          #
-          # NOTE: Build a list of auxiliary Managed Debugging Assistants (MDA)
-          #       configuration files that may need to be deleted or copied.
-          #
-          set mdaConfigFileNames [list \
-              Installer.exe.mda.config test.exe.mda.config \
-              testlinq.exe.mda.config]
-
-          #
-          # NOTE: Skip trying to delete external files if we are so instructed.
-          #
-          if {![info exists ::no(deleteSqliteExternalFiles)]} then {
-            foreach mdaConfigFileName $mdaConfigFileNames {
-              tryDeleteBuildFile $mdaConfigFileName
+            if {![info exists ::no(loadSqliteArchitectureFiles)] && \
+                [string length $architecture] > 0} then {
+              tryLoadAssembly System.Data.SQLite.dll $architecture
             }
           }
 
           #
-          # NOTE: Skip trying to copy external files if we are so instructed.
+          # NOTE: Skip trying to delete external files if instructed.
+          #
+          if {![info exists ::no(deleteSqliteExternalFiles)]} then {
+            foreach fileName $mdaConfigFileNames {
+              tryDeleteBuildFile $fileName
+            }
+          }
+
+          #
+          # NOTE: Skip trying to copy external files if instructed.
           #
           if {![info exists ::no(copySqliteExternalFiles)]} then {
             #
@@ -2346,8 +2450,8 @@ namespace eval ::Eagle {
             #       legacy tests run with exactly the same set of Managed
             #       Debugging Assistants configured.
             #
-            foreach mdaConfigFileName $mdaConfigFileNames {
-              tryCopyBinaryFile EagleShell.exe.mda.config "" $mdaConfigFileName
+            foreach fileName $mdaConfigFileNames {
+              tryCopyBinaryFile EagleShell.exe.mda.config "" $fileName
             }
           }
         }
@@ -2396,6 +2500,29 @@ namespace eval ::Eagle {
                 "---- file version of \"" $platform \
                 "/System.Data.SQLite.dll\"... " [file version \
                 [getBinaryFileName System.Data.SQLite.dll $platform]] \n]
+          }
+        }
+
+        if {[string length $architecture] > 0} then {
+          catch {
+            tputs $::test_channel [appendArgs \
+                "---- file version of \"" $architecture \
+                "/sqlite3.dll\"... " [file version \
+                [getBinaryFileName sqlite3.dll $architecture]] \n]
+          }
+
+          catch {
+            tputs $::test_channel [appendArgs \
+                "---- file version of \"" $architecture \
+                "/SQLite.Interop.dll\"... " [file version \
+                [getBinaryFileName SQLite.Interop.dll $architecture]] \n]
+          }
+
+          catch {
+            tputs $::test_channel [appendArgs \
+                "---- file version of \"" $architecture \
+                "/System.Data.SQLite.dll\"... " [file version \
+                [getBinaryFileName System.Data.SQLite.dll $architecture]] \n]
           }
         }
 
