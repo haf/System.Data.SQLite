@@ -23,8 +23,10 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
-    Enter the following command to build all the x86 and x64 binaries:&nbsp;
-    <b>build_all.bat</b><br />
+    Enter the following command to build all the x86 and x64 binaries:
+    <br />
+    <br />
+    <b>build_all.bat</b>
   </li>
 </ol>
 
@@ -44,8 +46,10 @@
 
   <li>
     Enter the following command to test all the x86 or x64 binaries, depending
-    on the processor architecture of the current machine:&nbsp;
-    <b>test_all.bat</b><br />
+    on the processor architecture of the current machine:
+    <br />
+    <br />
+    <b>test_all.bat</b>
   </li>
 
   <li>
@@ -64,17 +68,28 @@
 
   <li>
     Enter the following command to build all the binaries available for Windows
-    CE:&nbsp;<b>build_ce_200x.bat</b><br /><i>This assumes that Visual Studio
-    2005 and/or Visual Studio 2008, &quot;<b>Professional</b>&quot; edition or
-    &quot;better&quot; and the bundled Pocket PC 2003 SDK are installed.</i>
+    CE:
+    <br />
+    <br />
+    <b>build_ce_200x.bat</b>
+    <br />
+    <br />
+    <i>This assumes that Visual Studio 2005 and/or Visual Studio 2008,
+    &quot;<b>Professional</b>&quot; edition or &quot;better&quot; and the
+    bundled Pocket PC 2003 SDK are installed.</i>
   </li>
 
   <li>
     Enter the following command to build all the binaries available for Windows
-    Embedded Compact 2013:&nbsp;<b>build_ce_2013.bat</b><br /><i>This assumes
-    that Visual Studio 2012, &quot;<b>Professional</b>&quot; edition or
-    &quot;better&quot; and the Windows Embedded Compact 2013 Toolkit are
-    installed.</i>
+    Embedded Compact 2013:
+    <br />
+    <br />
+    <b>build_ce_2013.bat</b>
+    <br />
+    <br />
+    <i>This assumes that Visual Studio 2012, &quot;<b>Professional</b>&quot;
+    edition or &quot;better&quot; and the Windows Embedded Compact 2013 Toolkit
+    are installed.</i>
   </li>
 </ol>
 
@@ -94,7 +109,10 @@
 
   <li>
     Enter the following command to test all the binaries available for Windows
-    CE:&nbsp;<b>test_ce_200x.bat</b><br />
+    CE:
+    <br />
+    <br />
+    <b>test_ce_200x.bat</b>
   </li>
 </ol>
 
@@ -182,8 +200,14 @@
   <li>
     Enter the following command to build all the documentation in
     [http://en.wikipedia.org/wiki/Microsoft_Compiled_HTML_Help | CHM]
-    format:&nbsp;<b>tclsh.exe&nbsp;buildChm.tcl</b><br /><i>This assumes that
-    [http://www.activestate.com/activetcl | ActiveTcl] version 8.4 or later, the
+    format:
+    <br />
+    <br />
+    <b>tclsh.exe&nbsp;buildChm.tcl</b>
+    <br />
+    <br />
+    <i>This assumes that [http://www.activestate.com/activetcl | ActiveTcl]
+    version 8.4 or later, the
     [http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=21138 | HTML Help Workshop],
     and [http://ndoc3.sourceforge.net/ | NDoc3] have all been installed using
     the default settings.</i>
@@ -199,8 +223,10 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
-    Enter the following command to build all the setup packages for x86 and
-    x64:&nbsp;<b>bake_all.bat</b><br />
+    Enter the following command to build all the setup packages for x86 and x64:
+    <br />
+    <br />
+    <b>bake_all.bat</b>
   </li>
 </ol>
 
@@ -213,8 +239,11 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
-    Enter the following command to build all the binary release packages for
-    x86 and x64:&nbsp;<b>release_all.bat</b><br />
+    Enter the following command to build all the binary release packages for x86
+    and x64:
+    <br />
+    <br />
+    <b>release_all.bat</b>
   </li>
 </ol>
 
@@ -228,7 +257,10 @@
 
   <li>
     Enter the following command to build all the static binary release packages
-    for x86 and x64:&nbsp;<b>release_static.bat</b><br />
+    for x86 and x64:
+    <br />
+    <br />
+    <b>release_static.bat</b>
   </li>
 </ol>
 
@@ -242,12 +274,18 @@
 
   <li>
     Enter the following command to build all the binary release packages for
-    Windows CE:&nbsp;<b>release_ce_200x.bat</b><br />
+    Windows CE:
+    <br />
+    <br />
+    <b>release_ce_200x.bat</b>
   </li>
 
   <li>
     Enter the following command to build all the binary release packages for
-    Windows Embedded Compact 2013:&nbsp;<b>release_ce_2013.bat</b><br />
+    Windows Embedded Compact 2013:
+    <br />
+    <br />
+    <b>release_ce_2013.bat</b>
   </li>
 </ol>
 
@@ -261,7 +299,9 @@
 
   <li>
     Enter the following command to build all the source release packages:
-    &nbsp;<b>archive.bat</b><br />
+    <br />
+    <br />
+    <b>archive.bat</b>
   </li>
 </ol>
 
@@ -274,8 +314,12 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
-    Enter the following command to build all the source release packages:&nbsp;
-    <b>..\Externals\Eagle\bin\EagleShell.exe -file verify.eagle Output</b><br />
+    Enter the following command to build all the source release packages:
+    <br />
+    <br />
+    <b>..\Externals\Eagle\bin\EagleShell.exe -file verify.eagle Output</b>
+    <br />
+    <br />
     <i>If errors are generated, the file &quot;&lt;root&gt;\Setup\verify.lst&quot;
     may need to be updated to account for the files that have been added and/or
     removed from the release archives since the previous release.</i>
@@ -292,32 +336,49 @@
 
   <li>
     Enter the following command to build the &quot;default&quot; NuGet package:
-    &nbsp;<b>nuget.exe&nbsp;pack&nbsp;SQLite.nuspec</b><br /><i>This assumes
-    that the NuGet binary is available somewhere along the
-    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
-    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
-  </li>
-
-  <li>
-    Enter the following command to build the &quot;managed-only&quot; NuGet
-    package:&nbsp;<b>nuget.exe&nbsp;pack&nbsp;SQLite.MSIL.nuspec</b><br />
+    <br />
+    <br />
+    <b>nuget.exe&nbsp;pack&nbsp;SQLite.nuspec</b>
+    <br />
+    <br />
     <i>This assumes that the NuGet binary is available somewhere along the
     [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
     to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
   </li>
 
   <li>
-    Enter the following command to build the NuGet package for x86:&nbsp;
-    <b>nuget.exe&nbsp;pack&nbsp;SQLite.x86.nuspec</b><br /><i>This assumes that
-    the NuGet binary is available somewhere along the
+    Enter the following command to build the &quot;managed-only&quot; NuGet
+    package:
+    <br />
+    <br />
+    <b>nuget.exe&nbsp;pack&nbsp;SQLite.MSIL.nuspec</b>
+    <br />
+    <br />
+    <i>This assumes that the NuGet binary is available somewhere along the
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
+    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+  </li>
+
+  <li>
+    Enter the following command to build the NuGet package for x86:
+    <br />
+    <br />
+    <b>nuget.exe&nbsp;pack&nbsp;SQLite.x86.nuspec</b>
+    <br />
+    <br />
+    <i>This assumes that the NuGet binary is available somewhere along the
     [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
     to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
   </li>
 
   <li>
     Enter the following command to build the NuGet package for x64:
-    &nbsp;<b>nuget.exe&nbsp;pack&nbsp;SQLite.x64.nuspec</b><br /><i>This assumes
-    that the NuGet binary is available somewhere along the
+    <br />
+    <br />
+    <b>nuget.exe&nbsp;pack&nbsp;SQLite.x64.nuspec</b>
+    <br />
+    <br />
+    <i>This assumes that the NuGet binary is available somewhere along the
     [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
     to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
   </li>
@@ -325,7 +386,9 @@
   <li>
     Enter the following command to move the NuGet packages to the release output
     directory:
-    &nbsp;<b>move *.nupkg Setup\Output</b>
+    <br />
+    <br />
+    <b>move *.nupkg Setup\Output</b>
   </li>
 </ol>
 
@@ -345,11 +408,15 @@
 
   <li>
     Enter the following command to update the sizes and hashes on the downloads
-    page based on all the built release packages:&nbsp;<b>tclsh.exe&nbsp;
-    updateFileInfo.tcl</b><br /><i>This assumes that
-    [http://www.activestate.com/activetcl | ActiveTcl] version 8.4 or later has
-    been installed using the default settings and that the Fossil binary is
-    available somewhere along the
+    page based on all the built release packages:
+    <br />
+    <br />
+    <b>tclsh.exe&nbsp;updateFileInfo.tcl</b>
+    <br />
+    <br />
+    <i>This assumes that [http://www.activestate.com/activetcl | ActiveTcl]
+    version 8.4 or later has been installed using the default settings and that
+    the Fossil binary is available somewhere along the
     [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH] (i.e. for
     calculating the SHA1 hashes).</i>
   </li>

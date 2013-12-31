@@ -38,8 +38,9 @@
 <h2>Test Procedures</h2>
 
 <p>
-  Follow these steps to unit test the System.Data.SQLite (SDS) binaries.
-  Unless otherwise noted, all steps need to be done in the order specified.
+  Follow these steps to unit test the System.Data.SQLite (&quot;SDS&quot;)
+  binaries.  Unless otherwise noted, all steps need to be done in the order
+  specified.
 </p>
 
 <p>
@@ -61,11 +62,11 @@
 
 <p>
   The new unit tests have been setup using <a href="http://eagle.to/">Eagle</a>
-  and its associated unit testing framework, named &quot;EagleTest&quot;.  Eagle
-  is an implementation of the <a href="http://www.tcl.tk/">Tcl</a> scripting
-  language for the Common Language Runtime (CLR).  EagleTest is the unit testing
-  framework for Eagle, packaged as a collection of Eagle scripts, based loosely
-  on the implementation of
+  and its associated unit testing framework, named &quot;Eagle.Test&quot;.
+  Eagle itself is an implementation of the <a href="http://www.tcl.tk/">Tcl</a>
+  scripting language for the Common Language Runtime (CLR).
+  &quot;Eagle.Test&quot; is the unit testing framework for Eagle, packaged as a
+  collection of Eagle scripts, based loosely on the implementation of
   <a href="http://www.tcl.tk/man/tcl8.4/TclCmd/tcltest.htm">tcltest</a>.
 </p>
 
@@ -80,40 +81,58 @@
   <li>
     Enter the following command to run all the unit tests against the binaries
     built with a separate managed and interop assembly:
+    <br />
+    <br />
     <b>Externals\Eagle\bin\EagleShell.exe&nbsp;-file&nbsp;Tests\all.eagle</b>
   </li>
 
   <li>
     Enter the following command to run all the unit tests against the binaries
     built with a mixed-mode assembly:
+    <br />
+    <br />
     <b>Externals\Eagle\bin\EagleShell.exe&nbsp;-initialize&nbsp;-runtimeOption&nbsp;native&nbsp;-file&nbsp;Tests\all.eagle</b>
   </li>
 
   <li>
-    To test binaries built with MSBuild 3.5 or Visual Studio 2008 (i.e. because
-    the default is to test binaries built with MSBuild 4.0 or Visual Studio
-    2010) add the following command line argument right after
-    &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
+    In order to test binaries built with MSBuild 3.5 or Visual Studio 2008 (i.e.
+    because the default is to test binaries built with MSBuild 4.0 or Visual
+    Studio 2010) add the following command line argument right after
+    &quot;<b>Externals\Eagle\bin\EagleShell.exe</b>&quot; in any of the above
     command lines:
+    <br />
+    <br />
     <b>-anyInitialize&nbsp;&quot;set&nbsp;test_year&nbsp;2008&quot;</b>
   </li>
 
   <li>
-    To test binaries built in the &quot;Debug&quot; build configuration (i.e.
-    because the default is to test binaries built in the &quot;Release&quot;
-    build configuration) add the following command line argument right after
-    &quot;Externals\Eagle\bin\EagleShell.exe&quot; in either of the above
-    command lines:
+    In order to test binaries built in the &quot;Debug&quot; build configuration
+    (i.e. because the default is to test binaries built in the
+    &quot;Release&quot; build configuration) add the following command line
+    argument right after &quot;<b>Externals\Eagle\bin\EagleShell.exe</b>&quot;
+    in any of the above command lines:
+    <br />
+    <br />
     <b>-anyInitialize&nbsp;&quot;set&nbsp;test_configuration&nbsp;Debug&quot;</b>
+  </li>
+
+  <li>
+    In order to test the native library pre-loader, add the following command
+    line argument right after
+    &quot;<b>Externals\Eagle\bin\EagleShell.exe</b>&quot;
+    in any of the above command lines:
+    <br />
+    <br />
+    <b>-anyInitialize&nbsp;&quot;set&nbsp;no(copySqliteImplicitFiles)&nbsp;1&quot;</b>
   </li>
 
   <li>
     Make sure all tests pass; the log file
     &quot;%TEMP%\EagleShell.exe.test.&lt;pid&gt;.log&quot; may be checked if any
-    errors should occur.  EagleTest should produce &quot;success&quot; messages
-    very similar to the following:<br /><br />
-    PASSED: 116<br />
-    TOTAL: 116<br />
+    errors should occur.  The test suite should produce &quot;success&quot;
+    messages very similar to the following:<br /><br />
+    PASSED: 254<br />
+    TOTAL: 254<br />
     PASS PERCENTAGE: 100%<br />
     OVERALL RESULT: SUCCESS<br />
   </li>

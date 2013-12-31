@@ -48,13 +48,18 @@
 
   <li>
     Change the current directory to &quot;<b>&lt;root&gt;</b>&quot; using a
-    command similar to:&nbsp;<b>cd&nbsp;/D&nbsp;&lt;root&gt;</b>
+    command similar to:
+    <br />
+    <br />
+    <b>cd&nbsp;/D&nbsp;&lt;root&gt;</b>
   </li>
 
   <li>
     Enter the following command to create a complete clone (i.e. local copy) of
     the entire source code repository for the System.Data.SQLite project,
-    including the entire check-in history:&nbsp;
+    including the entire check-in history:
+    <br />
+    <br />
     <b>fossil&nbsp;[http://www.fossil-scm.org/index.html/help/clone | clone]&nbsp;http://system.data.sqlite.org/&nbsp;&lt;repositories&gt;/sds.fossil</b>
   </li>
 
@@ -82,12 +87,17 @@
 
   <li>
     Change the current directory to &quot;<b>&lt;root&gt;</b>&quot; using a
-    command similar to:&nbsp;<b>cd&nbsp;/D&nbsp;&lt;root&gt;</b>
+    command similar to:
+    <br />
+    <br />
+    <b>cd&nbsp;/D&nbsp;&lt;root&gt;</b>
   </li>
 
   <li>
     Enter the following command to create a local working copy of all the files
-    that are currently part of the System.Data.SQLite project:&nbsp;
+    that are currently part of the System.Data.SQLite project:
+    <br />
+    <br />
     <b>fossil&nbsp;[http://www.fossil-scm.org/index.html/help/open | open]&nbsp;&lt;repositories&gt;/sds.fossil</b>
   </li>
 

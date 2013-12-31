@@ -369,6 +369,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx-source"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx-source-1.0.90.0.zip">sqlite-netFx-source-1.0.90.0.zip</a>
         <br />
         (3.39 MiB)
@@ -391,6 +392,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-setup-bundle-x86-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-setup-bundle-x86-2005-1.0.90.0.exe">sqlite-netFx20-setup-bundle-x86-2005-1.0.90.0.exe</a>
         <br />
         (4.39 MiB)
@@ -413,6 +415,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-setup-x86-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-setup-x86-2005-1.0.90.0.exe">sqlite-netFx20-setup-x86-2005-1.0.90.0.exe</a>
         <br />
         (4.38 MiB)
@@ -437,6 +440,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-setup-bundle-x64-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-setup-bundle-x64-2005-1.0.90.0.exe">sqlite-netFx20-setup-bundle-x64-2005-1.0.90.0.exe</a>
         <br />
         (4.97 MiB)
@@ -456,6 +460,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-setup-x64-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-setup-x64-2005-1.0.90.0.exe">sqlite-netFx20-setup-x64-2005-1.0.90.0.exe</a>
         <br />
         (4.96 MiB)
@@ -480,6 +485,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-setup-bundle-x86-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-setup-bundle-x86-2008-1.0.90.0.exe">sqlite-netFx35-setup-bundle-x86-2008-1.0.90.0.exe</a>
         <br />
         (6.42 MiB)
@@ -502,6 +508,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-setup-x86-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-setup-x86-2008-1.0.90.0.exe">sqlite-netFx35-setup-x86-2008-1.0.90.0.exe</a>
         <br />
         (6.41 MiB)
@@ -526,6 +533,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-setup-bundle-x64-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-setup-bundle-x64-2008-1.0.90.0.exe">sqlite-netFx35-setup-bundle-x64-2008-1.0.90.0.exe</a>
         <br />
         (7.16 MiB)
@@ -545,6 +553,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-setup-x64-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-setup-x64-2008-1.0.90.0.exe">sqlite-netFx35-setup-x64-2008-1.0.90.0.exe</a>
         <br />
         (7.15 MiB)
@@ -569,6 +578,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-setup-bundle-x86-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-setup-bundle-x86-2010-1.0.90.0.exe">sqlite-netFx40-setup-bundle-x86-2010-1.0.90.0.exe</a>
         <br />
         (10.75 MiB)
@@ -590,6 +600,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-setup-x86-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-setup-x86-2010-1.0.90.0.exe">sqlite-netFx40-setup-x86-2010-1.0.90.0.exe</a>
         <br />
         (10.74 MiB)
@@ -614,6 +625,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-setup-bundle-x64-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-setup-bundle-x64-2010-1.0.90.0.exe">sqlite-netFx40-setup-bundle-x64-2010-1.0.90.0.exe</a>
         <br />
         (12.00 MiB)
@@ -632,6 +644,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-setup-x64-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-setup-x64-2010-1.0.90.0.exe">sqlite-netFx40-setup-x64-2010-1.0.90.0.exe</a>
         <br />
         (11.99 MiB)
@@ -656,6 +669,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-setup-bundle-x86-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-setup-bundle-x86-2012-1.0.90.0.exe">sqlite-netFx45-setup-bundle-x86-2012-1.0.90.0.exe</a>
         <br />
         (8.15 MiB)
@@ -678,6 +692,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-setup-x86-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-setup-x86-2012-1.0.90.0.exe">sqlite-netFx45-setup-x86-2012-1.0.90.0.exe</a>
         <br />
         (8.18 MiB)
@@ -702,6 +717,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-setup-bundle-x64-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-setup-bundle-x64-2012-1.0.90.0.exe">sqlite-netFx45-setup-bundle-x64-2012-1.0.90.0.exe</a>
         <br />
         (8.80 MiB)
@@ -721,6 +737,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-setup-x64-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-setup-x64-2012-1.0.90.0.exe">sqlite-netFx45-setup-x64-2012-1.0.90.0.exe</a>
         <br />
         (8.85 MiB)
@@ -745,6 +762,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-setup-bundle-x86-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-setup-bundle-x86-2013-1.0.90.0.exe">sqlite-netFx451-setup-bundle-x86-2013-1.0.90.0.exe</a>
         <br />
         (8.10 MiB)
@@ -767,6 +785,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-setup-x86-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-setup-x86-2013-1.0.90.0.exe">sqlite-netFx451-setup-x86-2013-1.0.90.0.exe</a>
         <br />
         (8.13 MiB)
@@ -791,6 +810,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-setup-bundle-x64-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-setup-bundle-x64-2013-1.0.90.0.exe">sqlite-netFx451-setup-bundle-x64-2013-1.0.90.0.exe</a>
         <br />
         (8.78 MiB)
@@ -810,6 +830,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-setup-x64-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-setup-x64-2013-1.0.90.0.exe">sqlite-netFx451-setup-x64-2013-1.0.90.0.exe</a>
         <br />
         (8.83 MiB)
@@ -834,6 +855,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-binary-bundle-Win32-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-binary-bundle-Win32-2005-1.0.90.0.zip">sqlite-netFx20-binary-bundle-Win32-2005-1.0.90.0.zip</a>
         <br />
         (1.39 MiB)
@@ -852,6 +874,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-binary-Win32-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-binary-Win32-2005-1.0.90.0.zip">sqlite-netFx20-binary-Win32-2005-1.0.90.0.zip</a>
         <br />
         (1.38 MiB)
@@ -875,6 +898,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-binary-bundle-x64-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-binary-bundle-x64-2005-1.0.90.0.zip">sqlite-netFx20-binary-bundle-x64-2005-1.0.90.0.zip</a>
         <br />
         (1.60 MiB)
@@ -893,6 +917,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-binary-x64-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-binary-x64-2005-1.0.90.0.zip">sqlite-netFx20-binary-x64-2005-1.0.90.0.zip</a>
         <br />
         (1.59 MiB)
@@ -916,6 +941,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-binary-bundle-Win32-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-binary-bundle-Win32-2008-1.0.90.0.zip">sqlite-netFx35-binary-bundle-Win32-2008-1.0.90.0.zip</a>
         <br />
         (1.84 MiB)
@@ -934,6 +960,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-binary-Win32-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-binary-Win32-2008-1.0.90.0.zip">sqlite-netFx35-binary-Win32-2008-1.0.90.0.zip</a>
         <br />
         (1.83 MiB)
@@ -957,6 +984,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-binary-bundle-x64-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-binary-bundle-x64-2008-1.0.90.0.zip">sqlite-netFx35-binary-bundle-x64-2008-1.0.90.0.zip</a>
         <br />
         (1.91 MiB)
@@ -975,6 +1003,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-binary-x64-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-binary-x64-2008-1.0.90.0.zip">sqlite-netFx35-binary-x64-2008-1.0.90.0.zip</a>
         <br />
         (1.90 MiB)
@@ -998,6 +1027,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-binary-bundle-Win32-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-binary-bundle-Win32-2010-1.0.90.0.zip">sqlite-netFx40-binary-bundle-Win32-2010-1.0.90.0.zip</a>
         <br />
         (1.89 MiB)
@@ -1016,6 +1046,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-binary-Win32-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-binary-Win32-2010-1.0.90.0.zip">sqlite-netFx40-binary-Win32-2010-1.0.90.0.zip</a>
         <br />
         (1.88 MiB)
@@ -1039,6 +1070,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-binary-bundle-x64-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-binary-bundle-x64-2010-1.0.90.0.zip">sqlite-netFx40-binary-bundle-x64-2010-1.0.90.0.zip</a>
         <br />
         (1.91 MiB)
@@ -1057,6 +1089,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-binary-x64-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-binary-x64-2010-1.0.90.0.zip">sqlite-netFx40-binary-x64-2010-1.0.90.0.zip</a>
         <br />
         (1.91 MiB)
@@ -1080,6 +1113,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-binary-bundle-Win32-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-binary-bundle-Win32-2012-1.0.90.0.zip">sqlite-netFx45-binary-bundle-Win32-2012-1.0.90.0.zip</a>
         <br />
         (1.82 MiB)
@@ -1098,6 +1132,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-binary-Win32-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-binary-Win32-2012-1.0.90.0.zip">sqlite-netFx45-binary-Win32-2012-1.0.90.0.zip</a>
         <br />
         (1.87 MiB)
@@ -1121,6 +1156,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-binary-bundle-x64-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-binary-bundle-x64-2012-1.0.90.0.zip">sqlite-netFx45-binary-bundle-x64-2012-1.0.90.0.zip</a>
         <br />
         (1.85 MiB)
@@ -1139,6 +1175,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-binary-x64-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-binary-x64-2012-1.0.90.0.zip">sqlite-netFx45-binary-x64-2012-1.0.90.0.zip</a>
         <br />
         (1.92 MiB)
@@ -1162,6 +1199,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-binary-bundle-Win32-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-binary-bundle-Win32-2013-1.0.90.0.zip">sqlite-netFx451-binary-bundle-Win32-2013-1.0.90.0.zip</a>
         <br />
         (1.82 MiB)
@@ -1180,6 +1218,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-binary-Win32-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-binary-Win32-2013-1.0.90.0.zip">sqlite-netFx451-binary-Win32-2013-1.0.90.0.zip</a>
         <br />
         (1.87 MiB)
@@ -1203,6 +1242,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-binary-bundle-x64-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-binary-bundle-x64-2013-1.0.90.0.zip">sqlite-netFx451-binary-bundle-x64-2013-1.0.90.0.zip</a>
         <br />
         (1.85 MiB)
@@ -1221,6 +1261,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-binary-x64-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-binary-x64-2013-1.0.90.0.zip">sqlite-netFx451-binary-x64-2013-1.0.90.0.zip</a>
         <br />
         (1.92 MiB)
@@ -1244,6 +1285,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-static-binary-bundle-Win32-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-static-binary-bundle-Win32-2005-1.0.90.0.zip">sqlite-netFx20-static-binary-bundle-Win32-2005-1.0.90.0.zip</a>
         <br />
         (1.60 MiB)
@@ -1262,6 +1304,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-static-binary-Win32-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-static-binary-Win32-2005-1.0.90.0.zip">sqlite-netFx20-static-binary-Win32-2005-1.0.90.0.zip</a>
         <br />
         (1.59 MiB)
@@ -1286,6 +1329,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-static-binary-bundle-x64-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-static-binary-bundle-x64-2005-1.0.90.0.zip">sqlite-netFx20-static-binary-bundle-x64-2005-1.0.90.0.zip</a>
         <br />
         (1.75 MiB)
@@ -1304,6 +1348,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx20-static-binary-x64-2005"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx20-static-binary-x64-2005-1.0.90.0.zip">sqlite-netFx20-static-binary-x64-2005-1.0.90.0.zip</a>
         <br />
         (1.74 MiB)
@@ -1328,6 +1373,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-static-binary-bundle-Win32-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-static-binary-bundle-Win32-2008-1.0.90.0.zip">sqlite-netFx35-static-binary-bundle-Win32-2008-1.0.90.0.zip</a>
         <br />
         (2.05 MiB)
@@ -1346,6 +1392,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-static-binary-Win32-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-static-binary-Win32-2008-1.0.90.0.zip">sqlite-netFx35-static-binary-Win32-2008-1.0.90.0.zip</a>
         <br />
         (2.05 MiB)
@@ -1370,6 +1417,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-static-binary-bundle-x64-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-static-binary-bundle-x64-2008-1.0.90.0.zip">sqlite-netFx35-static-binary-bundle-x64-2008-1.0.90.0.zip</a>
         <br />
         (2.09 MiB)
@@ -1388,6 +1436,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-static-binary-x64-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-static-binary-x64-2008-1.0.90.0.zip">sqlite-netFx35-static-binary-x64-2008-1.0.90.0.zip</a>
         <br />
         (2.08 MiB)
@@ -1412,6 +1461,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-static-binary-bundle-Win32-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-static-binary-bundle-Win32-2010-1.0.90.0.zip">sqlite-netFx40-static-binary-bundle-Win32-2010-1.0.90.0.zip</a>
         <br />
         (2.11 MiB)
@@ -1430,6 +1480,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-static-binary-Win32-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-static-binary-Win32-2010-1.0.90.0.zip">sqlite-netFx40-static-binary-Win32-2010-1.0.90.0.zip</a>
         <br />
         (2.10 MiB)
@@ -1454,6 +1505,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-static-binary-bundle-x64-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-static-binary-bundle-x64-2010-1.0.90.0.zip">sqlite-netFx40-static-binary-bundle-x64-2010-1.0.90.0.zip</a>
         <br />
         (2.11 MiB)
@@ -1472,6 +1524,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx40-static-binary-x64-2010"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx40-static-binary-x64-2010-1.0.90.0.zip">sqlite-netFx40-static-binary-x64-2010-1.0.90.0.zip</a>
         <br />
         (2.10 MiB)
@@ -1496,6 +1549,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-static-binary-bundle-Win32-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-static-binary-bundle-Win32-2012-1.0.90.0.zip">sqlite-netFx45-static-binary-bundle-Win32-2012-1.0.90.0.zip</a>
         <br />
         (2.14 MiB)
@@ -1514,6 +1568,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-static-binary-Win32-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-static-binary-Win32-2012-1.0.90.0.zip">sqlite-netFx45-static-binary-Win32-2012-1.0.90.0.zip</a>
         <br />
         (2.19 MiB)
@@ -1538,6 +1593,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-static-binary-bundle-x64-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-static-binary-bundle-x64-2012-1.0.90.0.zip">sqlite-netFx45-static-binary-bundle-x64-2012-1.0.90.0.zip</a>
         <br />
         (2.11 MiB)
@@ -1556,6 +1612,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx45-static-binary-x64-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx45-static-binary-x64-2012-1.0.90.0.zip">sqlite-netFx45-static-binary-x64-2012-1.0.90.0.zip</a>
         <br />
         (2.18 MiB)
@@ -1580,6 +1637,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-static-binary-bundle-Win32-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-static-binary-bundle-Win32-2013-1.0.90.0.zip">sqlite-netFx451-static-binary-bundle-Win32-2013-1.0.90.0.zip</a>
         <br />
         (2.16 MiB)
@@ -1598,6 +1656,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-static-binary-Win32-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-static-binary-Win32-2013-1.0.90.0.zip">sqlite-netFx451-static-binary-Win32-2013-1.0.90.0.zip</a>
         <br />
         (2.21 MiB)
@@ -1622,6 +1681,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-static-binary-bundle-x64-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-static-binary-bundle-x64-2013-1.0.90.0.zip">sqlite-netFx451-static-binary-bundle-x64-2013-1.0.90.0.zip</a>
         <br />
         (2.14 MiB)
@@ -1640,6 +1700,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx451-static-binary-x64-2013"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx451-static-binary-x64-2013-1.0.90.0.zip">sqlite-netFx451-static-binary-x64-2013-1.0.90.0.zip</a>
         <br />
         (2.20 MiB)
@@ -1664,6 +1725,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx35-binary-PocketPC-ARM-2008"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx35-binary-PocketPC-ARM-2008-1.0.90.0.zip">sqlite-netFx35-binary-PocketPC-ARM-2008-1.0.90.0.zip</a>
         <br />
         (1.03 MiB)
@@ -1683,6 +1745,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx39-binary-WinCE-ARM-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx39-binary-WinCE-ARM-2012-1.0.90.0.zip">sqlite-netFx39-binary-WinCE-ARM-2012-1.0.90.0.zip</a>
         <br />
         (1.14 MiB)
@@ -1700,6 +1763,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a name="sqlite-netFx39-binary-WinCE-x86-2012"></a>
         <a href="/downloads/1.0.90.0/sqlite-netFx39-binary-WinCE-x86-2012-1.0.90.0.zip">sqlite-netFx39-binary-WinCE-x86-2012-1.0.90.0.zip</a>
         <br />
         (1.19 MiB)

@@ -4,8 +4,9 @@
   <h2>Build Procedures</h2>
 
   <p>
-    Follow these steps to build the System.Data.SQLite (SDS) binaries.
-    Unless otherwise noted, all steps need to be done in the order specified.
+    Follow these steps to build the System.Data.SQLite (&quot;SDS&quot;)
+    binaries.  Unless otherwise noted, all steps need to be done in the order
+    specified.
   </p>
 
   <p>
@@ -269,7 +270,11 @@
 
     <li>
       Enter the following command to build the managed-only binaries:
-      &nbsp;<b>build.bat&nbsp;ReleaseManagedOnly</b>
+      <br />
+      <br />
+      <b>build.bat&nbsp;ReleaseManagedOnly</b>
+      <br />
+      <br />
     </li>
 
     <li>
@@ -280,10 +285,14 @@
 
     <li>
       Enter the following command to build the binaries for Win32 (x86):&nbsp;
-      <b>build.bat&nbsp;ReleaseNativeOnly&nbsp;Win32</b><br /><i>You may need to
-      enter the command &quot;<b>setenv&nbsp;/x86</b>&quot; first if you are using
-      a &quot;Windows SDK Command Prompt&quot; or &quot;Visual Studio Command
-      Prompt&quot; window.</i>
+      <br />
+      <br />
+      <b>build.bat&nbsp;ReleaseNativeOnly&nbsp;Win32</b>
+      <br />
+      <br />
+      <i>You may need to enter the command &quot;<b>setenv&nbsp;/x86</b>&quot;
+      first if you are using a &quot;Windows SDK Command Prompt&quot; or
+      &quot;Visual Studio Command Prompt&quot; window.</i>
     </li>
 
     <li>
@@ -293,11 +302,15 @@
     </li>
 
     <li>
-      Enter the following command to build the binaries for x64:&nbsp;<b>build.bat
-      &nbsp;ReleaseNativeOnly&nbsp;x64</b><br /><i>You may need to enter the
-      command&quot;<b>setenv&nbsp;/x64</b>&quot; first if you are using a
-      &quot;Windows SDK Command Prompt&quot; or &quot;Visual Studio Command
-      Prompt&quot; window.</i>
+      Enter the following command to build the binaries for x64:
+      <br />
+      <br />
+      <b>build.bat&nbsp;ReleaseNativeOnly&nbsp;x64</b>
+      <br />
+      <br />
+      <i>You may need to enter the command&quot;<b>setenv&nbsp;/x64</b>&quot;
+      first if you are using a &quot;Windows SDK Command Prompt&quot; or
+      &quot;Visual Studio Command Prompt&quot; window.</i>
     </li>
 
     <li>
@@ -310,14 +323,21 @@
       Enter the following command to build the setup binaries for all supported
       build configurations (unfortunately, it is not possible to build the setup
       using the Inno Setup IDE.  It must be done using the provided command line
-      tools due to its highly dynamic nature):&nbsp;<b>bake_all.bat</b>
+      tools due to its highly dynamic nature):
+      <br />
+      <br />
+      <b>bake_all.bat</b>
+      <br />
+      <br />
     </li>
 
     <li>
       Make sure everything succeeds with no errors.  Inno Setup should produce
-      &quot;success&quot; messages very similar to the following:&nbsp;
-      <b>Successful compile (X.XXX sec). Resulting Setup program filename
-      is:&nbsp;abc</b>
+      &quot;success&quot; messages very similar to the following:
+      <br />
+      <br />
+      <b>Successful compile (X.XXX sec). Resulting Setup program filename is:
+      &nbsp;abc</b>
     </li>
   </ol>
 
@@ -343,12 +363,20 @@
     <li>
       Enter the following command to set the environment variable used to pass
       the necessary extra arguments to MSBuild:
-      &nbsp;<b>SET&nbsp;MSBUILD_ARGS=/property:UseInteropDll=false&nbsp;/property:UseSqliteStandard=true</b>
+      <br />
+      <br />
+      <b>SET&nbsp;MSBUILD_ARGS=/property:UseInteropDll=false&nbsp;/property:UseSqliteStandard=true</b>
+      <br />
+      <br />
     </li>
 
     <li>
       Enter the following command to build the managed-only binaries for Mono:
-      &nbsp;<b>build.bat&nbsp;ReleaseManagedOnly</b>
+      <br />
+      <br />
+      <b>build.bat&nbsp;ReleaseManagedOnly</b>
+      <br />
+      <br />
     </li>
 
     <li>
