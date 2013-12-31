@@ -127,14 +127,17 @@ namespace eval ::Eagle {
         #       the test machine architecture; otherwise, return an empty
         #       string.
         #
-        return [expr {$native ? [machineToPlatform $::test_machine] : ""}]
+        return [expr {
+          $native ? [machineToPlatform $::test_machine] : ""
+        }]
       } elseif {[info exists ::tcl_platform(machine)]} then {
         #
         # NOTE: For native builds, return the platform name corresponding to
         #       the machine architecture; otherwise, return an empty string.
         #
-        return [expr {$native ? \
-            [machineToPlatform $::tcl_platform(machine)] : ""}]
+        return [expr {
+          $native ? [machineToPlatform $::tcl_platform(machine)] : ""
+        }]
       } else {
         #
         # NOTE: No machine architecture is available, return an empty string.
@@ -922,7 +925,7 @@ namespace eval ::Eagle {
       #       always return zero.
       #
       return [expr {
-          [haveConstraint System.Data.SQLite] && [haveConstraint SQLite]
+        [haveConstraint System.Data.SQLite] && [haveConstraint SQLite]
       }]
     }
 
@@ -1344,26 +1347,34 @@ namespace eval ::Eagle {
       upvar 1 $varName db
 
       #
-      # NOTE: Execute the SQL query against the sqlite_master table to check if
-      #       the named table is present and return non-zero if it is.
+      # NOTE: Use the sqlite_master table to determine if the named table is
+      #       present in the database.
       #
-      return [expr {[sql execute -execute scalar $db \
-          "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?;" \
-          [list param1 String $name]] > 0}]
+      set sql {
+        SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?;
+      }
+
+      #
+      # NOTE: Return non-zero if the named table is present.
+      #
+      return [expr {
+        [sql execute -execute scalar $db $sql [list param1 String $name]] > 0
+      }]
     }
 
     proc trimSql { sql } {
       return [regsub -all -- {\s+} [string trim $sql] " "]
     }
 
-    proc executeSql { sql {execute none} {fileName ""} } {
+    proc executeSql { sql {execute none} {format none} {fileName ""} } {
       if {[string length $fileName] == 0} then {set fileName :memory:}
-      setupDb $fileName "" "" "" "" "" false false false false memDb
+      setupDb $fileName "" "" "" "" "" false false false false
 
       try {
-        return [sql execute -execute $execute $memDb $sql]
+        return [uplevel 1 [list \
+            sql execute -execute $execute -format $format $db $sql]]
       } finally {
-        cleanupDb $fileName memDb false false
+        cleanupDb $fileName db false false false
       }
     }
 
