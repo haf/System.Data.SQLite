@@ -2426,8 +2426,10 @@ namespace eval ::Eagle {
           # NOTE: Skip trying to load any files if instructed.
           #
           if {![info exists ::no(loadSqliteFiles)]} then {
-            tryLoadAssembly System.Data.SQLite.dll
-            tryLoadAssembly System.Data.SQLite.Linq.dll
+            if {![info exists ::no(loadSqliteImplicitFiles)]} then {
+              tryLoadAssembly System.Data.SQLite.dll
+              tryLoadAssembly System.Data.SQLite.Linq.dll
+            }
 
             if {![info exists ::no(loadSqlitePlatformFiles)] && \
                 [string length $platform] > 0} then {
