@@ -509,7 +509,7 @@ namespace System.Data.SQLite
           )
       {
           if (GetSettingValue(
-                "PreLoadSQLite_SearchForDirectory", null) == null)
+                "PreLoadSQLite_NoSearchForDirectory", null) != null)
           {
               return false; /* DISABLED */
           }

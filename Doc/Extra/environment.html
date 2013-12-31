@@ -129,13 +129,13 @@
           of the native library to pre-load.</td>
         </tr>
         <tr valign="top">
-          <td>PreLoadSQLite_SearchForDirectory</td>
+          <td>PreLoadSQLite_NoSearchForDirectory</td>
           <td>If this environment variable is set [to anything], the native
-          library pre-loading code will conduct a search for the native library
-          to pre-load, starting in the location of the currently executing
-          assembly (i.e. the one containing all the managed components for
-          System.Data.SQLite) and then falling back to the application domain
-          base directory.</td>
+          library pre-loading code will skip conducting a search for the native
+          library to pre-load.  By default, the search starts in the location
+          of the currently executing assembly (i.e. the assembly containing all
+          the managed components for System.Data.SQLite) and then falls back to
+          the application domain base directory.</td>
         </tr>
         <tr valign="top">
           <td>PreLoadSQLite_UseAssemblyDirectory</td>
