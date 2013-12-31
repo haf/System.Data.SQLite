@@ -4,7 +4,7 @@
 
 <ul>
   <li>
-    Written from scratch on Visual Studio 2008 specifically for ADO.NET,
+    Written from scratch on Visual Studio 2005 specifically for ADO.NET,
     implementing all the base classes and features recently introduced in the
     framework, including automatic transaction enlistment.
   </li>

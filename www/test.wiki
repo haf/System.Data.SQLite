@@ -12,8 +12,8 @@
 
   <li>
     The string &quot;&lt;year&gt;&quot; represents the version of Visual Studio
-    used (e.g. &quot;2008&quot; or &quot;2010&quot;) to build the binaries being
-    tested.
+    used (e.g. &quot;2005&quot;, &quot;2008&quot;, &quot;2010&quot;,
+    &quot;2012&quot;, or &quot;2013&quot;) to build the binaries being tested.
   </li>
 
   <li>

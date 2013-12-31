@@ -110,7 +110,9 @@
     In the future, to update the local working copy with the latest changes from
     the official System.Data.SQLite repository (i.e. instead of having to
     re-clone the entire thing), enter the following command from the same
-    directory where the working copy is located:&nbsp;
+    directory where the working copy is located:
+    <br />
+    <br />
     <b>fossil&nbsp;[http://www.fossil-scm.org/index.html/help/update | update]</b>
   </li>
 </ol>

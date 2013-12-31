@@ -10,12 +10,12 @@
   </p>
 
   <p>
-    You will need a Visual Studio 2008, Visual Studio 2008 SP1, Visual Studio
-    2010, Visual Studio 2010 SP1, Visual Studio 2012, or Visual Studio 2013
-    development environment for this build.  In order to build both the managed
-    (C#) and native projects (C++) for a particular solution together, the
-    &quot;Professional Edition&quot; (or better) of that particular version of
-    Visual Studio is required.
+    You will need a Visual Studio 2005, Visual Studio 2005 SP1, Visual Studio
+    2008, Visual Studio 2008 SP1, Visual Studio 2010, Visual Studio 2010 SP1,
+    Visual Studio 2012, or Visual Studio 2013 development environment for this
+    build.  In order to build both the managed (C#) and native projects (C++)
+    for a particular solution together, the &quot;Professional Edition&quot;
+    (or better) of that particular version of Visual Studio is required.
   </p>
 
   <p>
@@ -92,7 +92,7 @@
 
     <li>
       The string &quot;&lt;year&gt;&quot; represents the version of Visual
-      Studio being used (e.g. 2008).
+      Studio being used (e.g. 2005, 2008, 2010, 2012, or 2013).
     </li>
 
     <li>
