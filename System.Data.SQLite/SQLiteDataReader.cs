@@ -834,18 +834,18 @@ namespace System.Data.SQLite
       CheckClosed();
       if (_throwOnDisposed) SQLiteCommand.Check(_command);
 
-     //
-     // BUGFIX: We need to quickly scan all the fields in the current
-     //         "result set" to see how many distinct tables are actually
-     //         involved.  This information is necessary so that some
-     //         intelligent decisions can be made when constructing the
-     //         metadata below.  For example, we need to be very careful
-     //         about flagging a particular column as "unique" just
-     //         because it was in its original underlying database table
-     //         if there are now multiple tables involved in the
-     //         "result set".  See ticket [7e3fa93744] for more detailed
-     //         information.
-     //
+      //
+      // BUGFIX: We need to quickly scan all the fields in the current
+      //         "result set" to see how many distinct tables are actually
+      //         involved.  This information is necessary so that some
+      //         intelligent decisions can be made when constructing the
+      //         metadata below.  For example, we need to be very careful
+      //         about flagging a particular column as "unique" just
+      //         because it was in its original underlying database table
+      //         if there are now multiple tables involved in the
+      //         "result set".  See ticket [7e3fa93744] for more detailed
+      //         information.
+      //
       Dictionary<ColumnParent, List<int>> parentToColumns = null;
       Dictionary<int, ColumnParent> columnToParent = null;
 
