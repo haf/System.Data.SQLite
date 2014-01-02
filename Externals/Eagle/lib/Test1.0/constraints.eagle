@@ -191,8 +191,7 @@ namespace eval ::Eagle {
     #
     # NOTE: Are we running on Windows at all?
     #
-    if {[info exists ::tcl_platform(platform)] && \
-        $::tcl_platform(platform) eq "windows"} then {
+    if {[isWindows]} then {
       #
       # NOTE: Is the specific OS name and version number available?
       #
@@ -341,8 +340,7 @@ namespace eval ::Eagle {
         # NOTE: If the current platform is Windows the Tcl binary must have
         #       been compiled for Windows.
         #
-        if {[info exists ::tcl_platform(platform)] && \
-            $::tcl_platform(platform) eq "windows"} then {
+        if {[isWindows]} then {
           lappend result compile.WINDOWS
           addConstraint compile.WINDOWS
         }
@@ -373,8 +371,7 @@ namespace eval ::Eagle {
   proc checkForWindowsCommandProcessor { channel pattern {constraint ""} } {
     tputs $channel "---- checking for Windows Command Processor... "
 
-    if {[info exists ::tcl_platform(platform)] && \
-        $::tcl_platform(platform) eq "windows"} then {
+    if {[isWindows]} then {
       #
       # NOTE: Grab the "ComSpec" from the Windows environment and make sure it
       #       matches the file pattern supplied by the caller (e.g. "cmd.exe").
@@ -874,8 +871,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Use the appropriate environment variable for the platform.
       #
-      if {[info exists ::tcl_platform(platform)] && \
-          $::tcl_platform(platform) eq "windows"} then {
+      if {[isWindows]} then {
         set pathName PATH
       } else {
         #
@@ -902,8 +898,7 @@ namespace eval ::Eagle {
         #
         if {[info exists ::tcl_platform(pathSeparator)]} then {
           set separator $::tcl_platform(pathSeparator)
-        } elseif {[info exists ::tcl_platform(platform)] && \
-            $::tcl_platform(platform) eq "windows"} then {
+        } elseif {[isWindows]} then {
           set separator \;
         } else {
           set separator :
@@ -2019,10 +2014,8 @@ namespace eval ::Eagle {
       #       On some Unix systems, dlopen does not work (e.g. because
       #       Mono is statically linked, etc).
       #
-      if {([info exists ::tcl_platform(platform)] && \
-           $::tcl_platform(platform) eq "windows") || \
-          ([llength [info commands library]] > 0 && \
-           [catch {library test}] == 0)} then {
+      if {[isWindows] || ([llength [info commands library]] > 0 && \
+          [catch {library test}] == 0)} then {
         #
         # NOTE: Yes, it appears that it is available.
         #
@@ -2047,9 +2040,7 @@ namespace eval ::Eagle {
       #       Windows Form when the X server is unavailable (e.g. on
       #       OpenBSD).
       #
-      if {([info exists ::tcl_platform(platform)] && \
-           $::tcl_platform(platform) eq "windows") || \
-          [info exists ::env(DISPLAY)]} then {
+      if {[isWindows] || [info exists ::env(DISPLAY)]} then {
         #
         # NOTE: Is the Windows Forms assembly available?
         #
@@ -2381,8 +2372,7 @@ namespace eval ::Eagle {
       # NOTE: Platform must be Windows for this constraint to
       #       even be checked (i.e. we require the registry).
       #
-      if {[info exists ::tcl_platform(platform)] && \
-          $::tcl_platform(platform) eq "windows"} then {
+      if {[isWindows]} then {
         #
         # NOTE: Indicate that we have not found it yet.
         #
@@ -2615,8 +2605,7 @@ namespace eval ::Eagle {
       # NOTE: Platform must be Windows for this constraint to even be
       #       checked (i.e. we require the registry).
       #
-      if {[info exists ::tcl_platform(platform)] && \
-          $::tcl_platform(platform) eq "windows"} then {
+      if {[isWindows]} then {
         #
         # NOTE: Registry hive where the .NET Framework 4.0 setup and
         #       servicing information is stored.  No need to look in
@@ -2680,8 +2669,7 @@ namespace eval ::Eagle {
       #
       set visualStudioVersions [list]
 
-      if {[info exists ::tcl_platform(platform)] && \
-          $::tcl_platform(platform) eq "windows"} then {
+      if {[isWindows]} then {
         #
         # NOTE: Registry hive where Visual Studio install information is
         #       stored.  Make sure to look in the WoW64 registry because

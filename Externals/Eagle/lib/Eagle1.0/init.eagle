@@ -37,6 +37,17 @@ namespace eval ::Eagle {
         [string compare -nocase eagle $::tcl_platform(engine)] == 0}]
   }
 
+  #
+  # NOTE: This is the procedure that detects whether or not we are
+  #       running on Windows (otherwise, we are running on some flavor
+  #       of Unix).  This procedure must function correctly in both Tcl
+  #       and Eagle and must return non-zero only when on Windows.
+  #
+  proc isWindows {} {
+    return [expr {[info exists ::tcl_platform(platform)] && \
+        $::tcl_platform(platform) eq "windows"}]
+  }
+
   proc haveGaruda { {varName ""} } {
     #
     # NOTE: Check for a variable name to place the Garuda package Id into.
@@ -504,7 +515,7 @@ namespace eval ::Eagle {
     # NOTE: On Windows, use PATH; otherwise (i.e. Unix), use
     #       LD_LIBRARY_PATH.
     #
-    if {$::tcl_platform(platform) eq "windows"} then {
+    if {[isWindows]} then {
       set name PATH
     } else {
       set name LD_LIBRARY_PATH
@@ -516,7 +527,7 @@ namespace eval ::Eagle {
     #
     if {[info exists ::tcl_platform(pathSeparator)]} then {
       set separator $::tcl_platform(pathSeparator)
-    } elseif {$::tcl_platform(platform) eq "windows"} then {
+    } elseif {[isWindows]} then {
       set separator \;
     } else {
       set separator :
@@ -577,7 +588,7 @@ namespace eval ::Eagle {
     # NOTE: On Windows, use PATH; otherwise (i.e. Unix), use
     #       LD_LIBRARY_PATH.
     #
-    if {$::tcl_platform(platform) eq "windows"} then {
+    if {[isWindows]} then {
       set name PATH
     } else {
       set name LD_LIBRARY_PATH
@@ -589,7 +600,7 @@ namespace eval ::Eagle {
     #
     if {[info exists ::tcl_platform(pathSeparator)]} then {
       set separator $::tcl_platform(pathSeparator)
-    } elseif {$::tcl_platform(platform) eq "windows"} then {
+    } elseif {[isWindows]} then {
       set separator \;
     } else {
       set separator :
@@ -1120,8 +1131,7 @@ namespace eval ::Eagle {
       # NOTE: Figure out the appropriate file extension to download for
       #       this platform.
       #
-      set extension [expr {$::tcl_platform(platform) eq "windows" ? \
-          ".exe" : ".rar"}]
+      set extension [expr {[isWindows] ? ".exe" : ".rar"}]
 
       #
       # NOTE: Build the necessary arguments for the download.
@@ -2224,15 +2234,16 @@ namespace eval ::Eagle {
     #       into the global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        isEagle haveGaruda isTclThread isMono getEnvironmentVariable \
-        combineFlags getCompileInfo getPlatformInfo getPluginPath appendArgs \
-        lappendArgs getDictionaryValue getColumnValue getRowColumnValue \
-        tqputs tqlog readFile readSharedFile writeFile appendFile \
-        appendLogFile appendSharedFile appendSharedLogFile readAsciiFile \
-        writeAsciiFile readUnicodeFile writeUnicodeFile getDirResultPath \
-        addToPath removeFromPath execShell lshuffle ldifference filter map \
-        reduce getLengthModifier debug findDirectories findFiles \
-        findFilesRecursive exportAndImportPackageCommands] false false
+        isEagle isWindows haveGaruda isTclThread isMono \
+        getEnvironmentVariable combineFlags getCompileInfo getPlatformInfo \
+        getPluginPath appendArgs lappendArgs getDictionaryValue \
+        getColumnValue getRowColumnValue tqputs tqlog readFile \
+        readSharedFile writeFile appendFile appendLogFile appendSharedFile \
+        appendSharedLogFile readAsciiFile writeAsciiFile readUnicodeFile \
+        writeUnicodeFile getDirResultPath addToPath removeFromPath execShell \
+        lshuffle ldifference filter map reduce getLengthModifier debug \
+        findDirectories findFiles findFilesRecursive \
+        exportAndImportPackageCommands] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

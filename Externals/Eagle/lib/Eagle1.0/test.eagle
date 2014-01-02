@@ -570,10 +570,31 @@ namespace eval ::Eagle {
           #
           foreach version [lsort -real -decreasing [tcl \
               versionrange -maximumversion $dotVersion]] {
-            lappend shells [appendArgs \
-                tclsh [string map [list . ""] $version]]
+            #
+            # NOTE: Build the candidate Tcl shell executable file name
+            #       with the dot-separated version.  This is the common
+            #       naming scheme on Unix.
+            #
+            set dotShell [appendArgs tclsh $version]
 
-            lappend shells [appendArgs tclsh $version]
+            #
+            # NOTE: Build the candidate Tcl shell executable file name
+            #       with the version, removing the dot.  This is the
+            #       common naming scheme on Windows.
+            #
+            set shell [appendArgs tclsh [string map [list . ""] $version]]
+
+            #
+            # NOTE: Always favor the Tcl shell executable file naming
+            #       scheme for the current operating system first.
+            #
+            if {[isWindows]} then {
+              lappend shells $shell
+              lappend shells $dotShell
+            } else {
+              lappend shells $dotShell
+              lappend shells $shell
+            }
           }
         }
       }
@@ -1989,9 +2010,7 @@ namespace eval ::Eagle {
     #
     switch -exact -- [string tolower $machine] {
       intel {
-        if {!$architecture && \
-            [info exists ::tcl_platform(platform)] && \
-            $::tcl_platform(platform) eq "windows"} then {
+        if {!$architecture && [isWindows]} then {
           return Win32
         } else {
           return x86
