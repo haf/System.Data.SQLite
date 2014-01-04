@@ -97,7 +97,7 @@ runTest {test tkt-7e3fa93744-1.2 {composite primary key, DataTable} -setup {
         public static int Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 

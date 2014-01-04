@@ -50,7 +50,7 @@ runTest {test tkt-6434e23a0f-1.1 {SQLiteDataAdapter command disposal} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 

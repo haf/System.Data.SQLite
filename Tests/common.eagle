@@ -1391,10 +1391,15 @@ namespace eval ::Eagle {
         #
         if {!$quiet} then {
           tputs $::test_channel [appendArgs \
-              "---- local connection flags are: " $flags \n]
+              "---- local connection flags are: " \
+              [expr {[string length $flags] > 0 ? \
+              [appendArgs \" $flags \"] : "<none>"}] \n]
 
           tputs $::test_channel [appendArgs \
-              "---- global connection flags detected: " $::connection_flags \n]
+              "---- global connection flags detected: " \
+              [expr {[info exists ::connection_flags] && \
+              [string length $::connection_flags] > 0 ? \
+              [appendArgs \" $::connection_flags \"] : "<none>"}] \n]
         }
 
         #
@@ -1408,11 +1413,60 @@ namespace eval ::Eagle {
         #
         if {!$quiet} then {
           tputs $::test_channel [appendArgs \
-              "---- combined connection flags are: " $flags \n]
+              "---- combined connection flags are: " \
+              [expr {[string length $flags] > 0 ? \
+              [appendArgs \" $flags \"] : "<none>"}] \n]
         }
       }
 
       return $flags
+    }
+
+    proc getFlagsProperty { {flags ""} } {
+      #
+      # NOTE: Determine what the combined (global and local) connection
+      #       flags should be, quietly.
+      #
+      set flags [getConnectionFlags $flags true]
+
+      #
+      # NOTE: If no global or local connection flags were specified, the
+      #       default connection flags should be used; therefore, return
+      #       an empty string in that case.
+      #
+      if {[string length $flags] == 0} then {
+        return ""
+      }
+
+      #
+      # NOTE: In order to check if the default connection flags are being used
+      #       it is necessary to attempt a conversion to the actual enumerated
+      #       type.  Failing that, the check against the default value will be
+      #       skipped.
+      #
+      set error null; # IGNORED
+      set value [object invoke Utility TryParseFlagsEnum "" \
+          System.Data.SQLite.SQLiteConnectionFlags "" $flags null true \
+          error]
+
+      #
+      # NOTE: If the combined flags string could not actually be converted
+      #       to the enumerated type it is the default value, then just use
+      #       it verbatim; otherwise, just return an empty string.  In that
+      #       case, the default connection flags will be used.
+      #
+      if {[string length $value] == 0 || $value ne "Default"} then {
+        #
+        # WARNING: This returns the string value of the combined flags, not
+        #          the enumerated value.  This is by design and should not
+        #          be changed without careful consideration (e.g. it would
+        #          prevent the SQLiteConnection class from allowing invalid
+        #          ["magical"] meta-flags).
+        #
+        return [appendArgs "Flags=" $flags \;]
+      }
+
+      return ""
     }
 
     proc setupDb {

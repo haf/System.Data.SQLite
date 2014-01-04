@@ -49,7 +49,7 @@ runTest {test tkt-3aa50d8413-1.1 {FillSchema with multiple result sets} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 

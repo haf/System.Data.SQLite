@@ -129,7 +129,7 @@ runTest {test tkt-343d392b51-2.1 {SQLiteDataAdapter update fail} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -235,7 +235,8 @@ runTest {test tkt-343d392b51-2.2 {SQLiteDataAdapter update success} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};DateTimeFormat=JulianDay;"))
+              "Data Source=${dataSource};DateTimeFormat=JulianDay;" +
+              "[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -380,7 +381,7 @@ runTest {test tkt-343d392b51-3.2 {adapter, attached db, table names} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 

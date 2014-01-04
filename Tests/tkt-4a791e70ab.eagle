@@ -40,7 +40,7 @@ runTest {test tkt-4a791e70ab-1.1 {SQLiteDataAdapter w/SelectCommand} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 

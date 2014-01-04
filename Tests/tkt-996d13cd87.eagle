@@ -149,7 +149,8 @@ for {set i 1} {$i < 11} {incr i} {
                   Thread.Sleep(random.Next(0, 500));
 
                   SQLiteConnection connection = new SQLiteConnection(
-                      "Data Source=${dataSource};Pooling=${pooling};");
+                      "Data Source=${dataSource};Pooling=${pooling};" +
+                      "[getFlagsProperty]");
 
                   connection.Open();
 

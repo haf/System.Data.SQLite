@@ -46,12 +46,12 @@ runTest {test tkt-56b42d99c1-1.1 {enlisted transaction isolation} -setup {
               TransactionScopeOption.Required, transactionOptions))
           {
             using (SQLiteConnection connection1 = new SQLiteConnection(
-                "Data Source=${dataSource};"))
+                "Data Source=${dataSource};[getFlagsProperty]"))
             {
               connection1.Open();
 
               using (SQLiteConnection connection2 = new SQLiteConnection(
-                  "Data Source=${dataSource};"))
+                  "Data Source=${dataSource};[getFlagsProperty]"))
               {
                 connection2.Open();
 

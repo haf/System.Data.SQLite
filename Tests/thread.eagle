@@ -207,7 +207,7 @@ runTest {test thread-1.1 {Thread.Abort() impact on native resources} -setup {
                 //       cleanup via the garbage collector.
                 //
                 SQLiteConnection connection = new SQLiteConnection(
-                    "Data Source=${dataSource};");
+                    "Data Source=${dataSource};[getFlagsProperty]");
 
                 //
                 // NOTE: Open the connection.  After this point, native memory

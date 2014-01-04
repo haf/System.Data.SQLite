@@ -192,7 +192,7 @@ runTest {test data-1.4 {GetSchema with ReservedWords} -setup {
         public static DataTable GetReservedWords()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -254,7 +254,7 @@ runTest {test data-1.5 {GetSchema with ForeignKeys} -setup {
         public static DataRowCollection GetForeignKeys()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -335,7 +335,7 @@ runTest {test data-1.6 {SQLITE_FCNTL_WIN32_AV_RETRY} -setup {
           )
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -439,7 +439,7 @@ runTest {test data-1.7 {properly closed database file (non-query)} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -495,7 +495,7 @@ runTest {test data-1.8 {properly closed database file (reader #1)} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -555,7 +555,7 @@ runTest {test data-1.9 {properly closed database file (reader #2)} -setup {
         public static void Main()
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -1172,7 +1172,7 @@ runTest {test data-1.21 {SQLiteTransaction disposal behavior} -setup {
           SQLiteFunction.RegisterFunction(typeof(Test${id}));
 
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -1254,7 +1254,7 @@ runTest {test data-1.22 {SQLiteFunction collation exception} -setup {
           SQLiteFunction.RegisterFunction(typeof(Test${id}));
 
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 
@@ -2430,7 +2430,7 @@ runTest {test data-1.50 {bind SQLiteFunction to one SQLiteConnection} -setup {
         public static object DoTest(bool bindFunction)
         {
           using (SQLiteConnection connection = new SQLiteConnection(
-              "Data Source=${dataSource};"))
+              "Data Source=${dataSource};[getFlagsProperty]"))
           {
             connection.Open();
 

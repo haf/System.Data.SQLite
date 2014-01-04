@@ -163,7 +163,7 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
                   //       system is initialized and in working order.
                   //
                   using (SQLiteConnection connection = new SQLiteConnection(
-                      "Data Source=${dataSource};"))
+                      "Data Source=${dataSource};[getFlagsProperty]"))
                   {
                     connection.Open();
                     connection.LogMessage(0, "TEST ${id}");
