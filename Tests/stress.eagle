@@ -890,12 +890,12 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
                 public static void BackupAndGetData()
                 {
                   using (SQLiteConnection source = new SQLiteConnection(
-                      "FullUri=${dstFileName};[getFlagsProperty]"))
+                      "FullUri=${dstFileName};[getFlagsProperty {} true]"))
                   {
                     source.Open();
 
                     using (SQLiteConnection destination = new SQLiteConnection(
-                        "FullUri=${srcFileName};[getFlagsProperty]"))
+                        "FullUri=${srcFileName};[getFlagsProperty {} true]"))
                     {
                       destination.Open();
 
@@ -972,12 +972,12 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
                 public static void BackupAndGetData()
                 {
                   using (SQLiteConnection source = new SQLiteConnection(
-                      "FullUri=${srcFileName};[getFlagsProperty]"))
+                      "FullUri=${srcFileName};[getFlagsProperty {} true]"))
                   {
                     source.Open();
 
                     using (SQLiteConnection destination = new SQLiteConnection(
-                        "FullUri=${dstFileName};[getFlagsProperty]"))
+                        "FullUri=${dstFileName};[getFlagsProperty {} true]"))
                     {
                       destination.Open();
 

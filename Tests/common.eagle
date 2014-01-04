@@ -1380,6 +1380,25 @@ namespace eval ::Eagle {
 
     proc getConnectionFlags { flags {quiet false} } {
       #
+      # NOTE: Show (and log) the local connection flags and the associated
+      #       data source or file name.
+      #
+      if {!$quiet} then {
+        if {[info exists ::dataSource] && ![array exists ::dataSource]} then {
+          set database [appendArgs "data source \"" $::dataSource \"]
+        } elseif {[info exists ::fileName] && ![array exists ::fileName]} then {
+          set database [appendArgs "file name \"" $::fileName \"]
+        } else {
+          set database <unknown>
+        }
+
+        tputs $::test_channel [appendArgs \
+            "---- local connection flags for " $database \
+            " are: " [expr {[string length $flags] > 0 ? \
+            [appendArgs \" $flags \"] : "<none>"}] \n]
+      }
+
+      #
       # NOTE: If there are any global (per test run) connection flags currently
       #       set, use them now (i.e. by combining them with the ones for this
       #       connection).
@@ -1387,14 +1406,9 @@ namespace eval ::Eagle {
       if {[info exists ::connection_flags] && \
           [string length $::connection_flags] > 0} then {
         #
-        # NOTE: Show (and log) that the local and global connection flags.
+        # NOTE: Show (and log) the detected global connection flags.
         #
         if {!$quiet} then {
-          tputs $::test_channel [appendArgs \
-              "---- local connection flags are: " \
-              [expr {[string length $flags] > 0 ? \
-              [appendArgs \" $flags \"] : "<none>"}] \n]
-
           tputs $::test_channel [appendArgs \
               "---- global connection flags detected: " \
               [expr {[info exists ::connection_flags] && \
@@ -1422,12 +1436,12 @@ namespace eval ::Eagle {
       return $flags
     }
 
-    proc getFlagsProperty { {flags ""} } {
+    proc getFlagsProperty { {flags ""} {quiet false} } {
       #
       # NOTE: Determine what the combined (global and local) connection
-      #       flags should be, quietly.
+      #       flags should be, possibly quietly.
       #
-      set flags [getConnectionFlags $flags true]
+      set flags [getConnectionFlags $flags $quiet]
 
       #
       # NOTE: If no global or local connection flags were specified, the
