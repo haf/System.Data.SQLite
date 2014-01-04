@@ -1378,6 +1378,43 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getConnectionFlags { flags {quiet false} } {
+      #
+      # NOTE: If there are any global (per test run) connection flags currently
+      #       set, use them now (i.e. by combining them with the ones for this
+      #       connection).
+      #
+      if {[info exists ::connection_flags] && \
+          [string length $::connection_flags] > 0} then {
+        #
+        # NOTE: Show (and log) that the local and global connection flags.
+        #
+        if {!$quiet} then {
+          tputs $::test_channel [appendArgs \
+              "---- local connection flags are: " $flags \n]
+
+          tputs $::test_channel [appendArgs \
+              "---- global connection flags detected: " $::connection_flags \n]
+        }
+
+        #
+        # NOTE: Combine and/or replace the connection flags and then show the
+        #       new value.
+        #
+        set flags [combineFlags $flags $::connection_flags]
+
+        #
+        # NOTE: Show (and log) the new effective connection flags.
+        #
+        if {!$quiet} then {
+          tputs $::test_channel [appendArgs \
+              "---- combined connection flags are: " $flags \n]
+        }
+      }
+
+      return $flags
+    }
+
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
             {extra ""} {qualify true} {delete true} {uri false}
@@ -1469,37 +1506,9 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If there are any global (per test run) connection flags currently
-      #       set, use them now (i.e. by combining them with the ones for this
-      #       connection).
+      # NOTE: Figure out what the final flags for this connection need to be.
       #
-      if {[info exists ::connection_flags] && \
-          [string length $::connection_flags] > 0} then {
-        #
-        # NOTE: Show (and log) that the local and global connection flags.
-        #
-        if {!$quiet} then {
-          tputs $::test_channel [appendArgs \
-              "---- local connection flags are: " $flags \n]
-
-          tputs $::test_channel [appendArgs \
-              "---- global connection flags detected: " $::connection_flags \n]
-        }
-
-        #
-        # NOTE: Combine and/or replace the connection flags and then show the
-        #       new value.
-        #
-        set flags [combineFlags $flags $::connection_flags]
-
-        #
-        # NOTE: Show (and log) the new effective connection flags.
-        #
-        if {!$quiet} then {
-          tputs $::test_channel [appendArgs \
-              "---- combined connection flags are: " $flags \n]
-        }
-      }
+      set flags [getConnectionFlags $flags $quiet]
 
       #
       # NOTE: If our caller specified some SQLiteConnectionFlags, add the
