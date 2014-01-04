@@ -736,6 +736,40 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Queries and returns the string representation for an object, using the
+    /// specified (or current) format provider.
+    /// </summary>
+    /// <param name="obj">
+    /// The object instance to return the string representation for.
+    /// </param>
+    /// <param name="provider">
+    /// The format provider to use -OR- null if the current format provider for
+    /// the thread should be used instead.
+    /// </param>
+    /// <returns>
+    /// The string representation for the object instance -OR- null if the
+    /// object instance is also null.
+    /// </returns>
+    public static string ToStringWithProvider(
+        object obj,
+        IFormatProvider provider
+        )
+    {
+        if (obj == null)
+            return null; /* null --> null */
+
+        if (obj is string)
+            return (string)obj; /* identity */
+
+        IConvertible convertible = obj as IConvertible;
+
+        if (convertible != null)
+            return convertible.ToString(provider);
+
+        return obj.ToString(); /* not IConvertible */
+    }
+
+    /// <summary>
     /// Convert a value to true or false.
     /// </summary>
     /// <param name="source">A string or number representing true or false</param>
@@ -744,7 +778,8 @@ namespace System.Data.SQLite
     {
       if (source is bool) return (bool)source;
 
-      return ToBoolean(source.ToString());
+      return ToBoolean(ToStringWithProvider(
+          source, CultureInfo.InvariantCulture));
     }
 
     /// <summary>
