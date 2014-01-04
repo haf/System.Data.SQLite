@@ -62,7 +62,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #       setting up the new connection because it is not thread-safe.
     #
     uplevel 1 [list setupDb $fileName "" "" "" "" "" false false true false \
-        $varName]
+        $varName true]
   }
 
   #############################################################################
@@ -74,7 +74,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     #       the new connection because it is not thread-safe.
     #
     uplevel 1 [list setupDb $fileName "" "" "" "" "" true false false false \
-        $varName]
+        $varName true]
   }
 
   #############################################################################

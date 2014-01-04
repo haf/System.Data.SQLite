@@ -1368,7 +1368,7 @@ namespace eval ::Eagle {
 
     proc executeSql { sql {execute none} {format none} {fileName ""} } {
       if {[string length $fileName] == 0} then {set fileName :memory:}
-      setupDb $fileName "" "" "" "" "" false false false false
+      setupDb $fileName "" "" "" "" "" false false false false db true
 
       try {
         return [uplevel 1 [list \
@@ -1381,7 +1381,7 @@ namespace eval ::Eagle {
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
             {extra ""} {qualify true} {delete true} {uri false}
-            {temporary true} {varName db} } {
+            {temporary true} {varName db} {quiet false} } {
       #
       # NOTE: First, see if our caller has requested an in-memory database.
       #
@@ -1410,9 +1410,11 @@ namespace eval ::Eagle {
           #
           # NOTE: We somehow failed to delete the file, report why.
           #
-          tputs $::test_channel [appendArgs \
-              "==== WARNING: failed to delete database file \"" $fileName \
-              "\" during setup, error: " \n\t $error \n]
+          if {!$quiet} then {
+            tputs $::test_channel [appendArgs \
+                "==== WARNING: failed to delete database file \"" $fileName \
+                "\" during setup, error: " \n\t $error \n]
+          }
         }
       }
 
@@ -1474,10 +1476,15 @@ namespace eval ::Eagle {
       if {[info exists ::connection_flags] && \
           [string length $::connection_flags] > 0} then {
         #
-        # NOTE: Show (and log) that we detected some global connection flags.
+        # NOTE: Show (and log) that the local and global connection flags.
         #
-        tputs $::test_channel [appendArgs \
-            "---- global connection flags detected: " $::connection_flags \n]
+        if {!$quiet} then {
+          tputs $::test_channel [appendArgs \
+              "---- local connection flags are: " $flags \n]
+
+          tputs $::test_channel [appendArgs \
+              "---- global connection flags detected: " $::connection_flags \n]
+        }
 
         #
         # NOTE: Combine and/or replace the connection flags and then show the
@@ -1485,8 +1492,13 @@ namespace eval ::Eagle {
         #
         set flags [combineFlags $flags $::connection_flags]
 
-        tputs $::test_channel [appendArgs \
-            "---- combined connection flags are: " $flags \n]
+        #
+        # NOTE: Show (and log) the new effective connection flags.
+        #
+        if {!$quiet} then {
+          tputs $::test_channel [appendArgs \
+              "---- combined connection flags are: " $flags \n]
+        }
       }
 
       #
