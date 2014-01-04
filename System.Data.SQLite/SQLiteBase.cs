@@ -996,9 +996,9 @@ namespace System.Data.SQLite
       ConvertInvariantText = 0x20000,
 
       /// <summary>
-      /// When binding and returning column values, always treat them as though
-      /// they were plain text (i.e. no numeric, date/time, or other conversions
-      /// should be attempted).
+      /// When binding parameter values or returning column values, always
+      /// treat them as though they were plain text (i.e. no numeric,
+      /// date/time, or other conversions should be attempted).
       /// </summary>
       BindAndGetAllAsText = BindAllAsText | GetAllAsText,
 
