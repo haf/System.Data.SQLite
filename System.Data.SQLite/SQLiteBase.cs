@@ -985,15 +985,15 @@ namespace System.Data.SQLite
 
       /// <summary>
       /// When binding parameter values, always use the invariant culture when
-      /// converting them to strings.
+      /// converting their values from strings.
       /// </summary>
-      BindInvariantText = 0x10000,
+      ConvertInvariantText = 0x10000,
 
       /// <summary>
       /// When binding parameter values, always use the invariant culture when
-      /// converting them from strings.
+      /// converting their values to strings.
       /// </summary>
-      ConvertInvariantText = 0x20000,
+      BindInvariantText = 0x20000,
 
       /// <summary>
       /// When binding parameter values or returning column values, always
@@ -1001,6 +1001,30 @@ namespace System.Data.SQLite
       /// date/time, or other conversions should be attempted).
       /// </summary>
       BindAndGetAllAsText = BindAllAsText | GetAllAsText,
+
+      /// <summary>
+      /// When binding parameter values, always use the invariant culture when
+      /// converting their values to strings or from strings.
+      /// </summary>
+      ConvertAndBindInvariantText = ConvertInvariantText | BindInvariantText,
+
+      /// <summary>
+      /// When binding parameter values or returning column values, always
+      /// treat them as though they were plain text (i.e. no numeric,
+      /// date/time, or other conversions should be attempted) and always
+      /// use the invariant culture when converting their values to strings.
+      /// </summary>
+      BindAndGetAllAsInvariantText = BindAndGetAllAsText | BindInvariantText,
+
+      /// <summary>
+      /// When binding parameter values or returning column values, always
+      /// treat them as though they were plain text (i.e. no numeric,
+      /// date/time, or other conversions should be attempted) and always
+      /// use the invariant culture when converting their values to strings
+      /// or from strings.
+      /// </summary>
+      ConvertAndBindAndGetAllAsInvariantText = BindAndGetAllAsText |
+                                               ConvertAndBindInvariantText,
 
       /// <summary>
       /// Enable all logging.
