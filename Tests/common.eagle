@@ -1378,20 +1378,29 @@ namespace eval ::Eagle {
       }
     }
 
-    proc getConnectionFlags { flags {quiet false} } {
+    proc getConnectionFlags { fileName flags {quiet false} } {
+      #
+      # NOTE: Figure out which database file name or connection string these
+      #       connection flags will actually apply to.  This is not necessary
+      #       in quiet mode because this information is only used for logging
+      #       and reporting purposes.
+      #
+      if {!$quiet} then {
+        if {[string length $fileName] > 0} then {
+          set database [appendArgs "file name \"" $fileName \"]
+        } elseif {[info exists ::dataSource] && \
+            ![array exists ::dataSource]} then {
+          set database [appendArgs "data source \"" $::dataSource \"]
+        } else {
+          set database <unknown>
+        }
+      }
+
       #
       # NOTE: Show (and log) the local connection flags and the associated
       #       data source or file name.
       #
       if {!$quiet} then {
-        if {[info exists ::dataSource] && ![array exists ::dataSource]} then {
-          set database [appendArgs "data source \"" $::dataSource \"]
-        } elseif {[info exists ::fileName] && ![array exists ::fileName]} then {
-          set database [appendArgs "file name \"" $::fileName \"]
-        } else {
-          set database <unknown>
-        }
-
         tputs $::test_channel [appendArgs \
             "---- local connection flags for " $database \
             " are: " [expr {[string length $flags] > 0 ? \
@@ -1427,8 +1436,8 @@ namespace eval ::Eagle {
         #
         if {!$quiet} then {
           tputs $::test_channel [appendArgs \
-              "---- combined connection flags are: " \
-              [expr {[string length $flags] > 0 ? \
+              "---- combined connection flags for " $database \
+              " are: " [expr {[string length $flags] > 0 ? \
               [appendArgs \" $flags \"] : "<none>"}] \n]
         }
       }
@@ -1441,7 +1450,7 @@ namespace eval ::Eagle {
       # NOTE: Determine what the combined (global and local) connection
       #       flags should be, possibly quietly.
       #
-      set flags [getConnectionFlags $flags $quiet]
+      set flags [getConnectionFlags "" $flags $quiet]
 
       #
       # NOTE: If no global or local connection flags were specified, the
@@ -1576,7 +1585,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Figure out what the final flags for this connection need to be.
       #
-      set flags [getConnectionFlags $flags $quiet]
+      set flags [getConnectionFlags $fileName $flags $quiet]
 
       #
       # NOTE: If our caller specified some SQLiteConnectionFlags, add the
@@ -2406,17 +2415,19 @@ namespace eval ::Eagle {
                 }
               }
 
-              if {![info exists ::no(deleteSqlitePlatformFiles)] && \
-                  [string length $platform] > 0} then {
-                foreach fileName $nativeFileNames {
-                  tryDeleteAssembly $fileName $platform
+              if {![info exists ::no(deleteSqliteNonImplicitFiles)]} then {
+                if {![info exists ::no(deleteSqlitePlatformFiles)] && \
+                    [string length $platform] > 0} then {
+                  foreach fileName $nativeFileNames {
+                    tryDeleteAssembly $fileName $platform
+                  }
                 }
-              }
 
-              if {![info exists ::no(deleteSqliteArchitectureFiles)] && \
-                  [string length $architecture] > 0} then {
-                foreach fileName $nativeFileNames {
-                  tryDeleteAssembly $fileName $architecture
+                if {![info exists ::no(deleteSqliteArchitectureFiles)] && \
+                    [string length $architecture] > 0} then {
+                  foreach fileName $nativeFileNames {
+                    tryDeleteAssembly $fileName $architecture
+                  }
                 }
               }
             }
@@ -2489,17 +2500,19 @@ namespace eval ::Eagle {
                 }
               }
 
-              if {![info exists ::no(copySqlitePlatformFiles)] && \
-                  [string length $platform] > 0} then {
-                foreach fileName $nativeFileNames {
-                  tryCopyAssembly $fileName $platform
+              if {![info exists ::no(copySqliteNonImplicitFiles)]} then {
+                if {![info exists ::no(copySqlitePlatformFiles)] && \
+                    [string length $platform] > 0} then {
+                  foreach fileName $nativeFileNames {
+                    tryCopyAssembly $fileName $platform
+                  }
                 }
-              }
 
-              if {![info exists ::no(copySqliteArchitectureFiles)] && \
-                  [string length $architecture] > 0} then {
-                foreach fileName $nativeFileNames {
-                  tryCopyAssembly $fileName $architecture
+                if {![info exists ::no(copySqliteArchitectureFiles)] && \
+                    [string length $architecture] > 0} then {
+                  foreach fileName $nativeFileNames {
+                    tryCopyAssembly $fileName $architecture
+                  }
                 }
               }
             }
@@ -2520,14 +2533,16 @@ namespace eval ::Eagle {
               tryLoadAssembly System.Data.SQLite.Linq.dll
             }
 
-            if {![info exists ::no(loadSqlitePlatformFiles)] && \
-                [string length $platform] > 0} then {
-              tryLoadAssembly System.Data.SQLite.dll $platform
-            }
+            if {![info exists ::no(loadSqliteNonImplicitFiles)]} then {
+              if {![info exists ::no(loadSqlitePlatformFiles)] && \
+                  [string length $platform] > 0} then {
+                tryLoadAssembly System.Data.SQLite.dll $platform
+              }
 
-            if {![info exists ::no(loadSqliteArchitectureFiles)] && \
-                [string length $architecture] > 0} then {
-              tryLoadAssembly System.Data.SQLite.dll $architecture
+              if {![info exists ::no(loadSqliteArchitectureFiles)] && \
+                  [string length $architecture] > 0} then {
+                tryLoadAssembly System.Data.SQLite.dll $architecture
+              }
             }
           }
 
@@ -2628,12 +2643,16 @@ namespace eval ::Eagle {
           }
         }
 
+        #
+        # NOTE: Grab the list of managed assemblies for the current process
+        #       and report on the System.Data.SQLite related ones.
+        #
         set assemblies [object invoke AppDomain.CurrentDomain GetAssemblies]
 
         object foreach assembly $assemblies {
           if {[string match \{System.Data.SQLite* $assembly]} then {
             tputs $::test_channel [appendArgs \
-                "---- found assembly: " $assembly \n]
+                "---- found loaded assembly: " $assembly \n]
           }
         }
 
@@ -2787,6 +2806,28 @@ namespace eval ::Eagle {
         # NOTE: Report the resource usage prior to running any tests.
         #
         reportSQLiteResources $::test_channel
+
+        #
+        # NOTE: Grab the list of native modules for the current process and
+        #       report on the System.Data.SQLite related ones.
+        #
+        set modules [object invoke \
+            System.Diagnostics.Process.GetCurrentProcess Modules]
+
+        object foreach -alias module $modules {
+          set fileName [file normalize [$module FileName]]
+
+          if {[string match -nocase */sqlite3.dll $fileName]} then {
+            tputs $::test_channel [appendArgs \
+                "---- found loaded SQLite native library module: " \
+                $fileName \n]
+          } elseif {[string match \
+              -nocase */SQLite.Interop.dll $fileName]} then {
+            tputs $::test_channel [appendArgs \
+                "---- found loaded SQLite interop assembly module: " \
+                $fileName \n]
+          }
+        }
 
         #
         # NOTE: Show the active test constraints.
