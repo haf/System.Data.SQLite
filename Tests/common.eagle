@@ -2829,6 +2829,34 @@ namespace eval ::Eagle {
           }
         }
 
+        catch {
+          tputs $::test_channel \
+              "---- compile-time options for SQLite core library... "
+
+          if {[catch {object invoke -flags +NonPublic \
+                  System.Data.SQLite.SQLite3 SQLiteCompileOptions} \
+                  compileOptions] == 0} then {
+            tputs $::test_channel [appendArgs [formatList [lsort \
+                $compileOptions] <none>] \n]
+          } else {
+            tputs $::test_channel unknown\n
+          }
+        }
+
+        catch {
+          tputs $::test_channel \
+              "---- compile-time options for SQLite interop assembly... "
+
+          if {[catch {object invoke -flags +NonPublic \
+                  System.Data.SQLite.SQLite3 InteropCompileOptions} \
+                  compileOptions] == 0} then {
+            tputs $::test_channel [appendArgs [formatList [lsort \
+                $compileOptions] <none>] \n]
+          } else {
+            tputs $::test_channel unknown\n
+          }
+        }
+
         #
         # NOTE: Show the active test constraints.
         #

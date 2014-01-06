@@ -1103,10 +1103,16 @@ namespace System.Data.SQLite
 #if !SQLITE_STANDARD
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_libversion_interop();
+    internal static extern IntPtr interop_libversion();
 
     [DllImport(SQLITE_DLL)]
-    internal static extern IntPtr sqlite3_sourceid_interop();
+    internal static extern IntPtr interop_sourceid();
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern int interop_compileoption_used(IntPtr zOptName);
+
+    [DllImport(SQLITE_DLL)]
+    internal static extern IntPtr interop_compileoption_get(int N);
 
     [DllImport(SQLITE_DLL)]
     internal static extern SQLiteErrorCode sqlite3_close_interop(IntPtr db);
@@ -1357,6 +1363,42 @@ namespace System.Data.SQLite
     // Standard API calls global across versions.  There are a few instances of interop calls
     // scattered in here, but they are only active when PLATFORM_COMPACTFRAMEWORK is declared.
     #region standard sqlite api calls
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_libversion();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_libversion_number();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_sourceid();
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern int sqlite3_compileoption_used(IntPtr zOptName);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
+    internal static extern IntPtr sqlite3_compileoption_get(int N);
+
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 #else
@@ -1422,27 +1464,6 @@ namespace System.Data.SQLite
     internal static extern SQLiteErrorCode sqlite3_win32_compact_heap(ref uint largest);
 #endif
 #endif
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
-    internal static extern IntPtr sqlite3_libversion();
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
-    internal static extern int sqlite3_libversion_number();
-
-#if !PLATFORM_COMPACTFRAMEWORK
-    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
-#else
-    [DllImport(SQLITE_DLL)]
-#endif
-    internal static extern IntPtr sqlite3_sourceid();
 
 #if !PLATFORM_COMPACTFRAMEWORK
     [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]

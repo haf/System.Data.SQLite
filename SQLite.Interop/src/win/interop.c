@@ -59,6 +59,97 @@ extern int RegisterExtensionFunctions(sqlite3 *db);
 typedef void (*SQLITEUSERFUNC)(sqlite3_context *, int, sqlite3_value **);
 typedef void (*SQLITEFUNCFINAL)(sqlite3_context *);
 
+/*
+** An array of names of all compile-time options.  This array should
+** be sorted A-Z.
+**
+** This array looks large, but in a typical installation actually uses
+** only a handful of compile-time options, so most times this array is usually
+** rather short and uses little memory space.
+*/
+static const char * const azInteropCompileOpt[] = {
+
+/* These macros are provided to "stringify" the value of the define
+** for those options in which the value is meaningful. */
+#ifndef CTIMEOPT_VAL_
+#define CTIMEOPT_VAL_(opt) #opt
+#endif
+
+#ifndef CTIMEOPT_VAL
+#define CTIMEOPT_VAL(opt) CTIMEOPT_VAL_(opt)
+#endif
+
+#ifdef INTEROP_CODEC
+  "CODEC",
+#endif
+#ifdef INTEROP_DEBUG
+  "DEBUG=" CTIMEOPT_VAL(INTEROP_DEBUG),
+#endif
+#ifdef INTEROP_EXTENSION_FUNCTIONS
+  "EXTENSION_FUNCTIONS",
+#endif
+#ifdef INTEROP_LEGACY_CLOSE
+  "LEGACY_CLOSE",
+#endif
+#ifdef INTEROP_LOG
+  "LOG",
+#endif
+#ifdef INTEROP_PERCENTILE_EXTENSION
+  "PERCENTILE_EXTENSION",
+#endif
+#ifdef INTEROP_REGEXP_EXTENSION
+  "REGEXP_EXTENSION",
+#endif
+#ifdef INTEROP_TEST_EXTENSION
+  "TEST_EXTENSION",
+#endif
+#ifdef INTEROP_TOTYPE_EXTENSION
+  "TOTYPE_EXTENSION",
+#endif
+#ifdef SQLITE_VERSION_NUMBER
+  "VERSION_NUMBER=" CTIMEOPT_VAL(SQLITE_VERSION_NUMBER),
+#endif
+#ifdef INTEROP_VIRTUAL_TABLE
+  "VIRTUAL_TABLE",
+#endif
+};
+
+/*
+** Given the name of a compile-time option, return true if that option
+** was used and false if not.
+**
+** The name can optionally begin with "SQLITE_" or "INTEROP_" but those
+** prefixes are not required for a match.
+*/
+SQLITE_API int WINAPI interop_compileoption_used(const char *zOptName){
+  int i, n;
+  if( sqlite3StrNICmp(zOptName, "SQLITE_", 7)==0 ) zOptName += 7;
+  if( sqlite3StrNICmp(zOptName, "INTEROP_", 8)==0 ) zOptName += 8;
+  n = sqlite3Strlen30(zOptName);
+
+  /* Since ArraySize(azInteropCompileOpt) is normally in single digits, a
+  ** linear search is adequate.  No need for a binary search. */
+  for(i=0; i<ArraySize(azInteropCompileOpt); i++){
+    if( sqlite3StrNICmp(zOptName, azInteropCompileOpt[i], n)==0
+     && sqlite3CtypeMap[(unsigned char)azInteropCompileOpt[i][n]]==0
+    ){
+      return 1;
+    }
+  }
+  return 0;
+}
+
+/*
+** Return the N-th compile-time option string.  If N is out of range,
+** return a NULL pointer.
+*/
+SQLITE_API const char *WINAPI interop_compileoption_get(int N){
+  if( N>=0 && N<ArraySize(azInteropCompileOpt) ){
+    return azInteropCompileOpt[N];
+  }
+  return 0;
+}
+
 #if defined(INTEROP_DEBUG) || defined(INTEROP_LOG)
 SQLITE_PRIVATE void sqlite3InteropDebug(const char *zFormat, ...){
   va_list ap;                         /* Vararg list */
@@ -231,12 +322,12 @@ SQLITE_API int WINAPI sqlite3_config_log_interop()
 }
 #endif
 
-SQLITE_API const char *sqlite3_libversion_interop(void)
+SQLITE_API const char *WINAPI interop_libversion(void)
 {
   return INTEROP_VERSION;
 }
 
-SQLITE_API const char *sqlite3_sourceid_interop(void)
+SQLITE_API const char *WINAPI interop_sourceid(void)
 {
   return INTEROP_SOURCE_ID " " INTEROP_SOURCE_TIMESTAMP;
 }
@@ -283,7 +374,7 @@ SQLITE_API int WINAPI sqlite3_open16_interop(const char *filename, int flags, sq
   return ret;
 }
 
-SQLITE_API const char * WINAPI sqlite3_errmsg_interop(sqlite3 *db, int *plen)
+SQLITE_API const char *WINAPI sqlite3_errmsg_interop(sqlite3 *db, int *plen)
 {
   const char *pval = sqlite3_errmsg(db);
   *plen = (pval != 0) ? strlen(pval) : 0;

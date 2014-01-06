@@ -304,7 +304,7 @@ namespace System.Data.SQLite
     {
       get
       {
-        return SQLite3.SQLiteVersion;
+        return SQLiteVersion;
       }
     }
 
@@ -312,7 +312,7 @@ namespace System.Data.SQLite
     {
       get
       {
-        return SQLite3.SQLiteVersionNumber;
+        return SQLiteVersionNumber;
       }
     }
 
@@ -365,12 +365,33 @@ namespace System.Data.SQLite
       }
     }
 
+    internal static string SQLiteCompileOptions
+    {
+        get
+        {
+            StringBuilder result = new StringBuilder();
+            int index = 0;
+            IntPtr zValue = UnsafeNativeMethods.sqlite3_compileoption_get(index++);
+
+            while (zValue != IntPtr.Zero)
+            {
+                if (result.Length > 0)
+                    result.Append(' ');
+
+                result.Append(UTF8ToString(zValue, -1));
+                zValue = UnsafeNativeMethods.sqlite3_compileoption_get(index++);
+            }
+
+            return result.ToString();
+        }
+    }
+
     internal static string InteropVersion
     {
         get
         {
 #if !SQLITE_STANDARD
-            return UTF8ToString(UnsafeNativeMethods.sqlite3_libversion_interop(), -1);
+            return UTF8ToString(UnsafeNativeMethods.interop_libversion(), -1);
 #else
             return null;
 #endif
@@ -382,7 +403,32 @@ namespace System.Data.SQLite
         get
         {
 #if !SQLITE_STANDARD
-            return UTF8ToString(UnsafeNativeMethods.sqlite3_sourceid_interop(), -1);
+            return UTF8ToString(UnsafeNativeMethods.interop_sourceid(), -1);
+#else
+            return null;
+#endif
+        }
+    }
+
+    internal static string InteropCompileOptions
+    {
+        get
+        {
+#if !SQLITE_STANDARD
+            StringBuilder result = new StringBuilder();
+            int index = 0;
+            IntPtr zValue = UnsafeNativeMethods.interop_compileoption_get(index++);
+
+            while (zValue != IntPtr.Zero)
+            {
+                if (result.Length > 0)
+                    result.Append(' ');
+
+                result.Append(UTF8ToString(zValue, -1));
+                zValue = UnsafeNativeMethods.interop_compileoption_get(index++);
+            }
+
+            return result.ToString();
 #else
             return null;
 #endif

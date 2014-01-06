@@ -190,6 +190,7 @@ it to extend its functionality, but the core engine's source is not changed.</p>
     <b>1.0.91.0 - February XX, 2014 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
+    <li>Add SQLiteCompileOptions and InteropCompileOptions methods to the SQLiteConnection class to return the compile-time options for the SQLite core library and interop assembly, respectively.</li>
     <li>Add BindInvariantText and ConvertInvariantText connection flags to force the invariant culture to be used when converting parameter values to/from strings.</li>
     <li>Modify handling of the design-time components installer to run Visual Studio <b>devenv.exe /setup</b> after installing the package. This appears to be necessary in some circumstances for Visual Studio 2013. Pursuant to [a47eff2c71].</li>
     <li>Modify the native library pre-loader to support reading settings from an XML configuration file and to be capable of checking more than one directory. Persuant to [f0246d1817].</li>

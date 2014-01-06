@@ -2615,6 +2615,15 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Returns a string containing the compile-time options used to
+    /// compile the SQLite core native library, delimited with spaces.
+    /// </summary>
+    public static string SQLiteCompileOptions
+    {
+        get { return SQLite3.SQLiteCompileOptions; }
+    }
+
+    /// <summary>
     /// This method returns the version of the interop SQLite assembly
     /// used.  If the SQLite interop assembly is not in use or the
     /// necessary information cannot be obtained for any reason, a null
@@ -2635,6 +2644,15 @@ namespace System.Data.SQLite
     public static string InteropSourceId
     {
       get { return SQLite3.InteropSourceId; }
+    }
+
+    /// <summary>
+    /// Returns a string containing the compile-time options used to
+    /// compile the SQLite interop assembly, delimited with spaces.
+    /// </summary>
+    public static string InteropCompileOptions
+    {
+        get { return SQLite3.InteropCompileOptions; }
     }
 
     /// <summary>
