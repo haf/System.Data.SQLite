@@ -385,6 +385,13 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
+  #
+  # HACK: Make sure the effective connection flags for this test are logged.
+  #
+  getConnectionFlags "stress test" "" false; # IGNORED
+
+  #############################################################################
+
   tputs $test_channel [appendArgs \
       "---- workloads will repeat " $count(0) " time(s)\n"]
 
