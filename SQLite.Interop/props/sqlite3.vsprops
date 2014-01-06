@@ -33,8 +33,13 @@
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro
-		Name="SQLITE_WINCE_DEFINES"
+		Name="SQLITE_WINCE_200X_DEFINES"
 		Value="SQLITE_OMIT_WAL=1"
+		PerformEnvironmentSet="true"
+	/>
+	<UserMacro
+		Name="SQLITE_WINCE_2013_DEFINES"
+		Value="HAVE_ERRNO_H=1;SQLITE_MSVC_LOCALTIME_API=1"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro

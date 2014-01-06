@@ -91,7 +91,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(INTEROP_INCLUDE_DIRECTORIES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;UNICODE;HAVE_ERRNO_H=1;SQLITE_MSVC_LOCALTIME_API=1;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES);$(INTEROP_EXTRA_DEFINES);$(INTEROP_DEBUG_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;UNICODE;$(SQLITE_WINCE_2013_DEFINES);$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES);$(INTEROP_EXTRA_DEFINES);$(INTEROP_DEBUG_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/D "DEBUG" /D "STANDARDSHELL_UI_MODEL" %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -113,7 +113,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(INTEROP_INCLUDE_DIRECTORIES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;UNICODE;HAVE_ERRNO_H=1;SQLITE_MSVC_LOCALTIME_API=1;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES);$(INTEROP_EXTRA_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;UNICODE;$(SQLITE_WINCE_2013_DEFINES);$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES);$(INTEROP_EXTRA_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/D "_WINDOWS" /D "STANDARDSHELL_UI_MODEL" %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -135,7 +135,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(INTEROP_INCLUDE_DIRECTORIES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;UNICODE;HAVE_ERRNO_H=1;SQLITE_MSVC_LOCALTIME_API=1;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES);$(INTEROP_EXTRA_DEFINES);$(INTEROP_DEBUG_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;UNICODE;$(SQLITE_WINCE_2013_DEFINES);$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_DEBUG_DEFINES);$(INTEROP_EXTRA_DEFINES);$(INTEROP_DEBUG_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/D "DEBUG" /D "STANDARDSHELL_UI_MODEL" %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -157,7 +157,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(INTEROP_INCLUDE_DIRECTORIES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;UNICODE;HAVE_ERRNO_H=1;SQLITE_MSVC_LOCALTIME_API=1;$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES);$(INTEROP_EXTRA_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;UNICODE;$(SQLITE_WINCE_2013_DEFINES);$(SQLITE_COMMON_DEFINES);$(SQLITE_EXTRA_DEFINES);$(SQLITE_RELEASE_DEFINES);$(INTEROP_EXTRA_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/D "_WINDOWS" /D "STANDARDSHELL_UI_MODEL" %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>$(SQLITE_DISABLE_WARNINGS);%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
