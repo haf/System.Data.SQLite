@@ -87,40 +87,6 @@ if {![info exists no([file tail [info script]])]} then {
   #############################################################################
 
   #
-  # NOTE: Set the local root directory of the source checkout (i.e. of Eagle
-  #       or whatever project the Eagle binaries are being used by) using a
-  #       Fossil binary in the PATH, if available.
-  #
-  if {![info exists root_path] && \
-      ![info exists no(exec)] && ![info exists no(fossil)]} then {
-    set pattern {^local-root:\s+(.*?)\s+$}
-
-    if {[catch {exec -- fossil info} exec] || \
-        ![regexp -line -- $pattern $exec dummy directory]} then {
-      #
-      # NOTE: We could not query local root directory of the source checkout
-      #       from Fossil; therefore, attempt to make an educated guess.  This
-      #       value will probably be wrong for any project(s) other than Eagle.
-      #       In that case, this value should be overridden by that project to
-      #       reflect the actual local root directory of the source checkout
-      #       for that project.
-      #
-      set root_path $base_path
-    } else {
-      #
-      # NOTE: We extracted the local root directory of the source checkout
-      #       from Fossil.  Now, make sure it is fully normalized and has no
-      #       trailing slashes.
-      #
-      set root_path [file normalize $directory]
-    }
-
-    unset -nocomplain directory dummy exec pattern
-  }
-
-  #############################################################################
-
-  #
   # NOTE: Set the executable file name for the process, if
   #       necessary.
   #
@@ -230,6 +196,7 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Verify that the current call frame is correct and that the
   #       interpreter call stack has not been imbalanced by previous
   #       tests or other errors.  This check only applies to Eagle.
+  #       This block requires the "Eagle.Library" package.
   #
   if {[isEagle]} then {
     #
@@ -241,6 +208,52 @@ if {![info exists no([file tail [info script]])]} then {
         [appendArgs source " " [file normalize [info script]]]} then {
       unset -nocomplain test_suite_running
       error "cannot run, current frame is not for this script"
+    }
+  }
+
+  #############################################################################
+
+  #
+  # NOTE: Set the local root directory of the source checkout (i.e. of Eagle
+  #       or whatever project the Eagle binaries are being used by) using a
+  #       Fossil binary in the PATH, if available.  This block now requires
+  #       the "Eagle.Test.Constraints" package.
+  #
+  if {![info exists root_path]} then {
+    #
+    # NOTE: Is the use of Fossil by the test suite allowed?
+    #
+    if {[canExecFossil]} then {
+      set pattern {^local-root:\s+(.*?)\s+$}
+
+      if {[catch {exec -- fossil info} exec] || \
+          ![regexp -line -- $pattern $exec dummy directory]} then {
+        #
+        # NOTE: We could not query local root directory of the source
+        #       checkout from Fossil; therefore, attempt to make an
+        #       educated guess.  This value will probably be wrong for
+        #       any project(s) other than Eagle.  In that case, this
+        #       value should be overridden by that project to reflect
+        #       the actual local root directory of the source checkout
+        #       for that project.
+        #
+        set root_path $base_path
+      } else {
+        #
+        # NOTE: We extracted the local root directory of the source
+        #       checkout from Fossil.  Now, make sure it is fully
+        #       normalized and has no trailing slashes.
+        #
+        set root_path [file normalize $directory]
+      }
+
+      unset -nocomplain directory dummy exec pattern
+    } else {
+      #
+      # NOTE: Use of Fossil by the test suite is forbidden.  Fallback
+      #       to using the base path.
+      #
+      set root_path $base_path
     }
   }
 
@@ -425,7 +438,8 @@ if {![info exists no([file tail [info script]])]} then {
           #
           set test_tclsh $test_flags(-tclsh)
         } else {
-          if {![info exists no(getTclShellFileName)]} then {
+          if {[canExecTclShell] && \
+              ![info exists no(getTclShellFileName)]} then {
             #
             # NOTE: Attempt to automatically select the native Tcl shell
             #       to use.
@@ -839,7 +853,7 @@ if {![info exists no([file tail [info script]])]} then {
     if {![info exists no(machine)]} then {
       checkForMachine $test_channel 32 intel; # (i.e. x86)
       checkForMachine $test_channel 32 arm;   # (i.e. arm)
-      checkForMachine $test_channel 64 ia64;  # (i.e. ia64)
+      checkForMachine $test_channel 64 ia64;  # (i.e. itanium)
       checkForMachine $test_channel 64 amd64; # (i.e. x64)
     }
 
@@ -1002,271 +1016,281 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(compileOptions)]} then {
       #
-      # NOTE: Has callback queue support been enabled (at compile-time)?
+      # NOTE: Has "known" compile option testing support been disabled?
       #
-      if {![info exists no(compileCallbackQueue)]} then {
+      if {![info exists no(knownCompileOptions)]} then {
         #
-        # NOTE: For test "commands-1.4".
+        # NOTE: Check for all "known" compile options.
         #
-        checkForCompileOption $test_channel CALLBACK_QUEUE
-      }
+        checkForKnownCompileOptions $test_channel
+      } else {
+        #
+        # NOTE: Has callback queue support been enabled (at compile-time)?
+        #
+        if {![info exists no(compileCallbackQueue)]} then {
+          #
+          # NOTE: For tests "basic-1.54" and "commands-1.4".
+          #
+          checkForCompileOption $test_channel CALLBACK_QUEUE
+        }
 
-      #
-      # NOTE: Has legacy CAS policy support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileCasPolicy)]} then {
         #
-        # NOTE: For tests "load-1.6" and "load-1.7".
+        # NOTE: Has legacy CAS policy support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel CAS_POLICY
-      }
+        if {![info exists no(compileCasPolicy)]} then {
+          #
+          # NOTE: For tests "load-1.6" and "load-1.7".
+          #
+          checkForCompileOption $test_channel CAS_POLICY
+        }
 
-      #
-      # NOTE: Has console support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileConsole)]} then {
         #
-        # NOTE: For test "host-1.2".
+        # NOTE: Has console support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel CONSOLE
-      }
+        if {![info exists no(compileConsole)]} then {
+          #
+          # NOTE: For test "host-1.2".
+          #
+          checkForCompileOption $test_channel CONSOLE
+        }
 
-      #
-      # NOTE: Has database support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileData)]} then {
         #
-        # NOTE: For tests "sql-1.1" and "upvar-99.1".
+        # NOTE: Has database support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel DATA
-      }
+        if {![info exists no(compileData)]} then {
+          #
+          # NOTE: For tests "sql-1.1" and "upvar-99.1".
+          #
+          checkForCompileOption $test_channel DATA
+        }
 
-      #
-      # NOTE: Has script debugger support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileDebugger)]} then {
         #
-        # NOTE: For tests "debug-1.1", "debug-2.1", "debug-3.1" and
-        #       "debug-4.1".
+        # NOTE: Has script debugger support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel DEBUGGER
-      }
+        if {![info exists no(compileDebugger)]} then {
+          #
+          # NOTE: For tests "debug-1.1", "debug-2.1", "debug-3.1" and
+          #       "debug-4.1".
+          #
+          checkForCompileOption $test_channel DEBUGGER
+        }
 
-      #
-      # NOTE: Has application domain management support been enabled (at
-      #       compile-time)?
-      #
-      if {![info exists no(compileAppDomains)]} then {
         #
-        # NOTE: For test "interp-1.27".
+        # NOTE: Has application domain management support been enabled (at
+        #       compile-time)?
         #
-        checkForCompileOption $test_channel APPDOMAINS
-      }
+        if {![info exists no(compileAppDomains)]} then {
+          #
+          # NOTE: For test "interp-1.27".
+          #
+          checkForCompileOption $test_channel APPDOMAINS
+        }
 
-      #
-      # NOTE: Has isolated interpreter support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileIsolatedInterpreters)]} then {
         #
-        # NOTE: For test "xaml-1.2".
+        # NOTE: Has isolated interpreter support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel ISOLATED_INTERPRETERS
-      }
+        if {![info exists no(compileIsolatedInterpreters)]} then {
+          #
+          # NOTE: For test "xaml-1.2".
+          #
+          checkForCompileOption $test_channel ISOLATED_INTERPRETERS
+        }
 
-      #
-      # NOTE: Has expression flags support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileExpressionFlags)]} then {
         #
-        # NOTE: For test "function-2.16".
+        # NOTE: Has expression flags support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel EXPRESSION_FLAGS
-      }
+        if {![info exists no(compileExpressionFlags)]} then {
+          #
+          # NOTE: For test "function-2.16".
+          #
+          checkForCompileOption $test_channel EXPRESSION_FLAGS
+        }
 
-      #
-      # NOTE: Has isolated plugin support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileIsolatedPlugins)]} then {
         #
-        # NOTE: For test "load-1.1.1".
+        # NOTE: Has isolated plugin support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel ISOLATED_PLUGINS
-      }
+        if {![info exists no(compileIsolatedPlugins)]} then {
+          #
+          # NOTE: For test "load-1.1.1".
+          #
+          checkForCompileOption $test_channel ISOLATED_PLUGINS
+        }
 
-      #
-      # NOTE: Has PowerShell approved-verbs support been enabled (at
-      #       compile-time)?
-      #
-      if {![info exists no(compileApprovedVerbs)]} then {
         #
-        # NOTE: For test "object-4.8".
+        # NOTE: Has PowerShell approved-verbs support been enabled (at
+        #       compile-time)?
         #
-        checkForCompileOption $test_channel APPROVED_VERBS
-      }
+        if {![info exists no(compileApprovedVerbs)]} then {
+          #
+          # NOTE: For test "object-4.8".
+          #
+          checkForCompileOption $test_channel APPROVED_VERBS
+        }
 
-      #
-      # NOTE: Has Mono support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileMono)]} then {
         #
-        # NOTE: For test "object-4.13".
+        # NOTE: Has Mono support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel MONO
-      }
+        if {![info exists no(compileMono)]} then {
+          #
+          # NOTE: For test "object-4.13".
+          #
+          checkForCompileOption $test_channel MONO
+        }
 
-      #
-      # NOTE: Has Windows support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileWindows)]} then {
         #
-        # NOTE: For tests "garuda-1.1" and "garuda-1.2".
+        # NOTE: Has Windows support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel WINDOWS
-      }
+        if {![info exists no(compileWindows)]} then {
+          #
+          # NOTE: For tests "garuda-1.1" and "garuda-1.2".
+          #
+          checkForCompileOption $test_channel WINDOWS
+        }
 
-      #
-      # NOTE: Has Windows Forms support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileWinForms)]} then {
         #
-        # NOTE: For tests "object-10.21", "tclLoad-1.2", "winForms-*.*".
+        # NOTE: Has Windows Forms support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel WINFORMS
-      }
+        if {![info exists no(compileWinForms)]} then {
+          #
+          # NOTE: For tests "object-10.21", "tclLoad-1.2", "winForms-*.*".
+          #
+          checkForCompileOption $test_channel WINFORMS
+        }
 
-      #
-      # NOTE: Has native code support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileNative)]} then {
         #
-        # NOTE: For tests "debug-3.2", "expr-3.2", and "host-1.1".
+        # NOTE: Has native code support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel NATIVE
-      }
+        if {![info exists no(compileNative)]} then {
+          #
+          # NOTE: For tests "debug-3.2", "expr-3.2", and "host-1.1".
+          #
+          checkForCompileOption $test_channel NATIVE
+        }
 
-      #
-      # NOTE: Has native package support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileNativePackage)]} then {
         #
-        # NOTE: For tests "garuda-1.1" and "garuda-1.2".
+        # NOTE: Has native package support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel NATIVE_PACKAGE
-      }
+        if {![info exists no(compileNativePackage)]} then {
+          #
+          # NOTE: For tests "garuda-1.1" and "garuda-1.2".
+          #
+          checkForCompileOption $test_channel NATIVE_PACKAGE
+        }
 
-      #
-      # NOTE: Has network support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileNetwork)]} then {
         #
-        # NOTE: For tests "commands-1.4", "socket-1.*", "socket-2.1", and
-        #       "socket-3.1".
+        # NOTE: Has network support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel NETWORK
-      }
+        if {![info exists no(compileNetwork)]} then {
+          #
+          # NOTE: For tests "commands-1.4", "socket-1.*", "socket-2.1", and
+          #       "socket-3.1".
+          #
+          checkForCompileOption $test_channel NETWORK
+        }
 
-      #
-      # NOTE: Has native Tcl support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileTcl)]} then {
         #
-        # NOTE: For tests "commands-1.1.*", "excel-2.2", "tclCancel-1.1",
-        #       "tclEncoding-1.*", "tclErrorInfo-1.*", "tclLoad-1.*",
-        #       "tclResetCancel-1.1", "tclResetCancel-2.1",
-        #       "tclResetCancel-2.2", "tclResetCancel-3.1",
-        #       "tclResetCancel-4.1", "tclSet-1.1", and "tclSubst-1.1".
+        # NOTE: Has native Tcl support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel TCL
-      }
+        if {![info exists no(compileTcl)]} then {
+          #
+          # NOTE: For tests "commands-1.1.*", "excel-2.2", "tclCancel-1.1",
+          #       "tclEncoding-1.*", "tclErrorInfo-1.*", "tclLoad-1.*",
+          #       "tclResetCancel-1.1", "tclResetCancel-2.1",
+          #       "tclResetCancel-2.2", "tclResetCancel-3.1",
+          #       "tclResetCancel-4.1", "tclSet-1.1", and "tclSubst-1.1".
+          #
+          checkForCompileOption $test_channel TCL
+        }
 
-      #
-      # NOTE: Has XML support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileXml)]} then {
         #
-        # NOTE: For tests "commands-1.4", "object-7.3" and "xml-1.1.*".
+        # NOTE: Has XML support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel XML
-      }
+        if {![info exists no(compileXml)]} then {
+          #
+          # NOTE: For tests "commands-1.4", "object-7.3" and "xml-1.1.*".
+          #
+          checkForCompileOption $test_channel XML
+        }
 
-      #
-      # NOTE: Has serialization support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileSerialization)]} then {
         #
-        # NOTE: For test "interp-1.10".
+        # NOTE: Has serialization support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel SERIALIZATION
-      }
+        if {![info exists no(compileSerialization)]} then {
+          #
+          # NOTE: For test "interp-1.10".
+          #
+          checkForCompileOption $test_channel SERIALIZATION
+        }
 
-      #
-      # NOTE: Has dedicated test support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileTest)]} then {
         #
-        # NOTE: For tests "basic-1.20", "basic-1.21", "function-1.1",
-        #       "object-2.1", "object-3.1", "object-4.1", "object-7.1",
-        #       "object-7.2", "object-7.4", "object-14.4", "object-14.5",
-        #       "object-14.6", "remotingServer-1.*", and "debug-5.*".
+        # NOTE: Has dedicated test support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel TEST
-      }
+        if {![info exists no(compileTest)]} then {
+          #
+          # NOTE: For tests "basic-1.20", "basic-1.21", "function-1.1",
+          #       "object-2.1", "object-3.1", "object-4.1", "object-7.1",
+          #       "object-7.2", "object-7.4", "object-14.4", "object-14.5",
+          #       "object-14.6", "remotingServer-1.*", and "debug-5.*".
+          #
+          checkForCompileOption $test_channel TEST
+        }
 
-      #
-      # NOTE: Has threading support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileThreading)]} then {
         #
-        # NOTE: For tests "object-10.2" and "object-10.3".
+        # NOTE: Has threading support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel THREADING
-      }
+        if {![info exists no(compileThreading)]} then {
+          #
+          # NOTE: For tests "object-10.2" and "object-10.3".
+          #
+          checkForCompileOption $test_channel THREADING
+        }
 
-      #
-      # NOTE: Has Tcl threading support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileTclThreaded)]} then {
         #
-        # NOTE: For tests "tclLoad-1.5" and "tclLoad-1.6".
+        # NOTE: Has Tcl threading support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel TCL_THREADED
-      }
+        if {![info exists no(compileTclThreaded)]} then {
+          #
+          # NOTE: For tests "tclLoad-1.5" and "tclLoad-1.6".
+          #
+          checkForCompileOption $test_channel TCL_THREADED
+        }
 
-      #
-      # NOTE: Has Tcl isolated interpreter thread support been enabled (at
-      #       compile-time)?
-      #
-      if {![info exists no(compileTclThreads)]} then {
         #
-        # NOTE: For tests "tclLoad-1.5" and "tclLoad-1.6".
+        # NOTE: Has Tcl isolated interpreter thread support been enabled (at
+        #       compile-time)?
         #
-        checkForCompileOption $test_channel TCL_THREADS
-      }
+        if {![info exists no(compileTclThreads)]} then {
+          #
+          # NOTE: For tests "tclLoad-1.5" and "tclLoad-1.6".
+          #
+          checkForCompileOption $test_channel TCL_THREADS
+        }
 
-      #
-      # NOTE: Has GDI+ drawing support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileDrawing)]} then {
-        checkForCompileOption $test_channel DRAWING
-      }
-
-      #
-      # NOTE: Has WinForms support been enabled (at compile-time)?
-      #
-      if {![info exists no(compileWinForms)]} then {
-        checkForCompileOption $test_channel WINFORMS
-      }
-
-      #
-      # NOTE: Has runtime license checking support been disabled (at
-      #       compile-time).  This only applies to third-party plugins
-      #       and applications.
-      #
-      if {![info exists no(compileLicensing)]} then {
         #
-        # NOTE: This is not currently used by any tests.
+        # NOTE: Has GDI+ drawing support been enabled (at compile-time)?
         #
-        checkForCompileOption $test_channel LICENSING
+        if {![info exists no(compileDrawing)]} then {
+          checkForCompileOption $test_channel DRAWING
+        }
+
+        #
+        # NOTE: Has WinForms support been enabled (at compile-time)?
+        #
+        if {![info exists no(compileWinForms)]} then {
+          checkForCompileOption $test_channel WINFORMS
+        }
+
+        #
+        # NOTE: Has runtime license checking support been disabled (at
+        #       compile-time).  This only applies to third-party plugins
+        #       and applications.
+        #
+        if {![info exists no(compileLicensing)]} then {
+          #
+          # NOTE: This is not currently used by any tests.
+          #
+          checkForCompileOption $test_channel LICENSING
+        }
       }
     }
 
@@ -1915,13 +1939,23 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(compileOptions)]} then {
       #
-      # NOTE: Has dedicated test support been enabled (at compile-time)?
+      # NOTE: Has "known" compile option testing support been disabled?
       #
-      if {![info exists no(compileTest)]} then {
+      if {![info exists no(knownCompileOptions)]} then {
         #
-        # NOTE: For tests "tclLoad-1.17.1" and "tclLoad-1.17.2".
+        # NOTE: Check for all "known" compile options.
         #
-        checkForCompileOption $test_channel TEST
+        checkForKnownCompileOptions $test_channel
+      } else {
+        #
+        # NOTE: Has dedicated test support been enabled (at compile-time)?
+        #
+        if {![info exists no(compileTest)]} then {
+          #
+          # NOTE: For tests "tclLoad-1.17.1" and "tclLoad-1.17.2".
+          #
+          checkForCompileOption $test_channel TEST
+        }
       }
     }
 
@@ -2449,11 +2483,14 @@ if {![info exists no([file tail [info script]])]} then {
   #
   if {[isEagle]} then {
     #
-    # NOTE: Get the source checkout and tags (i.e. of Eagle or whatever
-    #       project the Eagle binaries are being used by) using a Fossil
-    #       binary in the PATH, if available.
+    # NOTE: Is the use of Fossil by the test suite allowed?
     #
-    if {![info exists no(exec)] && ![info exists no(fossil)]} then {
+    if {[canExecFossil]} then {
+      #
+      # NOTE: Get the source checkout and tags (i.e. of Eagle or whatever
+      #       project the Eagle binaries are being used by) using a Fossil
+      #       binary in the PATH, if available.
+      #
       if {[catch {exec -- fossil info} exec] == 0} then {
         set pattern {^checkout:\s+(.*?)\s+$}
 
@@ -2483,7 +2520,7 @@ if {![info exists no([file tail [info script]])]} then {
       unset -nocomplain dummy exec pattern
     } else {
       #
-      # NOTE: Querying the source checkout from Fossil was disabled.
+      # NOTE: Use of Fossil by the test suite is forbidden.
       #
       set checkout <none>
       set tags <none>

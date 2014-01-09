@@ -68,6 +68,14 @@ namespace eval ::Eagle {
 
           unset ::test_log_queue($entry)
         }
+
+        #
+        # NOTE: If all entries in the test log queue were just processed,
+        #       unset the entire array now.
+        #
+        if {[array size test_log_queue] == 0} then {
+          unset ::test_log_queue
+        }
       }
 
       #
@@ -515,7 +523,7 @@ namespace eval ::Eagle {
         #
         # NOTE: *EXTERNAL* Use verbatim, no normalization.
         #
-        if {$automatic} then {
+        if {$automatic && [isEagle]} then {
           #
           # NOTE: In automatic mode, the environment variable
           #       value simply represents another candidate
@@ -950,6 +958,27 @@ namespace eval ::Eagle {
     }
   }
 
+  #
+  # NOTE: This procedure should return non-zero if the [exec] command may be
+  #       used by the specified test package procedure.
+  #
+  proc canTestExec { procName } {
+    if {[info exists ::no(exec)]} then {
+      return false
+    }
+
+    if {[info exists ::no(canTestExec)]} then {
+      return false
+    }
+
+    if {[string length $procName] > 0 && \
+        [info exists [appendArgs ::no(canTestExec. $procName )]]} then {
+      return false
+    }
+
+    return true
+  }
+
   proc testExec { commandName options args } {
     set command [list exec]
 
@@ -958,11 +987,11 @@ namespace eval ::Eagle {
     lappend command -- $commandName
 
     if {[llength $args] > 0} then {eval lappend command $args}
+    set procName [lindex [info level [info level]] 0]
 
-    if {[info exists ::no(exec)]} then {
+    if {![canTestExec $procName]} then {
       tputs $::test_channel [appendArgs "---- skipping command: " $command \n]
 
-      set procName [lindex [info level [info level]] 0]
       error "test use of \[$procName\] has been disabled"
     } else {
       tputs $::test_channel [appendArgs "---- running command: " $command \n]
@@ -989,11 +1018,11 @@ namespace eval ::Eagle {
     }
 
     if {[llength $args] > 0} then {eval lappend command $args}
+    set procName [lindex [info level [info level]] 0]
 
-    if {[info exists ::no(exec)]} then {
+    if {![canTestExec $procName]} then {
       tputs $::test_channel [appendArgs "---- skipping command: " $command \n]
 
-      set procName [lindex [info level [info level]] 0]
       error "test use of \[$procName\] has been disabled"
     } else {
       tputs $::test_channel [appendArgs "---- running command: " $command \n]
@@ -1003,12 +1032,13 @@ namespace eval ::Eagle {
   }
 
   proc execTestShell { options args } {
-    if {[info exists ::no(exec)]} then {
+    set procName [lindex [info level [info level]] 0]
+
+    if {![canTestExec $procName]} then {
       tputs $::test_channel [appendArgs \
           "---- skipping nested shell: exec " [string trim [appendArgs \
           $options " " -- " \"" [info nameofexecutable] "\" " $args]] \n]
 
-      set procName [lindex [info level [info level]] 0]
       error "test use of \[$procName\] has been disabled"
     } else {
       tputs $::test_channel [appendArgs \
@@ -1533,16 +1563,18 @@ namespace eval ::Eagle {
     if {[isEagle]} then {
       set totalTests $::eagle_tests(Total)
       set failedTests $::eagle_tests(Failed)
+      set skippedTests $::eagle_tests(Skipped)
     } else {
       set totalTests $::tcltest::numTests(Total)
       set failedTests $::tcltest::numTests(Failed)
+      set skippedTests $::tcltest::numTests(Skipped)
     }
 
     set status [appendArgs \
         "---- test suite running, about " $percent "% complete (" \
         $totalTests " tests total, " $failedTests " tests failed, " \
-        $totalFiles " files total, " $failedFiles " files failed, " \
-        $leakedFiles " files leaked)..."]
+        $skippedTests " tests skipped, " $totalFiles " files total, " \
+        $failedFiles " files failed, " $leakedFiles " files leaked)..."]
 
     tputs $channel [appendArgs $status \n]
 
@@ -2465,7 +2497,7 @@ namespace eval ::Eagle {
       } $shell]
     }
 
-    proc getGarudaDll {} {
+    proc getGarudaDll { {machine ""} } {
       #
       # NOTE: Get the Garuda DLL of the same platform (i.e. machine type)
       #       as the native Tcl shell.
@@ -2491,15 +2523,22 @@ namespace eval ::Eagle {
         set suffix [getTestSuffix]
 
         #
+        # NOTE: If necessary, automatically detect the machine for the Tcl
+        #       shell that we plan on using.
+        #
+        if {[string length $machine] == 0} then {
+          set machine [getMachineForTclShell]
+        }
+
+        #
         # NOTE: Build the full path and file name of the Garuda DLL, using
         #       the Eagle base path.  Currently, this will only work
         #       correctly if the test suite is being run from inside the
         #       source tree.
         #
         return [file join $::base_path bin \
-            [machineToPlatform [getMachineForTclShell]] [appendArgs \
-            $configuration Dll $suffix] [appendArgs Garuda [info \
-            sharedlibextension]]]
+            [machineToPlatform $machine] [appendArgs $configuration Dll \
+            $suffix] [appendArgs Garuda [info sharedlibextension]]]
       } else {
         #
         # NOTE: We are missing the base path, return nothing.

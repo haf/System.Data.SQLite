@@ -20,6 +20,30 @@
 #       namespace if this script actually ends up being evaluated in Tcl.
 #
 namespace eval ::Eagle {
+  proc getKnownCompileOptions {} {
+    return [list \
+        APPDOMAINS APPROVED_VERBS ARM ASSEMBLY_RELEASE \
+        ASSEMBLY_STRONG_NAME_TAG ASSEMBLY_TAG ASSEMBLY_TEXT ASSEMBLY_URI \
+        BREAK_ON_EXITING BREAKPOINTS CACHE_ARGUMENT_TOSTRING \
+        CACHE_ARGUMENTLIST_TOSTRING CACHE_DICTIONARY CACHE_RESULT_TOSTRING \
+        CACHE_STATISTICS CACHE_STRINGLIST_TOSTRING CALLBACK_QUEUE CAS_POLICY \
+        CODE_ANALYSIS COM_TYPE_CACHE CONSOLE DAEMON DATA DEAD_CODE DEBUG \
+        DEBUGGER DEBUGGER_ARGUMENTS DEBUG_TRACE DEBUG_WRITE DRAWING DYNAMIC \
+        EAGLE EMBEDDED_LIBRARY EXECUTE_CACHE EXPRESSION_FLAGS FAST_ERRORCODE \
+        FAST_ERRORINFO HAVE_SIZEOF HISTORY IA64 INTERACTIVE_COMMANDS \
+        INTERNALS_VISIBLE_TO ISOLATED_INTERPRETERS ISOLATED_PLUGINS LIBRARY \
+        LICENSING LIST_CACHE MONO MONO_BUILD MONO_HACKS MONO_LEGACY \
+        NATIVE NATIVE_PACKAGE NATIVE_UTILITY NATIVE_UTILITY_BSTR NETWORK \
+        NET_20 NET_20_FAST_ENUM NET_20_ONLY NET_20_SP1 NET_20_SP2 NET_30 \
+        NET_35 NET_40 NET_45 NET_451 NON_WORKING_CODE NOTIFY NOTIFY_ACTIVE \
+        NOTIFY_ARGUMENTS NOTIFY_GLOBAL NOTIFY_OBJECT OBSOLETE PARSE_CACHE \
+        PATCHLEVEL POLICY_TRACE PREVIOUS_RESULT RANDOMIZE_ID REMOTING SAMPLE \
+        SERIALIZATION SHARED_ID_POOL SHELL SOURCE_ID SOURCE_TIMESTAMP STATIC \
+        TCL TCL_KITS TCL_THREADED TCL_THREADS TCL_UNICODE TCL_WRAPPER TEST \
+        THREADING THROW_ON_DISPOSED TRACE TYPE_CACHE UNIX VERBOSE WEB \
+        WINDOWS WINFORMS WIX_30 WIX_35 WIX_36 WIX_37 WIX_38 X64 X86 XML]
+  }
+
   proc getKnownMonoVersions {} {
     #
     # NOTE: This job of this procedure is to return the list of "known"
@@ -29,6 +53,51 @@ namespace eval ::Eagle {
         [list 2 0] [list 2 2] [list 2 4] [list 2 6] [list 2 8] [list 2 10] \
         [list 2 11] [list 2 12] [list 3 0] [list 3 1] [list 3 2] [list 3 3] \
         [list 3 4] [list 3 5] [list 3 6]]
+  }
+
+  #
+  # NOTE: This procedure should return non-zero if the native Tcl shell may
+  #       be executed by the test suite infrastructure outside the context
+  #       of any specific tests.  The specific tests themselves must make
+  #       use of their own constraints to prevent execution of the native
+  #       Tcl shell.
+  #
+  proc canExecTclShell {} {
+    if {[info exists ::no(exec)]} then {
+      return false
+    }
+
+    if {[info exists ::no(tcl)]} then {
+      return false
+    }
+
+    if {[info exists ::no(canExecTclShell)]} then {
+      return false
+    }
+
+    return true
+  }
+
+  #
+  # NOTE: This procedure should return non-zero if Fossil may be executed by
+  #       the test suite infrastructure outside the context of any specific
+  #       tests.  The specific tests themselves must make use of their own
+  #       constraints to prevent execution of Fossil.
+  #
+  proc canExecFossil {} {
+    if {[info exists ::no(exec)]} then {
+      return false
+    }
+
+    if {[info exists ::no(fossil)]} then {
+      return false
+    }
+
+    if {[info exists ::no(canExecFossil)]} then {
+      return false
+    }
+
+    return true
   }
 
   proc checkForTestSuiteFiles { channel } {
@@ -403,7 +472,8 @@ namespace eval ::Eagle {
   proc checkForFossil { channel } {
     tputs $channel "---- checking for Fossil... "
 
-    if {[catch {exec -- fossil version} version] == 0} then {
+    if {[canExecFossil] && \
+        [catch {exec -- fossil version} version] == 0} then {
       set version [string trim $version]
       set pattern {^This is fossil version (.*) \[([0-9a-f]+)\]\
           \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC$}
@@ -420,7 +490,8 @@ namespace eval ::Eagle {
         #
         append result version " " $version " \[" $sourceId \]
 
-        if {[catch {exec -- fossil remote} remote] == 0} then {
+        if {[canExecFossil] && \
+            [catch {exec -- fossil remote} remote] == 0} then {
           set remote [string trim $remote]; set valid false
 
           if {[isEagle]} then {
@@ -769,6 +840,11 @@ namespace eval ::Eagle {
       addConstraint testExec
 
       tputs $channel yes\n
+
+      if {[info exists ::no(exec)]} then {
+        tputs $channel \
+            "==== WARNING: running with the \"testExec\" procedure disabled\n"
+      }
     } else {
       tputs $channel no\n
     }
@@ -1406,6 +1482,27 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForKnownCompileOptions { channel } {
+    #
+    # NOTE: Check for all "known" compile options.
+    #
+    tputs $channel "---- checking for known compile options... "
+
+    set options [getKnownCompileOptions]
+
+    if {[llength $options] > 0} then {
+      tputs $channel [appendArgs "yes (" [llength $options] ")\n"]
+
+      foreach option $options {
+        if {![info exists [appendArgs ::no(compile. $option )]]} then {
+          checkForCompileOption $channel $option
+        }
+      }
+    } else {
+      tputs $channel no\n
+    }
+  }
+
   if {[isEagle]} then {
     ###########################################################################
     ############################ BEGIN Eagle ONLY #############################
@@ -1904,10 +2001,36 @@ namespace eval ::Eagle {
 
     proc checkForGarudaDll { channel } {
       #
+      # NOTE: Skip automatic Tcl shell machine detection if we are not
+      #       allowed to execute external commands.
+      #
+      if {[canExecTclShell]} then {
+        #
+        # NOTE: Have the [getGarudaDll] procedure automatically detect the
+        #       machine.
+        #
+        set machine ""
+      } else {
+        #
+        # NOTE: Use the machine for this test run.
+        #
+        set machine [getTestMachine]
+
+        #
+        # NOTE: Since an empty string means "automatically detect" to the
+        #       [getGarudaDll] procedure, we must make sure the value is
+        #       something else.
+        #
+        if {[string length $machine] == 0} then {
+          set machine unknown
+        }
+      }
+
+      #
       # NOTE: Check for the Garuda DLL of the same platform (i.e. machine
       #       type) as the native Tcl shell.
       #
-      return [checkForFile $channel [getGarudaDll]]
+      return [checkForFile $channel [getGarudaDll $machine]]
     }
 
     proc checkForCulture { channel } {
@@ -2305,7 +2428,8 @@ namespace eval ::Eagle {
       #
       set prefix "---- checking for Tcl shell version... "
 
-      if {[catch {getTclVersionForTclShell} version] == 0 && \
+      if {[canExecTclShell] && \
+          [catch {getTclVersionForTclShell} version] == 0 && \
           $version ne "error"} then {
         #
         # NOTE: Yes, a native Tcl shell appears to be available.
@@ -2333,7 +2457,8 @@ namespace eval ::Eagle {
       #
       set prefix "---- checking for Tk package version... "
 
-      if {[catch {getTkVersionForTclShell} version] == 0 && \
+      if {[canExecTclShell] && \
+          [catch {getTkVersionForTclShell} version] == 0 && \
           $version ne "error"} then {
         #
         # NOTE: Yes, a native Tk package appears to be available.
@@ -2859,7 +2984,8 @@ namespace eval ::Eagle {
     #       global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        getKnownMonoVersions checkForTestSuiteFiles checkForPlatform \
+        getKnownCompileOptions getKnownMonoVersions canExecTclShell \
+        canExecFossil checkForTestSuiteFiles checkForPlatform \
         checkForWindowsVersion checkForScriptLibrary checkForVariable \
         checkForTclOptions checkForWindowsCommandProcessor checkForFossil \
         checkForEagle checkForSymbols checkForLogFile checkForGaruda \
@@ -2870,8 +2996,8 @@ namespace eval ::Eagle {
         checkForTip194 checkForTip241 checkForTip285 checkForTip405 \
         checkForTip426 checkForTiming checkForPerformance checkForBigLists \
         checkForStackIntensive checkForInteractive checkForInteractiveCommand \
-        checkForUserInteraction checkForNetwork checkForCompileOption] false \
-        false
+        checkForUserInteraction checkForNetwork checkForCompileOption \
+        checkForKnownCompileOptions] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################
