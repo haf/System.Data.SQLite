@@ -2368,7 +2368,8 @@ namespace eval ::Eagle {
         # NOTE: Build the list of managed assembly files that we handle.
         #
         set managedFileNames [list \
-            System.Data.SQLite.dll System.Data.SQLite.Linq.dll]
+            System.Data.SQLite.dll System.Data.SQLite.Linq.dll \
+            System.Data.SQLite.EF6.dll]
 
         #
         # NOTE: Remove any test constraints that refer to the native and/or
@@ -2531,6 +2532,7 @@ namespace eval ::Eagle {
             if {![info exists ::no(loadSqliteImplicitFiles)]} then {
               tryLoadAssembly System.Data.SQLite.dll
               tryLoadAssembly System.Data.SQLite.Linq.dll
+              tryLoadAssembly System.Data.SQLite.EF6.dll
             }
 
             if {![info exists ::no(loadSqliteNonImplicitFiles)]} then {
@@ -2595,6 +2597,12 @@ namespace eval ::Eagle {
           tputs $::test_channel [appendArgs \
               "---- file version of \"System.Data.SQLite.Linq.dll\"... " \
               [file version [getBinaryFileName System.Data.SQLite.Linq.dll]] \n]
+        }
+
+        catch {
+          tputs $::test_channel [appendArgs \
+              "---- file version of \"System.Data.SQLite.EF6.dll\"... " \
+              [file version [getBinaryFileName System.Data.SQLite.EF6.dll]] \n]
         }
 
         if {[string length $platform] > 0} then {
