@@ -1915,6 +1915,7 @@ namespace System.Data.SQLite
                 string directory,
                 string coreFileName,
                 string linqFileName,
+                string ef6FileName,
                 string designerFileName,
                 string registryVersion,
                 string configVersion,
@@ -1955,6 +1956,7 @@ namespace System.Data.SQLite
                 this.directory = directory;
                 this.coreFileName = coreFileName;
                 this.linqFileName = linqFileName;
+                this.ef6FileName = ef6FileName;
                 this.designerFileName = designerFileName;
                 this.registryVersion = registryVersion;
                 this.configVersion = configVersion;
@@ -1998,6 +2000,7 @@ namespace System.Data.SQLite
                 ref string directory,
                 ref string coreFileName,
                 ref string linqFileName,
+                ref string ef6FileName,
                 ref string designerFileName
                 )
             {
@@ -2014,6 +2017,9 @@ namespace System.Data.SQLite
 
                 linqFileName = Path.Combine(directory,
                     Installer.LinqFileName);
+
+                ef6FileName = Path.Combine(directory,
+                    Installer.Ef6FileName);
 
                 designerFileName = Path.Combine(directory,
                     Installer.DesignerFileName);
@@ -2126,15 +2132,17 @@ namespace System.Data.SQLite
                 string directory = null;
                 string coreFileName = null;
                 string linqFileName = null;
+                string ef6FileName = null;
                 string designerFileName = null;
 
                 GetDefaultFileNames(
                     ref directory, ref coreFileName, ref linqFileName,
-                    ref designerFileName);
+                    ref ef6FileName, ref designerFileName);
 
-                return new Configuration(thisAssembly, null, directory,
-                    coreFileName, linqFileName, designerFileName, null, null,
-                    null, TraceOps.DebugFormat, TraceOps.TraceFormat,
+                return new Configuration(
+                    thisAssembly, null, directory, coreFileName, linqFileName,
+                    ef6FileName, designerFileName, null, null, null,
+                    TraceOps.DebugFormat, TraceOps.TraceFormat,
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, false, true, false, false, false,
                     false, false, false, false, false, false, false, false,
@@ -2349,6 +2357,17 @@ namespace System.Data.SQLite
                             configuration.linqFileName = Path.Combine(
                                 configuration.directory, linqFileName);
 
+                            string ef6FileName = configuration.ef6FileName;
+
+                            if (!String.IsNullOrEmpty(ef6FileName))
+                                ef6FileName = Path.GetFileName(ef6FileName);
+
+                            if (String.IsNullOrEmpty(ef6FileName))
+                                ef6FileName = Installer.Ef6FileName;
+
+                            configuration.ef6FileName = Path.Combine(
+                                configuration.directory, ef6FileName);
+
                             string designerFileName = configuration.designerFileName;
 
                             if (!String.IsNullOrEmpty(designerFileName))
@@ -2359,6 +2378,10 @@ namespace System.Data.SQLite
 
                             configuration.designerFileName = Path.Combine(
                                 configuration.directory, designerFileName);
+                        }
+                        else if (MatchOption(newArg, "ef6FileName"))
+                        {
+                            configuration.ef6FileName = text;
                         }
                         else if (MatchOption(newArg, "install"))
                         {
@@ -3265,6 +3288,19 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            public bool IsEf6Supported()
+            {
+                //
+                // NOTE: Return non-zero if the EF6 assembly should be
+                //       processed during the install.  If the target is
+                //       Visual Studio 2005 or Visual Studio 2008, this
+                //       should return zero.
+                //
+                return !noNetFx40 || !noNetFx45 || !noNetFx451;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             public void Dump(
                 TraceCallback traceCallback
                 )
@@ -3289,6 +3325,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "LinqFileName", ForDisplay(linqFileName)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "Ef6FileName", ForDisplay(ef6FileName)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3485,6 +3525,15 @@ namespace System.Data.SQLite
             {
                 get { return linqFileName; }
                 set { linqFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string ef6FileName;
+            public string Ef6FileName
+            {
+                get { return ef6FileName; }
+                set { ef6FileName = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3879,6 +3928,7 @@ namespace System.Data.SQLite
         #region Private Constant Data
         private const string CoreFileName = "System.Data.SQLite.dll";
         private const string LinqFileName = "System.Data.SQLite.Linq.dll";
+        private const string Ef6FileName = "System.Data.SQLite.EF6.dll";
         private const string DesignerFileName = "SQLite.Designer.dll";
         private const string ProviderName = "SQLite Data Provider";
         private const string ProjectName = "System.Data.SQLite";
@@ -6560,6 +6610,19 @@ namespace System.Data.SQLite
                                     traceCategory);
                             }
 
+                            if (configuration.IsEf6Supported())
+                            {
+                                if (!configuration.WhatIf)
+                                    /* throw */
+                                    publish.GacInstall(configuration.Ef6FileName);
+
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacInstall: assemblyPath = {0}",
+                                    ForDisplay(configuration.Ef6FileName)),
+                                    traceCategory);
+                            }
+
                             if (configuration.HasFlags(
                                     InstallFlags.VsPackageGlobalAssemblyCache, true))
                             {
@@ -6587,6 +6650,19 @@ namespace System.Data.SQLite
                                     debugCallback, traceCallback, String.Format(
                                     "GacRemove: assemblyPath = {0}",
                                     ForDisplay(configuration.DesignerFileName)),
+                                    traceCategory);
+                            }
+
+                            if (configuration.IsEf6Supported())
+                            {
+                                if (!configuration.WhatIf)
+                                    /* throw */
+                                    publish.GacRemove(configuration.Ef6FileName);
+
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacRemove: assemblyPath = {0}",
+                                    ForDisplay(configuration.Ef6FileName)),
                                     traceCategory);
                             }
 
