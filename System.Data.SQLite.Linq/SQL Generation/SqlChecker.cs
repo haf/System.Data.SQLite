@@ -9,7 +9,12 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
   using System.Data.Common.CommandTrees;
+#endif
 
     internal sealed class SqlChecker : DbExpressionVisitor<bool>
   {

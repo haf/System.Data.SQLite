@@ -12,8 +12,14 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Metadata.Edm;
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
   using System.Data.Metadata.Edm;
   using System.Data.Common.CommandTrees;
+#endif
 
   /// <summary>
   /// A Join symbol is a special kind of Symbol.

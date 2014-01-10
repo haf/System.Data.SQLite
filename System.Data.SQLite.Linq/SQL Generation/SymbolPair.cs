@@ -11,7 +11,12 @@
 namespace System.Data.SQLite
 {
   using System.Diagnostics;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
   using System.Data.Common.CommandTrees;
+#endif
 
   /// <summary>
   /// The SymbolPair exists to solve the record flattening problem.

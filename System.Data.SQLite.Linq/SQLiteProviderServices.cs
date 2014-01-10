@@ -9,12 +9,19 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Data.Common;
-  using System.Data.Common.CommandTrees;
-  using System.Data.Metadata.Edm;
   using System.Diagnostics;
   using System.Collections.Generic;
   using System.Text;
   using System.Globalization;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Common;
+  using System.Data.Entity.Core.Metadata.Edm;
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
+  using System.Data.Metadata.Edm;
+  using System.Data.Common.CommandTrees;
+#endif
 
   internal sealed class SQLiteProviderServices : DbProviderServices, ISQLiteSchemaExtensions
   {

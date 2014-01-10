@@ -394,6 +394,12 @@ set sds_manifests(source) {
   "System.Data.SQLite.Linq/SQL Generation/TopClause.cs"
   System.Data.SQLite.Linq/SQLiteProviderManifest.cs
   System.Data.SQLite.Linq/SQLiteProviderServices.cs
+  System.Data.SQLite.Linq/System.Data.SQLite.Core.2010.csproj
+  System.Data.SQLite.Linq/System.Data.SQLite.Core.2012.csproj
+  System.Data.SQLite.Linq/System.Data.SQLite.Core.2013.csproj
+  System.Data.SQLite.Linq/System.Data.SQLite.EF6.2010.csproj
+  System.Data.SQLite.Linq/System.Data.SQLite.EF6.2012.csproj
+  System.Data.SQLite.Linq/System.Data.SQLite.EF6.2013.csproj
   System.Data.SQLite.Linq/System.Data.SQLite.Linq.2008.csproj
   System.Data.SQLite.Linq/System.Data.SQLite.Linq.2010.csproj
   System.Data.SQLite.Linq/System.Data.SQLite.Linq.2012.csproj

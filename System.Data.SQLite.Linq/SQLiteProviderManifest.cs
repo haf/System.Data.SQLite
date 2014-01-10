@@ -13,7 +13,14 @@ namespace System.Data.SQLite
   using System.IO;
   using System.Xml;
   using System.Data.Common;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core;
+  using System.Data.Entity.Core.Common;
+  using System.Data.Entity.Core.Metadata.Edm;
+#else
   using System.Data.Metadata.Edm;
+#endif
 
   /// <summary>
   /// The Provider Manifest for SQL Server

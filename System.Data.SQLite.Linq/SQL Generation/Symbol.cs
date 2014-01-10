@@ -12,7 +12,12 @@ namespace System.Data.SQLite
 {
   using System;
   using System.Collections.Generic;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Metadata.Edm;
+#else
   using System.Data.Metadata.Edm;
+#endif
 
     /// <summary>
   /// <see cref="SymbolTable"/>

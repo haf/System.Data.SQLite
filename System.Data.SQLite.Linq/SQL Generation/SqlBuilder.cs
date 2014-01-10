@@ -13,7 +13,12 @@ namespace System.Data.SQLite
   using System;
   using System.Collections.Generic;
   using System.Diagnostics;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
   using System.Data.Common.CommandTrees;
+#endif
 
   /// <summary>
   /// This class is like StringBuilder.  While traversing the tree for the first time, 

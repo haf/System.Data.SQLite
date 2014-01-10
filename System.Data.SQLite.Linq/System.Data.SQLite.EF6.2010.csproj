@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * System.Data.SQLite.EF6.2010.csproj -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <UseEntityFramework6>true</UseEntityFramework6>
+    <ProjectGuid>{F1B93C04-C4AE-4D6D-B353-417AEFDCEE7B}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Core.2010.csproj" />
+</Project>

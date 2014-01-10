@@ -41,6 +41,11 @@ using System.Runtime.ConstrainedExecution;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 [assembly: InternalsVisibleTo("System.Data.SQLite.Linq, PublicKey=" + System.Data.SQLite.SQLite3.PublicKey)]
+
+#if NET_40 || NET_45 || NET_451
+[assembly: InternalsVisibleTo("System.Data.SQLite.EF6, PublicKey=" + System.Data.SQLite.SQLite3.PublicKey)]
+#endif
+
 [assembly: NeutralResourcesLanguage("en")]
 
 #if !PLATFORM_COMPACTFRAMEWORK

@@ -128,6 +128,10 @@ namespace System.Data.SQLite
             "TRACK_MEMORY_BYTES",
 #endif
 
+#if USE_ENTITY_FRAMEWORK_6
+            "USE_ENTITY_FRAMEWORK_6",
+#endif
+
 #if USE_INTEROP_DLL
             "USE_INTEROP_DLL",
 #endif

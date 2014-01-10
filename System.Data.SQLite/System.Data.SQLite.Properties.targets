@@ -239,4 +239,11 @@
   <PropertyGroup Condition="'$(UseWindows)' != 'false'">
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
+
+  <!--
+      NOTE: Enable the use of Entity Framework 6 or higher?
+  -->
+  <PropertyGroup Condition="'$(UseEntityFramework6)' != 'false'">
+    <DefineConstants>$(DefineConstants);USE_ENTITY_FRAMEWORK_6</DefineConstants>
+  </PropertyGroup>
 </Project>

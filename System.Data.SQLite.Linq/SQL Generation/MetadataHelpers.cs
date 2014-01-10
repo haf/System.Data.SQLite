@@ -13,8 +13,13 @@ namespace System.Data.SQLite
   using System;
   using System.Data;
   using System.Collections.Generic;
-  using System.Data.Metadata.Edm;
   using System.Diagnostics;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Metadata.Edm;
+#else
+  using System.Data.Metadata.Edm;
+#endif
 
   /// <summary>
   /// A set of static helpers for type metadata
