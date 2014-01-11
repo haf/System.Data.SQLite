@@ -572,6 +572,18 @@ set sds_manifests(binaryLinq) {
 ###############################################################################
 #
 # NOTE: This is the list of extra files that should be present in all binary
+#       archives that support EF6 (i.e. available with the desktop .NET
+#       Framework 4.0 and later).
+#
+set sds_manifests(binaryEf6) {
+  System.Data.SQLite.EF6.dll
+  System.Data.SQLite.EF6.pdb
+  System.Data.SQLite.EF6.xml
+}
+
+###############################################################################
+#
+# NOTE: This is the list of extra files that should be present in all binary
 #       archives that support the desktop versions of the .NET Framework.
 #
 set sds_manifests(binaryExtra) {
@@ -948,42 +960,42 @@ set manifests(sqlite-netFx35-binary-PocketPC-ARM-2008-.zip,subst) ""; # dynamic
 ###############################################################################
 
 set manifests(sqlite-netFx40-binary-Win32-2010-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-binary-x64-2010-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-binary-bundle-Win32-2010-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-binary-bundle-x64-2010-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-static-binary-Win32-2010-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-static-binary-x64-2010-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-static-binary-bundle-Win32-2010-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-static-binary-bundle-x64-2010-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
@@ -1010,42 +1022,42 @@ set manifests(sqlite-netFx40-setup-bundle-x64-2010-.exe) [list sds \
 ###############################################################################
 
 set manifests(sqlite-netFx45-binary-Win32-2012-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-binary-x64-2012-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-binary-bundle-Win32-2012-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-binary-bundle-x64-2012-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-static-binary-Win32-2012-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-static-binary-x64-2012-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-static-binary-bundle-Win32-2012-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-static-binary-bundle-x64-2012-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
@@ -1088,42 +1100,42 @@ set manifests(sqlite-netFx39-binary-WinCE-x86-2012-.zip,subst) ""; # dynamic
 ###############################################################################
 
 set manifests(sqlite-netFx451-binary-Win32-2013-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-binary-x64-2013-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-binary-bundle-Win32-2013-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-binary-bundle-x64-2013-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-static-binary-Win32-2013-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-static-binary-x64-2013-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra binaryInterop]
+    binaryCore binaryLinq binaryEf6 binaryExtra binaryInterop]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-static-binary-bundle-Win32-2013-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-static-binary-bundle-x64-2013-.zip) [list sds \
-    binaryCore binaryLinq binaryExtra]
+    binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
 

@@ -307,6 +307,22 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.Linq.*" (
   %_AECHO%.
 )
 
+IF EXIST "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*" exist.
+  %_AECHO%.
+)
+
 IF EXIST "%TEMP%\EagleShell.exe.test.*.log" (
   %__ECHO% DEL /Q "%TEMP%\EagleShell.exe.test.*.log"
 
