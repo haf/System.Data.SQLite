@@ -2532,7 +2532,7 @@ namespace eval ::Eagle {
             if {![info exists ::no(loadSqliteImplicitFiles)]} then {
               tryLoadAssembly System.Data.SQLite.dll
               tryLoadAssembly System.Data.SQLite.Linq.dll
-              # tryLoadAssembly System.Data.SQLite.EF6.dll
+              tryLoadAssembly System.Data.SQLite.EF6.dll
             }
 
             if {![info exists ::no(loadSqliteNonImplicitFiles)]} then {

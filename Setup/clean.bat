@@ -259,6 +259,54 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\sqlite3.*" (
   %_AECHO%.
 )
 
+IF EXIST "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*" exist.
+  %_AECHO%.
+)
+
 IF EXIST "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*" (
   %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*"
 
@@ -272,6 +320,54 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*" (
   )
 ) ELSE (
   %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*" exist.
   %_AECHO%.
 )
 
