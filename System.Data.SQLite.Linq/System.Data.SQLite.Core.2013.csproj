@@ -54,7 +54,6 @@
     <Reference Include="System.Data.Entity" />
   </ItemGroup>
   <ItemGroup Condition="'$(UseEntityFramework6)' != 'false'">
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="EntityFramework">
       <HintPath>$(SQLiteNetDir)\Externals\EntityFramework\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
