@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -15,38 +15,39 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
+using System.Data.EntityClient;
+using System.Data.Metadata.Edm;
 using System.Data.Objects;
 using System.Data.Objects.DataClasses;
-using System.Data.EntityClient;
-using System.ComponentModel;
-using System.Xml.Serialization;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 [assembly: EdmSchemaAttribute()]
 #region EDM Relationship Metadata
 
-[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_Products_CategoryID_CategoryID", "Categories", System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Categories), "Products", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Products))]
-[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_Orders_CustomerID_CustomerID", "Customers", System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Customers), "Orders", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Orders))]
-[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_InternationalOrders_OrderID_OrderID", "Orders", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Orders), "InternationalOrders", System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.InternationalOrders), true)]
-[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_OrderDetails_OrderID_OrderID", "Orders", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Orders), "OrderDetails", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.OrderDetails), true)]
-[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_OrderDetails_ProductID_ProductID", "Products", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Products), "OrderDetails", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.OrderDetails), true)]
-[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_Products_SupplierID_SupplierID", "Suppliers", System.Data.Metadata.Edm.RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Suppliers), "Products", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Products))]
-[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_Territories_RegionID_RegionID", "Regions", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(testlinq.Regions), "Territories", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Territories))]
-[assembly: EdmRelationshipAttribute("northwindEFModel", "EmployeesTerritories", "Employees", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Employees), "Territories", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(testlinq.Territories))]
+[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_Products_CategoryID_CategoryID", "Categories", RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Categories), "Products", RelationshipMultiplicity.Many, typeof(testlinq.Products))]
+[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_Orders_CustomerID_CustomerID", "Customers", RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Customers), "Orders", RelationshipMultiplicity.Many, typeof(testlinq.Orders))]
+[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_InternationalOrders_OrderID_OrderID", "Orders", RelationshipMultiplicity.One, typeof(testlinq.Orders), "InternationalOrders", RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.InternationalOrders), true)]
+[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_OrderDetails_OrderID_OrderID", "Orders", RelationshipMultiplicity.One, typeof(testlinq.Orders), "OrderDetails", RelationshipMultiplicity.Many, typeof(testlinq.OrderDetails), true)]
+[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_OrderDetails_ProductID_ProductID", "Products", RelationshipMultiplicity.One, typeof(testlinq.Products), "OrderDetails", RelationshipMultiplicity.Many, typeof(testlinq.OrderDetails), true)]
+[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_Products_SupplierID_SupplierID", "Suppliers", RelationshipMultiplicity.ZeroOrOne, typeof(testlinq.Suppliers), "Products", RelationshipMultiplicity.Many, typeof(testlinq.Products))]
+[assembly: EdmRelationshipAttribute("northwindEFModel", "FK_Territories_RegionID_RegionID", "Regions", RelationshipMultiplicity.One, typeof(testlinq.Regions), "Territories", RelationshipMultiplicity.Many, typeof(testlinq.Territories))]
+[assembly: EdmRelationshipAttribute("northwindEFModel", "EmployeesTerritories", "Employees", RelationshipMultiplicity.Many, typeof(testlinq.Employees), "Territories", RelationshipMultiplicity.Many, typeof(testlinq.Territories))]
 
 #endregion
 
 namespace testlinq
 {
     #region Contexts
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
     public partial class northwindEFEntities : ObjectContext
     {
         #region Constructors
-    
+
         /// <summary>
         /// Initializes a new northwindEFEntities object using the connection string found in the 'northwindEFEntities' section of the application configuration file.
         /// </summary>
@@ -54,7 +55,7 @@ namespace testlinq
         {
             OnContextCreated();
         }
-    
+
         /// <summary>
         /// Initialize a new northwindEFEntities object.
         /// </summary>
@@ -62,7 +63,7 @@ namespace testlinq
         {
             OnContextCreated();
         }
-    
+
         /// <summary>
         /// Initialize a new northwindEFEntities object.
         /// </summary>
@@ -70,17 +71,17 @@ namespace testlinq
         {
             OnContextCreated();
         }
-    
+
         #endregion
-    
+
         #region Partial Methods
-    
+
         partial void OnContextCreated();
-    
+
         #endregion
-    
+
         #region ObjectSet Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -96,7 +97,7 @@ namespace testlinq
             }
         }
         private ObjectSet<Categories> _Categories;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -112,7 +113,7 @@ namespace testlinq
             }
         }
         private ObjectSet<Customers> _Customers;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -128,7 +129,7 @@ namespace testlinq
             }
         }
         private ObjectSet<Employees> _Employees;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -144,7 +145,7 @@ namespace testlinq
             }
         }
         private ObjectSet<InternationalOrders> _InternationalOrders;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -160,7 +161,7 @@ namespace testlinq
             }
         }
         private ObjectSet<OrderDetails> _OrderDetails;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -176,7 +177,7 @@ namespace testlinq
             }
         }
         private ObjectSet<Orders> _Orders;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -192,7 +193,7 @@ namespace testlinq
             }
         }
         private ObjectSet<PreviousEmployees> _PreviousEmployees;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -208,7 +209,7 @@ namespace testlinq
             }
         }
         private ObjectSet<Products> _Products;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -224,7 +225,7 @@ namespace testlinq
             }
         }
         private ObjectSet<Regions> _Regions;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -240,7 +241,7 @@ namespace testlinq
             }
         }
         private ObjectSet<Suppliers> _Suppliers;
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -259,7 +260,7 @@ namespace testlinq
 
         #endregion
         #region AddTo Methods
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the Categories EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -267,7 +268,7 @@ namespace testlinq
         {
             base.AddObject("Categories", categories);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the Customers EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -275,7 +276,7 @@ namespace testlinq
         {
             base.AddObject("Customers", customers);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the Employees EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -283,7 +284,7 @@ namespace testlinq
         {
             base.AddObject("Employees", employees);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the InternationalOrders EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -291,7 +292,7 @@ namespace testlinq
         {
             base.AddObject("InternationalOrders", internationalOrders);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the OrderDetails EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -299,7 +300,7 @@ namespace testlinq
         {
             base.AddObject("OrderDetails", orderDetails);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the Orders EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -307,7 +308,7 @@ namespace testlinq
         {
             base.AddObject("Orders", orders);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the PreviousEmployees EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -315,7 +316,7 @@ namespace testlinq
         {
             base.AddObject("PreviousEmployees", previousEmployees);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the Products EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -323,7 +324,7 @@ namespace testlinq
         {
             base.AddObject("Products", products);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the Regions EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -331,7 +332,7 @@ namespace testlinq
         {
             base.AddObject("Regions", regions);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the Suppliers EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -339,7 +340,7 @@ namespace testlinq
         {
             base.AddObject("Suppliers", suppliers);
         }
-    
+
         /// <summary>
         /// Deprecated Method for adding a new object to the Territories EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
@@ -350,12 +351,12 @@ namespace testlinq
 
         #endregion
     }
-    
+
 
     #endregion
-    
+
     #region Entities
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -365,7 +366,7 @@ namespace testlinq
     public partial class Categories : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new Categories object.
         /// </summary>
@@ -381,7 +382,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -408,7 +409,7 @@ namespace testlinq
         private global::System.Int64 _CategoryID;
         partial void OnCategoryIDChanging(global::System.Int64 value);
         partial void OnCategoryIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -432,7 +433,7 @@ namespace testlinq
         private global::System.String _CategoryName;
         partial void OnCategoryNameChanging(global::System.String value);
         partial void OnCategoryNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -456,7 +457,7 @@ namespace testlinq
         private global::System.String _Description;
         partial void OnDescriptionChanging(global::System.String value);
         partial void OnDescriptionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -482,9 +483,9 @@ namespace testlinq
         partial void OnPictureChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -509,7 +510,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -519,7 +520,7 @@ namespace testlinq
     public partial class Customers : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new Customers object.
         /// </summary>
@@ -535,7 +536,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -562,7 +563,7 @@ namespace testlinq
         private global::System.String _CustomerID;
         partial void OnCustomerIDChanging(global::System.String value);
         partial void OnCustomerIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -586,7 +587,7 @@ namespace testlinq
         private global::System.String _CompanyName;
         partial void OnCompanyNameChanging(global::System.String value);
         partial void OnCompanyNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -610,7 +611,7 @@ namespace testlinq
         private global::System.String _ContactName;
         partial void OnContactNameChanging(global::System.String value);
         partial void OnContactNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -634,7 +635,7 @@ namespace testlinq
         private global::System.String _ContactTitle;
         partial void OnContactTitleChanging(global::System.String value);
         partial void OnContactTitleChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -658,7 +659,7 @@ namespace testlinq
         private global::System.String _Address;
         partial void OnAddressChanging(global::System.String value);
         partial void OnAddressChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -682,7 +683,7 @@ namespace testlinq
         private global::System.String _City;
         partial void OnCityChanging(global::System.String value);
         partial void OnCityChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -706,7 +707,7 @@ namespace testlinq
         private global::System.String _Region;
         partial void OnRegionChanging(global::System.String value);
         partial void OnRegionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -730,7 +731,7 @@ namespace testlinq
         private global::System.String _PostalCode;
         partial void OnPostalCodeChanging(global::System.String value);
         partial void OnPostalCodeChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -754,7 +755,7 @@ namespace testlinq
         private global::System.String _Country;
         partial void OnCountryChanging(global::System.String value);
         partial void OnCountryChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -778,7 +779,7 @@ namespace testlinq
         private global::System.String _Phone;
         partial void OnPhoneChanging(global::System.String value);
         partial void OnPhoneChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -804,9 +805,9 @@ namespace testlinq
         partial void OnFaxChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -831,7 +832,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -841,7 +842,7 @@ namespace testlinq
     public partial class Employees : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new Employees object.
         /// </summary>
@@ -859,7 +860,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -886,7 +887,7 @@ namespace testlinq
         private global::System.Int64 _EmployeeID;
         partial void OnEmployeeIDChanging(global::System.Int64 value);
         partial void OnEmployeeIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -910,7 +911,7 @@ namespace testlinq
         private global::System.String _LastName;
         partial void OnLastNameChanging(global::System.String value);
         partial void OnLastNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -934,7 +935,7 @@ namespace testlinq
         private global::System.String _FirstName;
         partial void OnFirstNameChanging(global::System.String value);
         partial void OnFirstNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -958,7 +959,7 @@ namespace testlinq
         private global::System.String _Title;
         partial void OnTitleChanging(global::System.String value);
         partial void OnTitleChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -982,7 +983,7 @@ namespace testlinq
         private global::System.String _TitleOfCourtesy;
         partial void OnTitleOfCourtesyChanging(global::System.String value);
         partial void OnTitleOfCourtesyChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1006,7 +1007,7 @@ namespace testlinq
         private Nullable<global::System.DateTime> _BirthDate;
         partial void OnBirthDateChanging(Nullable<global::System.DateTime> value);
         partial void OnBirthDateChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1030,7 +1031,7 @@ namespace testlinq
         private Nullable<global::System.DateTime> _HireDate;
         partial void OnHireDateChanging(Nullable<global::System.DateTime> value);
         partial void OnHireDateChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1054,7 +1055,7 @@ namespace testlinq
         private global::System.String _Address;
         partial void OnAddressChanging(global::System.String value);
         partial void OnAddressChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1078,7 +1079,7 @@ namespace testlinq
         private global::System.String _City;
         partial void OnCityChanging(global::System.String value);
         partial void OnCityChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1102,7 +1103,7 @@ namespace testlinq
         private global::System.String _Region;
         partial void OnRegionChanging(global::System.String value);
         partial void OnRegionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1126,7 +1127,7 @@ namespace testlinq
         private global::System.String _PostalCode;
         partial void OnPostalCodeChanging(global::System.String value);
         partial void OnPostalCodeChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1150,7 +1151,7 @@ namespace testlinq
         private global::System.String _Country;
         partial void OnCountryChanging(global::System.String value);
         partial void OnCountryChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1174,7 +1175,7 @@ namespace testlinq
         private global::System.String _HomePhone;
         partial void OnHomePhoneChanging(global::System.String value);
         partial void OnHomePhoneChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1198,7 +1199,7 @@ namespace testlinq
         private global::System.String _Extension;
         partial void OnExtensionChanging(global::System.String value);
         partial void OnExtensionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1222,7 +1223,7 @@ namespace testlinq
         private global::System.Byte[] _Photo;
         partial void OnPhotoChanging(global::System.Byte[] value);
         partial void OnPhotoChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1246,7 +1247,7 @@ namespace testlinq
         private global::System.String _Notes;
         partial void OnNotesChanging(global::System.String value);
         partial void OnNotesChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1272,9 +1273,9 @@ namespace testlinq
         partial void OnPhotoPathChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1299,7 +1300,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -1309,7 +1310,7 @@ namespace testlinq
     public partial class InternationalOrders : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new InternationalOrders object.
         /// </summary>
@@ -1327,7 +1328,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1354,7 +1355,7 @@ namespace testlinq
         private global::System.Int64 _OrderID;
         partial void OnOrderIDChanging(global::System.Int64 value);
         partial void OnOrderIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1378,7 +1379,7 @@ namespace testlinq
         private global::System.String _CustomsDescription;
         partial void OnCustomsDescriptionChanging(global::System.String value);
         partial void OnCustomsDescriptionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1404,9 +1405,9 @@ namespace testlinq
         partial void OnExciseTaxChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1447,7 +1448,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -1457,7 +1458,7 @@ namespace testlinq
     public partial class OrderDetails : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new OrderDetails object.
         /// </summary>
@@ -1479,7 +1480,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1506,7 +1507,7 @@ namespace testlinq
         private global::System.Int64 _OrderID;
         partial void OnOrderIDChanging(global::System.Int64 value);
         partial void OnOrderIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1533,7 +1534,7 @@ namespace testlinq
         private global::System.Int64 _ProductID;
         partial void OnProductIDChanging(global::System.Int64 value);
         partial void OnProductIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1557,7 +1558,7 @@ namespace testlinq
         private global::System.Decimal _UnitPrice;
         partial void OnUnitPriceChanging(global::System.Decimal value);
         partial void OnUnitPriceChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1581,7 +1582,7 @@ namespace testlinq
         private global::System.Int16 _Quantity;
         partial void OnQuantityChanging(global::System.Int16 value);
         partial void OnQuantityChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1607,9 +1608,9 @@ namespace testlinq
         partial void OnDiscountChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1647,7 +1648,7 @@ namespace testlinq
                 }
             }
         }
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1688,7 +1689,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -1698,7 +1699,7 @@ namespace testlinq
     public partial class Orders : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new Orders object.
         /// </summary>
@@ -1712,7 +1713,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1739,7 +1740,7 @@ namespace testlinq
         private global::System.Int64 _OrderID;
         partial void OnOrderIDChanging(global::System.Int64 value);
         partial void OnOrderIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1763,7 +1764,7 @@ namespace testlinq
         private Nullable<global::System.Int64> _EmployeeID;
         partial void OnEmployeeIDChanging(Nullable<global::System.Int64> value);
         partial void OnEmployeeIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1787,7 +1788,7 @@ namespace testlinq
         private Nullable<global::System.DateTime> _OrderDate;
         partial void OnOrderDateChanging(Nullable<global::System.DateTime> value);
         partial void OnOrderDateChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1811,7 +1812,7 @@ namespace testlinq
         private Nullable<global::System.DateTime> _RequiredDate;
         partial void OnRequiredDateChanging(Nullable<global::System.DateTime> value);
         partial void OnRequiredDateChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1835,7 +1836,7 @@ namespace testlinq
         private Nullable<global::System.DateTime> _ShippedDate;
         partial void OnShippedDateChanging(Nullable<global::System.DateTime> value);
         partial void OnShippedDateChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1859,7 +1860,7 @@ namespace testlinq
         private Nullable<global::System.Decimal> _Freight;
         partial void OnFreightChanging(Nullable<global::System.Decimal> value);
         partial void OnFreightChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1883,7 +1884,7 @@ namespace testlinq
         private global::System.String _ShipName;
         partial void OnShipNameChanging(global::System.String value);
         partial void OnShipNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1907,7 +1908,7 @@ namespace testlinq
         private global::System.String _ShipAddress;
         partial void OnShipAddressChanging(global::System.String value);
         partial void OnShipAddressChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1931,7 +1932,7 @@ namespace testlinq
         private global::System.String _ShipCity;
         partial void OnShipCityChanging(global::System.String value);
         partial void OnShipCityChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1955,7 +1956,7 @@ namespace testlinq
         private global::System.String _ShipRegion;
         partial void OnShipRegionChanging(global::System.String value);
         partial void OnShipRegionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -1979,7 +1980,7 @@ namespace testlinq
         private global::System.String _ShipPostalCode;
         partial void OnShipPostalCodeChanging(global::System.String value);
         partial void OnShipPostalCodeChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2005,9 +2006,9 @@ namespace testlinq
         partial void OnShipCountryChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2045,7 +2046,7 @@ namespace testlinq
                 }
             }
         }
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2083,7 +2084,7 @@ namespace testlinq
                 }
             }
         }
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2108,7 +2109,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -2118,7 +2119,7 @@ namespace testlinq
     public partial class PreviousEmployees : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new PreviousEmployees object.
         /// </summary>
@@ -2136,7 +2137,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2163,7 +2164,7 @@ namespace testlinq
         private global::System.Int64 _EmployeeID;
         partial void OnEmployeeIDChanging(global::System.Int64 value);
         partial void OnEmployeeIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2187,7 +2188,7 @@ namespace testlinq
         private global::System.String _LastName;
         partial void OnLastNameChanging(global::System.String value);
         partial void OnLastNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2211,7 +2212,7 @@ namespace testlinq
         private global::System.String _FirstName;
         partial void OnFirstNameChanging(global::System.String value);
         partial void OnFirstNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2235,7 +2236,7 @@ namespace testlinq
         private global::System.String _Title;
         partial void OnTitleChanging(global::System.String value);
         partial void OnTitleChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2259,7 +2260,7 @@ namespace testlinq
         private global::System.String _TitleOfCourtesy;
         partial void OnTitleOfCourtesyChanging(global::System.String value);
         partial void OnTitleOfCourtesyChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2283,7 +2284,7 @@ namespace testlinq
         private Nullable<global::System.DateTime> _BirthDate;
         partial void OnBirthDateChanging(Nullable<global::System.DateTime> value);
         partial void OnBirthDateChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2307,7 +2308,7 @@ namespace testlinq
         private Nullable<global::System.DateTime> _HireDate;
         partial void OnHireDateChanging(Nullable<global::System.DateTime> value);
         partial void OnHireDateChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2331,7 +2332,7 @@ namespace testlinq
         private global::System.String _Address;
         partial void OnAddressChanging(global::System.String value);
         partial void OnAddressChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2355,7 +2356,7 @@ namespace testlinq
         private global::System.String _City;
         partial void OnCityChanging(global::System.String value);
         partial void OnCityChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2379,7 +2380,7 @@ namespace testlinq
         private global::System.String _Region;
         partial void OnRegionChanging(global::System.String value);
         partial void OnRegionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2403,7 +2404,7 @@ namespace testlinq
         private global::System.String _PostalCode;
         partial void OnPostalCodeChanging(global::System.String value);
         partial void OnPostalCodeChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2427,7 +2428,7 @@ namespace testlinq
         private global::System.String _Country;
         partial void OnCountryChanging(global::System.String value);
         partial void OnCountryChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2451,7 +2452,7 @@ namespace testlinq
         private global::System.String _HomePhone;
         partial void OnHomePhoneChanging(global::System.String value);
         partial void OnHomePhoneChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2475,7 +2476,7 @@ namespace testlinq
         private global::System.String _Extension;
         partial void OnExtensionChanging(global::System.String value);
         partial void OnExtensionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2499,7 +2500,7 @@ namespace testlinq
         private global::System.Byte[] _Photo;
         partial void OnPhotoChanging(global::System.Byte[] value);
         partial void OnPhotoChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2523,7 +2524,7 @@ namespace testlinq
         private global::System.String _Notes;
         partial void OnNotesChanging(global::System.String value);
         partial void OnNotesChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2549,9 +2550,9 @@ namespace testlinq
         partial void OnPhotoPathChanged();
 
         #endregion
-    
+
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -2561,7 +2562,7 @@ namespace testlinq
     public partial class Products : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new Products object.
         /// </summary>
@@ -2579,7 +2580,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2606,7 +2607,7 @@ namespace testlinq
         private global::System.Int64 _ProductID;
         partial void OnProductIDChanging(global::System.Int64 value);
         partial void OnProductIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2630,7 +2631,7 @@ namespace testlinq
         private global::System.String _ProductName;
         partial void OnProductNameChanging(global::System.String value);
         partial void OnProductNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2654,7 +2655,7 @@ namespace testlinq
         private global::System.String _QuantityPerUnit;
         partial void OnQuantityPerUnitChanging(global::System.String value);
         partial void OnQuantityPerUnitChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2678,7 +2679,7 @@ namespace testlinq
         private Nullable<global::System.Decimal> _UnitPrice;
         partial void OnUnitPriceChanging(Nullable<global::System.Decimal> value);
         partial void OnUnitPriceChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2702,7 +2703,7 @@ namespace testlinq
         private Nullable<global::System.Int16> _UnitsInStock;
         partial void OnUnitsInStockChanging(Nullable<global::System.Int16> value);
         partial void OnUnitsInStockChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2726,7 +2727,7 @@ namespace testlinq
         private Nullable<global::System.Int16> _UnitsOnOrder;
         partial void OnUnitsOnOrderChanging(Nullable<global::System.Int16> value);
         partial void OnUnitsOnOrderChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2750,7 +2751,7 @@ namespace testlinq
         private Nullable<global::System.Int16> _ReorderLevel;
         partial void OnReorderLevelChanging(Nullable<global::System.Int16> value);
         partial void OnReorderLevelChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2774,7 +2775,7 @@ namespace testlinq
         private global::System.Boolean _Discontinued;
         partial void OnDiscontinuedChanging(global::System.Boolean value);
         partial void OnDiscontinuedChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2800,9 +2801,9 @@ namespace testlinq
         partial void OnDiscontinuedDateChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2840,7 +2841,7 @@ namespace testlinq
                 }
             }
         }
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2862,7 +2863,7 @@ namespace testlinq
                 }
             }
         }
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2903,7 +2904,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -2913,7 +2914,7 @@ namespace testlinq
     public partial class Regions : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new Regions object.
         /// </summary>
@@ -2929,7 +2930,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2956,7 +2957,7 @@ namespace testlinq
         private global::System.Int64 _RegionID;
         partial void OnRegionIDChanging(global::System.Int64 value);
         partial void OnRegionIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -2982,9 +2983,9 @@ namespace testlinq
         partial void OnRegionDescriptionChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3009,7 +3010,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -3019,7 +3020,7 @@ namespace testlinq
     public partial class Suppliers : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new Suppliers object.
         /// </summary>
@@ -3035,7 +3036,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3062,7 +3063,7 @@ namespace testlinq
         private global::System.Int64 _SupplierID;
         partial void OnSupplierIDChanging(global::System.Int64 value);
         partial void OnSupplierIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3086,7 +3087,7 @@ namespace testlinq
         private global::System.String _CompanyName;
         partial void OnCompanyNameChanging(global::System.String value);
         partial void OnCompanyNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3110,7 +3111,7 @@ namespace testlinq
         private global::System.String _ContactName;
         partial void OnContactNameChanging(global::System.String value);
         partial void OnContactNameChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3134,7 +3135,7 @@ namespace testlinq
         private global::System.String _ContactTitle;
         partial void OnContactTitleChanging(global::System.String value);
         partial void OnContactTitleChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3158,7 +3159,7 @@ namespace testlinq
         private global::System.String _Address;
         partial void OnAddressChanging(global::System.String value);
         partial void OnAddressChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3182,7 +3183,7 @@ namespace testlinq
         private global::System.String _City;
         partial void OnCityChanging(global::System.String value);
         partial void OnCityChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3206,7 +3207,7 @@ namespace testlinq
         private global::System.String _Region;
         partial void OnRegionChanging(global::System.String value);
         partial void OnRegionChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3230,7 +3231,7 @@ namespace testlinq
         private global::System.String _PostalCode;
         partial void OnPostalCodeChanging(global::System.String value);
         partial void OnPostalCodeChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3254,7 +3255,7 @@ namespace testlinq
         private global::System.String _Country;
         partial void OnCountryChanging(global::System.String value);
         partial void OnCountryChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3278,7 +3279,7 @@ namespace testlinq
         private global::System.String _Phone;
         partial void OnPhoneChanging(global::System.String value);
         partial void OnPhoneChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3302,7 +3303,7 @@ namespace testlinq
         private global::System.String _Fax;
         partial void OnFaxChanging(global::System.String value);
         partial void OnFaxChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3328,9 +3329,9 @@ namespace testlinq
         partial void OnHomePageChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3355,7 +3356,7 @@ namespace testlinq
 
         #endregion
     }
-    
+
     /// <summary>
     /// No Metadata Documentation available.
     /// </summary>
@@ -3365,7 +3366,7 @@ namespace testlinq
     public partial class Territories : EntityObject
     {
         #region Factory Method
-    
+
         /// <summary>
         /// Create a new Territories object.
         /// </summary>
@@ -3381,7 +3382,7 @@ namespace testlinq
 
         #endregion
         #region Primitive Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3408,7 +3409,7 @@ namespace testlinq
         private global::System.Int64 _TerritoryID;
         partial void OnTerritoryIDChanging(global::System.Int64 value);
         partial void OnTerritoryIDChanged();
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3434,9 +3435,9 @@ namespace testlinq
         partial void OnTerritoryDescriptionChanged();
 
         #endregion
-    
+
         #region Navigation Properties
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3474,7 +3475,7 @@ namespace testlinq
                 }
             }
         }
-    
+
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
@@ -3501,5 +3502,5 @@ namespace testlinq
     }
 
     #endregion
-    
+
 }

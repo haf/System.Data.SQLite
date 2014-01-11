@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -29,7 +29,7 @@
 // Generation date: 8/25/2008 8:54:05 AM
 namespace testlinq
 {
-    
+
     /// <summary>
     /// There are no comments for northwindEFEntities in the schema.
     /// </summary>
@@ -38,7 +38,7 @@ namespace testlinq
         /// <summary>
         /// Initializes a new northwindEFEntities object using the connection string found in the 'northwindEFEntities' section of the application configuration file.
         /// </summary>
-        public northwindEFEntities() : 
+        public northwindEFEntities() :
                 base("name=northwindEFEntities", "northwindEFEntities")
         {
             this.OnContextCreated();
@@ -46,7 +46,7 @@ namespace testlinq
         /// <summary>
         /// Initialize a new northwindEFEntities object.
         /// </summary>
-        public northwindEFEntities(string connectionString) : 
+        public northwindEFEntities(string connectionString) :
                 base(connectionString, "northwindEFEntities")
         {
             this.OnContextCreated();
@@ -54,7 +54,7 @@ namespace testlinq
         /// <summary>
         /// Initialize a new northwindEFEntities object.
         /// </summary>
-        public northwindEFEntities(global::System.Data.EntityClient.EntityConnection connection) : 
+        public northwindEFEntities(global::System.Data.EntityClient.EntityConnection connection) :
                 base(connection, "northwindEFEntities")
         {
             this.OnContextCreated();

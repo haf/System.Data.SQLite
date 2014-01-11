@@ -2354,7 +2354,7 @@ namespace eval ::Eagle {
         #
         set mdaConfigFileNames [list \
             Installer.exe.mda.config test.exe.mda.config \
-            testlinq.exe.mda.config]
+            testlinq.exe.mda.config testef6.exe.mda.config]
 
         #
         # NOTE: Build the list of native assembly files that we handle.  The
@@ -2532,7 +2532,7 @@ namespace eval ::Eagle {
             if {![info exists ::no(loadSqliteImplicitFiles)]} then {
               tryLoadAssembly System.Data.SQLite.dll
               tryLoadAssembly System.Data.SQLite.Linq.dll
-              tryLoadAssembly System.Data.SQLite.EF6.dll
+              # tryLoadAssembly System.Data.SQLite.EF6.dll
             }
 
             if {![info exists ::no(loadSqliteNonImplicitFiles)]} then {

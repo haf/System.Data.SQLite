@@ -14,7 +14,12 @@ using System.Runtime.ConstrainedExecution;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
+#if USE_ENTITY_FRAMEWORK_6
+[assembly: AssemblyTitle("System.Data.SQLite for Entity Framework 6")]
+#else
 [assembly: AssemblyTitle("System.Data.SQLite for LINQ")]
+#endif
+
 [assembly: AssemblyDescription("ADO.NET Data Provider for SQLite")]
 [assembly: AssemblyCompany("http://system.data.sqlite.org/")]
 [assembly: AssemblyProduct("System.Data.SQLite")]
