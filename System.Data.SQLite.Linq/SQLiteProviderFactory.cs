@@ -5,7 +5,11 @@
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
-namespace System.Data.SQLite
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6
+#else
+namespace System.Data.SQLite.Linq
+#endif
 {
     using System;
     using System.Data.Common;
@@ -13,8 +17,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// SQLite implementation of <see cref="DbProviderFactory" />.
     /// </summary>
-    public sealed partial class SQLiteProviderFactory :
-        DbProviderFactory, IDisposable
+    public sealed class SQLiteProviderFactory : DbProviderFactory, IDisposable
     {
         #region Public Static Data
         /// <summary>
@@ -130,7 +133,10 @@ namespace System.Data.SQLite
         {
 #if THROW_ON_DISPOSED
             if (disposed)
-                throw new ObjectDisposedException(typeof(SQLiteProviderFactory).Name);
+            {
+                throw new ObjectDisposedException(
+                    typeof(SQLiteProviderFactory).Name);
+            }
 #endif
         }
 
