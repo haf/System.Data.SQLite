@@ -243,6 +243,22 @@ IF EXIST "%SOURCE%\Doc\SQLite.NET.chw" (
   %_AECHO%.
 )
 
+IF EXIST "%SOURCE%\Externals\Eagle\bin\EntityFramework.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\EntityFramework.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\EntityFramework.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\EntityFramework.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\EntityFramework.*" exist.
+  %_AECHO%.
+)
+
 IF EXIST "%SOURCE%\Externals\Eagle\bin\sqlite3.*" (
   %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\sqlite3.*"
 
