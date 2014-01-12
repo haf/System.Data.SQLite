@@ -1141,7 +1141,7 @@ namespace System.Data.SQLite
                     //
                     // HACK: Attempt to open the specified sub-key.  If this
                     //       fails, we will simply return the wrapped root key
-                    //       itself since no writes are allowed in 'what-if'
+                    //       itself since no writes are allowed in "what-if"
                     //       mode anyhow.
                     //
                     RegistryKey subKey = key.OpenSubKey(subKeyName);
@@ -1390,7 +1390,7 @@ namespace System.Data.SQLite
 
             #region Implicit Conversion Operators
             //
-            // BUGBUG: Remove me?  This should be safe because in 'what-if'
+            // BUGBUG: Remove me?  This should be safe because in "what-if"
             //         mode all keys are opened read-only.
             //
             public static implicit operator RegistryKey(
@@ -1530,7 +1530,7 @@ namespace System.Data.SQLite
 
                 //
                 // HACK: Always forbid writable access when operating in
-                //       'what-if' mode.
+                //       "what-if" mode.
                 //
                 MockRegistryKey key = rootKey.OpenSubKey(
                     subKeyName, whatIf ? false : writable);
@@ -1563,7 +1563,7 @@ namespace System.Data.SQLite
                 {
                     //
                     // HACK: Always open a key, rather than creating one when
-                    //       operating in 'what-if' mode.
+                    //       operating in "what-if" mode.
                     //
                     if (whatIf)
                     {
@@ -1571,7 +1571,7 @@ namespace System.Data.SQLite
                         // HACK: Attempt to open the specified sub-key.  If
                         //       this fails, we will simply return the root
                         //       key itself since no writes are allowed in
-                        //       'what-if' mode anyhow.
+                        //       "what-if" mode anyhow.
                         //
                         MockRegistryKey key = rootKey.OpenSubKey(subKeyName);
 
@@ -2125,7 +2125,9 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            private static bool IsEf6AssemblyAvailable()
+            private static bool IsEf6AssemblyAvailable(
+                bool whatIf
+                )
             {
                 try
                 {
@@ -2152,7 +2154,11 @@ namespace System.Data.SQLite
                     "Entity Framework 6 assembly was not resolved.",
                     traceCategory);
 
-                return false;
+                //
+                // HACK: In "what-if" mode, we always return true here so
+                //       that those code paths can be tested.
+                //
+                return whatIf;
             }
             #endregion
 
@@ -3115,8 +3121,8 @@ namespace System.Data.SQLite
                     if (!configuration.whatIf)
                     {
                         //
-                        // NOTE: If the debugger is attached and What-If mode
-                        //       is [now] disabled, issue a warning.
+                        // NOTE: If the debugger is attached and "what-if"
+                        //       mode is [now] disabled, issue a warning.
                         //
                         if (Debugger.IsAttached)
                             TraceOps.DebugAndTrace(TracePriority.MediumHigh,
@@ -3334,7 +3340,7 @@ namespace System.Data.SQLite
                 if (noNetFx40 && noNetFx45 && noNetFx451)
                     return false;
 
-                return IsEf6AssemblyAvailable();
+                return IsEf6AssemblyAvailable(whatIf);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -6392,7 +6398,7 @@ namespace System.Data.SQLite
                     traceCategory);
 
             //
-            // NOTE: In 'what-if' mode, do not actually start the process.
+            // NOTE: In "what-if" mode, do not actually start the process.
             //
             if (!whatIf)
             {
