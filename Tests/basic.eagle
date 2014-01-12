@@ -1352,8 +1352,8 @@ interrupted.*$}}
 ###############################################################################
 
 runTest {test data-1.24 {LINQ SQL_CONSTRAINTCOLUMNS resource} -body {
-  object invoke -flags +NonPublic System.Data.SQLite.Properties.Resources \
-      SQL_CONSTRAINTCOLUMNS
+  object invoke -flags +NonPublic \
+      System.Data.SQLite.Linq.Properties.Resources SQL_CONSTRAINTCOLUMNS
 } -constraints {eagle System.Data.SQLite System.Data.SQLite.Linq} -result {
       CREATE TEMP VIEW SCHEMACONSTRAINTCOLUMNS AS
         SELECT CONSTRAINT_CATALOG,
@@ -1378,8 +1378,8 @@ runTest {test data-1.24 {LINQ SQL_CONSTRAINTCOLUMNS resource} -body {
 ###############################################################################
 
 runTest {test data-1.25 {LINQ SQL_CONSTRAINTS resource} -body {
-  object invoke -flags +NonPublic System.Data.SQLite.Properties.Resources \
-      SQL_CONSTRAINTS
+  object invoke -flags +NonPublic \
+      System.Data.SQLite.Linq.Properties.Resources SQL_CONSTRAINTS
 } -constraints {eagle System.Data.SQLite System.Data.SQLite.Linq} -result {
       CREATE TEMP VIEW SCHEMACONSTRAINTS AS
         SELECT INDEX_CATALOG AS CONSTRAINT_CATALOG,
@@ -1490,7 +1490,7 @@ runTest {test data-1.27 {LINQ ISQLiteSchemaExtensions.BuildTempSchema} -setup {
   set connection [getDbConnection]
 
   set providerServices [object invoke -flags +NonPublic \
-      System.Data.SQLite.SQLiteProviderServices Instance]
+      System.Data.SQLite.Linq.SQLiteProviderServices Instance]
 
   object invoke -flags +NonPublic -type \
       System.Data.SQLite.ISQLiteSchemaExtensions $providerServices \

@@ -67,7 +67,7 @@ namespace System.Data.SQLite
         if (_sqliteServices == null)
         {
             Version version = this.GetType().Assembly.GetName().Version;
-            Type type = Type.GetType(String.Format(CultureInfo.InvariantCulture, "System.Data.SQLite.SQLiteProviderServices, System.Data.SQLite.Linq, Version={0}, Culture=neutral, PublicKeyToken=db937bc2d44ff139", version), false);
+            Type type = Type.GetType(String.Format(CultureInfo.InvariantCulture, "System.Data.SQLite.Linq.SQLiteProviderServices, System.Data.SQLite.Linq, Version={0}, Culture=neutral, PublicKeyToken=db937bc2d44ff139", version), false);
 
             if (type != null)
             {
