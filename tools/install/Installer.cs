@@ -2125,9 +2125,7 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            private static bool IsEf6AssemblyAvailable(
-                bool whatIf
-                )
+            private static bool IsEf6AssemblyAvailable()
             {
                 try
                 {
@@ -2154,11 +2152,7 @@ namespace System.Data.SQLite
                     "Entity Framework 6 assembly was not resolved.",
                     traceCategory);
 
-                //
-                // HACK: In "what-if" mode, we always return true here so
-                //       that those code paths can be tested.
-                //
-                return whatIf;
+                return false;
             }
             #endregion
 
@@ -3340,7 +3334,7 @@ namespace System.Data.SQLite
                 if (noNetFx40 && noNetFx45 && noNetFx451)
                     return false;
 
-                return IsEf6AssemblyAvailable(whatIf);
+                return IsEf6AssemblyAvailable();
             }
 
             ///////////////////////////////////////////////////////////////////
