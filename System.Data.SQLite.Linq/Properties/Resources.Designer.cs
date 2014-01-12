@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -15,10 +15,14 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace System.Data.SQLite.Properties {
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6.Properties
+#else
+namespace System.Data.SQLite.Linq.Properties
+#endif
+{
     using System;
-    
-    
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -30,15 +34,15 @@ namespace System.Data.SQLite.Properties {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal sealed class Resources {
-        
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -46,13 +50,13 @@ namespace System.Data.SQLite.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Data.SQLite.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Data.SQLite.Properties", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -66,10 +70,10 @@ namespace System.Data.SQLite.Properties {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to CREATE TEMP VIEW SCHEMACONSTRAINTCOLUMNS AS
-        ///SELECT CONSTRAINT_CATALOG, NULL AS CONSTRAINT_SCHEMA, CONSTRAINT_NAME, TABLE_CATALOG, NULL AS TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME 
+        ///SELECT CONSTRAINT_CATALOG, NULL AS CONSTRAINT_SCHEMA, CONSTRAINT_NAME, TABLE_CATALOG, NULL AS TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME
         ///FROM TEMP.SCHEMAINDEXCOLUMNS
         ///UNION
         ///SELECT CONSTRAINT_CATALOG, NULL, CONSTRAINT_NAME, TABLE_CATALOG, NULL, TABLE_NAME, FKEY_FROM_COLUMN
@@ -80,13 +84,13 @@ namespace System.Data.SQLite.Properties {
                 return ResourceManager.GetString("SQL_CONSTRAINTCOLUMNS", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to CREATE TEMP VIEW SCHEMACONSTRAINTS AS
         ///SELECT INDEX_CATALOG AS CONSTRAINT_CATALOG, NULL AS CONSTRAINT_SCHEMA, INDEX_NAME AS CONSTRAINT_NAME, TABLE_CATALOG, NULL AS TABLE_SCHEMA, TABLE_NAME, &apos;PRIMARY KEY&apos; AS CONSTRAINT_TYPE, 0 AS IS_DEFERRABLE, 0 AS INITIALLY_DEFERRED, NULL AS CHECK_CLAUSE
         ///FROM TEMP.SCHEMAINDEXES WHERE PRIMARY_KEY = 1
         ///UNION
-        ///SELECT INDEX_CATALOG, NULL, INDEX_NAME, TABLE_CATALOG, NULL, TABLE_NAME, &apos;UNIQUE&apos;, 0, 0, NULL 
+        ///SELECT INDEX_CATALOG, NULL, INDEX_NAME, TABLE_CATALOG, NULL, TABLE_NAME, &apos;UNIQUE&apos;, 0, 0, NULL
         ///FROM TEMP.SCHEMAINDEXES WHERE PRIMARY_KEY = 0 AND [UNIQUE] = 1
         ///UNION
         /// [rest of string was truncated]&quot;;.

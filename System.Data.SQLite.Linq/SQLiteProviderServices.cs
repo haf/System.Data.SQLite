@@ -5,7 +5,11 @@
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
-namespace System.Data.SQLite
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6
+#else
+namespace System.Data.SQLite.Linq
+#endif
 {
   using System;
   using System.Data.Common;

@@ -24,6 +24,7 @@ runSQLiteTestPrologue
 # NOTE: Setup the variables that refer to the various files required by the
 #       tests in this file.
 #
+set entityFrameworkDllFile [getBuildFileName EntityFramework.dll]
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
 set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
 set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
@@ -37,6 +38,11 @@ set northwindEfDbFile [file nativename [file join [file dirname $path] \
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
 #
+if {![haveConstraint [appendArgs file_ \
+    [file tail $entityFrameworkDllFile]]]} then {
+  checkForFile $test_channel $entityFrameworkDllFile
+}
+
 if {![haveConstraint [appendArgs file_ \
     [file tail $systemDataSQLiteDllFile]]]} then {
   checkForFile $test_channel $systemDataSQLiteDllFile
@@ -190,7 +196,7 @@ runTest {test data-1.3 {unit tests from the 'testef6' project} -setup {
 
   unset -nocomplain code output error savedEncoding encoding
 } -constraints \
-{eagle monoToDo SQLite file_System.Data.SQLite.dll\
+{eagle monoToDo SQLite file_EntityFramework.dll file_System.Data.SQLite.dll\
 file_System.Data.SQLite.EF6.dll file_testef6.exe file_northwindEF.db\
 file_testlinq.out testExec} -result {0 True {}}}
 
@@ -1352,8 +1358,8 @@ interrupted.*$}}
 ###############################################################################
 
 runTest {test data-1.24 {LINQ SQL_CONSTRAINTCOLUMNS resource} -body {
-  object invoke -flags +NonPublic System.Data.SQLite.Properties.Resources \
-      SQL_CONSTRAINTCOLUMNS
+  object invoke -flags +NonPublic \
+      System.Data.SQLite.Linq.Properties.Resources SQL_CONSTRAINTCOLUMNS
 } -constraints {eagle System.Data.SQLite System.Data.SQLite.Linq} -result {
       CREATE TEMP VIEW SCHEMACONSTRAINTCOLUMNS AS
         SELECT CONSTRAINT_CATALOG,
@@ -1378,8 +1384,8 @@ runTest {test data-1.24 {LINQ SQL_CONSTRAINTCOLUMNS resource} -body {
 ###############################################################################
 
 runTest {test data-1.25 {LINQ SQL_CONSTRAINTS resource} -body {
-  object invoke -flags +NonPublic System.Data.SQLite.Properties.Resources \
-      SQL_CONSTRAINTS
+  object invoke -flags +NonPublic \
+      System.Data.SQLite.Linq.Properties.Resources SQL_CONSTRAINTS
 } -constraints {eagle System.Data.SQLite System.Data.SQLite.Linq} -result {
       CREATE TEMP VIEW SCHEMACONSTRAINTS AS
         SELECT INDEX_CATALOG AS CONSTRAINT_CATALOG,
@@ -1490,7 +1496,7 @@ runTest {test data-1.27 {LINQ ISQLiteSchemaExtensions.BuildTempSchema} -setup {
   set connection [getDbConnection]
 
   set providerServices [object invoke -flags +NonPublic \
-      System.Data.SQLite.SQLiteProviderServices Instance]
+      System.Data.SQLite.Linq.SQLiteProviderServices Instance]
 
   object invoke -flags +NonPublic -type \
       System.Data.SQLite.ISQLiteSchemaExtensions $providerServices \
@@ -2759,7 +2765,7 @@ reportSQLiteResources $test_channel
 unset -nocomplain northwindEfDbFile testLinqOutFile testEf6ExeFile \
     testLinqExeFile testExeFile sqliteDesignerDllFile \
     systemDataSQLiteEf6DllFile systemDataSQLiteLinqDllFile \
-    systemDataSQLiteDllFile
+    systemDataSQLiteDllFile entityFrameworkDllFile
 
 ###############################################################################
 

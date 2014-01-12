@@ -1141,7 +1141,7 @@ namespace System.Data.SQLite
                     //
                     // HACK: Attempt to open the specified sub-key.  If this
                     //       fails, we will simply return the wrapped root key
-                    //       itself since no writes are allowed in 'what-if'
+                    //       itself since no writes are allowed in "what-if"
                     //       mode anyhow.
                     //
                     RegistryKey subKey = key.OpenSubKey(subKeyName);
@@ -1390,7 +1390,7 @@ namespace System.Data.SQLite
 
             #region Implicit Conversion Operators
             //
-            // BUGBUG: Remove me?  This should be safe because in 'what-if'
+            // BUGBUG: Remove me?  This should be safe because in "what-if"
             //         mode all keys are opened read-only.
             //
             public static implicit operator RegistryKey(
@@ -1530,7 +1530,7 @@ namespace System.Data.SQLite
 
                 //
                 // HACK: Always forbid writable access when operating in
-                //       'what-if' mode.
+                //       "what-if" mode.
                 //
                 MockRegistryKey key = rootKey.OpenSubKey(
                     subKeyName, whatIf ? false : writable);
@@ -1563,7 +1563,7 @@ namespace System.Data.SQLite
                 {
                     //
                     // HACK: Always open a key, rather than creating one when
-                    //       operating in 'what-if' mode.
+                    //       operating in "what-if" mode.
                     //
                     if (whatIf)
                     {
@@ -1571,7 +1571,7 @@ namespace System.Data.SQLite
                         // HACK: Attempt to open the specified sub-key.  If
                         //       this fails, we will simply return the root
                         //       key itself since no writes are allowed in
-                        //       'what-if' mode anyhow.
+                        //       "what-if" mode anyhow.
                         //
                         MockRegistryKey key = rootKey.OpenSubKey(subKeyName);
 
@@ -2121,6 +2121,38 @@ namespace System.Data.SQLite
                 }
 
                 return null;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static bool IsEf6AssemblyAvailable()
+            {
+                try
+                {
+                    Assembly assembly = Assembly.ReflectionOnlyLoad(
+                        Ef6AssemblyName);
+
+                    if (assembly != null)
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.Highest,
+                            debugCallback, traceCallback,
+                            "Entity Framework 6 assembly was resolved.",
+                            traceCategory);
+
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // do nothing.
+                }
+
+                TraceOps.DebugAndTrace(TracePriority.Highest,
+                    debugCallback, traceCallback,
+                    "Entity Framework 6 assembly was not resolved.",
+                    traceCategory);
+
+                return false;
             }
             #endregion
 
@@ -3083,8 +3115,8 @@ namespace System.Data.SQLite
                     if (!configuration.whatIf)
                     {
                         //
-                        // NOTE: If the debugger is attached and What-If mode
-                        //       is [now] disabled, issue a warning.
+                        // NOTE: If the debugger is attached and "what-if"
+                        //       mode is [now] disabled, issue a warning.
                         //
                         if (Debugger.IsAttached)
                             TraceOps.DebugAndTrace(TracePriority.MediumHigh,
@@ -3279,9 +3311,10 @@ namespace System.Data.SQLite
             public bool IsLinqSupported()
             {
                 //
-                // NOTE: Return non-zero if the LINQ assembly should be
-                //       processed during the install.  If the target is
-                //       Visual Studio 2005, this should return zero.
+                // NOTE: Return non-zero if the System.Data.SQLite.Linq
+                //       assembly should be processed during the install.
+                //       If the target is Visual Studio 2005, this must
+                //       return zero.
                 //
                 return !noNetFx35 || !noNetFx40 || !noNetFx45 || !noNetFx451;
             }
@@ -3291,12 +3324,17 @@ namespace System.Data.SQLite
             public bool IsEf6Supported()
             {
                 //
-                // NOTE: Return non-zero if the EF6 assembly should be
-                //       processed during the install.  If the target is
-                //       Visual Studio 2005 or Visual Studio 2008, this
-                //       should return zero.
+                // NOTE: Return non-zero if the System.Data.SQLite.EF6
+                //       assembly should be processed during the install.
+                //       If the target is Visual Studio 2005 or Visual
+                //       Studio 2008, this must return zero.  Also, if
+                //       the EF6 core assembly is unavailable, this must
+                //       return zero.
                 //
-                return !noNetFx40 || !noNetFx45 || !noNetFx451;
+                if (noNetFx40 && noNetFx45 && noNetFx451)
+                    return false;
+
+                return IsEf6AssemblyAvailable();
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3941,6 +3979,11 @@ namespace System.Data.SQLite
 
         private const string CLRv2ImageRuntimeVersion = "v2.0.50727";
         private const string CLRv4ImageRuntimeVersion = "v4.0.30319";
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private const string Ef6AssemblyName = "EntityFramework, " +
+            "Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -6349,7 +6392,7 @@ namespace System.Data.SQLite
                     traceCategory);
 
             //
-            // NOTE: In 'what-if' mode, do not actually start the process.
+            // NOTE: In "what-if" mode, do not actually start the process.
             //
             if (!whatIf)
             {

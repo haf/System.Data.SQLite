@@ -90,26 +90,26 @@
   </ItemGroup>
   <ItemGroup Condition="'$(UseEntityFramework6)' == 'false'">
     <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.Linq.ssdl">
-      <LogicalName>System.Data.SQLite.Resources.SQLiteProviderServices.StoreSchemaDefinition.ssdl</LogicalName>
+      <LogicalName>System.Data.SQLite.SQLiteProviderServices.StoreSchemaDefinition.ssdl</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup Condition="'$(UseEntityFramework6)' != 'false'">
     <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.EF6.ssdl">
-      <LogicalName>System.Data.SQLite.Resources.SQLiteProviderServices.StoreSchemaDefinition.ssdl</LogicalName>
+      <LogicalName>System.Data.SQLite.SQLiteProviderServices.StoreSchemaDefinition.ssdl</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Common.ConceptualSchemaDefinition.csdl">
-      <LogicalName>System.Data.SQLite.Resources.Common.ConceptualSchemaDefinition.csdl</LogicalName>
+      <LogicalName>System.Data.SQLite.Common.ConceptualSchemaDefinition.csdl</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\SQLiteProviderServices.ProviderManifest.xml">
-      <LogicalName>System.Data.SQLite.Resources.SQLiteProviderServices.ProviderManifest.xml</LogicalName>
+      <LogicalName>System.Data.SQLite.SQLiteProviderServices.ProviderManifest.xml</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaMapping.msl">
-      <LogicalName>System.Data.SQLite.Resources.SQLiteProviderServices.StoreSchemaMapping.msl</LogicalName>
+      <LogicalName>System.Data.SQLite.SQLiteProviderServices.StoreSchemaMapping.msl</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <LogicalName>System.Data.SQLite.Properties.Resources.resources</LogicalName>
+      <LogicalName>System.Data.SQLite.Properties.resources</LogicalName>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>

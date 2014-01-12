@@ -112,6 +112,43 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getBuildNetFx {} {
+      #
+      # NOTE: See if the test .NET Framework setting has been overridden by
+      #       the user (e.g. on the command line).
+      #
+      if {[info exists ::test_net_fx] && \
+          [string length $::test_net_fx] > 0} then {
+        #
+        # NOTE: Use the specified test .NET Framework.
+        #
+        return $::test_net_fx
+      } else {
+        set year [getBuildYear]
+
+        switch -exact -- $year {
+          2005 {
+            return netFx20
+          }
+          2008 {
+            return netFx35
+          }
+          2010 {
+            return netFx40
+          }
+          2012 {
+            return netFx45
+          }
+          2013 {
+            return netFx451
+          }
+          default {
+            return ""
+          }
+        }
+      }
+    }
+
     proc getBuildPlatform { native } {
       if {[info exists ::test_platform] && \
           [string length $::test_platform] > 0} then {
@@ -514,6 +551,14 @@ namespace eval ::Eagle {
           [file join [getBuildDirectory] $platform [file tail $fileName]]]
     }
 
+    proc getExternalDirectory {} {
+      #
+      # NOTE: This procedure returns the directory where the external binary
+      #       files are located.
+      #
+      return [file nativename [file dirname [file dirname [info binary]]]]
+    }
+
     proc getBinaryDirectory {} {
       #
       # NOTE: This procedure returns the directory where the test application
@@ -532,6 +577,14 @@ namespace eval ::Eagle {
       } else {
         return [info binary]
       }
+    }
+
+    proc getExternalFileName { fileName } {
+      #
+      # NOTE: Returns the specified file name as if it were located in the
+      #       directory containing the external binaries.
+      #
+      return [file nativename [file join [getExternalDirectory] $fileName]]
     }
 
     proc getBinaryFileName { fileName {platform ""} } {
@@ -759,6 +812,40 @@ namespace eval ::Eagle {
           object invoke Interpreter.GetActive AddRuntimeOption native
         }
       } [getTestOverridesPreamble [list path test_channel]] $suffix]]]
+    }
+
+    proc tryCopyExternalFile { fileName {platform ""} {newFileName ""} } {
+      set sourceFileName [getExternalFileName $fileName]
+
+      if {![file exists $sourceFileName]} then {
+        tputs $::test_channel [appendArgs \
+            "---- skipped copying external file \"" $sourceFileName \
+            "\", it does not exist\n"]
+
+        return
+      }
+
+      if {[string length $newFileName] > 0} then {
+        set targetFileName [getBinaryFileName $newFileName $platform]
+      } else {
+        set targetFileName [getBinaryFileName $fileName $platform]
+      }
+
+      set targetDirectory [file dirname $targetFileName]
+
+      if {[catch {
+              if {![file exists $targetDirectory]} then {
+                file mkdir $targetDirectory
+              }
+              file copy -force $sourceFileName $targetFileName}] == 0} then {
+        tputs $::test_channel [appendArgs \
+            "---- copied external file from \"" $sourceFileName "\" to \"" \
+            $targetFileName \"\n]
+      } else {
+        tputs $::test_channel [appendArgs \
+            "---- failed to copy external file from \"" $sourceFileName \
+            "\" to \"" $targetFileName \"\n]
+      }
     }
 
     proc tryCopyBinaryFile { fileName {platform ""} {newFileName ""} } {
@@ -2357,6 +2444,15 @@ namespace eval ::Eagle {
             testlinq.exe.mda.config testef6.exe.mda.config]
 
         #
+        # NOTE: Build the list of external files that we handle.  Some of
+        #       these files may be native and/or managed assemblies that are
+        #       required to perform various tests.
+        #
+        set externalFileNames [list \
+            [file join EntityFramework lib [string map [list Fx ""] [string \
+            map [list netFx451 netFx45] [getBuildNetFx]]] EntityFramework.dll]]
+
+        #
         # NOTE: Build the list of native assembly files that we handle.  The
         #       reason the "System.Data.SQLite.dll" file is included here is
         #       because it could be the mixed-mode assembly.
@@ -2385,6 +2481,10 @@ namespace eval ::Eagle {
             removeConstraint [appendArgs file_ $fileName]
           }
 
+          foreach fileName $externalFileNames {
+            removeConstraint [appendArgs file_ [file tail $fileName]]
+          }
+
           foreach fileName $nativeFileNames {
             removeConstraint [appendArgs file_ $fileName]
           }
@@ -2405,6 +2505,16 @@ namespace eval ::Eagle {
           if {![info exists ::no(deleteSqliteFiles)]} then {
             if {![info exists ::no(deleteSqliteConfigFiles)]} then {
               foreach fileName $configFileNames {
+                tryDeleteBinaryFile $fileName
+              }
+            }
+
+            if {![info exists ::no(deleteSqliteExternalFiles)]} then {
+              foreach fileName $mdaConfigFileNames {
+                tryDeleteBuildFile $fileName
+              }
+
+              foreach fileName $externalFileNames {
                 tryDeleteBinaryFile $fileName
               }
             }
@@ -2494,6 +2604,24 @@ namespace eval ::Eagle {
               }
             }
 
+            if {![info exists ::no(copySqliteExternalFiles)]} then {
+              #
+              # NOTE: Copy the Managed Debugging Assistants (MDA) configuration
+              #       file for the Eagle shell to the build output directory,
+              #       while using each of the names of the various legacy test
+              #       executables.  This will help to make sure that all the
+              #       legacy tests run with exactly the same set of Managed
+              #       Debugging Assistants configured.
+              #
+              foreach fileName $mdaConfigFileNames {
+                tryCopyBinaryFile EagleShell.exe.mda.config "" $fileName
+              }
+
+              foreach fileName $externalFileNames {
+                tryCopyExternalFile $fileName
+              }
+            }
+
             if {![info exists ::no(copySqliteNativeFiles)]} then {
               if {![info exists ::no(copySqliteImplicitFiles)]} then {
                 foreach fileName $nativeFileNames {
@@ -2545,32 +2673,6 @@ namespace eval ::Eagle {
                   [string length $architecture] > 0} then {
                 tryLoadAssembly System.Data.SQLite.dll $architecture
               }
-            }
-          }
-
-          #
-          # NOTE: Skip trying to delete external files if instructed.
-          #
-          if {![info exists ::no(deleteSqliteExternalFiles)]} then {
-            foreach fileName $mdaConfigFileNames {
-              tryDeleteBuildFile $fileName
-            }
-          }
-
-          #
-          # NOTE: Skip trying to copy external files if instructed.
-          #
-          if {![info exists ::no(copySqliteExternalFiles)]} then {
-            #
-            # NOTE: Copy the Managed Debugging Assistants (MDA) configuration
-            #       file for the Eagle shell to the build output directory,
-            #       while using each of the names of the various legacy test
-            #       executables.  This will help to make sure that all the
-            #       legacy tests run with exactly the same set of Managed
-            #       Debugging Assistants configured.
-            #
-            foreach fileName $mdaConfigFileNames {
-              tryCopyBinaryFile EagleShell.exe.mda.config "" $fileName
             }
           }
         }
@@ -2824,6 +2926,9 @@ namespace eval ::Eagle {
             System.Diagnostics.Process.GetCurrentProcess Modules]
 
         object foreach -alias module $modules {
+          #
+          # NOTE: The module file name here must be normalized.
+          #
           set fileName [file normalize [$module FileName]]
 
           if {[string match -nocase */sqlite3.dll $fileName]} then {
