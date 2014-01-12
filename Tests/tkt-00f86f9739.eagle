@@ -24,6 +24,7 @@ runSQLiteTestPrologue
 # NOTE: Setup the variables that refer to the various files required by the
 #       tests in this file.
 #
+set entityFrameworkDllFile [getBuildFileName EntityFramework.dll]
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
 set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
 set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
@@ -35,6 +36,11 @@ set northwindEfDbFile [file nativename [file join [file dirname $path] \
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
 #
+if {![haveConstraint [appendArgs file_ \
+    [file tail $entityFrameworkDllFile]]]} then {
+  checkForFile $test_channel $entityFrameworkDllFile
+}
+
 if {![haveConstraint [appendArgs file_ \
     [file tail $systemDataSQLiteDllFile]]]} then {
   checkForFile $test_channel $systemDataSQLiteDllFile
@@ -133,15 +139,16 @@ runTest {test tkt-00f86f9739-1.2 {LINQ with StartsWith (EF6)} -body {
 } -constraints \
 {eagle monoToDo defineConstant.System.Data.SQLite.USE_INTEROP_DLL\
 defineConstant.System.Data.SQLite.INTEROP_EXTENSION_FUNCTIONS SQLite testExec\
-file_System.Data.SQLite.dll file_System.Data.SQLite.EF6.dll file_testef6.exe\
-file_northwindEF.db} -result {0 {} 0 {DRACD OLDWO RATTC} 0 {ALFKI CACTU CHOPS\
-FOLKO GALED KOENE LILAS MAGAA MAISD OCEAN RANCH SAVEA THECR} 0 {} 0 {} 0 {} 0\
-{}}}
+file_EntityFramework.dll file_System.Data.SQLite.dll\
+file_System.Data.SQLite.EF6.dll file_testef6.exe file_northwindEF.db} -result \
+{0 {} 0 {DRACD OLDWO RATTC} 0 {ALFKI CACTU CHOPS FOLKO GALED KOENE LILAS MAGAA\
+MAISD OCEAN RANCH SAVEA THECR} 0 {} 0 {} 0 {} 0 {}}}
 
 ###############################################################################
 
-unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
-    systemDataSQLiteEf6DllFile testLinqExeFile testEf6ExeFile northwindEfDbFile
+unset -nocomplain northwindEfDbFile testEf6ExeFile testLinqExeFile \
+    systemDataSQLiteEf6DllFile systemDataSQLiteLinqDllFile \
+    systemDataSQLiteDllFile entityFrameworkDllFile
 
 ###############################################################################
 
