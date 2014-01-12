@@ -26,7 +26,9 @@ runSQLiteTestPrologue
 #
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
 set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
+set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
 set testLinqExeFile [getBuildFileName testlinq.exe]
+set testEf6ExeFile [getBuildFileName testef6.exe]
 set northwindEfDbFile [file nativename [file join [file dirname $path] \
     testlinq northwindEF.db]]
 
@@ -43,8 +45,17 @@ if {![haveConstraint [appendArgs file_ \
   checkForFile $test_channel $systemDataSQLiteLinqDllFile
 }
 
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteEf6DllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteEf6DllFile
+}
+
 if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
   checkForFile $test_channel $testLinqExeFile
+}
+
+if {![haveConstraint [appendArgs file_ [file tail $testEf6ExeFile]]]} then {
+  checkForFile $test_channel $testEf6ExeFile
 }
 
 if {![haveConstraint [appendArgs file_ [file tail $northwindEfDbFile]]]} then {
@@ -53,7 +64,14 @@ if {![haveConstraint [appendArgs file_ [file tail $northwindEfDbFile]]]} then {
 
 ###############################################################################
 
-runTest {test tkt-ccfa69fc32-1.1 {Entity Framework / Transaction Scope} -body {
+runTest {test tkt-ccfa69fc32-1.1 {LINQ Transaction Scope} -body {
+  #
+  # NOTE: Re-copy the reference database file used for this unit test to the
+  #       build directory in case it has been changed by a previous test run.
+  #
+  file copy -force $northwindEfDbFile \
+      [file join [getBuildDirectory] [file tail $northwindEfDbFile]]
+
   set result [list]
 
   foreach add [list false true false] {
@@ -83,15 +101,62 @@ runTest {test tkt-ccfa69fc32-1.1 {Entity Framework / Transaction Scope} -body {
   unset -nocomplain code output error result add
 } -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll testExec\
 file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db} -match \
-glob -result {0 {1581 1730 1833 2116 2139} 0 {System.Data.UpdateException: *\
----> System.Data.SQLite.SQLiteException: constraint failed
+glob -result {0 {1581 1730 1833 2116 2139} 0\
+{System.Data.UpdateException: * --->\
+System.Data.SQLite.SQLiteException: constraint failed
 UNIQUE constraint failed: Territories.TerritoryID
 *} 0 {1 2 3 4 5 6 7 8 9 10 1576 1577 1578 1579 1580 1581 1730 1833 2116 2139}}}
 
 ###############################################################################
 
-unset -nocomplain systemDataSQLiteDllFile systemDataSQLiteLinqDllFile \
-    testLinqExeFile northwindEfDbFile
+runTest {test tkt-ccfa69fc32-1.2 {EF6 Transaction Scope} -body {
+  #
+  # NOTE: Re-copy the reference database file used for this unit test to the
+  #       build directory in case it has been changed by a previous test run.
+  #
+  file copy -force $northwindEfDbFile \
+      [file join [getBuildDirectory] [file tail $northwindEfDbFile]]
+
+  set result [list]
+
+  foreach add [list false true false] {
+    set output ""
+
+    set code [catch {
+      testClrExec $testEf6ExeFile [list -eventflags Wait -directory \
+          [file dirname $testEf6ExeFile] -nocarriagereturns -stdout output \
+          -success 0] -efTransaction $add
+    } error]
+
+    tlog "---- BEGIN STDOUT OUTPUT\n"
+    tlog $output
+    tlog "\n---- END STDOUT OUTPUT\n"
+
+    lappend result $code
+
+    if {$code == 0} then {
+      lappend result [string trim $output]
+    } else {
+      lappend result [string trim $error]
+    }
+  }
+
+  set result
+} -cleanup {
+  unset -nocomplain code output error result add
+} -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll testExec\
+file_System.Data.SQLite.EF6.dll file_testef6.exe file_northwindEF.db} -match \
+glob -result {0 {1581 1730 1833 2116 2139} 0\
+{System.Data.Entity.Core.UpdateException: * --->\
+System.Data.SQLite.SQLiteException: constraint failed
+UNIQUE constraint failed: Territories.TerritoryID
+*} 0 {1 2 3 4 5 6 7 8 9 10 1576 1577 1578 1579 1580 1581 1730 1833 2116 2139}}}
+
+###############################################################################
+
+unset -nocomplain northwindEfDbFile testEf6ExeFile testLinqExeFile \
+    systemDataSQLiteEf6DllFile systemDataSQLiteLinqDllFile \
+    systemDataSQLiteDllFile
 
 ###############################################################################
 

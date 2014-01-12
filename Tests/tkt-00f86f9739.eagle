@@ -71,6 +71,13 @@ if {![haveConstraint [appendArgs file_ [file tail $northwindEfDbFile]]]} then {
 ###############################################################################
 
 runTest {test tkt-00f86f9739-1.1 {LINQ with StartsWith} -body {
+  #
+  # NOTE: Re-copy the reference database file used for this unit test to the
+  #       build directory in case it has been changed by a previous test run.
+  #
+  file copy -force $northwindEfDbFile \
+      [file join [getBuildDirectory] [file tail $northwindEfDbFile]]
+
   set result [list]
 
   foreach value [list "" a b z 1+1 don notthere] {
@@ -108,15 +115,22 @@ FOLKO GALED KOENE LILAS MAGAA MAISD OCEAN RANCH SAVEA THECR} 0 {} 0 {} 0 {} 0\
 
 ###############################################################################
 
-runTest {test tkt-00f86f9739-1.2 {LINQ with StartsWith (EF6)} -body {
+runTest {test tkt-00f86f9739-1.2 {EF6 with StartsWith} -body {
+  #
+  # NOTE: Re-copy the reference database file used for this unit test to the
+  #       build directory in case it has been changed by a previous test run.
+  #
+  file copy -force $northwindEfDbFile \
+      [file join [getBuildDirectory] [file tail $northwindEfDbFile]]
+
   set result [list]
 
   foreach value [list "" a b z 1+1 don notthere] {
     set output ""
 
     set code [catch {
-      testClrExec $testLinqExeFile [list -eventflags Wait -directory \
-          [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
+      testClrExec $testEf6ExeFile [list -eventflags Wait -directory \
+          [file dirname $testEf6ExeFile] -nocarriagereturns -stdout output \
           -success 0] -startsWith $value
     } error]
 
