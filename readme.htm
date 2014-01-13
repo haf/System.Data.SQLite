@@ -136,7 +136,7 @@ Download and run one of the setup packages and then select the
 option when prompted.
 </p>
 <h2>
-<strong>DbFactory Support (Non-Compact Framework)</strong></h2>
+<strong>DbFactory Support (Desktop Framework)</strong></h2>
 In order to use the SQLiteFactory and have the SQLite data provider enumerated in
 the DbProviderFactories methods, you must add the following segment into your application's
 app.config file:<br />
@@ -156,7 +156,7 @@ See the help documentation for further details on implementing both version-spec
 (GAC enabled) and version independent DBProviderFactories support.
 </p>
 
-<h2>Compiling for the Compact Framework</h2>
+<h2>Compiling for the .NET Compact Framework</h2>
 
 <p>
 Just change the target platform from Win32 to Compact Framework and recompile.&nbsp;
@@ -165,23 +165,45 @@ therefore all user-defined collating sequences and functions must be explicitly
 registered.</strong>&nbsp; See the <strong>testce</strong> sample application for
 an example of how to explicitly register user-defined collating sequences and functions.</p>
 
-<h2><b><a name="redist"></a>Distributing The SQLite Engine and ADO.NET Assembly</b></h2>
+<h2><b><a name="redist"></a>Distributing or Deploying System.Data.SQLite</b></h2>
 
 <p>
-On the desktop, only the <strong>System.Data.SQLite.DLL</strong> file needs to be
-distributed with your application(s).&nbsp; This DLL contains both the managed wrapper
-and the native SQLite3 codebase.&nbsp; For the Compact Framework, you will have
-to distribute both the CF version of System.Data.SQLite.DLL, as well as the SQLite.Interop.XXX.DLL.&nbsp;
-This is a breaking change as of 1.0.59.0.&nbsp; Recent Windows Mobile frameworks
-are not supporting the mixed CF assembly I was building prior to this version.</p>
+On the desktop, when using the statically linked mixed-mode assembly, only the
+<strong>System.Data.SQLite.dll</strong> file needs to be distributed with your
+application(s).  This dynamic link library contains both the managed provider
+and the SQLite native library.  For other build configurations, including those
+for the .NET Compact Framework, you will need to distribute both the managed
+provider <strong>System.Data.SQLite.dll</strong>, as well as the associated
+native library <strong>SQLite.Interop.dll</strong> (or
+<strong>SQLite.Interop.XXX.dll</strong> for the .NET Compact Framework).  For
+the .NET Compact Framework edition, this is a breaking change as of 1.0.59.0.
+The recent versions of the .NET Compact Framework do not appear to properly
+support mixed-mode assemblies.  All builds of System.Data.SQLite, except those
+explicitly marked as &quot;static&quot; in their package name, will also require
+the associated <a href="https://support.microsoft.com/kb/2019667">Microsoft
+Visual C++ Runtime Library</a> to be installed on the target machine.  For
+further details on distributing and/or deploying System.Data.SQLite, please
+refer to the
+<a href="http://system.data.sqlite.org/index.html/doc/trunk/www/downloads.wiki">System.Data.SQLite Downloads</a>
+web page.
+</p>
 
-<h2><b>Development Notes Regarding the SQLite 3 Source Code</b></h2>
+<h2><b>Development Notes Regarding the SQLite Native Library Source Code</b></h2>
 
 <p>
-The core SQLite engine is compiled directly from the unmodified source code available
-at the sqlite.org website.&nbsp; Several additional pieces are compiled on top of
-it to extend its functionality, but the core engine's source is not changed.</p>
+The included SQLite native library is compiled directly from the official source
+code releases available from the <a href="http://www.sqlite.org/">sqlite.org</a>
+website.
+</p>
+
 <p>
+In addition, there are several relatively small extensions included within the
+System.Data.SQLite &quot;interop assembly&quot; and some of these extensions are
+specific to the System.Data.SQLite project itself; however, the included SQLite
+native library source code itself is compiled verbatim, using a set of fully
+supported <a href="http://www.sqlite.org/compile.html">compile-time options</a>
+designed for robustness and maximum backward compatibility with previously
+released versions of System.Data.SQLite.
 </p>
 
 <h2><b>Version History</b></h2>
@@ -1279,7 +1301,7 @@ related to construction of named parameters.</li>
 functions, and made several enhancements and fixes to schemas.&nbsp;</li>
 <li>Implemented the SourceColumnNullMapping property of SQLiteParameter to fix a
 DbCommandBuilder code generation bug.&nbsp;</li><li>Removed the runtime dependency
-on MSVCR80.DLL.&nbsp; File size is somewhat larger for the varying desktop versions.</li><li>
+on msvcr80.dll.&nbsp; File size is somewhat larger for the varying desktop versions.</li><li>
 Created an install program to manage installation and uninstallation of the SQLite
 design-time support.</li>
 <li>Designer support now works for all Visual Studio editions, including all Express
@@ -1320,7 +1342,7 @@ to be able to use the library normally.</li></ul>
 code.&nbsp; Therefore no guarantees can be made regarding its suitability for production
 use.</li>
 <li><strong>You no longer need to distribute 2 files on the CompactFramework.&nbsp;
-You can delete SQLite.Interop.DLL entirely.&nbsp; </strong>I wrote a custom tool
+You can delete SQLite.Interop.dll entirely.&nbsp; </strong>I wrote a custom tool
 called "mergebin" (available in the source zip file) which combines the two libraries
 and gets around a glaring defect in the VS2005 linker for ARM processors which doesn't
 allow you to link netmodules.</li>
@@ -1532,7 +1554,7 @@ associated with a connection) or just prior to the command being executed.&nbsp;
 <b>1.0.11 - August 1, 2005</b><br />
 </p>
 <ul>
-<li><strong>For everything except the Compact Framework, System.Data.SQLite.DLL
+<li><strong>For everything except the Compact Framework, System.Data.SQLite.dll
 is now the <em>only</em> DLL required to use this provider!</strong>&nbsp; The assembly
 is now a multi-module assembly, containing both the native SQLite3 codebase and
 the C# classes built on top of it.&nbsp; The Compact Framework version (when completed)
@@ -1559,7 +1581,7 @@ the parameters to be out of whack. </li>
 </p>
 <ul>
 <li>Fixed a broken helpfile and corrected some obsolete help remarks in SQLiteFunction.cs
-<li>Added a version resource to the SQLite.Interop.DLL.&nbsp;</li></ul>
+<li>Added a version resource to the SQLite.Interop.dll.&nbsp;</li></ul>
 <p>
 <b>1.0.09 - May 24, 2005</b><br />
 </p>
@@ -1621,7 +1643,7 @@ that invalidate a prepared statement.&nbsp; Statements are recompiled transparen
 <li>Renamed many internal variables, reviewed access to variables marked as internal
 and altered their protection levels accordingly.
 <li>Due to the presence of the altered sqlite3 codebase and so many added interop
-functions, I decided to rename the sqlite3 C project and the DLL to SQLite.Interop.DLL.&nbsp;
+functions, I decided to rename the sqlite3 C project and the DLL to SQLite.Interop.dll.&nbsp;
 This is the same core sqlite3 codebase but designed specifically for this ADO.NET
 provider.&nbsp; This eliminates any possibility of someone dropping another build
 of sqlite3.dll into the system and rendering the provider inoperable.&nbsp; In the
