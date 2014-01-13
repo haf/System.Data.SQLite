@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -17,6 +17,23 @@ namespace System.Data.SQLite
   /// </summary>
   public sealed partial class SQLiteFactory : IServiceProvider
   {
+    //
+    // TODO: This points to the legacy "System.Data.SQLite.Linq" assembly
+    //       (i.e. the one that does not support Entity Framework 6).
+    //       Currently, this class and its containing assembly (i.e.
+    //       "System.Data.SQLite") know nothing about the Entity Framework
+    //       6 compatible assembly (i.e. "System.Data.SQLite.EF6").  This
+    //       situation may need to change.
+    //
+    private static readonly string DefaultTypeName =
+      "System.Data.SQLite.Linq.SQLiteProviderServices, System.Data.SQLite.Linq, " +
+      "Version={0}, Culture=neutral, PublicKeyToken=db937bc2d44ff139";
+
+    private static readonly BindingFlags DefaultBindingFlags =
+        BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
+
+    ///////////////////////////////////////////////////////////////////////////
+
     private static Type _dbProviderServicesType;
     private static object _sqliteServices;
 
@@ -66,13 +83,31 @@ namespace System.Data.SQLite
     {
         if (_sqliteServices == null)
         {
+            string typeName = UnsafeNativeMethods.GetSettingValue(
+                "TypeName_SQLiteProviderServices", null);
+
             Version version = this.GetType().Assembly.GetName().Version;
-            Type type = Type.GetType(String.Format(CultureInfo.InvariantCulture, "System.Data.SQLite.Linq.SQLiteProviderServices, System.Data.SQLite.Linq, Version={0}, Culture=neutral, PublicKeyToken=db937bc2d44ff139", version), false);
+
+            if (typeName != null)
+            {
+                typeName = String.Format(
+                    CultureInfo.InvariantCulture, typeName, version);
+            }
+            else
+            {
+                typeName = String.Format(
+                    CultureInfo.InvariantCulture, DefaultTypeName, version);
+            }
+
+            Type type = Type.GetType(typeName, false);
 
             if (type != null)
             {
-                FieldInfo field = type.GetField("Instance", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-                _sqliteServices = field.GetValue(null);
+                FieldInfo field = type.GetField(
+                    "Instance", DefaultBindingFlags);
+
+                if (field != null)
+                    _sqliteServices = field.GetValue(null);
             }
         }
         return _sqliteServices;
