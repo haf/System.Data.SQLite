@@ -106,7 +106,7 @@ namespace eval ::Eagle {
         return $::test_years
       } else {
         #
-        # NOTE: Use the default list of test years.
+        # NOTE: Use the default list of test years (i.e. all).
         #
         return [list 2005 2008 2010 2012 2013]
       }
@@ -143,7 +143,7 @@ namespace eval ::Eagle {
             return netFx451
           }
           default {
-            return ""
+            return netFx35; # TODO: Good "fallback" default?
           }
         }
       }
@@ -178,6 +178,8 @@ namespace eval ::Eagle {
       } else {
         #
         # NOTE: No machine architecture is available, return an empty string.
+        #       It is important to return an empty string here because the
+        #       result of this procedure may be used with [file join].
         #
         return ""
       }
@@ -536,6 +538,8 @@ namespace eval ::Eagle {
       } else {
         #
         # NOTE: No release version is available, return an empty string.
+        #       It is important to return an empty string here because the
+        #       result of this procedure may be used with [file join].
         #
         return ""
       }
@@ -2617,6 +2621,12 @@ namespace eval ::Eagle {
                 tryCopyBinaryFile EagleShell.exe.mda.config "" $fileName
               }
 
+              #
+              # NOTE: Copy the external binaries, if any, to the directory that
+              #       contains the Eagle shell.  This is typically used to make
+              #       sure assemblies referenced by the ones being tested are
+              #       available during the testing process.
+              #
               foreach fileName $externalFileNames {
                 tryCopyExternalFile $fileName
               }
@@ -2659,7 +2669,13 @@ namespace eval ::Eagle {
           if {![info exists ::no(loadSqliteFiles)]} then {
             if {![info exists ::no(loadSqliteImplicitFiles)]} then {
               tryLoadAssembly System.Data.SQLite.dll
+            }
+
+            if {![info exists ::no(loadSqliteLinqFiles)]} then {
               tryLoadAssembly System.Data.SQLite.Linq.dll
+            }
+
+            if {![info exists ::no(loadSqliteEf6Files)]} then {
               tryLoadAssembly System.Data.SQLite.EF6.dll
             }
 
@@ -2874,6 +2890,18 @@ namespace eval ::Eagle {
         set year [getBuildYear]
         addConstraint [appendArgs buildYear. $year]
         tputs $::test_channel [appendArgs \" $year \"\n]
+
+        #
+        # NOTE: Check the current build .NET Framework.  Basically, this
+        #       indicates which version of the .NET Framework is being
+        #       by the assembly binaries under test.
+        #
+        tputs $::test_channel \
+            "---- checking for System.Data.SQLite build .NET Framework... "
+
+        set netFx [getBuildNetFx]
+        addConstraint [appendArgs buildFramework. $netFx]
+        tputs $::test_channel [appendArgs \" $netFx \"\n]
 
         #
         # NOTE: Check the current build configuration.  This should normally
