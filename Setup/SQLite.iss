@@ -194,6 +194,8 @@ Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#BaseConfiguration}\b
 Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
+Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+
 #if Year != "2005"
 #if Pos("NativeOnly", AppConfiguration) == 0
 Components: Application\LINQ; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
@@ -234,6 +236,9 @@ Components: Application\Test and Application\LINQ; Source: ..\bin\{#Year}\{#Base
 
 #if Year != "2005" && Year != "2008"
 Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6) and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #elif Year != "2005"
 Components: Application\Test and Application\LINQ; Source: ..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif

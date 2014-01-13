@@ -603,6 +603,9 @@ set sds_manifests(binaryEf6) {
   System.Data.SQLite.EF6.dll
   System.Data.SQLite.EF6.pdb
   System.Data.SQLite.EF6.xml
+  testef6.exe
+  testef6.exe.config
+  testef6.pdb
 }
 
 ###############################################################################
