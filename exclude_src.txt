@@ -15,9 +15,11 @@ bin/*
 Doc/Output/*
 Externals/Eagle/bin/Eagle.dll
 Externals/Eagle/bin/EagleShell.exe
+Externals/Eagle/bin/EntityFramework.*
 Externals/Eagle/bin/SQLite.Interop.*
 Externals/Eagle/bin/sqlite3.*
 Externals/Eagle/bin/System.*
+Externals/Eagle/bin/Win32/*
 Externals/Eagle/bin/x64/*
 Externals/Eagle/bin/x86/*
 Externals/Eagle/lib/Eagle1.0/embed.eagle
@@ -34,6 +36,7 @@ Externals/Eagle/lib/Test1.0/epilogue.eagle
 Externals/Eagle/lib/Test1.0/pkgIndex.eagle
 Externals/Eagle/lib/Test1.0/pkgIndex.tcl
 Externals/Eagle/lib/Test1.0/prologue.eagle
+Externals/EntityFramework/*
 Externals/HtmlHelp/*
 Externals/MSVCPP/*
 Externals/NDoc3/*
