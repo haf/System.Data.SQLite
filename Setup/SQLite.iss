@@ -207,7 +207,19 @@ Components: Application\LINQ and Application\Symbols; Source: ..\bin\{#Year}\{#B
 
 #if Year != "2005" && Year != "2008"
 #if Pos("NativeOnly", AppConfiguration) == 0
+#if Year == "2010"
+Components: Application\EF6; Tasks: gac; Source: ..\Externals\EntityFramework\lib\net40\EntityFramework.dll; DestDir: {app}\GAC; StrongAssemblyName: "EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+#elif Year == "2012" || Year == "2013"
+Components: Application\EF6; Tasks: gac; Source: ..\Externals\EntityFramework\lib\net45\EntityFramework.dll; DestDir: {app}\GAC; StrongAssemblyName: "EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+#endif
+
 Components: Application\EF6; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.EF6, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+#endif
+
+#if Year == "2010"
+Components: Application\EF6; Source: ..\Externals\EntityFramework\lib\net40\EntityFramework.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#elif Year == "2012" || Year == "2013"
+Components: Application\EF6; Source: ..\Externals\EntityFramework\lib\net45\EntityFramework.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
 Components: Application\EF6; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete

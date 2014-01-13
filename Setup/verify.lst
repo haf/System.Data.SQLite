@@ -749,6 +749,7 @@ set sds_manifests(setupLinqBundle) {
 #       Framework 4.0 and later).
 #
 set sds_manifests(setupEf6Interop) {
+  {{app}\bin\EntityFramework.dll}
   {{app}\bin\System.Data.SQLite.EF6.dll}
 }
 
@@ -760,6 +761,7 @@ set sds_manifests(setupEf6Interop) {
 #       later).
 #
 set sds_manifests(setupEf6Bundle) {
+  {{app}\GAC\EntityFramework.dll}
   {{app}\GAC\System.Data.SQLite.EF6.dll}
 }
 
