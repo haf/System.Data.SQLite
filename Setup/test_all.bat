@@ -158,6 +158,13 @@ FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
             ECHO Failed to copy "bin\%%Y\%%C\bin\System.Data.SQLite.EF6.*" to "bin\%%Y\%PLATFORM%\%%C".
             GOTO errors
           )
+
+          %__ECHO% XCOPY "bin\%%Y\%%C\bin\testef6.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+          IF ERRORLEVEL 1 (
+            ECHO Failed to copy "bin\%%Y\%%C\bin\testef6.*" to "bin\%%Y\%PLATFORM%\%%C".
+            GOTO errors
+          )
         )
 
         %__ECHO% XCOPY "bin\%%Y\%%C\bin\SQLite.Designer.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
