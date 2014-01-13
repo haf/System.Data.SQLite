@@ -77,7 +77,7 @@
     <Compile Include="SQLiteProviderServices.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.ssdl">
+    <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.Linq.ssdl">
       <LogicalName>System.Data.SQLite.SQLiteProviderServices.StoreSchemaDefinition.ssdl</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
