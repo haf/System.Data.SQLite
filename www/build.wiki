@@ -148,10 +148,13 @@
         <li>&lt;root&gt;\test\AssemblyInfo.cs</li>
         <li>&lt;root&gt;\test\app.config</li>
         <li>&lt;root&gt;\testce\AssemblyInfo.cs</li>
-        <li>&lt;root&gt;\testlinq\2008\App.config</li>
-        <li>&lt;root&gt;\testlinq\2010\App.config</li>
-        <li>&lt;root&gt;\testlinq\2012\App.config</li>
-        <li>&lt;root&gt;\testlinq\2013\App.config</li>
+        <li>&lt;root&gt;\testlinq\2008\LINQ\App.config</li>
+        <li>&lt;root&gt;\testlinq\2010\EF6\App.config</li>
+        <li>&lt;root&gt;\testlinq\2010\LINQ\App.config</li>
+        <li>&lt;root&gt;\testlinq\2012\EF6\App.config</li>
+        <li>&lt;root&gt;\testlinq\2012\LINQ\App.config</li>
+        <li>&lt;root&gt;\testlinq\2013\EF6\App.config</li>
+        <li>&lt;root&gt;\testlinq\2013\LINQ\App.config</li>
         <li>&lt;root&gt;\testlinq\Properties\AssemblyInfo.cs</li>
         <li>&lt;root&gt;\Tests\version.eagle</li>
         <li>&lt;root&gt;\tools\install\Properties\AssemblyInfo.cs</li>
