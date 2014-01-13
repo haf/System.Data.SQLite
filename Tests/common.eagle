@@ -610,10 +610,10 @@ namespace eval ::Eagle {
       #       mixed-mode assembly is being used and the name of the current
       #       platform.
       #
-      if {[catch {object invoke -flags +NonPublic \
-              System.Data.SQLite.UnsafeNativeMethods \
-              _SQLiteNativeModuleFileName} fileName] == 0 && \
-          [string length $fileName] > 0} then {
+      if {[catch {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.UnsafeNativeMethods _SQLiteNativeModuleFileName
+      } fileName] == 0 && [string length $fileName] > 0} then {
         #
         # NOTE: The SQLite core native library has already been loaded via
         #       the native library pre-loader.  Return that file name now.
@@ -838,10 +838,11 @@ namespace eval ::Eagle {
       set targetDirectory [file dirname $targetFileName]
 
       if {[catch {
-              if {![file exists $targetDirectory]} then {
-                file mkdir $targetDirectory
-              }
-              file copy -force $sourceFileName $targetFileName}] == 0} then {
+        if {![file exists $targetDirectory]} then {
+          file mkdir $targetDirectory
+        }
+        file copy -force $sourceFileName $targetFileName
+      }] == 0} then {
         tputs $::test_channel [appendArgs \
             "---- copied external file from \"" $sourceFileName "\" to \"" \
             $targetFileName \"\n]
@@ -872,10 +873,11 @@ namespace eval ::Eagle {
       set targetDirectory [file dirname $targetFileName]
 
       if {[catch {
-              if {![file exists $targetDirectory]} then {
-                file mkdir $targetDirectory
-              }
-              file copy -force $sourceFileName $targetFileName}] == 0} then {
+        if {![file exists $targetDirectory]} then {
+          file mkdir $targetDirectory
+        }
+        file copy -force $sourceFileName $targetFileName
+      }] == 0} then {
         tputs $::test_channel [appendArgs \
             "---- copied binary file from \"" $sourceFileName "\" to \"" \
             $targetFileName \"\n]
@@ -906,10 +908,11 @@ namespace eval ::Eagle {
       set targetDirectory [file dirname $targetFileName]
 
       if {[catch {
-              if {![file exists $targetDirectory]} then {
-                file mkdir $targetDirectory
-              }
-              file copy -force $sourceFileName $targetFileName}] == 0} then {
+        if {![file exists $targetDirectory]} then {
+          file mkdir $targetDirectory
+        }
+        file copy -force $sourceFileName $targetFileName
+      }] == 0} then {
         tputs $::test_channel [appendArgs \
             "---- copied build file from \"" $sourceFileName "\" to \"" \
             $targetFileName \"\n]
@@ -981,8 +984,9 @@ namespace eval ::Eagle {
     proc tryLoadAssembly { fileName {platform ""} } {
       set fileName [getBinaryFileName $fileName $platform]
 
-      if {[catch {set assembly \
-              [object load -loadtype File -alias $fileName]}] == 0} then {
+      if {[catch {
+        set assembly [object load -loadtype File -alias $fileName]
+      }] == 0} then {
         #
         # NOTE: Now, add the necessary test constraint.
         #
@@ -1190,8 +1194,9 @@ namespace eval ::Eagle {
       tputs $channel "---- checking for SQLite core library... "
 
       if {[catch {
-              object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
-              SQLiteVersion} version] == 0} then {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.SQLite3 SQLiteVersion
+      } version] == 0} then {
         #
         # NOTE: Check if the returned version was null.  If so, make it easy
         #       to spot.
@@ -1205,8 +1210,9 @@ namespace eval ::Eagle {
         #       core library.
         #
         if {[catch {
-                object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
-                SQLiteSourceId} sourceId]} then {
+          object invoke -flags +NonPublic \
+              System.Data.SQLite.SQLite3 SQLiteSourceId
+        } sourceId]} then {
           #
           # NOTE: We failed to query the Fossil source identifier.
           #
@@ -1236,8 +1242,9 @@ namespace eval ::Eagle {
       tputs $channel "---- checking for SQLite interop assembly... "
 
       if {[catch {
-              object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
-              InteropVersion} version] == 0} then {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.SQLite3 InteropVersion
+      } version] == 0} then {
         #
         # NOTE: Check if the returned version was null.  If so, make it easy
         #       to spot.
@@ -1251,8 +1258,9 @@ namespace eval ::Eagle {
         #       core library.
         #
         if {[catch {
-                object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
-                InteropSourceId} sourceId]} then {
+          object invoke -flags +NonPublic \
+              System.Data.SQLite.SQLite3 InteropSourceId
+        } sourceId]} then {
           #
           # NOTE: We failed to query the Fossil source identifier.
           #
@@ -1284,8 +1292,9 @@ namespace eval ::Eagle {
           "\"... "]
 
       if {[catch {
-              object invoke -flags +NonPublic System.Data.SQLite.SQLite3 \
-              DefineConstants} defineConstants] == 0} then {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.SQLite3 DefineConstants
+      } defineConstants] == 0} then {
         if {[lsearch -exact -nocase $defineConstants $name] != -1} then {
           #
           # NOTE: Yes, this define constant was enabled when the managed
@@ -1731,9 +1740,9 @@ namespace eval ::Eagle {
       #
       if {[info exists db]} then {
         if {[catch {
-                object invoke -flags +NonPublic -objectflags +NoDispose \
-                -alias Interpreter.GetActive.connections Item $db} \
-                result] == 0} then {
+          object invoke -flags +NonPublic -objectflags +NoDispose -alias \
+              Interpreter.GetActive.connections Item $db
+        } result] == 0} then {
           #
           # NOTE: Success, return the opaque object handle.
           #
@@ -2093,9 +2102,10 @@ namespace eval ::Eagle {
         #
         checkForSQLiteDirectories $channel true
 
-        if {[catch {object invoke -flags +NonPublic \
-                System.Data.SQLite.UnsafeNativeMethods \
-                sqlite3_shutdown} result] == 0} then {
+        if {[catch {
+          object invoke -flags +NonPublic \
+              System.Data.SQLite.UnsafeNativeMethods sqlite3_shutdown
+        } result] == 0} then {
           if {!$quiet} then {
             tputs $channel [appendArgs \
                 "---- call sqlite3_shutdown()... ok: " $result \n]
@@ -2121,9 +2131,10 @@ namespace eval ::Eagle {
           tputs $channel "---- current memory in use by SQLiteMemory... "
         }
 
-        if {[catch {object invoke -flags +NonPublic \
-                System.Data.SQLite.SQLiteMemory \
-                bytesAllocated} memory] == 0} then {
+        if {[catch {
+          object invoke -flags +NonPublic \
+              System.Data.SQLite.SQLiteMemory bytesAllocated
+        } memory] == 0} then {
           if {!$quiet} then {
             tputs $channel [appendArgs $memory " bytes\n"]
           }
@@ -2139,9 +2150,10 @@ namespace eval ::Eagle {
           tputs $channel "---- maximum memory in use by SQLiteMemory... "
         }
 
-        if {[catch {object invoke -flags +NonPublic \
-                System.Data.SQLite.SQLiteMemory \
-                maximumBytesAllocated} memory] == 0} then {
+        if {[catch {
+          object invoke -flags +NonPublic \
+              System.Data.SQLite.SQLiteMemory maximumBytesAllocated
+        } memory] == 0} then {
           if {!$quiet} then {
             tputs $channel [appendArgs $memory " bytes\n"]
           }
@@ -2158,9 +2170,10 @@ namespace eval ::Eagle {
         tputs $channel "---- current memory in use by SQLite... "
       }
 
-      if {[catch {object invoke -flags +NonPublic \
-              System.Data.SQLite.UnsafeNativeMethods \
-              sqlite3_memory_used} memory] == 0} then {
+      if {[catch {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.UnsafeNativeMethods sqlite3_memory_used
+      } memory] == 0} then {
         if {!$quiet} then {
           tputs $channel [appendArgs $memory " bytes\n"]
         }
@@ -2181,9 +2194,10 @@ namespace eval ::Eagle {
         tputs $channel "---- maximum memory in use by SQLite... "
       }
 
-      if {[catch {object invoke -flags +NonPublic \
-              System.Data.SQLite.UnsafeNativeMethods \
-              sqlite3_memory_highwater 0} memory] == 0} then {
+      if {[catch {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.UnsafeNativeMethods sqlite3_memory_highwater 0
+      } memory] == 0} then {
         if {!$quiet} then {
           tputs $channel [appendArgs $memory " bytes\n"]
         }
@@ -2244,9 +2258,10 @@ namespace eval ::Eagle {
       #       directory is changed).
       #
       if {[catch {
-              object invoke -flags +NonPublic \
-              System.Data.SQLite.UnsafeNativeMethods \
-              sqlite3_win32_set_directory 0 null}] == 0} then {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.UnsafeNativeMethods \
+            sqlite3_win32_set_directory 0 null
+      }] == 0} then {
         #
         # NOTE: Calling the sqlite3_win32_set_directory function does not
         #       cause an exception; therefore, it must be available (i.e.
@@ -2269,10 +2284,10 @@ namespace eval ::Eagle {
           #
           for {set index 1} {$index < 3} {incr index} {
             if {[catch {
-                    object invoke -flags +NonPublic \
-                    System.Data.SQLite.UnsafeNativeMethods \
-                    sqlite3_win32_set_directory $index null} \
-                    result] == 0} then {
+              object invoke -flags +NonPublic \
+                  System.Data.SQLite.UnsafeNativeMethods \
+                  sqlite3_win32_set_directory $index null
+            } result] == 0} then {
               tputs $channel [appendArgs \
                   "---- call sqlite3_win32_set_directory(" $index \
                   ", null)... ok: " $result \n]
@@ -2354,8 +2369,9 @@ namespace eval ::Eagle {
                   $userSettingsFileName \"...\n]
             }
 
-            if {[catch {uplevel 1 [list source $userSettingsFileName]} \
-                    error]} then {
+            if {[catch {
+              uplevel 1 [list source $userSettingsFileName]
+            } error]} then {
               if {!$quiet} then {
                 tputs $channel [appendArgs \
                     "==== WARNING: failed to load per-user settings file \"" \
@@ -2384,8 +2400,9 @@ namespace eval ::Eagle {
                   $hostSettingsFileName \"...\n]
             }
 
-            if {[catch {uplevel 1 [list source $hostSettingsFileName]} \
-                    error]} then {
+            if {[catch {
+              uplevel 1 [list source $hostSettingsFileName]
+            } error]} then {
               if {!$quiet} then {
                 tputs $channel [appendArgs \
                     "==== WARNING: failed to load per-host settings file \"" \
@@ -2786,9 +2803,10 @@ namespace eval ::Eagle {
           tputs $::test_channel \
               "---- define constants for \"System.Data.SQLite\"... "
 
-          if {[catch {object invoke -flags +NonPublic \
-                  System.Data.SQLite.SQLite3 DefineConstants} \
-                  defineConstants] == 0} then {
+          if {[catch {
+            object invoke -flags +NonPublic \
+                System.Data.SQLite.SQLite3 DefineConstants
+          } defineConstants] == 0} then {
             tputs $::test_channel [appendArgs [formatList [lsort \
                 $defineConstants] <none>] \n]
           } else {
@@ -2800,9 +2818,10 @@ namespace eval ::Eagle {
           tputs $::test_channel \
               "---- source version of \"System.Data.SQLite.dll\"... "
 
-          if {[catch {object invoke -flags +NonPublic \
-                  System.Data.SQLite.SQLiteConnection ProviderVersion} \
-                  version] == 0} then {
+          if {[catch {
+            object invoke -flags +NonPublic \
+                System.Data.SQLite.SQLiteConnection ProviderVersion
+          } version] == 0} then {
             if {[string length $version] == 0} then {
               set version null
             }
@@ -2816,9 +2835,10 @@ namespace eval ::Eagle {
           tputs $::test_channel \
               "---- source checkout of \"System.Data.SQLite.dll\"... "
 
-          if {[catch {object invoke -flags +NonPublic \
-                  System.Data.SQLite.SQLiteConnection ProviderSourceId} \
-                  sourceId] == 0} then {
+          if {[catch {
+            object invoke -flags +NonPublic \
+                System.Data.SQLite.SQLiteConnection ProviderSourceId
+          } sourceId] == 0} then {
             if {[string length $sourceId] == 0} then {
               set sourceId null
             }
@@ -2894,7 +2914,7 @@ namespace eval ::Eagle {
         #
         # NOTE: Check the current build .NET Framework.  Basically, this
         #       indicates which version of the .NET Framework is being
-        #       by the assembly binaries under test.
+        #       used by the assembly binaries under test.
         #
         tputs $::test_channel \
             "---- checking for System.Data.SQLite build .NET Framework... "
@@ -2975,9 +2995,10 @@ namespace eval ::Eagle {
           tputs $::test_channel \
               "---- compile-time options for SQLite core library... "
 
-          if {[catch {object invoke -flags +NonPublic \
-                  System.Data.SQLite.SQLite3 SQLiteCompileOptions} \
-                  compileOptions] == 0} then {
+          if {[catch {
+            object invoke -flags +NonPublic \
+                System.Data.SQLite.SQLite3 SQLiteCompileOptions
+          } compileOptions] == 0} then {
             tputs $::test_channel [appendArgs [formatList [lsort \
                 $compileOptions] <none>] \n]
           } else {
@@ -2989,9 +3010,10 @@ namespace eval ::Eagle {
           tputs $::test_channel \
               "---- compile-time options for SQLite interop assembly... "
 
-          if {[catch {object invoke -flags +NonPublic \
-                  System.Data.SQLite.SQLite3 InteropCompileOptions} \
-                  compileOptions] == 0} then {
+          if {[catch {
+            object invoke -flags +NonPublic \
+                System.Data.SQLite.SQLite3 InteropCompileOptions
+          } compileOptions] == 0} then {
             tputs $::test_channel [appendArgs [formatList [lsort \
                 $compileOptions] <none>] \n]
           } else {
