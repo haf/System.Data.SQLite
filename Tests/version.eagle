@@ -51,9 +51,11 @@ set version(full) [appendArgs $version(major) . $version(minor) . \
 #
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
 set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
+set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
 set sqliteDesignerDllFile [getBuildFileName SQLite.Designer.dll]
 set testExeFile [getBuildFileName test.exe]
 set testLinqExeFile [getBuildFileName testlinq.exe]
+set testEf6ExeFile [getBuildFileName testef6.exe]
 
 #
 # NOTE: Setup the test constraints specific to the tests in this file.
@@ -69,6 +71,11 @@ if {![haveConstraint [appendArgs file_ \
 }
 
 if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteEf6DllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteEf6DllFile
+}
+
+if {![haveConstraint [appendArgs file_ \
     [file tail $sqliteDesignerDllFile]]]} then {
   checkForFile $test_channel $sqliteDesignerDllFile
 }
@@ -79,6 +86,10 @@ if {![haveConstraint [appendArgs file_ [file tail $testExeFile]]]} then {
 
 if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
   checkForFile $test_channel $testLinqExeFile
+}
+
+if {![haveConstraint [appendArgs file_ [file tail $testEf6ExeFile]]]} then {
+  checkForFile $test_channel $testEf6ExeFile
 }
 
 ###############################################################################
@@ -117,13 +128,30 @@ runTest {test version-1.4 {'System.Data.SQLite.Linq' assembly version} -body {
 
 ###############################################################################
 
-runTest {test version-1.5 {'SQLite.Designer' binary version} -body {
+runTest {test version-1.5 {'System.Data.SQLite.EF6' binary version} -body {
+  file version $systemDataSQLiteEf6DllFile
+} -constraints {eagle file_System.Data.SQLite.EF6.dll} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.6 {'System.Data.SQLite.EF6' assembly version} -body {
+  set assemblyName [object invoke -alias System.Reflection.AssemblyName \
+      GetAssemblyName $systemDataSQLiteEf6DllFile]
+
+  $assemblyName Version.ToString
+} -cleanup {
+  unset -nocomplain assemblyName
+} -constraints {eagle file_System.Data.SQLite.EF6.dll} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.7 {'SQLite.Designer' binary version} -body {
   file version $sqliteDesignerDllFile
 } -constraints {eagle file_SQLite.Designer.dll} -result $version(full)}
 
 ###############################################################################
 
-runTest {test version-1.6 {'SQLite.Designer' assembly version} -body {
+runTest {test version-1.8 {'SQLite.Designer' assembly version} -body {
   set assemblyName [object invoke -alias System.Reflection.AssemblyName \
       GetAssemblyName $sqliteDesignerDllFile]
 
@@ -134,13 +162,13 @@ runTest {test version-1.6 {'SQLite.Designer' assembly version} -body {
 
 ###############################################################################
 
-runTest {test version-1.7 {'test' binary version} -body {
+runTest {test version-1.9 {'test' binary version} -body {
   file version $testExeFile
 } -constraints {eagle file_test.exe} -result $version(full)}
 
 ###############################################################################
 
-runTest {test version-1.8 {'test' assembly version} -body {
+runTest {test version-1.10 {'test' assembly version} -body {
   set assemblyName [object invoke -alias System.Reflection.AssemblyName \
       GetAssemblyName $testExeFile]
 
@@ -151,13 +179,13 @@ runTest {test version-1.8 {'test' assembly version} -body {
 
 ###############################################################################
 
-runTest {test version-1.9 {'testlinq' binary version} -body {
+runTest {test version-1.11 {'testlinq' binary version} -body {
   file version $testLinqExeFile
 } -constraints {eagle file_testlinq.exe} -result $version(full)}
 
 ###############################################################################
 
-runTest {test version-1.10 {'testlinq' assembly version} -body {
+runTest {test version-1.12 {'testlinq' assembly version} -body {
   set assemblyName [object invoke -alias System.Reflection.AssemblyName \
       GetAssemblyName $testLinqExeFile]
 
@@ -168,40 +196,57 @@ runTest {test version-1.10 {'testlinq' assembly version} -body {
 
 ###############################################################################
 
-runTest {test version-1.11 {SQLiteVersion} -body {
+runTest {test version-1.13 {'testef6' binary version} -body {
+  file version $testEf6ExeFile
+} -constraints {eagle file_testef6.exe} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.14 {'testef6' assembly version} -body {
+  set assemblyName [object invoke -alias System.Reflection.AssemblyName \
+      GetAssemblyName $testEf6ExeFile]
+
+  $assemblyName Version.ToString
+} -cleanup {
+  unset -nocomplain assemblyName
+} -constraints {eagle file_testef6.exe} -result $version(full)}
+
+###############################################################################
+
+runTest {test version-1.15 {SQLiteVersion} -body {
   object invoke System.Data.SQLite.SQLiteConnection SQLiteVersion
 } -constraints {eagle SQLite System.Data.SQLite} -match regexp -result \
 {^\d+\.\d+\.\d+(?:\.\d+)?$}}
 
 ###############################################################################
 
-runTest {test version-1.12 {SQLiteSourceId} -body {
+runTest {test version-1.16 {SQLiteSourceId} -body {
   object invoke System.Data.SQLite.SQLiteConnection SQLiteSourceId
 } -constraints {eagle SQLite System.Data.SQLite} -match regexp -result \
 {^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [0-9a-f]{40}$}}
 
 ###############################################################################
 
-runTest {test version-1.13 {InteropVersion} -body {
+runTest {test version-1.17 {InteropVersion} -body {
   object invoke System.Data.SQLite.SQLiteConnection InteropVersion
 } -constraints {eagle SQLiteInterop System.Data.SQLite} -result $version(full)}
 
 ###############################################################################
 
-runTest {test version-1.14 {InteropSourceId} -body {
+runTest {test version-1.18 {InteropSourceId} -body {
   object invoke System.Data.SQLite.SQLiteConnection InteropSourceId
 } -constraints {eagle SQLiteInterop System.Data.SQLite} -match regexp -result \
 {^[0-9a-f]{40} \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC$}}
 
 ###############################################################################
 
-runTest {test version-1.15 {ProviderVersion} -body {
+runTest {test version-1.19 {ProviderVersion} -body {
   object invoke System.Data.SQLite.SQLiteConnection ProviderVersion
 } -constraints {eagle System.Data.SQLite} -result $version(full)}
 
 ###############################################################################
 
-runTest {test version-1.16 {ProviderSourceId} -body {
+runTest {test version-1.20 {ProviderSourceId} -body {
   #
   # NOTE: The ProviderSourceId property value may be null, which
   #       would result in an empty string being returned here.
@@ -270,9 +315,48 @@ set patterns [list \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
-    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
-    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
-    [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteFactory, System\\.Data\\.SQLite, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteFactory, System\\.Data\\.SQLite, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteFactory, System\\.Data\\.SQLite, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteFactory, System\\.Data\\.SQLite, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
@@ -318,9 +402,20 @@ set fileNames [list \
     [file join test app.config] \
     [file join testce AssemblyInfo.cs] \
     [file join testce AssemblyInfo.cs] \
-    [file join testlinq 2008 App.config] \
-    [file join testlinq 2010 App.config] \
-    [file join testlinq 2012 App.config] \
+    [file join testlinq 2008 LINQ App.config] \
+    [file join testlinq 2008 LINQ App.config] \
+    [file join testlinq 2010 EF6 App.config] \
+    [file join testlinq 2010 EF6 App.config] \
+    [file join testlinq 2010 LINQ App.config] \
+    [file join testlinq 2010 LINQ App.config] \
+    [file join testlinq 2012 EF6 App.config] \
+    [file join testlinq 2012 EF6 App.config] \
+    [file join testlinq 2012 LINQ App.config] \
+    [file join testlinq 2012 LINQ App.config] \
+    [file join testlinq 2013 EF6 App.config] \
+    [file join testlinq 2013 EF6 App.config] \
+    [file join testlinq 2013 LINQ App.config] \
+    [file join testlinq 2013 LINQ App.config] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join tools install Properties AssemblyInfo.cs] \
@@ -336,7 +431,7 @@ for {set i 1} {$i <= [llength $fileNames]} {incr i} {
     checkForFile $test_channel $fileName $constraint
   }
 
-  runTest {test [appendArgs version-1.17. $i] \
+  runTest {test [appendArgs version-1.21. $i] \
       [appendArgs "pattern {" $pattern "} in file \"" $fileName \"] -body {
     regexp -- $pattern [readFile $fileName]
   } -constraints [list eagle [appendArgs file_ $constraint]] -result {1}}
@@ -348,7 +443,8 @@ unset -nocomplain constraint fileName pattern fileNames patterns i version
 
 ###############################################################################
 
-unset -nocomplain testLinqExeFile testExeFile sqliteDesignerDllFile \
+unset -nocomplain testEf6ExeFile testLinqExeFile testExeFile \
+    sqliteDesignerDllFile systemDataSQLiteEf6DllFile \
     systemDataSQLiteLinqDllFile systemDataSQLiteDllFile
 
 ###############################################################################

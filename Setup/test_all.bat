@@ -151,6 +151,22 @@ FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
           )
         )
 
+        IF DEFINED HAVE_EF6 (
+          %__ECHO% XCOPY "bin\%%Y\%%C\bin\System.Data.SQLite.EF6.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+          IF ERRORLEVEL 1 (
+            ECHO Failed to copy "bin\%%Y\%%C\bin\System.Data.SQLite.EF6.*" to "bin\%%Y\%PLATFORM%\%%C".
+            GOTO errors
+          )
+
+          %__ECHO% XCOPY "bin\%%Y\%%C\bin\testef6.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+          IF ERRORLEVEL 1 (
+            ECHO Failed to copy "bin\%%Y\%%C\bin\testef6.*" to "bin\%%Y\%PLATFORM%\%%C".
+            GOTO errors
+          )
+        )
+
         %__ECHO% XCOPY "bin\%%Y\%%C\bin\SQLite.Designer.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
 
         IF ERRORLEVEL 1 (
@@ -187,14 +203,21 @@ GOTO no_errors
 
 :fn_CheckForLinq
   CALL :fn_UnsetVariable HAVE_LINQ
+  CALL :fn_UnsetVariable HAVE_EF6
   IF /I "%1" == "2008" (
     SET HAVE_LINQ=1
   )
   IF /I "%1" == "2010" (
     SET HAVE_LINQ=1
+    SET HAVE_EF6=1
   )
   IF /I "%1" == "2012" (
     SET HAVE_LINQ=1
+    SET HAVE_EF6=1
+  )
+  IF /I "%1" == "2013" (
+    SET HAVE_LINQ=1
+    SET HAVE_EF6=1
   )
   GOTO :EOF
 

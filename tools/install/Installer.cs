@@ -1141,7 +1141,7 @@ namespace System.Data.SQLite
                     //
                     // HACK: Attempt to open the specified sub-key.  If this
                     //       fails, we will simply return the wrapped root key
-                    //       itself since no writes are allowed in 'what-if'
+                    //       itself since no writes are allowed in "what-if"
                     //       mode anyhow.
                     //
                     RegistryKey subKey = key.OpenSubKey(subKeyName);
@@ -1390,7 +1390,7 @@ namespace System.Data.SQLite
 
             #region Implicit Conversion Operators
             //
-            // BUGBUG: Remove me?  This should be safe because in 'what-if'
+            // BUGBUG: Remove me?  This should be safe because in "what-if"
             //         mode all keys are opened read-only.
             //
             public static implicit operator RegistryKey(
@@ -1530,7 +1530,7 @@ namespace System.Data.SQLite
 
                 //
                 // HACK: Always forbid writable access when operating in
-                //       'what-if' mode.
+                //       "what-if" mode.
                 //
                 MockRegistryKey key = rootKey.OpenSubKey(
                     subKeyName, whatIf ? false : writable);
@@ -1563,7 +1563,7 @@ namespace System.Data.SQLite
                 {
                     //
                     // HACK: Always open a key, rather than creating one when
-                    //       operating in 'what-if' mode.
+                    //       operating in "what-if" mode.
                     //
                     if (whatIf)
                     {
@@ -1571,7 +1571,7 @@ namespace System.Data.SQLite
                         // HACK: Attempt to open the specified sub-key.  If
                         //       this fails, we will simply return the root
                         //       key itself since no writes are allowed in
-                        //       'what-if' mode anyhow.
+                        //       "what-if" mode anyhow.
                         //
                         MockRegistryKey key = rootKey.OpenSubKey(subKeyName);
 
@@ -1915,6 +1915,7 @@ namespace System.Data.SQLite
                 string directory,
                 string coreFileName,
                 string linqFileName,
+                string ef6FileName,
                 string designerFileName,
                 string registryVersion,
                 string configVersion,
@@ -1955,6 +1956,7 @@ namespace System.Data.SQLite
                 this.directory = directory;
                 this.coreFileName = coreFileName;
                 this.linqFileName = linqFileName;
+                this.ef6FileName = ef6FileName;
                 this.designerFileName = designerFileName;
                 this.registryVersion = registryVersion;
                 this.configVersion = configVersion;
@@ -1998,6 +2000,7 @@ namespace System.Data.SQLite
                 ref string directory,
                 ref string coreFileName,
                 ref string linqFileName,
+                ref string ef6FileName,
                 ref string designerFileName
                 )
             {
@@ -2014,6 +2017,9 @@ namespace System.Data.SQLite
 
                 linqFileName = Path.Combine(directory,
                     Installer.LinqFileName);
+
+                ef6FileName = Path.Combine(directory,
+                    Installer.Ef6FileName);
 
                 designerFileName = Path.Combine(directory,
                     Installer.DesignerFileName);
@@ -2116,6 +2122,38 @@ namespace System.Data.SQLite
 
                 return null;
             }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static bool IsEf6AssemblyAvailable()
+            {
+                try
+                {
+                    Assembly assembly = Assembly.ReflectionOnlyLoad(
+                        Ef6AssemblyName);
+
+                    if (assembly != null)
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.Highest,
+                            debugCallback, traceCallback,
+                            "Entity Framework 6 assembly was resolved.",
+                            traceCategory);
+
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // do nothing.
+                }
+
+                TraceOps.DebugAndTrace(TracePriority.Highest,
+                    debugCallback, traceCallback,
+                    "Entity Framework 6 assembly was not resolved.",
+                    traceCategory);
+
+                return false;
+            }
             #endregion
 
             ///////////////////////////////////////////////////////////////////
@@ -2126,15 +2164,17 @@ namespace System.Data.SQLite
                 string directory = null;
                 string coreFileName = null;
                 string linqFileName = null;
+                string ef6FileName = null;
                 string designerFileName = null;
 
                 GetDefaultFileNames(
                     ref directory, ref coreFileName, ref linqFileName,
-                    ref designerFileName);
+                    ref ef6FileName, ref designerFileName);
 
-                return new Configuration(thisAssembly, null, directory,
-                    coreFileName, linqFileName, designerFileName, null, null,
-                    null, TraceOps.DebugFormat, TraceOps.TraceFormat,
+                return new Configuration(
+                    thisAssembly, null, directory, coreFileName, linqFileName,
+                    ef6FileName, designerFileName, null, null, null,
+                    TraceOps.DebugFormat, TraceOps.TraceFormat,
                     InstallFlags.Default, TracePriority.Default,
                     TracePriority.Default, false, true, false, false, false,
                     false, false, false, false, false, false, false, false,
@@ -2349,6 +2389,17 @@ namespace System.Data.SQLite
                             configuration.linqFileName = Path.Combine(
                                 configuration.directory, linqFileName);
 
+                            string ef6FileName = configuration.ef6FileName;
+
+                            if (!String.IsNullOrEmpty(ef6FileName))
+                                ef6FileName = Path.GetFileName(ef6FileName);
+
+                            if (String.IsNullOrEmpty(ef6FileName))
+                                ef6FileName = Installer.Ef6FileName;
+
+                            configuration.ef6FileName = Path.Combine(
+                                configuration.directory, ef6FileName);
+
                             string designerFileName = configuration.designerFileName;
 
                             if (!String.IsNullOrEmpty(designerFileName))
@@ -2359,6 +2410,10 @@ namespace System.Data.SQLite
 
                             configuration.designerFileName = Path.Combine(
                                 configuration.directory, designerFileName);
+                        }
+                        else if (MatchOption(newArg, "ef6FileName"))
+                        {
+                            configuration.ef6FileName = text;
                         }
                         else if (MatchOption(newArg, "install"))
                         {
@@ -3060,8 +3115,8 @@ namespace System.Data.SQLite
                     if (!configuration.whatIf)
                     {
                         //
-                        // NOTE: If the debugger is attached and What-If mode
-                        //       is [now] disabled, issue a warning.
+                        // NOTE: If the debugger is attached and "what-if"
+                        //       mode is [now] disabled, issue a warning.
                         //
                         if (Debugger.IsAttached)
                             TraceOps.DebugAndTrace(TracePriority.MediumHigh,
@@ -3256,11 +3311,30 @@ namespace System.Data.SQLite
             public bool IsLinqSupported()
             {
                 //
-                // NOTE: Return non-zero if the LINQ assembly should be
-                //       processed during the install.  If the target is
-                //       Visual Studio 2005, this should return zero.
+                // NOTE: Return non-zero if the System.Data.SQLite.Linq
+                //       assembly should be processed during the install.
+                //       If the target is Visual Studio 2005, this must
+                //       return zero.
                 //
                 return !noNetFx35 || !noNetFx40 || !noNetFx45 || !noNetFx451;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public bool IsEf6Supported()
+            {
+                //
+                // NOTE: Return non-zero if the System.Data.SQLite.EF6
+                //       assembly should be processed during the install.
+                //       If the target is Visual Studio 2005 or Visual
+                //       Studio 2008, this must return zero.  Also, if
+                //       the EF6 core assembly is unavailable, this must
+                //       return zero.
+                //
+                if (noNetFx40 && noNetFx45 && noNetFx451)
+                    return false;
+
+                return IsEf6AssemblyAvailable();
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3289,6 +3363,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "LinqFileName", ForDisplay(linqFileName)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "Ef6FileName", ForDisplay(ef6FileName)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3485,6 +3563,15 @@ namespace System.Data.SQLite
             {
                 get { return linqFileName; }
                 set { linqFileName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string ef6FileName;
+            public string Ef6FileName
+            {
+                get { return ef6FileName; }
+                set { ef6FileName = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3879,6 +3966,7 @@ namespace System.Data.SQLite
         #region Private Constant Data
         private const string CoreFileName = "System.Data.SQLite.dll";
         private const string LinqFileName = "System.Data.SQLite.Linq.dll";
+        private const string Ef6FileName = "System.Data.SQLite.EF6.dll";
         private const string DesignerFileName = "SQLite.Designer.dll";
         private const string ProviderName = "SQLite Data Provider";
         private const string ProjectName = "System.Data.SQLite";
@@ -3891,6 +3979,11 @@ namespace System.Data.SQLite
 
         private const string CLRv2ImageRuntimeVersion = "v2.0.50727";
         private const string CLRv4ImageRuntimeVersion = "v4.0.30319";
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private const string Ef6AssemblyName = "EntityFramework, " +
+            "Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -6299,7 +6392,7 @@ namespace System.Data.SQLite
                     traceCategory);
 
             //
-            // NOTE: In 'what-if' mode, do not actually start the process.
+            // NOTE: In "what-if" mode, do not actually start the process.
             //
             if (!whatIf)
             {
@@ -6560,6 +6653,19 @@ namespace System.Data.SQLite
                                     traceCategory);
                             }
 
+                            if (configuration.IsEf6Supported())
+                            {
+                                if (!configuration.WhatIf)
+                                    /* throw */
+                                    publish.GacInstall(configuration.Ef6FileName);
+
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacInstall: assemblyPath = {0}",
+                                    ForDisplay(configuration.Ef6FileName)),
+                                    traceCategory);
+                            }
+
                             if (configuration.HasFlags(
                                     InstallFlags.VsPackageGlobalAssemblyCache, true))
                             {
@@ -6587,6 +6693,19 @@ namespace System.Data.SQLite
                                     debugCallback, traceCallback, String.Format(
                                     "GacRemove: assemblyPath = {0}",
                                     ForDisplay(configuration.DesignerFileName)),
+                                    traceCategory);
+                            }
+
+                            if (configuration.IsEf6Supported())
+                            {
+                                if (!configuration.WhatIf)
+                                    /* throw */
+                                    publish.GacRemove(configuration.Ef6FileName);
+
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacRemove: assemblyPath = {0}",
+                                    ForDisplay(configuration.Ef6FileName)),
                                     traceCategory);
                             }
 

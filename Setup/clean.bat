@@ -243,6 +243,22 @@ IF EXIST "%SOURCE%\Doc\SQLite.NET.chw" (
   %_AECHO%.
 )
 
+IF EXIST "%SOURCE%\Externals\Eagle\bin\EntityFramework.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\EntityFramework.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\EntityFramework.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\EntityFramework.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\EntityFramework.*" exist.
+  %_AECHO%.
+)
+
 IF EXIST "%SOURCE%\Externals\Eagle\bin\sqlite3.*" (
   %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\sqlite3.*"
 
@@ -259,6 +275,54 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\sqlite3.*" (
   %_AECHO%.
 )
 
+IF EXIST "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\Win32\sqlite3.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\x86\sqlite3.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\x64\sqlite3.*" exist.
+  %_AECHO%.
+)
+
 IF EXIST "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*" (
   %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*"
 
@@ -272,6 +336,54 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*" (
   )
 ) ELSE (
   %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\SQLite.Interop.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\Win32\SQLite.Interop.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\x86\SQLite.Interop.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\x64\SQLite.Interop.*" exist.
   %_AECHO%.
 )
 
@@ -304,6 +416,22 @@ IF EXIST "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.Linq.*" (
   )
 ) ELSE (
   %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.Linq.*" exist.
+  %_AECHO%.
+)
+
+IF EXIST "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*" (
+  %__ECHO% DEL /Q "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%SOURCE%\Externals\Eagle\bin\System.Data.SQLite.EF6.*" exist.
   %_AECHO%.
 )
 

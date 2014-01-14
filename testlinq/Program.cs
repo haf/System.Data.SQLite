@@ -8,9 +8,14 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Data.Objects;
 using System.Text;
 using System.Transactions;
+
+#if USE_ENTITY_FRAMEWORK_6
+using System.Data.Entity.Core.Objects;
+#else
+using System.Data.Objects;
+#endif
 
 namespace testlinq
 {

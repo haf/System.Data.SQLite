@@ -184,6 +184,11 @@
     </li>
 
     <li>
+      The .NET Framework 4.0 (or higher) for the System.Data.SQLite.EF6
+      assembly.
+    </li>
+
+    <li>
       All sub-projects are fully supported with the .NET Framework 4.0.
     </li>
 
@@ -300,6 +305,11 @@
     <li>
       If necessary (i.e. you require LINQ support), also add a reference to the
       "System.Data.SQLite.Linq" assembly from the "Externals" directory.
+    </li>
+
+    <li>
+      If necessary (i.e. you require EF6 support), also add a reference to the
+      "System.Data.SQLite.EF6" assembly from the "Externals" directory.
     </li>
   </ul>
 </p>

@@ -8,13 +8,22 @@
 // </copyright>
 //---------------------------------------------------------------------
 
-namespace System.Data.SQLite
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6
+#else
+namespace System.Data.SQLite.Linq
+#endif
 {
   using System;
   using System.Data;
   using System.Collections.Generic;
-  using System.Data.Metadata.Edm;
   using System.Diagnostics;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Metadata.Edm;
+#else
+  using System.Data.Metadata.Edm;
+#endif
 
   /// <summary>
   /// A set of static helpers for type metadata

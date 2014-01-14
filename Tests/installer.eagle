@@ -26,6 +26,7 @@ runSQLiteTestPrologue
 #
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
 set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
+set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
 set sqliteDesignerDllFile [getBuildFileName SQLite.Designer.dll]
 set installerExeFile [getBuildFileName Installer.exe]
 
@@ -74,6 +75,11 @@ if {![haveConstraint [appendArgs file_ \
 if {![haveConstraint [appendArgs file_ \
     [file tail $systemDataSQLiteLinqDllFile]]]} then {
   checkForFile $test_channel $systemDataSQLiteLinqDllFile
+}
+
+if {![haveConstraint [appendArgs file_ \
+    [file tail $systemDataSQLiteEf6DllFile]]]} then {
+  checkForFile $test_channel $systemDataSQLiteEf6DllFile
 }
 
 if {![haveConstraint [appendArgs file_ \
@@ -329,7 +335,8 @@ runTest {test installer-1.5 {installer tool / Visual Studio 2010} -setup {
 } -constraints {eagle administrator buildYear.2010 visualStudio2010\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_SQLite.Designer.dll file_Installer_Test_Vs2010.log} -result {0 True}}
+file_System.Data.SQLite.EF6.dll file_SQLite.Designer.dll\
+file_Installer_Test_Vs2010.log} -result {0 True}}
 
 ###############################################################################
 
@@ -368,7 +375,8 @@ runTest {test installer-1.6 {uninstaller tool / Visual Studio 2010} -setup {
 } -constraints {eagle administrator buildYear.2010 visualStudio2010\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_SQLite.Designer.dll file_Uninstaller_Test_Vs2010.log} -result {0 True}}
+file_System.Data.SQLite.EF6.dll file_SQLite.Designer.dll\
+file_Uninstaller_Test_Vs2010.log} -result {0 True}}
 
 ###############################################################################
 
@@ -408,7 +416,8 @@ runTest {test installer-1.7 {installer tool / Visual Studio 2012} -setup {
 } -constraints {eagle administrator buildYear.2012 visualStudio2012\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_SQLite.Designer.dll file_Installer_Test_Vs2012.log} -result {0 True}}
+file_System.Data.SQLite.EF6.dll file_SQLite.Designer.dll\
+file_Installer_Test_Vs2012.log} -result {0 True}}
 
 ###############################################################################
 
@@ -448,7 +457,8 @@ runTest {test installer-1.8 {uninstaller tool / Visual Studio 2012} -setup {
 } -constraints {eagle administrator buildYear.2012 visualStudio2012\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_SQLite.Designer.dll file_Uninstaller_Test_Vs2012.log} -result {0 True}}
+file_System.Data.SQLite.EF6.dll file_SQLite.Designer.dll\
+file_Uninstaller_Test_Vs2012.log} -result {0 True}}
 
 ###############################################################################
 
@@ -488,7 +498,8 @@ runTest {test installer-1.9 {installer tool / Visual Studio 2013} -setup {
 } -constraints {eagle administrator buildYear.2013 visualStudio2013\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_SQLite.Designer.dll file_Installer_Test_Vs2013.log} -result {0 True}}
+file_System.Data.SQLite.EF6.dll file_SQLite.Designer.dll\
+file_Installer_Test_Vs2013.log} -result {0 True}}
 
 ###############################################################################
 
@@ -528,7 +539,8 @@ runTest {test installer-1.10 {uninstaller tool / Visual Studio 2013} -setup {
 } -constraints {eagle administrator buildYear.2013 visualStudio2013\
 System.Data.SQLite.dll_v4.0.30319 file_Installer.exe testExec\
 file_System.Data.SQLite.dll file_System.Data.SQLite.Linq.dll\
-file_SQLite.Designer.dll file_Uninstaller_Test_Vs2013.log} -result {0 True}}
+file_System.Data.SQLite.EF6.dll file_SQLite.Designer.dll\
+file_Uninstaller_Test_Vs2013.log} -result {0 True}}
 
 ###############################################################################
 
@@ -537,7 +549,8 @@ unset -nocomplain testUninstallVs2013LogFile testUninstallVs2012LogFile \
     testUninstallVs2005LogFile testInstallVs2013LogFile \
     testInstallVs2012LogFile testInstallVs2010LogFile \
     testInstallVs2008LogFile testInstallVs2005LogFile sqliteDesignerDllFile \
-    installerExeFile systemDataSQLiteLinqDllFile systemDataSQLiteDllFile
+    installerExeFile systemDataSQLiteEf6DllFile systemDataSQLiteLinqDllFile \
+    systemDataSQLiteDllFile
 
 ###############################################################################
 

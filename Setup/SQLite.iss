@@ -62,6 +62,10 @@ Name: Application\Core\{#AppProcessor}; Description: Core native {#AppProcessor}
 Name: Application\LINQ; Description: LINQ support components.; Types: custom compact full
 #endif
 
+#if Year != "2005" && Year != "2008"
+Name: Application\EF6; Description: Entity Framework 6 support components.; Types: custom compact full
+#endif
+
 Name: Application\Designer; Description: Visual Studio designer components.; Types: custom full
 Name: Application\Designer\Installer; Description: Visual Studio designer installer components.; Types: custom full
 Name: Application\Symbols; Description: Debugging symbol components.; Types: custom compact full
@@ -71,15 +75,19 @@ Name: Application\Test; Description: Test components.; Types: custom compact ful
 [Tasks]
 #if Year == "2005"
 Components: Application\Core\MSIL; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
-#else
+#elif Year == "2008"
 Components: Application\Core\MSIL Or Application\LINQ; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
+#else
+Components: Application\Core\MSIL Or Application\LINQ Or Application\EF6; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx4Setup()
 #endif
 
 #if Pos("NativeOnly", AppConfiguration) == 0
 #if Year == "2005"
 Components: Application\Core\MSIL; Name: gac; Description: Install the assemblies into the global assembly cache.; Flags: unchecked; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
-#else
+#elif Year == "2008"
 Components: Application\Core\MSIL Or Application\LINQ; Name: gac; Description: Install the assemblies into the global assembly cache.; Flags: unchecked; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
+#else
+Components: Application\Core\MSIL Or Application\LINQ Or Application\EF6; Name: gac; Description: Install the assemblies into the global assembly cache.; Flags: unchecked; Check: CheckIsNetFx4Setup()
 #endif
 
 #if AppProcessor == "x86"
@@ -108,6 +116,10 @@ Components: Application\Core\MSIL; Tasks: ngen; Filename: {code:GetNetFx4Install
 #if Year != "2005"
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup() and CheckForNetFx35(1)
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
+#endif
+
+#if Year != "2005" && Year != "2008"
+Components: Application\EF6; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "install ""{app}\bin\System.Data.SQLite.EF6.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 #endif
 
 #if Pos("NativeOnly", AppConfiguration) == 0 && AppProcessor == "x86"
@@ -149,6 +161,10 @@ Components: {#InstallerCondition}; Tasks: gac\vs2005; Filename: {app}\bin\Instal
 #endif
 #endif
 
+#if Year != "2005" && Year != "2008"
+Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.EF6.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
+#endif
+
 #if Year != "2005"
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx2InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.Linq.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx2Setup() and CheckForNetFx35(1)
@@ -178,6 +194,8 @@ Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#BaseConfiguration}\b
 Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
+Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+
 #if Year != "2005"
 #if Pos("NativeOnly", AppConfiguration) == 0
 Components: Application\LINQ; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
@@ -185,6 +203,15 @@ Components: Application\LINQ; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfigura
 
 Components: Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\LINQ and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#endif
+
+#if Year != "2005" && Year != "2008"
+#if Pos("NativeOnly", AppConfiguration) == 0
+Components: Application\EF6; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.EF6, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+#endif
+
+Components: Application\EF6; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\EF6 and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
 #if Pos("NativeOnly", AppConfiguration) != 0
@@ -205,6 +232,14 @@ Components: Application\Test; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\te
 Components: Application\Test and Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test and Application\LINQ and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test and Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#endif
+
+#if Year != "2005" && Year != "2008"
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6) and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#elif Year != "2005"
 Components: Application\Test and Application\LINQ; Source: ..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 

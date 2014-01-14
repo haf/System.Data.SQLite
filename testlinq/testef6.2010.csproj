@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * testef6.2010.csproj -
+ *
+ * Written by Joe Mistachkin.
+ * Released to the public domain, use at your own risk!
+ *
+-->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <UseEntityFramework6>true</UseEntityFramework6>
+  </PropertyGroup>
+  <Import Project="$(MSBuildProjectDirectory)\test.2010.csproj" />
+</Project>

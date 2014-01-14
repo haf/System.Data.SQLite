@@ -5,7 +5,11 @@
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
-namespace System.Data.SQLite
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6
+#else
+namespace System.Data.SQLite.Linq
+#endif
 {
   using System;
   using System.Data;
@@ -13,7 +17,14 @@ namespace System.Data.SQLite
   using System.IO;
   using System.Xml;
   using System.Data.Common;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core;
+  using System.Data.Entity.Core.Common;
+  using System.Data.Entity.Core.Metadata.Edm;
+#else
   using System.Data.Metadata.Edm;
+#endif
 
   /// <summary>
   /// The Provider Manifest for SQL Server
@@ -38,7 +49,7 @@ namespace System.Data.SQLite
 
     internal static XmlReader GetProviderManifest()
     {
-      return GetXmlResource("System.Data.SQLite.Linq.Resources.SQLiteProviderServices.ProviderManifest.xml");
+      return GetXmlResource("System.Data.SQLite.SQLiteProviderServices.ProviderManifest.xml");
     }
 
     /// <summary>
@@ -297,12 +308,12 @@ namespace System.Data.SQLite
 
     private XmlReader GetStoreSchemaMapping()
     {
-      return GetXmlResource("System.Data.SQLite.Linq.Resources.SQLiteProviderServices.StoreSchemaMapping.msl");
+      return GetXmlResource("System.Data.SQLite.SQLiteProviderServices.StoreSchemaMapping.msl");
     }
 
     private XmlReader GetStoreSchemaDescription()
     {
-      return GetXmlResource("System.Data.SQLite.Linq.Resources.SQLiteProviderServices.StoreSchemaDefinition.ssdl");
+      return GetXmlResource("System.Data.SQLite.SQLiteProviderServices.StoreSchemaDefinition.ssdl");
     }
 
     internal static XmlReader GetXmlResource(string resourceName)

@@ -8,7 +8,11 @@
 // </copyright>
 //---------------------------------------------------------------------
 
-namespace System.Data.SQLite
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6
+#else
+namespace System.Data.SQLite.Linq
+#endif
 {
   using System;
   using System.Linq;
@@ -16,11 +20,17 @@ namespace System.Data.SQLite
   using System.Globalization;
   using System.Text;
   using System.Data.Common;
-  using System.Data.Metadata.Edm;
-  using System.Data.Common.CommandTrees;
   using System.Data;
   using System.Collections.ObjectModel;
   using System.Collections.Generic;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Metadata.Edm;
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
+  using System.Data.Metadata.Edm;
+  using System.Data.Common.CommandTrees;
+#endif
 
   /// <summary>
   /// Translates the command object into a SQL string that can be executed on

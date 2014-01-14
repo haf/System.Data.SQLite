@@ -8,11 +8,20 @@
 // </copyright>
 //---------------------------------------------------------------------
 
-namespace System.Data.SQLite
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6
+#else
+namespace System.Data.SQLite.Linq
+#endif
 {
   using System;
   using System.Collections.Generic;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
   using System.Data.Common.CommandTrees;
+#endif
 
   /// <summary>
   /// The symbol table is quite primitive - it is a stack with a new entry for

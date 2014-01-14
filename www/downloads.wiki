@@ -271,6 +271,10 @@
             managed-only LINQ assembly)
           </li>
           <li>
+            <b>&lt;bin&gt;\System.Data.SQLite.EF6.dll</b> (optional,
+            managed-only EF6 assembly)
+          </li>
+          <li>
             <b>&lt;bin&gt;\x86\SQLite.Interop.dll</b> (required, x86 native
             interop assembly)
           </li>

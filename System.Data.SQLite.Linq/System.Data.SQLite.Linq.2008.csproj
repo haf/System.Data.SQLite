@@ -72,18 +72,30 @@
     <Compile Include="SQL Generation\SymbolPair.cs" />
     <Compile Include="SQL Generation\SymbolTable.cs" />
     <Compile Include="SQL Generation\TopClause.cs" />
+    <Compile Include="SQLiteProviderFactory.cs" />
     <Compile Include="SQLiteProviderManifest.cs" />
     <Compile Include="SQLiteProviderServices.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Common.ConceptualSchemaDefinition.csdl" />
-    <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.ssdl" />
-    <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaMapping.msl" />
+    <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaDefinition.Linq.ssdl">
+      <LogicalName>System.Data.SQLite.SQLiteProviderServices.StoreSchemaDefinition.ssdl</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Common.ConceptualSchemaDefinition.csdl">
+      <LogicalName>System.Data.SQLite.Common.ConceptualSchemaDefinition.csdl</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\SQLiteProviderServices.ProviderManifest.xml">
+      <LogicalName>System.Data.SQLite.SQLiteProviderServices.ProviderManifest.xml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\SQLiteProviderServices.StoreSchemaMapping.msl">
+      <LogicalName>System.Data.SQLite.SQLiteProviderServices.StoreSchemaMapping.msl</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
+      <LogicalName>System.Data.SQLite.Properties.resources</LogicalName>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\SQLiteProviderServices.ProviderManifest.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Data.SQLite\System.Data.SQLite.2008.csproj">

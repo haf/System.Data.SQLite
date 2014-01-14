@@ -8,9 +8,17 @@
 // </copyright>
 //---------------------------------------------------------------------
 
-namespace System.Data.SQLite
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6
+#else
+namespace System.Data.SQLite.Linq
+#endif
 {
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
   using System.Data.Common.CommandTrees;
+#endif
 
   /// <summary>
   /// Represents the sql fragment for any node in the query tree.

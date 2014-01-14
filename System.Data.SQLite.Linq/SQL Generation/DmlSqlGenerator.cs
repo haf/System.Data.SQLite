@@ -8,7 +8,11 @@
 // </copyright>
 //---------------------------------------------------------------------
 
-namespace System.Data.SQLite
+#if USE_ENTITY_FRAMEWORK_6
+namespace System.Data.SQLite.EF6
+#else
+namespace System.Data.SQLite.Linq
+#endif
 {
   using System;
   using System.Collections.Generic;
@@ -17,8 +21,14 @@ namespace System.Data.SQLite
   using System.Text;
   using System.Data;
   using System.Data.Common;
+
+#if USE_ENTITY_FRAMEWORK_6
+  using System.Data.Entity.Core.Metadata.Edm;
+  using System.Data.Entity.Core.Common.CommandTrees;
+#else
   using System.Data.Metadata.Edm;
   using System.Data.Common.CommandTrees;
+#endif
 
     /// <summary>
   /// Class generating SQL for a DML command tree.

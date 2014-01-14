@@ -418,6 +418,14 @@
               that require the use of native Windows APIs will be unavailable.
     -->
     <UseWindows Condition="'$(UseWindows)' == ''">true</UseWindows>
+
+    <!--
+        NOTE: For interaction with the Entity Framework, assume version 6 or
+              higher?  By default, this is disabled.  If this is enabled, the
+              "System.Data.SQLite.Linq" assembly will not work with any Entity
+              Framework prior to version 6.
+    -->
+    <UseEntityFramework6 Condition="'$(UseEntityFramework6)' == ''">false</UseEntityFramework6>
   </PropertyGroup>
 
   <!--
