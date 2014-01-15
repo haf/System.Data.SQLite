@@ -749,18 +749,8 @@ set sds_manifests(setupLinqBundle) {
 #       Framework 4.0 and later).
 #
 set sds_manifests(setupEf6Interop) {
+  {{app}\bin\EntityFramework.dll}
   {{app}\bin\System.Data.SQLite.EF6.dll}
-}
-
-###############################################################################
-#
-# NOTE: This is the list of core files that should be present in the bundled
-#       setup archives (i.e. those containing the mixed-mode assembly) that
-#       support EF6 (i.e. available with the desktop .NET Framework 4.0 and
-#       later).
-#
-set sds_manifests(setupEf6Bundle) {
-  {{app}\GAC\System.Data.SQLite.EF6.dll}
 }
 
 ###############################################################################
@@ -878,7 +868,7 @@ set sds_manifests(setupX64Vs2013) {
 #       $result == $eagle_manifests(core) UNION $eagle_manifests(library)
 #
 ###############################################################################
-################################# Source Code #################################
+############################ Source Code Packages #############################
 ###############################################################################
 
 set manifests(sqlite-netFx-source-.zip) [list sds \
@@ -886,6 +876,7 @@ set manifests(sqlite-netFx-source-.zip) [list sds \
 
 ###############################################################################
 ################### Visual Studio 2005 / .NET Framework 2.0 ###################
+############################### Binary Packages ###############################
 ###############################################################################
 
 set manifests(sqlite-netFx20-binary-Win32-2005-.zip) [list sds \
@@ -927,6 +918,9 @@ set manifests(sqlite-netFx20-static-binary-bundle-x64-2005-.zip) [list sds \
     binaryCore binaryExtra]
 
 ###############################################################################
+################### Visual Studio 2005 / .NET Framework 2.0 ###################
+############################### Setup Packages ################################
+###############################################################################
 
 set manifests(sqlite-netFx20-setup-x86-2005-.exe) [list sds \
     setupCore setupInterop setupX86Vs2005]
@@ -948,6 +942,7 @@ set manifests(sqlite-netFx20-setup-bundle-x64-2005-.exe) [list sds \
 
 ###############################################################################
 ################### Visual Studio 2008 / .NET Framework 3.5 ###################
+############################### Binary Packages ###############################
 ###############################################################################
 
 set manifests(sqlite-netFx35-binary-Win32-2008-.zip) [list sds \
@@ -989,6 +984,9 @@ set manifests(sqlite-netFx35-static-binary-bundle-x64-2008-.zip) [list sds \
     binaryCore binaryLinq binaryExtra]
 
 ###############################################################################
+################### Visual Studio 2008 / .NET Framework 3.5 ###################
+############################### Setup Packages ################################
+###############################################################################
 
 set manifests(sqlite-netFx35-setup-x86-2008-.exe) [list sds \
     setupCore setupLinqCore setupInterop setupLinqInterop setupX86Vs2008]
@@ -1010,6 +1008,7 @@ set manifests(sqlite-netFx35-setup-bundle-x64-2008-.exe) [list sds \
 
 ###############################################################################
 ############### Visual Studio 2008 / .NET Compact Framework 3.5 ###############
+############################### Binary Packages ###############################
 ###############################################################################
 
 set manifests(sqlite-netFx35-binary-PocketPC-ARM-2008-.zip) [list sds \
@@ -1019,6 +1018,7 @@ set manifests(sqlite-netFx35-binary-PocketPC-ARM-2008-.zip,subst) ""; # dynamic
 
 ###############################################################################
 ################### Visual Studio 2010 / .NET Framework 4.0 ###################
+############################### Binary Packages ###############################
 ###############################################################################
 
 set manifests(sqlite-netFx40-binary-Win32-2010-.zip) [list sds \
@@ -1060,6 +1060,9 @@ set manifests(sqlite-netFx40-static-binary-bundle-x64-2010-.zip) [list sds \
     binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
+################### Visual Studio 2010 / .NET Framework 4.0 ###################
+############################### Setup Packages ################################
+###############################################################################
 
 set manifests(sqlite-netFx40-setup-x86-2010-.exe) [list sds \
     setupCore setupInterop setupLinqCore setupEf6Core setupLinqInterop \
@@ -1075,16 +1078,17 @@ set manifests(sqlite-netFx40-setup-x64-2010-.exe) [list sds \
 
 set manifests(sqlite-netFx40-setup-bundle-x86-2010-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Bundle setupX86Vs2010]
+    setupEf6Interop setupX86Vs2010]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-setup-bundle-x64-2010-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Bundle setupX64Vs2010]
+    setupEf6Interop setupX64Vs2010]
 
 ###############################################################################
 ################### Visual Studio 2012 / .NET Framework 4.5 ###################
+############################### Binary Packages ###############################
 ###############################################################################
 
 set manifests(sqlite-netFx45-binary-Win32-2012-.zip) [list sds \
@@ -1126,6 +1130,9 @@ set manifests(sqlite-netFx45-static-binary-bundle-x64-2012-.zip) [list sds \
     binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
+################### Visual Studio 2012 / .NET Framework 4.5 ###################
+############################### Setup Packages ################################
+###############################################################################
 
 set manifests(sqlite-netFx45-setup-x86-2012-.exe) [list sds \
     setupCore setupInterop setupLinqCore setupEf6Core setupLinqInterop \
@@ -1141,16 +1148,17 @@ set manifests(sqlite-netFx45-setup-x64-2012-.exe) [list sds \
 
 set manifests(sqlite-netFx45-setup-bundle-x86-2012-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Bundle setupX86Vs2012]
+    setupEf6Interop setupX86Vs2012]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-setup-bundle-x64-2012-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Bundle setupX64Vs2012]
+    setupEf6Interop setupX64Vs2012]
 
 ###############################################################################
 ############### Visual Studio 2012 / .NET Compact Framework 3.9 ###############
+############################### Binary Packages ###############################
 ###############################################################################
 
 set manifests(sqlite-netFx39-binary-WinCE-ARM-2012-.zip) [list sds \
@@ -1167,6 +1175,7 @@ set manifests(sqlite-netFx39-binary-WinCE-x86-2012-.zip,subst) ""; # dynamic
 
 ###############################################################################
 ################## Visual Studio 2013 / .NET Framework 4.5.1 ##################
+############################### Binary Packages ###############################
 ###############################################################################
 
 set manifests(sqlite-netFx451-binary-Win32-2013-.zip) [list sds \
@@ -1208,6 +1217,9 @@ set manifests(sqlite-netFx451-static-binary-bundle-x64-2013-.zip) [list sds \
     binaryCore binaryLinq binaryEf6 binaryExtra]
 
 ###############################################################################
+################## Visual Studio 2013 / .NET Framework 4.5.1 ##################
+############################### Setup Packages ################################
+###############################################################################
 
 set manifests(sqlite-netFx451-setup-x86-2013-.exe) [list sds \
     setupCore setupInterop setupLinqCore setupEf6Core setupLinqInterop \
@@ -1223,13 +1235,13 @@ set manifests(sqlite-netFx451-setup-x64-2013-.exe) [list sds \
 
 set manifests(sqlite-netFx451-setup-bundle-x86-2013-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Bundle setupX86Vs2013]
+    setupEf6Interop setupX86Vs2013]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-setup-bundle-x64-2013-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Bundle setupX64Vs2013]
+    setupEf6Interop setupX64Vs2013]
 
 ###############################################################################
 # end of file
