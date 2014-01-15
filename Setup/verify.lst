@@ -71,7 +71,15 @@ set sds_manifests(source) {
   Externals/Eagle/lib/Eagle1.0/
   Externals/Eagle/lib/Eagle1.0/vendor.eagle
   Externals/Eagle/lib/Test1.0/
-  install.ps1
+  NuGet/net20/config.transform
+  NuGet/net40/config.transform
+  NuGet/net20/install.ps1
+  NuGet/net40/install.ps1
+  NuGet/SQLite.Beta.nuspec
+  NuGet/SQLite.MSIL.nuspec
+  NuGet/SQLite.nuspec
+  NuGet/SQLite.x64.nuspec
+  NuGet/SQLite.x86.nuspec
   readme.htm
   Setup/
   Setup/archive.bat
@@ -152,7 +160,6 @@ set sds_manifests(source) {
   Setup/verify.eagle
   Setup/verify.lst
   Setup/vsSp.bat
-  SQLite.Beta.nuspec
   SQLite.Designer/
   SQLite.Designer/AssemblyInfo.cs
   SQLite.Designer/ChangePasswordDialog.cs
@@ -276,7 +283,6 @@ set sds_manifests(source) {
   SQLite.Interop/src/win/interop.c
   SQLite.Interop/src/win/interop.h
   SQLite.Interop/src/win/SQLite.Interop.rc
-  SQLite.MSIL.nuspec
   SQLite.NET.2005.MSBuild.sln
   SQLite.NET.2005.sln
   SQLite.NET.2008.MSBuild.sln
@@ -291,9 +297,6 @@ set sds_manifests(source) {
   SQLite.NET.Settings.targets
   SQLite.NET.Settings.targets.netFx35
   SQLite.NET.targets
-  SQLite.nuspec
-  SQLite.x64.nuspec
-  SQLite.x86.nuspec
   System.Data.SQLite/
   System.Data.SQLite/AssemblyInfo.cs
   System.Data.SQLite/AssemblySourceIdAttribute.cs

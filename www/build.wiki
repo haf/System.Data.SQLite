@@ -126,13 +126,13 @@
 
       <ul>
         <li>&lt;root&gt;\readme.htm</li>
-        <li>&lt;root&gt;\SQLite.nuspec</li>
-        <li>&lt;root&gt;\SQLite.Beta.nuspec</li>
-        <li>&lt;root&gt;\SQLite.MSIL.nuspec</li>
-        <li>&lt;root&gt;\SQLite.x86.nuspec</li>
-        <li>&lt;root&gt;\SQLite.x64.nuspec</li>
         <li>&lt;root&gt;\Doc\Extra\dbfactorysupport.html</li>
         <li>&lt;root&gt;\Doc\Extra\welcome.html</li>
+        <li>&lt;root&gt;\NuGet\SQLite.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Beta.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.MSIL.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.x86.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.x64.nuspec</li>
         <li>&lt;root&gt;\SQLite.Designer\AssemblyInfo.cs</li>
         <li>&lt;root&gt;\SQLite.Designer\source.extension.vsixmanifest</li>
         <li>&lt;root&gt;\SQLite.Interop\props\SQLite.Interop.2005.vsprops</li>

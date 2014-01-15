@@ -338,7 +338,7 @@
     Enter the following command to build the &quot;default&quot; NuGet package:
     <br />
     <br />
-    <b>nuget.exe&nbsp;pack&nbsp;SQLite.nuspec</b>
+    <b>nuget.exe&nbsp;pack&nbsp;NuGet\SQLite.nuspec</b>
     <br />
     <br />
     <i>This assumes that the NuGet binary is available somewhere along the
@@ -351,7 +351,7 @@
     package:
     <br />
     <br />
-    <b>nuget.exe&nbsp;pack&nbsp;SQLite.MSIL.nuspec</b>
+    <b>nuget.exe&nbsp;pack&nbsp;NuGet\SQLite.MSIL.nuspec</b>
     <br />
     <br />
     <i>This assumes that the NuGet binary is available somewhere along the
@@ -363,7 +363,7 @@
     Enter the following command to build the NuGet package for x86:
     <br />
     <br />
-    <b>nuget.exe&nbsp;pack&nbsp;SQLite.x86.nuspec</b>
+    <b>nuget.exe&nbsp;pack&nbsp;NuGet\SQLite.x86.nuspec</b>
     <br />
     <br />
     <i>This assumes that the NuGet binary is available somewhere along the
@@ -375,7 +375,7 @@
     Enter the following command to build the NuGet package for x64:
     <br />
     <br />
-    <b>nuget.exe&nbsp;pack&nbsp;SQLite.x64.nuspec</b>
+    <b>nuget.exe&nbsp;pack&nbsp;NuGet\SQLite.x64.nuspec</b>
     <br />
     <br />
     <i>This assumes that the NuGet binary is available somewhere along the

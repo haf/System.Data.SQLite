@@ -259,18 +259,18 @@ runTest {test version-1.20 {ProviderSourceId} -body {
 
 set patterns [list \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
-        </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
-        </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
-        </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
-        </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
-        </version>] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs &quot\; [format %03d $version(build)] &quot\;] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(full)] \
+        </version>] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
@@ -368,13 +368,13 @@ set patterns [list \
 
 set fileNames [list \
     readme.htm \
-    SQLite.nuspec \
-    SQLite.Beta.nuspec \
-    SQLite.MSIL.nuspec \
-    SQLite.x64.nuspec \
-    SQLite.x86.nuspec \
     [file join Doc Extra dbfactorysupport.html] \
     [file join Doc Extra welcome.html] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.MSIL.nuspec] \
+    [file join NuGet SQLite.x64.nuspec] \
+    [file join NuGet SQLite.x86.nuspec] \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Designer AssemblyInfo.cs] \
     [file join SQLite.Designer source.extension.vsixmanifest] \
