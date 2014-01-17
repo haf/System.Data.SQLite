@@ -299,7 +299,17 @@
         deployment shown above, the System.Data.SQLite managed-only assembly
         will attempt to automatically detect the processor architecture of the
         current process and pre-load the appropriate native library.
-        <br /><br />
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="importantHeader">
+        <b>Advanced Configuration Settings</b>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="importantNotes">
         If native library pre-loading feature does not work properly in your
         environment, it can be disabled by setting the
         &quot;No_PreLoadSQLite&quot; environment variable (i.e. to anything)
@@ -307,6 +317,35 @@
         are several more environment variables that can be used to influence the
         behavior of the native library pre-loading feature, documented
         <a href="/index.html/artifact?ci=trunk&filename=Doc/Extra/environment.html">here</a>.
+        <br /><br />
+        Use of environment variables for configuration settings is not
+        supported by the .NET Compact Framework builds of System.Data.SQLite,
+        due to limitations imposed by the platform itself.
+        <br /><br />
+        Alternatively, as of version 1.0.91.0, all configuration settings can be
+        specified via an optional
+        <a href="/index.html/artifact?ci=trunk&filename=System.Data.SQLite/System.Data.SQLite.dll.config">XML configuration file</a>.
+        Using the XML configuration file when the primary System.Data.SQLite
+        assembly (&quot;System.Data.SQLite.dll&quot;) is being executed from the
+        Global Assembly Cache is <b>unsupported</b>.
+        <br /><br />
+        For each configuration setting, the associated environment variable
+        value, if present, will override the value specified via the XML
+        configuration file.
+        <br /><br />
+        For the full .NET Framework, the XML configuration file <b>must</b> be
+        named &quot;<b>System.Data.SQLite.dll.config</b>&quot; and it
+        <b>must</b> be present in the
+        <a href="http://msdn.microsoft.com/en-us/library/system.appdomain.basedirectory%28v=vs.80%29.aspx">base directory for the application domain</a>
+        <b>or</b> the directory containing the primary System.Data.SQLite
+        assembly as reported by its
+        <a href="http://msdn.microsoft.com/en-us/library/system.reflection.assembly.location%28v=vs.80%29.aspx">location</a>
+        property; otherwise, it will be ignored.
+        <br /><br />
+        For the .NET Compact Framework, the XML configuration file <b>must</b>
+        be named &quot;<b>System.Data.SQLite.dll.config</b>&quot; and it
+        <b>must</b> be present in the directory containing the primary
+        System.Data.SQLite assembly; otherwise, it will be ignored.
       </td>
     </tr>
 
