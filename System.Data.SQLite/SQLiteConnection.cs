@@ -361,7 +361,7 @@ namespace System.Data.SQLite
     private const bool DefaultBinaryGUID = true;
     private const bool DefaultUseUTF16Encoding = false;
     private const bool DefaultToFullPath = true;
-    private const bool DefaultPooling = false;
+    private const bool DefaultPooling = false; // TODO: Maybe promote this to static property?
     private const bool DefaultLegacyFormat = false;
     private const bool DefaultForeignKeys = false;
     private const bool DefaultEnlist = true;
@@ -2026,6 +2026,39 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// This method figures out what the default connection pool setting should
+    /// be based on the connection flags.  When present, the "Pooling" connection
+    /// string property value always overrides the value returned by this method.
+    /// </summary>
+    /// <returns>
+    /// Non-zero if the connection pool should be enabled by default; otherwise,
+    /// zero.
+    /// </returns>
+    private bool GetDefaultPooling()
+    {
+        bool result = DefaultPooling;
+
+        if (result) /* NOTE: True branch not reached in the default build. */
+        {
+            if ((_flags & SQLiteConnectionFlags.NoConnectionPool) == SQLiteConnectionFlags.NoConnectionPool)
+                result = false;
+
+            if ((_flags & SQLiteConnectionFlags.UseConnectionPool) == SQLiteConnectionFlags.UseConnectionPool)
+                result = true;
+        }
+        else
+        {
+            if ((_flags & SQLiteConnectionFlags.UseConnectionPool) == SQLiteConnectionFlags.UseConnectionPool)
+                result = true;
+
+            if ((_flags & SQLiteConnectionFlags.NoConnectionPool) == SQLiteConnectionFlags.NoConnectionPool)
+                result = false;
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// Opens the connection using the parameters found in the <see cref="ConnectionString" />.
     /// </summary>
     public override void Open()
@@ -2095,7 +2128,7 @@ namespace System.Data.SQLite
 
       try
       {
-        bool usePooling = SQLiteConvert.ToBoolean(FindKey(opts, "Pooling", DefaultPooling.ToString()));
+        bool usePooling = SQLiteConvert.ToBoolean(FindKey(opts, "Pooling", GetDefaultPooling().ToString()));
         int maxPoolSize = Convert.ToInt32(FindKey(opts, "Max Pool Size", DefaultMaxPoolSize.ToString()), CultureInfo.InvariantCulture);
 
         _defaultTimeout = Convert.ToInt32(FindKey(opts, "Default Timeout", DefaultConnectionTimeout.ToString()), CultureInfo.InvariantCulture);

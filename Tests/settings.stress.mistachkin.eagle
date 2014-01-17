@@ -13,3 +13,4 @@
 # set count(5) 209715200; # Maximum heap memory to exclude at one time.
 # set exitOnFail true;    # Halt testing and exit process on test failure?
 # set noTrace true;       # Disable SQLite trace logging to a file?
+# set noWorkload [list];  # Workloads to be omitted from the run, by index.

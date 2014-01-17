@@ -996,6 +996,24 @@ namespace System.Data.SQLite
       BindInvariantText = 0x20000,
 
       /// <summary>
+      /// Disable using the connection pool by default.  If the "Pooling"
+      /// connection string property is specified, its value will override
+      /// this flag.  The precise outcome of combining this flag with the
+      /// <see cref="UseConnectionPool" /> flag is unspecified; however,
+      /// one of the flags will be in effect.
+      /// </summary>
+      NoConnectionPool = 0x40000,
+
+      /// <summary>
+      /// Enable using the connection pool by default.  If the "Pooling"
+      /// connection string property is specified, its value will override
+      /// this flag.  The precise outcome of combining this flag with the
+      /// <see cref="NoConnectionPool" /> flag is unspecified; however,
+      /// one of the flags will be in effect.
+      /// </summary>
+      UseConnectionPool = 0x80000,
+
+      /// <summary>
       /// When binding parameter values or returning column values, always
       /// treat them as though they were plain text (i.e. no numeric,
       /// date/time, or other conversions should be attempted).

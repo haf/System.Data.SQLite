@@ -50,11 +50,11 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload priority noWorkload \
       priorities srcDb db fileName compiled options count times logFileName \
       logListener event timeout connection indicators iterations exitOnFail \
-      coTaskMem noTrace failures status
+      coTaskMem noTrace failures status workloadNames workloadCallbacks
 
   #############################################################################
 
-  proc setupWorkloadMemDb { fileName {varName db} } {
+  proc setupWorkloadMemDb { fileName varName } {
     #
     # NOTE: This should be an in-memory database; therefore, skip attempting
     #       to delete the underlying database file as that would not make any
@@ -67,7 +67,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  proc setupWorkloadFileDb { fileName {varName db} } {
+  proc setupWorkloadFileDb { fileName varName } {
     #
     # NOTE: Skip attempting to delete the underlying database file.  Also,
     #       disable use of "PRAGMA temp_store_directory" when setting up
@@ -472,7 +472,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   #############################################################################
 
   setupWorkloadMemDb $fileName(1) srcDb
-  setupWorkloadFileDb $fileName(2)
+  setupWorkloadFileDb $fileName(2) db
 
   #############################################################################
 
@@ -512,7 +512,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest A
     lappend ::times(1) [lindex [time {
       initTest A
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 2} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs \
@@ -544,7 +544,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest B
     lappend ::times(2) [lindex [time {
       initTest B
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 2} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs \
@@ -575,7 +575,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest C
     lappend ::times(3) [lindex [time {
       initTest C
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           set reader [sql execute -execute reader \
@@ -613,7 +613,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest D
     lappend ::times(4) [lindex [time {
       initTest D
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           set reader [sql execute -execute reader \
@@ -651,7 +651,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest E
     lappend ::times(5) [lindex [time {
       initTest E
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "INSERT INTO " $table \
@@ -684,7 +684,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest F
     lappend ::times(6) [lindex [time {
       initTest F
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "INSERT INTO " $table \
@@ -716,7 +716,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest G
     lappend ::times(7) [lindex [time {
       initTest G
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "UPDATE " $table \
@@ -748,7 +748,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest H
     lappend ::times(8) [lindex [time {
       initTest H
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "UPDATE " $table \
@@ -780,7 +780,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest I
     lappend ::times(9) [lindex [time {
       initTest I
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "DELETE FROM " $table \
@@ -811,7 +811,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest J
     lappend ::times(10) [lindex [time {
       initTest J
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "DELETE FROM " $table \
@@ -842,7 +842,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest K
     lappend ::times(11) [lindex [time {
       initTest K
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db "VACUUM;"
@@ -1036,7 +1036,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest N
     lappend ::times(14) [lindex [time {
       initTest N
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           set result [sql execute -execute scalar $db \
@@ -1138,7 +1138,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest Q
     lappend ::times(17) [lindex [time {
       initTest Q
-      setupWorkloadFileDb $dstFileName
+      setupWorkloadFileDb $dstFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           sql execute $db [appendArgs "PRAGMA journal_mode = \"" \
@@ -1169,7 +1169,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     waitTest R
     lappend ::times(18) [lindex [time {
       initTest R
-      setupWorkloadMemDb $srcFileName
+      setupWorkloadMemDb $srcFileName db
       for {set index 1} {$index <= $count1} {incr index} {
         if {[catch {
           #
@@ -1256,7 +1256,83 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
       doneTest R
     }] 0]
   }]
+
+  #############################################################################
+  #                              WORKLOAD #19 (S)                             #
+  #############################################################################
+
+  set workload(19) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
+    #
+    # NOTE: Workload #19, rapidly open/close connections, thread #1.
+    #
+    waitTest S
+    lappend ::times(19) [lindex [time {
+      initTest S
+      for {set index 1} {$index <= $count1} {incr index} {
+        if {[catch {
+          setupWorkloadFileDb $dstFileName db
+          cleanupDb $dstFileName db false true false
+          showTest S
+        } error]} then {
+          if {[isExpectedError $error]} then {
+            showTest s
+          } else {
+            failTest s $error
+          }
+        }
+      }
+      doneTest S
+    }] 0]
+  }]
+
+  #############################################################################
+  #                              WORKLOAD #20 (T)                             #
+  #############################################################################
+
+  set workload(20) [list \
+      [list srcFileName dstFileName table count1 count2 count3] {
+    #
+    # NOTE: Workload #20, rapidly open/close connections, thread #2.
+    #
+    waitTest T
+    lappend ::times(20) [lindex [time {
+      initTest T
+      for {set index 1} {$index <= $count1} {incr index} {
+        if {[catch {
+          setupWorkloadFileDb $dstFileName db
+          cleanupDb $dstFileName db false true false
+          showTest T
+        } error]} then {
+          if {[isExpectedError $error]} then {
+            showTest t
+          } else {
+            failTest t $error
+          }
+        }
+      }
+      doneTest T
+    }] 0]
+  }]
 } -body {
+  set workloadNames(all) [array names workload]
+
+  tputs $test_channel [appendArgs \
+      "---- there are " [llength $workloadNames(all)] \
+      " total workloads, their names are: " $workloadNames(all) \n]
+
+  set workloadNames(enabled) [list]
+
+  foreach index(0) [lsort -integer $workloadNames(all)] {
+    if {[lsearch -exact $noWorkload $index(0)] == -1} then {
+      lappend workloadNames(enabled) $index(0)
+    }
+  }
+
+  tputs $test_channel [appendArgs \
+      "---- there are " [llength $workloadNames(enabled)] \
+      " enabled workloads, their names are: " $workloadNames(enabled) \n]
+
   tputs $test_channel [appendArgs \
       "==== WARNING: this stress test may take several minutes...\n"]
 
@@ -1277,18 +1353,19 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
     sql execute $srcDb "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
 
-    foreach index(1) [lsort -integer [array names workload]] {
-      if {[lsearch -exact $noWorkload $index(1)] == -1} then {
-        set thread($index(1)) [object create -alias System.Threading.Thread \
-            [list apply $workload($index(1)) $fileName(1) $fileName(2) t1 \
-            $count(1) $count(3) $count(4)] 1048576]
+    foreach index(1) [lsort -integer $workloadNames(enabled)] {
+      set workloadCallbacks($index(1)) [list \
+          apply $workload($index(1)) $fileName(1) $fileName(2) t1 $count(1) \
+          $count(3) $count(4)]
 
-        $thread($index(1)) Name [appendArgs \
-            [file rootname [file tail $fileName(2)]] " #" $index(1)]
+      set thread($index(1)) [object create -alias System.Threading.Thread \
+          $workloadCallbacks($index(1)) 1048576]
 
-        if {[info exists priority($index(1))]} then {
-          $thread($index(1)) Priority $priority($index(1))
-        }
+      $thread($index(1)) Name [appendArgs \
+          [file rootname [file tail $fileName(2)]] " #" $index(1)]
+
+      if {[info exists priority($index(1))]} then {
+        $thread($index(1)) Priority $priority($index(1))
       }
     }
 
@@ -1349,10 +1426,8 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
-  foreach index(0) [lsort -integer [array names workload]] {
-    if {[lsearch -exact $noWorkload $index(0)] == -1} then {
-      tputs $test_channel [formatWorkloadResult $index(0)]
-    }
+  foreach index(0) [lsort -integer $workloadNames(enabled)] {
+    tputs $test_channel [formatWorkloadResult $index(0)]
   }
 
   #############################################################################
@@ -1412,13 +1487,20 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   rename setupWorkloadFileDb ""
   rename setupWorkloadMemDb ""
 
+  catch {
+    #
+    # NOTE: We must clear the connection pool now because we intend
+    #       to delete the databases for this test.
+    #
+    object invoke System.Data.SQLite.SQLiteConnection ClearAllPools
+  }
+
   cleanupDb $fileName(2)
   cleanupDb $fileName(1) srcDb
 
-  foreach index(0) [array names workload] {
+  foreach index(0) [array names workloadCallbacks] {
     catch {
-      object removecallback [list apply $workload($index(0)) $fileName(1) \
-          $fileName(2) t1 $count(1) $count(3) $count(4)]
+      object removecallback $workloadCallbacks($index(0))
     }
   }
 
@@ -1434,7 +1516,7 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
   unset -nocomplain result thread index workload priority noWorkload \
       priorities srcDb db fileName compiled options count times logFileName \
       logListener event timeout connection indicators iterations exitOnFail \
-      coTaskMem noTrace failures status
+      coTaskMem noTrace failures status workloadNames workloadCallbacks
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite compileCSharp} -result {0}}
 
