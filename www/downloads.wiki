@@ -91,8 +91,11 @@
 
     <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantNotes">
-        Further information on integrating SQLite into Windows Embedded Compact
-        can be found at the following web site:
+        The <a href="#sqlite-netFx35-binary-PocketPC-ARM-2008">Precompiled
+        Binaries for Windows CE (.NET Compact Framework)</a> section of this
+        page contains several binary packages for Windows Embedded Compact
+        2013.  Further information on integrating SQLite into Windows Embedded
+        Compact 2013 can be found at the following web site:
       </td>
     </tr>
 
