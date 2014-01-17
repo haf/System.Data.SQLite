@@ -5,6 +5,7 @@
   <table width="100%" cellpadding="5" cellspacing="0">
     <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantHeader">
+        <a name="runtimeLibraryNotes"></a>
         <b>Runtime Library Notes</b>
       </td>
     </tr>
@@ -25,6 +26,7 @@
 
     <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantHeader">
+        <a name="msvcDownloads"></a>
         <b>Latest Microsoft Visual C++ Runtime Library Downloads</b>
       </td>
     </tr>
@@ -51,6 +53,7 @@
 
     <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantHeader">
+        <a name="supportNotes"></a>
         <b>Support Notes</b>
       </td>
     </tr>
@@ -85,6 +88,7 @@
 
     <tr bgcolor="#fff1c8">
       <td colspan="3" class="importantHeader">
+        <a name="windowsEmbeddedCompact"></a>
         <b>Windows Embedded Compact</b>
       </td>
     </tr>
@@ -116,6 +120,7 @@
   <table width="100%" cellpadding="5">
     <tr>
       <td colspan="3" class="importantHeader">
+        <a name="releaseNotes"></a>
         <b>Release Notes</b>
       </td>
     </tr>
@@ -132,6 +137,7 @@
   <table width="100%" cellpadding="5">
     <tr>
       <td colspan="3" class="importantHeader">
+        <a name="packageTypes"></a>
         <b>Package Types</b>
       </td>
     </tr>
@@ -218,6 +224,7 @@
 
     <tr>
       <td colspan="3" class="importantHeader">
+        <a name="nativeLibraryPreLoading"></a>
         <b>Using Native Library Pre-Loading</b>
       </td>
     </tr>
@@ -304,6 +311,7 @@
 
     <tr>
       <td colspan="3" class="importantHeader">
+        <a name="advancedConfigurationSettings"></a>
         <b>Advanced Configuration Settings</b>
       </td>
     </tr>
@@ -351,6 +359,7 @@
 
     <tr>
       <td colspan="3" class="importantHeader">
+        <a name="deploymentGuidelines"></a>
         <b>Deployment Guidelines</b>
       </td>
     </tr>
