@@ -416,6 +416,14 @@
 
   <table width="100%" cellpadding="5">
     <tr>
+      <td align="center">
+        <h2>List of Release Packages</h2>
+      </td>
+    </tr>
+  </table>
+
+  <table width="100%" cellpadding="5">
+    <tr>
       <td colspan="4">
         <b>Source Code</b>
       </td>
