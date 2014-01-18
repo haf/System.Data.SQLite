@@ -895,7 +895,7 @@ if {![info exists no([file tail [info script]])]} then {
     #
     # NOTE: Has database testing support been disabled?
     #
-    if {![info exists no(database)]} then {
+    if {![info exists no(core)] && ![info exists no(database)]} then {
       #
       # NOTE: Set the server name, if necessary.
       #
@@ -1337,7 +1337,7 @@ if {![info exists no([file tail [info script]])]} then {
     #
     # NOTE: Has custom test method support been disabled?
     #
-    if {![info exists no(test)]} then {
+    if {![info exists no(core)] && ![info exists no(test)]} then {
       #
       # NOTE: Has script stream testing support been disabled?
       #
@@ -2014,10 +2014,10 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Has checking for the extra files needed by various tests been
-  #       disabled?
+  # NOTE: Has checking for the extra files needed by various tests in the
+  #       Eagle core test suite been disabled?
   #
-  if {![info exists no(checkForFile)]} then {
+  if {![info exists no(core)] && ![info exists no(checkForFile)]} then {
     #
     # NOTE: For tests "benchmark-1.3[89]" and "benchmark-1.40".
     #
@@ -2369,7 +2369,8 @@ if {![info exists no([file tail [info script]])]} then {
   #
   # NOTE: Has performance testing been disabled?
   #
-  if {![info exists no(checkForPerformance)]} then {
+  if {![info exists no(core)] && \
+      ![info exists no(checkForPerformance)]} then {
     checkForPerformance $test_channel
   }
 
@@ -2382,11 +2383,13 @@ if {![info exists no([file tail [info script]])]} then {
   #         timing issues is certainly warranted.
   #
   #
-  if {![info exists no(timing)]} then {
+  if {![info exists no(core)] && \
+      ![info exists no(timing)]} then {
     checkForTiming $test_channel 50; # 1/20th second.
   }
 
-  if {![info exists no(preciseTiming)]} then {
+  if {![info exists no(core)] && \
+      ![info exists no(preciseTiming)]} then {
     checkForTiming $test_channel 25 preciseTiming; # 1/40th second.
   }
 
@@ -2400,7 +2403,8 @@ if {![info exists no([file tail [info script]])]} then {
   #
   # NOTE: Has interactive command testing been disabled?
   #
-  if {![info exists no(interactiveCommand)]} then {
+  if {![info exists no(core)] && \
+      ![info exists no(interactiveCommand)]} then {
     #
     # NOTE: For test "debug-1.8".
     #
@@ -2425,7 +2429,7 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Check for network connectivity to our test host (i.e.
   #       the Eagle distribution site).
   #
-  if {![info exists no(network)]} then {
+  if {![info exists no(core)] && ![info exists no(network)]} then {
     checkForNetwork $test_channel $test_host $test_timeout
   }
 

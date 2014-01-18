@@ -229,6 +229,14 @@ namespace eval ::Eagle {
     if {[string length $vendor_directory] > 0} then {
       setupInterpreterTestPath stdout $vendor_directory false
     }
+
+    #
+    # HACK: Prevent the Eagle core test suite infrastructure from checking
+    #       test constraints that are time-consuming and/or most likely to
+    #       be superfluous to third-party test suites (i.e. those that are
+    #       not testing the Eagle core library itself).
+    #
+    set no(core) 1
   }
 }
 
