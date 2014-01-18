@@ -1744,7 +1744,13 @@ namespace System.Data.SQLite
       /// action-specific arguments are the name of the operation (BEGIN,
       /// RELEASE, or ROLLBACK) and the savepoint name.
       /// </summary>
-      Savepoint = 32
+      Savepoint = 32,
+
+      /// <summary>
+      /// A recursive query will be executed.  The action-specific arguments
+      /// are two null values.
+      /// </summary>
+      Recursive = 33
   }
 
   /// <summary>

@@ -30,7 +30,7 @@ runTest {test authorizer-1.1 {SQLiteConnection Authorize event} -setup {
         CreateTable CreateIndex Read Insert Update Delete]
 
     if {[$e ActionCode] in $noiseActionCodes && \
-        [string match "sqlite_*" [$e Argument1]]} then {
+        [string match sqlite_* [$e Argument1]]} then {
       return
     }
 
@@ -101,6 +101,12 @@ runTest {test authorizer-1.1 {SQLiteConnection Authorize event} -setup {
     DropView          {DROP VIEW v1;} \
     DropTrigger       {DROP TRIGGER tr1;} \
     DropIndex         {DROP INDEX i1;} \
+    Recursive         {WITH t4(x) AS (
+                         VALUES(1)
+                         UNION ALL
+                         SELECT t1.x FROM t1, t4 WHERE t1.x = t4.x
+                       )
+                       SELECT x FROM t4;} \
     DropTable         {DROP TABLE t1;} \
     Transaction       {BEGIN; SELECT 0; COMMIT;} \
     Savepoint         {SAVEPOINT s1; RELEASE SAVEPOINT s1;} \
@@ -149,13 +155,14 @@ main {}}} 0 0} {DropTempView {{0 DropTempView v2 {} temp {}}} 0 0}\
 DropTempIndex i2 t2 temp {}}} 0 0} {DropTempTable {{0 DropTempTable t2 {} temp\
 {}}} 0 0} {DropView {{0 DropView v1 {} main {}}} 0 0} {DropTrigger {{0\
 DropTrigger tr1 t1 main {}}} 0 0} {DropIndex {{0 DropIndex i1 t1 main {}}} 0 0}\
-{DropTable {{0 DropTable t1 {} main {}}} 0 0} {Transaction {{0 Transaction\
-BEGIN {} {} {}} {0 Transaction COMMIT {} {} {}}} 0 0} {Savepoint {{0 Savepoint\
-BEGIN s1 {} {}} {0 Savepoint RELEASE s1 {} {}}} 0 0} {Attach {{0 Attach\
-:memory: {} {} {}}} 0 0} {Detach {{0 Detach d1 {} {} {}}} 0 0} {CreateVtable\
-{{0 CreateVtable t3 fts4 main {}}} 0 0} {DropVtable {{0 DropVtable t3 fts4 main\
-{}}} 0 0} {CreateTable {{0 CreateTable tDeny {} main {}}} 1\
-{System.Data.SQLite.SQLiteException (0x80004005): authorization denied}} False}}
+{Recursive {{0 Recursive {} {} {} {}}} 0 0} {DropTable {{0 DropTable t1 {} main\
+{}}} 0 0} {Transaction {{0 Transaction BEGIN {} {} {}} {0 Transaction COMMIT {}\
+{} {}}} 0 0} {Savepoint {{0 Savepoint BEGIN s1 {} {}} {0 Savepoint RELEASE s1\
+{} {}}} 0 0} {Attach {{0 Attach :memory: {} {} {}}} 0 0} {Detach {{0 Detach d1\
+{} {} {}}} 0 0} {CreateVtable {{0 CreateVtable t3 fts4 main {}}} 0 0}\
+{DropVtable {{0 DropVtable t3 fts4 main {}}} 0 0} {CreateTable {{0 CreateTable\
+tDeny {} main {}}} 1 {System.Data.SQLite.SQLiteException (0x80004005):\
+authorization denied}} False}}
 
 ###############################################################################
 
