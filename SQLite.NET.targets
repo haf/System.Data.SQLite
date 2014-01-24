@@ -127,7 +127,7 @@
     <Touch Condition="'$(DirForCloneAndMark32BitOnly)' != '' And
                       HasTrailingSlash('$(DirForCloneAndMark32BitOnly)') And
                       Exists('$(DirForCloneAndMark32BitOnly)bin\CorFlags.exe') And
-                      Exists('$(DirForStrongName)bin\sn.exe')"
+                      Exists('$(DirForCloneAndMark32BitOnly)bin\sn.exe')"
            AlwaysCreate="true"
            Files="$(TargetPath).CloneAndMark32BitOnly.done" />
   </Target>
