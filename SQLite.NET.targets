@@ -50,8 +50,8 @@
   ******************************************************************************
   -->
 
-  <Target Name="StrongNameSign"
-          Condition="'$(StrongNameSign)' != 'false' And
+  <Target Name="StrongNameSignFrameworkTargetPath"
+          Condition="'$(StrongNameSignFrameworkTargetPath)' != 'false' And
                      '$(SignAssembly)' != 'false' And
                      Exists('$(AssemblyOriginatorKeyFile)')"
           Inputs="$(TargetPath)"
@@ -77,8 +77,8 @@
   ******************************************************************************
   -->
 
-  <Target Name="StrongNameSign2"
-          Condition="'$(StrongNameSign)' != 'false' And
+  <Target Name="StrongNameSignSdkToolsTargetPath"
+          Condition="'$(StrongNameSignSdkToolsTargetPath)' != 'false' And
                      '$(SignAssembly)' != 'false' And
                      Exists('$(AssemblyOriginatorKeyFile)')"
           Inputs="$(TargetPath)"
@@ -99,45 +99,69 @@
   ******************************************************************************
   -->
 
-  <Target Name="Mark32BitOnly"
-          Condition="'$(Mark32BitOnly)' != 'false'"
+  <Target Name="CloneAndMark32BitOnlyFrameworkTargetName32"
+          Condition="'$(CloneAndMark32BitOnlyFrameworkTargetName32)' != 'false'"
           Inputs="$(TargetPath)"
-          Outputs="$(TargetPath).Mark32BitOnly.done">
+          Outputs="$(TargetPath).CloneAndMark32BitOnly.done">
     <GetFrameworkSDKPath>
       <Output TaskParameter="Path"
-              PropertyName="DirForMark32BitOnly" />
+              PropertyName="DirForCloneAndMark32BitOnly" />
     </GetFrameworkSDKPath>
 
-    <Exec Condition="'$(DirForMark32BitOnly)' != '' And
-                     HasTrailingSlash('$(DirForMark32BitOnly)') And
-                     Exists('$(DirForMark32BitOnly)bin\CorFlags.exe')"
-          Command="&quot;$(DirForMark32BitOnly)bin\CorFlags.exe&quot; &quot;$(TargetPath)&quot; /32BIT+ /Force" />
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt)" />
 
-    <Touch Condition="'$(DirForMark32BitOnly)' != '' And
-                      HasTrailingSlash('$(DirForMark32BitOnly)') And
-                      Exists('$(DirForMark32BitOnly)bin\CorFlags.exe')"
+    <Copy SourceFiles="$(TargetPath).config"
+          DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt).config" />
+
+    <Exec Condition="'$(DirForCloneAndMark32BitOnly)' != '' And
+                     HasTrailingSlash('$(DirForCloneAndMark32BitOnly)') And
+                     Exists('$(DirForCloneAndMark32BitOnly)bin\CorFlags.exe')"
+          Command="&quot;$(DirForCloneAndMark32BitOnly)bin\CorFlags.exe&quot; &quot;$(TargetDir)$(TargetName)32$(TargetExt)&quot; /32BIT+ /Force" />
+
+    <Exec Condition="'$(DirForCloneAndMark32BitOnly)' != '' And
+                     HasTrailingSlash('$(DirForCloneAndMark32BitOnly)') And
+                     Exists('$(DirForCloneAndMark32BitOnly)bin\sn.exe')"
+          Command="&quot;$(DirForCloneAndMark32BitOnly)bin\sn.exe&quot; -Ra &quot;$(TargetDir)$(TargetName)32$(TargetExt)&quot; &quot;$(AssemblyOriginatorKeyFile)&quot;" />
+
+    <Touch Condition="'$(DirForCloneAndMark32BitOnly)' != '' And
+                      HasTrailingSlash('$(DirForCloneAndMark32BitOnly)') And
+                      Exists('$(DirForCloneAndMark32BitOnly)bin\CorFlags.exe') And
+                      Exists('$(DirForStrongName)bin\sn.exe')"
            AlwaysCreate="true"
-           Files="$(TargetPath).Mark32BitOnly.done" />
+           Files="$(TargetPath).CloneAndMark32BitOnly.done" />
   </Target>
 
   <!--
   ******************************************************************************
   -->
 
-  <Target Name="Mark32BitOnly2"
-          Condition="'$(Mark32BitOnly)' != 'false'"
+  <Target Name="CloneAndMark32BitOnlySdkToolsTargetName32"
+          Condition="'$(CloneAndMark32BitOnlySdkToolsTargetName32)' != 'false'"
           Inputs="$(TargetPath)"
-          Outputs="$(TargetPath).Mark32BitOnly.done">
+          Outputs="$(TargetPath).CloneAndMark32BitOnly.done">
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt)" />
+
+    <Copy SourceFiles="$(TargetPath).config"
+          DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt).config" />
+
     <Exec Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
                      HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And
                      Exists('$(TargetFrameworkSDKToolsDirectory)CorFlags.exe')"
-          Command="&quot;$(TargetFrameworkSDKToolsDirectory)CorFlags.exe&quot; &quot;$(TargetPath)&quot; /32BIT+ /Force" />
+          Command="&quot;$(TargetFrameworkSDKToolsDirectory)CorFlags.exe&quot; &quot;$(TargetDir)$(TargetName)32$(TargetExt)&quot; /32BIT+ /Force" />
+
+    <Exec Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
+                     HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And
+                     Exists('$(TargetFrameworkSDKToolsDirectory)sn.exe')"
+          Command="&quot;$(TargetFrameworkSDKToolsDirectory)sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(AssemblyOriginatorKeyFile)&quot;" />
 
     <Touch Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
                       HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And
-                      Exists('$(TargetFrameworkSDKToolsDirectory)CorFlags.exe')"
+                      Exists('$(TargetFrameworkSDKToolsDirectory)CorFlags.exe') And
+                      Exists('$(TargetFrameworkSDKToolsDirectory)sn.exe')"
            AlwaysCreate="true"
-           Files="$(TargetPath).Mark32BitOnly.done" />
+           Files="$(TargetPath).CloneAndMark32BitOnly.done" />
   </Target>
 
   <!--

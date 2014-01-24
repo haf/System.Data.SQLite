@@ -5,6 +5,8 @@
 *.map
 *.mda.config
 *.txt
+*32.exe
+*32.exe.config
 *EntityFramework.*
 *EnvDTE.*
 *Microsoft.*

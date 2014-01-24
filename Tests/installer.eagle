@@ -89,7 +89,7 @@ if {![haveConstraint [appendArgs file_ \
 
 if {![haveConstraint [appendArgs file_ \
     [file tail $installerExeFile]]]} then {
-  checkForFile $test_channel $installerExeFile
+  checkForFile $test_channel $installerExeFile Installer.exe
 }
 
 if {![haveConstraint [appendArgs file_ \

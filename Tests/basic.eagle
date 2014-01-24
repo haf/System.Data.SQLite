@@ -59,15 +59,15 @@ if {![haveConstraint [appendArgs file_ \
 }
 
 if {![haveConstraint [appendArgs file_ [file tail $testExeFile]]]} then {
-  checkForFile $test_channel $testExeFile
+  checkForFile $test_channel $testExeFile test.exe
 }
 
 if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
-  checkForFile $test_channel $testLinqExeFile
+  checkForFile $test_channel $testLinqExeFile testlinq.exe
 }
 
 if {![haveConstraint [appendArgs file_ [file tail $testEf6ExeFile]]]} then {
-  checkForFile $test_channel $testEf6ExeFile
+  checkForFile $test_channel $testEf6ExeFile testef6.exe
 }
 
 if {![haveConstraint [appendArgs file_ [file tail $northwindEfDbFile]]]} then {

@@ -157,8 +157,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Running on WoW64 is never the default platform.
       #
-      if {[info exists ::eagle_platform(wow64)] && \
-          $::eagle_platform(wow64)} then {
+      if {[isRunningWoW64]} then {
         if {$verbose} then {
           tputs $::test_channel \
               "---- detected non-default platform (WoW64)\n"
@@ -303,6 +302,12 @@ namespace eval ::Eagle {
         #
         return ""
       }
+    }
+
+    proc isRunningWoW64 {} {
+      return [expr {
+        [info exists ::eagle_platform(wow64)] && $::eagle_platform(wow64)
+      }]
     }
 
     proc isMixedModeAssembly { fileName {varName ""} } {
@@ -577,8 +582,18 @@ namespace eval ::Eagle {
       #       build directory, discarding any directory information present
       #       in the file name as provided by our caller.
       #
-      return [file nativename \
+      set result [file nativename \
           [file join [getBuildDirectory] $platform [file tail $fileName]]]
+
+      #
+      # HACK: When running on WoW64, assume the test executables are present
+      #       with the "32" suffix on them.
+      #
+      if {[isRunningWoW64] && [file extension $result] eq ".exe"} then {
+        set result [appendArgs [file rootname $result] 32.exe]
+      }
+
+      return $result
     }
 
     proc getExternalDirectory {} {
