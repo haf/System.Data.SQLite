@@ -149,6 +149,32 @@ namespace eval ::Eagle {
       }
     }
 
+    #
+    # NOTE: This procedure should return non-zero if the configured test
+    #       platform is most likely the default for this machine.
+    #
+    proc isDefaultBuildPlatform { {verbose false} } {
+      #
+      # NOTE: Running on WoW64 is never the default platform.
+      #
+      if {[info exists ::eagle_platform(wow64)] && \
+          $::eagle_platform(wow64)} then {
+        if {$verbose} then {
+          tputs $::test_channel \
+              "---- detected non-default platform (WoW64)\n"
+        }
+        return false
+      }
+
+      #
+      # NOTE: This has a good chance of being the default platform.
+      #
+      if {$verbose} then {
+        tputs $::test_channel "---- detected default platform\n"
+      }
+      return true
+    }
+
     proc getBuildPlatform { native } {
       if {[info exists ::test_platform] && \
           [string length $::test_platform] > 0} then {
@@ -818,14 +844,16 @@ namespace eval ::Eagle {
       } [getTestOverridesPreamble [list path test_channel]] $suffix]]]
     }
 
-    proc tryCopyExternalFile { fileName {platform ""} {newFileName ""} } {
+    proc tryCopyExternalFile {
+            fileName {platform ""} {newFileName ""} {verbose false} } {
       set sourceFileName [getExternalFileName $fileName]
 
       if {![file exists $sourceFileName]} then {
-        tputs $::test_channel [appendArgs \
-            "---- skipped copying external file \"" $sourceFileName \
-            "\", it does not exist\n"]
-
+        if {$verbose} then {
+          tputs $::test_channel [appendArgs \
+              "---- skipped copying external file \"" $sourceFileName \
+              "\", it does not exist\n"]
+        }
         return
       }
 
@@ -853,14 +881,16 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryCopyBinaryFile { fileName {platform ""} {newFileName ""} } {
+    proc tryCopyBinaryFile {
+            fileName {platform ""} {newFileName ""} {verbose false} } {
       set sourceFileName [getBinaryFileName $fileName $platform]
 
       if {![file exists $sourceFileName]} then {
-        tputs $::test_channel [appendArgs \
-            "---- skipped copying binary file \"" $sourceFileName \
-            "\", it does not exist\n"]
-
+        if {$verbose} then {
+          tputs $::test_channel [appendArgs \
+              "---- skipped copying binary file \"" $sourceFileName \
+              "\", it does not exist\n"]
+        }
         return
       }
 
@@ -888,14 +918,16 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryCopyBuildFile { fileName {platform ""} {newFileName ""} } {
+    proc tryCopyBuildFile {
+            fileName {platform ""} {newFileName ""} {verbose false} } {
       set sourceFileName [getBuildFileName $fileName $platform]
 
       if {![file exists $sourceFileName]} then {
-        tputs $::test_channel [appendArgs \
-            "---- skipped copying build file \"" $sourceFileName \
-            "\", it does not exist\n"]
-
+        if {$verbose} then {
+          tputs $::test_channel [appendArgs \
+              "---- skipped copying build file \"" $sourceFileName \
+              "\", it does not exist\n"]
+        }
         return
       }
 
@@ -923,14 +955,15 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryDeleteBinaryFile { fileName {platform ""} } {
+    proc tryDeleteBinaryFile { fileName {platform ""} {verbose false} } {
       set fileName [getBinaryFileName $fileName $platform]
 
       if {![file exists $fileName]} then {
-        tputs $::test_channel [appendArgs \
-            "---- skipped deleting binary file \"" $fileName \
-            "\", it does not exist\n"]
-
+        if {$verbose} then {
+          tputs $::test_channel [appendArgs \
+              "---- skipped deleting binary file \"" $fileName \
+              "\", it does not exist\n"]
+        }
         return
       }
 
@@ -943,14 +976,15 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryDeleteBuildFile { fileName {platform ""} } {
+    proc tryDeleteBuildFile { fileName {platform ""} {verbose false} } {
       set fileName [getBuildFileName $fileName $platform]
 
       if {![file exists $fileName]} then {
-        tputs $::test_channel [appendArgs \
-            "---- skipped deleting build file \"" $fileName \
-            "\", it does not exist\n"]
-
+        if {$verbose} then {
+          tputs $::test_channel [appendArgs \
+              "---- skipped deleting build file \"" $fileName \
+              "\", it does not exist\n"]
+        }
         return
       }
 
@@ -963,21 +997,23 @@ namespace eval ::Eagle {
       }
     }
 
-    proc tryCopyAssembly { fileName {platform ""} {pdb true} } {
-      tryCopyBuildFile $fileName $platform
+    proc tryCopyAssembly {
+            fileName {platform ""} {pdb true} {verbose false} } {
+      tryCopyBuildFile $fileName $platform "" $verbose
 
       if {$pdb} then {
         tryCopyBuildFile [appendArgs \
-            [file rootname $fileName] .pdb] $platform
+            [file rootname $fileName] .pdb] $platform "" $verbose
       }
     }
 
-    proc tryDeleteAssembly { fileName {platform ""} {pdb true} } {
-      tryDeleteBinaryFile $fileName $platform
+    proc tryDeleteAssembly {
+            fileName {platform ""} {pdb true} {verbose false} } {
+      tryDeleteBinaryFile $fileName $platform $verbose
 
       if {$pdb} then {
         tryDeleteBinaryFile [appendArgs \
-            [file rootname $fileName] .pdb] $platform
+            [file rootname $fileName] .pdb] $platform $verbose
       }
     }
 
@@ -2651,7 +2687,13 @@ namespace eval ::Eagle {
             }
 
             if {![info exists ::no(copySqliteNativeFiles)]} then {
-              if {![info exists ::no(copySqliteImplicitFiles)]} then {
+              #
+              # NOTE: If the test platform is likely the default for this
+              #       machine, also try to copy the native files to the
+              #       binary location.
+              #
+              if {![info exists ::no(copySqliteImplicitFiles)] && \
+                  [isDefaultBuildPlatform true]} then {
                 foreach fileName $nativeFileNames {
                   tryCopyAssembly $fileName
                 }
