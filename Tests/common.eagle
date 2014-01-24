@@ -2461,8 +2461,9 @@ namespace eval ::Eagle {
         #       configuration files that we handle.
         #
         set mdaConfigFileNames [list \
-            Installer.exe.mda.config test.exe.mda.config \
-            testlinq.exe.mda.config testef6.exe.mda.config]
+            EagleShell32.exe.mda.config Installer.exe.mda.config \
+            test.exe.mda.config testlinq.exe.mda.config \
+            testef6.exe.mda.config]
 
         #
         # NOTE: Build the list of external files that we handle.  Some of

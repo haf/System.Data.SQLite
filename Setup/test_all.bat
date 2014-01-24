@@ -101,6 +101,7 @@ IF NOT DEFINED TEST_FILE (
 )
 
 %_VECHO% TestFile = '%TEST_FILE%'
+%_VECHO% TestInitialize = '%TEST_INITIALIZE%'
 
 IF NOT DEFINED 32BITONLY (
   SET EAGLESHELL=EagleShell.exe
@@ -126,7 +127,7 @@ SET TEST_ALL=1
 FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
   FOR %%Y IN (%YEARS%) DO (
     IF NOT DEFINED NOMANAGEDONLY (
-      %__ECHO% "Externals\Eagle\bin\%EAGLESHELL%" -anyInitialize "set test_year {%%Y}; set test_configuration {%%C}" -file "%TEST_FILE%"
+      %__ECHO% "Externals\Eagle\bin\%EAGLESHELL%" -anyInitialize "set test_year {%%Y}; set test_configuration {%%C}; %TEST_INITIALIZE" -file "%TEST_FILE%"
 
       IF ERRORLEVEL 1 (
         ECHO Testing of "%%Y/%%C" managed-only assembly failed.
@@ -199,7 +200,7 @@ FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
         )
       )
 
-      %__ECHO% "Externals\Eagle\bin\%EAGLESHELL%" -preInitialize "set test_year {%%Y}; set test_configuration {%%C}" -initialize -runtimeOption native -file "%TEST_FILE%"
+      %__ECHO% "Externals\Eagle\bin\%EAGLESHELL%" -preInitialize "set test_year {%%Y}; set test_configuration {%%C}; %TEST_INITIALIZE" -initialize -runtimeOption native -file "%TEST_FILE%"
 
       IF ERRORLEVEL 1 (
         ECHO Testing of "%%Y/%%C" mixed-mode assembly failed.
@@ -224,6 +225,7 @@ IF NOT DEFINED SKIP32BITONLY (
   IF NOT DEFINED 32BITONLY (
     IF /I NOT "%PROCESSOR_ARCHITECTURE%" == "x86" (
       SET PLATFORM=Win32
+      SET TEST_INITIALIZE=set test_platform Win32
       SET 32BITONLY=1
       GOTO redo
     )
