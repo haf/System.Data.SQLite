@@ -11,6 +11,8 @@
 
 SETLOCAL
 
+:redo
+
 REM SET __ECHO=ECHO
 REM SET __ECHO2=ECHO
 REM SET __ECHO3=ECHO
@@ -66,6 +68,11 @@ IF NOT DEFINED TEST_CONFIGURATIONS (
 
 %_VECHO% TestConfigurations = '%TEST_CONFIGURATIONS%'
 
+IF DEFINED PLATFORM (
+  %_AECHO% Skipping platform detection, already set...
+  GOTO skip_detectPlatform
+)
+
 IF /I "%PROCESSOR_ARCHITECTURE%" == "x86" (
   SET PLATFORM=Win32
 )
@@ -73,6 +80,8 @@ IF /I "%PROCESSOR_ARCHITECTURE%" == "x86" (
 IF /I "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
   SET PLATFORM=x64
 )
+
+:skip_detectPlatform
 
 IF NOT DEFINED PLATFORM (
   ECHO Unsupported platform.
@@ -205,6 +214,20 @@ FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
 IF ERRORLEVEL 1 (
   ECHO Could not restore directory.
   GOTO errors
+)
+
+REM
+REM NOTE: If this is a 64-bit machine and we have not already run the 32-bit
+REM       tests, do so now, unless we are forbidden from doing so.
+REM
+IF NOT DEFINED SKIP32BITONLY (
+  IF NOT DEFINED 32BITONLY (
+    IF /I NOT "%PROCESSOR_ARCHITECTURE%" == "x86" (
+      SET PLATFORM=Win32
+      SET 32BITONLY=1
+      GOTO redo
+    )
+  )
 )
 
 GOTO no_errors
