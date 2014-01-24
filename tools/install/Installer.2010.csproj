@@ -64,6 +64,8 @@
       EmbedExeManifest;
       StrongNameSignFrameworkTargetPath;
       StrongNameSignSdkToolsTargetPath;
+      CloneAndMark32BitOnlyFrameworkTargetName32;
+      CloneAndMark32BitOnlySdkToolsTargetName32;
     </BuildDependsOn>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

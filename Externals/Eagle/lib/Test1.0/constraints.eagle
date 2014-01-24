@@ -55,6 +55,24 @@ namespace eval ::Eagle {
         [list 3 4] [list 3 5] [list 3 6]]
   }
 
+  proc alwaysFullInterpReady {} {
+    #
+    # NOTE: The [interp readylimit] sub-command is only in Eagle.
+    #
+    if {![isEagle]} then {
+      return true
+    }
+
+    #
+    # NOTE: If this Eagle version lacks [interp readylimit] -OR- it has
+    #       the default value (i.e. it always fully checks readiness),
+    #       return true.
+    #
+    return [expr {
+      [catch {interp readylimit {}} readylimit] != 0 || $readylimit == 0
+    }]
+  }
+
   #
   # NOTE: This procedure should return non-zero if the native Tcl shell may
   #       be executed by the test suite infrastructure outside the context
@@ -833,6 +851,32 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForNamespaces { channel } {
+    tputs $channel "---- checking for namespace support... "
+
+    if {[isEagle]} then {
+      if {[catch {object invoke -flags +NonPublic Interpreter.GetActive \
+              AreNamespacesEnabled} enabled] == 0 && \
+          $enabled} then {
+        #
+        # NOTE: Yes, it appears that it is available.
+        #
+        addConstraint namespaces
+
+        tputs $channel yes\n
+      } else {
+        tputs $channel no\n
+      }
+    } else {
+      #
+      # NOTE: All supported versions of native Tcl have namespaces.
+      #
+      addConstraint namespaces
+
+      tputs $channel yes\n
+    }
+  }
+
   proc checkForTestExec { channel } {
     tputs $channel "---- checking for test use of \"exec\" command... "
 
@@ -1098,18 +1142,25 @@ namespace eval ::Eagle {
   proc checkForTip285 { channel } {
     tputs $channel "---- checking for TIP #285... "
 
-    #
-    # NOTE: Is the interpreter TIP #285 ready?
-    #
-    catch {interp cancel} error
+    if {[alwaysFullInterpReady]} then {
+      #
+      # NOTE: Is the interpreter TIP #285 ready?
+      #
+      catch {interp cancel} error
 
-    if {$error eq "eval canceled"} then {
-      addConstraint tip285
+      if {$error eq "eval canceled"} then {
+        addConstraint tip285
 
-      tputs $channel yes\n
-    } else {
-      tputs $channel no\n
+        tputs $channel yes\n
+
+        #
+        # NOTE: We are done here, return now.
+        #
+        return
+      }
     }
+
+    tputs $channel no\n
   }
 
   proc checkForTip405 { channel } {
@@ -2185,6 +2236,23 @@ namespace eval ::Eagle {
       tputs $channel no\n
     }
 
+    proc checkForWoW64 { channel } {
+      tputs $channel "---- checking for WoW64... "
+
+      if {[info exists ::eagle_platform(wow64)] && \
+          [string is boolean -strict $::eagle_platform(wow64)] && \
+          $::eagle_platform(wow64)} then {
+        #
+        # NOTE: Yes, we are running in a WoW64 process.
+        #
+        addConstraint wow64
+
+        tputs $channel yes\n
+      } else {
+        tputs $channel no\n
+      }
+    }
+
     proc checkForStaThread { channel } {
       tputs $channel "---- checking for STA thread... "
 
@@ -2984,20 +3052,20 @@ namespace eval ::Eagle {
     #       global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        getKnownCompileOptions getKnownMonoVersions canExecTclShell \
-        canExecFossil checkForTestSuiteFiles checkForPlatform \
+        getKnownCompileOptions getKnownMonoVersions alwaysFullInterpReady \
+        canExecTclShell canExecFossil checkForTestSuiteFiles checkForPlatform \
         checkForWindowsVersion checkForScriptLibrary checkForVariable \
         checkForTclOptions checkForWindowsCommandProcessor checkForFossil \
         checkForEagle checkForSymbols checkForLogFile checkForGaruda \
         checkForShell checkForDebug checkForTk checkForVersion \
-        checkForCommand checkForTestExec checkForTestMachine \
-        checkForTestPlatform checkForTestConfiguration checkForTestSuffix \
-        checkForFile checkForPathFile checkForNativeCode checkForTip127 \
-        checkForTip194 checkForTip241 checkForTip285 checkForTip405 \
-        checkForTip426 checkForTiming checkForPerformance checkForBigLists \
-        checkForStackIntensive checkForInteractive checkForInteractiveCommand \
-        checkForUserInteraction checkForNetwork checkForCompileOption \
-        checkForKnownCompileOptions] false false
+        checkForCommand checkForNamespaces checkForTestExec \
+        checkForTestMachine checkForTestPlatform checkForTestConfiguration \
+        checkForTestSuffix checkForFile checkForPathFile checkForNativeCode \
+        checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
+        checkForTip405 checkForTip426 checkForTiming checkForPerformance \
+        checkForBigLists checkForStackIntensive checkForInteractive \
+        checkForInteractiveCommand checkForUserInteraction checkForNetwork \
+        checkForCompileOption checkForKnownCompileOptions] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

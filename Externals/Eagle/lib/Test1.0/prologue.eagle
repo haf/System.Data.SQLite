@@ -1759,6 +1759,16 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Are we running in a WoW64 process?
+    #
+    if {![info exists no(wow64)]} then {
+      #
+      # NOTE: This is not currently used by any tests.
+      #
+      checkForWoW64 $test_channel
+    }
+
+    #
     # NOTE: Are we running in an STA thread?
     #
     if {![info exists no(staThread)]} then {
@@ -2339,6 +2349,13 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: Has namespace detection support been disabled?
+  #
+  if {![info exists no(namespaces)]} then {
+    checkForNamespaces $test_channel
+  }
+
+  #
   # NOTE: Check for various features that were added through
   #       the TIP process.
   #
@@ -2436,7 +2453,7 @@ if {![info exists no([file tail [info script]])]} then {
   #
   # NOTE: Figure out the approximate relative performance of this machine.
   #
-  if {[haveConstraint performance]} then {
+  if {![info exists no(bogoCops)] && [haveConstraint performance]} then {
     tputs $test_channel [appendArgs \
         "---- checking for baseline BogoCops (commands-per-second)... "]
 

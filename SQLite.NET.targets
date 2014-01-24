@@ -112,7 +112,8 @@
           DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt)" />
 
     <Copy SourceFiles="$(TargetPath).config"
-          DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt).config" />
+          DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt).config"
+          Condition="Exists('$(TargetPath).config')" />
 
     <Exec Condition="'$(DirForCloneAndMark32BitOnly)' != '' And
                      HasTrailingSlash('$(DirForCloneAndMark32BitOnly)') And
@@ -144,7 +145,8 @@
           DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt)" />
 
     <Copy SourceFiles="$(TargetPath).config"
-          DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt).config" />
+          DestinationFiles="$(TargetDir)$(TargetName)32$(TargetExt).config"
+          Condition="Exists('$(TargetPath).config')" />
 
     <Exec Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
                      HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And

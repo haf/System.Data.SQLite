@@ -237,6 +237,14 @@ namespace eval ::Eagle {
     #       not testing the Eagle core library itself).
     #
     set no(core) 1
+
+    #
+    # HACK: Prevent the Eagle core test suite infrastructure from doing
+    #       things that require beta 29 (or later) binaries.  This section
+    #       should be removed when the Eagle beta 29 binaries are checked
+    #       into the System.Data.SQLite repository.
+    #
+    set no(bogoCops) 1; # NOTE: Lack of [interp readylimit].
   }
 }
 

@@ -1899,15 +1899,17 @@ namespace eval ::Eagle {
       return -code error "invalid command name \"$name\""
     }
 
-    #
-    # TODO: Revise or remove this procedure when full [namespace]
-    #       support has been added.
-    #
-    proc ::tcl::tm::UnknownHandler { original name args } {
+    namespace eval ::tcl::tm {
       #
-      # NOTE: Do nothing except call the original handler.
+      # NOTE: Ideally, this procedure should be created in the "::tcl::tm"
+      #       namespace.
       #
-      uplevel 1 $original [::linsert $args 0 $name]
+      proc ::tcl::tm::UnknownHandler { original name args } {
+        #
+        # NOTE: Do nothing except call the original handler.
+        #
+        uplevel 1 $original [::linsert $args 0 $name]
+      }
     }
 
     proc tclPkgUnknown { name args } {

@@ -259,81 +259,95 @@ namespace eval ::Eagle {
     }
 
     #
-    # HACK: Different techniques are used here to calculate the performance of
-    #       the machine for Tcl and Eagle.
+    # HACK: Different techniques are used to calculate the performance of the
+    #       machine for Tcl and Eagle.
     #
     if {!$legacy && [isEagle]} then {
       #
-      # NOTE: Save the current background error handler for later restoration
-      #       and then reset the current background error handler to nothing.
+      # NOTE: Save the current readiness limit for later restoration and then
+      #       set the current readiness limit to always check the interpreter
+      #       readiness (default).  If this was not done, the [interp cancel]
+      #       command in this procedure may have no effect, which could cause
+      #       this procedure to run forever.
       #
-      set bgerror [interp bgerror {}]
-      interp bgerror {} ""
+      set readylimit [interp readylimit {}]
+      interp readylimit {} 0
 
       try {
         #
-        # NOTE: Save the current [after] flags for later restoration and then
-        #       reset them to process events immediately.
+        # NOTE: Save the current background error handler for later restoration
+        #       and then reset the current background error handler to nothing.
         #
-        set flags [after flags]
-        after flags =Immediate
+        set bgerror [interp bgerror {}]
+        interp bgerror {} ""
 
         try {
-          set code [catch {
-            #
-            # NOTE: First, make sure that the [after] event queue for the
-            #       interpreter is totally empty.
-            #
-            catch {eval after cancel [after info]}
+          #
+          # NOTE: Save the current [after] flags for later restoration and then
+          #       reset them to process events immediately.
+          #
+          set flags [after flags]
+          after flags =Immediate
+
+          try {
+            set code [catch {
+              #
+              # NOTE: First, make sure that the [after] event queue for the
+              #       interpreter is totally empty.
+              #
+              catch {eval after cancel [after info]}
+
+              #
+              # NOTE: Schedule the event to cancel the script we are about to
+              #       evaluate, capturing the name so we can cancel it later,
+              #       if necessary.
+              #
+              set event [after $milliseconds [list interp cancel]]
+
+              #
+              # HACK: There is a potential "race condition" here.  If the
+              #       specified number of milliseconds elapses before (or
+              #       after) entering the [catch] script block (below) then
+              #       the resulting script cancellation error will not be
+              #       caught and we will be unable to return the correct
+              #       result to the caller.
+              #
+              set before [info cmdcount]
+              catch {time {nop} -1}; # uses the [time] internal busy loop.
+              set after [info cmdcount]
+
+              #
+              # HACK: Mono has a bug that results in excessive trailing zeros
+              #       here (Mono bug #655780).
+              #
+              if {[isMono]} then {
+                expr {double(($after - $before) / ($milliseconds / 1000.0))}
+              } else {
+                expr {($after - $before) / ($milliseconds / 1000.0)}
+              }
+            } result]
 
             #
-            # NOTE: Schedule the event to cancel the script we are about to
-            #       evaluate, capturing the name so we can cancel it later, if
-            #       necessary.
+            # NOTE: If we failed due to the race condition explained above,
+            #       return an obviously invalid result instead.
             #
-            set event [after $milliseconds [list interp cancel]]
-
-            #
-            # HACK: There is the potential for a "race condition" here.  If the
-            #       specified number of milliseconds elapses before (or after)
-            #       entering the [catch] script block (below) then the resulting
-            #       script cancellation error will not be caught and we will be
-            #       unable to return the correct result to the caller.
-            #
-            set before [info cmdcount]
-            catch {time {nop} -1}; # uses the [time] internal busy loop.
-            set after [info cmdcount]
-
-            #
-            # HACK: Mono has a bug that results in excessive trailing zeros
-            #       here (Mono bug #655780).
-            #
-            if {[isMono]} then {
-              expr {double(($after - $before) / ($milliseconds / 1000.0))}
+            if {$code == 0} then {
+              return $result
             } else {
-              expr {($after - $before) / ($milliseconds / 1000.0)}
+              return 0
             }
-          } result]
+          } finally {
+            if {[info exists event]} then {
+              catch {after cancel $event}
+            }
 
-          #
-          # NOTE: If we failed to calculate the number of commands-per-second
-          #       due to some subtle race condition [as explained above], return
-          #       an obviously invalid result instead.
-          #
-          if {$code == 0} then {
-            return $result
-          } else {
-            return 0
+            after flags =$flags
           }
         } finally {
-          if {[info exists event]} then {
-            catch {after cancel $event}
-          }
-
-          after flags =$flags
+          interp bgerror {} $bgerror
         }
       } finally {
-        interp bgerror {} $bgerror
+        interp readylimit {} $readylimit
       }
     } else {
       #
@@ -440,11 +454,11 @@ namespace eval ::Eagle {
     if {[string length $fileName] > 0} then {
       if {[file exists $fileName]} then {
         tputs $::test_channel [appendArgs \
-            "---- evaluating $type file: \"" $fileName \"\n]
+            "---- evaluating " $type " file: \"" $fileName \"\n]
 
         if {[catch {uplevel 1 [list source $fileName]} error]} then {
           tputs $::test_channel [appendArgs \
-              "---- error during $type file: " $error \n]
+              "---- error during " $type " file: " $error \n]
 
           #
           # NOTE: The error has been logged, now re-throw it.
@@ -454,7 +468,7 @@ namespace eval ::Eagle {
         }
       } else {
         tputs $::test_channel [appendArgs \
-            "---- skipped $type file: \"" $fileName \
+            "---- skipped " $type " file: \"" $fileName \
             "\", it does not exist\n"]
       }
     }
@@ -487,12 +501,12 @@ namespace eval ::Eagle {
         set array($name) $value
 
         tqputs $::test_channel [appendArgs \
-            "---- overrode test option \"" $name "\" with value \"" $value \
-            \"\n]
+            "---- overrode test option \"" $name "\" with value \"" \
+            $value \"\n]
       } else {
         tqputs $::test_channel [appendArgs \
-            "---- unknown test option \"" $name "\" with value \"" $value \
-            "\" ignored\n"]
+            "---- unknown test option \"" $name "\" with value \"" \
+            $value "\" ignored\n"]
       }
     }
 
@@ -750,10 +764,10 @@ namespace eval ::Eagle {
         #       reflection (Mono bug #636939).  Also, strip any leading
         #       minus signs for cleanliness.
         #
-        return [hash normal sha256 [appendArgs [info host] [string trimleft \
-            [pid] -] [string trimleft [info tid] -] [string trimleft \
-            [clock now] -] [string trimleft [clock clicks] -] [string trimleft \
-            [expr $expr] -]]]
+        return [hash normal sha256 [appendArgs [info host] [string \
+            trimleft [pid] -] [string trimleft [info tid] -] [string \
+            trimleft [clock now] -] [string trimleft [clock clicks] -] \
+            [string trimleft [expr $expr] -]]]
       }
     } else {
       #
@@ -777,8 +791,9 @@ namespace eval ::Eagle {
       #
       set pid [pid]; set seconds [clock seconds]; set clicks [clock clicks]
 
-      return [appendArgs $host [format [appendArgs % [getLengthModifier $pid] \
-          X% [getLengthModifier $seconds] X% [getLengthModifier $clicks] X% \
+      return [appendArgs \
+          $host [format [appendArgs % [getLengthModifier $pid] X% \
+          [getLengthModifier $seconds] X% [getLengthModifier $clicks] X% \
           [getLengthModifier $random] X] $pid $seconds $clicks $random]]
     }
   }
@@ -1964,6 +1979,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Setup the necessary compatibility shims for the test suite.
       #
+      namespace eval ::tcltest {}; # HACK: Force namespace creation now.
       setupTestShims true [expr {![isTestSuiteRunning]}]
 
       #
@@ -2271,8 +2287,8 @@ namespace eval ::Eagle {
       if {[$thread IsAlive]} then {
         if {[catch {$thread Interrupt} error]} then {
           tputs $::test_channel [appendArgs \
-              "---- failed to interrupt test thread \"" $thread "\": " $error \
-              \n]
+              "---- failed to interrupt test thread \"" $thread "\": " \
+              $error \n]
         } else {
           tputs $::test_channel [appendArgs "---- test thread \"" $thread \
               "\" interrupted\n"]
@@ -2281,29 +2297,30 @@ namespace eval ::Eagle {
         if {[$thread IsAlive]} then {
           if {[catch {$thread Join $timeout} error]} then {
             tputs $::test_channel [appendArgs \
-                "---- failed to join test thread \"" $thread "\": " $error \n]
+                "---- failed to join test thread \"" $thread "\": " \
+                $error \n]
           } elseif {$error} then {
             tputs $::test_channel [appendArgs "---- joined test thread \"" \
                 $thread \"\n]
           } else {
             tputs $::test_channel [appendArgs \
-                "---- timeout joining test thread \"" $thread " (" $timeout \
-                " milliseconds)\"\n"]
+                "---- timeout joining test thread \"" $thread " (" \
+                $timeout " milliseconds)\"\n"]
           }
 
           if {[$thread IsAlive]} then {
             if {[catch {$thread Abort} error]} then {
               tputs $::test_channel [appendArgs \
-                  "---- failed to abort test thread \"" $thread "\": " $error \
-                  \n]
+                  "---- failed to abort test thread \"" $thread "\": " \
+                  $error \n]
             } else {
-              tputs $::test_channel [appendArgs "---- test thread \"" $thread \
-                  "\" aborted\n"]
+              tputs $::test_channel [appendArgs "---- test thread \"" \
+                  $thread "\" aborted\n"]
             }
 
             if {[$thread IsAlive]} then {
-              tputs $::test_channel [appendArgs "---- test thread \"" $thread \
-                  "\" appears to be a zombie\n"]
+              tputs $::test_channel [appendArgs "---- test thread \"" \
+                  $thread "\" appears to be a zombie\n"]
             } else {
               return true; # aborted?
             }

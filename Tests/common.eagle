@@ -305,9 +305,11 @@ namespace eval ::Eagle {
     }
 
     proc isRunningWoW64 {} {
-      return [expr {
-        [info exists ::eagle_platform(wow64)] && $::eagle_platform(wow64)
-      }]
+      #
+      # NOTE: For now, just use the existing test constraint for detecting
+      #       a WoW64 process.
+      #
+      return [haveConstraint wow64]
     }
 
     proc isMixedModeAssembly { fileName {varName ""} } {
