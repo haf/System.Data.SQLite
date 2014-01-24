@@ -15,6 +15,7 @@ bin/*
 Doc/Output/*
 Externals/Eagle/bin/Eagle.dll
 Externals/Eagle/bin/EagleShell.exe
+Externals/Eagle/bin/EagleShell32.exe
 Externals/Eagle/bin/EntityFramework.*
 Externals/Eagle/bin/SQLite.Interop.*
 Externals/Eagle/bin/sqlite3.*

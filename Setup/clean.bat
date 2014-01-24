@@ -451,6 +451,22 @@ IF EXIST "%TEMP%\EagleShell.exe.test.*.log" (
   %_AECHO%.
 )
 
+IF EXIST "%TEMP%\EagleShell32.exe.test.*.log" (
+  %__ECHO% DEL /Q "%TEMP%\EagleShell32.exe.test.*.log"
+
+  IF ERRORLEVEL 1 (
+    ECHO Could not delete "%TEMP%\EagleShell32.exe.test.*.log".
+    ECHO.
+    GOTO errors
+  ) ELSE (
+    %_AECHO% Deleted "%TEMP%\EagleShell32.exe.test.*.log".
+    %_AECHO%.
+  )
+) ELSE (
+  %_AECHO% No files matching "%TEMP%\EagleShell32.exe.test.*.log" exist.
+  %_AECHO%.
+)
+
 IF EXIST "%TEMP%\mono.exe.test.*.log" (
   %__ECHO% DEL /Q "%TEMP%\mono.exe.test.*.log"
 

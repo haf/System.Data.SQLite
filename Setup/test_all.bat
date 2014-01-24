@@ -93,6 +93,14 @@ IF NOT DEFINED TEST_FILE (
 
 %_VECHO% TestFile = '%TEST_FILE%'
 
+IF NOT DEFINED 32BITONLY (
+  SET EAGLESHELL=EagleShell.exe
+) ELSE (
+  SET EAGLESHELL=EagleShell32.exe
+)
+
+%_VECHO% EagleShell = '%EAGLESHELL%'
+
 %__ECHO2% PUSHD "%ROOT%"
 
 IF ERRORLEVEL 1 (
@@ -109,7 +117,7 @@ SET TEST_ALL=1
 FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
   FOR %%Y IN (%YEARS%) DO (
     IF NOT DEFINED NOMANAGEDONLY (
-      %__ECHO% Externals\Eagle\bin\EagleShell.exe -anyInitialize "set test_year {%%Y}; set test_configuration {%%C}" -file "%TEST_FILE%"
+      %__ECHO% "Externals\Eagle\bin\%EAGLESHELL%" -anyInitialize "set test_year {%%Y}; set test_configuration {%%C}" -file "%TEST_FILE%"
 
       IF ERRORLEVEL 1 (
         ECHO Testing of "%%Y/%%C" managed-only assembly failed.
@@ -182,7 +190,7 @@ FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
         )
       )
 
-      %__ECHO% Externals\Eagle\bin\EagleShell.exe -preInitialize "set test_year {%%Y}; set test_configuration {%%C}" -initialize -runtimeOption native -file "%TEST_FILE%"
+      %__ECHO% "Externals\Eagle\bin\%EAGLESHELL%" -preInitialize "set test_year {%%Y}; set test_configuration {%%C}" -initialize -runtimeOption native -file "%TEST_FILE%"
 
       IF ERRORLEVEL 1 (
         ECHO Testing of "%%Y/%%C" mixed-mode assembly failed.

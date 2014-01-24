@@ -89,10 +89,18 @@ IF NOT DEFINED NOVS2008 (
 
 %_VECHO% Years = '%YEARS%'
 
+IF NOT DEFINED 32BITONLY (
+  SET EAGLESHELL=EagleShell.exe
+) ELSE (
+  SET EAGLESHELL=EagleShell32.exe
+)
+
+%_VECHO% EagleShell = '%EAGLESHELL%'
+
 FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
   FOR %%P IN (%PLATFORMS%) DO (
     FOR %%Y IN (%YEARS%) DO (
-      %__ECHO% EagleShell.exe -file "%TOOLS%\deployAndTestCe.eagle" %%Y %%P %%C
+      %__ECHO% "%EAGLESHELL%" -file "%TOOLS%\deployAndTestCe.eagle" %%Y %%P %%C
 
       IF ERRORLEVEL 1 (
         ECHO Tests failed for %%C/%%P/%%Y binaries.

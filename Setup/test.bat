@@ -67,8 +67,16 @@ IF NOT DEFINED POSTARGS (
 
 %_VECHO% PostArgs = '%POSTARGS%'
 
-%_CECHO% Externals\Eagle\bin\EagleShell.exe %PREARGS% %* %POSTARGS%
-%__ECHO% Externals\Eagle\bin\EagleShell.exe %PREARGS% %* %POSTARGS%
+IF NOT DEFINED 32BITONLY (
+  SET EAGLESHELL=EagleShell.exe
+) ELSE (
+  SET EAGLESHELL=EagleShell32.exe
+)
+
+%_VECHO% EagleShell = '%EAGLESHELL%'
+
+%_CECHO% "Externals\Eagle\bin\%EAGLESHELL%" %PREARGS% %* %POSTARGS%
+%__ECHO% "Externals\Eagle\bin\%EAGLESHELL%" %PREARGS% %* %POSTARGS%
 
 IF ERRORLEVEL 1 (
   ECHO Received non-zero return code from the Eagle Shell.
