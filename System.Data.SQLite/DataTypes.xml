@@ -4,7 +4,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 -->
@@ -50,6 +50,23 @@
     <ColumnSize>7</ColumnSize>
     <DataType>System.Single</DataType>
     <CreateFormat>real</CreateFormat>
+    <IsAutoIncrementable>false</IsAutoIncrementable>
+    <IsCaseSensitive>false</IsCaseSensitive>
+    <IsFixedLength>true</IsFixedLength>
+    <IsFixedPrecisionScale>false</IsFixedPrecisionScale>
+    <IsLong>false</IsLong>
+    <IsNullable>true</IsNullable>
+    <IsSearchable>true</IsSearchable>
+    <IsSearchableWithLike>false</IsSearchableWithLike>
+    <IsUnsigned>false</IsUnsigned>
+    <IsBestMatch>true</IsBestMatch>
+  </DataTypes>
+  <DataTypes>
+    <TypeName>single</TypeName>
+    <ProviderDbType>15</ProviderDbType>
+    <ColumnSize>7</ColumnSize>
+    <DataType>System.Single</DataType>
+    <CreateFormat>single</CreateFormat>
     <IsAutoIncrementable>false</IsAutoIncrementable>
     <IsCaseSensitive>false</IsCaseSensitive>
     <IsFixedLength>true</IsFixedLength>
