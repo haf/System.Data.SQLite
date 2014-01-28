@@ -6329,6 +6329,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool AddVsDevEnvSetup(
             Version vsVersion,
             string directory,
@@ -6414,6 +6415,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool RemoveVsDevEnvSetup(
             Version vsVersion,
             string directory,
