@@ -6434,6 +6434,13 @@ namespace System.Data.SQLite
             //       this is being done after all the other changes for the
             //       package removal have been completed).
             //
+            if (verbose)
+                TraceOps.DebugAndTrace(TracePriority.Highest,
+                    debugCallback, traceCallback, String.Format(
+                    "Preparing to run Visual Studio {0} 'setup' mode to " +
+                    "refresh its configuration.", ForDisplay(vsVersion)),
+                    traceCategory);
+
             return AddVsDevEnvSetup(
                 vsVersion, directory, perUser, whatIf, verbose, ref error);
         }
