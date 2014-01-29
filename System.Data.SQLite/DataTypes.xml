@@ -46,9 +46,9 @@
   </DataTypes>
   <DataTypes>
     <TypeName>real</TypeName>
-    <ProviderDbType>15</ProviderDbType>
-    <ColumnSize>7</ColumnSize>
-    <DataType>System.Single</DataType>
+    <ProviderDbType>8</ProviderDbType>
+    <ColumnSize>6</ColumnSize>
+    <DataType>System.Double</DataType>
     <CreateFormat>real</CreateFormat>
     <IsAutoIncrementable>false</IsAutoIncrementable>
     <IsCaseSensitive>false</IsCaseSensitive>

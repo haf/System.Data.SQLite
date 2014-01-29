@@ -29,7 +29,7 @@ PROCESS
     </Type>
     <Type Name="float" PrimitiveTypeKind="Double">
     </Type>
-    <Type Name="real" PrimitiveTypeKind="Single">
+    <Type Name="real" PrimitiveTypeKind="Double">
     </Type>
     <Type Name="decimal" PrimitiveTypeKind="Decimal">
       <FacetDescriptions>
