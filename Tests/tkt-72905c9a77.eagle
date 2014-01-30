@@ -120,8 +120,11 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
               // NOTE: Create 4 threads for each processor on the machine.
               //       Under normal circumstances, this should give us a good
               //       chance of triggering the race condition being tested.
+              //       However, since this test was originally designed on a
+              //       machine with 4 processors, limit the total number of
+              //       threads to 16.
               //
-              int count = 4 * Environment.ProcessorCount;
+              int count = Math.Min(4 * Environment.ProcessorCount, 16);
 
               //
               // NOTE: Create a random number generator suitable for waiting a
