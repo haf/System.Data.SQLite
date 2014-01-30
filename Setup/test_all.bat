@@ -171,6 +171,13 @@ FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
             )
 
             IF DEFINED HAVE_EF6 (
+              %__ECHO% XCOPY "bin\%%Y\%%C\bin\EntityFramework.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
+
+              IF ERRORLEVEL 1 (
+                ECHO Failed to copy "bin\%%Y\%%C\bin\EntityFramework.*" to "bin\%%Y\%PLATFORM%\%%C".
+                GOTO errors
+              )
+
               %__ECHO% XCOPY "bin\%%Y\%%C\bin\System.Data.SQLite.EF6.*" "bin\%%Y\%PLATFORM%\%%C" %FFLAGS% %DFLAGS%
 
               IF ERRORLEVEL 1 (
