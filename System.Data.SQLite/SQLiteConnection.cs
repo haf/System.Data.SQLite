@@ -1882,7 +1882,9 @@ namespace System.Data.SQLite
     {
       string ret;
 
+      if (String.IsNullOrEmpty(key)) return defValue;
       if (items.TryGetValue(key, out ret)) return ret;
+      if (items.TryGetValue(key.Replace(" ", String.Empty), out ret)) return ret;
 
       return defValue;
     }
