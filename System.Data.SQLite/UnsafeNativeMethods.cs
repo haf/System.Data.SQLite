@@ -26,6 +26,10 @@ namespace System.Data.SQLite
 
   using System.Runtime.InteropServices;
 
+#if !PLATFORM_COMPACTFRAMEWORK
+  using System.Text;
+#endif
+
 #if !PLATFORM_COMPACTFRAMEWORK || COUNT_HANDLE
   using System.Threading;
 #endif
@@ -57,18 +61,134 @@ namespace System.Data.SQLite
       /////////////////////////////////////////////////////////////////////////
 
       #region Shared Native SQLite Library Pre-Loading Code
+      #region Private Constants
+      /// <summary>
+      /// The file extension used for dynamic link libraries.
+      /// </summary>
       private static readonly string DllFileExtension = ".dll";
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// The file extension used for the XML configuration file.
+      /// </summary>
       private static readonly string ConfigFileExtension = ".config";
 
       /////////////////////////////////////////////////////////////////////////
-
-      //
-      // NOTE: This is the name of the XML configuration file specific to the
-      //       System.Data.SQLite assembly.
-      //
+      /// <summary>
+      /// This is the name of the XML configuration file specific to the
+      /// System.Data.SQLite assembly.
+      /// </summary>
       private static readonly string XmlConfigFileName =
           typeof(UnsafeNativeMethods).Namespace + DllFileExtension +
           ConfigFileExtension;
+      #endregion
+
+      /////////////////////////////////////////////////////////////////////////
+
+      #region Private Data
+      /// <summary>
+      /// This lock is used to protect the static _SQLiteNativeModuleFileName,
+      /// _SQLiteNativeModuleHandle, and processorArchitecturePlatforms fields.
+      /// </summary>
+      private static readonly object staticSyncRoot = new object();
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// This dictionary stores the mappings between processor architecture
+      /// names and platform names.  These mappings are now used for two
+      /// purposes.  First, they are used to determine if the assembly code
+      /// base should be used instead of the location, based upon whether one
+      /// or more of the named sub-directories exist within the assembly code
+      /// base.  Second, they are used to assist in loading the appropriate
+      /// SQLite interop assembly into the current process.
+      /// </summary>
+      private static Dictionary<string, string> processorArchitecturePlatforms;
+      #endregion
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// For now, this method simply calls the Initialize method.
+      /// </summary>
+      static UnsafeNativeMethods()
+      {
+          Initialize();
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// Attempts to initialize this class by pre-loading the native SQLite
+      /// library for the processor architecture of the current process.
+      /// </summary>
+      internal static void Initialize()
+      {
+#if SQLITE_STANDARD || USE_INTEROP_DLL || PLATFORM_COMPACTFRAMEWORK
+#if PRELOAD_NATIVE_LIBRARY
+          //
+          // NOTE: If the "No_PreLoadSQLite" environment variable is set (to
+          //       anything), skip all our special code and simply return.
+          //
+          if (GetSettingValue("No_PreLoadSQLite", null) != null)
+              return;
+#endif
+#endif
+
+          lock (staticSyncRoot)
+          {
+              //
+              // TODO: Make sure this list is updated if the supported
+              //       processor architecture names and/or platform names
+              //       changes.
+              //
+              if (processorArchitecturePlatforms == null)
+              {
+                  //
+                  // NOTE: Create the map of processor architecture names
+                  //       to platform names using a case-insensitive string
+                  //       comparer.
+                  //
+                  processorArchitecturePlatforms =
+                      new Dictionary<string, string>(
+                          StringComparer.OrdinalIgnoreCase);
+
+                  //
+                  // NOTE: Setup the list of platform names associated with
+                  //       the supported processor architectures.
+                  //
+                  processorArchitecturePlatforms.Add("x86", "Win32");
+                  processorArchitecturePlatforms.Add("AMD64", "x64");
+                  processorArchitecturePlatforms.Add("IA64", "Itanium");
+                  processorArchitecturePlatforms.Add("ARM", "WinCE");
+              }
+
+#if SQLITE_STANDARD || USE_INTEROP_DLL || PLATFORM_COMPACTFRAMEWORK
+#if PRELOAD_NATIVE_LIBRARY
+              //
+              // BUGBUG: What about other application domains?
+              //
+              if (_SQLiteNativeModuleHandle == IntPtr.Zero)
+              {
+                  string baseDirectory = null;
+                  string processorArchitecture = null;
+
+                  /* IGNORED */
+                  SearchForDirectory(
+                      ref baseDirectory, ref processorArchitecture);
+
+                  //
+                  // NOTE: Attempt to pre-load the SQLite core library (or
+                  //       interop assembly) and store both the file name
+                  //       and native module handle for later usage.
+                  //
+                  /* IGNORED */
+                  PreLoadSQLiteDll(
+                      baseDirectory, processorArchitecture,
+                      ref _SQLiteNativeModuleFileName,
+                      ref _SQLiteNativeModuleHandle);
+              }
+#endif
+#endif
+          }
+      }
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
@@ -209,6 +329,173 @@ namespace System.Data.SQLite
       }
 
       /////////////////////////////////////////////////////////////////////////
+
+#if !PLATFORM_COMPACTFRAMEWORK
+      private static string ListToString(IList<string> list)
+      {
+          if (list == null)
+              return null;
+
+          StringBuilder result = new StringBuilder();
+
+          foreach (string element in list)
+          {
+              if (element == null)
+                  continue;
+
+              if (result.Length > 0)
+                  result.Append(' ');
+
+              result.Append(element);
+          }
+
+          return result.ToString();
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      private static int CheckForArchitecturesAndPlatforms(
+          string directory,
+          ref List<string> matches
+          )
+      {
+          int result = 0;
+
+          if (matches == null)
+              matches = new List<string>();
+
+          lock (staticSyncRoot)
+          {
+              if (!String.IsNullOrEmpty(directory) &&
+                  (processorArchitecturePlatforms != null))
+              {
+                  foreach (KeyValuePair<string, string> pair
+                            in processorArchitecturePlatforms)
+                  {
+                      if (Directory.Exists(Path.Combine(directory, pair.Key)))
+                      {
+                          matches.Add(pair.Key);
+                          result++;
+                      }
+
+                      string value = pair.Value;
+
+                      if (value == null)
+                          continue;
+
+                      if (Directory.Exists(Path.Combine(directory, value)))
+                      {
+                          matches.Add(value);
+                          result++;
+                      }
+                  }
+              }
+          }
+
+          return result;
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      private static bool CheckAssemblyCodeBase(
+          Assembly assembly,
+          ref string fileName
+          )
+      {
+          try
+          {
+              if (assembly == null)
+                  return false;
+
+              string codeBase = assembly.CodeBase;
+
+              if (String.IsNullOrEmpty(codeBase))
+                  return false;
+
+              Uri uri = new Uri(codeBase);
+              string localFileName = uri.LocalPath;
+
+              if (!File.Exists(localFileName))
+                  return false;
+
+              string directory = Path.GetDirectoryName(
+                  localFileName); /* throw */
+
+              string xmlConfigFileName = Path.Combine(
+                  directory, XmlConfigFileName);
+
+              if (File.Exists(xmlConfigFileName))
+              {
+#if !NET_COMPACT_20 && TRACE_SHARED
+                  try
+                  {
+                      Trace.WriteLine(String.Format(
+                          CultureInfo.CurrentCulture,
+                          "Native library pre-loader found XML configuration file " +
+                          "via code base for currently executing assembly: \"{0}\"",
+                          xmlConfigFileName)); /* throw */
+                  }
+                  catch
+                  {
+                      // do nothing.
+                  }
+#endif
+
+                  fileName = localFileName;
+                  return true;
+              }
+
+              List<string> matches = null;
+
+              if (CheckForArchitecturesAndPlatforms(directory, ref matches) > 0)
+              {
+#if !NET_COMPACT_20 && TRACE_SHARED
+                  try
+                  {
+                      Trace.WriteLine(String.Format(
+                          CultureInfo.CurrentCulture,
+                          "Native library pre-loader found native sub-directories " +
+                          "via code base for currently executing assembly: \"{0}\"",
+                          ListToString(matches))); /* throw */
+                  }
+                  catch
+                  {
+                      // do nothing.
+                  }
+#endif
+
+                  fileName = localFileName;
+                  return true;
+              }
+
+              return false;
+          }
+#if !NET_COMPACT_20 && TRACE_SHARED
+          catch (Exception e)
+#else
+          catch (Exception)
+#endif
+          {
+#if !NET_COMPACT_20 && TRACE_SHARED
+              try
+              {
+                  Trace.WriteLine(String.Format(
+                      CultureInfo.CurrentCulture,
+                      "Native library pre-loader failed to check code base " +
+                      "for currently executing assembly: {0}", e)); /* throw */
+              }
+              catch
+              {
+                  // do nothing.
+              }
+#endif
+          }
+
+          return false;
+      }
+#endif
+
+      /////////////////////////////////////////////////////////////////////////
       /// <summary>
       /// Queries and returns the directory for the assembly currently being
       /// executed.
@@ -226,7 +513,7 @@ namespace System.Data.SQLite
               if (assembly == null)
                   return null;
 
-              string fileName;
+              string fileName = null;
 
 #if PLATFORM_COMPACTFRAMEWORK
               AssemblyName assemblyName = assembly.GetName();
@@ -236,7 +523,8 @@ namespace System.Data.SQLite
 
               fileName = assemblyName.CodeBase;
 #else
-              fileName = assembly.Location;
+              if (!CheckAssemblyCodeBase(assembly, ref fileName))
+                  fileName = assembly.Location;
 #endif
 
               if (String.IsNullOrEmpty(fileName))
@@ -381,20 +669,8 @@ namespace System.Data.SQLite
 #endif
 
       /////////////////////////////////////////////////////////////////////////
-      /// <summary>
-      /// This lock is used to protect the static _SQLiteModule and
-      /// processorArchitecturePlatforms fields, below.
-      /// </summary>
-      private static readonly object staticSyncRoot = new object();
 
-      /////////////////////////////////////////////////////////////////////////
-      /// <summary>
-      /// Stores the mappings between processor architecture names and platform
-      /// names.
-      /// </summary>
-      private static Dictionary<string, string> processorArchitecturePlatforms;
-
-      /////////////////////////////////////////////////////////////////////////
+      #region Private Data
       /// <summary>
       /// The native module file name for the native SQLite library or null.
       /// </summary>
@@ -406,83 +682,7 @@ namespace System.Data.SQLite
       /// IntPtr.Zero.
       /// </summary>
       private static IntPtr _SQLiteNativeModuleHandle = IntPtr.Zero;
-
-      /////////////////////////////////////////////////////////////////////////
-      /// <summary>
-      /// For now, this method simply calls the Initialize method.
-      /// </summary>
-      static UnsafeNativeMethods()
-      {
-          Initialize();
-      }
-
-      /////////////////////////////////////////////////////////////////////////
-      /// <summary>
-      /// Attempts to initialize this class by pre-loading the native SQLite
-      /// library for the processor architecture of the current process.
-      /// </summary>
-      internal static void Initialize()
-      {
-          //
-          // NOTE: If the "No_PreLoadSQLite" environment variable is set (to
-          //       anything), skip all our special code and simply return.
-          //
-          if (GetSettingValue("No_PreLoadSQLite", null) != null)
-              return;
-
-          lock (staticSyncRoot)
-          {
-              //
-              // TODO: Make sure this list is updated if the supported
-              //       processor architecture names and/or platform names
-              //       changes.
-              //
-              if (processorArchitecturePlatforms == null)
-              {
-                  //
-                  // NOTE: Create the map of processor architecture names
-                  //       to platform names using a case-insensitive string
-                  //       comparer.
-                  //
-                  processorArchitecturePlatforms =
-                      new Dictionary<string, string>(
-                          StringComparer.OrdinalIgnoreCase);
-
-                  //
-                  // NOTE: Setup the list of platform names associated with
-                  //       the supported processor architectures.
-                  //
-                  processorArchitecturePlatforms.Add("x86", "Win32");
-                  processorArchitecturePlatforms.Add("AMD64", "x64");
-                  processorArchitecturePlatforms.Add("IA64", "Itanium");
-                  processorArchitecturePlatforms.Add("ARM", "WinCE");
-              }
-
-              //
-              // BUGBUG: What about other application domains?
-              //
-              if (_SQLiteNativeModuleHandle == IntPtr.Zero)
-              {
-                  string baseDirectory = null;
-                  string processorArchitecture = null;
-
-                  /* IGNORED */
-                  SearchForDirectory(
-                      ref baseDirectory, ref processorArchitecture);
-
-                  //
-                  // NOTE: Attempt to pre-load the SQLite core library (or
-                  //       interop assembly) and store both the file name
-                  //       and native module handle for later usage.
-                  //
-                  /* IGNORED */
-                  PreLoadSQLiteDll(
-                      baseDirectory, processorArchitecture,
-                      ref _SQLiteNativeModuleFileName,
-                      ref _SQLiteNativeModuleHandle);
-              }
-          }
-      }
+      #endregion
 
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
