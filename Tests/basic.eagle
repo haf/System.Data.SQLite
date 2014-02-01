@@ -2852,6 +2852,58 @@ runTest {test data-1.59 {percentile extension} -setup {
 
 ###############################################################################
 
+runTest {test data-1.60 {per-connection type mappings} -setup {
+  setupDb [set fileName data-1.60.db] "" "" "" UseConnectionTypes
+} -body {
+  set connection [getDbConnection]
+  set result [list]
+
+  lappend result [sql execute $db \
+      "CREATE TABLE t1(x DATE, y MYDATE);"]
+
+  set dateTime [clock format [clock scan "2014-02-01 12:34:56Z"] \
+      -format yyyyMMddHHmmss -gmt true]
+
+  lappend result [sql execute $db [appendArgs \
+      "INSERT INTO t1 (x, y) VALUES('" $dateTime "', '" $dateTime "');"]]
+
+  lappend result [sql execute -verbatim -execute reader -format list \
+      -datetimeformat [getDateTimeFormat] $db "SELECT x, y FROM t1;"]
+
+  lappend result [$connection ClearTypeMappings]; # 0
+  lappend result [$connection AddTypeMapping MYDATE DateTime false]; # 0
+  lappend result [$connection AddTypeMapping MYDATE DateTime true]; # 1
+  lappend result [$connection AddTypeMapping MYDATE DateTime false]; # 1
+  lappend result [$connection AddTypeMapping MYDATE DateTime true]; # 2
+  lappend result [$connection ClearTypeMappings]; # 2
+  lappend result [$connection AddTypeMapping MYDATE DateTime true]; # 0
+
+  set typeMappings [$connection GetTypeMappings]
+
+  object foreach -alias pair $typeMappings {
+    set typeMapping [$pair Value]
+    lappend result [list [$pair Key] [enumerableToList $typeMapping]]
+  }
+
+  lappend result [sql execute -verbatim -execute reader -format list \
+      -datetimeformat [getDateTimeFormat] $db "SELECT x, y FROM t1;"]
+
+  set result
+} -cleanup {
+  freeDbConnection
+
+  unset -nocomplain typeMapping typeMappings pair result connection
+
+  cleanupDb $fileName
+
+  unset -nocomplain dateTime db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{0 1 {{2014-02-01 12:34:56} 20140201123456} 0 0 1 1 2 2 0 {MYDATE {MYDATE\
+DateTime True}} {{2014-02-01 12:34:56} {2014-02-01 12:34:56}}}}
+
+###############################################################################
+
 reportSQLiteResources $test_channel
 
 ###############################################################################

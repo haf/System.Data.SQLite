@@ -380,7 +380,7 @@ namespace System.Data.SQLite.Linq
         foreach (DataColumn dc in table.Columns)
         {
           DbType dbtypeName = SQLiteConvert.TypeToDbType(dc.DataType);
-          string typeName = SQLiteConvert.DbTypeToTypeName(dbtypeName, flags);
+          string typeName = SQLiteConvert.DbTypeToTypeName(cnn, dbtypeName, flags);
 
           sql.AppendFormat(CultureInfo.InvariantCulture, "{2}{0} {1} COLLATE NOCASE", builder.QuoteIdentifier(dc.ColumnName), typeName, separator);
           separator = ", ";

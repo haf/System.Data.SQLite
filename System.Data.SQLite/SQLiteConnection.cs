@@ -435,6 +435,12 @@ namespace System.Data.SQLite
 #endif
 
     /// <summary>
+    /// The per-connection mappings between type names and <see cref="DbType" />
+    /// values.  These mappings override the corresponding global mappings.
+    /// </summary>
+    internal SQLiteDbTypeMap _typeNames;
+
+    /// <summary>
     /// The base SQLite object to interop with
     /// </summary>
     internal SQLiteBase _sql;
@@ -603,6 +609,7 @@ namespace System.Data.SQLite
       }
 #endif
 
+      _typeNames = new SQLiteDbTypeMap();
       _parseViaFramework = parseViaFramework;
       _flags = SQLiteConnectionFlags.Default;
       _connectionState = ConnectionState.Closed;
@@ -880,6 +887,122 @@ namespace System.Data.SQLite
             if (backup != null)
                 sqliteBase.FinishBackup(backup); /* throw */
         }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Per-Connection Type Mappings
+    /// <summary>
+    /// Clears the per-connection type mappings.
+    /// </summary>
+    /// <returns>
+    /// The total number of per-connection type mappings cleared.
+    /// </returns>
+    public int ClearTypeMappings()
+    {
+        CheckDisposed();
+
+        int result = -1; /* NO MAPPINGS */
+
+        if (_typeNames != null)
+            result = _typeNames.Clear();
+
+        return result;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Returns the per-connection type mappings.
+    /// </summary>
+    /// <returns>
+    /// The per-connection type mappings -OR- null if they are unavailable.
+    /// </returns>
+    public Dictionary<string, object> GetTypeMappings()
+    {
+        CheckDisposed();
+
+        Dictionary<string, object> result = null;
+
+        if (_typeNames != null)
+        {
+            result = new Dictionary<string, object>(_typeNames.Count, _typeNames.Comparer);
+
+            foreach (KeyValuePair<string, SQLiteDbTypeMapping> pair in _typeNames)
+            {
+                SQLiteDbTypeMapping mapping = pair.Value;
+
+                object typeName = null; /* System.String */
+                object dataType = null; /* System.Data.DbType */
+                object primary = null;  /* System.Boolean */
+
+                if (mapping != null)
+                {
+                    typeName = mapping.typeName;
+                    dataType = mapping.dataType;
+                    primary = mapping.primary;
+                }
+
+                result.Add(pair.Key, new object[] { typeName, dataType, primary });
+            }
+        }
+
+        return result;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Adds a per-connection type mapping, possibly replacing one or more
+    /// that already exist.
+    /// </summary>
+    /// <param name="typeName">
+    /// The case-insensitive database type name (e.g. "MYDATE").  The value
+    /// of this parameter cannot be null.  Using an empty string value (or
+    /// a string value consisting entirely of whitespace) for this parameter
+    /// is not recommended.
+    /// </param>
+    /// <param name="dataType">
+    /// The <see cref="DbType" /> value that should be associated with the
+    /// specified type name.
+    /// </param>
+    /// <param name="primary">
+    /// Non-zero if this mapping should be considered to be the primary one
+    /// for the specified <see cref="DbType" />.
+    /// </param>
+    /// <returns>
+    /// A negative value if nothing was done.  Zero if no per-connection type
+    /// mappings were replaced (i.e. it was a pure add operation).  More than
+    /// zero if some per-connection type mappings were replaced.
+    /// </returns>
+    public int AddTypeMapping(
+        string typeName,
+        DbType dataType,
+        bool primary
+        )
+    {
+        CheckDisposed();
+
+        if (typeName == null)
+            throw new ArgumentNullException("typeName");
+
+        int result = -1; /* NO MAPPINGS */
+
+        if (_typeNames != null)
+        {
+            result = 0;
+
+            if (primary && _typeNames.ContainsKey(dataType))
+                result += _typeNames.Remove(dataType) ? 1 : 0;
+
+            if (_typeNames.ContainsKey(typeName))
+                result += _typeNames.Remove(typeName) ? 1 : 0;
+
+            _typeNames.Add(new SQLiteDbTypeMapping(typeName, dataType, primary));
+        }
+
+        return result;
     }
     #endregion
 
@@ -3361,7 +3484,7 @@ namespace System.Data.SQLite
                     row["COLUMN_DEFAULT"] = schemaRow[SchemaTableOptionalColumn.DefaultValue];
                     row["IS_NULLABLE"] = schemaRow[SchemaTableColumn.AllowDBNull];
                     row["DATA_TYPE"] = schemaRow["DataTypeName"].ToString().ToLower(CultureInfo.InvariantCulture);
-                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)schemaRow[SchemaTableColumn.ProviderType], _flags).ToString().ToLower(CultureInfo.InvariantCulture);
+                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName(this, (DbType)schemaRow[SchemaTableColumn.ProviderType], _flags).ToString().ToLower(CultureInfo.InvariantCulture);
                     row["CHARACTER_MAXIMUM_LENGTH"] = schemaRow[SchemaTableColumn.ColumnSize];
                     row["TABLE_SCHEMA"] = schemaRow[SchemaTableColumn.BaseSchemaName];
                     row["PRIMARY_KEY"] = schemaRow[SchemaTableColumn.IsKey];
@@ -4052,7 +4175,7 @@ namespace System.Data.SQLite
                     row["ORDINAL_POSITION"] = viewRow[SchemaTableColumn.ColumnOrdinal];
                     row["IS_NULLABLE"] = viewRow[SchemaTableColumn.AllowDBNull];
                     row["DATA_TYPE"] = viewRow["DataTypeName"]; // SQLiteConvert.DbTypeToType((DbType)viewRow[SchemaTableColumn.ProviderType]).ToString();
-                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName((DbType)viewRow[SchemaTableColumn.ProviderType], _flags).ToString().ToLower(CultureInfo.InvariantCulture);
+                    row["EDM_TYPE"] = SQLiteConvert.DbTypeToTypeName(this, (DbType)viewRow[SchemaTableColumn.ProviderType], _flags).ToString().ToLower(CultureInfo.InvariantCulture);
                     row["CHARACTER_MAXIMUM_LENGTH"] = viewRow[SchemaTableColumn.ColumnSize];
                     row["TABLE_SCHEMA"] = viewRow[SchemaTableColumn.BaseSchemaName];
                     row["PRIMARY_KEY"] = viewRow[SchemaTableColumn.IsKey];

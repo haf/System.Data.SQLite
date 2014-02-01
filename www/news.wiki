@@ -8,6 +8,7 @@
 <ul>
     <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.8.3].</li>
     <li>Add support for [http://entityframework.codeplex.com/|Entity Framework 6].</li>
+    <li>Add support for per-connection mappings between type names and DbType values. Pursuant to [e87af1d06a].</li>
     <li>Modify the namespace used for all internal classes in the System.Data.SQLite.Linq assembly.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Add SQLiteCompileOptions and InteropCompileOptions properties to the SQLiteConnection class to return the compile-time options for the SQLite core library and interop assembly, respectively.</li>
     <li>Add BindInvariantText and ConvertInvariantText connection flags to force the invariant culture to be used when converting parameter values to/from strings.</li>

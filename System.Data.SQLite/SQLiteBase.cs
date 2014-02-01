@@ -1014,6 +1014,27 @@ namespace System.Data.SQLite
       UseConnectionPool = 0x80000,
 
       /// <summary>
+      /// Enable using per-connection mappings between type names and
+      /// <see cref="DbType" /> values.  Also see the
+      /// <see cref="SQLiteConnection.ClearTypeMappings" />,
+      /// <see cref="SQLiteConnection.GetTypeMappings" />, and
+      /// <see cref="SQLiteConnection.AddTypeMapping" /> methods.  These
+      /// per-connection mappings, when present, override the corresponding
+      /// global mappings.
+      /// </summary>
+      UseConnectionTypes = 0x100000,
+
+      /// <summary>
+      /// Disable using global mappings between type names and
+      /// <see cref="DbType" /> values.  This may be useful in some very narrow
+      /// cases; however, if there are no per-connection type mappings, the
+      /// fallback defaults will be used for both type names and their
+      /// associated <see cref="DbType" /> values.  Therefore, use of this flag
+      /// is not recommended.
+      /// </summary>
+      NoGlobalTypes = 0x200000,
+
+      /// <summary>
       /// When binding parameter values or returning column values, always
       /// treat them as though they were plain text (i.e. no numeric,
       /// date/time, or other conversions should be attempted).

@@ -1296,6 +1296,41 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// This method attempts to query the database connection associated with
+    /// the data reader in use.  If the underlying command or connection is
+    /// unavailable, a null value will be returned.
+    /// </summary>
+    /// <returns>
+    /// The connection object -OR- null if it is unavailable.
+    /// </returns>
+    private static SQLiteConnection GetConnection(
+        SQLiteDataReader dataReader
+        )
+    {
+        try
+        {
+            if (dataReader != null)
+            {
+                SQLiteCommand command = dataReader._command;
+
+                if (command != null)
+                {
+                    SQLiteConnection connection = command.Connection;
+
+                    if (connection != null)
+                        return connection;
+                }
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // do nothing.
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// This method attempts to query the flags associated with the database
     /// connection in use.  If the database connection is disposed, the default
     /// flags will be returned.
@@ -1349,7 +1384,7 @@ namespace System.Data.SQLite
       // If not initialized, then fetch the declared column datatype and attempt to convert it
       // to a known DbType.
       if (typ.Affinity == TypeAffinity.Uninitialized)
-        typ.Type = SQLiteConvert.TypeNameToDbType(_activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity), GetFlags(this));
+        typ.Type = SQLiteConvert.TypeNameToDbType(GetConnection(this), _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity), GetFlags(this));
       else
         typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
 

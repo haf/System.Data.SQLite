@@ -987,11 +987,39 @@ namespace System.Data.SQLite
     /// <summary>
     /// Determines the type name for the given database value type.
     /// </summary>
-    /// <param name="typ">The database value type.</param>
+    /// <param name="connection">The connection context for custom type mappings, if any.</param>
+    /// <param name="dbType">The database value type.</param>
     /// <param name="flags">The flags associated with the parent connection object.</param>
     /// <returns>The type name or an empty string if it cannot be determined.</returns>
-    internal static string DbTypeToTypeName(DbType typ, SQLiteConnectionFlags flags)
+    internal static string DbTypeToTypeName(
+        SQLiteConnection connection,
+        DbType dbType,
+        SQLiteConnectionFlags flags
+        )
     {
+        if (connection != null)
+        {
+            flags |= connection.Flags;
+
+            if ((flags & SQLiteConnectionFlags.UseConnectionTypes) == SQLiteConnectionFlags.UseConnectionTypes)
+            {
+                SQLiteDbTypeMap connectionTypeNames = connection._typeNames;
+
+                if (connectionTypeNames != null)
+                {
+                    SQLiteDbTypeMapping value;
+
+                    if (connectionTypeNames.TryGetValue(dbType, out value))
+                        return value.typeName;
+                }
+            }
+        }
+
+        string defaultTypeName = String.Empty;
+
+        if ((flags & SQLiteConnectionFlags.NoGlobalTypes) == SQLiteConnectionFlags.NoGlobalTypes)
+            return defaultTypeName;
+
         lock (_syncRoot)
         {
             if (_typeNames == null)
@@ -999,11 +1027,9 @@ namespace System.Data.SQLite
 
             SQLiteDbTypeMapping value;
 
-            if (_typeNames.TryGetValue(typ, out value))
+            if (_typeNames.TryGetValue(dbType, out value))
                 return value.typeName;
         }
-
-        string defaultTypeName = String.Empty;
 
 #if !NET_COMPACT_20 && TRACE_WARNING
         if ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning)
@@ -1011,7 +1037,7 @@ namespace System.Data.SQLite
             Trace.WriteLine(String.Format(
                 CultureInfo.CurrentCulture,
                 "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
-                defaultTypeName, typ));
+                defaultTypeName, dbType));
         }
 #endif
 
@@ -1186,45 +1212,88 @@ namespace System.Data.SQLite
     /// <summary>
     /// For a given type name, return a closest-match .NET type
     /// </summary>
-    /// <param name="Name">The name of the type to match</param>
+    /// <param name="connection">The connection context for custom type mappings, if any.</param>
+    /// <param name="name">The name of the type to match</param>
     /// <param name="flags">The flags associated with the parent connection object.</param>
     /// <returns>The .NET DBType the text evaluates to.</returns>
-    internal static DbType TypeNameToDbType(string Name, SQLiteConnectionFlags flags)
+    internal static DbType TypeNameToDbType(
+        SQLiteConnection connection,
+        string name,
+        SQLiteConnectionFlags flags
+        )
     {
-        lock (_syncRoot)
+        if (connection != null)
         {
-            if (_typeNames == null)
-                _typeNames = GetSQLiteDbTypeMap();
+            flags |= connection.Flags;
 
-            if (String.IsNullOrEmpty(Name)) return DbType.Object;
-
-            SQLiteDbTypeMapping value;
-
-            if (_typeNames.TryGetValue(Name, out value))
+            if ((flags & SQLiteConnectionFlags.UseConnectionTypes) == SQLiteConnectionFlags.UseConnectionTypes)
             {
-                return value.dataType;
-            }
-            else
-            {
-                int index = Name.IndexOf('(');
+                SQLiteDbTypeMap connectionTypeNames = connection._typeNames;
 
-                if ((index > 0) &&
-                    _typeNames.TryGetValue(Name.Substring(0, index).TrimEnd(), out value))
+                if (connectionTypeNames != null)
                 {
-                    return value.dataType;
+                    if (name != null)
+                    {
+                        SQLiteDbTypeMapping value;
+
+                        if (connectionTypeNames.TryGetValue(name, out value))
+                        {
+                            return value.dataType;
+                        }
+                        else
+                        {
+                            int index = name.IndexOf('(');
+
+                            if ((index > 0) &&
+                                connectionTypeNames.TryGetValue(name.Substring(0, index).TrimEnd(), out value))
+                            {
+                                return value.dataType;
+                            }
+                        }
+                    }
                 }
             }
         }
 
         DbType defaultDbType = DbType.Object;
 
+        if ((flags & SQLiteConnectionFlags.NoGlobalTypes) == SQLiteConnectionFlags.NoGlobalTypes)
+            return defaultDbType;
+
+        lock (_syncRoot)
+        {
+            if (_typeNames == null)
+                _typeNames = GetSQLiteDbTypeMap();
+
+            if (name != null)
+            {
+                SQLiteDbTypeMapping value;
+
+                if (_typeNames.TryGetValue(name, out value))
+                {
+                    return value.dataType;
+                }
+                else
+                {
+                    int index = name.IndexOf('(');
+
+                    if ((index > 0) &&
+                        _typeNames.TryGetValue(name.Substring(0, index).TrimEnd(), out value))
+                    {
+                        return value.dataType;
+                    }
+                }
+            }
+        }
+
 #if !NET_COMPACT_20 && TRACE_WARNING
-        if ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning)
+        if (!String.IsNullOrEmpty(name) &&
+            ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning))
         {
             Trace.WriteLine(String.Format(
                 CultureInfo.CurrentCulture,
                 "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
-                defaultDbType, Name));
+                defaultDbType, name));
         }
 #endif
 
@@ -1554,7 +1623,7 @@ namespace System.Data.SQLite
       /// <summary>
       /// An index will be created.  The action-specific arguments are the
       /// index name and the table name.
-      /// 
+      ///
       /// </summary>
       CreateIndex = 1,
 
@@ -1798,11 +1867,14 @@ namespace System.Data.SQLite
   internal sealed class SQLiteDbTypeMap
       : Dictionary<string, SQLiteDbTypeMapping>
   {
+      #region Private Data
       private Dictionary<DbType, SQLiteDbTypeMapping> reverse;
+      #endregion
 
       /////////////////////////////////////////////////////////////////////////
 
-      private SQLiteDbTypeMap()
+      #region Public Constructors
+      public SQLiteDbTypeMap()
           : base(new TypeNameStringComparer())
       {
           reverse = new Dictionary<DbType, SQLiteDbTypeMapping>();
@@ -1817,9 +1889,31 @@ namespace System.Data.SQLite
       {
           Add(collection);
       }
+      #endregion
 
       /////////////////////////////////////////////////////////////////////////
 
+      #region System.Collections.Generic.Dictionary "Overrides"
+      public new int Clear()
+      {
+          int result = 0;
+
+          if (reverse != null)
+          {
+              result += reverse.Count;
+              reverse.Clear();
+          }
+
+          result += base.Count;
+          base.Clear();
+
+          return result;
+      }
+      #endregion
+
+      /////////////////////////////////////////////////////////////////////////
+
+      #region SQLiteDbTypeMapping Helper Methods
       public void Add(
           IEnumerable<SQLiteDbTypeMapping> collection
           )
@@ -1846,6 +1940,18 @@ namespace System.Data.SQLite
           if (item.primary)
               reverse.Add(item.dataType, item);
       }
+      #endregion
+
+      /////////////////////////////////////////////////////////////////////////
+
+      #region DbType Helper Methods
+      public bool ContainsKey(DbType key)
+      {
+          if (reverse == null)
+              return false;
+
+          return reverse.ContainsKey(key);
+      }
 
       /////////////////////////////////////////////////////////////////////////
 
@@ -1859,6 +1965,17 @@ namespace System.Data.SQLite
 
           return reverse.TryGetValue(key, out value);
       }
+
+      /////////////////////////////////////////////////////////////////////////
+
+      public bool Remove(DbType key)
+      {
+          if (reverse == null)
+              return false;
+
+          return reverse.Remove(key);
+      }
+      #endregion
   }
 
   /////////////////////////////////////////////////////////////////////////////
