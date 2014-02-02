@@ -221,6 +221,7 @@ released versions of System.Data.SQLite.
     <li>Add NoConnectionPool and UseConnectionPool connection flags to disable or enable connection pooling by default.</li>
     <li>Modify handling of the design-time components installer to run Visual Studio <b>devenv.exe /setup</b> after installing the package. This appears to be necessary in some circumstances for Visual Studio 2013. Pursuant to [a47eff2c71].</li>
     <li>Modify the native library pre-loader to support reading settings from an XML configuration file and to be capable of checking more than one directory. Persuant to [f0246d1817].</li>
+    <li>Support detecting when the native library pre-loader should use the CodeBase property instead of the Location property as the basis for locating the interop assembly.</li>
     <li>Change the default behavior for the native library pre-loader so it first searches the executing (i.e. System.Data.SQLite) assembly directory and then the application domain directory. Pursuant to [f0246d1817].&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>
