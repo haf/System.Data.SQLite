@@ -1,0 +1,174 @@
+<html dir="LTR" xmlns="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:MSHelp="http://msdn.microsoft.com/mshelp" xmlns:tool="http://www.microsoft.com/tooltip" xmlns:ndoc="urn:ndoc-preprocess">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
+    <title>Introduction</title>
+    <link rel="stylesheet" type="text/css" href="../Include/ndoc.css" />
+  </head>
+  <body>
+    <div id="header">
+      <table width="100%" id="topTable">
+        <tr id="headerTableRow1">
+          <td align="left">
+            <span id="runningHeaderText">SQLite ADO.NET Provider</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow2">
+          <td align="left">
+            <span id="nsrTitle">SQLite.NET Class Library Documentation</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow3" style="display:none">
+          <td>
+            <a id="seeAlsoSectionLink" href="#seeAlsoToggle" onclick="OpenSection(seeAlsoToggle)">See Also</a>
+            <a id="exampleSectionLink" href="#codeExampleToggle" onclick="OpenSection(codeExampleToggle)">Example</a>
+          </td>
+        </tr>
+     </table>
+      <table width="100%" id="bottomTable" cellspacing="0" cellpadding="0" style="display:none">
+        <tr>
+          <td>
+            <span onclick="ExpandCollapseAll(toggleAllImage)" style="cursor:default;" onkeypress="ExpandCollapseAll_CheckKey(toggleAllImage)" tabindex="0">
+              <img ID="toggleAllImage" class="toggleAll" src="collall.gif" />
+              <label id="collapseAllLabel" for="toggleAllImage" style="display: none;">
+							Collapse All
+						</label>
+              <label id="expandAllLabel" for="toggleAllImage" style="display: none;">
+							Expand All
+						</label>
+            </span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div id="mainSection">
+    <div id="mainBody">
+      <h1 class="heading">About SQLite.NET</h1>
+      <p>This class library is an ADO.NET wrapper around the popular (and free!)
+        SQLite database engine. For information on SQL syntax, features of SQLite and a
+        good understanding of how it works and what it does, I highly recommend heading
+        over to <a target="_blank" href="http://www.sqlite.org">sqlite.org</a> and
+        reading the documentation there.</p>
+      <P>The C# provider, the very minor C code modifications to SQLite, documentation and
+        etc&nbsp;were written by <A href="mailto:robert@blackcastlesoft.com">Robert
+          Simpson</A>, and the SourceForge project page can be found <A target="_blank" href="http://sourceforge.net/projects/sqlite-dotnet2">
+          here</A>.</P>
+      <p>The System.Data.SQLite project is currently maintained by the
+         <A target="_blank" href="http://www.sqlite.org/">SQLite Development Team</a> and
+         the latest source code and project information can be found
+         <A target="_blank" href="http://system.data.sqlite.org/">here</A>.</p>
+      <DIV>
+        <br>
+      </DIV>
+      <h1 class="heading">What's New?</h1>
+      <p><a href="version.html">Click here to see the version history of this SQLite.NET
+          provider</a></p>
+      <DIV>
+        <br>
+      </DIV>
+      <h1 class="heading">Using this library</h1>
+      <p>The following are links to information on various aspects of the library and
+        how to use it in your application(s)
+      </p>
+      <p><a href="designer.html">How to install&nbsp;Visual Studio Design-Time Support</a></p>
+      <P><A href="dbfactorysupport.html">How to configure and enumerate SQLite.NET
+          through the DbProviderFactories object</A></P>
+      <p><a href="optimizing.html">Getting the best performance out of SQLite</a></p>
+      <p><a href="limitations.html">Limitations of the SQLite.NET provider and the SQLite
+          engine (compared to other providers and engines)</a></p>
+      <br>
+      <h1 class="heading">SQLite.NET Provider Features</h1>
+      <p>This SQLite provider implements every feature of the underlying SQLite
+        database engine without omission. Here's a brief summary:</p>
+      <UL>
+        <LI>
+        Written from scratch on Visual Studio 2008 specifically for ADO.NET, implenting all the
+        base classes and features recently introduced in the framework, including automatic
+        transaction enlistment.<li>Supports the Full and Compact .NET Framework, as well as
+          native C/C++ development.&nbsp; 100% binary compatible with the original sqlite3.dll.</li>
+        <li>Full support for Mono via a &quot;managed only&quot; provider that runs against the
+          official SQLite 3.6.1 or higher library.</li>
+        <li>Full Entity Framework support (ADO.NET 3.5 SP1)</li>
+        <li>
+        On the Compact Framework, it is faster than Sql Server Mobile.
+          SQLite's installed size is a fraction of Sql Mobile's. It uses less memory at runtime,
+          runs queries faster, and has a smaller database file size as well. </li>
+        <li>Encrypted database support.&nbsp; Encrypted databases are fully encrypted and
+          support both binary and cleartext password types. </li>
+        <li>Visual Studio 2005/2008/2010/2012 Design-Time Support.&nbsp; You can add a SQLite
+        database to the Servers list, design queries with the Query Designer,
+        drag-and-drop tables onto a Typed DataSet, etc.</li>
+            <li>Full SQLite schema editing inside Visual Studio.&nbsp; You can create/edit
+              tables, views, triggers, indexes, check constraints and foreign keys. </li>
+        <li>
+        Available as a single file redistributable (except Compact Framework).&nbsp; The core sqlite3 codebase and the ADO.NET wrapper
+        are combined into one multi-module assembly. </li>
+        <li>Also available as separate native and managed assemblies and optionally with the Visual C++ Runtime statically linked. </li>
+        <li>
+          Binaries included for Itanium, x64, x86 and ARM processors.
+          <br />
+          <font color="red">
+            Itanium processor support not currently included.
+          </font>
+        </li>
+        <li>
+        DbProviderFactory support. </li>
+        <li>
+          Full support for ATTACH'ed databases.&nbsp; Exposed as <i>Catalogs</i>
+        in the schema.&nbsp; When cloning a connection, all attached databases are
+        automatically re-attached to the new connection. </li>
+        <li>
+          DbConnection.GetSchema(...) support includes the <i>MetaDataCollections</i>, <i>
+          DataSourceInformation</i>, <i>Columns</i>, <i>Tables</i>, <i>Views, ViewColumns, </i>
+          <i>Catalogs, </i><i>Indexes,
+            IndexColumns, ForeignKeys </i>and <em>Triggers</em>.
+        </li>
+        <li>
+        Enhanced DbDataReader.GetSchemaTable() functionality returns catalog, namespace
+        and detailed schema information even for complex queries. </li>
+        <li>
+        Named and unnamed parameters. </li>
+        <li>
+        Full UTF-8 and UTF-16 support, each with optimized pipelines into the native
+        database core. </li>
+        <li>
+        Multiple simultaneous DataReaders (one DataReader per Command however). </li>
+        <li>
+        Full support for user-defined scalar and aggregate functions, encapsulated into
+        an easy-to-use base class in which only a couple of overrides are necessary to
+        implement new SQL functions. </li>
+        <li>
+        Full support for user-defined collating sequences, every bit as simple to
+        implement as user-defined functions and uses the same base class. </li>
+        <li>
+          Full source for the entire engine and wrapper.&nbsp; No copyrights.&nbsp;
+          Public Domain.&nbsp; 100% free for commercial and non-commercial use.&nbsp;</li>
+      </UL>
+      <br>
+      <h1 class="heading">Distributing the Binaries (Desktop)</h1>
+      <p>When using the mixed-mode assembly, the <b>System.Data.SQLite.DLL</b> file
+        includes all the native and managed code. In that case, this is the only
+        DLL required to be redistributed with your SQLite.NET application(s).&nbsp;
+        When using separate native and managed assemblies, the
+        <b>System.Data.SQLite.DLL</b> file contains all the managed code and the
+        <b>SQLite.Interop.DLL</b> file contains all the native code.
+        The native code comes in&nbsp;3 flavors: Win32, Itanium and x64 (AMD64).
+        <br />
+        <font color="red">
+          Itanium processor support not currently included.
+        </font>
+      </p>
+      <h1 class="heading">Distributing the Binaries (Compact Framework)</h1>
+      <p>Both the <b>System.Data.SQLite.DLL </b>and <b>SQLite.Interop.XXX.DLL</b> files
+        must be deployed on the Compact Framework.&nbsp; The XXX is the build number of
+        the System.Data.SQLite library (e.g. &quot;091&quot;).&nbsp; The
+        <b>SQLite.Interop.XXX.DLL</b> file is a fully native assembly compiled for
+        the ARM processor, and System.Data.SQLite is the fully-managed Compact
+        Framework assembly.</p>
+      <hr />
+      <div id="footer">
+        <p>
+          <a href="mailto:sqlite-users@sqlite.org?subject=SQLite.NET%20Class%20Library%20Documentation%20Feedback:%20Welcome">
+          Send comments on this topic.<!--[if gte IE 5]><tool:tip element="seeAlsoToolTip" avoidmouse="false" /><tool:tip element="languageFilterToolTip" avoidmouse="false" /><![endif]-->    </div>
+    </div>
+  </body>
+</html>

@@ -195,8 +195,8 @@ set patterns(.html,8) \
 
 set subSpecs(.hhc,1) [readFileAsSubSpec [file join $path SQLite.NET.hhc]]
 
-set subSpecs(.hhp,1) {Default topic=welcome.html}
-set subSpecs(.hhp,2) {"welcome.html","welcome.html",,,,,}
+set subSpecs(.hhp,1) {Default topic=Provider\welcome.html}
+set subSpecs(.hhp,2) {"Provider\welcome.html","Provider\welcome.html",,,,,}
 
 set subSpecs(.html,1) {"System.Data.SQLite~\1.html"}
 set subSpecs(.html,2) {9eekhta0}

@@ -19,43 +19,46 @@ set sds_manifests(source) {
   Doc/
   Doc/buildChm.tcl
   Doc/Extra/
-  Doc/Extra/dbfactorysupport.html
-  Doc/Extra/designer.html
-  Doc/Extra/environment.html
-  Doc/Extra/lang_altertable.html
-  Doc/Extra/lang_analyze.html
-  Doc/Extra/lang_attach.html
-  Doc/Extra/lang_comment.html
-  Doc/Extra/lang_conflict.html
-  Doc/Extra/lang_createindex.html
-  Doc/Extra/lang_createtable.html
-  Doc/Extra/lang_createtrigger.html
-  Doc/Extra/lang_createview.html
-  Doc/Extra/lang_createvtab.html
-  Doc/Extra/lang_datetime.html
-  Doc/Extra/lang_delete.html
-  Doc/Extra/lang_detach.html
-  Doc/Extra/lang_dropindex.html
-  Doc/Extra/lang_droptable.html
-  Doc/Extra/lang_droptrigger.html
-  Doc/Extra/lang_dropview.html
-  Doc/Extra/lang_explain.html
-  Doc/Extra/lang_expr.html
-  Doc/Extra/lang_insert.html
-  Doc/Extra/lang_reindex.html
-  Doc/Extra/lang_replace.html
-  Doc/Extra/lang_select.html
-  Doc/Extra/lang_transaction.html
-  Doc/Extra/lang_types.html
-  Doc/Extra/lang_update.html
-  Doc/Extra/lang_vacuum.html
-  Doc/Extra/limitations.html
-  Doc/Extra/ndoc.css
-  Doc/Extra/optimizing.html
-  Doc/Extra/pragma.html
-  Doc/Extra/syntax.html
-  Doc/Extra/version.html
-  Doc/Extra/welcome.html
+  Doc/Extra/Core/
+  Doc/Extra/Core/lang_altertable.html
+  Doc/Extra/Core/lang_analyze.html
+  Doc/Extra/Core/lang_attach.html
+  Doc/Extra/Core/lang_comment.html
+  Doc/Extra/Core/lang_conflict.html
+  Doc/Extra/Core/lang_createindex.html
+  Doc/Extra/Core/lang_createtable.html
+  Doc/Extra/Core/lang_createtrigger.html
+  Doc/Extra/Core/lang_createview.html
+  Doc/Extra/Core/lang_createvtab.html
+  Doc/Extra/Core/lang_datetime.html
+  Doc/Extra/Core/lang_delete.html
+  Doc/Extra/Core/lang_detach.html
+  Doc/Extra/Core/lang_dropindex.html
+  Doc/Extra/Core/lang_droptable.html
+  Doc/Extra/Core/lang_droptrigger.html
+  Doc/Extra/Core/lang_dropview.html
+  Doc/Extra/Core/lang_explain.html
+  Doc/Extra/Core/lang_expr.html
+  Doc/Extra/Core/lang_insert.html
+  Doc/Extra/Core/lang_reindex.html
+  Doc/Extra/Core/lang_replace.html
+  Doc/Extra/Core/lang_select.html
+  Doc/Extra/Core/lang_transaction.html
+  Doc/Extra/Core/lang_types.html
+  Doc/Extra/Core/lang_update.html
+  Doc/Extra/Core/lang_vacuum.html
+  Doc/Extra/Core/pragma.html
+  Doc/Extra/Core/syntax.html
+  Doc/Extra/Include/
+  Doc/Extra/Include/ndoc.css
+  Doc/Extra/Provider/
+  Doc/Extra/Provider/dbfactorysupport.html
+  Doc/Extra/Provider/designer.html
+  Doc/Extra/Provider/environment.html
+  Doc/Extra/Provider/limitations.html
+  Doc/Extra/Provider/optimizing.html
+  Doc/Extra/Provider/version.html
+  Doc/Extra/Provider/welcome.html
   Doc/SQLite.NET.chm
   Doc/SQLite.NET.hhc
   Doc/SQLite.NET.hhp
@@ -71,9 +74,12 @@ set sds_manifests(source) {
   Externals/Eagle/lib/Eagle1.0/
   Externals/Eagle/lib/Eagle1.0/vendor.eagle
   Externals/Eagle/lib/Test1.0/
+  NuGet/
+  NuGet/net20/
   NuGet/net20/config.transform
-  NuGet/net40/config.transform
   NuGet/net20/install.ps1
+  NuGet/net40/
+  NuGet/net40/config.transform
   NuGet/net40/install.ps1
   NuGet/SQLite.Beta.nuspec
   NuGet/SQLite.MSIL.nuspec

@@ -2,7 +2,7 @@
 Compatibility=1.1 or later
 Compiled file=SQLite.NET.extra.chm
 Contents file=SQLite.NET.hhc
-Default topic=Extra\welcome.html
+Default topic=Provider\welcome.html
 Display compile progress=Yes
 Error log file=SQLite.NET.log
 Full-text search=Yes
@@ -10,40 +10,40 @@ Language=0x409 English (United States)
 Title=SQLite.NET Help
 
 [FILES]
-Extra\ndoc.css
-Extra\dbfactorysupport.html
-Extra\designer.html
-Extra\environment.html
-Extra\lang_altertable.html
-Extra\lang_analyze.html
-Extra\lang_attach.html
-Extra\lang_comment.html
-Extra\lang_conflict.html
-Extra\lang_createindex.html
-Extra\lang_createtable.html
-Extra\lang_createtrigger.html
-Extra\lang_createview.html
-Extra\lang_createvtab.html
-Extra\lang_datetime.html
-Extra\lang_delete.html
-Extra\lang_detach.html
-Extra\lang_dropindex.html
-Extra\lang_droptable.html
-Extra\lang_droptrigger.html
-Extra\lang_dropview.html
-Extra\lang_explain.html
-Extra\lang_expr.html
-Extra\lang_insert.html
-Extra\lang_reindex.html
-Extra\lang_replace.html
-Extra\lang_select.html
-Extra\lang_transaction.html
-Extra\lang_types.html
-Extra\lang_update.html
-Extra\lang_vacuum.html
-Extra\limitations.html
-Extra\optimizing.html
-Extra\pragma.html
-Extra\syntax.html
-Extra\version.html
-Extra\welcome.html
+Core\lang_altertable.html
+Core\lang_analyze.html
+Core\lang_attach.html
+Core\lang_comment.html
+Core\lang_conflict.html
+Core\lang_createindex.html
+Core\lang_createtable.html
+Core\lang_createtrigger.html
+Core\lang_createview.html
+Core\lang_createvtab.html
+Core\lang_datetime.html
+Core\lang_delete.html
+Core\lang_detach.html
+Core\lang_dropindex.html
+Core\lang_droptable.html
+Core\lang_droptrigger.html
+Core\lang_dropview.html
+Core\lang_explain.html
+Core\lang_expr.html
+Core\lang_insert.html
+Core\lang_reindex.html
+Core\lang_replace.html
+Core\lang_select.html
+Core\lang_transaction.html
+Core\lang_types.html
+Core\lang_update.html
+Core\lang_vacuum.html
+Core\pragma.html
+Core\syntax.html
+Include\ndoc.css
+Provider\dbfactorysupport.html
+Provider\designer.html
+Provider\environment.html
+Provider\limitations.html
+Provider\optimizing.html
+Provider\version.html
+Provider\welcome.html

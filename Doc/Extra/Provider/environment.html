@@ -1,0 +1,176 @@
+<html dir="LTR" xmlns="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:MSHelp="http://msdn.microsoft.com/mshelp" xmlns:tool="http://www.microsoft.com/tooltip" xmlns:ndoc="urn:ndoc-preprocess">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
+    <title>Environment Variables</title>
+    <link rel="stylesheet" type="text/css" href="../Include/ndoc.css" />
+  </head>
+  <body>
+    <div id="header">
+      <table width="100%" id="topTable">
+        <tr id="headerTableRow1">
+          <td align="left">
+            <span id="runningHeaderText">Environment Variables</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow2">
+          <td align="left">
+            <span id="nsrTitle">SQLite.NET Class Library Documentation</span>
+          </td>
+        </tr>
+        <tr id="headerTableRow3" style="display:none">
+          <td>
+            <a id="seeAlsoSectionLink" href="#seeAlsoToggle" onclick="OpenSection(seeAlsoToggle)">See Also</a>
+            <a id="exampleSectionLink" href="#codeExampleToggle" onclick="OpenSection(codeExampleToggle)">Example</a>
+          </td>
+        </tr>
+     </table>
+      <table width="100%" id="bottomTable" cellspacing="0" cellpadding="0" style="display:none">
+        <tr>
+          <td>
+            <span onclick="ExpandCollapseAll(toggleAllImage)" style="cursor:default;" onkeypress="ExpandCollapseAll_CheckKey(toggleAllImage)" tabindex="0">
+              <img ID="toggleAllImage" class="toggleAll" src="collall.gif" />
+              <label id="collapseAllLabel" for="toggleAllImage" style="display: none;">
+							Collapse All
+						</label>
+              <label id="expandAllLabel" for="toggleAllImage" style="display: none;">
+							Expand All
+						</label>
+            </span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div id="mainSection">
+    <div id="mainBody">
+      <p>
+        These environment variables are used to control several features of
+        the System.Data.SQLite library.  All of these environment variables
+        are optional.  If a particular environment variable is not present,
+        the XML configuration file &quot;System.Data.SQLite.dll.config&quot;
+        in the directory containing the currently executing assembly (i.e.
+        the one containing all the managed components for System.Data.SQLite)
+        will also be consulted.  If present, the XML configuration file should
+        be structured as follows:
+        <pre>
+        &lt;?xml version=&quot;1.0&quot;?&gt;
+        &lt;configuration&gt;
+          &lt;appSettings&gt;
+            &lt;add key=&quot;A_Setting&quot; value=&quot;String Value&quot; /&gt;
+            &lt;add key=&quot;Another_Setting&quot; value=&quot;%ENV_VALUE%&quot; /&gt;
+          &lt;/appSettings&gt;
+        &lt;/configuration&gt;
+        </pre>
+      </p>
+      <p>
+        All references to existing environment variables will be expanded to
+        their corresponding values within the returned settings values unless
+        either the &quot;No_Expand&quot; or &quot;No_Expand_&lt;name&gt;&quot;
+        environment variable is set [to anything].
+      </p>
+      <p>
+        <font color="red">
+          None of these environment variables are supported by the Compact
+          Framework builds of System.Data.SQLite, due to limitations imposed
+          by the platform itself; however, the XML configuration file mentioned
+          above may be used instead.
+        </font>
+      </p>
+      <table width="80%" cellpadding="0" cellspacing="0">
+        <tr valign="top">
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+        <tr valign="top">
+          <td>Force_SQLiteLog</td>
+          <td>If this environment variable is set [to anything], the SQLite
+          logging subsystem may be initialized in a non-default application
+          domain.  By default, this is not allowed due to the potential for
+          application domain unloading issues.</td>
+        </tr>
+        <tr valign="top">
+          <td>No_PreLoadSQLite</td>
+          <td>If this environment variable is set [to anything], the native
+          library pre-loading code will be disabled.  By default, the native
+          library pre-loading code will attempt to load the native SQLite
+          library from architecture-specific (e.g. &quot;x86&quot;,
+          &quot;amd64&quot;, &quot;x64&quot;) or platform-specific (e.g.
+          &quot;Win32&quot;) directories that reside underneath the application
+          base directory.</td>
+        </tr>
+        <tr valign="top">
+          <td>No_SQLiteConnectionNewParser</td>
+          <td>If this environment variable is set [to anything], the new
+          connection string parsing algorithm will not be used.  This
+          environment variable is intended for use with legacy code only.</td>
+        </tr>
+        <tr valign="top">
+          <td>No_SQLiteFunctions</td>
+          <td>If this environment variable is set [to anything], the initial
+          search for types in all loaded assemblies that are tagged with the
+          SQLiteFunction attribute will be skipped.  Normally, this search is
+          conducted only once per application domain by the static constructor
+          of the SQLiteFunction class; however, these implementation details
+          are subject to change.</td>
+        </tr>
+        <tr valign="top">
+          <td>PreLoadSQLite_BaseDirectory</td>
+          <td>If this environment variable is set [to anything], it will be
+          used instead of the application base directory by the native
+          library pre-loader.  This environment variable can be especially
+          useful in ASP.NET and other hosted environments where direct control
+          of the location of the managed assemblies is not under the control
+          of the application.</td>
+        </tr>
+        <tr valign="top">
+          <td>PreLoadSQLite_ProcessorArchitecture</td>
+          <td>If this environment variable is set [to anything], it will be
+          used instead of the processor architecture value contained in the
+          PROCESSOR_ARCHITECTURE environment variable to help build the path
+          of the native library to pre-load.</td>
+        </tr>
+        <tr valign="top">
+          <td>PreLoadSQLite_NoSearchForDirectory</td>
+          <td>If this environment variable is set [to anything], the native
+          library pre-loading code will skip conducting a search for the native
+          library to pre-load.  By default, the search starts in the location
+          of the currently executing assembly (i.e. the assembly containing all
+          the managed components for System.Data.SQLite) and then falls back to
+          the application domain base directory.</td>
+        </tr>
+        <tr valign="top">
+          <td>PreLoadSQLite_UseAssemblyDirectory</td>
+          <td>If this environment variable is set [to anything], the location
+          of the currently executing assembly (i.e. the one containing all the
+          managed components for System.Data.SQLite) will be used as the basis
+          for locating the the native library to pre-load (i.e. instead of
+          using the application domain base directory).</td>
+        </tr>
+        <tr valign="top">
+          <td>PROCESSOR_ARCHITECTURE</td>
+          <td>This environment variable is normally set by the operating
+          system itself and should reflect the native processor architecture
+          of the current process (e.g. a 32-bit x86 application running on a
+          64-bit x64 operating system should have the value &quot;x86&quot;).
+          </td>
+        </tr>
+        <tr valign="top">
+          <td>TypeName_SQLiteProviderServices</td>
+          <td>If this environment variable is set [to anything], it will be
+          used by the System.Data.SQLite.SQLiteFactory class as the type name
+          containing the System.Data.Common.DbProviderServices implementation
+          that should be used.</td>
+        </tr>
+      </table>
+      <hr/>
+      <div id="footer">
+        <p>
+          <a href="mailto:sqlite-users@sqlite.org?subject=SQLite.NET%20Class%20Library%20Documentation%20Feedback:%20Environment%20Variables">
+            Send comments on this topic.</a>
+        </p>
+        <p>
+        </p>
+      </div>
+    </div>
+    </div>
+  </body>
+</html>
