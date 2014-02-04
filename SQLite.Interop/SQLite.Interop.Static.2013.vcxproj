@@ -8,10 +8,6 @@
  *
 -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
-  <PropertyGroup>
-    <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
-  </PropertyGroup>
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugNativeOnly|x64">
       <Configuration>DebugNativeOnly</Configuration>
@@ -55,6 +51,10 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="props\sqlite3.props" />
   <Import Project="props\SQLite.Interop.2013.props" />
+  <PropertyGroup>
+    <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
+  </PropertyGroup>
+  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
   <Import Project="$(INTEROP_EXTRA_PROPS_FILE)"
           Condition="'$(INTEROP_EXTRA_PROPS_FILE)' != '' And
                      Exists('$(INTEROP_EXTRA_PROPS_FILE)')" />
