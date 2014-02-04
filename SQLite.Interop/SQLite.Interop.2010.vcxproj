@@ -251,8 +251,8 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\$(Platform)\" /D /E /V /I /F /H /Y</Command>
-      <Command Condition="'$(DoesMachineMatchPlatform)' != 'false'">XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
+      <Command>XCOPY "$(OutDir)$(TargetName).*" "$(OutDir)..\..\Debug\bin\$(Platform)\" /D /E /V /I /F /H /Y</Command>
+      <Command Condition="'$(DoesMachineMatchPlatform)' != 'false'">XCOPY "$(OutDir)$(TargetName).*" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugNativeOnly|x64'">
@@ -289,8 +289,8 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\$(Platform)\" /D /E /V /I /F /H /Y</Command>
-      <Command Condition="'$(DoesMachineMatchPlatform)' != 'false'">XCOPY "$(TargetPath)" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
+      <Command>XCOPY "$(OutDir)$(TargetName).*" "$(OutDir)..\..\Debug\bin\$(Platform)\" /D /E /V /I /F /H /Y</Command>
+      <Command Condition="'$(DoesMachineMatchPlatform)' != 'false'">XCOPY "$(OutDir)$(TargetName).*" "$(OutDir)..\..\Debug\bin\" /D /E /V /I /F /H /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -422,8 +422,8 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\$(Platform)\" /D /E /V /I /F /H /Y</Command>
-      <Command Condition="'$(DoesMachineMatchPlatform)' != 'false'">XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Command>
+      <Command>XCOPY "$(OutDir)$(TargetName).*" "$(OutDir)..\..\Release\bin\$(Platform)\" /D /E /V /I /F /H /Y</Command>
+      <Command Condition="'$(DoesMachineMatchPlatform)' != 'false'">XCOPY "$(OutDir)$(TargetName).*" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNativeOnly|x64'">
@@ -463,8 +463,8 @@
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
     <PostBuildEvent>
-      <Command>XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\$(Platform)\" /D /E /V /I /F /H /Y</Command>
-      <Command Condition="'$(DoesMachineMatchPlatform)' != 'false'">XCOPY "$(TargetPath)" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Command>
+      <Command>XCOPY "$(OutDir)$(TargetName).*" "$(OutDir)..\..\Release\bin\$(Platform)\" /D /E /V /I /F /H /Y</Command>
+      <Command Condition="'$(DoesMachineMatchPlatform)' != 'false'">XCOPY "$(OutDir)$(TargetName).*" "$(OutDir)..\..\Release\bin\" /D /E /V /I /F /H /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
