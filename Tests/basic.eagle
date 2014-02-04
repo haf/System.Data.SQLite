@@ -1608,17 +1608,17 @@ runTest {test data-1.30 {EF6 ISQLiteSchemaExtensions.BuildTempSchema} -setup {
 
 runTest {test data-1.31 {VARCHAR / NVARCHAR types with spaces} -body {
   list [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType VARCHAR None] \
+      TypeNameToDbType null VARCHAR None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType NVARCHAR None] \
+      TypeNameToDbType null NVARCHAR None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType VARCHAR(1) None] \
+      TypeNameToDbType null VARCHAR(1) None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType NVARCHAR(1) None] \
+      TypeNameToDbType null NVARCHAR(1) None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType "VARCHAR (1)" None] \
+      TypeNameToDbType null "VARCHAR (1)" None] \
       [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-      TypeNameToDbType "NVARCHAR (1)" None] \
+      TypeNameToDbType null "NVARCHAR (1)" None] \
 } -constraints {eagle System.Data.SQLite} -result \
 {AnsiString String AnsiString String AnsiString String}}
 
@@ -2653,7 +2653,7 @@ runTest {test data-1.55 {SQLiteConvert TypeNameToDbType} -setup {
       UNSIGNEDINTEGER16 UNSIGNEDINTEGER32 UNSIGNEDINTEGER64 VARBINARY VARCHAR \
       VARCHAR2 YESNO] {
     lappend result [list $typeName [object invoke -flags +NonPublic \
-        System.Data.SQLite.SQLiteConvert TypeNameToDbType $typeName None]]
+        System.Data.SQLite.SQLiteConvert TypeNameToDbType null $typeName None]]
   }
   set result
 } -cleanup {
