@@ -1,94 +1,231 @@
-<html dir="LTR" xmlns="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:MSHelp="http://msdn.microsoft.com/mshelp" xmlns:tool="http://www.microsoft.com/tooltip" xmlns:ndoc="urn:ndoc-preprocess">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
-    <title>CREATE VIEW</title>
-    <link rel="stylesheet" type="text/css" href="../Include/ndoc.css" />
-  </head>
-  <body>
-    <div id="header">
-      <table width="100%" id="topTable">
-        <tr id="headerTableRow1">
-          <td align="left">
-            <span id="runningHeaderText">CREATE VIEW</span>&nbsp;</td>
-        </tr>
-        <tr id="headerTableRow2">
-          <td align="left">
-            <span id="nsrTitle">SQLite Language Reference Documentation</span>
-          </td>
-        </tr>
-        <tr id="headerTableRow3" style="display:none">
-          <td>
-            <a id="seeAlsoSectionLink" href="#seeAlsoToggle" onclick="OpenSection(seeAlsoToggle)">See Also</a>
-            <a id="exampleSectionLink" href="#codeExampleToggle" onclick="OpenSection(codeExampleToggle)">Example</a>
-          </td>
-        </tr>
-     </table>
-      <table width="100%" id="bottomTable" cellspacing="0" cellpadding="0" style="display:none">
-        <tr>
-          <td>
-            <span onclick="ExpandCollapseAll(toggleAllImage)" style="cursor:default;" onkeypress="ExpandCollapseAll_CheckKey(toggleAllImage)" tabindex="0">
-              <img ID="toggleAllImage" class="toggleAll" src="collall.gif" />
-              <label id="collapseAllLabel" for="toggleAllImage" style="display: none;">
-							Collapse All
-						</label>
-              <label id="expandAllLabel" for="toggleAllImage" style="display: none;">
-							Expand All
-						</label>
-            </span>
-          </td>
-        </tr>
-      </table>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>SQLite Query Language: CREATE VIEW</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #044a64 }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.menubar {
+  clear: both;
+  border-radius: 8px;
+  background: #044a64;
+  padding: 0px;
+  margin: 0px;
+  cell-spacing: 0px;
+}    
+.toolbar {
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding: 0px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #044a64; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* Things for "fancyformat" documents start here. */
+.fancy img+p {font-style:italic}
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#044a64}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/sqlite370_banner.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% class="menubar"><tr>
+  <td width=100%>
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <a href="support.html">Support</a>
+  </div>
+<script>
+  gMsg = "Search SQLite Docs..."
+  function entersearch() {
+    var q = document.getElementById("q");
+    if( q.value == gMsg ) { q.value = "" }
+    q.style.color = "black"
+    q.style.fontStyle = "normal"
+  }
+  function leavesearch() {
+    var q = document.getElementById("q");
+    if( q.value == "" ) { 
+      q.value = gMsg
+      q.style.color = "#044a64"
+      q.style.fontStyle = "italic"
+    }
+  }
+  function hideorshow(btn,obj){
+    var x = document.getElementById(obj);
+    var b = document.getElementById(btn);
+    if( x.style.display!='none' ){
+      x.style.display = 'none';
+      b.innerHTML='show';
+    }else{
+      x.style.display = '';
+      b.innerHTML='hide';
+    }
+    return false;
+  }
+</script>
+<td>
+    <div style="padding:0 1em 0px 0;white-space:nowrap">
+    <form name=f method="GET" action="http://www.sqlite.org/search">
+      <input id=q name=q type=text
+       onfocus="entersearch()" onblur="leavesearch()" style="width:24ex;padding:1px 1ex; border:solid white 1px; font-size:0.9em ; font-style:italic;color:#044a64;" value="Search SQLite Docs...">
+      <input type=submit value="Go" style="border:solid white 1px;background-color:#044a64;color:white;font-size:0.9em;padding:0 1ex">
+    </form>
     </div>
-    <div id="mainSection">
-    <div id="mainBody">
-      <h1 class="heading">
-        SQL As Understood By SQLite</h1>
-      <h4>
-        CREATE VIEW</h4>
-      <p>
-        <table cellpadding="10">
-          <tr>
-            <td align="right" width="1%" nowrap>
-              <i><font color="#ff3434">sql-command</font></i> ::=</td>
-            <td>
-              <b><font color="#2c2cf0">CREATE </font></b>[<b><font color="#2c2cf0">TEMP </font></b>
-              <big>|</big><b><font color="#2c2cf0"> TEMPORARY</font></b>]<b><font color="#2c2cf0">
-                VIEW </font></b>[<b><font color="#2c2cf0"></font></b><i><font color="#ff3434">database-name</font></i><b><font
-                  color="#2c2cf0"><big>.</big></font></b>]<b><font color="#2c2cf0"> </font></b>
-              <i><font color="#ff3434">view-name</font></i><b><font color="#2c2cf0"> AS </font></b>
-              <i><font color="#ff3434">select-statement</font></i><b><font color="#2c2cf0"></font></b></td>
-          </tr>
-        </table>
-      </p>
-      <p>
-        The CREATE VIEW command assigns a name to a pre-packaged <a href="lang_select.html">
-          SELECT</a> statement. Once the view is created, it can be used in the FROM clause
-        of another SELECT in place of a table name. 
-      </p>
-      <p>
-        If the "TEMP" or "TEMPORARY" keyword occurs in between "CREATE" and "VIEW" then
-        the view that is created is only visible to the process that opened the database
-        and is automatically deleted when the database is closed.</p>
-      <p>
-        If a &lt;database-name&gt; is specified, then the view is created in the named database.
-        It is an error to specify both a &lt;database-name&gt; and the TEMP keyword, unless
-        the &lt;database-name&gt; is "temp". If no database name is specified, and the TEMP
-        keyword is not present, the table is created in the main database.</p>
-      <p>
-        You cannot COPY, DELETE, INSERT or UPDATE a view. Views are read-only in SQLite.
-        However, in many cases you can use a <a href="lang_createtrigger.html">TRIGGER</a>
-        on the view to accomplish the same thing. Views are removed with the <a href="lang_dropview.html">
-          DROP VIEW</a> command.</p>
-      <p>
-      <hr>
-        &nbsp;</p>
-      <div id="footer">
-        <p>
-          &nbsp;</p>
-        <p>
-        </p>
-      </div>
-    </div>
-    </div>
-  </body>
-</html>
+  </table>
+
+<div class=startsearch></div>
+  
+<h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>CREATE VIEW</h2><p><b><a href="syntaxdiagrams.html#create-view-stmt">create-view-stmt:</a></b>
+<button id='x959' onclick='hideorshow("x959","x960")'>hide</button></p>
+ <blockquote id='x960'>
+ <img alt="syntax diagram create-view-stmt" src="images/syntax/create-view-stmt.gif" />
+<p><b><a href="syntaxdiagrams.html#select-stmt">select-stmt:</a></b>
+<button id='x961' onclick='hideorshow("x961","x962")'>show</button></p>
+ <blockquote id='x962' style='display:none;'>
+ <img alt="syntax diagram select-stmt" src="images/syntax/select-stmt.gif" />
+<p><b><a href="syntaxdiagrams.html#common-table-expression">common-table-expression:</a></b>
+<button id='x963' onclick='hideorshow("x963","x964")'>show</button></p>
+ <blockquote id='x964' style='display:none;'>
+ <img alt="syntax diagram common-table-expression" src="images/syntax/common-table-expression.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#compound-operator">compound-operator:</a></b>
+<button id='x965' onclick='hideorshow("x965","x966")'>show</button></p>
+ <blockquote id='x966' style='display:none;'>
+ <img alt="syntax diagram compound-operator" src="images/syntax/compound-operator.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#expr">expr:</a></b>
+<button id='x967' onclick='hideorshow("x967","x968")'>show</button></p>
+ <blockquote id='x968' style='display:none;'>
+ <img alt="syntax diagram expr" src="images/syntax/expr.gif" />
+<p><b><a href="syntaxdiagrams.html#literal-value">literal-value:</a></b>
+<button id='x969' onclick='hideorshow("x969","x970")'>show</button></p>
+ <blockquote id='x970' style='display:none;'>
+ <img alt="syntax diagram literal-value" src="images/syntax/literal-value.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#raise-function">raise-function:</a></b>
+<button id='x971' onclick='hideorshow("x971","x972")'>show</button></p>
+ <blockquote id='x972' style='display:none;'>
+ <img alt="syntax diagram raise-function" src="images/syntax/raise-function.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#type-name">type-name:</a></b>
+<button id='x973' onclick='hideorshow("x973","x974")'>show</button></p>
+ <blockquote id='x974' style='display:none;'>
+ <img alt="syntax diagram type-name" src="images/syntax/type-name.gif" />
+<p><b><a href="syntaxdiagrams.html#signed-number">signed-number:</a></b>
+<button id='x975' onclick='hideorshow("x975","x976")'>show</button></p>
+ <blockquote id='x976' style='display:none;'>
+ <img alt="syntax diagram signed-number" src="images/syntax/signed-number.gif" />
+</blockquote>
+</blockquote>
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#join-clause">join-clause:</a></b>
+<button id='x977' onclick='hideorshow("x977","x978")'>show</button></p>
+ <blockquote id='x978' style='display:none;'>
+ <img alt="syntax diagram join-clause" src="images/syntax/join-clause.gif" />
+<p><b><a href="syntaxdiagrams.html#join-constraint">join-constraint:</a></b>
+<button id='x979' onclick='hideorshow("x979","x980")'>show</button></p>
+ <blockquote id='x980' style='display:none;'>
+ <img alt="syntax diagram join-constraint" src="images/syntax/join-constraint.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#join-operator">join-operator:</a></b>
+<button id='x981' onclick='hideorshow("x981","x982")'>show</button></p>
+ <blockquote id='x982' style='display:none;'>
+ <img alt="syntax diagram join-operator" src="images/syntax/join-operator.gif" />
+</blockquote>
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#ordering-term">ordering-term:</a></b>
+<button id='x983' onclick='hideorshow("x983","x984")'>show</button></p>
+ <blockquote id='x984' style='display:none;'>
+ <img alt="syntax diagram ordering-term" src="images/syntax/ordering-term.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#result-column">result-column:</a></b>
+<button id='x985' onclick='hideorshow("x985","x986")'>show</button></p>
+ <blockquote id='x986' style='display:none;'>
+ <img alt="syntax diagram result-column" src="images/syntax/result-column.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#table-or-subquery">table-or-subquery:</a></b>
+<button id='x987' onclick='hideorshow("x987","x988")'>show</button></p>
+ <blockquote id='x988' style='display:none;'>
+ <img alt="syntax diagram table-or-subquery" src="images/syntax/table-or-subquery.gif" />
+</blockquote>
+</blockquote>
+</blockquote>
+
+
+<p>The CREATE VIEW command assigns a name to a pre-packaged 
+<a href="lang_select.html">SELECT</a> statement. 
+Once the view is created, it can be used in the FROM clause
+of another <a href="lang_select.html">SELECT</a> in place of a table name.
+</p>
+
+<p>If the "TEMP" or "TEMPORARY" keyword occurs in between "CREATE"
+and "VIEW" then the view that is created is only visible to the
+process that opened the database and is automatically deleted when
+the database is closed.</p>
+
+<p> If a &lt;database-name&gt; is specified, then the view is created in 
+the named database. It is an error to specify both a &lt;database-name&gt;
+and the TEMP keyword on a VIEW, unless the &lt;database-name&gt; is "temp".
+If no database name is specified, and the TEMP keyword is not present,
+the VIEW is created in the main database.</p>
+
+<p>You cannot <a href="lang_delete.html">DELETE</a>, <a href="lang_insert.html">INSERT</a>, or <a href="lang_update.html">UPDATE</a> a view.  Views are read-only 
+in SQLite.  However, in many cases you can use an
+<a href="lang_createtrigger.html#instead_of_trigger">INSTEAD OF trigger</a> on the view to accomplish 
+the same thing.  Views are removed 
+with the <a href="lang_dropview.html">DROP VIEW</a> command.</p>
+
+

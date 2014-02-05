@@ -1,127 +1,290 @@
-<html dir="LTR" xmlns="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:MSHelp="http://msdn.microsoft.com/mshelp" xmlns:tool="http://www.microsoft.com/tooltip" xmlns:ndoc="urn:ndoc-preprocess">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
-    <title>ALTER TABLE</title>
-    <link rel="stylesheet" type="text/css" href="../Include/ndoc.css" />
-  </head>
-  <body>
-    <div id="header">
-      <table width="100%" id="topTable">
-        <tr id="headerTableRow1">
-          <td align="left">
-            <span id="runningHeaderText">ALTER TABLE</span>&nbsp;</td>
-        </tr>
-        <tr id="headerTableRow2">
-          <td align="left">
-            <span id="nsrTitle">SQLite Language Reference Documentation</span>
-          </td>
-        </tr>
-        <tr id="headerTableRow3" style="display:none">
-          <td>
-            <a id="seeAlsoSectionLink" href="#seeAlsoToggle" onclick="OpenSection(seeAlsoToggle)">See Also</a>
-            <a id="exampleSectionLink" href="#codeExampleToggle" onclick="OpenSection(codeExampleToggle)">Example</a>
-          </td>
-        </tr>
-     </table>
-      <table width="100%" id="bottomTable" cellspacing="0" cellpadding="0" style="display:none">
-        <tr>
-          <td>
-            <span onclick="ExpandCollapseAll(toggleAllImage)" style="cursor:default;" onkeypress="ExpandCollapseAll_CheckKey(toggleAllImage)" tabindex="0">
-              <img ID="toggleAllImage" class="toggleAll" src="collall.gif" />
-              <label id="collapseAllLabel" for="toggleAllImage" style="display: none;">
-							Collapse All
-						</label>
-              <label id="expandAllLabel" for="toggleAllImage" style="display: none;">
-							Expand All
-						</label>
-            </span>
-          </td>
-        </tr>
-      </table>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>SQLite Query Language: ALTER TABLE</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #044a64 }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.menubar {
+  clear: both;
+  border-radius: 8px;
+  background: #044a64;
+  padding: 0px;
+  margin: 0px;
+  cell-spacing: 0px;
+}    
+.toolbar {
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding: 0px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #044a64; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* Things for "fancyformat" documents start here. */
+.fancy img+p {font-style:italic}
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#044a64}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/sqlite370_banner.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% class="menubar"><tr>
+  <td width=100%>
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <a href="support.html">Support</a>
+  </div>
+<script>
+  gMsg = "Search SQLite Docs..."
+  function entersearch() {
+    var q = document.getElementById("q");
+    if( q.value == gMsg ) { q.value = "" }
+    q.style.color = "black"
+    q.style.fontStyle = "normal"
+  }
+  function leavesearch() {
+    var q = document.getElementById("q");
+    if( q.value == "" ) { 
+      q.value = gMsg
+      q.style.color = "#044a64"
+      q.style.fontStyle = "italic"
+    }
+  }
+  function hideorshow(btn,obj){
+    var x = document.getElementById(obj);
+    var b = document.getElementById(btn);
+    if( x.style.display!='none' ){
+      x.style.display = 'none';
+      b.innerHTML='show';
+    }else{
+      x.style.display = '';
+      b.innerHTML='hide';
+    }
+    return false;
+  }
+</script>
+<td>
+    <div style="padding:0 1em 0px 0;white-space:nowrap">
+    <form name=f method="GET" action="http://www.sqlite.org/search">
+      <input id=q name=q type=text
+       onfocus="entersearch()" onblur="leavesearch()" style="width:24ex;padding:1px 1ex; border:solid white 1px; font-size:0.9em ; font-style:italic;color:#044a64;" value="Search SQLite Docs...">
+      <input type=submit value="Go" style="border:solid white 1px;background-color:#044a64;color:white;font-size:0.9em;padding:0 1ex">
+    </form>
     </div>
-    <div id="mainSection">
-    <div id="mainBody">
-      <h1 class="heading">
-        SQL As Understood By SQLite</h1>
-      <h4>
-        ALTER TABLE</h4>
-      <p>
-        <table cellpadding="10">
-          <tr>
-            <td align="right" width="1%" nowrap>
-              <i><font color="#ff3434">sql-statement</font></i> ::=</td>
-            <td>
-              <b><font color="#2c2cf0">ALTER TABLE </font></b>[<b><font color="#2c2cf0"></font></b><i><font
-                color="#ff3434">database-name</font></i><b><font color="#2c2cf0"> <big>.</big></font></b>]<b><font
-                  color="#2c2cf0"> </font></b><i><font color="#ff3434">table-name</font></i><b><font
-                    color="#2c2cf0"> </font></b><i><font color="#ff3434">alteration</font></i><b><font
-                      color="#2c2cf0"></font></b></td>
-          </tr>
-          <tr>
-            <td align="right" width="1%" nowrap>
-              <i><font color="#ff3434">alteration</font></i> ::=</td>
-            <td>
-              <b><font color="#2c2cf0">RENAME TO </font></b><i><font color="#ff3434">new-table-name</font></i><b><font
-                color="#2c2cf0"></font></b></td>
-          </tr>
-          <tr>
-            <td align="right" width="1%" nowrap>
-              <i><font color="#ff3434">alteration</font></i> ::=</td>
-            <td>
-              <b><font color="#2c2cf0">ADD </font></b>[<b><font color="#2c2cf0">COLUMN</font></b>]<b><font
-                color="#2c2cf0"> </font></b><i><font color="#ff3434">column-def</font></i><b><font
-                  color="#2c2cf0"></font></b></td>
-          </tr>
-        </table>
-      </p>
-      <p>
-        SQLite's version of the ALTER TABLE command allows the user to rename or add a new
-        column to an existing table. It is not possible to remove a column from a table.
-      </p>
-      <p>
-        The RENAME TO syntax is used to rename the table identified by <i>[database-name.]table-name</i>
-        to <i>new-table-name</i>. This command cannot be used to move a table between attached
-        databases, only to rename a table within the same database.</p>
-      <p>
-        If the table being renamed has triggers or indices, then these remain attached to
-        the table after it has been renamed. However, if there are any view definitions,
-        or statements executed by triggers that refer to the table being renamed, these
-        are not automatically modified to use the new table name. If this is required, the
-        triggers or view definitions must be dropped and recreated to use the new table
-        name by hand.
-      </p>
-      <p>
-        The ADD [COLUMN] syntax is used to add a new column to an existing table. The new
-        column is always appended to the end of the list of existing columns. <i>Column-def</i>
-        may take any of the forms permissable in a CREATE TABLE statement, with the following
-        restrictions:
-      </p>
-      <ul>
-        <li>The column may not have a PRIMARY KEY or UNIQUE constraint. </li>
-        <li>The column may not have a default value of CURRENT_TIME, CURRENT_DATE or CURRENT_TIMESTAMP.
-        </li>
-        <li>If a NOT NULL constraint is specified, then the column must have a default value
-          other than NULL. </li>
-      </ul>
-      <p>
-        The execution time of the ALTER TABLE command is independent of the amount of data
-        in the table. The ALTER TABLE command runs as quickly on a table with 10 million
-        rows as it does on a table with 1 row.
-      </p>
-      <p>
-        After ADD COLUMN has been run on a database, that database will not be readable
-        by SQLite version 3.1.3 and earlier until the database is <a href="lang_vacuum.html">
-          VACUUM</a>ed.</p>
-      <p>
-        &nbsp;</p>
-      <hr>
-      <div id="footer">
-        <p>
-          &nbsp;</p>
-        <p>
-        </p>
-      </div>
-    </div>
-    </div>
-  </body>
-</html>
+  </table>
+
+<div class=startsearch></div>
+  
+<h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>ALTER TABLE</h2><p><b><a href="syntaxdiagrams.html#alter-table-stmt">alter-table-stmt:</a></b>
+<button id='x729' onclick='hideorshow("x729","x730")'>hide</button></p>
+ <blockquote id='x730'>
+ <img alt="syntax diagram alter-table-stmt" src="images/syntax/alter-table-stmt.gif" />
+<p><b><a href="syntaxdiagrams.html#column-def">column-def:</a></b>
+<button id='x731' onclick='hideorshow("x731","x732")'>show</button></p>
+ <blockquote id='x732' style='display:none;'>
+ <img alt="syntax diagram column-def" src="images/syntax/column-def.gif" />
+<p><b><a href="syntaxdiagrams.html#column-constraint">column-constraint:</a></b>
+<button id='x733' onclick='hideorshow("x733","x734")'>show</button></p>
+ <blockquote id='x734' style='display:none;'>
+ <img alt="syntax diagram column-constraint" src="images/syntax/column-constraint.gif" />
+<p><b><a href="syntaxdiagrams.html#conflict-clause">conflict-clause:</a></b>
+<button id='x735' onclick='hideorshow("x735","x736")'>show</button></p>
+ <blockquote id='x736' style='display:none;'>
+ <img alt="syntax diagram conflict-clause" src="images/syntax/conflict-clause.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#expr">expr:</a></b>
+<button id='x737' onclick='hideorshow("x737","x738")'>show</button></p>
+ <blockquote id='x738' style='display:none;'>
+ <img alt="syntax diagram expr" src="images/syntax/expr.gif" />
+<p><b><a href="syntaxdiagrams.html#raise-function">raise-function:</a></b>
+<button id='x739' onclick='hideorshow("x739","x740")'>show</button></p>
+ <blockquote id='x740' style='display:none;'>
+ <img alt="syntax diagram raise-function" src="images/syntax/raise-function.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#select-stmt">select-stmt:</a></b>
+<button id='x741' onclick='hideorshow("x741","x742")'>show</button></p>
+ <blockquote id='x742' style='display:none;'>
+ <img alt="syntax diagram select-stmt" src="images/syntax/select-stmt.gif" />
+<p><b><a href="syntaxdiagrams.html#common-table-expression">common-table-expression:</a></b>
+<button id='x743' onclick='hideorshow("x743","x744")'>show</button></p>
+ <blockquote id='x744' style='display:none;'>
+ <img alt="syntax diagram common-table-expression" src="images/syntax/common-table-expression.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#compound-operator">compound-operator:</a></b>
+<button id='x745' onclick='hideorshow("x745","x746")'>show</button></p>
+ <blockquote id='x746' style='display:none;'>
+ <img alt="syntax diagram compound-operator" src="images/syntax/compound-operator.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#join-clause">join-clause:</a></b>
+<button id='x747' onclick='hideorshow("x747","x748")'>show</button></p>
+ <blockquote id='x748' style='display:none;'>
+ <img alt="syntax diagram join-clause" src="images/syntax/join-clause.gif" />
+<p><b><a href="syntaxdiagrams.html#join-constraint">join-constraint:</a></b>
+<button id='x749' onclick='hideorshow("x749","x750")'>show</button></p>
+ <blockquote id='x750' style='display:none;'>
+ <img alt="syntax diagram join-constraint" src="images/syntax/join-constraint.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#join-operator">join-operator:</a></b>
+<button id='x751' onclick='hideorshow("x751","x752")'>show</button></p>
+ <blockquote id='x752' style='display:none;'>
+ <img alt="syntax diagram join-operator" src="images/syntax/join-operator.gif" />
+</blockquote>
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#ordering-term">ordering-term:</a></b>
+<button id='x753' onclick='hideorshow("x753","x754")'>show</button></p>
+ <blockquote id='x754' style='display:none;'>
+ <img alt="syntax diagram ordering-term" src="images/syntax/ordering-term.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#result-column">result-column:</a></b>
+<button id='x755' onclick='hideorshow("x755","x756")'>show</button></p>
+ <blockquote id='x756' style='display:none;'>
+ <img alt="syntax diagram result-column" src="images/syntax/result-column.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#table-or-subquery">table-or-subquery:</a></b>
+<button id='x757' onclick='hideorshow("x757","x758")'>show</button></p>
+ <blockquote id='x758' style='display:none;'>
+ <img alt="syntax diagram table-or-subquery" src="images/syntax/table-or-subquery.gif" />
+</blockquote>
+</blockquote>
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#foreign-key-clause">foreign-key-clause:</a></b>
+<button id='x759' onclick='hideorshow("x759","x760")'>show</button></p>
+ <blockquote id='x760' style='display:none;'>
+ <img alt="syntax diagram foreign-key-clause" src="images/syntax/foreign-key-clause.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#literal-value">literal-value:</a></b>
+<button id='x761' onclick='hideorshow("x761","x762")'>show</button></p>
+ <blockquote id='x762' style='display:none;'>
+ <img alt="syntax diagram literal-value" src="images/syntax/literal-value.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#signed-number">signed-number:</a></b>
+<button id='x763' onclick='hideorshow("x763","x764")'>show</button></p>
+ <blockquote id='x764' style='display:none;'>
+ <img alt="syntax diagram signed-number" src="images/syntax/signed-number.gif" />
+</blockquote>
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#type-name">type-name:</a></b>
+<button id='x765' onclick='hideorshow("x765","x766")'>show</button></p>
+ <blockquote id='x766' style='display:none;'>
+ <img alt="syntax diagram type-name" src="images/syntax/type-name.gif" />
+<p><b><a href="syntaxdiagrams.html#signed-number">signed-number:</a></b>
+<button id='x767' onclick='hideorshow("x767","x768")'>show</button></p>
+ <blockquote id='x768' style='display:none;'>
+ <img alt="syntax diagram signed-number" src="images/syntax/signed-number.gif" />
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+
+
+<p>SQLite supports a limited subset of ALTER TABLE.
+The ALTER TABLE command in SQLite allows the user to rename a table
+or to add a new column to an existing table.
+</p>
+
+<p> The RENAME TO syntax is used to rename the table identified by 
+<i>&#91;database-name.&#93;table-name</i> to <i>new-table-name</i>.
+This command 
+cannot be used to move a table between attached databases, only to rename 
+a table within the same database.</p>
+
+<p> If the table being renamed has triggers or indices, then these remain
+attached to the table after it has been renamed.  However, if there are
+any view definitions, or statements executed by triggers that refer to
+the table being renamed, these are not automatically modified to use the new
+table name. If this is required, the triggers or view definitions must be
+dropped and recreated to use the new table name by hand.
+</p>
+
+<p>If <a href="foreignkeys.html">foreign key constraints</a> are 
+<a href="pragma.html#pragma_foreign_keys">enabled</a> when a table is renamed, then any
+<a href="syntaxdiagrams.html#foreign-key-clause">REFERENCES clauses</a> in any table (either the
+table being renamed or some other table)
+that refer to the table being renamed are modified to refer 
+to the renamed table by its new name.
+
+<p> The ADD COLUMN syntax
+is used to add a new column to an existing table.
+The new column is always appended to the end of the list of existing columns.
+The <a href="syntaxdiagrams.html#column-def">column-def</a> rule defines the characteristics of the new column.
+The new column may take any of the forms permissible in a <a href="lang_createtable.html">CREATE TABLE</a>
+statement, with the following restrictions:
+<ul>
+<li>The column may not have a PRIMARY KEY or UNIQUE constraint.</li>
+<li>The column may not have a default value of CURRENT_TIME, CURRENT_DATE, 
+    CURRENT_TIMESTAMP, or an expression in parentheses.</li>
+<li>If a NOT NULL constraint is specified, then the column must have a
+    default value other than NULL.
+<li>If <a href="foreignkeys.html">foreign key constraints</a> are <a href="pragma.html#pragma_foreign_keys">enabled</a> and
+    a column with a <a href="syntaxdiagrams.html#foreign-key-clause">REFERENCES clause</a>
+    is added, the column must have a default value of NULL.
+</ul>
+
+<p>Note also that when adding a <a href="lang_createtable.html#ckconst">CHECK constraint</a>, the CHECK constraint
+is not tested against preexisting rows of the table.
+This can result in a table that contains data that
+is in violation of the CHECK constraint.  Future versions of SQLite might
+change to validate CHECK constraints as they are added.</p>
+
+<p> The execution time of the ALTER TABLE command is independent of
+the amount of data in the table.  The ALTER TABLE command runs as quickly
+on a table with 10 million rows as it does on a table with 1 row.
+</p>
+
+<p>After ADD COLUMN has been run on a database, that database will not
+be readable by SQLite version 3.1.3 and earlier.</p>
+
+
