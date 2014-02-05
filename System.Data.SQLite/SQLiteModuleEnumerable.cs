@@ -316,6 +316,15 @@ namespace System.Data.SQLite
         /// for the virtual table.
         /// </summary>
         private IEnumerable enumerable;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Non-zero if different object instances with the same value should
+        /// generate different row identifiers, where applicable.  This has no
+        /// effect on the .NET Compact Framework.
+        /// </summary>
+        private bool objectIdentity;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -335,12 +344,40 @@ namespace System.Data.SQLite
             string name,
             IEnumerable enumerable
             )
+            : this(name, enumerable, false)
+        {
+            // do nothing.
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Constructs an instance of this class.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the module.  This parameter cannot be null.
+        /// </param>
+        /// <param name="enumerable">
+        /// The <see cref="IEnumerable" /> instance to expose as a virtual
+        /// table.  This parameter cannot be null.
+        /// </param>
+        /// <param name="objectIdentity">
+        /// Non-zero if different object instances with the same value should
+        /// generate different row identifiers, where applicable.  This
+        /// parameter has no effect on the .NET Compact Framework.
+        /// </param>
+        public SQLiteModuleEnumerable(
+            string name,
+            IEnumerable enumerable,
+            bool objectIdentity
+            )
             : base(name)
         {
             if (enumerable == null)
                 throw new ArgumentNullException("enumerable");
 
             this.enumerable = enumerable;
+            this.objectIdentity = objectIdentity;
         }
         #endregion
 
@@ -485,14 +522,10 @@ namespace System.Data.SQLite
             object value
             )
         {
-            if ((cursor != null) && (value != null))
-                return MakeRowId(cursor.GetRowIndex(), value.GetHashCode());
-            else if (cursor != null)
-                return cursor.GetRowIndex();
-            else if (value != null)
-                return value.GetHashCode();
-            else
-                return 0;
+            int rowIndex = (cursor != null) ? cursor.GetRowIndex() : 0;
+            int hashCode = SQLiteMarshal.GetHashCode(value, objectIdentity);
+
+            return MakeRowId(rowIndex, hashCode);
         }
         #endregion
 

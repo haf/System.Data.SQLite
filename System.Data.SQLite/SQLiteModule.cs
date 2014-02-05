@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -4536,6 +4537,38 @@ namespace System.Data.SQLite
 #endif
         }
         #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Object Helper Methods
+        /// <summary>
+        /// Generates a hash code value for the object.
+        /// </summary>
+        /// <param name="value">
+        /// The object instance used to calculate the hash code.
+        /// </param>
+        /// <param name="identity">
+        /// Non-zero if different object instances with the same value should
+        /// generate different hash codes, where applicable.  This parameter
+        /// has no effect on the .NET Compact Framework.
+        /// </param>
+        /// <returns>
+        /// The hash code value -OR- zero if the object is null.
+        /// </returns>
+        public static int GetHashCode(
+            object value,
+            bool identity
+            )
+        {
+#if !PLATFORM_COMPACTFRAMEWORK
+            if (identity)
+                return RuntimeHelpers.GetHashCode(value);
+#endif
+
+            if (value == null) return 0;
+            return value.GetHashCode();
+        }
+        #endregion
     }
     #endregion
 
@@ -4695,7 +4728,10 @@ namespace System.Data.SQLite
                 ref IntPtr pError
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                 {
@@ -4744,7 +4780,10 @@ namespace System.Data.SQLite
                 ref IntPtr pError
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                 {
@@ -4777,7 +4816,10 @@ namespace System.Data.SQLite
                 IntPtr pIndex
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -4800,7 +4842,10 @@ namespace System.Data.SQLite
                 IntPtr pVtab
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -4823,7 +4868,10 @@ namespace System.Data.SQLite
                 IntPtr pVtab
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -4850,7 +4898,10 @@ namespace System.Data.SQLite
                 ref IntPtr pCursor
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -4873,7 +4924,10 @@ namespace System.Data.SQLite
                 IntPtr pCursor
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableCursorError(pCursor);
@@ -4912,7 +4966,10 @@ namespace System.Data.SQLite
                 IntPtr argv
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableCursorError(pCursor);
@@ -4935,7 +4992,10 @@ namespace System.Data.SQLite
                 IntPtr pCursor
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableCursorError(pCursor);
@@ -4958,7 +5018,10 @@ namespace System.Data.SQLite
                 IntPtr pCursor
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                 {
@@ -4992,7 +5055,10 @@ namespace System.Data.SQLite
                 int index
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableCursorError(pCursor);
@@ -5019,7 +5085,10 @@ namespace System.Data.SQLite
                 ref long rowId
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableCursorError(pCursor);
@@ -5054,7 +5123,10 @@ namespace System.Data.SQLite
                 ref long rowId
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -5077,7 +5149,10 @@ namespace System.Data.SQLite
                 IntPtr pVtab
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -5100,7 +5175,10 @@ namespace System.Data.SQLite
                 IntPtr pVtab
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -5123,7 +5201,10 @@ namespace System.Data.SQLite
                 IntPtr pVtab
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -5146,7 +5227,10 @@ namespace System.Data.SQLite
                 IntPtr pVtab
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -5185,7 +5269,10 @@ namespace System.Data.SQLite
                 ref IntPtr pClientData
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                 {
@@ -5216,7 +5303,10 @@ namespace System.Data.SQLite
                 IntPtr zNew
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -5243,7 +5333,10 @@ namespace System.Data.SQLite
                 int iSavepoint
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -5270,7 +5363,10 @@ namespace System.Data.SQLite
                 int iSavepoint
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
@@ -5297,7 +5393,10 @@ namespace System.Data.SQLite
                 int iSavepoint
                 )
             {
-                // CheckDisposed();
+                //
+                // NOTE: Called by native code.
+                //
+                // CheckDisposed(); /* EXEMPT */
 
                 if (module == null)
                     return ModuleNotAvailableTableError(pVtab);
