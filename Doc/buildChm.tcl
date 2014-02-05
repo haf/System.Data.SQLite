@@ -188,6 +188,9 @@ proc copyMsdnDocumenter { sourceDirectory destinationDirectory } {
   }
 }
 
+#
+# NOTE: This is the entry point for this script.
+#
 set path [file normalize [file dirname [info script]]]
 
 set nDocExtPath [file join [file dirname $path] Externals NDoc3]
@@ -267,6 +270,8 @@ set code [catch {exec [file join $nDocInstPath bin NDoc3Console.exe] \
 
 puts stdout $result; if {$code != 0} then {exit $code}
 
+###############################################################################
+
 foreach fileName [glob -nocomplain [file join $corePath *.html]] {
   set fileName [file join $path $fileName]
 
@@ -278,13 +283,7 @@ foreach fileName [glob -nocomplain [file join $corePath *.html]] {
   transformCoreDocumentationFile $fileName http://www.sqlite.org/
 }
 
-set providerFileNames [list \
-    [file join $temporaryPath SQLite.NET.hhp] \
-    [file join $temporaryPath SQLite.NET.hhc]]
-
-foreach fileName [glob -nocomplain [file join $providerPath *.html]] {
-  lappend providerFileNames $fileName
-}
+###############################################################################
 
 set patterns(.hhc,1) {<!--This document contains Table of Contents information\
 for the HtmlHelp compiler\.--><UL>}
@@ -329,6 +328,16 @@ set subSpecs(.html,6) {"\1~Overloads.html"}
 set subSpecs(.html,7) {"\1~Overloads.html"}
 set subSpecs(.html,8) {"\1~Overloads.html"}
 
+###############################################################################
+
+set providerFileNames [list \
+    [file join $temporaryPath SQLite.NET.hhp] \
+    [file join $temporaryPath SQLite.NET.hhc]]
+
+foreach fileName [glob -nocomplain [file join $providerPath *.html]] {
+  lappend providerFileNames $fileName
+}
+
 foreach fileName $providerFileNames {
   set fileName [file join $path $fileName]
 
@@ -336,7 +345,7 @@ foreach fileName $providerFileNames {
   # NOTE: Make sure the file we need actually exists.
   #
   if {![file isfile $fileName]} then {
-    puts stdout "Cannot find file: $fileName"
+    puts stdout "Cannot find provider file: $fileName"
     exit 1
   }
 
