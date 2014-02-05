@@ -6,7 +6,7 @@
 </HEAD><BODY>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Introduction">
+		<param name="Name" value="Introduction to System.Data.SQLite">
 		<param name="Local" value="Provider/welcome.html">
 		</OBJECT>
 	<UL>
@@ -44,7 +44,7 @@
 			</OBJECT>
 	</UL>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Query Language Understood by SQLite">
+		<param name="Name" value="Query Language Understood By SQLite">
 		<param name="Local" value="Core/lang.html">
 		</OBJECT>
 	<UL>
