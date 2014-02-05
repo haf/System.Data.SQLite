@@ -1611,5 +1611,96 @@ System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{0 4294967296 4294967296\
 
 ###############################################################################
 
+runTest {test vtab-1.11 {IEnumerable virtual table w/object identity} -setup {
+  set fileName vtab-1.11.db
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql(1) { \
+    CREATE VIRTUAL TABLE t${id} USING mod${id}; \
+  }
+
+  set sql(2) { \
+    SELECT rowId, * FROM t${id}; \
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System;
+    using System.Data.SQLite;
+    using Eagle._Containers.Public;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static StringList GetList(params string\[\] strings)
+        {
+          StringList result = new StringList();
+
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};[getFlagsProperty]"))
+          {
+            connection.Open();
+
+            connection.CreateModule(new SQLiteModuleEnumerable(
+              "mod${id}", strings, true));
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(1)}]";
+              command.ExecuteNonQuery();
+            }
+
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+              command.CommandText = "[subst ${sql(2)}]";
+
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                while (dataReader.Read())
+                {
+                  result.Add(dataReader\[0\].ToString());
+                  result.Add(dataReader\[1\].ToString());
+                }
+              }
+            }
+
+            connection.Close();
+          }
+
+          return result;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors [list System.Data.SQLite.dll Eagle.dll]]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} GetList one two three 4 5.0
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result code results errors sql dataSource id fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
+regexp -result [string map [list \n \r\n] {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\d+ one \d+ two \d+ three\
+\d+ 4 \d+ 5\.0\}$}]}
+
+###############################################################################
+
 runSQLiteTestEpilogue
 runTestEpilogue

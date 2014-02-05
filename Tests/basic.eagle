@@ -2904,6 +2904,33 @@ DateTime True}} {{2014-02-01 12:34:56} {2014-02-01 12:34:56}}}}
 
 ###############################################################################
 
+runTest {test data-1.61 {using TYPES with SELECT} -setup {
+  setupDb [set fileName data-1.61.db]
+} -body {
+  set values [list NULL 1 'one' 1.0 X'01']
+  sql execute $db "CREATE TABLE t1(x, y);"
+
+  foreach x $values {
+    foreach y $values {
+      sql execute $db [appendArgs \
+          "INSERT INTO t1 (x, y) VALUES(" $x ", " $y ");"]
+    }
+  }
+
+  sql execute -execute reader -format list -allownull true $db \
+      "TYPES INTEGER, INTEGER, REAL; SELECT rowId, x, y FROM t1 ORDER BY rowId;"
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain y x values db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{1 {} {} 2 {} 1 3 {} 0 4 {} 1 5 {} 0 6 1 {} 7 1 1 8 1 0 9 1 1 10 1 0 11 0 {} 12\
+0 1 13 0 0 14 0 1 15 0 0 16 1 {} 17 1 1 18 1 0 19 1 1 20 1 0 21 0 {} 22 0 1 23\
+0 0 24 0 1 25 0 0}}
+
+###############################################################################
+
 reportSQLiteResources $test_channel
 
 ###############################################################################
