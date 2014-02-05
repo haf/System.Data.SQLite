@@ -26,11 +26,14 @@ proc writeFile { fileName data } {
   return ""
 }
 
-proc readFileAsSubSpec { fileName } {
-  set data [readFile $fileName]
+proc escapeSubSpec { data } {
   regsub -all -- {&} $data {\\\&} data
   regsub -all -- {\\(\d+)} $data {\\\\\1} data
   return $data
+}
+
+proc readFileAsSubSpec { fileName } {
+  return [escapeSubSpec [readFile $fileName]]
 }
 
 proc getFileHash { fileName } {
@@ -40,6 +43,110 @@ proc getFileHash { fileName } {
     return [string trim [lindex [split $result " "] 0]]
   }
   return ""
+}
+
+#
+# HACK: This procedure checks all the "href" attribute values in the specified
+#       core documentation file.  For each value, this procedure checks if the
+#       reference conforms to one of the following general categories:
+#
+#       1. A relative reference to a named anchor within the same document.
+#       2. An absolute reference using HTTP or HTTPS.
+#       3. A relative reference to an existing local file.
+#       4. An absolute reference to a local file.
+#
+#       Otherwise, this procedure transforms the "href" attribute value into
+#       an absolute reference using the specified base URL.
+#
+proc transformCoreDocumentationFile { fileName url } {
+  #
+  # NOTE: Grab the name of the directory containing the file.
+  #
+  set directory [file dirname $fileName]
+
+  #
+  # NOTE: Read all the textual data from the file.
+  #
+  set data [readFile $fileName]
+
+  #
+  # NOTE: No replacements made yet.
+  #
+  set count 0
+
+  #
+  # NOTE: Process all "href" attribute values from the data.  This pattern is
+  #       not univeral; however, as of this writing (Feb 2014), the core docs
+  #       are using it consistently.
+  #
+  foreach {dummy href} [regexp -all -inline -nocase -- {href="(.*?)"} $data] {
+    #
+    # NOTE: Skip all references to other items on this page.
+    #
+    if {[string index $href 0] eq "#"} then {
+      continue
+    }
+
+    #
+    # NOTE: Skip all absolute HTTP/HTTPS references.
+    #
+    if {[string range $href 0 6] eq "http://" || \
+        [string range $href 0 7] eq "https://"} then {
+      continue
+    }
+
+    #
+    # NOTE: Split on the "#" character to get the file name.  There are some
+    #       places within the core docs that refer to named anchors within
+    #       other files.
+    #
+    set parts [split $href #]; set part1 [lindex $parts 0]
+
+    #
+    # NOTE: If there is no file name part, skip the reference.
+    #
+    if {[string length $part1] == 0} then {
+      continue
+    }
+
+    #
+    # NOTE: If it does not appear to be relative, skip it.
+    #
+    if {[file pathtype $part1] ne "relative"} then {
+      continue
+    }
+
+    #
+    # NOTE: If the referenced file name exists locally, skip it.
+    #
+    if {[file exists [file join $directory $part1]]} then {
+      continue
+    }
+
+    #
+    # NOTE: Replace the reference with an absolute reference using the base
+    #       URL specified by the caller, escaping it as necessary for use
+    #       with [regsub].
+    #
+    set pattern "***=$dummy"; # NOTE: Use literal string syntax.
+    set subSpec "href=\"[escapeSubSpec $url$href]\""
+
+    #
+    # NOTE: Perform the replacements, if any, keeping track of how many were
+    #       done.
+    #
+    incr count [regsub -all -- $pattern $data $subSpec data]
+  }
+
+  #
+  # NOTE: If some replacements were performed on the data from the file, then
+  #       overwrite it with the new data; otherwise, issue a warning.
+  #
+  if {$count > 0} then {
+    writeFile $fileName $data
+  } else {
+    puts stdout "*WARNING* File \"$fileName\" does not match: href=\"(.*?)\""
+  }
 }
 
 #
@@ -148,6 +255,8 @@ if {$count > 0} then {
 #
 set outputPath [file join Output]
 set temporaryPath [file join $outputPath ndoc3_msdn_temp]
+set corePath [file join $temporaryPath Core]
+set providerPath [file join $temporaryPath Provider]
 
 if {[file isdirectory $nDocExtPath]} then {
   copyMsdnDocumenter $nDocExtPath $nDocInstPath
@@ -158,10 +267,23 @@ set code [catch {exec [file join $nDocInstPath bin NDoc3Console.exe] \
 
 puts stdout $result; if {$code != 0} then {exit $code}
 
-set fileNames [list SQLite.NET.hhp SQLite.NET.hhc]
+foreach fileName [glob -nocomplain [file join $corePath *.html]] {
+  set fileName [file join $path $fileName]
 
-foreach fileName [glob -nocomplain [file join $temporaryPath *.html]] {
-  lappend fileNames [file tail $fileName]
+  if {![file isfile $fileName]} then {
+    puts stdout "Cannot find core file: $fileName"
+    exit 1
+  }
+
+  transformCoreDocumentationFile $fileName http://www.sqlite.org/
+}
+
+set providerFileNames [list \
+    [file join $temporaryPath SQLite.NET.hhp] \
+    [file join $temporaryPath SQLite.NET.hhc]]
+
+foreach fileName [glob -nocomplain [file join $providerPath *.html]] {
+  lappend providerFileNames $fileName
 }
 
 set patterns(.hhc,1) {<!--This document contains Table of Contents information\
@@ -207,8 +329,8 @@ set subSpecs(.html,6) {"\1~Overloads.html"}
 set subSpecs(.html,7) {"\1~Overloads.html"}
 set subSpecs(.html,8) {"\1~Overloads.html"}
 
-foreach fileName $fileNames {
-  set fileName [file join $path $temporaryPath $fileName]
+foreach fileName $providerFileNames {
+  set fileName [file join $path $fileName]
 
   #
   # NOTE: Make sure the file we need actually exists.

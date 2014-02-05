@@ -197,7 +197,7 @@
 			<param name="Local" value="Core/pragma.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Syntax Diagrams For SQLite">
+			<param name="Name" value="Syntax Diagrams">
 			<param name="Local" value="Core/syntaxdiagrams.html">
 			</OBJECT>
 	</UL>
