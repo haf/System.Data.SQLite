@@ -20,17 +20,88 @@ set sds_manifests(source) {
   Doc/buildChm.tcl
   Doc/Extra/
   Doc/Extra/Core/
+  Doc/Extra/Core/images/
+  Doc/Extra/Core/images/sqlite370_banner.gif
+  Doc/Extra/Core/images/syntax/
+  Doc/Extra/Core/images/syntax/a.gif
+  Doc/Extra/Core/images/syntax/alter-table-stmt.gif
+  Doc/Extra/Core/images/syntax/analyze-stmt.gif
+  Doc/Extra/Core/images/syntax/attach-stmt.gif
+  Doc/Extra/Core/images/syntax/begin-stmt.gif
+  Doc/Extra/Core/images/syntax/column-constraint.gif
+  Doc/Extra/Core/images/syntax/column-def.gif
+  Doc/Extra/Core/images/syntax/comment-syntax.gif
+  Doc/Extra/Core/images/syntax/commit-stmt.gif
+  Doc/Extra/Core/images/syntax/common-table-expression.gif
+  Doc/Extra/Core/images/syntax/compound-operator.gif
+  Doc/Extra/Core/images/syntax/compound-select-stmt.gif
+  Doc/Extra/Core/images/syntax/conflict-clause.gif
+  Doc/Extra/Core/images/syntax/create-index-stmt.gif
+  Doc/Extra/Core/images/syntax/create-table-stmt.gif
+  Doc/Extra/Core/images/syntax/create-trigger-stmt.gif
+  Doc/Extra/Core/images/syntax/create-view-stmt.gif
+  Doc/Extra/Core/images/syntax/create-virtual-table-stmt.gif
+  Doc/Extra/Core/images/syntax/cte-table-name.gif
+  Doc/Extra/Core/images/syntax/delete-stmt-limited.gif
+  Doc/Extra/Core/images/syntax/delete-stmt.gif
+  Doc/Extra/Core/images/syntax/detach-stmt.gif
+  Doc/Extra/Core/images/syntax/drop-index-stmt.gif
+  Doc/Extra/Core/images/syntax/drop-table-stmt.gif
+  Doc/Extra/Core/images/syntax/drop-trigger-stmt.gif
+  Doc/Extra/Core/images/syntax/drop-view-stmt.gif
+  Doc/Extra/Core/images/syntax/expr.gif
+  Doc/Extra/Core/images/syntax/factored-select-stmt.gif
+  Doc/Extra/Core/images/syntax/floating-point-literal.gif
+  Doc/Extra/Core/images/syntax/foreign-key-clause.gif
+  Doc/Extra/Core/images/syntax/foreign-key-clause2.gif
+  Doc/Extra/Core/images/syntax/indexed-column.gif
+  Doc/Extra/Core/images/syntax/insert-stmt.gif
+  Doc/Extra/Core/images/syntax/join-clause.gif
+  Doc/Extra/Core/images/syntax/join-constraint.gif
+  Doc/Extra/Core/images/syntax/join-op.gif
+  Doc/Extra/Core/images/syntax/join-operator.gif
+  Doc/Extra/Core/images/syntax/join-source.gif
+  Doc/Extra/Core/images/syntax/literal-value.gif
+  Doc/Extra/Core/images/syntax/numeric-literal.gif
+  Doc/Extra/Core/images/syntax/ordering-term.gif
+  Doc/Extra/Core/images/syntax/pragma-stmt.gif
+  Doc/Extra/Core/images/syntax/pragma-value.gif
+  Doc/Extra/Core/images/syntax/qualified-table-name.gif
+  Doc/Extra/Core/images/syntax/raise-function.gif
+  Doc/Extra/Core/images/syntax/recursive-cte.gif
+  Doc/Extra/Core/images/syntax/reindex-stmt.gif
+  Doc/Extra/Core/images/syntax/release-stmt.gif
+  Doc/Extra/Core/images/syntax/result-column.gif
+  Doc/Extra/Core/images/syntax/rollback-stmt.gif
+  Doc/Extra/Core/images/syntax/savepoint-stmt.gif
+  Doc/Extra/Core/images/syntax/select-core.gif
+  Doc/Extra/Core/images/syntax/select-stmt.gif
+  Doc/Extra/Core/images/syntax/signed-number.gif
+  Doc/Extra/Core/images/syntax/simple-select-stmt.gif
+  Doc/Extra/Core/images/syntax/single-source.gif
+  Doc/Extra/Core/images/syntax/sql-stmt-list.gif
+  Doc/Extra/Core/images/syntax/sql-stmt.gif
+  Doc/Extra/Core/images/syntax/table-constraint.gif
+  Doc/Extra/Core/images/syntax/table-or-subquery.gif
+  Doc/Extra/Core/images/syntax/type-name.gif
+  Doc/Extra/Core/images/syntax/update-stmt-limited.gif
+  Doc/Extra/Core/images/syntax/update-stmt.gif
+  Doc/Extra/Core/images/syntax/vacuum-stmt.gif
+  Doc/Extra/Core/images/syntax/with-clause.gif
+  Doc/Extra/Core/lang.html
+  Doc/Extra/Core/lang_aggfunc.html
   Doc/Extra/Core/lang_altertable.html
   Doc/Extra/Core/lang_analyze.html
   Doc/Extra/Core/lang_attach.html
   Doc/Extra/Core/lang_comment.html
   Doc/Extra/Core/lang_conflict.html
+  Doc/Extra/Core/lang_corefunc.html
   Doc/Extra/Core/lang_createindex.html
   Doc/Extra/Core/lang_createtable.html
   Doc/Extra/Core/lang_createtrigger.html
   Doc/Extra/Core/lang_createview.html
   Doc/Extra/Core/lang_createvtab.html
-  Doc/Extra/Core/lang_datetime.html
+  Doc/Extra/Core/lang_datefunc.html
   Doc/Extra/Core/lang_delete.html
   Doc/Extra/Core/lang_detach.html
   Doc/Extra/Core/lang_dropindex.html
@@ -39,24 +110,30 @@ set sds_manifests(source) {
   Doc/Extra/Core/lang_dropview.html
   Doc/Extra/Core/lang_explain.html
   Doc/Extra/Core/lang_expr.html
+  Doc/Extra/Core/lang_indexedby.html
   Doc/Extra/Core/lang_insert.html
+  Doc/Extra/Core/lang_keywords.html
+  Doc/Extra/Core/lang_naming.html
   Doc/Extra/Core/lang_reindex.html
   Doc/Extra/Core/lang_replace.html
+  Doc/Extra/Core/lang_savepoint.html
   Doc/Extra/Core/lang_select.html
   Doc/Extra/Core/lang_transaction.html
-  Doc/Extra/Core/lang_types.html
   Doc/Extra/Core/lang_update.html
   Doc/Extra/Core/lang_vacuum.html
+  Doc/Extra/Core/lang_with.html
   Doc/Extra/Core/pragma.html
-  Doc/Extra/Core/syntax.html
+  Doc/Extra/Core/syntaxdiagrams.html
   Doc/Extra/Include/
   Doc/Extra/Include/ndoc.css
   Doc/Extra/Provider/
   Doc/Extra/Provider/dbfactorysupport.html
   Doc/Extra/Provider/designer.html
   Doc/Extra/Provider/environment.html
+  Doc/Extra/Provider/lang_types.html
   Doc/Extra/Provider/limitations.html
   Doc/Extra/Provider/optimizing.html
+  Doc/Extra/Provider/syntax.html
   Doc/Extra/Provider/version.html
   Doc/Extra/Provider/welcome.html
   Doc/SQLite.NET.chm
