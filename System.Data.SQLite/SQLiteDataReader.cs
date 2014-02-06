@@ -961,8 +961,9 @@ namespace System.Data.SQLite
             if (arSize.Length > 1)
             {
               arSize = arSize[0].Split(',', '.');
-              if (sqlType.Type == DbType.Binary || sqlType.Type == DbType.String ||
-                  sqlType.Type == DbType.AnsiStringFixedLength || sqlType.Type == DbType.StringFixedLength)
+              if (sqlType.Type == DbType.AnsiString || sqlType.Type == DbType.Binary ||
+                  sqlType.Type == DbType.String || sqlType.Type == DbType.AnsiStringFixedLength ||
+                  sqlType.Type == DbType.StringFixedLength)
               {
                 row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
               }

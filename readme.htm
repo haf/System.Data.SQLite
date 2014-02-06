@@ -224,6 +224,7 @@ released versions of System.Data.SQLite.
     <li>Modify the native library pre-loader to support reading settings from an XML configuration file and to be capable of checking more than one directory. Persuant to [f0246d1817].</li>
     <li>Support detecting when the native library pre-loader should use the CodeBase property instead of the Location property as the basis for locating the interop assembly.</li>
     <li>Change the default behavior for the native library pre-loader so it first searches the executing (i.e. System.Data.SQLite) assembly directory and then the application domain directory. Pursuant to [f0246d1817].&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>Include DbType.AnsiString in the list of types that need special ColumnSize handling. Fix for [0550f0326e].</li>
 </ul>
 <p>
     <b>1.0.90.0 - December 23, 2013</b>

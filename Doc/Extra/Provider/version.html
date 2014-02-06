@@ -57,6 +57,7 @@
       <li>Modify the native library pre-loader to support reading settings from an XML configuration file and to be capable of checking more than one directory. Persuant to <a href="http://system.data.sqlite.org/index.html/info/f0246d1817">[f0246d1817]</a>.</li>
       <li>Support detecting when the native library pre-loader should use the CodeBase property instead of the Location property as the basis for locating the interop assembly.</li>
       <li>Change the default behavior for the native library pre-loader so it first searches the executing (i.e. System.Data.SQLite) assembly directory and then the application domain directory. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/f0246d1817">[f0246d1817]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>Include DbType.AnsiString in the list of types that need special ColumnSize handling. Fix for <a href="http://system.data.sqlite.org/index.html/info/0550f0326e">[0550f0326e]</a>.</li>
     </ul>
     <p><b>1.0.90.0 - December 23, 2013</b></p>
     <ul>

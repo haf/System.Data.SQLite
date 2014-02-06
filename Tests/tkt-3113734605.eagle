@@ -27,7 +27,12 @@ runTest {test tkt-3113734605-1.1 {ColumnSize and NumericPrecision} -setup {
 
   set result [list]
 
-  sql execute $db "CREATE TABLE t1 (x CHAR(3));"
+  sql execute $db {
+    CREATE TABLE t1(
+      v BINARY(12), w CHAR(23), x NCHAR(34), y VARCHAR(45), z NVARCHAR(56)
+    );
+  }
+
   sql execute $db "CREATE VIEW v1 AS SELECT * FROM t1;"
 
   foreach collectionName [list TABLECOLUMNS VIEWCOLUMNS] {
@@ -55,7 +60,11 @@ runTest {test tkt-3113734605-1.1 {ColumnSize and NumericPrecision} -setup {
       connection db fileName
 } -constraints \
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -match \
-regexp -result {^t1 x 3 System#DBNull#\d+ v1 x 3 System#DBNull#\d+ t1 x 3\
+regexp -result {^t1 v 12 System#DBNull#\d+ t1 w 23 System#DBNull#\d+ t1 x 34\
+System#DBNull#\d+ t1 y 45 System#DBNull#\d+ t1 z 56 System#DBNull#\d+ v1 v 12\
+System#DBNull#\d+ v1 w 23 System#DBNull#\d+ v1 x 34 System#DBNull#\d+ v1 y 45\
+System#DBNull#\d+ v1 z 56 System#DBNull#\d+ t1 v 12 System#DBNull#\d+ t1 w 23\
+System#DBNull#\d+ t1 x 34 System#DBNull#\d+ t1 y 45 System#DBNull#\d+ t1 z 56\
 System#DBNull#\d+$}}
 
 ###############################################################################
