@@ -183,8 +183,9 @@
   </li>
 
   <li>
-    Copy those changes to the &quot;&lt;root&gt;\Doc\Extra\version.html&quot;
-    and &quot;&lt;root&gt;\www\news.wiki&quot; files, reformatting as necessary
+    Copy those changes to the
+    &quot;&lt;root&gt;\Doc\Extra\Provider\version.html&quot; and
+    &quot;&lt;root&gt;\www\news.wiki&quot; files, reformatting as necessary
     to fit with the existing document conventions.
   </li>
 </ol>
