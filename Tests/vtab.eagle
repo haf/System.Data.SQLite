@@ -1697,8 +1697,8 @@ runTest {test vtab-1.11 {IEnumerable virtual table w/object identity} -setup {
 {eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
 defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE compileCSharp} -match \
 regexp -result [string map [list \n \r\n] {^Ok\
-System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{\d+ one \d+ two \d+ three\
-\d+ 4 \d+ 5\.0\}$}]}
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 \{-?\d+ one -?\d+ two -?\d+\
+three -?\d+ 4 -?\d+ 5\.0\}$}]}
 
 ###############################################################################
 
