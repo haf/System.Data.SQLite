@@ -324,7 +324,7 @@
         prior to loading and/or using the System.Data.SQLite assembly.  There
         are several more environment variables that can be used to influence the
         behavior of the native library pre-loading feature, documented
-        <a href="/index.html/artifact?ci=trunk&filename=Doc/Extra/environment.html">here</a>.
+        <a href="/index.html/artifact?ci=trunk&filename=Doc/Extra/Provider/environment.html">here</a>.
         <br /><br />
         Use of environment variables for configuration settings is not
         supported by the .NET Compact Framework builds of System.Data.SQLite,

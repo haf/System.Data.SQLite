@@ -126,8 +126,8 @@
 
       <ul>
         <li>&lt;root&gt;\readme.htm</li>
-        <li>&lt;root&gt;\Doc\Extra\dbfactorysupport.html</li>
-        <li>&lt;root&gt;\Doc\Extra\welcome.html</li>
+        <li>&lt;root&gt;\Doc\Extra\Provider\dbfactorysupport.html</li>
+        <li>&lt;root&gt;\Doc\Extra\Provider\welcome.html</li>
         <li>&lt;root&gt;\NuGet\SQLite.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Beta.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.MSIL.nuspec</li>

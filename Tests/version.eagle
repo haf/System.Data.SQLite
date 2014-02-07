@@ -368,8 +368,8 @@ set patterns [list \
 
 set fileNames [list \
     readme.htm \
-    [file join Doc Extra dbfactorysupport.html] \
-    [file join Doc Extra welcome.html] \
+    [file join Doc Extra Provider dbfactorysupport.html] \
+    [file join Doc Extra Provider welcome.html] \
     [file join NuGet SQLite.nuspec] \
     [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.MSIL.nuspec] \
