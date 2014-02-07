@@ -4607,6 +4607,15 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             /// <summary>
+            /// This is the value that is always used for the "logExceptions"
+            /// parameter to the various static error handling methods provided
+            /// by the <see cref="SQLiteModule" /> class.
+            /// </summary>
+            private const bool DefaultLogExceptions = true;
+
+            ///////////////////////////////////////////////////////////////////
+
+            /// <summary>
             /// This is the error message text used when the contained
             /// <see cref="SQLiteModule" /> object instance is not available
             /// for any reason.
@@ -4663,7 +4672,7 @@ namespace System.Data.SQLite
                 )
             {
                 SetTableError(null, pVtab, DefaultLogErrors,
-                    ModuleNotAvailableErrorMessage);
+                    DefaultLogExceptions, ModuleNotAvailableErrorMessage);
 
                 return SQLiteErrorCode.Error;
             }
@@ -4686,7 +4695,7 @@ namespace System.Data.SQLite
                 )
             {
                 SetCursorError(null, pCursor, DefaultLogErrors,
-                    ModuleNotAvailableErrorMessage);
+                    DefaultLogExceptions, ModuleNotAvailableErrorMessage);
 
                 return SQLiteErrorCode.Error;
             }
@@ -6161,6 +6170,10 @@ namespace System.Data.SQLite
         /// Non-zero if this error message should also be logged using the
         /// <see cref="SQLiteLog" /> class.
         /// </param>
+        /// <param name="logExceptions">
+        /// Non-zero if caught exceptions should be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
         /// <param name="error">
         /// The error message.
         /// </param>
@@ -6171,6 +6184,7 @@ namespace System.Data.SQLite
             SQLiteModule module,
             IntPtr pVtab,
             bool logErrors,
+            bool logExceptions,
             string error
             )
         {
@@ -6188,42 +6202,60 @@ namespace System.Data.SQLite
                 // do nothing.
             }
 
-            if (pVtab == IntPtr.Zero)
-                return false;
-
-            int offset = 0;
-
-            offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
-                sizeof(int));
-
-            offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
-                IntPtr.Size);
-
-            IntPtr pError = SQLiteMarshal.ReadIntPtr(pVtab, offset);
-
-            if (pError != IntPtr.Zero)
-            {
-                SQLiteMemory.Free(pError); pError = IntPtr.Zero;
-                SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
-            }
-
-            if (error == null)
-                return true;
-
             bool success = false;
+            IntPtr pNewError = IntPtr.Zero;
 
             try
             {
-                pError = SQLiteString.Utf8IntPtrFromString(error);
-                SQLiteMarshal.WriteIntPtr(pVtab, offset, pError);
+                if (pVtab == IntPtr.Zero)
+                    return false;
+
+                int offset = 0;
+
+                offset = SQLiteMarshal.NextOffsetOf(offset, IntPtr.Size,
+                    sizeof(int));
+
+                offset = SQLiteMarshal.NextOffsetOf(offset, sizeof(int),
+                    IntPtr.Size);
+
+                IntPtr pOldError = SQLiteMarshal.ReadIntPtr(pVtab, offset);
+
+                if (pOldError != IntPtr.Zero)
+                {
+                    SQLiteMemory.Free(pOldError); pOldError = IntPtr.Zero;
+                    SQLiteMarshal.WriteIntPtr(pVtab, offset, pOldError);
+                }
+
+                if (error == null)
+                    return true;
+
+                pNewError = SQLiteString.Utf8IntPtrFromString(error);
+                SQLiteMarshal.WriteIntPtr(pVtab, offset, pNewError);
                 success = true;
+            }
+            catch (Exception e) /* NOTE: Must catch ALL. */
+            {
+                try
+                {
+                    if (logExceptions)
+                    {
+                        SQLiteLog.LogMessage(SQLiteBase.COR_E_EXCEPTION,
+                            String.Format(CultureInfo.CurrentCulture,
+                            "Caught exception in \"SetTableError\" method: {0}",
+                            e)); /* throw */
+                    }
+                }
+                catch
+                {
+                    // do nothing.
+                }
             }
             finally
             {
-                if (!success && (pError != IntPtr.Zero))
+                if (!success && (pNewError != IntPtr.Zero))
                 {
-                    SQLiteMemory.Free(pError);
-                    pError = IntPtr.Zero;
+                    SQLiteMemory.Free(pNewError);
+                    pNewError = IntPtr.Zero;
                 }
             }
 
@@ -6248,6 +6280,10 @@ namespace System.Data.SQLite
         /// Non-zero if this error message should also be logged using the
         /// <see cref="SQLiteLog" /> class.
         /// </param>
+        /// <param name="logExceptions">
+        /// Non-zero if caught exceptions should be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
         /// <param name="error">
         /// The error message.
         /// </param>
@@ -6258,6 +6294,7 @@ namespace System.Data.SQLite
             SQLiteModule module,
             SQLiteVirtualTable table,
             bool logErrors,
+            bool logExceptions,
             string error
             )
         {
@@ -6269,7 +6306,8 @@ namespace System.Data.SQLite
             if (pVtab == IntPtr.Zero)
                 return false;
 
-            return SetTableError(module, pVtab, logErrors, error);
+            return SetTableError(
+                module, pVtab, logErrors, logExceptions, error);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6291,6 +6329,10 @@ namespace System.Data.SQLite
         /// Non-zero if this error message should also be logged using the
         /// <see cref="SQLiteLog" /> class.
         /// </param>
+        /// <param name="logExceptions">
+        /// Non-zero if caught exceptions should be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
         /// <param name="error">
         /// The error message.
         /// </param>
@@ -6301,6 +6343,7 @@ namespace System.Data.SQLite
             SQLiteModule module,
             IntPtr pCursor,
             bool logErrors,
+            bool logExceptions,
             string error
             )
         {
@@ -6312,7 +6355,8 @@ namespace System.Data.SQLite
             if (pVtab == IntPtr.Zero)
                 return false;
 
-            return SetTableError(module, pVtab, logErrors, error);
+            return SetTableError(
+                module, pVtab, logErrors, logExceptions, error);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6333,6 +6377,10 @@ namespace System.Data.SQLite
         /// Non-zero if this error message should also be logged using the
         /// <see cref="SQLiteLog" /> class.
         /// </param>
+        /// <param name="logExceptions">
+        /// Non-zero if caught exceptions should be logged using the
+        /// <see cref="SQLiteLog" /> class.
+        /// </param>
         /// <param name="error">
         /// The error message.
         /// </param>
@@ -6343,6 +6391,7 @@ namespace System.Data.SQLite
             SQLiteModule module,
             SQLiteVirtualTableCursor cursor,
             bool logErrors,
+            bool logExceptions,
             string error
             )
         {
@@ -6354,7 +6403,8 @@ namespace System.Data.SQLite
             if (pCursor == IntPtr.Zero)
                 return false;
 
-            return SetCursorError(module, pCursor, logErrors, error);
+            return SetCursorError(
+                module, pCursor, logErrors, logExceptions, error);
         }
         #endregion
         #endregion
@@ -6903,8 +6953,10 @@ namespace System.Data.SQLite
         /// Returns or sets a boolean value indicating whether exceptions
         /// caught in the
         /// <see cref="ISQLiteNativeModule.xDisconnect" /> method,
-        /// <see cref="ISQLiteNativeModule.xDestroy" /> method, and the
-        /// <see cref="Dispose()" /> method should be logged using the
+        /// the <see cref="ISQLiteNativeModule.xDestroy" /> method,
+        /// the <see cref="SetTableError(IntPtr,string)" /> method,
+        /// the <see cref="SetTableError(SQLiteVirtualTable,string)" /> method,
+        /// and the <see cref="Dispose()" /> method should be logged using the
         /// <see cref="SQLiteLog" /> class.
         /// </summary>
         protected virtual bool LogExceptionsNoThrow
@@ -6936,7 +6988,8 @@ namespace System.Data.SQLite
             string error
             )
         {
-            return SetTableError(this, pVtab, LogErrorsNoThrow, error);
+            return SetTableError(
+                this, pVtab, LogErrorsNoThrow, LogExceptionsNoThrow, error);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6961,7 +7014,8 @@ namespace System.Data.SQLite
             string error
             )
         {
-            return SetTableError(this, table, LogErrorsNoThrow, error);
+            return SetTableError(
+                this, table, LogErrorsNoThrow, LogExceptionsNoThrow, error);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -6986,7 +7040,8 @@ namespace System.Data.SQLite
             string error
             )
         {
-            return SetCursorError(this, cursor, LogErrorsNoThrow, error);
+            return SetCursorError(
+                this, cursor, LogErrorsNoThrow, LogExceptionsNoThrow, error);
         }
         #endregion
 
