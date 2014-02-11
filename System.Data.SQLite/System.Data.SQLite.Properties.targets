@@ -213,6 +213,10 @@
     <DefineConstants>$(DefineConstants);TRACE_CONNECTION</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TraceDetection)' != 'false'">
+    <DefineConstants>$(DefineConstants);TRACE_DETECTION</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TraceHandle)' != 'false'">
     <DefineConstants>$(DefineConstants);TRACE_HANDLE</DefineConstants>
   </PropertyGroup>

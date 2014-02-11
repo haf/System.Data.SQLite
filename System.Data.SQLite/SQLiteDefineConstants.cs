@@ -104,6 +104,10 @@ namespace System.Data.SQLite
             "TRACE_CONNECTION",
 #endif
 
+#if TRACE_DETECTION
+            "TRACE_DETECTION",
+#endif
+
 #if TRACE_HANDLE
             "TRACE_HANDLE",
 #endif
