@@ -442,6 +442,13 @@
     <TraceConnection Condition="'$(TraceConnection)' == ''">false</TraceConnection>
 
     <!--
+        NOTE: Enable tracing of events related to automatic detection of the
+              native library directory within the native library pre-loading
+              code?  By default, this is disabled.
+    -->
+    <TraceDetection Condition="'$(TraceDetection)' == ''">false</TraceDetection>
+
+    <!--
         NOTE: Enable tracing of events related to CriticalHandle handling?  By
               default, this is disabled.
     -->

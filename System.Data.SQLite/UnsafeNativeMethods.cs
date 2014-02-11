@@ -10,7 +10,7 @@ namespace System.Data.SQLite
   using System;
   using System.Globalization;
 
-#if !NET_COMPACT_20 && (TRACE_PRELOAD || TRACE_HANDLE)
+#if !NET_COMPACT_20 && (TRACE_DETECTION || TRACE_SHARED || TRACE_PRELOAD || TRACE_HANDLE)
   using System.Diagnostics;
 #endif
 
@@ -426,7 +426,7 @@ namespace System.Data.SQLite
 
               if (File.Exists(xmlConfigFileName))
               {
-#if !NET_COMPACT_20 && TRACE_SHARED
+#if !NET_COMPACT_20 && TRACE_DETECTION
                   try
                   {
                       Trace.WriteLine(String.Format(
@@ -449,7 +449,7 @@ namespace System.Data.SQLite
 
               if (CheckForArchitecturesAndPlatforms(directory, ref matches) > 0)
               {
-#if !NET_COMPACT_20 && TRACE_SHARED
+#if !NET_COMPACT_20 && TRACE_DETECTION
                   try
                   {
                       Trace.WriteLine(String.Format(
@@ -893,7 +893,7 @@ namespace System.Data.SQLite
               String.Equals(processorArchitecture, "AMD64",
                   StringComparison.OrdinalIgnoreCase))
           {
-#if !NET_COMPACT_20 && TRACE_PRELOAD
+#if !NET_COMPACT_20 && TRACE_DETECTION
               //
               // NOTE: When tracing is enabled, save the originally detected
               //       processor architecture before changing it.
@@ -909,7 +909,7 @@ namespace System.Data.SQLite
               //
               processorArchitecture = "x86";
 
-#if !NET_COMPACT_20 && TRACE_PRELOAD
+#if !NET_COMPACT_20 && TRACE_DETECTION
               try
               {
                   //
