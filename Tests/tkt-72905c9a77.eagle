@@ -96,8 +96,8 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
             //       throw a NullReferenceException, which is fine as that will
             //       cause the whole test to fail.
             //
-            Type type = Type.GetType("System.Data.SQLite.SQLite3, " +
-                "System.Data.SQLite");
+            Type type = Type.GetType(
+                "System.Data.SQLite.SQLite3, System.Data.SQLite");
 
             //
             // NOTE: Attempt to lookup the method object for the private method
@@ -127,13 +127,6 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
               int count = Math.Min(4 * Environment.ProcessorCount, 16);
 
               //
-              // NOTE: Create a random number generator suitable for waiting a
-              //       random number of milliseconds between each attempt to
-              //       cause the race condition on a given thread.
-              //
-              Random random = new Random();
-
-              //
               // NOTE: Create a (reusable) delegate that will contain the code
               //       that each created thread is to execute.
               //
@@ -146,6 +139,14 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
                   //       can start working at approximately the same time.
                   //
                   goEvent.WaitOne();
+
+                  //
+                  // NOTE: Create a pseudorandom number generator suitable for
+                  //       waiting a random number of milliseconds between each
+                  //       attempt to cause the race condition being tested on
+                  //       a given thread.
+                  //
+                  Random random = new Random();
 
                   //
                   // NOTE: Force the SQLiteLog.StaticIsInitialized method to
@@ -275,7 +276,8 @@ runTest {test tkt-72905c9a77-1.1 {StaticIsInitialized race condition} -setup {
   cleanupDb $fileName
 
   unset -nocomplain result code results errors dataSource fileName
-} -constraints [fixConstraints {eagle monoBug28 configuration.Release\
+} -constraints \
+[fixConstraints {fail.false eagle monoBug28 configuration.Release\
 !defineConstant.System.Data.SQLite.INTEROP_LOG command.sql compile.DATA\
 SQLite System.Data.SQLite compileCSharp}] -match regexp -result [appendArgs \
 "^Ok System#CodeDom#Compiler#CompilerResults#\\d+ \\{\\} 0 \\{" [string repeat \
