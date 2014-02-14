@@ -1,4 +1,4 @@
-<title>About</title>
+<title>Home</title>
 <nowiki>
   <br>
   <table width="100%" cellpadding="5">
