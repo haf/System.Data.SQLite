@@ -7,8 +7,9 @@
         &nbsp;
       </td>
       <td>
+        <h2>About System.Data.SQLite</h2>
         <p>
-          System.Data.SQLite is an ADO.NET adapter for
+          System.Data.SQLite is an ADO.NET provider for
           <a href="http://www.sqlite.org/">SQLite</a>.
         </p>
         <p>
@@ -34,14 +35,17 @@
           <a href="downloads.wiki">download page</a> for a complete list of
           downloadable packages and information on their use.
         </p>
+        <h2>Documentation for System.Data.SQLite</h2>
         <p>
-          The current documentation for all public types, methods, properties,
-          and events is checked into the repository, in
+          The documentation corresponding to the most recently released version
+          of System.Data.SQLite, which contains detailed information for all
+          public types, methods, properties, and events is checked into the
+          repository in
           <a href="http://en.wikipedia.org/wiki/Microsoft_Compiled_HTML_Help">
           <i>Microsoft Compiled HTML Help</i> (&quot;CHM&quot;) format</a>.  It
           can also be
           <a href="/index.html/doc/trunk/Doc/SQLite.NET.chm?mimetype=application/x-chm">
-          downloaded directly</a> via the web interface to the repository.
+          <b>downloaded directly</b></a> via the web interface to the repository.
         </p>
       </td>
       <td width="30%" valign="top">
