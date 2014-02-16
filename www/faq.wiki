@@ -234,9 +234,9 @@
 
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.Core">
-      System.Data.SQLite</a>: The SQLite database engine for both x86 and x64
-      along with the ADO.NET provider, without support for LINQ and/or Entity
-      Framework 6.
+      System.Data.SQLite.Core</a>: The SQLite database engine for both x86 and
+      x64 along with the ADO.NET provider, without support for LINQ and/or
+      Entity Framework 6.
     </li>
 
     <li>
