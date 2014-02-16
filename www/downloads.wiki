@@ -1870,6 +1870,27 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core/1.0.91.0">System.Data.SQLite.Core.1.0.91.0.nupkg</a>
+        <br />
+        (4.78 MiB)
+      </td>
+      <td width="5"></td>
+      <td valign="top">
+        This NuGet package contains all the binaries for both the x86 and x64
+        versions of System.Data.SQLite 1.0.91.0 (3.8.3.1), <big><b>except those
+        needed for LINQ and Entity Framework 6 support</b></big>.  The .NET
+        Framework 3.5 SP1, 4.0, 4.5, or 4.5.1 is required.  For the included
+        native binaries, the version of the Visual C++ runtime corresponding to
+        the .NET Framework used by the associated managed assembly is statically
+        linked.
+        <br />
+        (sha1: 885ab9ba23264dae156bb95bab54193c38d7cf03)
+      </td>
+    </tr>
+
+    <tr>
+      <td width="10">&nbsp;</td>
+      <td width="30%" valign="top" align="right">
         <a href="http://nuget.org/api/v2/package/System.Data.SQLite.MSIL/1.0.91.0">System.Data.SQLite.MSIL.1.0.91.0.nupkg</a>
         <br />
         (0.96 MiB)
