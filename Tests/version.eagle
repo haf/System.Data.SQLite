@@ -46,6 +46,16 @@ set version(full) [appendArgs $version(major) . $version(minor) . \
 ###############################################################################
 
 #
+# NOTE: Build the version number used for the NuGet packages.  This should
+#       be the same as the above version number, with the exception of the
+#       revision, which may differ.
+#
+set version(nuget) [appendArgs $version(major) . $version(minor) . \
+                               $version(build) . \\d+]
+
+###############################################################################
+
+#
 # NOTE: Setup the variables that refer to the various files required by the
 #       tests in this file.
 #
@@ -261,15 +271,17 @@ set patterns [list \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs &quot\; [format %03d $version(build)] &quot\;] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(full)] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
@@ -372,6 +384,7 @@ set fileNames [list \
     [file join Doc Extra Provider welcome.html] \
     [file join NuGet SQLite.nuspec] \
     [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Core.nuspec] \
     [file join NuGet SQLite.MSIL.nuspec] \
     [file join NuGet SQLite.x64.nuspec] \
     [file join NuGet SQLite.x86.nuspec] \

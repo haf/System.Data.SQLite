@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGet\net20\install.ps1 = NuGet\net20\install.ps1
 		NuGet\net40\install.ps1 = NuGet\net40\install.ps1
 		NuGet\SQLite.Beta.nuspec = NuGet\SQLite.Beta.nuspec
+		NuGet\SQLite.Core.nuspec = NuGet\SQLite.Core.nuspec
 		NuGet\SQLite.MSIL.nuspec = NuGet\SQLite.MSIL.nuspec
 		NuGet\SQLite.nuspec = NuGet\SQLite.nuspec
 		NuGet\SQLite.x64.nuspec = NuGet\SQLite.x64.nuspec
