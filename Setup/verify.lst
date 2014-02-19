@@ -153,11 +153,17 @@ set sds_manifests(source) {
   Externals/Eagle/lib/Test1.0/
   NuGet/
   NuGet/net20/
-  NuGet/net20/config.transform
-  NuGet/net20/install.ps1
+  NuGet/net20/Core/
+  NuGet/net20/Core/config.transform
+  NuGet/net20/Core/install.ps1
   NuGet/net40/
-  NuGet/net40/config.transform
-  NuGet/net40/install.ps1
+  NuGet/net40/Core/
+  NuGet/net40/Core/config.transform
+  NuGet/net40/Core/install.ps1
+  NuGet/net40/EF6/
+  NuGet/net40/EF6/config.transform
+  NuGet/net40/EF6/install.ps1
+  NuGet/net40/EF6/provider.ps1
   NuGet/SQLite.Beta.nuspec
   NuGet/SQLite.Core.nuspec
   NuGet/SQLite.EF6.nuspec
