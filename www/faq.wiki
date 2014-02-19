@@ -229,34 +229,46 @@
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite">
       System.Data.SQLite</a>: The SQLite database engine for both x86 and x64
-      along with the ADO.NET provider.
+      along with the ADO.NET provider, including support for LINQ and Entity
+      Framework 6.
     </li>
 
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.Core">
       System.Data.SQLite.Core</a>: The SQLite database engine for both x86 and
-      x64 along with the ADO.NET provider, without support for LINQ and/or
-      Entity Framework 6.
+      x64 along with the ADO.NET provider.
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.EF6">
+      System.Data.SQLite.EF6</a>: Just support for Entity Framework 6 using
+      System.Data.SQLite.
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.Linq">
+      System.Data.SQLite.Linq</a>: Just support for LINQ using
+      System.Data.SQLite.
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.MSIL">
+      System.Data.SQLite.MSIL</a>: Just the managed ADO.NET provider for
+      SQLite.
     </li>
 
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.x86">
       System.Data.SQLite.x86</a>: The SQLite database engine combined with a
-      complete ADO.NET provider all rolled into a single mixed-mode assembly for
-      x86.
+      complete ADO.NET provider all rolled into a single mixed-mode assembly
+      for x86.
     </li>
 
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.x64">
       System.Data.SQLite.x64</a>: The SQLite database engine combined with a
-      complete ADO.NET provider all rolled into a single mixed-mode assembly for
-      x64.
-    </li>
-
-    <li>
-      <a href="http://www.nuget.org/packages/System.Data.SQLite.MSIL">
-      System.Data.SQLite.MSIL</a>: Just the ADO.NET provider for SQLite
-      (managed-only).
+      complete ADO.NET provider all rolled into a single mixed-mode assembly
+      for x64.
     </li>
   </ul>
 </p>

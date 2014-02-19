@@ -360,6 +360,30 @@
   </li>
 
   <li>
+    Enter the following command to build the &quot;EF6&quot; NuGet package:
+    <br />
+    <br />
+    <b>nuget.exe&nbsp;pack&nbsp;NuGet\SQLite.EF6.nuspec</b>
+    <br />
+    <br />
+    <i>This assumes that the NuGet binary is available somewhere along the
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
+    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+  </li>
+
+  <li>
+    Enter the following command to build the &quot;LINQ&quot; NuGet package:
+    <br />
+    <br />
+    <b>nuget.exe&nbsp;pack&nbsp;NuGet\SQLite.Linq.nuspec</b>
+    <br />
+    <br />
+    <i>This assumes that the NuGet binary is available somewhere along the
+    [http://en.wikipedia.org/wiki/PATH_%28variable%29 | PATH].<br />Please refer
+    to [http://docs.nuget.org/ | NuGet Documentation] for further details.</i>
+  </li>
+
+  <li>
     Enter the following command to build the &quot;managed-only&quot; NuGet
     package:
     <br />

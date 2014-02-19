@@ -283,6 +283,10 @@ set patterns [list \
         </version>] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
@@ -385,6 +389,8 @@ set fileNames [list \
     [file join NuGet SQLite.nuspec] \
     [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Core.nuspec] \
+    [file join NuGet SQLite.EF6.nuspec] \
+    [file join NuGet SQLite.Linq.nuspec] \
     [file join NuGet SQLite.MSIL.nuspec] \
     [file join NuGet SQLite.x64.nuspec] \
     [file join NuGet SQLite.x86.nuspec] \
