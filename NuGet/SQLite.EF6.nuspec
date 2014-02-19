@@ -22,13 +22,13 @@
     <copyright>Public Domain</copyright>
     <dependencies>
       <group targetFramework="net40">
-        <dependency id="System.Data.SQLite.Core" version="1.0.91.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.91.3" />
       </group>
       <group targetFramework="net45">
-        <dependency id="System.Data.SQLite.Core" version="1.0.91.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.91.3" />
       </group>
       <group targetFramework="net451">
-        <dependency id="System.Data.SQLite.Core" version="1.0.91.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.91.3" />
       </group>
       <group targetFramework="net40">
         <dependency id="EntityFramework" version="6.0.0.0" />

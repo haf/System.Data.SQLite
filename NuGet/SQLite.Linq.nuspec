@@ -10,7 +10,7 @@
 <package>
   <metadata>
     <id>System.Data.SQLite.Linq</id>
-    <title>System.Data.SQLite.Linq (x86/x64)</title>
+    <title>System.Data.SQLite LINQ (x86/x64)</title>
     <version>1.0.91.3</version>
     <authors>SQLite Development Team</authors>
     <description>Support for LINQ using System.Data.SQLite.</description>
@@ -22,16 +22,16 @@
     <copyright>Public Domain</copyright>
     <dependencies>
       <group targetFramework="net20">
-        <dependency id="System.Data.SQLite.Core" version="1.0.91.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.91.3" />
       </group>
       <group targetFramework="net40">
-        <dependency id="System.Data.SQLite.Core" version="1.0.91.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.91.3" />
       </group>
       <group targetFramework="net45">
-        <dependency id="System.Data.SQLite.Core" version="1.0.91.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.91.3" />
       </group>
       <group targetFramework="net451">
-        <dependency id="System.Data.SQLite.Core" version="1.0.91.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.91.3" />
       </group>
     </dependencies>
   </metadata>
