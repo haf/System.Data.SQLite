@@ -2211,6 +2211,7 @@ namespace System.Data.SQLite
       enumValue = TryParseEnum(typeof(SQLiteConnectionFlags), FindKey(opts, "Flags", DefaultFlags.ToString()), true);
       _flags = (enumValue is SQLiteConnectionFlags) ? (SQLiteConnectionFlags)enumValue : DefaultFlags;
 
+      bool uri = false;
       bool fullUri = false;
       string fileName;
 
@@ -2231,10 +2232,29 @@ namespace System.Data.SQLite
             fullUri = true;
         }
         else
+        {
           fileName = MapUriPath(fileName);
+          uri = true;
+        }
       }
 
       bool isMemory = (String.Compare(fileName, MemoryFileName, StringComparison.OrdinalIgnoreCase) == 0);
+
+#if !NET_COMPACT_20 && TRACE_WARNING
+      if ((_flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning)
+      {
+          if (!uri && !fullUri && !isMemory && !String.IsNullOrEmpty(fileName) &&
+              fileName.StartsWith("\\", StringComparison.OrdinalIgnoreCase) &&
+              !fileName.StartsWith("\\\\", StringComparison.OrdinalIgnoreCase))
+          {
+              System.Diagnostics.Trace.WriteLine(String.Format(CultureInfo.CurrentCulture,
+                  "WARNING: Detected a possibly malformed UNC database file name \"{0}\" that " +
+                  "may have originally started with two backslashes; however, four leading " +
+                  "backslashes may be required, e.g.: \"Data Source=\\\\\\{0};\"",
+                  fileName));
+          }
+      }
+#endif
 
       if (!fullUri)
       {
