@@ -1308,6 +1308,7 @@ namespace eval ::Eagle {
     set array(variables,$index) [llength [info globals]]
     set array(commands,$index) [llength [info commands]]
     set array(procedures,$index) [llength [info procs]]
+    set array(namespaces,$index) [llength [namespace children ::]]
     set array(files,$index) [llength [getFiles $::test_path *]]
     set array(temporaryFiles,$index) [llength [getFiles [getTemporaryPath] *]]
     set array(channels,$index) [llength [file channels]]
@@ -1317,13 +1318,13 @@ namespace eval ::Eagle {
 
     if {[isEagle]} then {
       set array(scopes,$index) [llength [scope list]]
-      set array(objects,$index) [llength [info objects]]
-      set array(callbacks,$index) [llength [info callbacks]]
-      set array(types,$index) [llength [object types]]
-      set array(interfaces,$index) [llength [object interfaces]]
-      set array(namespaces,$index) [llength [object namespaces]]
-      set array(processes,$index) [llength [getProcesses ""]]
       set array(assemblies,$index) [llength [object assemblies]]
+      set array(processes,$index) [llength [getProcesses ""]]
+      set array(objects,$index) [llength [info objects]]
+      set array(objectCallbacks,$index) [llength [info callbacks]]
+      set array(objectTypes,$index) [llength [object types]]
+      set array(objectInterfaces,$index) [llength [object interfaces]]
+      set array(objectNamespaces,$index) [llength [object namespaces]]
 
       #
       # NOTE: Support for some of all of these entity types may not be
@@ -1336,9 +1337,9 @@ namespace eval ::Eagle {
       set array(modules,$index) 0
       set array(delegates,$index) 0
       set array(tcl,$index) 0
-      set array(tclinterps,$index) 0
-      set array(tclthreads,$index) 0
-      set array(tclcommands,$index) 0
+      set array(tclInterps,$index) 0
+      set array(tclThreads,$index) 0
+      set array(tclCommands,$index) 0
 
       catch {set array(connections,$index) [llength [info connections]]}
       catch {set array(transactions,$index) [llength [info transactions]]}
@@ -1349,15 +1350,15 @@ namespace eval ::Eagle {
         set array(tcl,$index) [tcl ready]
       }
 
-      catch {set array(tclinterps,$index) [llength [tcl interps]]}
-      catch {set array(tclthreads,$index) [llength [tcl threads]]}
-      catch {set array(tclcommands,$index) [llength [tcl command list]]}
+      catch {set array(tclInterps,$index) [llength [tcl interps]]}
+      catch {set array(tclThreads,$index) [llength [tcl threads]]}
+      catch {set array(tclCommands,$index) [llength [tcl command list]]}
     }
   }
 
   proc reportTestStatistics { channel fileName statsVarName filesVarName } {
-    set statistics [list afters variables commands procedures files \
-        temporaryFiles channels aliases interpreters environment]
+    set statistics [list afters variables commands procedures namespaces \
+        files temporaryFiles channels aliases interpreters environment]
 
     if {[isEagle]} then {
       #
@@ -1365,9 +1366,10 @@ namespace eval ::Eagle {
       #       the .NET Framework has no way to unload them without tearing
       #       down the entire application domain.
       #
-      lappend statistics scopes objects callbacks types interfaces \
-          namespaces processes connections transactions modules \
-          delegates tcl tclinterps tclthreads tclcommands; # assemblies
+      lappend statistics scopes processes objects objectCallbacks \
+          objectTypes objectInterfaces objectNamespaces connections \
+          transactions modules delegates tcl tclInterps tclThreads \
+          tclCommands; # assemblies
     }
 
     #
@@ -2222,13 +2224,36 @@ namespace eval ::Eagle {
                 "---- added \"::tcltest::cleanupTests\" procedure\n"
           }
         }
+
+        #
+        # NOTE: This is needed by some tests in the Tcl test suite.  Make
+        #       sure this command does not already exist prior to adding it.
+        #
+        if {[llength [info commands \
+            ::tcltest::loadTestedCommands]] == 0} then {
+          proc ::tcltest::loadTestedCommands { args } {}
+
+          if {!$quiet} then {
+            tqputs [getTestChannelOrDefault] \
+                "---- added \"::tcltest::loadTestedCommands\" procedure\n"
+          }
+        }
       } else {
         #
         # NOTE: Remove the compatibility shim command aliases that we setup
         #       earlier.
         #
-        if {[lsearch -exact [info commands] \
-            ::tcltest::cleanupTests] != -1} then {
+        if {[llength [info commands \
+            ::tcltest::loadTestedCommands]] > 0} then {
+          rename ::tcltest::loadTestedCommands ""
+
+          if {!$quiet} then {
+            tqputs $::test_channel \
+                "---- removed \"::tcltest::loadTestedCommands\" procedure\n"
+          }
+        }
+
+        if {[llength [info commands ::tcltest::cleanupTests]] > 0} then {
           rename ::tcltest::cleanupTests ""
 
           if {!$quiet} then {
@@ -2237,8 +2262,7 @@ namespace eval ::Eagle {
           }
         }
 
-        if {[lsearch -exact [interp aliases] \
-            ::tcltest::testConstraint] != -1} then {
+        if {[llength [interp aliases ::tcltest::testConstraint]] > 0} then {
           interp alias {} ::tcltest::testConstraint {} {}
 
           if {!$quiet} then {
@@ -2247,7 +2271,7 @@ namespace eval ::Eagle {
           }
         }
 
-        if {[lsearch -exact [interp aliases] testConstraint] != -1} then {
+        if {[llength [interp aliases testConstraint]] > 0} then {
           interp alias {} testConstraint {} {}
 
           if {!$quiet} then {

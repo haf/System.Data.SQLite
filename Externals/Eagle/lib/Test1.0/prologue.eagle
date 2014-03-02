@@ -205,7 +205,7 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {[object invoke -flags +NonPublic \
             Interpreter.GetActive.CurrentFrame Name] ne \
-        [appendArgs source " " [file normalize [info script]]]} then {
+        [list source [file normalize [info script]]]} then {
       unset -nocomplain test_suite_running
       error "cannot run, current frame is not for this script"
     }

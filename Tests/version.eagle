@@ -301,8 +301,6 @@ set patterns [list \
         </version>] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
-    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
-        </version>] \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
