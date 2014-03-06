@@ -29,7 +29,7 @@ runSQLiteTestPrologue
 #
 set version(major)             1
 set version(minor)             0
-set version(build)            91; # NOTE: Incremented with each release.
+set version(build)            92; # NOTE: Incremented with each release.
 set version(revision)          0
 
 ###############################################################################
@@ -358,17 +358,9 @@ set patterns [list \
         "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
         "Version=" [string map [list . \\.] $version(full)] ,] \
     [appendArgs \
-        "SQLiteFactory, System\\.Data\\.SQLite, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.EF6, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
+        "System\\.Data\\.SQLite\\.EF6\\.SQLiteProviderServices, " \
+        "System\\.Data\\.SQLite\\.EF6, Version=" \
+        [string map [list . \\.] $version(full)] ,] \
     [appendArgs \
         "SQLiteFactory, System\\.Data\\.SQLite, " \
         "Version=" [string map [list . \\.] $version(full)] ,] \
@@ -381,6 +373,26 @@ set patterns [list \
     [appendArgs \
         "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
         "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "System\\.Data\\.SQLite\\.EF6\\.SQLiteProviderServices, " \
+        "System\\.Data\\.SQLite\\.EF6, Version=" \
+        [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteFactory, System\\.Data\\.SQLite, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "System\\.Data\\.SQLite\\.EF6\\.SQLiteProviderServices, " \
+        "System\\.Data\\.SQLite\\.EF6, Version=" \
+        [string map [list . \\.] $version(full)] ,] \
     [appendArgs \
         "SQLiteFactory, System\\.Data\\.SQLite, " \
         "Version=" [string map [list . \\.] $version(full)] ,] \
@@ -446,12 +458,15 @@ set fileNames [list \
     [file join testlinq 2008 LINQ App.config] \
     [file join testlinq 2010 EF6 App.config] \
     [file join testlinq 2010 EF6 App.config] \
+    [file join testlinq 2010 EF6 App.config] \
     [file join testlinq 2010 LINQ App.config] \
     [file join testlinq 2010 LINQ App.config] \
     [file join testlinq 2012 EF6 App.config] \
     [file join testlinq 2012 EF6 App.config] \
+    [file join testlinq 2012 EF6 App.config] \
     [file join testlinq 2012 LINQ App.config] \
     [file join testlinq 2012 LINQ App.config] \
+    [file join testlinq 2013 EF6 App.config] \
     [file join testlinq 2013 EF6 App.config] \
     [file join testlinq 2013 EF6 App.config] \
     [file join testlinq 2013 LINQ App.config] \

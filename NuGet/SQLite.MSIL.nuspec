@@ -10,7 +10,7 @@
 <package>
   <metadata>
     <id>System.Data.SQLite.MSIL</id>
-    <version>1.0.91.3</version>
+    <version>1.0.92.0</version>
     <authors>SQLite Development Team</authors>
     <description>An ADO.NET provider for SQLite (managed-only).</description>
     <language>en-US</language>
