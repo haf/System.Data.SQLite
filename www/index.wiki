@@ -63,6 +63,7 @@
                 <li><a href="build.wiki">Build Procedures</a></li>
                 <li><a href="test.wiki">Test Procedures</a></li>
                 <li><a href="release.wiki">Release Procedures</a></li>
+                <li><a href="copyright.wiki">Copyright</a></li>
               </ul>
             </td>
           </tr>
