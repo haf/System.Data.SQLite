@@ -104,14 +104,12 @@ namespace System.Data.SQLite
       _activeStatementIndex = -1;
       _rowsAffected = -1;
 
-      if (_command != null)
-      {
-          SQLiteConnection.OnChanged(_command.Connection,
-              new ConnectionEventArgs(SQLiteConnectionEventType.NewDataReader,
-              null, null, _command, this, null, null, new object[] { behave }));
+      SQLiteConnection.OnChanged(GetConnection(this),
+          new ConnectionEventArgs(SQLiteConnectionEventType.NewDataReader,
+          null, null, _command, this, null, null, new object[] { behave }));
 
+      if (_command != null)
           NextResult();
-      }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +132,12 @@ namespace System.Data.SQLite
     /// <param name="disposing"></param>
     protected override void Dispose(bool disposing)
     {
+        SQLiteConnection.OnChanged(GetConnection(this),
+            new ConnectionEventArgs(SQLiteConnectionEventType.DisposingDataReader,
+            null, null, _command, this, null, null, new object[] { disposing,
+            disposed, _commandBehavior, _readingState, _rowsAffected, _fieldCount,
+            _disposeCommand, _throwOnDisposed }));
+
         try
         {
             if (!disposed)

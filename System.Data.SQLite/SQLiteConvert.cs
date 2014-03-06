@@ -1418,7 +1418,17 @@ namespace System.Data.SQLite
       /// <summary>
       /// The connection was closed.
       /// </summary>
-      Closed = 11
+      Closed = 11,
+
+      /// <summary>
+      /// A command is being disposed.
+      /// </summary>
+      DisposingCommand = 12,
+
+      /// <summary>
+      /// A data reader is being disposed.
+      /// </summary>
+      DisposingDataReader = 13
   }
 
   /// <summary>

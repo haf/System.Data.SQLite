@@ -189,6 +189,10 @@ namespace System.Data.SQLite
     /// <param name="disposing">Whether or not the class is being explicitly or implicitly disposed</param>
     protected override void Dispose(bool disposing)
     {
+        SQLiteConnection.OnChanged(_cnn, new ConnectionEventArgs(
+            SQLiteConnectionEventType.DisposingCommand, null, _transaction, this,
+            null, null, null, new object[] { disposing, disposed }));
+
         bool skippedDispose = false;
 
         try
