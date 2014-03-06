@@ -186,6 +186,12 @@ namespace System.Data.SQLite
     {
       CheckDisposed();
 
+      SQLiteConnection.OnChanged(GetConnection(this),
+          new ConnectionEventArgs(SQLiteConnectionEventType.ClosingDataReader,
+          null, null, _command, this, null, null, new object[] { _commandBehavior,
+          _readingState, _rowsAffected, _fieldCount, _disposeCommand,
+          _throwOnDisposed }));
+
       try
       {
         if (_command != null)

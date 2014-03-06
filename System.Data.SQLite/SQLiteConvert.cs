@@ -1428,7 +1428,12 @@ namespace System.Data.SQLite
       /// <summary>
       /// A data reader is being disposed.
       /// </summary>
-      DisposingDataReader = 13
+      DisposingDataReader = 13,
+
+      /// <summary>
+      /// A data reader is being closed.
+      /// </summary>
+      ClosingDataReader = 14
   }
 
   /// <summary>

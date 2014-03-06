@@ -7,7 +7,7 @@
 </p>
 <ul>
     <li>Updated to <a href="http://www.sqlite.org/src/info/trunk">SQLite 3.8.4</a>.</li>
-    <li>Raise the static SQLiteConnection.Changed event when any SQLiteCommand or SQLiteDataReader object is disposed.</li>
+    <li>Raise the static SQLiteConnection.Changed event when any SQLiteCommand or SQLiteDataReader object is closed or disposed.</li>
     <li>When the TraceWarning connection flag is set, issue warnings about possibly malformed UNC paths. Pursuant to [283344397b].</li>
     <li>Enhancements to the NuGet packages, including the new &quot;modular&quot; packages.</li>
 </ul>
