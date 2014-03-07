@@ -2211,7 +2211,9 @@ namespace System.Data.SQLite
       enumValue = TryParseEnum(typeof(SQLiteConnectionFlags), FindKey(opts, "Flags", DefaultFlags.ToString()), true);
       _flags = (enumValue is SQLiteConnectionFlags) ? (SQLiteConnectionFlags)enumValue : DefaultFlags;
 
+#if !NET_COMPACT_20 && TRACE_WARNING
       bool uri = false;
+#endif
       bool fullUri = false;
       string fileName;
 
@@ -2234,7 +2236,9 @@ namespace System.Data.SQLite
         else
         {
           fileName = MapUriPath(fileName);
+#if !NET_COMPACT_20 && TRACE_WARNING
           uri = true;
+#endif
         }
       }
 
