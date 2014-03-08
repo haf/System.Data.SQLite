@@ -1,6 +1,7 @@
 <configuration>
   <system.data>
     <DbProviderFactories>
+      <remove invariant="System.Data.SQLite" />
       <remove invariant="System.Data.SQLite.EF6" />
       <add name="SQLite Data Provider (Entity Framework 6)"
            invariant="System.Data.SQLite.EF6"
