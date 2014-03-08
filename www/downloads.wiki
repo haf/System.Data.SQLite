@@ -1856,7 +1856,7 @@
       </td>
       <td width="5"></td>
       <td valign="top">
-        This NuGet package contains all the binaries for both the x86 and x64
+        This NuGet package includes all the binaries for both the x86 and x64
         versions of System.Data.SQLite 1.0.91.0 (3.8.3.1).  The .NET Framework
         3.5 SP1, 4.0, 4.5, or 4.5.1 is required.  For the included native
         binaries, the version of the Visual C++ runtime corresponding to the
@@ -1865,6 +1865,14 @@
         <br />
         <big><b>This package depends on the &quot;EntityFramework&quot;
         package.</b></big>
+        <br />
+        <br />
+        <big><b><i>As of version 1.0.92.0, this package will not directly
+        contain any of the required binaries.  Instead, this package will
+        depend on the &quot;System.Data.SQLite.Core&quot;,
+        &quot;System.Data.SQLite.Linq&quot;, and
+        &quot;System.Data.SQLite.EF6&quot; packages.</i></b></big>
+        <br />
         <br />
         (sha1: 85ba2276a065f9ef498133923f40e797c0ad48c7)
       </td>
