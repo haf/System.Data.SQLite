@@ -273,8 +273,74 @@ set patterns [list \
     [appendArgs &quot\; [format %03d $version(build)] &quot\;] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
@@ -413,6 +479,28 @@ set fileNames [list \
     [file join Doc Extra Provider dbfactorysupport.html] \
     [file join Doc Extra Provider welcome.html] \
     [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Core.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \

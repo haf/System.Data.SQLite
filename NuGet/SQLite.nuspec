@@ -21,52 +21,39 @@
     <tags>sqlite database ado.net provider interop</tags>
     <copyright>Public Domain</copyright>
     <dependencies>
+      <group targetFramework="net20">
+        <dependency id="System.Data.SQLite.Core" version="1.0.92.0" />
+      </group>
       <group targetFramework="net40">
-        <dependency id="EntityFramework" version="6.0.0.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.92.0" />
       </group>
       <group targetFramework="net45">
-        <dependency id="EntityFramework" version="6.0.0.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.92.0" />
       </group>
       <group targetFramework="net451">
-        <dependency id="EntityFramework" version="6.0.0.0" />
+        <dependency id="System.Data.SQLite.Core" version="1.0.92.0" />
+      </group>
+      <group targetFramework="net20">
+        <dependency id="System.Data.SQLite.Linq" version="1.0.92.0" />
+      </group>
+      <group targetFramework="net40">
+        <dependency id="System.Data.SQLite.Linq" version="1.0.92.0" />
+      </group>
+      <group targetFramework="net45">
+        <dependency id="System.Data.SQLite.Linq" version="1.0.92.0" />
+      </group>
+      <group targetFramework="net451">
+        <dependency id="System.Data.SQLite.Linq" version="1.0.92.0" />
+      </group>
+      <group targetFramework="net40">
+        <dependency id="System.Data.SQLite.EF6" version="1.0.92.0" />
+      </group>
+      <group targetFramework="net45">
+        <dependency id="System.Data.SQLite.EF6" version="1.0.92.0" />
+      </group>
+      <group targetFramework="net451">
+        <dependency id="System.Data.SQLite.EF6" version="1.0.92.0" />
       </group>
     </dependencies>
   </metadata>
-  <files>
-    <file src="..\bin\2008\Release\bin\System.Data.SQLite.dll" target="lib\net20" />
-    <file src="..\bin\2008\Release\bin\System.Data.SQLite.xml" target="lib\net20" />
-    <file src="..\bin\2010\Release\bin\System.Data.SQLite.dll" target="lib\net40" />
-    <file src="..\bin\2010\Release\bin\System.Data.SQLite.xml" target="lib\net40" />
-    <file src="..\bin\2012\Release\bin\System.Data.SQLite.dll" target="lib\net45" />
-    <file src="..\bin\2012\Release\bin\System.Data.SQLite.xml" target="lib\net45" />
-    <file src="..\bin\2013\Release\bin\System.Data.SQLite.dll" target="lib\net451" />
-    <file src="..\bin\2013\Release\bin\System.Data.SQLite.xml" target="lib\net451" />
-    <file src="..\bin\2008\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net20" />
-    <file src="..\bin\2010\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net40" />
-    <file src="..\bin\2012\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net45" />
-    <file src="..\bin\2013\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net451" />
-    <file src="..\bin\2010\Release\bin\System.Data.SQLite.EF6.dll" target="lib\net40" />
-    <file src="..\bin\2012\Release\bin\System.Data.SQLite.EF6.dll" target="lib\net45" />
-    <file src="..\bin\2013\Release\bin\System.Data.SQLite.EF6.dll" target="lib\net451" />
-    <file src="..\bin\2008\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net20\x86" />
-    <file src="..\bin\2008\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net20\x64" />
-    <file src="..\bin\2010\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net40\x86" />
-    <file src="..\bin\2010\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net40\x64" />
-    <file src="..\bin\2012\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net45\x86" />
-    <file src="..\bin\2012\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net45\x64" />
-    <file src="..\bin\2013\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net451\x86" />
-    <file src="..\bin\2013\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net451\x64" />
-    <file src="net20\Core\config.transform" target="content\net20\app.config.transform" />
-    <file src="net20\Core\config.transform" target="content\net20\web.config.transform" />
-    <file src="net40\EF6\config.transform" target="content\net40\app.config.transform" />
-    <file src="net40\EF6\config.transform" target="content\net40\web.config.transform" />
-    <file src="net40\EF6\config.transform" target="content\net45\app.config.transform" />
-    <file src="net40\EF6\config.transform" target="content\net45\web.config.transform" />
-    <file src="net40\EF6\config.transform" target="content\net451\app.config.transform" />
-    <file src="net40\EF6\config.transform" target="content\net451\web.config.transform" />
-    <file src="net20\Core\install.ps1" target="tools\net20\install.ps1" />
-    <file src="net40\EF6\install.ps1" target="tools\net40\install.ps1" />
-    <file src="net40\EF6\install.ps1" target="tools\net45\install.ps1" />
-    <file src="net40\EF6\install.ps1" target="tools\net451\install.ps1" />
-  </files>
 </package>
