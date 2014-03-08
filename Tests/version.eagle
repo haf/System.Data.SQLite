@@ -273,8 +273,74 @@ set patterns [list \
     [appendArgs &quot\; [format %03d $version(build)] &quot\;] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
@@ -297,6 +363,41 @@ set patterns [list \
         "\" "] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Core\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net20\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.Linq\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*? " \
+        "id=\"System\\.Data\\.SQLite\\.EF6\" version=\"" $version(nuget) \
+        "\" "] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
@@ -413,6 +514,28 @@ set fileNames [list \
     [file join Doc Extra Provider dbfactorysupport.html] \
     [file join Doc Extra Provider welcome.html] \
     [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
+    [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Core.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \
@@ -425,6 +548,18 @@ set fileNames [list \
     [file join NuGet SQLite.Linq.nuspec] \
     [file join NuGet SQLite.Linq.nuspec] \
     [file join NuGet SQLite.MSIL.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
+    [file join NuGet SQLite.Test.nuspec] \
     [file join NuGet SQLite.x64.nuspec] \
     [file join NuGet SQLite.x86.nuspec] \
     [file join SQLite.Designer AssemblyInfo.cs] \
@@ -488,6 +623,11 @@ for {set i 1} {$i <= [llength $fileNames]} {incr i} {
 
   runTest {test [appendArgs version-1.21. $i] \
       [appendArgs "pattern {" $pattern "} in file \"" $fileName \"] -body {
+    if {[hasRuntimeOption verbose]} then {
+      tputs $test_channel [appendArgs \
+          "---- checking pattern {" $pattern "} against file \"" $fileName \
+          \"...\n]
+    }
     regexp -- $pattern [readFile $fileName]
   } -constraints [list eagle [appendArgs file_ $constraint]] -result {1}}
 }

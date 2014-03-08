@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * SQLite.Beta.nuspec -
+ * SQLite.Test.nuspec -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -9,8 +9,8 @@
 -->
 <package>
   <metadata>
-    <id>System.Data.SQLite.Beta</id>
-    <title>System.Data.SQLite (x86/x64) Beta</title>
+    <id>System.Data.SQLite.Test</id>
+    <title>System.Data.SQLite (x86/x64) Test</title>
     <version>1.0.92.0</version>
     <authors>SQLite Development Team</authors>
     <description>The official SQLite database engine for both x86 and x64 along with the ADO.NET provider.</description>
