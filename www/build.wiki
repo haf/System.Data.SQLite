@@ -134,6 +134,7 @@
         <li>&lt;root&gt;\NuGet\SQLite.EF6.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Linq.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.MSIL.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Test.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.x86.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.x64.nuspec</li>
         <li>&lt;root&gt;\SQLite.Designer\AssemblyInfo.cs</li>

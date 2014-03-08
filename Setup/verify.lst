@@ -170,6 +170,7 @@ set sds_manifests(source) {
   NuGet/SQLite.Linq.nuspec
   NuGet/SQLite.MSIL.nuspec
   NuGet/SQLite.nuspec
+  NuGet/SQLite.Test.nuspec
   NuGet/SQLite.x64.nuspec
   NuGet/SQLite.x86.nuspec
   readme.htm
