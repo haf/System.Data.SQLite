@@ -24,8 +24,8 @@
     <NetFx35>true</NetFx35>
     <ConfigurationYear>2008</ConfigurationYear>
   </PropertyGroup>
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
     <OutputPath>$(BinaryOutputPath)</OutputPath>
   </PropertyGroup>
@@ -55,7 +55,7 @@
   <ItemGroup>
     <None Include="Resources\manifest.xml" />
   </ItemGroup>
-  <Import Project="$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.Properties.targets" />
+  <Import Project="$(SQLiteNetDir)\System.Data.SQLite\Targets\System.Data.SQLite.Properties.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <BuildDependsOn>

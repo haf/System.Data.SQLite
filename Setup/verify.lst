@@ -151,6 +151,9 @@ set sds_manifests(source) {
   Externals/Eagle/lib/Eagle1.0/
   Externals/Eagle/lib/Eagle1.0/vendor.eagle
   Externals/Eagle/lib/Test1.0/
+  Keys/
+  Keys/System.Data.SQLite.CF.snk
+  Keys/System.Data.SQLite.snk
   NuGet/
   NuGet/net20/
   NuGet/net20/Core/
@@ -387,31 +390,33 @@ set sds_manifests(source) {
   SQLite.NET.2012.sln
   SQLite.NET.2013.MSBuild.sln
   SQLite.NET.2013.sln
-  SQLite.NET.Settings.targets
-  SQLite.NET.Settings.targets.netFx35
-  SQLite.NET.targets
   System.Data.SQLite/
   System.Data.SQLite/AssemblyInfo.cs
   System.Data.SQLite/AssemblySourceIdAttribute.cs
   System.Data.SQLite/AssemblySourceTimeStampAttribute.cs
-  System.Data.SQLite/DataTypes.xml
+  System.Data.SQLite/Configurations/
+  System.Data.SQLite/Configurations/System.Data.SQLite.dll.config
   System.Data.SQLite/LINQ/
   System.Data.SQLite/LINQ/SQLiteConnection_Linq.cs
   System.Data.SQLite/LINQ/SQLiteFactory_Linq.cs
-  System.Data.SQLite/MetaDataCollections.xml
+  System.Data.SQLite/Resources/
+  System.Data.SQLite/Resources/DataTypes.xml
+  System.Data.SQLite/Resources/MetaDataCollections.xml
+  System.Data.SQLite/Resources/SQLiteCommand.bmp
+  System.Data.SQLite/Resources/SQLiteConnection.bmp
+  System.Data.SQLite/Resources/SQLiteDataAdapter.bmp
+  System.Data.SQLite/Resources/SR.Designer.cs
+  System.Data.SQLite/Resources/SR.resx
   System.Data.SQLite/SQLite3.cs
   System.Data.SQLite/SQLite3_UTF16.cs
   System.Data.SQLite/SQLiteBackup.cs
   System.Data.SQLite/SQLiteBase.cs
-  System.Data.SQLite/SQLiteCommand.bmp
   System.Data.SQLite/SQLiteCommand.cs
   System.Data.SQLite/SQLiteCommandBuilder.cs
-  System.Data.SQLite/SQLiteConnection.bmp
   System.Data.SQLite/SQLiteConnection.cs
   System.Data.SQLite/SQLiteConnectionPool.cs
   System.Data.SQLite/SQLiteConnectionStringBuilder.cs
   System.Data.SQLite/SQLiteConvert.cs
-  System.Data.SQLite/SQLiteDataAdapter.bmp
   System.Data.SQLite/SQLiteDataAdapter.cs
   System.Data.SQLite/SQLiteDataReader.cs
   System.Data.SQLite/SQLiteDefineConstants.cs
@@ -431,27 +436,23 @@ set sds_manifests(source) {
   System.Data.SQLite/SQLitePatchLevel.cs
   System.Data.SQLite/SQLiteStatement.cs
   System.Data.SQLite/SQLiteTransaction.cs
-  System.Data.SQLite/SR.Designer.cs
-  System.Data.SQLite/SR.resx
   System.Data.SQLite/System.Data.SQLite.2005.csproj
   System.Data.SQLite/System.Data.SQLite.2008.csproj
   System.Data.SQLite/System.Data.SQLite.2010.csproj
   System.Data.SQLite/System.Data.SQLite.2012.csproj
   System.Data.SQLite/System.Data.SQLite.2013.csproj
-  System.Data.SQLite/System.Data.SQLite.CF.snk
   System.Data.SQLite/System.Data.SQLite.Compact.2005.csproj
   System.Data.SQLite/System.Data.SQLite.Compact.2008.csproj
   System.Data.SQLite/System.Data.SQLite.Compact.2012.csproj
-  System.Data.SQLite/System.Data.SQLite.Files.targets
   System.Data.SQLite/System.Data.SQLite.Module.2005.csproj
   System.Data.SQLite/System.Data.SQLite.Module.2008.csproj
   System.Data.SQLite/System.Data.SQLite.Module.2010.csproj
   System.Data.SQLite/System.Data.SQLite.Module.2012.csproj
   System.Data.SQLite/System.Data.SQLite.Module.2013.csproj
-  System.Data.SQLite/System.Data.SQLite.Properties.targets
-  System.Data.SQLite/System.Data.SQLite.References.targets
-  System.Data.SQLite/System.Data.SQLite.dll.config
-  System.Data.SQLite/System.Data.SQLite.snk
+  System.Data.SQLite/Targets/
+  System.Data.SQLite/Targets/System.Data.SQLite.Files.targets
+  System.Data.SQLite/Targets/System.Data.SQLite.Properties.targets
+  System.Data.SQLite/Targets/System.Data.SQLite.References.targets
   System.Data.SQLite/UnsafeNativeMethods.cs
   System.Data.SQLite.Linq/
   System.Data.SQLite.Linq/AssemblyInfo.cs
@@ -502,6 +503,10 @@ set sds_manifests(source) {
   System.Data.SQLite.Linq/System.Data.SQLite.Linq.2010.csproj
   System.Data.SQLite.Linq/System.Data.SQLite.Linq.2012.csproj
   System.Data.SQLite.Linq/System.Data.SQLite.Linq.2013.csproj
+  Targets/
+  Targets/SQLite.NET.Settings.targets
+  Targets/SQLite.NET.Settings.targets.netFx35
+  Targets/SQLite.NET.targets
   test/
   test/app.config
   test/AssemblyInfo.cs

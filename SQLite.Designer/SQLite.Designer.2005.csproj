@@ -22,8 +22,8 @@
     <NetFx20>true</NetFx20>
     <ConfigurationYear>2005</ConfigurationYear>
   </PropertyGroup>
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
     <OutputPath>$(BinaryOutputPath)</OutputPath>
     <DocumentationFile>$(BinaryOutputPath)SQLite.Designer.xml</DocumentationFile>
@@ -194,7 +194,7 @@
     <None Include="Resources\ToolboxItems.txt" />
     <None Include="source.extension.vsixmanifest" />
   </ItemGroup>
-  <Import Project="$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.Properties.targets" />
+  <Import Project="$(SQLiteNetDir)\System.Data.SQLite\Targets\System.Data.SQLite.Properties.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(VSSDK80Install)' == ''">
     <VSSDK80Install Condition="'$(ProgramFiles)' != '' And ('$(PROCESSOR_ARCHITECTURE)' == 'x86' And '$(PROCESSOR_ARCHITEW6432)' == '')">$(ProgramFiles)\Visual Studio 2005 SDK\2007.02\</VSSDK80Install>

@@ -54,7 +54,7 @@
   <PropertyGroup>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
   </PropertyGroup>
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets" />
   <Import Project="$(INTEROP_EXTRA_PROPS_FILE)"
           Condition="'$(INTEROP_EXTRA_PROPS_FILE)' != '' And
                      Exists('$(INTEROP_EXTRA_PROPS_FILE)')" />
@@ -514,7 +514,7 @@
     <ResourceCompile Include="src\win\SQLite.Interop.rc" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\System.Data.SQLite\SR.resx">
+    <EmbeddedResource Include="..\System.Data.SQLite\Resources\SR.resx">
       <LogicalName>System.Data.SQLite.%(Filename).resources</LogicalName>
       <SubType>Designer</SubType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNativeOnly|Win32'">true</ExcludedFromBuild>

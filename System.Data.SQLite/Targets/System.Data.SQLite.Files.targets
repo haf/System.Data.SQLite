@@ -14,9 +14,6 @@
   -->
 
   <ItemGroup>
-    <None Include="System.Data.SQLite.dll.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblySourceIdAttribute.cs" />
     <Compile Include="AssemblySourceTimeStampAttribute.cs" />
@@ -53,17 +50,19 @@
     <Compile Include="SQLitePatchLevel.cs" />
     <Compile Include="SQLiteStatement.cs" />
     <Compile Include="SQLiteTransaction.cs" />
-    <Compile Include="SR.Designer.cs">
+    <Compile Include="UnsafeNativeMethods.cs" />
+    <Compile Include="Resources\SR.Designer.cs">
       <DependentUpon>SR.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="UnsafeNativeMethods.cs" />
-    <EmbeddedResource Include="SR.resx">
+    <EmbeddedResource Include="Resources\SR.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SR.Designer.cs</LastGenOutput>
+      <LogicalName>System.Data.SQLite.SR.resources</LogicalName>
     </EmbeddedResource>
+    <None Include="Configurations\System.Data.SQLite.dll.config" />
   </ItemGroup>
 
   <!--
@@ -88,9 +87,9 @@
              Include="LINQ\SQLiteFactory_Linq.cs">
       <SubType>Code</SubType>
     </Compile>
-    <EmbeddedResource Include="SQLiteCommand.bmp" />
-    <EmbeddedResource Include="SQLiteConnection.bmp" />
-    <EmbeddedResource Include="SQLiteDataAdapter.bmp" />
+    <EmbeddedResource Include="Resources\SQLiteCommand.bmp" />
+    <EmbeddedResource Include="Resources\SQLiteConnection.bmp" />
+    <EmbeddedResource Include="Resources\SQLiteDataAdapter.bmp" />
   </ItemGroup>
 
   <!--

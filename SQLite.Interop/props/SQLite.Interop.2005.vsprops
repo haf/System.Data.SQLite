@@ -64,12 +64,12 @@
 	/>
 	<UserMacro
 		Name="INTEROP_ASSEMBLY_RESOURCES"
-		Value="/ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp /ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp /ASSEMBLYRESOURCE:..\System.Data.SQLite\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp"
+		Value="/ASSEMBLYRESOURCE:..\System.Data.SQLite\Resources\SQLiteCommand.bmp,System.Data.SQLite.SQLiteCommand.bmp /ASSEMBLYRESOURCE:..\System.Data.SQLite\Resources\SQLiteConnection.bmp,System.Data.SQLite.SQLiteConnection.bmp /ASSEMBLYRESOURCE:..\System.Data.SQLite\Resources\SQLiteDataAdapter.bmp,System.Data.SQLite.SQLiteDataAdapter.bmp"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro
 		Name="INTEROP_KEY_FILE"
-		Value="$(ProjectDir)..\System.Data.SQLite\System.Data.SQLite.snk"
+		Value="$(ProjectDir)..\Keys\System.Data.SQLite.snk"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro

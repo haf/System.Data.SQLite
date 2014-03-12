@@ -34,7 +34,8 @@
     <ConfigurationYear>2008</ConfigurationYear>
     <ConfigurationSuffix>Compact</ConfigurationSuffix>
   </PropertyGroup>
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
     <OutputPath>$(BinaryOutputPath)</OutputPath>
     <DocumentationFile>$(BinaryOutputPath)System.Data.SQLite.xml</DocumentationFile>
@@ -58,12 +59,22 @@
     <ErrorReport>prompt</ErrorReport>
     <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
   </PropertyGroup>
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.References.targets" />
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Properties.targets" />
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Files.targets" />
+  <Import Project="$(MSBuildProjectDirectory)\Targets\System.Data.SQLite.References.targets" />
+  <Import Project="$(MSBuildProjectDirectory)\Targets\System.Data.SQLite.Properties.targets" />
+  <Import Project="$(MSBuildProjectDirectory)\Targets\System.Data.SQLite.Files.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v3.5'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <PropertyGroup>
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      CopyConfigurations;
+    </BuildDependsOn>
+    <CleanDependsOn>
+      $(CleanDependsOn);
+      CleanConfigurations;
+    </CleanDependsOn>
+  </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">

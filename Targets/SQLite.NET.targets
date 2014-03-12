@@ -17,8 +17,8 @@
       NOTE: If the per-user settings file exists, import it now.  The contained
             settings, if any, will override the default ones provided below.
   -->
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.targets.user"
-          Condition="Exists('$(SQLiteNetDir)\SQLite.NET.targets.user')" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.targets.user"
+          Condition="Exists('$(SQLiteNetDir)\Targets\SQLite.NET.targets.user')" />
 
   <!--
   ******************************************************************************
@@ -164,6 +164,44 @@
                       Exists('$(TargetFrameworkSDKToolsDirectory)sn.exe')"
            AlwaysCreate="true"
            Files="$(TargetPath).CloneAndMark32BitOnly.done" />
+  </Target>
+
+  <!--
+  ******************************************************************************
+  -->
+
+  <Target Name="CleanConfigurations"
+          Condition="'$(OutputPath)' != '' And
+                     HasTrailingSlash('$(OutputPath)') And
+                     Exists('$(OutputPath)')">
+    <CreateItem Include="$(OutputPath)*.config">
+      <Output ItemName="ConfigurationFiles" TaskParameter="Include" />
+    </CreateItem>
+
+    <Delete Condition="'@(ConfigurationFiles)' != ''"
+            Files="@(ConfigurationFiles)" />
+  </Target>
+
+  <!--
+  ******************************************************************************
+  -->
+
+  <Target Name="CopyConfigurations"
+          Condition="'$(CopyConfigurations)' != 'false' And
+                     '$(OutputPath)' != '' And
+                     HasTrailingSlash('$(OutputPath)') And
+                     Exists('$(OutputPath)')"
+          Inputs="$(TargetPath)"
+          Outputs="$(TargetPath).CopyConfigurations.done">
+    <CreateItem Include="Configurations\*.config" Exclude="Configurations\no_*">
+      <Output ItemName="ConfigurationFiles" TaskParameter="Include" />
+    </CreateItem>
+
+    <Copy SourceFiles="@(ConfigurationFiles)"
+          DestinationFolder="$(OutputPath)" />
+
+    <Touch AlwaysCreate="true"
+           Files="$(TargetPath).CopyConfigurations.done" />
   </Target>
 
   <!--

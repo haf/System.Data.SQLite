@@ -28,7 +28,8 @@
     <UseInteropDll>false</UseInteropDll>
     <UseSqliteStandard>false</UseSqliteStandard>
   </PropertyGroup>
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
     <OutputPath>$(BinaryOutputPath)</OutputPath>
     <DocumentationFile>$(BinaryOutputPath)System.Data.SQLite.xml</DocumentationFile>
@@ -46,10 +47,20 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.References.targets" />
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Properties.targets" />
-  <Import Project="$(MSBuildProjectDirectory)\System.Data.SQLite.Files.targets" />
+  <Import Project="$(MSBuildProjectDirectory)\Targets\System.Data.SQLite.References.targets" />
+  <Import Project="$(MSBuildProjectDirectory)\Targets\System.Data.SQLite.Properties.targets" />
+  <Import Project="$(MSBuildProjectDirectory)\Targets\System.Data.SQLite.Files.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      CopyConfigurations;
+    </BuildDependsOn>
+    <CleanDependsOn>
+      $(CleanDependsOn);
+      CleanConfigurations;
+    </CleanDependsOn>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

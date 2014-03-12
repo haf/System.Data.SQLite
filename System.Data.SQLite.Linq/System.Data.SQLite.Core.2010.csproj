@@ -27,7 +27,7 @@
     <NetFx40>true</NetFx40>
     <ConfigurationYear>2010</ConfigurationYear>
   </PropertyGroup>
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets" />
   <PropertyGroup Condition="'$(BinaryOutputPath)' != ''">
     <OutputPath>$(BinaryOutputPath)</OutputPath>
     <DocumentationFile Condition="'$(UseEntityFramework6)' == 'false'">$(BinaryOutputPath)System.Data.SQLite.Linq.xml</DocumentationFile>
@@ -120,7 +120,7 @@
       <Name>System.Data.SQLite.2010</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.Properties.targets" />
+  <Import Project="$(SQLiteNetDir)\System.Data.SQLite\Targets\System.Data.SQLite.Properties.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

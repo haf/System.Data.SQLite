@@ -44,7 +44,7 @@
   <PropertyGroup>
     <SQLiteNetDir>$(MSBuildProjectDirectory)\..</SQLiteNetDir>
   </PropertyGroup>
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets" />
   <Import Project="$(INTEROP_EXTRA_PROPS_FILE)"
           Condition="'$(INTEROP_EXTRA_PROPS_FILE)' != '' And
                      Exists('$(INTEROP_EXTRA_PROPS_FILE)')" />

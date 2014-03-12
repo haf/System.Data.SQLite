@@ -77,7 +77,7 @@
     <ResourceCompile Include="src\win\SQLite.Interop.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-    <EmbeddedResource Include="..\System.Data.SQLite\SR.resx">
+    <EmbeddedResource Include="..\System.Data.SQLite\Resources\SR.resx">
       <Filter>Resource Files</Filter>
     </EmbeddedResource>
   </ItemGroup>

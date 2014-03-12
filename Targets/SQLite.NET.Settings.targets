@@ -17,8 +17,8 @@
       NOTE: If the per-user settings file exists, import it now.  The contained
             settings, if any, will override the default ones provided below.
   -->
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.user"
-          Condition="Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.user')" />
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.user"
+          Condition="Exists('$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.user')" />
 
   <!--
   ******************************************************************************
@@ -31,30 +31,30 @@
             contained settings, if any, will override the default ones provided
             below.
   -->
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx20"
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx20"
           Condition="'$(NetFx20)' != '' And '$(NetFx20)' != 'false' And
                      ('$(NetFx20Settings)' == '' Or '$(NetFx20Settings)' != 'false') And
-                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx20')" />
+                     Exists('$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx20')" />
 
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx35"
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx35"
           Condition="'$(NetFx35)' != '' And '$(NetFx35)' != 'false' And
                      ('$(NetFx35Settings)' == '' Or '$(NetFx35Settings)' != 'false') And
-                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx35')" />
+                     Exists('$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx35')" />
 
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx40"
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx40"
           Condition="'$(NetFx40)' != '' And '$(NetFx40)' != 'false' And
                      ('$(NetFx40Settings)' == '' Or '$(NetFx40Settings)' != 'false') And
-                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx40')" />
+                     Exists('$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx40')" />
 
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx45"
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx45"
           Condition="'$(NetFx45)' != '' And '$(NetFx45)' != 'false' And
                      ('$(NetFx45Settings)' == '' Or '$(NetFx45Settings)' != 'false') And
-                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx45')" />
+                     Exists('$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx45')" />
 
-  <Import Project="$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx451"
+  <Import Project="$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx451"
           Condition="'$(NetFx451)' != '' And '$(NetFx451)' != 'false' And
                      ('$(NetFx451Settings)' == '' Or '$(NetFx451Settings)' != 'false') And
-                     Exists('$(SQLiteNetDir)\SQLite.NET.Settings.targets.netFx451')" />
+                     Exists('$(SQLiteNetDir)\Targets\SQLite.NET.Settings.targets.netFx451')" />
 
   <!--
   ******************************************************************************
@@ -558,8 +558,8 @@
 
   <PropertyGroup Condition="'$(SQLiteNetDir)' != '' And
                             !HasTrailingSlash('$(SQLiteNetDir)') And
-                            (('$(IsCompactFramework)' == 'false' And Exists('$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.snk')) Or
-                             ('$(IsCompactFramework)' != 'false' And Exists('$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.CF.snk')))">
+                            (('$(IsCompactFramework)' == 'false' And Exists('$(SQLiteNetDir)\Keys\System.Data.SQLite.snk')) Or
+                             ('$(IsCompactFramework)' != 'false' And Exists('$(SQLiteNetDir)\Keys\System.Data.SQLite.CF.snk')))">
     <!--
         NOTE: Sign the assembly?  By default, this is enabled.
     -->
@@ -574,7 +574,7 @@
     <!--
         NOTE: The full path and file name for the strong name key pair to use.
     -->
-    <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == '' And '$(IsCompactFramework)' == 'false'">$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.snk</AssemblyOriginatorKeyFile>
-    <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == '' And '$(IsCompactFramework)' != 'false'">$(SQLiteNetDir)\System.Data.SQLite\System.Data.SQLite.CF.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == '' And '$(IsCompactFramework)' == 'false'">$(SQLiteNetDir)\Keys\System.Data.SQLite.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == '' And '$(IsCompactFramework)' != 'false'">$(SQLiteNetDir)\Keys\System.Data.SQLite.CF.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 </Project>
