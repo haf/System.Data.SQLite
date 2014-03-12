@@ -48,6 +48,11 @@ namespace System.Data.SQLite
     /// </summary>
     private int _fieldCount;
     /// <summary>
+    /// The number of calls to Step() that have returned true (i.e. the number of rows that
+    /// have been read in the current result set).
+    /// </summary>
+    private int _stepCount;
+    /// <summary>
     /// Maps the field (column) names to their corresponding indexes within the results.
     /// </summary>
     private Dictionary<string, int> _fieldIndexes;
@@ -135,8 +140,8 @@ namespace System.Data.SQLite
         SQLiteConnection.OnChanged(GetConnection(this),
             new ConnectionEventArgs(SQLiteConnectionEventType.DisposingDataReader,
             null, null, _command, this, null, null, new object[] { disposing,
-            disposed, _commandBehavior, _readingState, _rowsAffected, _fieldCount,
-            _disposeCommand, _throwOnDisposed }));
+            disposed, _commandBehavior, _readingState, _rowsAffected, _stepCount,
+            _fieldCount, _disposeCommand, _throwOnDisposed }));
 
         try
         {
@@ -189,7 +194,7 @@ namespace System.Data.SQLite
       SQLiteConnection.OnChanged(GetConnection(this),
           new ConnectionEventArgs(SQLiteConnectionEventType.ClosingDataReader,
           null, null, _command, this, null, null, new object[] { _commandBehavior,
-          _readingState, _rowsAffected, _fieldCount, _disposeCommand,
+          _readingState, _rowsAffected, _stepCount, _fieldCount, _disposeCommand,
           _throwOnDisposed }));
 
       try
@@ -309,6 +314,20 @@ namespace System.Data.SQLite
 
         return _fieldCount + _keyInfo.Count;
       }
+    }
+
+    /// <summary>
+    /// Returns the number of rows seen so far in the current result set.
+    /// </summary>
+    public int StepCount
+    {
+        get
+        {
+            CheckDisposed();
+            CheckClosed();
+
+            return _stepCount;
+        }
     }
 
     /// <summary>
@@ -1238,7 +1257,7 @@ namespace System.Data.SQLite
               if (stmt == null) break;
               _activeStatementIndex++;
 
-              if (!schemaOnly) stmt._sql.Step(stmt);
+              if (!schemaOnly && stmt._sql.Step(stmt)) _stepCount++;
               if (stmt._sql.ColumnCount(stmt) == 0)
               {
                 if (_rowsAffected == -1) _rowsAffected = 0;
@@ -1274,6 +1293,7 @@ namespace System.Data.SQLite
         {
           if (!schemaOnly && stmt._sql.Step(stmt))
           {
+            _stepCount++;
             _readingState = -1;
           }
           else if (fieldCount == 0) // No rows returned, if fieldCount is zero, skip to the next statement
@@ -1427,6 +1447,8 @@ namespace System.Data.SQLite
         {
           if (_activeStatement._sql.Step(_activeStatement) == true)
           {
+            _stepCount++;
+
             if (_keyInfo != null)
               _keyInfo.Reset();
 

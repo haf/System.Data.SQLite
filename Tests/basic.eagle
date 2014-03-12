@@ -3013,6 +3013,60 @@ True False False False False False False 1 True 1 True 1 True}}
 
 ###############################################################################
 
+runTest {test data-1.64 {SQLiteDataReader StepCount property} -setup {
+  setupDb [set fileName data-1.64.db]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x);
+    CREATE TABLE t2(x);
+    INSERT INTO t2 (x) VALUES(1);
+    CREATE TABLE t3(x);
+    INSERT INTO t3 (x) VALUES(1);
+    INSERT INTO t3 (x) VALUES(2);
+  }
+
+  set reader(1) [sql execute -execute reader -format datareader -alias \
+      $db "SELECT * FROM t1;"]
+
+  set reader(2) [sql execute -execute reader -format datareader -alias \
+      $db "SELECT * FROM t2;"]
+
+  set reader(3) [sql execute -execute reader -format datareader -alias \
+      $db "SELECT * FROM t3;"]
+
+  set noRow "*: No current row*"
+
+  list [$reader(1) StepCount] [$reader(2) StepCount] [$reader(3) StepCount] \
+      [$reader(1) Read] [$reader(2) Read] [$reader(3) Read] \
+      [$reader(1) StepCount] [$reader(2) StepCount] [$reader(3) StepCount] \
+      [catch {$reader(1) Item x} error] [string match $noRow $error] \
+      [catch {$reader(2) Item x} error] [string match $noRow $error] \
+      [catch {$reader(3) Item x} error] [string match $noRow $error] \
+      [$reader(1) StepCount] [$reader(2) StepCount] [$reader(3) StepCount] \
+      [$reader(1) Read] [$reader(2) Read] [$reader(3) Read] \
+      [$reader(1) StepCount] [$reader(2) StepCount] [$reader(3) StepCount] \
+      [catch {$reader(1) Item x} error] [string match $noRow $error] \
+      [catch {$reader(2) Item x} error] [string match $noRow $error] \
+      [catch {$reader(3) Item x} error] [string match $noRow $error] \
+      [$reader(1) StepCount] [$reader(2) StepCount] [$reader(3) StepCount] \
+      [$reader(1) Read] [$reader(2) Read] [$reader(3) Read] \
+      [$reader(1) StepCount] [$reader(2) StepCount] [$reader(3) StepCount] \
+      [catch {$reader(1) Item x} error] [string match $noRow $error] \
+      [catch {$reader(2) Item x} error] [string match $noRow $error] \
+      [catch {$reader(3) Item x} error] [string match $noRow $error]
+} -cleanup {
+  unset -nocomplain reader
+
+  cleanupDb $fileName
+
+  unset -nocomplain error noRow db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{0 1 1 False True True 0 1 1 1 True 0 False 0 False 0 1 1 False False True 0 1\
+2 1 True 1 True 0 False 0 1 2 False False False 0 1 2 1 True 1 True 1 True}}
+
+###############################################################################
+
 reportSQLiteResources $test_channel
 
 ###############################################################################
