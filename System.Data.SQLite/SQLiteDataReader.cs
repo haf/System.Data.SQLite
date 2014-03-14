@@ -1199,6 +1199,24 @@ namespace System.Data.SQLite
       {
         CheckDisposed();
         CheckClosed();
+
+        //
+        // NOTE: If the "sticky" flag has been set, use the new behavior,
+        //       which returns non-zero if there were ever any rows in
+        //       the associated result sets.  Generally, this flag is only
+        //       useful when it is necessary to retain compatibility with
+        //       other ADO.NET providers that use these same semantics for
+        //       the HasRows property.
+        //
+        if ((GetFlags(this) & SQLiteConnectionFlags.StickyHasRows) == SQLiteConnectionFlags.StickyHasRows)
+          return ((_readingState != 1) || (_stepCount > 0));
+
+        //
+        // NOTE: This is the default behavior.  It returns non-zero only if
+        //       more rows are available (i.e. a call to the Read method is
+        //       expected to succeed).  Prior to the introduction of the
+        //       "sticky" flag, this is how this property has always worked.
+        //
         return (_readingState != 1);
       }
     }

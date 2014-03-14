@@ -1035,6 +1035,13 @@ namespace System.Data.SQLite
       NoGlobalTypes = 0x200000,
 
       /// <summary>
+      /// When the <see cref="SQLiteDataReader.HasRows" /> property is used, it
+      /// should return non-zero if there were ever any rows in the associated
+      /// result sets.
+      /// </summary>
+      StickyHasRows = 0x400000,
+
+      /// <summary>
       /// When binding parameter values or returning column values, always
       /// treat them as though they were plain text (i.e. no numeric,
       /// date/time, or other conversions should be attempted).
