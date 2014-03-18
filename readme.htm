@@ -216,6 +216,7 @@ released versions of System.Data.SQLite.
     <li>Update the list of keywords returned by SQLiteConnection.GetSchema(&quot;ReservedWords&quot;).&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Raise the static SQLiteConnection.Changed event when any SQLiteCommand or SQLiteDataReader object is closed or disposed.</li>
     <li>Add the SQLiteDataReader.StepCount property to return the number of rows seen so far.</li>
+    <li>Add StickyHasRows connection flag to cause the SQLiteDataReader.HasRows property to return non-zero if there were ever any rows in the associated result sets.</li>
     <li>When the TraceWarning connection flag is set, issue warnings about possibly malformed UNC paths. Pursuant to [283344397b].</li>
     <li>Convert the primary NuGet package, &quot;System.Data.SQLite&quot;, into a meta-package.</li>
     <li>Enhancements to the NuGet packages, including the new &quot;modular&quot; packages.</li>
