@@ -1959,14 +1959,13 @@
         package instead.  This package depends on the &quot;EntityFramework&quot;
         package.</b></big>
         <br />
-        <big><b>This NuGet package does not include any code from the native
+        <br />
+        <big><b><i>This NuGet package does not include any code from the native
         SQLite core library and will not work properly without the native
         assembly &quot;SQLite.Interop.dll&quot; compiled for the processor
         architecture of the host process being present in a directory in the
-        native library search path.</b></big>
+        native library search path.</i></b></big>
         <br />
-        <big><b>This package depends on the &quot;EntityFramework&quot;
-        package.</b></big>
         <br />
         (sha1: 57ac6bdcdbb27e3dcee0e259b82a55ba446ad403)
       </td>
