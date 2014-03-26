@@ -1954,6 +1954,11 @@
         This NuGet package contains the managed binaries for System.Data.SQLite
         1.0.92.0.  The .NET Framework 3.5 SP1, 4.0, 4.5, or 4.5.1 is required.
         <br />
+        <big><b>This is a legacy package; if possible, please use either the
+        &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot;
+        package instead.  This package depends on the &quot;EntityFramework&quot;
+        package.</b></big>
+        <br />
         <big><b>This NuGet package does not include any code from the native
         SQLite core library and will not work properly without the native
         assembly &quot;SQLite.Interop.dll&quot; compiled for the processor

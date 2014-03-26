@@ -26,10 +26,11 @@ runSQLiteTestPrologue
 # NOTE: For these unit tests to be useful and accurate, the following version
 #       numbers must be manually kept synchronized with the version numbers for
 #       the source code files, the built binaries, and the release packages.
+#       The revision number is reserved for NuGet package versioning.
 #
 set version(major)             1
 set version(minor)             0
-set version(build)            92; # NOTE: Incremented with each release.
+set version(build)            93; # NOTE: Incremented with each release.
 set version(revision)          0
 
 ###############################################################################
@@ -268,8 +269,11 @@ runTest {test version-1.20 {ProviderSourceId} -body {
 ###############################################################################
 
 set patterns [list \
+    [appendArgs Version " " [string map [list . \\.] $version(full)] " "] \
+    [appendArgs <b> [string map [list . \\.] $version(full)] " - "] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
     [appendArgs Version= [string map [list . \\.] $version(full)] ,] \
+    [appendArgs <b> [string map [list . \\.] $version(full)] " - "] \
     [appendArgs &quot\; [format %03d $version(build)] &quot\;] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
@@ -507,11 +511,15 @@ set patterns [list \
     [appendArgs AssemblyVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
-        $version(full)] \"\\)]]
+        $version(full)] \"\\)] \
+    [appendArgs <b> [string map [list . \\.] $version(full)] " - "]]
 
 set fileNames [list \
     readme.htm \
+    readme.htm \
+    readme.htm \
     [file join Doc Extra Provider dbfactorysupport.html] \
+    [file join Doc Extra Provider version.html] \
     [file join Doc Extra Provider welcome.html] \
     [file join NuGet SQLite.nuspec] \
     [file join NuGet SQLite.nuspec] \
@@ -609,7 +617,8 @@ set fileNames [list \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join tools install Properties AssemblyInfo.cs] \
-    [file join tools install Properties AssemblyInfo.cs]]
+    [file join tools install Properties AssemblyInfo.cs] \
+    [file join www news.wiki]]
 
 for {set i 1} {$i <= [llength $fileNames]} {incr i} {
   set pattern [lindex $patterns [expr {$i - 1}]]
