@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGet\net40\EF6\provider.ps1 = NuGet\net40\EF6\provider.ps1
 		NuGet\SQLite.Beta.nuspec = NuGet\SQLite.Beta.nuspec
 		NuGet\SQLite.Core.nuspec = NuGet\SQLite.Core.nuspec
+		NuGet\SQLite.Core.MSIL.nuspec = NuGet\SQLite.Core.MSIL.nuspec
 		NuGet\SQLite.EF6.nuspec = NuGet\SQLite.EF6.nuspec
 		NuGet\SQLite.Linq.nuspec = NuGet\SQLite.Linq.nuspec
 		NuGet\SQLite.MSIL.nuspec = NuGet\SQLite.MSIL.nuspec

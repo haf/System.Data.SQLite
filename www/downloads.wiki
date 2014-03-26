@@ -1904,6 +1904,34 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core.MSIL/1.0.92.0">System.Data.SQLite.Core.MSIL.1.0.92.0.nupkg</a>
+        <br />
+        (0.67 MiB)
+      </td>
+      <td width="5"></td>
+      <td valign="top">
+        This NuGet package contains the managed binaries for System.Data.SQLite
+        1.0.92.0.  The .NET Framework 3.5 SP1, 4.0, 4.5, or 4.5.1 is required.
+        <br />
+        <big><b>This is a legacy package; if possible, please use either the
+        &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot;
+        package instead.</b></big>
+        <br />
+        <br />
+        <big><b><i>This NuGet package does not include any code from the native
+        SQLite core library and will not work properly without the native
+        assembly &quot;SQLite.Interop.dll&quot; compiled for the processor
+        architecture of the host process being present in a directory in the
+        native library search path.</i></b></big>
+        <br />
+        <br />
+        (sha1: a605b40dfb711ad4448ec9df81e866f1cff781f5)
+      </td>
+    </tr>
+
+    <tr>
+      <td width="10">&nbsp;</td>
+      <td width="30%" valign="top" align="right">
         <a href="http://nuget.org/api/v2/package/System.Data.SQLite.EF6/1.0.92.0">System.Data.SQLite.EF6.1.0.92.0.nupkg</a>
         <br />
         (0.13 MiB)

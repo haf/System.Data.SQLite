@@ -169,6 +169,7 @@ set sds_manifests(source) {
   NuGet/net40/EF6/provider.ps1
   NuGet/SQLite.Beta.nuspec
   NuGet/SQLite.Core.nuspec
+  NuGet/SQLite.Core.MSIL.nuspec
   NuGet/SQLite.EF6.nuspec
   NuGet/SQLite.Linq.nuspec
   NuGet/SQLite.MSIL.nuspec

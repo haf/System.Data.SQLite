@@ -131,6 +131,7 @@
         <li>&lt;root&gt;\NuGet\SQLite.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Beta.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Core.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Core.MSIL.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.EF6.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Linq.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.MSIL.nuspec</li>

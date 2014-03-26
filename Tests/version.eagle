@@ -349,6 +349,8 @@ set patterns [list \
         </version>] \
     [appendArgs <version> [string map [list . \\.] $version(nuget)] \
         </version>] \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
     [appendArgs " targetFramework=\"net40\".*?\" version=\"" $version(nuget) \
         "\" "] \
     [appendArgs " targetFramework=\"net45\".*?\" version=\"" $version(nuget) \
@@ -546,6 +548,7 @@ set fileNames [list \
     [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Core.nuspec] \
+    [file join NuGet SQLite.Core.MSIL.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \

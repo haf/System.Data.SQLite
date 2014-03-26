@@ -248,6 +248,12 @@
     </li>
 
     <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.Core.MSIL">
+      System.Data.SQLite.Core.MSIL</a>: Just the managed ADO.NET provider for
+      SQLite.
+    </li>
+
+    <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.EF6">
       System.Data.SQLite.EF6</a>: Just support for Entity Framework 6 using
       System.Data.SQLite.
