@@ -1841,7 +1841,7 @@ runTest {test data-1.37 {sqlite3_win32_set_directory function} -setup {
       $directory(temp) \"\n]
 
   proc threadStart {} {
-    while {$::i < 100} {
+    while {$::i < 1000} {
       set ::found(temp) [expr \
           {[llength [file list $::directory(temp) etilqs_*]] > 0}]
 
