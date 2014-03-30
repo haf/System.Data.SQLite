@@ -8,7 +8,8 @@
 #if !PLATFORM_COMPACTFRAMEWORK
 namespace System.Data.SQLite
 {
-  using System.Transactions;
+    using System.Globalization;
+    using System.Transactions;
 
   internal sealed class SQLiteEnlistment : IDisposable, IEnlistmentNotification
   {
@@ -16,10 +17,17 @@ namespace System.Data.SQLite
     internal Transaction _scope;
     internal bool _disposeConnection;
 
-    internal SQLiteEnlistment(SQLiteConnection cnn, Transaction scope)
+    internal SQLiteEnlistment(
+        SQLiteConnection cnn,
+        Transaction scope,
+        System.Data.IsolationLevel defaultIsolationLevel,
+        bool throwOnUnavailable,
+        bool throwOnUnsupported
+        )
     {
       _transaction = cnn.BeginTransaction(GetSystemDataIsolationLevel(
-          cnn, scope));
+          cnn, scope, defaultIsolationLevel, throwOnUnavailable,
+          throwOnUnsupported));
 
       _scope = scope;
 
@@ -31,18 +39,29 @@ namespace System.Data.SQLite
     #region Private Methods
     private System.Data.IsolationLevel GetSystemDataIsolationLevel(
         SQLiteConnection connection,
-        Transaction transaction
+        Transaction transaction,
+        System.Data.IsolationLevel defaultIsolationLevel,
+        bool throwOnUnavailable,
+        bool throwOnUnsupported
         )
     {
         if (transaction == null)
         {
             //
-            // TODO: Perhaps throw an exception here if the connection
-            //       is null?
+            // NOTE: If neither the transaction nor connection isolation
+            //       level is available, throw an exception if instructed
+            //       by the caller.
             //
-            return (connection != null) ?
-                connection.GetDefaultIsolationLevel() :
-                SQLiteConnection.GetFallbackDefaultIsolationLevel();
+            if (connection != null)
+                return connection.GetDefaultIsolationLevel();
+
+            if (throwOnUnavailable)
+            {
+                throw new InvalidOperationException(
+                    "isolation level is unavailable");
+            }
+
+            return defaultIsolationLevel;
         }
 
         System.Transactions.IsolationLevel isolationLevel =
@@ -53,26 +72,35 @@ namespace System.Data.SQLite
         //
         switch (isolationLevel)
         {
+            case IsolationLevel.Unspecified:
+                return System.Data.IsolationLevel.Unspecified;
             case IsolationLevel.Chaos:
                 return System.Data.IsolationLevel.Chaos;
-            case IsolationLevel.ReadCommitted:
-                return System.Data.IsolationLevel.ReadCommitted;
             case IsolationLevel.ReadUncommitted:
                 return System.Data.IsolationLevel.ReadUncommitted;
+            case IsolationLevel.ReadCommitted:
+                return System.Data.IsolationLevel.ReadCommitted;
             case IsolationLevel.RepeatableRead:
                 return System.Data.IsolationLevel.RepeatableRead;
             case IsolationLevel.Serializable:
                 return System.Data.IsolationLevel.Serializable;
             case IsolationLevel.Snapshot:
                 return System.Data.IsolationLevel.Snapshot;
-            case IsolationLevel.Unspecified:
-                return System.Data.IsolationLevel.Unspecified;
         }
 
         //
-        // TODO: Perhaps throw an exception here?
+        // NOTE: When in "strict" mode, throw an exception if the isolation
+        //       level is not recognized; otherwise, fallback to the default
+        //       isolation level specified by the caller.
         //
-        return SQLiteConnection.GetFallbackDefaultIsolationLevel();
+        if (throwOnUnsupported)
+        {
+            throw new InvalidOperationException(
+                String.Format(CultureInfo.InvariantCulture,
+                "unsupported isolation level {0}", isolationLevel));
+        }
+
+        return defaultIsolationLevel;
     }
 
     ///////////////////////////////////////////////////////////////////////////

@@ -413,5 +413,406 @@ System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 1$}}
 
 ###############################################################################
 
+set flags MapIsolationLevels
+
+###############################################################################
+
+runTest {test tkt-56b42d99c1-1.6 {enlisted transaction isolation} -setup {
+  setupDb [set fileName tkt-56b42d99c1-1.6.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+    using System.Reflection;
+    using System.Transactions;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static bool TryEnlistInTransaction()
+        {
+          TransactionOptions transactionOptions = new TransactionOptions();
+          transactionOptions.IsolationLevel = IsolationLevel.ReadUncommitted;
+
+          using (TransactionScope transactionScope = new TransactionScope(
+              TransactionScopeOption.Required, transactionOptions))
+          {
+            using (SQLiteConnection connection1 = new SQLiteConnection(
+                "Data Source=${dataSource};[getFlagsProperty $flags]"))
+            {
+              connection1.Open();
+
+              using (SQLiteConnection connection2 = new SQLiteConnection(
+                  "Data Source=${dataSource};[getFlagsProperty $flags]"))
+              {
+                connection2.Open();
+
+                BindingFlags bindingFlags = BindingFlags.Instance |
+                  BindingFlags.NonPublic | BindingFlags.GetField;
+
+                FieldInfo fieldInfo1 = connection1.GetType().GetField(
+                  "_enlistment", bindingFlags);
+
+                object enlistment1 = fieldInfo1.GetValue(connection1);
+                object enlistment2 = fieldInfo1.GetValue(connection2);
+
+                FieldInfo fieldInfo2 = enlistment1.GetType().GetField(
+                  "_transaction", bindingFlags);
+
+                SQLiteTransaction transaction1 =
+                  (SQLiteTransaction)fieldInfo2.GetValue(enlistment1);
+
+                SQLiteTransaction transaction2 =
+                  (SQLiteTransaction)fieldInfo2.GetValue(enlistment2);
+
+                return (transaction1.IsolationLevel ==
+                        transaction2.IsolationLevel);
+              }
+            }
+          }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} TryEnlistInTransaction
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 True$}}
+
+###############################################################################
+
+runTest {test tkt-56b42d99c1-1.7 {enlisted transaction isolation} -setup {
+  setupDb [set fileName tkt-56b42d99c1-1.7.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set sql(1) { \
+    CREATE TABLE t1(x); \
+    INSERT INTO t1 (x) VALUES(1); \
+  }
+
+  set sql(2) { \
+    SELECT COUNT(*) FROM sqlite_master WHERE type = 'table'; \
+  }
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+    using System.Transactions;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static int Main()
+        {
+          TransactionOptions transactionOptions = new TransactionOptions();
+          transactionOptions.IsolationLevel = IsolationLevel.ReadUncommitted;
+
+          using (TransactionScope transactionScope = new TransactionScope(
+              TransactionScopeOption.Required, transactionOptions))
+          {
+            using (SQLiteConnection connection1 = new SQLiteConnection(
+                "Data Source=${dataSource};[getFlagsProperty $flags]"))
+            {
+              connection1.Open();
+
+              using (SQLiteConnection connection2 = new SQLiteConnection(
+                  "Data Source=${dataSource};[getFlagsProperty $flags]"))
+              {
+                connection2.Open();
+
+                using (SQLiteCommand command1 = connection1.CreateCommand())
+                {
+                  command1.CommandText = "${sql(1)}";
+                  command1.ExecuteNonQuery();
+
+                  using (SQLiteCommand command2 = connection2.CreateCommand())
+                  {
+                    command2.CommandText = "${sql(2)}";
+                    return (int)(long)command2.ExecuteScalar();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 0$}}
+
+###############################################################################
+
+runTest {test tkt-56b42d99c1-1.8 {enlisted transaction isolation} -setup {
+  setupDb [set fileName tkt-56b42d99c1-1.8.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set sql(1) { \
+    CREATE TABLE t1(x); \
+    INSERT INTO t1 (x) VALUES(1); \
+  }
+
+  set sql(2) { \
+    SELECT COUNT(*) FROM sqlite_master WHERE type = 'table'; \
+  }
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+    using System.Transactions;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static int Main()
+        {
+          TransactionOptions transactionOptions = new TransactionOptions();
+          transactionOptions.IsolationLevel = IsolationLevel.ReadUncommitted;
+
+          using (TransactionScope transactionScope = new TransactionScope(
+              TransactionScopeOption.Required, transactionOptions))
+          {
+            using (SQLiteConnection connection1 = new SQLiteConnection(
+                "Data Source=${dataSource};Enlist=False;[getFlagsProperty $flags]"))
+            {
+              connection1.Open();
+
+              using (SQLiteConnection connection2 = new SQLiteConnection(
+                  "Data Source=${dataSource};Enlist=False;[getFlagsProperty $flags]"))
+              {
+                connection2.Open();
+
+                using (SQLiteCommand command1 = connection1.CreateCommand())
+                {
+                  command1.CommandText = "${sql(1)}";
+                  command1.ExecuteNonQuery();
+
+                  using (SQLiteCommand command2 = connection2.CreateCommand())
+                  {
+                    command2.CommandText = "${sql(2)}";
+                    return (int)(long)command2.ExecuteScalar();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 1$}}
+
+###############################################################################
+
+runTest {test tkt-56b42d99c1-1.9 {enlisted transaction isolation} -setup {
+  setupDb [set fileName tkt-56b42d99c1-1.9.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set sql(1) { \
+    CREATE TABLE t1(x); \
+    INSERT INTO t1 (x) VALUES(1); \
+  }
+
+  set sql(2) { \
+    SELECT COUNT(*) FROM sqlite_master WHERE type = 'table'; \
+  }
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+    using System.Transactions;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static int Main()
+        {
+          TransactionOptions transactionOptions = new TransactionOptions();
+          transactionOptions.IsolationLevel = IsolationLevel.ReadUncommitted;
+
+          using (TransactionScope transactionScope = new TransactionScope(
+              TransactionScopeOption.Required, transactionOptions))
+          {
+            using (SQLiteConnection connection1 = new SQLiteConnection(
+                "Data Source=${dataSource};[getFlagsProperty $flags]"))
+            {
+              connection1.Open();
+
+              using (SQLiteConnection connection2 = new SQLiteConnection(
+                  "Data Source=${dataSource};Enlist=False;[getFlagsProperty $flags]"))
+              {
+                connection2.Open();
+
+                using (SQLiteCommand command1 = connection1.CreateCommand())
+                {
+                  command1.CommandText = "${sql(1)}";
+                  command1.ExecuteNonQuery();
+
+                  using (SQLiteCommand command2 = connection2.CreateCommand())
+                  {
+                    command2.CommandText = "${sql(2)}";
+                    return (int)(long)command2.ExecuteScalar();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 0$}}
+
+###############################################################################
+
+runTest {test tkt-56b42d99c1-1.10 {enlisted transaction isolation} -setup {
+  setupDb [set fileName tkt-56b42d99c1-1.10.db]
+} -body {
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  unset -nocomplain results errors
+
+  set sql(1) { \
+    CREATE TABLE t1(x); \
+    INSERT INTO t1 (x) VALUES(1); \
+  }
+
+  set sql(2) { \
+    SELECT COUNT(*) FROM sqlite_master WHERE type = 'table'; \
+  }
+
+  set code [compileCSharpWith [subst {
+    using System.Data.SQLite;
+    using System.Transactions;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static int Main()
+        {
+          TransactionOptions transactionOptions = new TransactionOptions();
+          transactionOptions.IsolationLevel = IsolationLevel.ReadUncommitted;
+
+          using (TransactionScope transactionScope = new TransactionScope(
+              TransactionScopeOption.Required, transactionOptions))
+          {
+            using (SQLiteConnection connection1 = new SQLiteConnection(
+                "Data Source=${dataSource};Enlist=False;[getFlagsProperty $flags]"))
+            {
+              connection1.Open();
+
+              using (SQLiteConnection connection2 = new SQLiteConnection(
+                  "Data Source=${dataSource};[getFlagsProperty $flags]"))
+              {
+                connection2.Open();
+
+                using (SQLiteCommand command1 = connection1.CreateCommand())
+                {
+                  command1.CommandText = "${sql(1)}";
+                  command1.ExecuteNonQuery();
+
+                  using (SQLiteCommand command2 = connection2.CreateCommand())
+                  {
+                    command2.CommandText = "${sql(2)}";
+                    return (int)(long)command2.ExecuteScalar();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke _Dynamic${id}.Test${id} Main
+      } result] : [set result ""]}] $result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 1$}}
+
+###############################################################################
+
+unset -nocomplain flags
+
+###############################################################################
+
 runSQLiteTestEpilogue
 runTestEpilogue
