@@ -338,6 +338,9 @@ namespace System.Data.SQLite
 
     private const string MemoryFileName = ":memory:";
 
+    internal const IsolationLevel DeferredIsolationLevel = IsolationLevel.ReadCommitted;
+    internal const IsolationLevel ImmediateIsolationLevel = IsolationLevel.Serializable;
+
     private const SQLiteConnectionFlags DefaultFlags = SQLiteConnectionFlags.Default;
     private const SQLiteSynchronousEnum DefaultSynchronous = SQLiteSynchronousEnum.Default;
     private const SQLiteJournalModeEnum DefaultJournalMode = SQLiteJournalModeEnum.Default;
@@ -1241,7 +1244,7 @@ namespace System.Data.SQLite
     /// The fallback default isolation level for this connection instance -OR-
     /// <see cref="IsolationLevel.Unspecified" /> if it cannot be determined.
     /// </returns>
-    internal static IsolationLevel GetFallbackDefaultIsolationLevel()
+    private static IsolationLevel GetFallbackDefaultIsolationLevel()
     {
         return DefaultIsolationLevel;
     }
@@ -1271,7 +1274,7 @@ namespace System.Data.SQLite
     public SQLiteTransaction BeginTransaction(IsolationLevel isolationLevel, bool deferredLock)
     {
       CheckDisposed();
-      return (SQLiteTransaction)BeginDbTransaction(deferredLock == false ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted);
+      return (SQLiteTransaction)BeginDbTransaction(deferredLock == false ? ImmediateIsolationLevel : DeferredIsolationLevel);
     }
 
     /// <summary>
@@ -1285,7 +1288,7 @@ namespace System.Data.SQLite
     public SQLiteTransaction BeginTransaction(bool deferredLock)
     {
       CheckDisposed();
-      return (SQLiteTransaction)BeginDbTransaction(deferredLock == false ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted);
+      return (SQLiteTransaction)BeginDbTransaction(deferredLock == false ? ImmediateIsolationLevel : DeferredIsolationLevel);
     }
 
     /// <summary>
@@ -1330,12 +1333,13 @@ namespace System.Data.SQLite
         throw new InvalidOperationException();
 
       if (isolationLevel == IsolationLevel.Unspecified) isolationLevel = _defaultIsolation;
+      isolationLevel = GetEffectiveIsolationLevel(isolationLevel);
 
-      if (isolationLevel != IsolationLevel.Serializable && isolationLevel != IsolationLevel.ReadCommitted)
+      if (isolationLevel != ImmediateIsolationLevel && isolationLevel != DeferredIsolationLevel)
         throw new ArgumentException("isolationLevel");
 
       SQLiteTransaction transaction =
-          new SQLiteTransaction(this, isolationLevel != IsolationLevel.Serializable);
+          new SQLiteTransaction(this, isolationLevel != ImmediateIsolationLevel);
 
       OnChanged(this, new ConnectionEventArgs(
           SQLiteConnectionEventType.NewTransaction, null, transaction,
@@ -1863,7 +1867,12 @@ namespace System.Data.SQLite
       else if (transaction == null)
         throw new ArgumentNullException("Unable to enlist in transaction, it is null");
 
-      _enlistment = new SQLiteEnlistment(this, transaction);
+      bool strictEnlistment = ((_flags & SQLiteConnectionFlags.StrictEnlistment) ==
+          SQLiteConnectionFlags.StrictEnlistment);
+
+      _enlistment = new SQLiteEnlistment(this, transaction,
+          GetFallbackDefaultIsolationLevel(), strictEnlistment,
+          strictEnlistment);
 
       OnChanged(this, new ConnectionEventArgs(
           SQLiteConnectionEventType.EnlistTransaction, null, null, null, null,
@@ -2184,6 +2193,45 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Determines the transaction isolation level that should be used by
+    /// the caller, primarily based upon the one specified by the caller.
+    /// If mapping of transaction isolation levels is enabled, the returned
+    /// transaction isolation level may be significantly different than the
+    /// originally specified one.
+    /// </summary>
+    /// <param name="isolationLevel">
+    /// The originally specified transaction isolation level.
+    /// </param>
+    /// <returns>
+    /// The transaction isolation level that should be used.
+    /// </returns>
+    private IsolationLevel GetEffectiveIsolationLevel(
+        IsolationLevel isolationLevel
+        )
+    {
+        if ((_flags & SQLiteConnectionFlags.MapIsolationLevels)
+                != SQLiteConnectionFlags.MapIsolationLevels)
+        {
+            return isolationLevel;
+        }
+
+        switch (isolationLevel)
+        {
+            case IsolationLevel.Unspecified:
+            case IsolationLevel.Chaos:
+            case IsolationLevel.ReadUncommitted:
+            case IsolationLevel.ReadCommitted:
+                return DeferredIsolationLevel;
+            case IsolationLevel.RepeatableRead:
+            case IsolationLevel.Serializable:
+            case IsolationLevel.Snapshot:
+                return ImmediateIsolationLevel;
+            default:
+                return GetFallbackDefaultIsolationLevel();
+        }
+    }
+
+    /// <summary>
     /// Opens the connection using the parameters found in the <see cref="ConnectionString" />.
     /// </summary>
     public override void Open()
@@ -2284,8 +2332,9 @@ namespace System.Data.SQLite
 
         enumValue = TryParseEnum(typeof(IsolationLevel), FindKey(opts, "Default IsolationLevel", DefaultIsolationLevel.ToString()), true);
         _defaultIsolation = (enumValue is IsolationLevel) ? (IsolationLevel)enumValue : DefaultIsolationLevel;
+        _defaultIsolation = GetEffectiveIsolationLevel(_defaultIsolation);
 
-        if (_defaultIsolation != IsolationLevel.Serializable && _defaultIsolation != IsolationLevel.ReadCommitted)
+        if (_defaultIsolation != ImmediateIsolationLevel && _defaultIsolation != DeferredIsolationLevel)
           throw new NotSupportedException("Invalid Default IsolationLevel specified");
 
         _baseSchemaName = FindKey(opts, "BaseSchemaName", DefaultBaseSchemaName);

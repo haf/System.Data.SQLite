@@ -7,6 +7,7 @@
 </p>
 <ul>
     <li>Updated to <a href="http://www.sqlite.org/releaselog/3_8_4_2.html">SQLite 3.8.4.2</a>.</li>
+    <li>Add support for mapping transaction isolation levels to their legacy default values. Pursuant to [56b42d99c1].</li>
 </ul>
 <p>
     <b>1.0.92.0 - March 19, 2014</b>

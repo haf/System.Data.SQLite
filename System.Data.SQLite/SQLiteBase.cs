@@ -1042,6 +1042,21 @@ namespace System.Data.SQLite
       StickyHasRows = 0x400000,
 
       /// <summary>
+      /// Enable "strict" transaction enlistment semantics.  Setting this flag
+      /// will cause an exception to be thrown if an attempt is made to enlist
+      /// in a transaction with an unavailable or unsupported isolation level.
+      /// In the future, more extensive checks may be enabled by this flag as
+      /// well.
+      /// </summary>
+      StrictEnlistment = 0x800000,
+
+      /// <summary>
+      /// Enable mapping of unsupported transaction isolation levels to the
+      /// closest supported transaction isolation level.
+      /// </summary>
+      MapIsolationLevels = 0x1000000,
+
+      /// <summary>
       /// When binding parameter values or returning column values, always
       /// treat them as though they were plain text (i.e. no numeric,
       /// date/time, or other conversions should be attempted).

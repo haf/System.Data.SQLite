@@ -34,7 +34,9 @@ namespace System.Data.SQLite
       _cnn = connection;
       _version = _cnn._version;
 
-      _level = (deferredLock == true) ? IsolationLevel.ReadCommitted : IsolationLevel.Serializable;
+      _level = (deferredLock == true) ?
+          SQLiteConnection.DeferredIsolationLevel :
+          SQLiteConnection.ImmediateIsolationLevel;
 
       if (_cnn._transactionLevel++ == 0)
       {
