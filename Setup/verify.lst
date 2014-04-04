@@ -16,6 +16,9 @@
 #       source code archive.
 #
 set sds_manifests(source) {
+  data/
+  data/exclude_bin.txt
+  data/exclude_src.txt
   Doc/
   Doc/buildChm.tcl
   Doc/Extra/
@@ -140,8 +143,6 @@ set sds_manifests(source) {
   Doc/SQLite.NET.hhc
   Doc/SQLite.NET.hhp
   Doc/SQLite.NET.ndoc
-  exclude_bin.txt
-  exclude_src.txt
   Externals/
   Externals/Eagle/
   Externals/Eagle/bin/

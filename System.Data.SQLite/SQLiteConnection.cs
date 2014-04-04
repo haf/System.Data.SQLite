@@ -1235,7 +1235,6 @@ namespace System.Data.SQLite
         }
     }
 
-#if !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
     /// Determines and returns the fallback default isolation level when one cannot be
     /// obtained from an existing connection instance.
@@ -1260,7 +1259,6 @@ namespace System.Data.SQLite
     {
         return _defaultIsolation;
     }
-#endif
 
     /// <summary>
     /// OBSOLETE.  Creates a new SQLiteTransaction if one isn't already active on the connection.

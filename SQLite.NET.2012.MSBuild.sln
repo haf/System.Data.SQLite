@@ -2,8 +2,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39A3B743-1EBD-4CC0-8E37-ACE3DD38B1C0}"
 	ProjectSection(SolutionItems) = preProject
-		exclude_bin.txt = exclude_bin.txt
-		exclude_src.txt = exclude_src.txt
+		data\exclude_bin.txt = data\exclude_bin.txt
+		data\exclude_src.txt = data\exclude_src.txt
 		Keys\System.Data.SQLite.CF.snk = Keys\System.Data.SQLite.CF.snk
 		Keys\System.Data.SQLite.snk = Keys\System.Data.SQLite.snk
 		NuGet\net20\Core\config.transform = NuGet\net20\Core\config.transform
