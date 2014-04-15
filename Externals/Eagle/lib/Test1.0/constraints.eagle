@@ -36,12 +36,13 @@ namespace eval ::Eagle {
         NATIVE NATIVE_PACKAGE NATIVE_UTILITY NATIVE_UTILITY_BSTR NETWORK \
         NET_20 NET_20_FAST_ENUM NET_20_ONLY NET_20_SP1 NET_20_SP2 NET_30 \
         NET_35 NET_40 NET_45 NET_451 NON_WORKING_CODE NOTIFY NOTIFY_ACTIVE \
-        NOTIFY_ARGUMENTS NOTIFY_GLOBAL NOTIFY_OBJECT OBSOLETE PARSE_CACHE \
-        PATCHLEVEL POLICY_TRACE PREVIOUS_RESULT RANDOMIZE_ID REMOTING SAMPLE \
-        SERIALIZATION SHARED_ID_POOL SHELL SOURCE_ID SOURCE_TIMESTAMP STATIC \
-        TCL TCL_KITS TCL_THREADED TCL_THREADS TCL_UNICODE TCL_WRAPPER TEST \
-        THREADING THROW_ON_DISPOSED TRACE TYPE_CACHE UNIX VERBOSE WEB \
-        WINDOWS WINFORMS WIX_30 WIX_35 WIX_36 WIX_37 WIX_38 X64 X86 XML]
+        NOTIFY_ARGUMENTS NOTIFY_GLOBAL NOTIFY_OBJECT OBSOLETE OFFICIAL \
+        PARSE_CACHE PATCHLEVEL POLICY_TRACE PREVIOUS_RESULT RANDOMIZE_ID \
+        REMOTING SAMPLE SERIALIZATION SHARED_ID_POOL SHELL SOURCE_ID \
+        SOURCE_TIMESTAMP STATIC TCL TCL_KITS TCL_THREADED TCL_THREADS \
+        TCL_UNICODE TCL_WRAPPER TEST THREADING THROW_ON_DISPOSED TRACE \
+        TYPE_CACHE UNIX VERBOSE WEB WINDOWS WINFORMS WIX_30 WIX_35 WIX_36 \
+        WIX_37 WIX_38 X64 X86 XML]
   }
 
   proc getKnownMonoVersions {} {
@@ -855,32 +856,72 @@ namespace eval ::Eagle {
     tputs $channel "---- checking for namespace support... "
 
     if {[isEagle]} then {
-      if {[catch {object invoke -flags +NonPublic Interpreter.GetActive \
-              AreNamespacesEnabled} enabled] == 0 && \
-          $enabled} then {
-        #
-        # NOTE: Yes, it appears that it is available.
-        #
-        addConstraint namespaces
+      #
+      # NOTE: Check if namespace support was compiled into the core library
+      #       (i.e. this is beta 30 or later).
+      #
+      set available false
 
-        tputs $channel yes\n
+      if {[catch {string length [object invoke \
+              Type GetType Eagle._Commands.Namespace2]} length] == 0 && \
+          [set available [expr {$length > 0}]]} then {
+        addConstraint namespaces.available
       } else {
-        tputs $channel no\n
+        addConstraint namespaces.unavailable
+      }
+
+      if {[catch {object invoke -flags +NonPublic Interpreter.GetActive \
+              AreNamespacesEnabled} enabled] == 0} then {
+        #
+        # NOTE: We were able to query for namespace support (i.e. this
+        #       must be beta 29 or later); however, we still need to
+        #       check if it has been enabled at runtime.
+        #
+        if {$enabled} then {
+          #
+          # NOTE: Yes, it appears that it is available and enabled.
+          #
+          addConstraint namespaces
+
+          tputs $channel enabled\n
+        } else {
+          tputs $channel disabled\n
+
+          #
+          # NOTE: Check if namespace support was compiled into the core
+          #       library (i.e. is this beta 30 or later).
+          #
+          if {$available} then {
+            #
+            # NOTE: The tests seem to be running with namespace support
+            #       available, but disabled.  Emit a warning into the
+            #       test log file.
+            #
+            tputs $channel \
+                "==== WARNING: running with namespaces available and disabled\n"
+          }
+        }
+      } else {
+        tputs $channel error\n
       }
     } else {
       #
-      # NOTE: All supported versions of native Tcl have namespaces.
+      # NOTE: All supported versions of native Tcl have namespaces enabled
+      #       and available.
       #
+      addConstraint namespaces.available
       addConstraint namespaces
 
-      tputs $channel yes\n
+      tputs $channel enabled\n
     }
   }
 
   proc checkForTestExec { channel } {
     tputs $channel "---- checking for test use of \"exec\" command... "
 
-    if {![info exists ::no(testExec)]} then {
+    set procName [lindex [info level [info level]] 0]
+
+    if {![info exists ::no(testExec)] && [canTestExec $procName]} then {
       addConstraint testExec
 
       tputs $channel yes\n
@@ -1117,6 +1158,23 @@ namespace eval ::Eagle {
 
     if {$error ne {invalid command name "apply"}} then {
       addConstraint tip194
+
+      tputs $channel yes\n
+    } else {
+      tputs $channel no\n
+    }
+  }
+
+  proc checkForTip207 { channel } {
+    tputs $channel "---- checking for TIP #207... "
+
+    #
+    # NOTE: Is the interpreter TIP #207 ready?
+    #
+    catch {interp invokehidden {} -namespace -- info} error
+
+    if {![string match {bad option "-namespace": *} $error]} then {
+      addConstraint tip207
 
       tputs $channel yes\n
     } else {
@@ -3061,11 +3119,12 @@ namespace eval ::Eagle {
         checkForCommand checkForNamespaces checkForTestExec \
         checkForTestMachine checkForTestPlatform checkForTestConfiguration \
         checkForTestSuffix checkForFile checkForPathFile checkForNativeCode \
-        checkForTip127 checkForTip194 checkForTip241 checkForTip285 \
-        checkForTip405 checkForTip426 checkForTiming checkForPerformance \
-        checkForBigLists checkForStackIntensive checkForInteractive \
-        checkForInteractiveCommand checkForUserInteraction checkForNetwork \
-        checkForCompileOption checkForKnownCompileOptions] false false
+        checkForTip127 checkForTip194 checkForTip207 checkForTip241 \
+        checkForTip285 checkForTip405 checkForTip426 checkForTiming \
+        checkForPerformance checkForBigLists checkForStackIntensive \
+        checkForInteractive checkForInteractiveCommand \
+        checkForUserInteraction checkForNetwork checkForCompileOption \
+        checkForKnownCompileOptions] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

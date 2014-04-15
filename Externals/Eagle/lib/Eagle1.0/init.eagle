@@ -1169,11 +1169,15 @@ namespace eval ::Eagle {
       }
     }
 
-    proc runUpdateAndExit {} {
+    proc runUpdateAndExit { {automatic false} } {
       set directory [file dirname [info nameofexecutable]]
 
       set command [list exec -shell -- \
           [file join $directory Hippogriff.exe] -delay 2000]
+
+      if {$automatic} then {
+        eval lappend command -silent true -confirm false
+      }
 
       eval $command &; exit -force
     }
@@ -1230,7 +1234,8 @@ namespace eval ::Eagle {
       #
       # NOTE: This should work properly in Eagle only.
       #
-      set updateUri [appendArgs [info engine Uri] [info engine UpdateFile]]
+      set updateUri [appendArgs \
+          [info engine UpdateBaseUri] [info engine UpdatePathAndQuery]]
 
       #
       # NOTE: Fetch the master update data from the distribution site

@@ -770,8 +770,8 @@ if {![info exists no([file tail [info script]])]} then {
     ######################### BEGIN Eagle Constraints #########################
     ###########################################################################
 
-    tputs $test_channel [appendArgs \
-        "---- start of Eagle specific test constraints...\n"]
+    tputs $test_channel \
+        "---- start of Eagle specific test constraints...\n"
 
     #
     # NOTE: Has administrator detection support been disabled?  We do
@@ -1941,8 +1941,8 @@ if {![info exists no([file tail [info script]])]} then {
     ########################## BEGIN Tcl Constraints ##########################
     ###########################################################################
 
-    tputs $test_channel [appendArgs \
-        "---- start of Tcl specific test constraints...\n"]
+    tputs $test_channel \
+        "---- start of Tcl specific test constraints...\n"
 
     #
     # NOTE: Has compile/runtime option testing support been disabled?
@@ -1978,8 +1978,8 @@ if {![info exists no([file tail [info script]])]} then {
   ####################### BEGIN Tcl & Eagle Constraints #######################
   #############################################################################
 
-  tputs $test_channel [appendArgs \
-      "---- start of common (Tcl & Eagle) test constraints...\n"]
+  tputs $test_channel \
+      "---- start of common (Tcl & Eagle) test constraints...\n"
 
   #
   # NOTE: Check for the test suite infrastructure files...
@@ -2367,6 +2367,10 @@ if {![info exists no([file tail [info script]])]} then {
     checkForTip194 $test_channel
   }
 
+  if {![info exists no(tip207)]} then {
+    checkForTip207 $test_channel
+  }
+
   if {![info exists no(tip241)]} then {
     checkForTip241 $test_channel
   }
@@ -2454,8 +2458,8 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Figure out the approximate relative performance of this machine.
   #
   if {![info exists no(bogoCops)] && [haveConstraint performance]} then {
-    tputs $test_channel [appendArgs \
-        "---- checking for baseline BogoCops (commands-per-second)... "]
+    tputs $test_channel \
+        "---- checking for baseline BogoCops (commands-per-second)... "
 
     if {![info exists test_base_cops]} then {
       #
@@ -2474,14 +2478,34 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     tputs $test_channel [appendArgs $test_base_cops \n]
-    tputs $test_channel [appendArgs \
-        "---- checking for current BogoCops (commands-per-second)... "]
+    tputs $test_channel \
+        "---- checking for current BogoCops (commands-per-second)... "
 
     if {![info exists test_cops]} then {
       set test_cops [calculateBogoCops]
     }
 
     tputs $test_channel [appendArgs [formatDecimal $test_cops] \n]
+    tputs $test_channel \
+        "---- checking for current BogoCops against baseline BogoCops... "
+
+    if {$test_cops > $test_base_cops} then {
+      addConstraint sameOrFasterBogoCops
+      addConstraint fasterBogoCops
+
+      tputs $test_channel faster\n
+    } elseif {$test_cops < $test_base_cops} then {
+      addConstraint sameOrSlowerBogoCops
+      addConstraint slowerBogoCops
+
+      tputs $test_channel slower\n
+    } else {
+      addConstraint sameOrFasterBogoCops
+      addConstraint sameOrSlowerBogoCops
+      addConstraint sameBogoCops
+
+      tputs $test_channel same\n
+    }
 
     set percent [expr {[calculateRelativePerformance iterations 1] * 100}]
 
