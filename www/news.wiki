@@ -8,6 +8,7 @@
 <ul>
     <li>Updated to <a href="http://www.sqlite.org/releaselog/3_8_4_3.html">SQLite 3.8.4.3</a>.</li>
     <li>Add support for mapping transaction isolation levels to their legacy default values. Pursuant to [56b42d99c1].</li>
+    <li>Add SetChunkSize method to the SQLiteConnection class. Pursuant to [d1c008fa0a].</li>
 </ul>
 <p>
     <b>1.0.92.0 - March 19, 2014</b>

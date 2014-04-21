@@ -370,6 +370,7 @@ namespace System.Data.SQLite
     private const bool DefaultEnlist = true;
     private const bool DefaultSetDefaults = true;
 
+    private const int SQLITE_FCNTL_CHUNK_SIZE = 6;
     private const int SQLITE_FCNTL_WIN32_AV_RETRY = 9;
 
     private const string _dataDirectory = "|DataDirectory|";
@@ -3166,7 +3167,7 @@ namespace System.Data.SQLite
 
             rc = _sql.FileControl(null, SQLITE_FCNTL_WIN32_AV_RETRY, pArg);
 
-            if (rc == 0)
+            if (rc == SQLiteErrorCode.Ok)
             {
                 count = Marshal.ReadInt32(pArg, 0);
                 interval = Marshal.ReadInt32(pArg, sizeof(int));
@@ -3179,6 +3180,41 @@ namespace System.Data.SQLite
         }
 
         return rc;
+    }
+
+    /// <summary>
+    /// Sets the chunk size for the primary file associated with this database
+    /// connection.
+    /// </summary>
+    /// <param name="size">
+    /// The new chunk size for the main database, in bytes.
+    /// </param>
+    /// <returns>
+    /// Zero for success, non-zero for error.
+    /// </returns>
+    public SQLiteErrorCode SetChunkSize(int size)
+    {
+        CheckDisposed();
+
+        if (_connectionState != ConnectionState.Open)
+            throw new InvalidOperationException(
+                "Database must be opened before changing the chunk size.");
+
+        IntPtr pArg = IntPtr.Zero;
+
+        try
+        {
+            pArg = Marshal.AllocHGlobal(sizeof(int) * 1);
+
+            Marshal.WriteInt32(pArg, 0, size);
+
+            return _sql.FileControl(null, SQLITE_FCNTL_CHUNK_SIZE, pArg);
+        }
+        finally
+        {
+            if (pArg != IntPtr.Zero)
+                Marshal.FreeHGlobal(pArg);
+        }
     }
 
     /// <summary>

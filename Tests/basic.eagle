@@ -3122,6 +3122,48 @@ runTest {test data-1.65 {SQLiteDataReader StepCount property} -setup {
 
 ###############################################################################
 
+runTest {test data-1.66 {SQLiteConnection.SetChunkSize default} -setup {
+  setupDb [set fileName data-1.66.db]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(a, b);
+  }
+
+  file size [file join [getDatabaseDirectory] $fileName]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{2048}}
+
+###############################################################################
+
+runTest {test data-1.67 {SQLiteConnection.SetChunkSize method} -setup {
+  setupDb [set fileName data-1.67.db]
+} -body {
+  set connection [getDbConnection]
+
+  lappend result [$connection SetChunkSize [expr {32 * 1024}]]
+
+  sql execute $db {
+    CREATE TABLE t1(a, b);
+  }
+
+  lappend result [file size [file join [getDatabaseDirectory] $fileName]]
+} -cleanup {
+  cleanupDb $fileName
+
+  freeDbConnection
+
+  unset -nocomplain result connection db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{Ok 32768}}
+
+###############################################################################
+
 reportSQLiteResources $test_channel
 
 ###############################################################################
