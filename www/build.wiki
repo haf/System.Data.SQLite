@@ -108,7 +108,8 @@
   <ol>
     <li>
       Make sure the version information is correct for SQLite in all of the
-      following files:
+      following files (<i>this step should not be necessary when using source
+      code checked out from the official repository</i>):
 
       <ul>
         <li>&lt;root&gt;\SQLite.Interop\props\sqlite3.vsprops</li>
@@ -122,7 +123,8 @@
 
     <li>
       Make sure the version information is correct for System.Data.SQLite in the
-      following files:
+      following files (<i>this step should not be necessary when using source
+      code checked out from the official repository</i>):
 
       <ul>
         <li>&lt;root&gt;\readme.htm</li>
@@ -179,8 +181,8 @@
 
   <ol>
     <li>
-      Complete the steps outlined in the <a href="#all">All Builds</a> section
-      (above).
+      Complete the applicable steps outlined in the <a href="#all">All Builds</a>
+      section (above).
     </li>
 
     <li>
@@ -262,8 +264,8 @@
 
   <ol>
     <li>
-      Complete the steps outlined in the <a href="#all">All Builds</a> section
-      (above).
+      Complete the applicable steps outlined in the <a href="#all">All Builds</a>
+      section (above).
     </li>
 
     <li>
@@ -354,8 +356,8 @@
 
   <ol>
     <li>
-      Complete the steps outlined in the <a href="#all">All Builds</a> section
-      (above).
+      Complete the applicable steps outlined in the <a href="#all">All Builds</a>
+      section (above).
     </li>
 
     <li>
