@@ -197,37 +197,43 @@ namespace eval ::Eagle {
     }
 
     #
-    # NOTE: This variable will contain the name of the directory containing the
-    #       vendor-specific testing infrastructure.  If the variable does not
-    #       already exist, create it; otherwise, it has been overridden and the
-    #       existing value should be left intact.
+    # NOTE: When being evaluated in a "safe" interpreter, some steps must be
+    #       skipped due to missing commands and/or sub-commands.
     #
-    set have_vendor_directory [info exists vendor_directory]
+    if {![interp issafe]} then {
+      #
+      # NOTE: This variable will contain the name of the directory containing
+      #       the vendor-specific testing infrastructure.  If the variable does
+      #       not already exist, create it; otherwise, it has been overridden
+      #       and the existing value should be left intact.
+      #
+      set have_vendor_directory [info exists vendor_directory]
 
-    if {!$have_vendor_directory} then {
-      set vendor_directory ""
-    }
+      if {!$have_vendor_directory} then {
+        set vendor_directory ""
+      }
 
-    #
-    # NOTE: This procedure will attempt to find the vendor-specific testing
-    #       infrastructure directory and add it to the auto-path for the
-    #       current interpreter.  Normally, this will also set the variable
-    #       created above to point to the directory added to the auto-path;
-    #       however, this will not be done if the variable was not created
-    #       by us.
-    #
-    addTestSuiteToAutoPath stdout [expr {$have_vendor_directory ? "" : \
-        "vendor_directory"}] false
+      #
+      # NOTE: This procedure will attempt to find the vendor-specific testing
+      #       infrastructure directory and add it to the auto-path for the
+      #       current interpreter.  Normally, this will also set the variable
+      #       created above to point to the directory added to the auto-path;
+      #       however, this will not be done if the variable was not created
+      #       by us.
+      #
+      addTestSuiteToAutoPath stdout [expr {$have_vendor_directory ? "" : \
+          "vendor_directory"}] false
 
-    unset have_vendor_directory
+      unset have_vendor_directory
 
-    #
-    # NOTE: If we actually found a vendor-specific testing infrastructure
-    #       directory then modify the TestPath property of the current
-    #       interpreter to point directly to it.
-    #
-    if {[string length $vendor_directory] > 0} then {
-      setupInterpreterTestPath stdout $vendor_directory false
+      #
+      # NOTE: If we actually found a vendor-specific testing infrastructure
+      #       directory then modify the TestPath property of the current
+      #       interpreter to point directly to it.
+      #
+      if {[string length $vendor_directory] > 0} then {
+        setupInterpreterTestPath stdout $vendor_directory false
+      }
     }
 
     #
