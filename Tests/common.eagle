@@ -1147,7 +1147,7 @@ namespace eval ::Eagle {
                 #       of System.Data.SQLite to be used.
                 #
                 object invoke Interpreter.GetActive [expr {$native ? \
-                    "AddRuntimeOption" : "RemoveRuntimeOption"}]  native
+                    "AddRuntimeOption" : "RemoveRuntimeOption"}] native
 
                 set ::test_year $year
                 set ::test_platform $platform
@@ -3123,6 +3123,12 @@ namespace eval ::Eagle {
         tputs $::test_channel [appendArgs \
             "---- System.Data.SQLite tests ended at " \
             [clock format [clock seconds]] \n]
+
+        #
+        # NOTE: Load the "epilogue" custom per-user and/or per-host test
+        #       settings now.
+        #
+        uplevel 1 [list loadSQLiteTestSettings $::test_channel .epilogue]
 
         #
         # BUGFIX: Before checking the final resources in use by SQLite, make
