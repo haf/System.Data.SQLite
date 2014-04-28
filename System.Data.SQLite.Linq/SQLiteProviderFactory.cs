@@ -14,10 +14,15 @@ namespace System.Data.SQLite.Linq
     using System;
     using System.Data.Common;
 
+#if USE_ENTITY_FRAMEWORK_6
+    using System.Data.Entity.Core.Common;
+#endif
+
     /// <summary>
     /// SQLite implementation of <see cref="DbProviderFactory" />.
     /// </summary>
-    public sealed class SQLiteProviderFactory : DbProviderFactory, IDisposable
+    public sealed class SQLiteProviderFactory :
+        DbProviderFactory, IServiceProvider, IDisposable
     {
         #region Public Static Data
         /// <summary>
@@ -112,6 +117,33 @@ namespace System.Data.SQLite.Linq
         {
             CheckDisposed();
             return new SQLiteParameter();
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region IServiceProvider Members
+        /// <summary>
+        /// Gets the service object of the specified type.
+        /// </summary>
+        /// <param name="serviceType">
+        /// An object that specifies the type of service object to get.
+        /// </param>
+        /// <returns>
+        /// A service object of type serviceType -OR- a null reference if
+        /// there is no service object of type serviceType.
+        /// </returns>
+        public object GetService(
+            Type serviceType
+            )
+        {
+            if ((serviceType == typeof(ISQLiteSchemaExtensions)) ||
+                (serviceType == typeof(DbProviderServices)))
+            {
+                return SQLiteProviderServices.Instance;
+            }
+
+            return null;
         }
         #endregion
 

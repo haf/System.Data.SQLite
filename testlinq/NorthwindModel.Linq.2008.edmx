@@ -14,7 +14,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="northwindEFModel.Store" Alias="Self" Provider="System.Data.SQLite" ProviderManifestToken="ISO8601" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
+    <Schema Namespace="northwindEFModel.Store" Alias="Self" Provider="System.Data.SQLite.Linq" ProviderManifestToken="ISO8601" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
         <EntityContainer Name="northwindEFModelStoreContainer">
           <EntitySet Name="Categories" EntityType="northwindEFModel.Store.Categories" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="northwindEFModel.Store.Customers" store:Type="Tables" />
