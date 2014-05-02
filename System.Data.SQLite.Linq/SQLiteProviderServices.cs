@@ -332,7 +332,7 @@ namespace System.Data.SQLite.Linq
     /// because schema information seems to always be queried on a new connection object, so the schema is
     /// always fresh.
     /// </remarks>
-    /// <param name="cnn">The connection upon which to build the schema tables</param>
+    /// <param name="cnn">The connection upon which to build the schema tables.</param>
     void ISQLiteSchemaExtensions.BuildTempSchema(SQLiteConnection cnn)
     {
       string[] arr = new string[] { "TABLES", "COLUMNS", "VIEWS", "VIEWCOLUMNS", "INDEXES", "INDEXCOLUMNS", "FOREIGNKEYS", "CATALOGS" };

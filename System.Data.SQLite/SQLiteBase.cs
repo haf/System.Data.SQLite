@@ -859,9 +859,18 @@ namespace System.Data.SQLite
     }
   }
 
-  internal interface ISQLiteSchemaExtensions
+  /// <summary>
+  /// 
+  /// </summary>
+  public interface ISQLiteSchemaExtensions
   {
-    void BuildTempSchema(SQLiteConnection cnn);
+      /// <summary>
+      /// Creates temporary tables on the connection so schema information can be queried.
+      /// </summary>
+      /// <param name="connection">
+      /// The connection upon which to build the schema tables.
+      /// </param>
+      void BuildTempSchema(SQLiteConnection connection);
   }
 
   [Flags]
