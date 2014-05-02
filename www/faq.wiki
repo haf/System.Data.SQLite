@@ -391,7 +391,7 @@
 <hr>
 <a name="q11"></a>
 <p>
-  <b>(11) Why do I get a <b>DllNotFoundException</b> (for &quot;sqlite3.dll&quot;
+  <b>(11) Why do I get a DllNotFoundException (for &quot;sqlite3.dll&quot;
   or &quot;SQLite.Interop.dll&quot;) when trying to run my application?</b>
 </p>
 
