@@ -453,7 +453,13 @@ set patterns [list \
     [appendArgs AssemblyFileVersion\\(\" [string map [list . \\.] \
         $version(full)] \"\\)] \
     [appendArgs \
-        "SQLiteFactory, System\\.Data\\.SQLite, " \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.EF6, " \
+        "Version=" [string map [list . \\.] $version(full)] ,] \
+    [appendArgs \
+        "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
         "Version=" [string map [list . \\.] $version(full)] ,] \
     [appendArgs \
         "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
@@ -465,13 +471,6 @@ set patterns [list \
         "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
         "Version=" [string map [list . \\.] $version(full)] ,] \
     [appendArgs \
-        "System\\.Data\\.SQLite\\.EF6\\.SQLiteProviderServices, " \
-        "System\\.Data\\.SQLite\\.EF6, Version=" \
-        [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteFactory, System\\.Data\\.SQLite, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
         "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
         "Version=" [string map [list . \\.] $version(full)] ,] \
     [appendArgs \
@@ -479,29 +478,6 @@ set patterns [list \
         "Version=" [string map [list . \\.] $version(full)] ,] \
     [appendArgs \
         "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "System\\.Data\\.SQLite\\.EF6\\.SQLiteProviderServices, " \
-        "System\\.Data\\.SQLite\\.EF6, Version=" \
-        [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteFactory, System\\.Data\\.SQLite, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteProviderFactory, System\\.Data\\.SQLite\\.EF6, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteProviderServices, System\\.Data\\.SQLite\\.EF6, " \
-        "Version=" [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "System\\.Data\\.SQLite\\.EF6\\.SQLiteProviderServices, " \
-        "System\\.Data\\.SQLite\\.EF6, Version=" \
-        [string map [list . \\.] $version(full)] ,] \
-    [appendArgs \
-        "SQLiteFactory, System\\.Data\\.SQLite, " \
         "Version=" [string map [list . \\.] $version(full)] ,] \
     [appendArgs \
         "SQLiteProviderFactory, System\\.Data\\.SQLite\\.Linq, " \
@@ -601,27 +577,26 @@ set fileNames [list \
     [file join testce AssemblyInfo.cs] \
     [file join testce AssemblyInfo.cs] \
     [file join testlinq 2008 LINQ App.config] \
-    [file join testlinq 2008 LINQ App.config] \
-    [file join testlinq 2010 EF6 App.config] \
     [file join testlinq 2010 EF6 App.config] \
     [file join testlinq 2010 EF6 App.config] \
     [file join testlinq 2010 LINQ App.config] \
-    [file join testlinq 2010 LINQ App.config] \
-    [file join testlinq 2012 EF6 App.config] \
     [file join testlinq 2012 EF6 App.config] \
     [file join testlinq 2012 EF6 App.config] \
     [file join testlinq 2012 LINQ App.config] \
-    [file join testlinq 2012 LINQ App.config] \
     [file join testlinq 2013 EF6 App.config] \
     [file join testlinq 2013 EF6 App.config] \
-    [file join testlinq 2013 EF6 App.config] \
-    [file join testlinq 2013 LINQ App.config] \
     [file join testlinq 2013 LINQ App.config] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join testlinq Properties AssemblyInfo.cs] \
     [file join tools install Properties AssemblyInfo.cs] \
     [file join tools install Properties AssemblyInfo.cs] \
     [file join www news.wiki]]
+
+if {[llength $patterns] != [llength $fileNames]} then {
+  error [appendArgs \
+      "number of regular expression patterns " [llength $patterns] \
+      " does not match number of file names " [llength $fileNames]]
+}
 
 for {set i 1} {$i <= [llength $fileNames]} {incr i} {
   set pattern [lindex $patterns [expr {$i - 1}]]
