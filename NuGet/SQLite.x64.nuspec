@@ -15,7 +15,7 @@
     <description>This is a legacy package; if possible, please use either the &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot; package instead.  The official SQLite database engine combined with a complete ADO.NET provider all rolled into a single mixed-mode assembly for x64.</description>
     <language>en-US</language>
     <projectUrl>http://system.data.sqlite.org/</projectUrl>
-    <iconUrl>http://system.data.sqlite.org/images/sqlite32.png</iconUrl>
+    <iconUrl>http://system.data.sqlite.org/images/sqlite128.png</iconUrl>
     <licenseUrl>http://www.sqlite.org/copyright.html</licenseUrl>
     <tags>sqlite database ado.net provider interop</tags>
     <copyright>Public Domain</copyright>

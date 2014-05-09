@@ -16,7 +16,7 @@
     <description>Support for Entity Framework 6 using System.Data.SQLite.</description>
     <language>en-US</language>
     <projectUrl>http://system.data.sqlite.org/</projectUrl>
-    <iconUrl>http://system.data.sqlite.org/images/sqlite32.png</iconUrl>
+    <iconUrl>http://system.data.sqlite.org/images/sqlite128.png</iconUrl>
     <licenseUrl>http://www.sqlite.org/copyright.html</licenseUrl>
     <tags>sqlite database ado.net provider interop</tags>
     <copyright>Public Domain</copyright>
