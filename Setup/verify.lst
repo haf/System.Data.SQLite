@@ -934,7 +934,7 @@ set sds_manifests(setupX64Vs2012) {
 #       supporting the .NET Framework 4.5.1 for x86.
 #
 set sds_manifests(setupX86Vs2013) {
-  {{tmp}\vcredist_x86_2013_RTM.exe}
+  {{tmp}\vcredist_x86_2013_VSU2.exe}
 }
 
 ###############################################################################
@@ -943,7 +943,7 @@ set sds_manifests(setupX86Vs2013) {
 #       supporting the .NET Framework 4.5.1 for x64.
 #
 set sds_manifests(setupX64Vs2013) {
-  {{tmp}\vcredist_x64_2013_RTM.exe}
+  {{tmp}\vcredist_x64_2013_VSU2.exe}
 }
 
 ###############################################################################
