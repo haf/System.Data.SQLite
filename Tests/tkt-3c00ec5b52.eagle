@@ -1,0 +1,106 @@
+###############################################################################
+#
+# tkt-3c00ec5b52.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-3c00ec5b52-1.1 {per-connection default types} -setup {
+  setupDb [set fileName tkt-3c00ec5b52-1.1.db] "" "" "" UseConnectionTypes \
+      "DefaultDbType=String;DefaultTypeName=TEXT;"
+} -body {
+  set connection [getDbConnection]
+  set result [list]
+
+  lappend result [object invoke -flags +NonPublic \
+      System.Data.SQLite.SQLiteConvert TypeNameToDbType $connection "" None]
+
+  lappend result [object invoke -flags +NonPublic \
+      System.Data.SQLite.SQLiteConvert DbTypeToTypeName $connection Object None]
+
+  set result
+} -cleanup {
+  freeDbConnection
+
+  unset -nocomplain result connection
+
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{String TEXT}}
+
+###############################################################################
+
+runTest {test tkt-3c00ec5b52-1.2 {per-connection default types} -setup {
+  setupDb [set fileName tkt-3c00ec5b52-1.2.db] "" "" "" UseConnectionTypes
+} -body {
+  set connection [getDbConnection]
+  set result [list]
+
+  lappend result [object invoke -flags +NonPublic \
+      System.Data.SQLite.SQLiteConvert TypeNameToDbType $connection "" None]
+
+  lappend result [object invoke -flags +NonPublic \
+      System.Data.SQLite.SQLiteConvert DbTypeToTypeName $connection Object None]
+
+  set result
+} -cleanup {
+  freeDbConnection
+
+  unset -nocomplain result connection
+
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{Object {}}}
+
+###############################################################################
+
+runTest {test tkt-3c00ec5b52-1.3 {per-connection default types} -setup {
+  setupDb [set fileName tkt-3c00ec5b52-1.3.db]
+} -body {
+  set connection [getDbConnection]
+  set result [list]
+
+  lappend result [object invoke -flags +NonPublic \
+      System.Data.SQLite.SQLiteConvert TypeNameToDbType $connection "" None]
+
+  lappend result [object invoke -flags +NonPublic \
+      System.Data.SQLite.SQLiteConvert DbTypeToTypeName $connection Object None]
+
+  set result
+} -cleanup {
+  freeDbConnection
+
+  unset -nocomplain result connection
+
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{Object {}}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

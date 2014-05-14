@@ -24,6 +24,18 @@ namespace System.Data.SQLite
   public abstract class SQLiteConvert
   {
     /// <summary>
+    /// The fallback default database type when one cannot be obtained from an
+    /// existing connection instance.
+    /// </summary>
+    internal static readonly DbType FallbackDefaultDbType = DbType.Object;
+
+    /// <summary>
+    /// The fallback default database type name when one cannot be obtained from
+    /// an existing connection instance.
+    /// </summary>
+    internal static readonly string FallbackDefaultTypeName = String.Empty;
+
+    /// <summary>
     /// The value for the Unix epoch (e.g. January 1, 1970 at midnight, in UTC).
     /// </summary>
     protected static readonly DateTime UnixEpoch =
@@ -997,6 +1009,8 @@ namespace System.Data.SQLite
         SQLiteConnectionFlags flags
         )
     {
+        string defaultTypeName = FallbackDefaultTypeName;
+
         if (connection != null)
         {
             flags |= connection.Flags;
@@ -1012,10 +1026,13 @@ namespace System.Data.SQLite
                     if (connectionTypeNames.TryGetValue(dbType, out value))
                         return value.typeName;
                 }
+
+                //
+                // NOTE: Use the default database type name for the connection.
+                //
+                defaultTypeName = connection.DefaultTypeName;
             }
         }
-
-        string defaultTypeName = String.Empty;
 
         if ((flags & SQLiteConnectionFlags.NoGlobalTypes) == SQLiteConnectionFlags.NoGlobalTypes)
             return defaultTypeName;
@@ -1222,6 +1239,8 @@ namespace System.Data.SQLite
         SQLiteConnectionFlags flags
         )
     {
+        DbType defaultDbType = FallbackDefaultDbType;
+
         if (connection != null)
         {
             flags |= connection.Flags;
@@ -1252,10 +1271,13 @@ namespace System.Data.SQLite
                         }
                     }
                 }
+
+                //
+                // NOTE: Use the default database type for the connection.
+                //
+                defaultDbType = connection.DefaultDbType;
             }
         }
-
-        DbType defaultDbType = DbType.Object;
 
         if ((flags & SQLiteConnectionFlags.NoGlobalTypes) == SQLiteConnectionFlags.NoGlobalTypes)
             return defaultDbType;
