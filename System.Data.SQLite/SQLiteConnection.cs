@@ -474,6 +474,20 @@ namespace System.Data.SQLite
     private SQLiteConnectionFlags _flags;
 
     /// <summary>
+    /// The default databse type for this connection.  This value will only
+    /// be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
+    /// flag is set.
+    /// </summary>
+    private DbType _defaultDbType;
+
+    /// <summary>
+    /// The default databse type name for this connection.  This value will only
+    /// be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
+    /// flag is set.
+    /// </summary>
+    private string _defaultTypeName;
+
+    /// <summary>
     /// Default command timeout
     /// </summary>
     private int _defaultTimeout = 30;
@@ -616,6 +630,8 @@ namespace System.Data.SQLite
       _typeNames = new SQLiteDbTypeMap();
       _parseViaFramework = parseViaFramework;
       _flags = SQLiteConnectionFlags.Default;
+      _defaultDbType = SQLiteConvert.FallbackDefaultDbType;
+      _defaultTypeName = SQLiteConvert.FallbackDefaultTypeName;
       _connectionState = ConnectionState.Closed;
       _connectionString = null;
 
@@ -2258,6 +2274,10 @@ namespace System.Data.SQLite
       enumValue = TryParseEnum(typeof(SQLiteConnectionFlags), FindKey(opts, "Flags", DefaultFlags.ToString()), true);
       _flags = (enumValue is SQLiteConnectionFlags) ? (SQLiteConnectionFlags)enumValue : DefaultFlags;
 
+      enumValue = TryParseEnum(typeof(DbType), FindKey(opts, "DefaultDbType", SQLiteConvert.FallbackDefaultDbType.ToString()), true);
+      _defaultDbType = (enumValue is DbType) ? (DbType)enumValue : SQLiteConvert.FallbackDefaultDbType;
+      _defaultTypeName = FindKey(opts, "DefaultTypeName", SQLiteConvert.FallbackDefaultTypeName);
+
 #if !NET_COMPACT_20 && TRACE_WARNING
       bool uri = false;
 #endif
@@ -2564,6 +2584,28 @@ namespace System.Data.SQLite
     {
       get { CheckDisposed(); return _flags; }
       set { CheckDisposed(); _flags = value; }
+    }
+
+    /// <summary>
+    /// Gets/sets the default database type for this connection.  This value
+    /// will only be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
+    /// flag is set.
+    /// </summary>
+    public DbType DefaultDbType
+    {
+      get { CheckDisposed(); return _defaultDbType; }
+      set { CheckDisposed(); _defaultDbType = value; }
+    }
+
+    /// <summary>
+    /// Gets/sets the default database type name for this connection.  This value
+    /// will only be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
+    /// flag is set.
+    /// </summary>
+    public string DefaultTypeName
+    {
+      get { CheckDisposed(); return _defaultTypeName; }
+      set { CheckDisposed(); _defaultTypeName = value; }
     }
 
     /// <summary>
