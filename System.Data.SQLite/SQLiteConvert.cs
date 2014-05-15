@@ -782,6 +782,80 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Attempts to convert an arbitrary object to the Boolean data type.
+    /// Null object values are converted to false.  Throws an exception
+    /// upon failure.
+    /// </summary>
+    /// <param name="obj">
+    /// The object value to convert.
+    /// </param>
+    /// <param name="provider">
+    /// The format provider to use.
+    /// </param>
+    /// <param name="viaFramework">
+    /// If non-zero, a string value will be converted using the
+    /// <see cref="Convert.ToBoolean(Object, IFormatProvider)" />
+    /// method; otherwise, the <see cref="ToBoolean(String)" />
+    /// method will be used.
+    /// </param>
+    /// <returns>
+    /// The converted boolean value.
+    /// </returns>
+    internal static bool ToBoolean(
+        object obj,
+        IFormatProvider provider,
+        bool viaFramework
+        )
+    {
+        if (obj == null)
+            return false;
+
+        TypeCode typeCode = Type.GetTypeCode(obj.GetType());
+
+        switch (typeCode)
+        {
+            case TypeCode.Empty:
+            case TypeCode.DBNull:
+                return false;
+            case TypeCode.Boolean:
+                return (bool)obj;
+            case TypeCode.Char:
+                return ((char)obj) != (char)0 ? true : false;
+            case TypeCode.SByte:
+                return ((sbyte)obj) != (sbyte)0 ? true : false;
+            case TypeCode.Byte:
+                return ((byte)obj) != (byte)0 ? true : false;
+            case TypeCode.Int16:
+                return ((short)obj) != (short)0 ? true : false;
+            case TypeCode.UInt16:
+                return ((ushort)obj) != (ushort)0 ? true : false;
+            case TypeCode.Int32:
+                return ((int)obj) != (int)0 ? true : false;
+            case TypeCode.UInt32:
+                return ((uint)obj) != (uint)0 ? true : false;
+            case TypeCode.Int64:
+                return ((long)obj) != (long)0 ? true : false;
+            case TypeCode.UInt64:
+                return ((ulong)obj) != (ulong)0 ? true : false;
+            case TypeCode.Single:
+                return ((float)obj) != (float)0.0 ? true : false;
+            case TypeCode.Double:
+                return ((double)obj) != (double)0.0 ? true : false;
+            case TypeCode.Decimal:
+                return ((decimal)obj) != Decimal.Zero ? true : false;
+            case TypeCode.String:
+                return viaFramework ?
+                    Convert.ToBoolean(obj, provider) :
+                    ToBoolean(ToStringWithProvider(obj, provider));
+            default:
+                throw new SQLiteException(String.Format(
+                    CultureInfo.CurrentCulture,
+                    "Cannot convert type {0} to boolean",
+                    typeCode));
+        }
+    }
+
+    /// <summary>
     /// Convert a value to true or false.
     /// </summary>
     /// <param name="source">A string or number representing true or false</param>

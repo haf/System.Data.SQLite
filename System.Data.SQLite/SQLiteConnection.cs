@@ -3777,7 +3777,7 @@ namespace System.Data.SQLite
                     row["TABLE_NAME"] = rdTables.GetString(2);
                     row["INDEX_CATALOG"] = strCatalog;
                     row["INDEX_NAME"] = rd.GetString(1);
-                    row["UNIQUE"] = rd.GetBoolean(2);
+                    row["UNIQUE"] = SQLiteConvert.ToBoolean(rd.GetValue(2), CultureInfo.InvariantCulture, false);
                     row["PRIMARY_KEY"] = false;
 
                     // get the index definition
