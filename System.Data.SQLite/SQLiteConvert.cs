@@ -997,6 +997,24 @@ namespace System.Data.SQLite
     };
 
     /// <summary>
+    /// Determines the default database type name to be used when a
+    /// per-connection value is not available.
+    /// </summary>
+    /// <returns>
+    /// The default database type name to use.
+    /// </returns>
+    private static string GetDefaultTypeName()
+    {
+        string value = UnsafeNativeMethods.GetSettingValue(
+            "Use_SQLiteConvert_DefaultTypeName", null);
+
+        if (value == null)
+            return FallbackDefaultTypeName;
+
+        return value;
+    }
+
+    /// <summary>
     /// Determines the type name for the given database value type.
     /// </summary>
     /// <param name="connection">The connection context for custom type mappings, if any.</param>
@@ -1009,7 +1027,7 @@ namespace System.Data.SQLite
         SQLiteConnectionFlags flags
         )
     {
-        string defaultTypeName = FallbackDefaultTypeName;
+        string defaultTypeName = GetDefaultTypeName();
 
         if (connection != null)
         {
@@ -1227,6 +1245,30 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Determines the default <see cref="DbType" /> value to be used when a
+    /// per-connection value is not available.
+    /// </summary>
+    /// <returns>
+    /// The default <see cref="DbType" /> value to use.
+    /// </returns>
+    private static DbType GetDefaultDbType()
+    {
+        string value = UnsafeNativeMethods.GetSettingValue(
+            "Use_SQLiteConvert_DefaultDbType", null);
+
+        if (value == null)
+            return FallbackDefaultDbType;
+
+        object enumValue = SQLiteConnection.TryParseEnum(
+            typeof(DbType), value, true);
+
+        if (!(enumValue is DbType))
+            return FallbackDefaultDbType;
+
+        return (DbType)enumValue;
+    }
+
+    /// <summary>
     /// For a given type name, return a closest-match .NET type
     /// </summary>
     /// <param name="connection">The connection context for custom type mappings, if any.</param>
@@ -1239,7 +1281,7 @@ namespace System.Data.SQLite
         SQLiteConnectionFlags flags
         )
     {
-        DbType defaultDbType = FallbackDefaultDbType;
+        DbType defaultDbType = GetDefaultDbType();
 
         if (connection != null)
         {

@@ -1920,7 +1920,7 @@ namespace System.Data.SQLite
     /// <param name="value">The string value to be converted.</param>
     /// <param name="ignoreCase">Non-zero to make the conversion case-insensitive.</param>
     /// <returns>The enumerated value upon success or null upon error.</returns>
-    private static object TryParseEnum(
+    internal static object TryParseEnum(
         Type type,
         string value,
         bool ignoreCase
