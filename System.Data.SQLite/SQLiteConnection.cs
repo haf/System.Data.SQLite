@@ -2492,7 +2492,7 @@ namespace System.Data.SQLite
                   }
 
                   strValue = FindKey(opts, "Foreign Keys", DefaultForeignKeys.ToString());
-                  boolValue = Convert.ToBoolean(strValue, CultureInfo.InvariantCulture);
+                  boolValue = SQLiteConvert.ToBoolean(strValue);
                   if (boolValue != DefaultForeignKeys)
                   {
                       cmd.CommandText = String.Format(CultureInfo.InvariantCulture, "PRAGMA foreign_keys={0}", boolValue ? "ON" : "OFF");
