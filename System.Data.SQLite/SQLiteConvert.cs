@@ -1343,6 +1343,116 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Determines if the specified textual value appears to be a
+    /// <see cref="DBNull" /> value.
+    /// </summary>
+    /// <param name="text">
+    /// The textual value to inspect.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the text looks like a <see cref="DBNull" /> value,
+    /// zero otherwise.
+    /// </returns>
+    internal static bool LooksLikeNull(
+        string text
+        )
+    {
+        return (text == null);
+    }
+
+    /// <summary>
+    /// Determines if the specified textual value appears to be an
+    /// <see cref="Int64" /> value.
+    /// </summary>
+    /// <param name="text">
+    /// The textual value to inspect.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the text looks like an <see cref="Int64" /> value,
+    /// zero otherwise.
+    /// </returns>
+    internal static bool LooksLikeInt64(
+        string text
+        )
+    {
+        long longValue;
+
+        if (!long.TryParse(text, out longValue))
+            return false;
+
+        return String.Equals(
+            longValue.ToString(CultureInfo.InvariantCulture), text,
+            StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Determines if the specified textual value appears to be a
+    /// <see cref="Double" /> value.
+    /// </summary>
+    /// <param name="text">
+    /// The textual value to inspect.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the text looks like a <see cref="Double" /> value,
+    /// zero otherwise.
+    /// </returns>
+    internal static bool LooksLikeDouble(
+        string text
+        )
+    {
+        double doubleValue;
+
+        if (!double.TryParse(text, out doubleValue))
+            return false;
+
+        return String.Equals(
+            doubleValue.ToString(CultureInfo.InvariantCulture), text,
+            StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Determines if the specified textual value appears to be a
+    /// <see cref="DateTime" /> value.
+    /// </summary>
+    /// <param name="convert">
+    /// The <see cref="SQLiteConvert" /> object instance configured with
+    /// the chosen <see cref="DateTime" /> format.
+    /// </param>
+    /// <param name="text">
+    /// The textual value to inspect.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the text looks like a <see cref="DateTime" /> in the
+    /// configured format, zero otherwise.
+    /// </returns>
+    internal static bool LooksLikeDateTime(
+        SQLiteConvert convert,
+        string text
+        )
+    {
+        if (convert == null)
+            return false;
+
+        try
+        {
+            DateTime dateTimeValue = convert.ToDateTime(text);
+
+            if (String.Equals(
+                    convert.ToString(dateTimeValue),
+                    text, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            // do nothing.
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// For a given type name, return a closest-match .NET type
     /// </summary>
     /// <param name="connection">The connection context for custom type mappings, if any.</param>
@@ -2013,6 +2123,37 @@ namespace System.Data.SQLite
     /// The affinity of a column, used for expressions or when Type is DbType.Object
     /// </summary>
     internal TypeAffinity Affinity;
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Constructs a default instance of this type.
+    /// </summary>
+    public SQLiteType()
+    {
+      // do nothing.
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Constructs an instance of this type with the specified field values.
+    /// </summary>
+    /// <param name="affinity">
+    /// The type affinity to use for the new instance.
+    /// </param>
+    /// <param name="type">
+    /// The database type to use for the new instance.
+    /// </param>
+    public SQLiteType(
+      TypeAffinity affinity,
+      DbType type
+      )
+      : this()
+    {
+      this.Affinity = affinity;
+      this.Type = type;
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////////

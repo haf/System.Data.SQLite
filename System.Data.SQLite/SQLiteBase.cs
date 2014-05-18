@@ -1066,6 +1066,16 @@ namespace System.Data.SQLite
       MapIsolationLevels = 0x1000000,
 
       /// <summary>
+      /// When returning column values, attempt to map textual values
+      /// onto fully conforming values of
+      /// <see cref="TypeAffinity.Null" />,
+      /// <see cref="TypeAffinity.Int64" />,
+      /// <see cref="TypeAffinity.Double" />,
+      /// or <see cref="TypeAffinity.DateTime" />.
+      /// </summary>
+      MapTextToAffinity = 0x2000000,
+
+      /// <summary>
       /// When binding parameter values or returning column values, always
       /// treat them as though they were plain text (i.e. no numeric,
       /// date/time, or other conversions should be attempted).

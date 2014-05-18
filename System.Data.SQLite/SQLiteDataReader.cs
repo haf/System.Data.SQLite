@@ -361,7 +361,7 @@ namespace System.Data.SQLite
       CheckClosed();
       CheckValidRow();
 
-      TypeAffinity affinity = GetSQLiteType(i).Affinity;
+      TypeAffinity affinity = GetSQLiteType(SQLiteCommand.GetFlags(_command), i).Affinity;
 
       switch (affinity)
       {
@@ -506,7 +506,7 @@ namespace System.Data.SQLite
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetDataTypeName(i - VisibleFieldCount);
 
-      SQLiteType typ = GetSQLiteType(i);
+      SQLiteType typ = GetSQLiteType(SQLiteCommand.GetFlags(_command), i);
       if (typ.Type == DbType.Object) return SQLiteConvert.SQLiteTypeToType(typ).Name;
       return _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity);
     }
@@ -571,7 +571,7 @@ namespace System.Data.SQLite
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetFieldType(i - VisibleFieldCount);
 
-      return SQLiteConvert.SQLiteTypeToType(GetSQLiteType(i));
+      return SQLiteConvert.SQLiteTypeToType(GetSQLiteType(SQLiteCommand.GetFlags(_command), i));
     }
 
     /// <summary>
@@ -922,7 +922,7 @@ namespace System.Data.SQLite
 
       for (int n = 0; n < _fieldCount; n++)
       {
-        SQLiteType sqlType = GetSQLiteType(n);
+        SQLiteType sqlType = GetSQLiteType(SQLiteCommand.GetFlags(_command), n);
 
         row = tbl.NewRow();
 
@@ -1133,10 +1133,17 @@ namespace System.Data.SQLite
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetValue(i - VisibleFieldCount);
 
-      SQLiteType typ = GetSQLiteType(i);
+      SQLiteConnectionFlags flags = SQLiteCommand.GetFlags(_command);
+      SQLiteType typ = GetSQLiteType(flags, i);
 
-      return _activeStatement._sql.GetValue(
-          _activeStatement, SQLiteCommand.GetFlags(_command), i, typ);
+      if (((flags & SQLiteConnectionFlags.MapTextToAffinity) == SQLiteConnectionFlags.MapTextToAffinity) &&
+          (typ != null) && (typ.Affinity == TypeAffinity.Text))
+      {
+          typ = GetSQLiteType(
+              typ, _activeStatement._sql.GetText(_activeStatement, i));
+      }
+
+      return _activeStatement._sql.GetValue(_activeStatement, flags, i, typ);
     }
 
     /// <summary>
@@ -1413,11 +1420,47 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Retrieves the SQLiteType for a given column and row value.
+    /// </summary>
+    /// <param name="oldType">
+    /// The original SQLiteType structure, based only on the column.
+    /// </param>
+    /// <param name="text">
+    /// The textual value of the column for a given row.
+    /// </param>
+    /// <returns>
+    /// The SQLiteType structure.
+    /// </returns>
+    private SQLiteType GetSQLiteType(
+        SQLiteType oldType,
+        string text
+        )
+    {
+        if (SQLiteConvert.LooksLikeNull(text))
+            return new SQLiteType(TypeAffinity.Null, DbType.Object);
+
+        if (SQLiteConvert.LooksLikeInt64(text))
+            return new SQLiteType(TypeAffinity.Int64, DbType.Int64);
+
+        if (SQLiteConvert.LooksLikeDouble(text))
+            return new SQLiteType(TypeAffinity.Double, DbType.Double);
+
+        if ((_activeStatement != null) &&
+            SQLiteConvert.LooksLikeDateTime(_activeStatement._sql, text))
+        {
+            return new SQLiteType(TypeAffinity.DateTime, DbType.DateTime);
+        }
+
+        return oldType;
+    }
+
+    /// <summary>
     /// Retrieves the SQLiteType for a given column, and caches it to avoid repetetive interop calls.
     /// </summary>
+    /// <param name="flags">The flags associated with the parent connection object.</param>
     /// <param name="i">The index of the column to retrieve</param>
     /// <returns>A SQLiteType structure</returns>
-    private SQLiteType GetSQLiteType(int i)
+    private SQLiteType GetSQLiteType(SQLiteConnectionFlags flags, int i)
     {
       SQLiteType typ;
 
@@ -1433,7 +1476,7 @@ namespace System.Data.SQLite
       // If not initialized, then fetch the declared column datatype and attempt to convert it
       // to a known DbType.
       if (typ.Affinity == TypeAffinity.Uninitialized)
-        typ.Type = SQLiteConvert.TypeNameToDbType(GetConnection(this), _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity), GetFlags(this));
+        typ.Type = SQLiteConvert.TypeNameToDbType(GetConnection(this), _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity), flags);
       else
         typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
 
