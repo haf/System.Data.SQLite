@@ -1377,8 +1377,24 @@ namespace System.Data.SQLite
     {
         long longValue;
 
-        if (!long.TryParse(text, out longValue))
+#if !PLATFORM_COMPACTFRAMEWORK
+        if (!long.TryParse(
+                text, NumberStyles.Integer, CultureInfo.InvariantCulture,
+                out longValue))
+        {
             return false;
+        }
+#else
+        try
+        {
+            longValue = long.Parse(
+                text, NumberStyles.Integer, CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            return false;
+        }
+#endif
 
         return String.Equals(
             longValue.ToString(CultureInfo.InvariantCulture), text,
@@ -1402,8 +1418,23 @@ namespace System.Data.SQLite
     {
         double doubleValue;
 
-        if (!double.TryParse(text, out doubleValue))
+#if !PLATFORM_COMPACTFRAMEWORK
+        if (!double.TryParse(
+                text, NumberStyles.Float | NumberStyles.AllowThousands,
+                CultureInfo.InvariantCulture, out doubleValue))
+        {
             return false;
+        }
+#else
+        try
+        {
+            doubleValue = double.Parse(text, CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            return false;
+        }
+#endif
 
         return String.Equals(
             doubleValue.ToString(CultureInfo.InvariantCulture), text,
