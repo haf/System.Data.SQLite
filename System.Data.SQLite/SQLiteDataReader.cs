@@ -1136,8 +1136,8 @@ namespace System.Data.SQLite
       SQLiteConnectionFlags flags = SQLiteCommand.GetFlags(_command);
       SQLiteType typ = GetSQLiteType(flags, i);
 
-      if (((flags & SQLiteConnectionFlags.MapTextToAffinity) == SQLiteConnectionFlags.MapTextToAffinity) &&
-          (typ != null) && (typ.Affinity == TypeAffinity.Text))
+      if (((flags & SQLiteConnectionFlags.DetectTextAffinity) == SQLiteConnectionFlags.DetectTextAffinity) &&
+          ((typ == null) || (typ.Affinity == TypeAffinity.Text)))
       {
           typ = GetSQLiteType(
               typ, _activeStatement._sql.GetText(_activeStatement, i));
@@ -1432,7 +1432,7 @@ namespace System.Data.SQLite
     /// The SQLiteType structure.
     /// </returns>
     private SQLiteType GetSQLiteType(
-        SQLiteType oldType,
+        SQLiteType oldType, /* PASS-THROUGH */
         string text
         )
     {
