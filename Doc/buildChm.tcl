@@ -330,15 +330,19 @@ set subSpecs(.html,8) {"\1~Overloads.html"}
 
 ###############################################################################
 
-set providerFileNames [list \
+set fileNames [list \
     [file join $temporaryPath SQLite.NET.hhp] \
     [file join $temporaryPath SQLite.NET.hhc]]
 
 foreach fileName [glob -nocomplain [file join $providerPath *.html]] {
-  lappend providerFileNames $fileName
+  lappend fileNames $fileName
 }
 
-foreach fileName $providerFileNames {
+foreach fileName [glob -nocomplain [file join $temporaryPath *.html]] {
+  lappend fileNames $fileName
+}
+
+foreach fileName $fileNames {
   set fileName [file join $path $fileName]
 
   #
