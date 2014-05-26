@@ -2013,6 +2013,37 @@ namespace System.Data.SQLite
     /// The affinity of a column, used for expressions or when Type is DbType.Object
     /// </summary>
     internal TypeAffinity Affinity;
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Constructs a default instance of this type.
+    /// </summary>
+    public SQLiteType()
+    {
+      // do nothing.
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Constructs an instance of this type with the specified field values.
+    /// </summary>
+    /// <param name="affinity">
+    /// The type affinity to use for the new instance.
+    /// </param>
+    /// <param name="type">
+    /// The database type to use for the new instance.
+    /// </param>
+    public SQLiteType(
+      TypeAffinity affinity,
+      DbType type
+      )
+        : this()
+    {
+      this.Affinity = affinity;
+      this.Type = type;
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////////
