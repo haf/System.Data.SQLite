@@ -920,9 +920,11 @@ namespace System.Data.SQLite
       tbl.Columns.Add("CollationType", typeof(string));
       tbl.BeginLoadData();
 
+      SQLiteConnectionFlags flags = SQLiteCommand.GetFlags(_command);
+
       for (int n = 0; n < _fieldCount; n++)
       {
-        SQLiteType sqlType = GetSQLiteType(SQLiteCommand.GetFlags(_command), n);
+        SQLiteType sqlType = GetSQLiteType(flags, n);
 
         row = tbl.NewRow();
 
