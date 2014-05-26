@@ -2039,7 +2039,7 @@ namespace System.Data.SQLite
       TypeAffinity affinity,
       DbType type
       )
-        : this()
+      : this()
     {
       this.Affinity = affinity;
       this.Type = type;
