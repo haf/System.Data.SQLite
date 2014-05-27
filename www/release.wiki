@@ -23,8 +23,10 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
-    Enter the following command to build all the x86 and x64 binaries:
+    Enter the following commands to build all the x86 and x64 binaries:
     <br />
+    <br />
+    <b>SET BUILD_DEBUG=1</b>
     <br />
     <b>build_all.bat</b>
   </li>
@@ -45,9 +47,11 @@
   <li>Change the current directory to &quot;&lt;root&gt;\Setup&quot;.</li>
 
   <li>
-    Enter the following command to test all the x86 or x64 binaries, depending
+    Enter the following commands to test all the x86 or x64 binaries, depending
     on the processor architecture of the current machine:
     <br />
+    <br />
+    <b>SET TEST_DEBUG=1</b>
     <br />
     <b>test_all.bat</b>
   </li>
