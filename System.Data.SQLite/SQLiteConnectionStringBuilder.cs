@@ -192,7 +192,8 @@ namespace System.Data.SQLite
     /// <summary>
     /// An alternate to the data source property
     /// </summary>
-    [Browsable(false)]
+    [Browsable(true)]
+    [DefaultValue(null)]
     public string Uri
     {
       get
@@ -210,7 +211,8 @@ namespace System.Data.SQLite
     /// <summary>
     /// An alternate to the data source property that uses the SQLite URI syntax.
     /// </summary>
-    [Browsable(false)]
+    [Browsable(true)]
+    [DefaultValue(null)]
     public string FullUri
     {
       get
