@@ -11,11 +11,11 @@
 #if Pos("NativeOnly", AppConfiguration) == 0
 #define InstallerCondition "Application\Core\MSIL and Application\Designer and Application\Designer\Installer"
 #define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + AppPlatform + "\" + AppConfiguration + "\System.Data.SQLite.dll", PRODUCT_VERSION)
-#define OutputConfiguration StringChange(StringChange(AppConfiguration, "Debug", "setup"), "Release", "setup") + "-bundle"
+#define OutputConfiguration StringChange(StringChange(AppConfiguration, "Debug", "setup-debug"), "Release", "setup") + "-bundle"
 #else
 #define InstallerCondition "Application\Core\MSIL and Application\Core\" + AppProcessor + " and Application\Designer and Application\Designer\Installer"
 #define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + BaseConfiguration + "\bin\System.Data.SQLite.dll", PRODUCT_VERSION)
-#define OutputConfiguration StringChange(StringChange(BaseConfiguration, "Debug", "setup"), "Release", "setup")
+#define OutputConfiguration StringChange(StringChange(BaseConfiguration, "Debug", "setup-debug"), "Release", "setup")
 #endif
 
 [Setup]
