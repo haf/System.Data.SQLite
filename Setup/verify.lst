@@ -202,6 +202,38 @@ set sds_manifests(source) {
   Setup/set_2012.bat
   Setup/set_2013.bat
   Setup/set_common.bat
+  Setup/set_Debug.bat
+  Setup/set_DebugNativeOnly.bat
+  "Setup/set_DebugNativeOnly_CEPC DevPlatform.bat"
+  "Setup/set_DebugNativeOnly_Pocket PC 2003 (ARMV4).bat"
+  "Setup/set_DebugNativeOnly_ARMV7.bat"
+  Setup/set_DebugNativeOnly_Win32.bat
+  Setup/set_DebugNativeOnly_x64.bat
+  Setup/set_DebugNativeOnly_x64_2005.bat
+  Setup/set_DebugNativeOnly_x64_2008.bat
+  Setup/set_DebugNativeOnly_x64_2010.bat
+  Setup/set_DebugNativeOnly_x64_2012.bat
+  Setup/set_DebugNativeOnly_x64_2013.bat
+  Setup/set_DebugNativeOnly_x86_2005.bat
+  Setup/set_DebugNativeOnly_x86_2008.bat
+  Setup/set_DebugNativeOnly_x86_2010.bat
+  Setup/set_DebugNativeOnly_x86_2012.bat
+  Setup/set_DebugNativeOnly_x86_2013.bat
+  "Setup/set_Debug_CEPC DevPlatform.bat"
+  "Setup/set_Debug_Pocket PC 2003 (ARMV4).bat"
+  "Setup/set_Debug_ARMV7.bat"
+  Setup/set_Debug_Win32.bat
+  Setup/set_Debug_x64.bat
+  Setup/set_Debug_x64_2005.bat
+  Setup/set_Debug_x64_2008.bat
+  Setup/set_Debug_x64_2010.bat
+  Setup/set_Debug_x64_2012.bat
+  Setup/set_Debug_x64_2013.bat
+  Setup/set_Debug_x86_2005.bat
+  Setup/set_Debug_x86_2008.bat
+  Setup/set_Debug_x86_2010.bat
+  Setup/set_Debug_x86_2012.bat
+  Setup/set_Debug_x86_2013.bat
   Setup/set_netFx20.bat
   Setup/set_netFx35.bat
   Setup/set_netFx40.bat
@@ -614,6 +646,7 @@ set sds_manifests(source) {
   Tests/tkt-3567020edf.eagle
   Tests/tkt-393d954be0.eagle
   Tests/tkt-3aa50d8413.eagle
+  Tests/tkt-3c00ec5b52.eagle
   Tests/tkt-448d663d11.eagle
   Tests/tkt-47f4bac575.eagle
   Tests/tkt-48a6b8e4ca.eagle
