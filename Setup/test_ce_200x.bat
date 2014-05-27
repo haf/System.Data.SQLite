@@ -100,7 +100,7 @@ IF NOT DEFINED 32BITONLY (
 FOR %%C IN (%TEST_CONFIGURATIONS%) DO (
   FOR %%P IN (%PLATFORMS%) DO (
     FOR %%Y IN (%YEARS%) DO (
-      %__ECHO% "%EAGLESHELL%" -file "%TOOLS%\deployAndTestCe.eagle" %%Y %%P %%C
+      %__ECHO% "%EAGLESHELL%" -file "%TOOLS%\deployAndTestCe200x.eagle" %%Y %%P %%C
 
       IF ERRORLEVEL 1 (
         ECHO Tests failed for %%C/%%P/%%Y binaries.
