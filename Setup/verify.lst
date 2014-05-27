@@ -189,7 +189,7 @@ set sds_manifests(source) {
   Setup/build_ce_2013.bat
   Setup/CheckForNetFx.pas
   Setup/clean.bat
-  Setup/deployAndTestCe.eagle
+  Setup/deployAndTestCe200x.eagle
   Setup/InitializeSetup.pas
   Setup/release.bat
   Setup/release_all.bat
