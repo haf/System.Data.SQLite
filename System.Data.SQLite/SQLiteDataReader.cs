@@ -992,9 +992,7 @@ namespace System.Data.SQLite
             if (arSize.Length > 1)
             {
               arSize = arSize[0].Split(',', '.');
-              if (sqlType.Type == DbType.AnsiString || sqlType.Type == DbType.Binary ||
-                  sqlType.Type == DbType.String || sqlType.Type == DbType.AnsiStringFixedLength ||
-                  sqlType.Type == DbType.StringFixedLength)
+              if (sqlType.Type == DbType.Binary || SQLiteConvert.IsStringDbType(sqlType.Type))
               {
                 row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
               }
@@ -1140,6 +1138,12 @@ namespace System.Data.SQLite
 
       if (((flags & SQLiteConnectionFlags.DetectTextAffinity) == SQLiteConnectionFlags.DetectTextAffinity) &&
           ((typ == null) || (typ.Affinity == TypeAffinity.Text)))
+      {
+          typ = GetSQLiteType(
+              typ, _activeStatement._sql.GetText(_activeStatement, i));
+      }
+      else if (((flags & SQLiteConnectionFlags.DetectStringType) == SQLiteConnectionFlags.DetectStringType) &&
+          ((typ == null) || SQLiteConvert.IsStringDbType(typ.Type)))
       {
           typ = GetSQLiteType(
               typ, _activeStatement._sql.GetText(_activeStatement, i));

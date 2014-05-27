@@ -1319,6 +1319,32 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Determines if a database type is considered to be a string.
+    /// </summary>
+    /// <param name="type">
+    /// The database type to check.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the database type is considered to be a string, zero
+    /// otherwise.
+    /// </returns>
+    internal static bool IsStringDbType(
+        DbType type
+        )
+    {
+        switch (type)
+        {
+            case DbType.AnsiString:
+            case DbType.String:
+            case DbType.AnsiStringFixedLength:
+            case DbType.StringFixedLength:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
     /// Determines the default <see cref="DbType" /> value to be used when a
     /// per-connection value is not available.
     /// </summary>

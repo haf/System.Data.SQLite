@@ -1067,13 +1067,23 @@ namespace System.Data.SQLite
 
       /// <summary>
       /// When returning column values, attempt to detect the affinity of
-      /// textual values to see if they fully conform to those of the
+      /// textual values by checking if they fully conform to those of the
       /// <see cref="TypeAffinity.Null" />,
       /// <see cref="TypeAffinity.Int64" />,
       /// <see cref="TypeAffinity.Double" />,
       /// or <see cref="TypeAffinity.DateTime" /> types.
       /// </summary>
       DetectTextAffinity = 0x2000000,
+
+      /// <summary>
+      /// When returning column values, attempt to detect the type of
+      /// string values by checking if they fully conform to those of
+      /// the <see cref="TypeAffinity.Null" />,
+      /// <see cref="TypeAffinity.Int64" />,
+      /// <see cref="TypeAffinity.Double" />,
+      /// or <see cref="TypeAffinity.DateTime" /> types.
+      /// </summary>
+      DetectStringType = 0x4000000,
 
       /// <summary>
       /// When binding parameter values or returning column values, always
