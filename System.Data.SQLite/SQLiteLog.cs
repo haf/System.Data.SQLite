@@ -95,7 +95,6 @@ namespace System.Data.SQLite
         /// </summary>
         private static event SQLiteLogEventHandler _handlers;
 
-
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
@@ -105,6 +104,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+#if !INTEROP_LOG
         /// <summary>
         /// The log callback passed to native SQLite engine.  This must live
         /// as long as the SQLite library has a pointer to it.
@@ -117,6 +117,7 @@ namespace System.Data.SQLite
         /// The base SQLite object to interop with.
         /// </summary>
         private static SQLiteBase _sql;
+#endif
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -177,6 +178,7 @@ namespace System.Data.SQLite
                 }
 #endif
 
+#if !INTEROP_LOG
                 //
                 // NOTE: Create an instance of the SQLite wrapper class.
                 //
@@ -203,6 +205,7 @@ namespace System.Data.SQLite
                         throw new SQLiteException(rc,
                             "Failed to initialize logging.");
                 }
+#endif
 
                 //
                 // NOTE: Logging is enabled by default.
@@ -242,6 +245,7 @@ namespace System.Data.SQLite
                 //
                 _enabled = false;
 
+#if !INTEROP_LOG
                 //
                 // BUGBUG: This will cause serious problems if other AppDomains
                 //         have any open SQLite connections; however, there is
@@ -273,6 +277,7 @@ namespace System.Data.SQLite
                 {
                     _callback = null;
                 }
+#endif
 
                 //
                 // NOTE: Remove the event handler for the DomainUnload event

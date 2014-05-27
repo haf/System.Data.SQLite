@@ -92,6 +92,13 @@ if {$argc == 1} then {
 
       #
       # HACK: Attempt to match and remove sub-strings from the
+      #       manifest file name that look like the name of a
+      #       build configuration (e.g. "debug" or "release").
+      #
+      regsub -- {-debug-|-release-} $manifest {-} manifest
+
+      #
+      # HACK: Attempt to match and remove sub-strings from the
       #       manifest file name that look like a version number
       #       in the format "<major>.<minor>.<build>.<revision>"
       #       and/or a date/time string matching the format

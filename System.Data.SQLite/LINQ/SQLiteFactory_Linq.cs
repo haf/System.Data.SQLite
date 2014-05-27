@@ -49,9 +49,9 @@ namespace System.Data.SQLite
             UnsafeNativeMethods.sqlite3_log(
                 SQLiteErrorCode.Ok, SQLiteConvert.ToUTF8("logging initialized."));
         }
-#else
-        SQLiteLog.Initialize();
 #endif
+
+        SQLiteLog.Initialize();
 
         string version =
 #if NET_40 || NET_45 || NET_451
