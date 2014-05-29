@@ -27,7 +27,7 @@ namespace System.Data.SQLite
     /// The fallback default database type when one cannot be obtained from an
     /// existing connection instance.
     /// </summary>
-    internal static readonly DbType FallbackDefaultDbType = DbType.Object;
+    internal const DbType FallbackDefaultDbType = DbType.Object;
 
     /// <summary>
     /// The fallback default database type name when one cannot be obtained from

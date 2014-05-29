@@ -596,6 +596,47 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Gets/sets the default database type for the connection.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(SQLiteConvert.FallbackDefaultDbType)]
+    public DbType DefaultDbType
+    {
+        get
+        {
+            object value;
+            TryGetValue("defaultdbtype", out value);
+            if (value is string)
+                return (DbType)TypeDescriptor.GetConverter(typeof(DbType)).ConvertFrom(value);
+            else
+                return (DbType)value;
+        }
+        set
+        {
+            this["defaultdbtype"] = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets/sets the default type name for the connection.
+    /// </summary>
+    [Browsable(true)]
+    [DefaultValue(null)]
+    public string DefaultTypeName
+    {
+        get
+        {
+            object value;
+            TryGetValue("defaulttypename", out value);
+            return value.ToString();
+        }
+        set
+        {
+            this["defaulttypename"] = value;
+        }
+    }
+
+    /// <summary>
     /// If enabled, use foreign key constraints
     /// </summary>
     [DisplayName("Foreign Keys")]

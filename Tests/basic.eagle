@@ -1073,7 +1073,8 @@ runTest {test data-1.17 {SQLiteConnectionStringBuilder properties} -body {
                    Password "Page Size" "Max Page Count" "Cache Size" \
                    DateTimeFormat DateTimeKind DateTimeFormatString \
                    BaseSchemaName "Journal Mode" "Default IsolationLevel" \
-                   "Foreign Keys" Flags SetDefaults ToFullPath HexPassword]
+                   "Foreign Keys" Flags SetDefaults ToFullPath HexPassword \
+                   DefaultDbType DefaultTypeName]
 
     set values [list null 3 Normal True False \
                      True test.db test.db file:test.db 60 \
@@ -1081,7 +1082,8 @@ runTest {test data-1.17 {SQLiteConnectionStringBuilder properties} -body {
                      secret 4096 1024 8192 \
                      UnixEpoch Utc yyyy-MM-dd sqlite_schema \
                      Memory Serializable False \
-                     Default False False 736563726574]
+                     Default False False 736563726574 String \
+                     TEXT]
 
     set propertyNames [list null Version SyncMode UseUTF16Encoding Pooling \
                             BinaryGUID DataSource Uri FullUri DefaultTimeout \
@@ -1090,7 +1092,7 @@ runTest {test data-1.17 {SQLiteConnectionStringBuilder properties} -body {
                             DateTimeFormat DateTimeKind DateTimeFormatString \
                             BaseSchemaName JournalMode DefaultIsolationLevel \
                             ForeignKeys Flags SetDefaults ToFullPath \
-                            HexPassword]
+                            HexPassword DefaultDbType DefaultTypeName]
 
     foreach key $keys value $values propertyName $propertyNames {
       set code [catch {
@@ -1122,7 +1124,8 @@ BaseSchemaName=sqlite_schema\} 0 \{Memory, Journal Mode=Memory\} 0\
 \{Serializable, Default IsolationLevel=Serializable\} 0 \{False, Foreign\
 Keys=False\} 0 \{(?:Default|LogCallbackException),\
 Flags=(?:Default|LogCallbackException)\} 0 \{False, SetDefaults=False\} 0\
-\{False, ToFullPath=False\} 0 {736563726574, HexPassword=736563726574}$}}
+\{False, ToFullPath=False\} 0 {736563726574, HexPassword=736563726574} 0\
+\{String, DefaultDbType=String\} 0 \{TEXT, DefaultTypeName=TEXT\}$}}
 
 ###############################################################################
 
