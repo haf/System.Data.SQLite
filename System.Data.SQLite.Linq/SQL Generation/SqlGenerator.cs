@@ -889,7 +889,7 @@ namespace System.Data.SQLite.Linq
             break;
 
           case PrimitiveTypeKind.DateTime:
-            result.Append(EscapeSingleQuote(((System.DateTime)e.Value).ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture), false /* IsUnicode */));
+            result.Append(EscapeSingleQuote(SQLiteConvert.ToString((System.DateTime)e.Value, SQLiteDateFormats.ISO8601, DateTimeKind.Unspecified, null), false /* IsUnicode */));
             break;
 
           case PrimitiveTypeKind.Decimal:

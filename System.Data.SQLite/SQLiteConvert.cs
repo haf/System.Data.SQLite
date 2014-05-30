@@ -499,7 +499,28 @@ namespace System.Data.SQLite
     /// string, a formatted date and time string in the current culture, or an ISO8601-format date/time string.</returns>
     public string ToString(DateTime dateValue)
     {
-        switch (_datetimeFormat)
+        return ToString(dateValue, _datetimeFormat, _datetimeKind, _datetimeFormatString);
+    }
+
+    /// <summary>
+    /// Converts a string into a DateTime, using the DateTimeFormat, DateTimeKind,
+    /// and DateTimeFormatString specified for the connection when it was opened.
+    /// </summary>
+    /// <param name="dateValue">The DateTime value to convert</param>
+    /// <param name="format">The SQLiteDateFormats to use.</param>
+    /// <param name="kind">The DateTimeKind to use.</param>
+    /// <param name="formatString">The DateTime format string to use.</param>
+    /// <returns>Either a string containing the long integer number of 100-nanosecond units since System.DateTime.MinValue, a
+    /// Julian day double, an integer number of seconds since the Unix epoch, a culture-independent formatted date and time
+    /// string, a formatted date and time string in the current culture, or an ISO8601-format date/time string.</returns>
+    public static string ToString(
+        DateTime dateValue,
+        SQLiteDateFormats format,
+        DateTimeKind kind,
+        string formatString
+        )
+    {
+        switch (format)
         {
             case SQLiteDateFormats.Ticks:
                 return dateValue.Ticks.ToString(CultureInfo.InvariantCulture);
@@ -508,17 +529,17 @@ namespace System.Data.SQLite
             case SQLiteDateFormats.UnixEpoch:
                 return ((long)(dateValue.Subtract(UnixEpoch).Ticks / TimeSpan.TicksPerSecond)).ToString();
             case SQLiteDateFormats.InvariantCulture:
-                return dateValue.ToString((_datetimeFormatString != null) ?
-                    _datetimeFormatString : FullFormat, CultureInfo.InvariantCulture);
+                return dateValue.ToString((formatString != null) ?
+                    formatString : FullFormat, CultureInfo.InvariantCulture);
             case SQLiteDateFormats.CurrentCulture:
-                return dateValue.ToString((_datetimeFormatString != null) ?
-                    _datetimeFormatString : FullFormat, CultureInfo.CurrentCulture);
+                return dateValue.ToString((formatString != null) ?
+                    formatString : FullFormat, CultureInfo.CurrentCulture);
             default:
                 return (dateValue.Kind == DateTimeKind.Unspecified) ?
-                    DateTime.SpecifyKind(dateValue, _datetimeKind).ToString(
-                        GetDateTimeKindFormat(_datetimeKind, _datetimeFormatString),
+                    DateTime.SpecifyKind(dateValue, kind).ToString(
+                        GetDateTimeKindFormat(kind, formatString),
                             CultureInfo.InvariantCulture) : dateValue.ToString(
-                        GetDateTimeKindFormat(dateValue.Kind, _datetimeFormatString),
+                        GetDateTimeKindFormat(dateValue.Kind, formatString),
                             CultureInfo.InvariantCulture);
         }
     }

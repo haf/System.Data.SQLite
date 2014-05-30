@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -57,6 +57,10 @@ namespace testlinq
               case "old":
                   {
                       return OldTests();
+                  }
+              case "datetime":
+                  {
+                      return DateTimeTest();
                   }
               case "skip":
                   {
@@ -324,6 +328,17 @@ namespace testlinq
           }
 
           return 0;
+      }
+
+      private static int DateTimeTest()
+      {
+          using (northwindEFEntities db = new northwindEFEntities())
+          {
+              DateTime dateTime = new DateTime(1997, 1, 1, 0, 0, 0, DateTimeKind.Local);
+              int c1 = db.Orders.Where(i => i.OrderDate == new DateTime(1997, 1, 1, 0, 0, 0, DateTimeKind.Local)).Count();
+              int c2 = db.Orders.Where(i => i.OrderDate == dateTime).Count();
+              return c1 == c2 ? 0 : 1;
+          }
       }
 
     private static int OldTests()

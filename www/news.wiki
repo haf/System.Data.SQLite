@@ -13,6 +13,7 @@
     <li>Make the ISQLiteSchemaExtensions interface public.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Have the SQLiteProviderFactory class (in the System.Data.SQLite.Linq assembly) implement the IServiceProvider interface.</li>
     <li>Fix bug in documentation generator automation that prevented some internal documentation links from working.</li>
+    <li>Fix DateTime constant handling in the LINQ assembly. Fix for [da9f18d039].&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>
     <b>1.0.92.0 - March 19, 2014</b>
