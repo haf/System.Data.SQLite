@@ -1,7 +1,7 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
@@ -551,10 +551,24 @@ namespace System.Data.SQLite
                     type = "data";
                 }
             }
+            else if (errorCode == null)
+            {
+                type = "trace";
+            }
 
-            Trace.WriteLine(String.Format(
-                CultureInfo.CurrentCulture, "SQLite {0} ({1}): {2}",
-                type, errorCode, message));
+            if ((errorCode != null) &&
+                !Object.ReferenceEquals(errorCode, String.Empty))
+            {
+                Trace.WriteLine(String.Format(
+                    CultureInfo.CurrentCulture, "SQLite {0} ({1}): {2}",
+                    type, errorCode, message));
+            }
+            else
+            {
+                Trace.WriteLine(String.Format(
+                    CultureInfo.CurrentCulture, "SQLite {0}: {1}",
+                    type, message));
+            }
 #endif
         }
     }
