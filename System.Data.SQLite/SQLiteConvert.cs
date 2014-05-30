@@ -1340,6 +1340,32 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Determines if a database type is considered to be a string.
+    /// </summary>
+    /// <param name="type">
+    /// The database type to check.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the database type is considered to be a string, zero
+    /// otherwise.
+    /// </returns>
+    internal static bool IsStringDbType(
+        DbType type
+        )
+    {
+        switch (type)
+        {
+            case DbType.AnsiString:
+            case DbType.String:
+            case DbType.AnsiStringFixedLength:
+            case DbType.StringFixedLength:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
     /// Determines the default <see cref="DbType" /> value to be used when a
     /// per-connection value is not available.
     /// </summary>
@@ -1361,6 +1387,147 @@ namespace System.Data.SQLite
             return FallbackDefaultDbType;
 
         return (DbType)enumValue;
+    }
+
+    /// <summary>
+    /// Determines if the specified textual value appears to be a
+    /// <see cref="DBNull" /> value.
+    /// </summary>
+    /// <param name="text">
+    /// The textual value to inspect.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the text looks like a <see cref="DBNull" /> value,
+    /// zero otherwise.
+    /// </returns>
+    internal static bool LooksLikeNull(
+        string text
+        )
+    {
+        return (text == null);
+    }
+
+    /// <summary>
+    /// Determines if the specified textual value appears to be an
+    /// <see cref="Int64" /> value.
+    /// </summary>
+    /// <param name="text">
+    /// The textual value to inspect.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the text looks like an <see cref="Int64" /> value,
+    /// zero otherwise.
+    /// </returns>
+    internal static bool LooksLikeInt64(
+        string text
+        )
+    {
+        long longValue;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+        if (!long.TryParse(
+                text, NumberStyles.Integer, CultureInfo.InvariantCulture,
+                out longValue))
+        {
+            return false;
+        }
+#else
+        try
+        {
+            longValue = long.Parse(
+                text, NumberStyles.Integer, CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            return false;
+        }
+#endif
+
+        return String.Equals(
+            longValue.ToString(CultureInfo.InvariantCulture), text,
+            StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Determines if the specified textual value appears to be a
+    /// <see cref="Double" /> value.
+    /// </summary>
+    /// <param name="text">
+    /// The textual value to inspect.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the text looks like a <see cref="Double" /> value,
+    /// zero otherwise.
+    /// </returns>
+    internal static bool LooksLikeDouble(
+        string text
+        )
+    {
+        double doubleValue;
+
+#if !PLATFORM_COMPACTFRAMEWORK
+        if (!double.TryParse(
+                text, NumberStyles.Float | NumberStyles.AllowThousands,
+                CultureInfo.InvariantCulture, out doubleValue))
+        {
+            return false;
+        }
+#else
+        try
+        {
+            doubleValue = double.Parse(text, CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            return false;
+        }
+#endif
+
+        return String.Equals(
+            doubleValue.ToString(CultureInfo.InvariantCulture), text,
+            StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Determines if the specified textual value appears to be a
+    /// <see cref="DateTime" /> value.
+    /// </summary>
+    /// <param name="convert">
+    /// The <see cref="SQLiteConvert" /> object instance configured with
+    /// the chosen <see cref="DateTime" /> format.
+    /// </param>
+    /// <param name="text">
+    /// The textual value to inspect.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the text looks like a <see cref="DateTime" /> in the
+    /// configured format, zero otherwise.
+    /// </returns>
+    internal static bool LooksLikeDateTime(
+        SQLiteConvert convert,
+        string text
+        )
+    {
+        if (convert == null)
+            return false;
+
+        try
+        {
+            DateTime dateTimeValue = convert.ToDateTime(text);
+
+            if (String.Equals(
+                    convert.ToString(dateTimeValue),
+                    text, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            // do nothing.
+        }
+
+        return false;
     }
 
     /// <summary>

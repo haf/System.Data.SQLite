@@ -992,9 +992,7 @@ namespace System.Data.SQLite
             if (arSize.Length > 1)
             {
               arSize = arSize[0].Split(',', '.');
-              if (sqlType.Type == DbType.AnsiString || sqlType.Type == DbType.Binary ||
-                  sqlType.Type == DbType.String || sqlType.Type == DbType.AnsiStringFixedLength ||
-                  sqlType.Type == DbType.StringFixedLength)
+              if (sqlType.Type == DbType.Binary || SQLiteConvert.IsStringDbType(sqlType.Type))
               {
                 row[SchemaTableColumn.ColumnSize] = Convert.ToInt32(arSize[0], CultureInfo.InvariantCulture);
               }
@@ -1137,6 +1135,19 @@ namespace System.Data.SQLite
 
       SQLiteConnectionFlags flags = SQLiteCommand.GetFlags(_command);
       SQLiteType typ = GetSQLiteType(flags, i);
+
+      if (((flags & SQLiteConnectionFlags.DetectTextAffinity) == SQLiteConnectionFlags.DetectTextAffinity) &&
+          ((typ == null) || (typ.Affinity == TypeAffinity.Text)))
+      {
+          typ = GetSQLiteType(
+              typ, _activeStatement._sql.GetText(_activeStatement, i));
+      }
+      else if (((flags & SQLiteConnectionFlags.DetectStringType) == SQLiteConnectionFlags.DetectStringType) &&
+          ((typ == null) || SQLiteConvert.IsStringDbType(typ.Type)))
+      {
+          typ = GetSQLiteType(
+              typ, _activeStatement._sql.GetText(_activeStatement, i));
+      }
 
       return _activeStatement._sql.GetValue(_activeStatement, flags, i, typ);
     }
@@ -1412,6 +1423,41 @@ namespace System.Data.SQLite
         }
 
         return SQLiteConnectionFlags.Default;
+    }
+
+    /// <summary>
+    /// Retrieves the SQLiteType for a given column and row value.
+    /// </summary>
+    /// <param name="oldType">
+    /// The original SQLiteType structure, based only on the column.
+    /// </param>
+    /// <param name="text">
+    /// The textual value of the column for a given row.
+    /// </param>
+    /// <returns>
+    /// The SQLiteType structure.
+    /// </returns>
+    private SQLiteType GetSQLiteType(
+        SQLiteType oldType, /* PASS-THROUGH */
+        string text
+        )
+    {
+        if (SQLiteConvert.LooksLikeNull(text))
+            return new SQLiteType(TypeAffinity.Null, DbType.Object);
+
+        if (SQLiteConvert.LooksLikeInt64(text))
+            return new SQLiteType(TypeAffinity.Int64, DbType.Int64);
+
+        if (SQLiteConvert.LooksLikeDouble(text))
+            return new SQLiteType(TypeAffinity.Double, DbType.Double);
+
+        if ((_activeStatement != null) &&
+            SQLiteConvert.LooksLikeDateTime(_activeStatement._sql, text))
+        {
+            return new SQLiteType(TypeAffinity.DateTime, DbType.DateTime);
+        }
+
+        return oldType;
     }
 
     /// <summary>
