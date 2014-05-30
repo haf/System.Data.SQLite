@@ -114,6 +114,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/Sets the encoding for the connection string.  The default is "False" which indicates UTF-8 encoding.
     /// </summary>
+    [DisplayName("Use UTF-16 Encoding")]
     [Browsable(true)]
     [DefaultValue(false)]
     public bool UseUTF16Encoding
@@ -153,6 +154,7 @@ namespace System.Data.SQLite
     /// Gets/Sets whethor not to store GUID's in binary format.  The default is True
     /// which saves space in the database.
     /// </summary>
+    [DisplayName("Binary GUID")]
     [Browsable(true)]
     [DefaultValue(true)]
     public bool BinaryGUID
@@ -192,6 +194,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// An alternate to the data source property
     /// </summary>
+    [DisplayName("URI")]
     [Browsable(true)]
     [DefaultValue(null)]
     public string Uri
@@ -211,6 +214,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// An alternate to the data source property that uses the SQLite URI syntax.
     /// </summary>
+    [DisplayName("Full URI")]
     [Browsable(true)]
     [DefaultValue(null)]
     public string FullUri
@@ -272,6 +276,7 @@ namespace System.Data.SQLite
     /// If set to true, will throw an exception if the database specified in the connection
     /// string does not exist.  If false, the database will be created automatically.
     /// </summary>
+    [DisplayName("Fail If Missing")]
     [Browsable(true)]
     [DefaultValue(false)]
     public bool FailIfMissing
@@ -352,6 +357,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/sets the database encryption hexadecimal password
     /// </summary>
+    [DisplayName("Hexadecimal Password")]
     [Browsable(true)]
     [PasswordPropertyText(true)]
     [DefaultValue(null)]
@@ -400,7 +406,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/Sets the maximum number of pages the database may hold
     /// </summary>
-    [DisplayName("Max Page Count")]
+    [DisplayName("Maximum Page Count")]
     [Browsable(true)]
     [DefaultValue(0)]
     public int MaxPageCount
@@ -440,6 +446,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/Sets the DateTime format for the connection.
     /// </summary>
+    [DisplayName("DateTime Format")]
     [Browsable(true)]
     [DefaultValue(SQLiteDateFormats.Default)]
     public SQLiteDateFormats DateTimeFormat
@@ -468,6 +475,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/Sets the DateTime kind for the connection.
     /// </summary>
+    [DisplayName("DateTime Kind")]
     [Browsable(true)]
     [DefaultValue(DateTimeKind.Unspecified)]
     public DateTimeKind DateTimeKind
@@ -497,6 +505,7 @@ namespace System.Data.SQLite
     /// Gets/sets the DateTime format string used for formatting
     /// and parsing purposes.
     /// </summary>
+    [DisplayName("DateTime Format String")]
     [Browsable(true)]
     [DefaultValue(null)]
     public string DateTimeFormatString
@@ -525,6 +534,7 @@ namespace System.Data.SQLite
     /// Gets/Sets the placeholder base schema name used for
     /// .NET Framework compatibility purposes.
     /// </summary>
+    [DisplayName("Base Schema Name")]
     [Browsable(true)]
     [DefaultValue(SQLiteConnection.DefaultBaseSchemaName)]
     public string BaseSchemaName
@@ -598,6 +608,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/sets the default database type for the connection.
     /// </summary>
+    [DisplayName("Default Database Type")]
     [Browsable(true)]
     [DefaultValue(SQLiteConvert.FallbackDefaultDbType)]
     public DbType DefaultDbType
@@ -620,6 +631,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Gets/sets the default type name for the connection.
     /// </summary>
+    [DisplayName("Default Type Name")]
     [Browsable(true)]
     [DefaultValue(null)]
     public string DefaultTypeName
@@ -687,7 +699,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// If enabled, apply the default connection settings to opened databases.
     /// </summary>
-    [DisplayName("SetDefaults")]
+    [DisplayName("Set Defaults")]
     [Browsable(true)]
     [DefaultValue(true)]
     public bool SetDefaults
@@ -708,7 +720,7 @@ namespace System.Data.SQLite
     /// If enabled, attempt to resolve the provided data source file name to a
     /// full path before opening.
     /// </summary>
-    [DisplayName("ToFullPath")]
+    [DisplayName("To Full Path")]
     [Browsable(true)]
     [DefaultValue(true)]
     public bool ToFullPath
@@ -722,6 +734,26 @@ namespace System.Data.SQLite
         set
         {
             this["tofullpath"] = value;
+        }
+    }
+
+    /// <summary>
+    /// If enabled, skip using the configured shared connection flags.
+    /// </summary>
+    [DisplayName("No Shared Flags")]
+    [Browsable(true)]
+    [DefaultValue(true)]
+    public bool NoSharedFlags
+    {
+        get
+        {
+            object value;
+            TryGetValue("nosharedflags", out value);
+            return SQLiteConvert.ToBoolean(value);
+        }
+        set
+        {
+            this["nosharedflags"] = value;
         }
     }
 

@@ -1561,6 +1561,25 @@ namespace eval ::Eagle {
       }
 
       #
+      # NOTE: Show (and log) the shared connection flags.
+      #
+      if {!$quiet} then {
+        if {[catch {
+          object invoke System.Data.SQLite.SQLiteConnection SharedFlags
+        } sharedFlags] == 0} then {
+          tputs $::test_channel [appendArgs \
+              "---- shared connection flags for " $database \
+              " are: " [expr {[string length $sharedFlags] > 0 && \
+              $sharedFlags ne "None" ? \
+              [appendArgs \" $sharedFlags \"] : "<none>"}] \n]
+        } else {
+          tputs $::test_channel [appendArgs \
+              "---- shared connection flags for " $database \
+              " are: <unavailable>\n"]
+        }
+      }
+
+      #
       # NOTE: If there are any global (per test run) connection flags currently
       #       set, use them now (i.e. by combining them with the ones for this
       #       connection).

@@ -359,6 +359,7 @@ namespace System.Data.SQLite
     private const int DefaultCacheSize = 2000;
     private const int DefaultMaxPoolSize = 100;
     private const int DefaultConnectionTimeout = 30;
+    private const bool DefaultNoSharedFlags = false;
     private const bool DefaultFailIfMissing = false;
     private const bool DefaultReadOnly = false;
     private const bool DefaultBinaryGUID = true;
@@ -396,6 +397,11 @@ namespace System.Data.SQLite
     /// Static variable to store the connection event handlers to call.
     /// </summary>
     private static event SQLiteConnectionEventHandler _handlers;
+
+    /// <summary>
+    /// The extra connection flags to be used for all opened connections.
+    /// </summary>
+    private static SQLiteConnectionFlags _sharedFlags;
 
 #if SQLITE_STANDARD && !PLATFORM_COMPACTFRAMEWORK
     /// <summary>
@@ -2272,6 +2278,9 @@ namespace System.Data.SQLite
       enumValue = TryParseEnum(typeof(SQLiteConnectionFlags), FindKey(opts, "Flags", DefaultFlags.ToString()), true);
       _flags = (enumValue is SQLiteConnectionFlags) ? (SQLiteConnectionFlags)enumValue : DefaultFlags;
 
+      bool noSharedFlags = SQLiteConvert.ToBoolean(FindKey(opts, "NoSharedFlags", DefaultNoSharedFlags.ToString()));
+      if (!noSharedFlags) { lock (_syncRoot) { _flags |= _sharedFlags; } }
+
       enumValue = TryParseEnum(typeof(DbType), FindKey(opts, "DefaultDbType", SQLiteConvert.FallbackDefaultDbType.ToString()), true);
       _defaultDbType = (enumValue is DbType) ? (DbType)enumValue : SQLiteConvert.FallbackDefaultDbType;
       _defaultTypeName = FindKey(opts, "DefaultTypeName", SQLiteConvert.FallbackDefaultTypeName);
@@ -2990,6 +2999,15 @@ namespace System.Data.SQLite
                 return null;
             }
         }
+    }
+
+    /// <summary>
+    /// The extra connection flags to be used for all opened connections.
+    /// </summary>
+    public static SQLiteConnectionFlags SharedFlags
+    {
+        get { lock (_syncRoot) { return _sharedFlags; } }
+        set { lock (_syncRoot) { _sharedFlags = value; } }
     }
 
     /// <summary>
