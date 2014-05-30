@@ -742,7 +742,7 @@ namespace System.Data.SQLite
     /// </summary>
     [DisplayName("No Shared Flags")]
     [Browsable(true)]
-    [DefaultValue(true)]
+    [DefaultValue(false)]
     public bool NoSharedFlags
     {
         get
