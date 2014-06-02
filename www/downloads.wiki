@@ -2054,7 +2054,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://sqlite.phxsoftware.com/">SQLite-1.0.66.0-setup.exe</a>
+        <a href="http://www.sourceforge.net/projects/sqlite-dotnet2/files/SQLite%20for%20ADO.NET%202.0/1.0.66.0/SQLite-1.0.66.0-setup.exe/download">SQLite-1.0.66.0-setup.exe</a>
         <br />
         (3.2 MiB)
       </td>
