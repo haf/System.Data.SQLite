@@ -34,6 +34,18 @@ proc qputs { args } {
   }
 }
 
+proc showPlatforms { cultureInfo } {
+  set datastoreManager [object create -alias \
+      Microsoft.SmartDevice.Connectivity.DatastoreManager \
+      [$cultureInfo LCID]]
+
+  object foreach -alias platform [$datastoreManager GetPlatforms] {
+    qputs stdout [appendArgs \
+        "found platform \"" [$platform Id.ToString] "\" with name \"" \
+        [$platform Name] \"...]
+  }
+}
+
 #
 # NOTE: This procedure looks up and returns the target device based on the
 #       locale, platform Id, and device Id.
@@ -252,7 +264,18 @@ if {$argc >= 0 && $argc <= 7} then {
   #       target device.  If this fails, the necessary SDK components are
   #       probably not available on this system.
   #
-  object load Microsoft.Smartdevice.Connectivity
+  # NOTE: As of Visual Studio 2013 Update 2 (?), this must specify the full
+  #       (versioned) assembly name here in order to make sure the assembly
+  #       associated with the Pocket PC 2003 platform(s) gets loaded.
+  #
+  object load [appendArgs \
+      "Microsoft.Smartdevice.Connectivity, Version=9.0.0.0, " \
+      "Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"]
+
+  #
+  # NOTE: Show the full list of available platforms.
+  #
+  showPlatforms $cultureInfo
 
   #
   # NOTE: Lookup the necessary device based on the platform and device Ids.
