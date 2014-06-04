@@ -1843,6 +1843,7 @@
 
     <tr>
       <td colspan="4">
+        <a name="nuGetPackages"></a>
         <b>Official NuGet Packages</b>
       </td>
     </tr>
@@ -2047,6 +2048,7 @@
 
     <tr>
       <td colspan="4">
+        <a name="legacyVersions"></a>
         <b>Legacy Versions</b>
       </td>
     </tr>
