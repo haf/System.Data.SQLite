@@ -3983,7 +3983,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         private const string Ef6AssemblyName = "EntityFramework, " +
-            "Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+            "Version=6.1.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
         ///////////////////////////////////////////////////////////////////////
 
