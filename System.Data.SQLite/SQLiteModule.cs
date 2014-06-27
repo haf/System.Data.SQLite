@@ -490,8 +490,8 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
             return UnsafeNativeMethods.sqlite3_value_int64(pValue);
 #elif !SQLITE_STANDARD
-            long value;
-            UnsafeNativeMethods.sqlite3_value_int64_interop(pValue, out value);
+            long value = 0;
+            UnsafeNativeMethods.sqlite3_value_int64_interop(pValue, ref value);
             return value;
 #else
             throw new NotImplementedException();
@@ -514,8 +514,8 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
             return UnsafeNativeMethods.sqlite3_value_double(pValue);
 #elif !SQLITE_STANDARD
-            double value;
-            UnsafeNativeMethods.sqlite3_value_double_interop(pValue, out value);
+            double value = 0.0;
+            UnsafeNativeMethods.sqlite3_value_double_interop(pValue, ref value);
             return value;
 #else
             throw new NotImplementedException();

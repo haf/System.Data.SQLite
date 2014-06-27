@@ -347,7 +347,7 @@ SQLITE_API int WINAPI sqlite3_open_interop(const char *filename, int flags, sqli
 #endif
 
 #if defined(INTEROP_EXTENSION_FUNCTIONS)
-  if (ret == SQLITE_OK)
+  if ((ret == SQLITE_OK) && ppdb)
     RegisterExtensionFunctions(*ppdb);
 #endif
 
@@ -368,7 +368,7 @@ SQLITE_API int WINAPI sqlite3_open16_interop(const char *filename, int flags, sq
   sqlite3InteropDebug("sqlite3_open16_interop(): sqlite3_open_interop(\"%s\", %d, %p) returned %d.\n", filename, flags, ppdb, ret);
 #endif
 
-  if ((ret == SQLITE_OK) && !DbHasProperty(*ppdb, 0, DB_SchemaLoaded))
+  if ((ret == SQLITE_OK) && ppdb && !DbHasProperty(*ppdb, 0, DB_SchemaLoaded))
     ENC(*ppdb) = SQLITE_UTF16NATIVE;
 
   return ret;
@@ -377,7 +377,7 @@ SQLITE_API int WINAPI sqlite3_open16_interop(const char *filename, int flags, sq
 SQLITE_API const char *WINAPI sqlite3_errmsg_interop(sqlite3 *db, int *plen)
 {
   const char *pval = sqlite3_errmsg(db);
-  *plen = (pval != 0) ? strlen(pval) : 0;
+  if (plen) *plen = pval ? strlen(pval) : 0;
   return pval;
 }
 
@@ -421,7 +421,7 @@ SQLITE_API int WINAPI sqlite3_prepare_interop(sqlite3 *db, const char *sql, int 
   sqlite3InteropDebug("sqlite3_prepare_interop(): sqlite3_prepare(%p, \"%s\", %d, %p) returned %d.\n", db, sql, nbytes, ppstmt, n);
 #endif
 
-  *plen = (*pztail != 0) ? strlen(*pztail) : 0;
+  if (plen) *plen = (pztail && *pztail) ? strlen(*pztail) : 0;
 
   return n;
 }
@@ -444,7 +444,7 @@ SQLITE_API int WINAPI sqlite3_prepare16_interop(sqlite3 *db, const void *sql, in
   sqlite3InteropDebug("sqlite3_prepare_interop(): sqlite3_prepare16(%p, \"%s\", %d, %p) returned %d.\n", db, sql, nchars, ppstmt, n);
 #endif
 
-  *plen = (*pztail != 0) ? wcslen((wchar_t *)*pztail) * sizeof(wchar_t) : 0;
+  if (plen) *plen = (pztail && *pztail) ? wcslen((wchar_t *)*pztail) * sizeof(wchar_t) : 0;
 
   return n;
 }
@@ -480,6 +480,7 @@ SQLITE_API void *WINAPI sqlite3_create_disposable_module_interop(
   void *pClientData,
   void(*xDestroyModule)(void*)
 ){
+  if (!pModule) return 0;
   memset(pModule, 0, sizeof(*pModule));
   pModule->iVersion = iVersion;
   pModule->xCreate = xCreate;
@@ -510,85 +511,92 @@ SQLITE_API void *WINAPI sqlite3_create_disposable_module_interop(
 
 SQLITE_API int WINAPI sqlite3_bind_double_interop(sqlite3_stmt *stmt, int iCol, double *val)
 {
-	return sqlite3_bind_double(stmt,iCol,*val);
+  if (!val) return SQLITE_ERROR;
+  return sqlite3_bind_double(stmt,iCol,*val);
 }
 
 SQLITE_API int WINAPI sqlite3_bind_int64_interop(sqlite3_stmt *stmt, int iCol, sqlite_int64 *val)
 {
-	return sqlite3_bind_int64(stmt,iCol,*val);
+  if (!val) return SQLITE_ERROR;
+  return sqlite3_bind_int64(stmt,iCol,*val);
 }
 
 SQLITE_API const char * WINAPI sqlite3_bind_parameter_name_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const char *pval = sqlite3_bind_parameter_name(stmt, iCol);
-  *plen = (pval != 0) ? strlen(pval) : 0;
+  if (plen) *plen = pval ? strlen(pval) : 0;
   return pval;
 }
 
 SQLITE_API const char * WINAPI sqlite3_column_name_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const char *pval = sqlite3_column_name(stmt, iCol);
-  *plen = (pval != 0) ? strlen(pval) : 0;
+  if (plen) *plen = pval ? strlen(pval) : 0;
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_column_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const void *pval = sqlite3_column_name16(stmt, iCol);
-  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  if (plen) *plen = pval ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
   return pval;
 }
 
 SQLITE_API const char * WINAPI sqlite3_column_decltype_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const char *pval = sqlite3_column_decltype(stmt, iCol);
-  *plen = (pval != 0) ? strlen(pval) : 0;
+  if (plen) *plen = pval ? strlen(pval) : 0;
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_column_decltype16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const void *pval = sqlite3_column_decltype16(stmt, iCol);
-  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  if (plen) *plen = pval ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
   return pval;
 }
 
 SQLITE_API void WINAPI sqlite3_column_double_interop(sqlite3_stmt *stmt, int iCol, double *val)
 {
-	*val = sqlite3_column_double(stmt,iCol);
+  if (!val) return;
+  *val = sqlite3_column_double(stmt,iCol);
 }
 
 SQLITE_API void WINAPI sqlite3_column_int64_interop(sqlite3_stmt *stmt, int iCol, sqlite_int64 *val)
 {
-	*val = sqlite3_column_int64(stmt,iCol);
+  if (!val) return;
+  *val = sqlite3_column_int64(stmt,iCol);
 }
 
 SQLITE_API void WINAPI sqlite3_last_insert_rowid_interop(sqlite3 *db, sqlite_int64 *rowId)
 {
-	*rowId = sqlite3_last_insert_rowid(db);
+  if (!rowId) return;
+  *rowId = sqlite3_last_insert_rowid(db);
 }
 
 SQLITE_API void WINAPI sqlite3_memory_used_interop(sqlite_int64 *nBytes)
 {
-	*nBytes = sqlite3_memory_used();
+  if (!nBytes) return;
+  *nBytes = sqlite3_memory_used();
 }
 
 SQLITE_API void WINAPI sqlite3_memory_highwater_interop(int resetFlag, sqlite_int64 *nBytes)
 {
-	*nBytes = sqlite3_memory_highwater(resetFlag);
+  if (!nBytes) return;
+  *nBytes = sqlite3_memory_highwater(resetFlag);
 }
 
 SQLITE_API const unsigned char * WINAPI sqlite3_column_text_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const unsigned char *pval = sqlite3_column_text(stmt, iCol);
-  *plen = sqlite3_column_bytes(stmt, iCol);
+  if (plen) *plen = sqlite3_column_bytes(stmt, iCol);
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_column_text16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const void *pval = sqlite3_column_text16(stmt, iCol);
-  *plen = sqlite3_column_bytes16(stmt, iCol);
+  if (plen) *plen = sqlite3_column_bytes16(stmt, iCol);
   return pval;
 }
 
@@ -599,7 +607,7 @@ SQLITE_API int WINAPI sqlite3_finalize_interop(sqlite3_stmt *stmt)
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_FINALIZE)
   Vdbe *p = (Vdbe *)stmt;
-  sqlite3 *db = p->db;
+  sqlite3 *db = p ? p->db : 0;
   sqlite3InteropDebug("sqlite3_finalize_interop(): calling sqlite3_finalize(%p, %p)...\n", db, stmt);
 #endif
 
@@ -644,8 +652,8 @@ SQLITE_API int WINAPI sqlite3_backup_finish_interop(sqlite3_backup *p)
   int ret;
 
 #if defined(INTEROP_DEBUG) && (INTEROP_DEBUG & INTEROP_DEBUG_BACKUP_FINISH)
-  sqlite3* pDestDb = p->pDestDb;
-  sqlite3* pSrcDb = p->pSrcDb;
+  sqlite3* pDestDb = p ? p->pDestDb : 0;
+  sqlite3* pSrcDb = p ? p->pSrcDb : 0;
   sqlite3InteropDebug("sqlite3_backup_finish_interop(): calling sqlite3_backup_finish(%p, %p, %p)...\n", pDestDb, pSrcDb, p);
 #endif
 
@@ -675,7 +683,7 @@ SQLITE_API int WINAPI sqlite3_reset_interop(sqlite3_stmt *stmt)
 
   return ret;
 #else
-  if (((Vdbe *)stmt)->magic == VDBE_MAGIC_DEAD) return SQLITE_SCHEMA;
+  if (stmt && ((Vdbe *)stmt)->magic == VDBE_MAGIC_DEAD) return SQLITE_SCHEMA;
   ret = sqlite3_reset(stmt);
   return ret;
 #endif
@@ -688,7 +696,7 @@ SQLITE_API int WINAPI sqlite3_create_function_interop(sqlite3 *psql, const char 
   if (eTextRep == SQLITE_UTF16)
     eTextRep = SQLITE_UTF16NATIVE;
 
-  n = sqlite3_create_function(psql, zFunctionName, nArg, eTextRep, 0, func, funcstep, funcfinal);
+  n = sqlite3_create_function(psql, zFunctionName, nArg, eTextRep, pvUser, func, funcstep, funcfinal);
   if (n == SQLITE_OK)
   {
     if (needCollSeq)
@@ -710,55 +718,61 @@ SQLITE_API int WINAPI sqlite3_create_function_interop(sqlite3 *psql, const char 
 
 SQLITE_API void WINAPI sqlite3_value_double_interop(sqlite3_value *pval, double *val)
 {
+  if (!val) return;
   *val = sqlite3_value_double(pval);
 }
 
 SQLITE_API void WINAPI sqlite3_value_int64_interop(sqlite3_value *pval, sqlite_int64 *val)
 {
+  if (!val) return;
   *val = sqlite3_value_int64(pval);
 }
 
 SQLITE_API const unsigned char * WINAPI sqlite3_value_text_interop(sqlite3_value *val, int *plen)
 {
   const unsigned char *pval = sqlite3_value_text(val);
-  *plen = sqlite3_value_bytes(val);
+  if (plen) *plen = sqlite3_value_bytes(val);
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_value_text16_interop(sqlite3_value *val, int *plen)
 {
   const void *pval = sqlite3_value_text16(val);
-  *plen = sqlite3_value_bytes16(val);
+  if (plen) *plen = sqlite3_value_bytes16(val);
   return pval;
 }
 
 SQLITE_API void WINAPI sqlite3_result_double_interop(sqlite3_context *pctx, double *val)
 {
+  if (!val) return;
   sqlite3_result_double(pctx, *val);
 }
 
 SQLITE_API void WINAPI sqlite3_result_int64_interop(sqlite3_context *pctx, sqlite_int64 *val)
 {
+  if (!val) return;
   sqlite3_result_int64(pctx, *val);
 }
 
 SQLITE_API int WINAPI sqlite3_context_collcompare_interop(sqlite3_context *ctx, const void *p1, int p1len, const void *p2, int p2len)
 {
+  if (!ctx || !ctx->pFunc || !ctx->pColl || !ctx->pColl->xCmp) return 3; /* ERROR */
 #if SQLITE_VERSION_NUMBER >= 3008001
-  if ((ctx->pFunc->funcFlags & SQLITE_FUNC_NEEDCOLL) == 0) return 2;
+  if ((ctx->pFunc->funcFlags & SQLITE_FUNC_NEEDCOLL) == 0) return 2; /* ERROR */
 #else
-  if ((ctx->pFunc->flags & SQLITE_FUNC_NEEDCOLL) == 0) return 2;
+  if ((ctx->pFunc->flags & SQLITE_FUNC_NEEDCOLL) == 0) return 2; /* ERROR */
 #endif
   return ctx->pColl->xCmp(ctx->pColl->pUser, p1len, p1, p2len, p2);
 }
 
 SQLITE_API const char * WINAPI sqlite3_context_collseq_interop(sqlite3_context *ctx, int *ptype, int *enc, int *plen)
 {
-  CollSeq *pColl = ctx->pColl;
-  *ptype = 0;
-  *plen = 0;
-  *enc = 0;
+  CollSeq *pColl = ctx ? ctx->pColl : 0;
+  if (ptype) *ptype = 0;
+  if (plen) *plen = 0;
+  if (enc) *enc = 0;
 
+  if (!ctx || !ctx->pFunc) return NULL;
 #if SQLITE_VERSION_NUMBER >= 3008001
   if ((ctx->pFunc->funcFlags & SQLITE_FUNC_NEEDCOLL) == 0) return NULL;
 #else
@@ -767,11 +781,11 @@ SQLITE_API const char * WINAPI sqlite3_context_collseq_interop(sqlite3_context *
 
   if (pColl)
   {
-    *enc = pColl->enc;
+    if (enc) *enc = pColl->enc;
 #if SQLITE_VERSION_NUMBER < 3007010
-    *ptype = pColl->type;
+    if (ptype) *ptype = pColl->type;
 #endif
-    *plen = (pColl->zName != 0) ? strlen(pColl->zName) : 0;
+    if (plen) *plen = pColl->zName ? strlen(pColl->zName) : 0;
 
     return pColl->zName;
   }
@@ -781,42 +795,42 @@ SQLITE_API const char * WINAPI sqlite3_context_collseq_interop(sqlite3_context *
 SQLITE_API const char * WINAPI sqlite3_column_database_name_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const char *pval = sqlite3_column_database_name(stmt, iCol);
-  *plen = (pval != 0) ? strlen(pval) : 0;
+  if (plen) *plen = pval ? strlen(pval) : 0;
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_column_database_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const void *pval = sqlite3_column_database_name16(stmt, iCol);
-  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  if (plen) *plen = pval ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
   return pval;
 }
 
 SQLITE_API const char * WINAPI sqlite3_column_table_name_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const char *pval = sqlite3_column_table_name(stmt, iCol);
-  *plen = (pval != 0) ? strlen(pval) : 0;
+  if (plen) *plen = pval ? strlen(pval) : 0;
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_column_table_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const void *pval = sqlite3_column_table_name16(stmt, iCol);
-  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  if (plen) *plen = pval ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
   return pval;
 }
 
 SQLITE_API const char * WINAPI sqlite3_column_origin_name_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const char *pval = sqlite3_column_origin_name(stmt, iCol);
-  *plen = (pval != 0) ? strlen(pval) : 0;
+  if (plen) *plen = pval ? strlen(pval) : 0;
   return pval;
 }
 
 SQLITE_API const void * WINAPI sqlite3_column_origin_name16_interop(sqlite3_stmt *stmt, int iCol, int *plen)
 {
   const void *pval = sqlite3_column_origin_name16(stmt, iCol);
-  *plen = (pval != 0) ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
+  if (plen) *plen = pval ? wcslen((wchar_t *)pval) * sizeof(wchar_t) : 0;
   return pval;
 }
 
@@ -825,8 +839,9 @@ SQLITE_API int WINAPI sqlite3_table_column_metadata_interop(sqlite3 *db, const c
   int n;
 
   n = sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc);
-  *pdtLen = (*pzDataType != 0) ? strlen(*pzDataType) : 0;
-  *pcsLen = (*pzCollSeq != 0) ? strlen(*pzCollSeq) : 0;
+
+  if (pdtLen) *pdtLen = (pzDataType && *pzDataType) ? strlen(*pzDataType) : 0;
+  if (pcsLen) *pcsLen = (pzCollSeq && *pzCollSeq) ? strlen(*pzCollSeq) : 0;
 
   return n;
 }
@@ -837,6 +852,7 @@ SQLITE_API int WINAPI sqlite3_index_column_info_interop(sqlite3 *db, const char 
   Table *pTab;
   int n;
 
+  if (!db) return SQLITE_ERROR;
   sqlite3_mutex_enter(db->mutex);
   sqlite3BtreeEnterAll(db);
 
@@ -853,10 +869,10 @@ SQLITE_API int WINAPI sqlite3_index_column_info_interop(sqlite3 *db, const char 
     int cnum = pIdx->aiColumn[n];
     if (sqlite3StrICmp(pTab->aCol[cnum].zName, zColumnName) == 0)
     {
-      *sortOrder = pIdx->aSortOrder[n];
-      *pzColl = pIdx->azColl[n];
-      *plen = strlen(*pzColl);
-      *onError = pIdx->onError;
+      if ( sortOrder ) *sortOrder = pIdx->aSortOrder[n];
+      if ( pzColl ) *pzColl = pIdx->azColl[n];
+      if ( plen ) *plen = strlen(*pzColl);
+      if ( onError ) *onError = pIdx->onError;
 
       return SQLITE_OK;
     }
@@ -869,8 +885,9 @@ SQLITE_API int WINAPI sqlite3_table_cursor_interop(sqlite3_stmt *pstmt, int iDb,
   Vdbe *p = (Vdbe *)pstmt;
   sqlite3 *db = (p == NULL) ? NULL : p->db;
   int n;
-  int ret = -1;
+  int ret = -1; /* NOT FOUND */
 
+  if (!p || !db) return ret;
   sqlite3_mutex_enter(db->mutex);
   for (n = 0; n < p->nCursor && p->apCsr[n] != NULL; n++)
   {
@@ -894,6 +911,7 @@ SQLITE_API int WINAPI sqlite3_cursor_rowid_interop(sqlite3_stmt *pstmt, int curs
   VdbeCursor *pC;
   int ret = SQLITE_OK;
 
+  if (!p || !db) return SQLITE_ERROR;
   sqlite3_mutex_enter(db->mutex);
   while (1)
   {
@@ -916,7 +934,7 @@ SQLITE_API int WINAPI sqlite3_cursor_rowid_interop(sqlite3_stmt *pstmt, int curs
 
     if(pC->rowidIsValid)
     {
-      *prowid = pC->lastRowid;
+      if (prowid) *prowid = pC->lastRowid;
     }
     else if(pC->pseudoTableReg > 0)
     {
@@ -936,7 +954,7 @@ SQLITE_API int WINAPI sqlite3_cursor_rowid_interop(sqlite3_stmt *pstmt, int curs
         break;
       }
       sqlite3BtreeKeySize(pC->pCursor, prowid);
-      *prowid = *prowid;
+      if (prowid) *prowid = *prowid;
     }
     break;
   }

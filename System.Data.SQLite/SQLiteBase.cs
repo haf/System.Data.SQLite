@@ -154,7 +154,7 @@ namespace System.Data.SQLite
     /// SQL up to to either the end of the text or to the first semi-colon delimiter.  The remaining text is returned
     /// here for a subsequent call to Prepare() until all the text has been processed.</param>
     /// <returns>Returns an initialized SQLiteStatement.</returns>
-    internal abstract SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, uint timeoutMS, out string strRemain);
+    internal abstract SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, uint timeoutMS, ref string strRemain);
     /// <summary>
     /// Steps through a prepared statement.
     /// </summary>
@@ -208,13 +208,13 @@ namespace System.Data.SQLite
     internal abstract int ColumnCount(SQLiteStatement stmt);
     internal abstract string ColumnName(SQLiteStatement stmt, int index);
     internal abstract TypeAffinity ColumnAffinity(SQLiteStatement stmt, int index);
-    internal abstract string ColumnType(SQLiteStatement stmt, int index, out TypeAffinity nAffinity);
+    internal abstract string ColumnType(SQLiteStatement stmt, int index, ref TypeAffinity nAffinity);
     internal abstract int ColumnIndex(SQLiteStatement stmt, string columnName);
     internal abstract string ColumnOriginalName(SQLiteStatement stmt, int index);
     internal abstract string ColumnDatabaseName(SQLiteStatement stmt, int index);
     internal abstract string ColumnTableName(SQLiteStatement stmt, int index);
-    internal abstract void ColumnMetaData(string dataBase, string table, string column, out string dataType, out string collateSequence, out bool notNull, out bool primaryKey, out bool autoIncrement);
-    internal abstract void GetIndexColumnExtendedInfo(string database, string index, string column, out int sortMode, out int onError, out string collationSequence);
+    internal abstract void ColumnMetaData(string dataBase, string table, string column, ref string dataType, ref string collateSequence, ref bool notNull, ref bool primaryKey, ref bool autoIncrement);
+    internal abstract void GetIndexColumnExtendedInfo(string database, string index, string column, ref int sortMode, ref int onError, ref string collationSequence);
 
     internal abstract double GetDouble(SQLiteStatement stmt, int index);
     internal abstract SByte GetSByte(SQLiteStatement stmt, int index);
@@ -442,7 +442,7 @@ namespace System.Data.SQLite
     /// <returns>
     /// True if there are more pages to be copied, false otherwise.
     /// </returns>
-    internal abstract bool StepBackup(SQLiteBackup backup, int nPage, out bool retry);
+    internal abstract bool StepBackup(SQLiteBackup backup, int nPage, ref bool retry);
 
     /// <summary>
     /// Returns the number of pages remaining to be copied from the source
@@ -635,8 +635,8 @@ namespace System.Data.SQLite
                 if (!hdl.IsInvalid && !hdl.IsClosed)
                 {
 #if !SQLITE_STANDARD
-                    int len;
-                    result = UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, out len), len);
+                    int len = 0;
+                    result = UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg_interop(db, ref len), len);
 #else
                     result = UTF8ToString(UnsafeNativeMethods.sqlite3_errmsg(db), -1);
 #endif
@@ -814,7 +814,7 @@ namespace System.Data.SQLite
                     {
                         n = UnsafeNativeMethods.sqlite3_exec(
                             db, ToUTF8("ROLLBACK"), IntPtr.Zero, IntPtr.Zero,
-                            out stmt);
+                            ref stmt);
 
                         if (n == SQLiteErrorCode.Ok)
                         {
