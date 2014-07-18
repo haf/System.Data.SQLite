@@ -631,6 +631,7 @@ set sds_manifests(source) {
   Tests/Installer_Test_Vs2013.log
   Tests/nonWal.db
   Tests/pkgIndex.eagle
+  Tests/speed.eagle
   Tests/stress.eagle
   Tests/testlinq.out
   Tests/thread.eagle

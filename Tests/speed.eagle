@@ -1,0 +1,115 @@
+###############################################################################
+#
+# speed.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+#
+# NOTE: Report before test, before shutdown.
+#
+checkForSQLiteDirectories $test_channel
+getSQLiteHandleCounts $test_channel
+reportSQLiteResources $test_channel
+
+###############################################################################
+
+#
+# NOTE: Make sure that SQLite core library is completely shutdown prior to
+#       starting any of the tests in this file.
+#
+shutdownSQLite $test_channel
+
+###############################################################################
+
+#
+# NOTE: Report before test, after shutdown.
+#
+checkForSQLiteDirectories $test_channel
+getSQLiteHandleCounts $test_channel
+reportSQLiteResources $test_channel
+
+###############################################################################
+
+runTest {test speed-1.1 {SQLiteDataReader speed testing} -setup {
+  setupDb [set fileName [appendArgs speed-1.1- [pid] .db]]
+
+  sql execute $db "CREATE TABLE t1(w INTEGER);"
+  sql execute $db "CREATE TABLE t2(x REAL);"
+  sql execute $db "CREATE TABLE t3(y TEXT);"
+  sql execute $db "CREATE TABLE t4(z BLOB);"
+
+  sql execute $db "INSERT INTO t1 (w) VALUES(NULL);"
+  sql execute $db "INSERT INTO t1 (w) VALUES(-9223372036854775808);"
+  sql execute $db "INSERT INTO t1 (w) VALUES(0);"
+  sql execute $db "INSERT INTO t1 (w) VALUES(9223372036854775807);"
+
+  sql execute $db "INSERT INTO t2 (x) VALUES(NULL);"
+  sql execute $db "INSERT INTO t2 (x) VALUES(-1.7976931348623157e+308);"
+  sql execute $db "INSERT INTO t2 (x) VALUES(0.0);"
+  sql execute $db "INSERT INTO t2 (x) VALUES(1.7976931348623157e+308);"
+
+  sql execute $db "INSERT INTO t3 (y) VALUES(NULL);"
+  sql execute $db "INSERT INTO t3 (y) VALUES('1');"
+  sql execute $db "INSERT INTO t3 (y) VALUES('1.1');"
+
+  sql execute $db [appendArgs \
+      "INSERT INTO t3 (y) VALUES('" [string repeat \
+      [format %c [expr {int(rand() * 0x100)}]] 1048576] "');"]
+
+  sql execute $db "INSERT INTO t4 (z) VALUES(NULL);"
+  sql execute $db "INSERT INTO t4 (z) VALUES(X'01');"
+  sql execute $db "INSERT INTO t4 (z) VALUES(X'0123456789');"
+  sql execute $db "INSERT INTO t4 (z) VALUES(randomblob(1048576));"
+} -body {
+  foreach sql [list \
+      {SELECT w FROM t1;} \
+      {SELECT x FROM t2;} \
+      {SELECT CASE length(y) = 1048576
+         WHEN 1 THEN length(y) ELSE y END FROM t3;} \
+      {SELECT CASE length(z) = 1048576
+         WHEN 1 THEN length(z) ELSE z END FROM t4;}] {
+    tputs $test_channel [appendArgs \
+        "---- executed query \"" \
+        [string map [list "\n         " " "] $sql] "\" in " [time {
+          lappend result [sql execute -execute reader -format list $db $sql]
+        }] \n]
+  }
+
+  set result
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result sql db fileName
+} -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite} -result {{-9223372036854775808 0 9223372036854775807}\
+{-Infinity 0 Infinity} {1 1.1 1048576} {1 {1 35 69 103 137} 1048576}}}
+
+###############################################################################
+
+#
+# NOTE: Report after test.
+#
+checkForSQLiteDirectories $test_channel
+getSQLiteHandleCounts $test_channel
+reportSQLiteResources $test_channel
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
