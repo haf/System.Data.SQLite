@@ -20,6 +20,10 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
+set times [list]
+
+###############################################################################
+
 #
 # NOTE: Report before test, before shutdown.
 #
@@ -88,18 +92,22 @@ runTest {test speed-1.1 {SQLiteDataReader speed testing} -setup {
               WHEN 1 THEN length(y) ELSE y END FROM t3;} \
       {SELECT CASE length(z) = 1048576
               WHEN 1 THEN length(z) ELSE z END FROM t4;}] {
+    set time [time {
+      lappend result [sql execute -execute reader -format list $db $sql]
+    }]
+
     tputs $test_channel [appendArgs \
-        "---- executed query \"" \
-        [string map [list "\n              " " "] $sql] "\" in " [time {
-          lappend result [sql execute -execute reader -format list $db $sql]
-        }] \n]
+        "---- executed query \"" [string map [list "\n              " " "] \
+        $sql] "\" in " $time \n]
+
+    lappend times [lindex $time 0]
   }
 
   set result
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain sql table column result db fileName
+  unset -nocomplain time sql result db fileName
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -result {{-9223372036854775808 0 9223372036854775807}\
 {-Infinity 0 Infinity} {1 1.1 1048576} {1 {1 35 69 103 137} 1048576}}}
@@ -142,18 +150,22 @@ runTest {test speed-1.2 {SQLiteDataReader speed testing} -setup {
   foreach {column table} [list w t1 x t2 y t3 z t4] {
     set sql [appendArgs "SELECT " $column " FROM " $table \;]
 
+    set time [time {
+      lappend result [llength \
+          [sql execute -execute reader -format list $db $sql]]
+    }]
+
     tputs $test_channel [appendArgs \
-        "---- executed query \"" $sql "\" in " [time {
-          lappend result [llength [sql execute \
-              -execute reader -format list $db $sql]]
-        }] \n]
+        "---- executed query \"" $sql "\" in " $time \n]
+
+    lappend times [lindex $time 0]
   }
 
   set result
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain sql table column result db fileName
+  unset -nocomplain time sql table column result db fileName
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -result {3 3 3 3}}
 
@@ -165,6 +177,15 @@ System.Data.SQLite} -result {3 3 3 3}}
 checkForSQLiteDirectories $test_channel
 getSQLiteHandleCounts $test_channel
 reportSQLiteResources $test_channel
+
+###############################################################################
+
+tputs $test_channel [appendArgs \
+    "---- overall performance results " $times \n]
+
+###############################################################################
+
+unset -nocomplain times
 
 ###############################################################################
 
