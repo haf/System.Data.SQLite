@@ -64,7 +64,7 @@ if {$argc == 1} then {
       }
     }
 
-    source [file join $path [appendArgs $rootName .lst]]
+    source [file join $path data [appendArgs $rootName .lst]]
 
     if {![array exists manifests]} then {
       usage "master archive manifest is missing"

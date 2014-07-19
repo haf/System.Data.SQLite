@@ -48,7 +48,7 @@ SET PATH=%ProgramFiles%\Inno Setup 5;%PATH%
 
 %_VECHO% Path = '%PATH%'
 
-%__ECHO% ISCC.exe "%TOOLS%\SQLite.iss" "/dAppId=%APPID%" "/dAppPublicKey=%PUBLICKEY%" "/dAppURL=%URL%" "/dIsNetFx2=%ISNETFX2%" "/dVcRuntime=%VCRUNTIME%" "/dAppConfiguration=%CONFIGURATION%" "/dAppPlatform=%PLATFORM%" "/dAppProcessor=%PROCESSOR%" "/dFramework=%FRAMEWORK%" "/dYear=%YEAR%"
+%__ECHO% ISCC.exe "%TOOLS%\data\SQLite.iss" "/dAppId=%APPID%" "/dAppPublicKey=%PUBLICKEY%" "/dAppURL=%URL%" "/dIsNetFx2=%ISNETFX2%" "/dVcRuntime=%VCRUNTIME%" "/dAppConfiguration=%CONFIGURATION%" "/dAppPlatform=%PLATFORM%" "/dAppProcessor=%PROCESSOR%" "/dFramework=%FRAMEWORK%" "/dYear=%YEAR%"
 
 IF %ERRORLEVEL% NEQ 0 (
   ECHO Failed to compile setup.

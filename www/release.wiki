@@ -325,9 +325,10 @@
     <b>..\Externals\Eagle\bin\EagleShell.exe -file verify.eagle Output</b>
     <br />
     <br />
-    <i>If errors are generated, the file &quot;&lt;root&gt;\Setup\verify.lst&quot;
-    may need to be updated to account for the files that have been added and/or
-    removed from the release archives since the previous release.</i>
+    <i>If errors are generated, the file
+    &quot;&lt;root&gt;\Setup\data\verify.lst&quot; may need to be updated to
+    account for the files that have been added and/or removed from the release
+    archives since the previous release.</i>
   </li>
 </ol>
 

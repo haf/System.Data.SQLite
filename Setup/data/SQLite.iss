@@ -10,11 +10,11 @@
 
 #if Pos("NativeOnly", AppConfiguration) == 0
 #define InstallerCondition "Application\Core\MSIL and Application\Designer and Application\Designer\Installer"
-#define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + AppPlatform + "\" + AppConfiguration + "\System.Data.SQLite.dll", PRODUCT_VERSION)
+#define AppVersion GetStringFileInfo("..\..\bin\" + Year + "\" + AppPlatform + "\" + AppConfiguration + "\System.Data.SQLite.dll", PRODUCT_VERSION)
 #define OutputConfiguration StringChange(StringChange(AppConfiguration, "Debug", "setup-debug"), "Release", "setup") + "-bundle"
 #else
 #define InstallerCondition "Application\Core\MSIL and Application\Core\" + AppProcessor + " and Application\Designer and Application\Designer\Installer"
-#define AppVersion GetStringFileInfo("..\bin\" + Year + "\" + BaseConfiguration + "\bin\System.Data.SQLite.dll", PRODUCT_VERSION)
+#define AppVersion GetStringFileInfo("..\..\bin\" + Year + "\" + BaseConfiguration + "\bin\System.Data.SQLite.dll", PRODUCT_VERSION)
 #define OutputConfiguration StringChange(StringChange(BaseConfiguration, "Debug", "setup-debug"), "Release", "setup")
 #endif
 
@@ -40,6 +40,7 @@ AppComments=The ADO.NET adapter for the SQLite database engine.
 AppReadmeFile={app}\readme.htm
 DefaultDirName={pf}\System.Data.SQLite\{#Year}
 DefaultGroupName=System.Data.SQLite\{#Year}
+OutputDir=..\Output
 OutputBaseFilename=sqlite-{#Framework}-{#OutputConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}
 OutputManifestFile=sqlite-{#Framework}-{#OutputConfiguration}-{#AppProcessor}-{#Year}-{#AppVersion}-manifest.txt
 SetupLogging=true
@@ -182,67 +183,67 @@ Name: {app}\GAC; Tasks: gac
 #endif
 
 [Files]
-Components: Application\Core\{#AppProcessor}; Source: ..\Externals\MSVCPP\vcredist_{#AppProcessor}_{#VcRuntime}.exe; DestDir: {tmp}; Flags: dontcopy
-Components: Application; Source: ..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
+Components: Application\Core\{#AppProcessor}; Source: ..\..\Externals\MSVCPP\vcredist_{#AppProcessor}_{#VcRuntime}.exe; DestDir: {tmp}; Flags: dontcopy
+Components: Application; Source: ..\..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
 
 #if Pos("NativeOnly", AppConfiguration) == 0
-Components: Application\Core\MSIL; Tasks: gac; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture={#GacProcessor}"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
-Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\MSIL; Tasks: gac; Source: ..\..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture={#GacProcessor}"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+Components: Application\Core\MSIL; Source: ..\..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\MSIL and Application\Symbols; Source: ..\..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #else
-Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Core\MSIL and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\MSIL; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\MSIL and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
-Components: Application\Core\MSIL; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\MSIL; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.dll.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 
 #if Year != "2005"
 #if Pos("NativeOnly", AppConfiguration) == 0
-Components: Application\LINQ; Tasks: gac; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+Components: Application\LINQ; Tasks: gac; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.Linq, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
 #endif
 
-Components: Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\LINQ and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\LINQ; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\LINQ and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.Linq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
 #if Year != "2005" && Year != "2008"
 #if Year == "2010"
-Components: Application\EF6; Source: ..\Externals\EntityFramework\lib\net40\EntityFramework.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\EF6; Source: ..\..\Externals\EntityFramework\lib\net40\EntityFramework.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #elif Year == "2012" || Year == "2013"
-Components: Application\EF6; Source: ..\Externals\EntityFramework\lib\net45\EntityFramework.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\EF6; Source: ..\..\Externals\EntityFramework\lib\net45\EntityFramework.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
-Components: Application\EF6; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\EF6 and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\EF6; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\EF6 and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
 #if Pos("NativeOnly", AppConfiguration) != 0
-Components: Application\Core\{#AppProcessor}; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\SQLite.Interop.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Core\{#AppProcessor} and Application\Symbols; Source: ..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\SQLite.Interop.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\{#AppProcessor}; Source: ..\..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\SQLite.Interop.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Core\{#AppProcessor} and Application\Symbols; Source: ..\..\bin\{#Year}\{#AppPlatform}\{#AppConfiguration}\SQLite.Interop.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
-Components: Application\Documentation; Source: ..\doc\SQLite.NET.chm; DestDir: {app}\doc; Flags: restartreplace uninsrestartdelete
-Components: Application\Designer; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\SQLite.Designer.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Designer and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\SQLite.Designer.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Designer\Installer; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\Installer.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Designer\Installer and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\Installer.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Documentation; Source: ..\..\doc\SQLite.NET.chm; DestDir: {app}\doc; Flags: restartreplace uninsrestartdelete
+Components: Application\Designer; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\SQLite.Designer.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Designer and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\SQLite.Designer.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Designer\Installer; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\Installer.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Designer\Installer and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\Installer.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\test.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 
 #if Year != "2005"
-Components: Application\Test and Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test and Application\LINQ and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test and Application\LINQ; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and Application\LINQ; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and Application\LINQ and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and Application\LINQ; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
 #if Year != "2005" && Year != "2008"
-Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test and (Application\LINQ or Application\EF6) and Application\Symbols; Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
-Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6) and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #elif Year != "2005"
-Components: Application\Test and Application\LINQ; Source: ..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+Components: Application\Test and Application\LINQ; Source: ..\..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
 [Icons]

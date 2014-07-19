@@ -187,10 +187,13 @@ set sds_manifests(source) {
   Setup/build_all.bat
   Setup/build_ce_200x.bat
   Setup/build_ce_2013.bat
-  Setup/CheckForNetFx.pas
   Setup/clean.bat
+  Setup/data/
+  Setup/data/CheckForNetFx.pas
+  Setup/data/InitializeSetup.pas
+  Setup/data/SQLite.iss
+  Setup/data/verify.lst
   Setup/deployAndTestCe200x.eagle
-  Setup/InitializeSetup.pas
   Setup/release.bat
   Setup/release_all.bat
   Setup/release_ce_200x.bat
@@ -282,13 +285,11 @@ set sds_manifests(source) {
   Setup/set_x86_2012.bat
   Setup/set_x86_2013.bat
   Setup/sourceTag.eagle
-  Setup/SQLite.iss
   Setup/test.bat
   Setup/test_all.bat
   Setup/test_ce_200x.bat
   Setup/updateFileInfo.tcl
   Setup/verify.eagle
-  Setup/verify.lst
   Setup/vsSp.bat
   SQLite.Designer/
   SQLite.Designer/AssemblyInfo.cs
