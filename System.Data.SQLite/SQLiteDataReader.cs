@@ -24,6 +24,10 @@ namespace System.Data.SQLite
     /// </summary>
     private SQLiteCommand _command;
     /// <summary>
+    /// The flags pertaining to the associated connection (via the command).
+    /// </summary>
+    private SQLiteConnectionFlags _flags;
+    /// <summary>
     /// Index of the current statement in the command being processed
     /// </summary>
     private int _activeStatementIndex;
@@ -108,6 +112,8 @@ namespace System.Data.SQLite
       _commandBehavior = behave;
       _activeStatementIndex = -1;
       _rowsAffected = -1;
+
+      RefreshFlags();
 
       SQLiteConnection.OnChanged(GetConnection(this),
           new ConnectionEventArgs(SQLiteConnectionEventType.NewDataReader,
@@ -317,6 +323,17 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Forces the connection flags cached by this data reader to be refreshed
+    /// from the underlying connection.
+    /// </summary>
+    public void RefreshFlags()
+    {
+        CheckDisposed();
+
+        _flags = SQLiteCommand.GetFlags(_command);
+    }
+
+    /// <summary>
     /// Returns the number of rows seen so far in the current result set.
     /// </summary>
     public int StepCount
@@ -361,7 +378,7 @@ namespace System.Data.SQLite
       CheckClosed();
       CheckValidRow();
 
-      TypeAffinity affinity = GetSQLiteType(SQLiteCommand.GetFlags(_command), i).Affinity;
+      TypeAffinity affinity = GetSQLiteType(_flags, i).Affinity;
 
       switch (affinity)
       {
@@ -506,7 +523,7 @@ namespace System.Data.SQLite
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetDataTypeName(i - VisibleFieldCount);
 
-      SQLiteType typ = GetSQLiteType(SQLiteCommand.GetFlags(_command), i);
+      SQLiteType typ = GetSQLiteType(_flags, i);
       if (typ.Type == DbType.Object) return SQLiteConvert.SQLiteTypeToType(typ).Name;
       return _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity);
     }
@@ -571,7 +588,7 @@ namespace System.Data.SQLite
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetFieldType(i - VisibleFieldCount);
 
-      return SQLiteConvert.SQLiteTypeToType(GetSQLiteType(SQLiteCommand.GetFlags(_command), i));
+      return SQLiteConvert.SQLiteTypeToType(GetSQLiteType(_flags, i));
     }
 
     /// <summary>
@@ -920,11 +937,9 @@ namespace System.Data.SQLite
       tbl.Columns.Add("CollationType", typeof(string));
       tbl.BeginLoadData();
 
-      SQLiteConnectionFlags flags = SQLiteCommand.GetFlags(_command);
-
       for (int n = 0; n < _fieldCount; n++)
       {
-        SQLiteType sqlType = GetSQLiteType(flags, n);
+        SQLiteType sqlType = GetSQLiteType(_flags, n);
 
         row = tbl.NewRow();
 
@@ -1133,23 +1148,22 @@ namespace System.Data.SQLite
       if (i >= VisibleFieldCount && _keyInfo != null)
         return _keyInfo.GetValue(i - VisibleFieldCount);
 
-      SQLiteConnectionFlags flags = SQLiteCommand.GetFlags(_command);
-      SQLiteType typ = GetSQLiteType(flags, i);
+      SQLiteType typ = GetSQLiteType(_flags, i);
 
-      if (((flags & SQLiteConnectionFlags.DetectTextAffinity) == SQLiteConnectionFlags.DetectTextAffinity) &&
+      if (((_flags & SQLiteConnectionFlags.DetectTextAffinity) == SQLiteConnectionFlags.DetectTextAffinity) &&
           ((typ == null) || (typ.Affinity == TypeAffinity.Text)))
       {
           typ = GetSQLiteType(
               typ, _activeStatement._sql.GetText(_activeStatement, i));
       }
-      else if (((flags & SQLiteConnectionFlags.DetectStringType) == SQLiteConnectionFlags.DetectStringType) &&
+      else if (((_flags & SQLiteConnectionFlags.DetectStringType) == SQLiteConnectionFlags.DetectStringType) &&
           ((typ == null) || SQLiteConvert.IsStringDbType(typ.Type)))
       {
           typ = GetSQLiteType(
               typ, _activeStatement._sql.GetText(_activeStatement, i));
       }
 
-      return _activeStatement._sql.GetValue(_activeStatement, flags, i, typ);
+      return _activeStatement._sql.GetValue(_activeStatement, _flags, i, typ);
     }
 
     /// <summary>
@@ -1221,7 +1235,7 @@ namespace System.Data.SQLite
         //       other ADO.NET providers that use these same semantics for
         //       the HasRows property.
         //
-        if ((GetFlags(this) & SQLiteConnectionFlags.StickyHasRows) == SQLiteConnectionFlags.StickyHasRows)
+        if ((_flags & SQLiteConnectionFlags.StickyHasRows) == SQLiteConnectionFlags.StickyHasRows)
           return ((_readingState != 1) || (_stepCount > 0));
 
         //
@@ -1390,39 +1404,6 @@ namespace System.Data.SQLite
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// This method attempts to query the flags associated with the database
-    /// connection in use.  If the database connection is disposed, the default
-    /// flags will be returned.
-    /// </summary>
-    /// <param name="dataReader">
-    /// The data reader containing the databse connection to query the flags from.
-    /// </param>
-    /// <returns>
-    /// The connection flags value.
-    /// </returns>
-    internal static SQLiteConnectionFlags GetFlags(
-        SQLiteDataReader dataReader
-        )
-    {
-        try
-        {
-            if (dataReader != null)
-            {
-                SQLiteCommand command = dataReader._command;
-
-                if (command != null)
-                    return SQLiteCommand.GetFlags(command);
-            }
-        }
-        catch (ObjectDisposedException)
-        {
-            // do nothing.
-        }
-
-        return SQLiteConnectionFlags.Default;
     }
 
     /// <summary>
