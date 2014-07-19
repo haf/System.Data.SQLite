@@ -487,7 +487,8 @@ namespace eval ::Eagle {
     set options [list \
         -breakOnLeak -configuration -constraints -exitOnComplete -file \
         -logFile -machine -match -no -notFile -platform -postTest -preTest \
-        -randomOrder -skip -stopOnFailure -suffix -suite -tclsh -threshold]
+        -randomOrder -skip -startFile -stopFile -stopOnFailure -suffix \
+        -suite -tclsh -threshold]
 
     foreach {name value} $args {
       #
@@ -1633,7 +1634,8 @@ namespace eval ::Eagle {
     }
   }
 
-  proc runAllTests { channel path fileNames skipFileNames } {
+  proc runAllTests {
+          channel path fileNames skipFileNames startFileName stopFileName } {
     #
     # NOTE: Are we configured to run the test files in random order?
     #
@@ -1690,6 +1692,46 @@ namespace eval ::Eagle {
       }
 
       #
+      # NOTE: If the starting file name has been specified by the caller,
+      #       skip over all the file names before it.
+      #
+      if {[string length $startFileName] > 0} then {
+        if {[file tail $fileName] eq [file tail $startFileName]} then {
+          #
+          # NOTE: Now that we found the starting test file name, do not
+          #       skip any more test files.
+          #
+          set startFileName ""
+        } else {
+          #
+          # NOTE: We have not found the starting test file name yet, skip
+          #       over this test file.
+          #
+          continue
+        }
+      }
+
+      #
+      # NOTE: If the stopping file name has been specified by the caller,
+      #       skip over all the file names after it.
+      #
+      if {[string length $stopFileName] > 0} then {
+        if {[file tail $fileName] eq [file tail $stopFileName]} then {
+          #
+          # NOTE: Now that we found the stopping test file name, do not
+          #       run any more test files.
+          #
+          set stopFileName ""
+
+          #
+          # NOTE: This will terminate the loop right after the test file
+          #       cleanup code (i.e. at the bottom of the loop).
+          #
+          set stop true
+        }
+      }
+
+      #
       # NOTE: Skipping over any file name that matches a pattern in the
       #       list of file names to skip.
       #
@@ -1706,8 +1748,8 @@ namespace eval ::Eagle {
         }
 
         #
-        # NOTE: The "magic" pattern we are looking for to determine if a
-        #       given file is part of the formal test suite.
+        # NOTE: The "magic" pattern we are looking for to determine if
+        #       a given file is part of the formal test suite.
         #
         set pattern {^(\s)*runTest .*$}
 

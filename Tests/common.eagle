@@ -304,6 +304,15 @@ namespace eval ::Eagle {
       }
     }
 
+    proc getSQLiteTestDataPath {} {
+      #
+      # NOTE: Figure out the directory where all the test data files should
+      #       be located.  This should be the "data" directory beneath the
+      #       directory containing the actual test scripts.
+      #
+      return [file join $::path data]
+    }
+
     proc isRunningWoW64 {} {
       #
       # NOTE: For now, just use the existing test constraint for detecting

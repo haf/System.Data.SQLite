@@ -48,7 +48,8 @@ set test_time [time {
   runAllTests $test_channel $path \
       [getTestFiles [list $path] $test_flags(-file) $test_flags(-notFile)] \
       [list [file tail [info script]] *.tcl pkgIndex.eagle common.eagle \
-      constraints.eagle empty.eagle epilogue.eagle prologue.eagle]
+          constraints.eagle empty.eagle epilogue.eagle prologue.eagle] \
+      $test_flags(-startFile) $test_flags(-stopFile)
 }]
 
 #

@@ -21,8 +21,8 @@ runSQLiteTestPrologue
 ###############################################################################
 
 #
-# NOTE: Setup the variables that refer to the various files required by the
-#       tests in this file.
+# NOTE: Setup the variables that refer to the various non-data files required
+#       by the tests in this file.
 #
 set entityFrameworkDllFile [getBuildFileName EntityFramework.dll]
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
@@ -31,9 +31,17 @@ set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
 set testExeFile [getBuildFileName test.exe]
 set testLinqExeFile [getBuildFileName testlinq.exe]
 set testEf6ExeFile [getBuildFileName testef6.exe]
-set testLinqOutFile [file nativename [file join $path testlinq.out]]
-set northwindEfDbFile [file nativename [file join [file dirname $path] \
-    testlinq northwindEF.db]]
+
+#
+# NOTE: Setup the variables that refer to the various data files required by
+#       the tests in this file.
+#
+set testLinqOutFile [file nativename [file join \
+    [getSQLiteTestDataPath] testlinq.out]]
+
+set northwindEfDbFile [file nativename [file join \
+    [file dirname [file dirname [getSQLiteTestDataPath]]] testlinq \
+    northwindEF.db]]
 
 #
 # NOTE: Setup the test constraints specific to the tests in this file.

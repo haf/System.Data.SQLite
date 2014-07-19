@@ -56,7 +56,8 @@ set test_time [time {
       [getTestFiles [list $test_path] $test_flags(-file) \
           $test_flags(-notFile)] \
       [list [file tail [info script]] *.tcl pkgIndex.eagle \
-          constraints.eagle epilogue.eagle prologue.eagle]
+          constraints.eagle epilogue.eagle prologue.eagle] \
+      $test_flags(-startFile) $test_flags(-stopFile)
 }]
 
 tputs $test_channel [appendArgs "---- all tests completed in " $test_time \n]

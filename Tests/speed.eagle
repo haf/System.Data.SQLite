@@ -73,8 +73,8 @@ runTest {test speed-1.1 {SQLiteDataReader speed testing} -setup {
   sql execute $db "INSERT INTO t3 (y) VALUES('1.1');"
 
   sql execute $db [appendArgs \
-      "INSERT INTO t3 (y) VALUES('" [string repeat \
-      [format %c [expr {int(rand() * 0x80)}]] 1048576] "');"]
+      "INSERT INTO t3 (y) VALUES('" [string map [list ' ''] [string \
+      repeat [format %c [expr {int(rand() * 0x80)}]] 1048576]] "');"]
 
   sql execute $db "INSERT INTO t4 (z) VALUES(NULL);"
   sql execute $db "INSERT INTO t4 (z) VALUES(X'01');"
@@ -137,8 +137,8 @@ runTest {test speed-1.2 {SQLiteDataReader speed testing} -setup {
   sql execute $db "INSERT INTO t3 (y) VALUES('1.1');"
 
   sql execute $db [appendArgs \
-      "INSERT INTO t3 (y) VALUES('" [string repeat \
-      [format %c [expr {int(rand() * 0x80)}]] 1048576] "');"]
+      "INSERT INTO t3 (y) VALUES('" [string map [list ' ''] [string \
+      repeat [format %c [expr {int(rand() * 0x80)}]] 1048576]] "');"]
 
   sql execute $db "INSERT INTO t4 (z) VALUES(NULL);"
   sql execute $db "INSERT INTO t4 (z) VALUES(X'01');"

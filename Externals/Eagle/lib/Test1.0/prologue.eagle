@@ -41,6 +41,13 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
+  # NOTE: Set the location of the test suite data, if necessary.
+  #
+  if {![info exists test_data_path]} then {
+    set test_data_path [file join $test_path data]
+  }
+
+  #
   # NOTE: Set the location of the base Eagle directory, if
   #       necessary.
   #
@@ -153,14 +160,14 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   #
-  # NOTE: Make sure our primary package path is part of the auto path.
+  # NOTE: Make sure our primary package path is part of the auto-path.
   #
   if {[lsearch -exact $auto_path $test_package_path] == -1} then {
     lappend auto_path $test_package_path
   }
 
   #
-  # NOTE: Make sure our test package path is part of the auto path.
+  # NOTE: Make sure our test package path is part of the auto-path.
   #
   if {[lsearch -exact $auto_path $test_path] == -1} then {
     lappend auto_path $test_path
@@ -269,6 +276,8 @@ if {![info exists no([file tail [info script]])]} then {
   set test_flags(-suffix) ""; # build suffix, default to empty.
   set test_flags(-file) [list *.eagle]; # default to running all test files.
   set test_flags(-notFile) [list l.*.eagle]; # COMPAT: Tcl.
+  set test_flags(-startFile) ""; # start running at the first test file.
+  set test_flags(-stopFile) ""; # stop running after the last test file.
   set test_flags(-match) [list *]; # default to running all tests.
   set test_flags(-skip) [list]; # default to skipping no tests.
   set test_flags(-constraints) [list]; # default to no manual constraints.
@@ -708,6 +717,16 @@ if {![info exists no([file tail [info script]])]} then {
         $test_flags(-notFile) \n]
   }
 
+  if {[llength $test_flags(-startFile)] > 0} then {
+    tputs $test_channel [appendArgs "---- starting with test file: " \
+        $test_flags(-startFile) \n]
+  }
+
+  if {[llength $test_flags(-stopFile)] > 0} then {
+    tputs $test_channel [appendArgs "---- stopping after test file: " \
+        $test_flags(-stopFile) \n]
+  }
+
   if {[llength $test_flags(-match)] > 0} then {
     tputs $test_channel [appendArgs "---- running tests that match: " \
         $test_flags(-match) \n]
@@ -734,10 +753,13 @@ if {![info exists no([file tail [info script]])]} then {
   tputs $test_channel [appendArgs "---- library path: \"" \
       $lib_path \"\n]
 
-  tputs $test_channel [appendArgs "---- tests located in: \"" \
+  tputs $test_channel [appendArgs "---- test script files located in: \"" \
       $test_path \"\n]
 
-  tputs $test_channel [appendArgs "---- tests running in: \"" \
+  tputs $test_channel [appendArgs "---- test data files located in: \"" \
+      $test_data_path \"\n]
+
+  tputs $test_channel [appendArgs "---- running in: \"" \
       [pwd] \"\n]
 
   tputs $test_channel [appendArgs "---- temporary files stored in: \"" \
@@ -964,6 +986,16 @@ if {![info exists no([file tail [info script]])]} then {
         #       by this test prologue.
         #
         set test_database [subst $test_database]
+      }
+
+      #
+      # NOTE: Set the test database table, if necessary.
+      #
+      if {![info exists test_database_table]} then {
+        #
+        # NOTE: Use the default database table.
+        #
+        set test_database_table eagle_sql_test_ok_to_delete
       }
 
       #
@@ -2032,7 +2064,7 @@ if {![info exists no([file tail [info script]])]} then {
     # NOTE: For tests "benchmark-1.3[89]" and "benchmark-1.40".
     #
     if {![info exists no(benchmark.txt)]} then {
-      checkForFile $test_channel [file join $test_path benchmark.txt]
+      checkForFile $test_channel [file join $test_data_path benchmark.txt]
     }
 
     #
@@ -2047,119 +2079,156 @@ if {![info exists no([file tail [info script]])]} then {
     # NOTE: For tests "subst-1.*".
     #
     if {![info exists no(bad_subst.txt)]} then {
-      checkForFile $test_channel [file join $test_path bad_subst.txt]
+      checkForFile $test_channel [file join $test_data_path bad_subst.txt]
+    }
+
+    #
+    # NOTE: This is not currently used by any tests.
+    #
+    if {![info exists no(evaluate.eagle)]} then {
+      checkForFile $test_channel [file join $test_data_path evaluate.eagle]
+    }
+
+    #
+    # NOTE: This is not currently used by any tests.
+    #
+    if {![info exists no(substitute.eagle)]} then {
+      checkForFile $test_channel [file join $test_data_path substitute.eagle]
+    }
+
+    #
+    # NOTE: This is not currently used by any tests.
+    #
+    if {![info exists no(unicode_bom.txt)]} then {
+      checkForFile $test_channel [file join $test_data_path unicode_bom.txt]
+    }
+
+    #
+    # NOTE: This is not currently used by any tests.
+    #
+    if {![info exists no(unicode_no_bom.txt)]} then {
+      checkForFile $test_channel [file join $test_data_path unicode_no_bom.txt]
+    }
+
+    #
+    # NOTE: This is not currently used by any tests.
+    #
+    if {![info exists no(utf8.txt)]} then {
+      checkForFile $test_channel [file join $test_data_path utf8.txt]
     }
 
     #
     # NOTE: For tests "fileIO-1.*".
     #
     if {![info exists no(file.dat)]} then {
-      checkForFile $test_channel [file join $test_path file.dat]
+      checkForFile $test_channel [file join $test_data_path file.dat]
     }
 
     #
     # NOTE: For test "garbage-1.1".
     #
     if {![info exists no(garbage.txt)]} then {
-      checkForFile $test_channel [file join $test_path garbage.txt]
+      checkForFile $test_channel [file join $test_data_path garbage.txt]
     }
 
     #
     # NOTE: For tests "xaml-1.*".
     #
     if {![info exists no(test.png)]} then {
-      checkForFile $test_channel [file join $test_path test.png]
+      checkForFile $test_channel [file join $test_data_path test.png]
     }
 
     #
     # NOTE: For test "socket-1.2".
     #
     if {![info exists no(client.tcl)]} then {
-      checkForFile $test_channel [file join $test_path client.tcl]
+      checkForFile $test_channel [file join $test_data_path client.tcl]
     }
 
     #
     # NOTE: For test "tclLoad-1.2".
     #
     if {![info exists no(tcl_unload.tcl)]} then {
-      checkForFile $test_channel [file join $test_path tcl_unload.tcl]
+      checkForFile $test_channel [file join $test_data_path tcl_unload.tcl]
     }
 
     #
     # NOTE: For test "basic-1.4".
     #
     if {![info exists no(read.eagle)]} then {
-      checkForFile $test_channel [file join $test_path read.eagle]
+      checkForFile $test_channel [file join $test_data_path read.eagle]
     }
 
     #
     # NOTE: For test "basic-1.5".
     #
     if {![info exists no(read2.eagle)]} then {
-      checkForFile $test_channel [file join $test_path read2.eagle]
+      checkForFile $test_channel [file join $test_data_path read2.eagle]
     }
 
     #
     # NOTE: For test "basic-1.6".
     #
     if {![info exists no(read3.eagle)]} then {
-      checkForFile $test_channel [file join $test_path read3.eagle]
+      checkForFile $test_channel [file join $test_data_path read3.eagle]
     }
 
     #
     # NOTE: For test "basic-1.7".
     #
     if {![info exists no(read4.eagle)]} then {
-      checkForFile $test_channel [file join $test_path read4.eagle]
+      checkForFile $test_channel [file join $test_data_path read4.eagle]
     }
 
     #
     # NOTE: For test "infoScript-1.1".
     #
     if {![info exists no(script.eagle)]} then {
-      checkForFile $test_channel [file join $test_path script.eagle]
+      checkForFile $test_channel [file join $test_data_path script.eagle]
     }
 
     #
     # NOTE: For test "basic-1.1".
     #
     if {![info exists no(source.eagle)]} then {
-      checkForFile $test_channel [file join $test_path source.eagle]
+      checkForFile $test_channel [file join $test_data_path source.eagle]
     }
 
     #
     # NOTE: For test "basic-1.2".
     #
     if {![info exists no(unbalanced_brace.eagle)]} then {
-      checkForFile $test_channel [file join $test_path unbalanced_brace.eagle]
+      checkForFile $test_channel [file join \
+          $test_data_path unbalanced_brace.eagle]
     }
 
     #
     # NOTE: For test "basic-1.3".
     #
     if {![info exists no(unbalanced_brace2.eagle)]} then {
-      checkForFile $test_channel [file join $test_path unbalanced_brace2.eagle]
+      checkForFile $test_channel [file join \
+          $test_data_path unbalanced_brace2.eagle]
     }
 
     #
     # NOTE: For tests "excel-2.*".
     #
     if {![info exists no(test.xls)]} then {
-      checkForFile $test_channel [file join $test_path test.xls]
+      checkForFile $test_channel [file join $test_data_path test.xls]
     }
 
     #
     # NOTE: For test "proc-1.9".
     #
     if {![info exists no(testProcs.tcl)]} then {
-      checkForFile $test_channel [file join $test_path testProcs.tcl]
+      checkForFile $test_channel [file join $test_data_path testProcs.tcl]
     }
 
     #
     # NOTE: For test "interp-1.10".
     #
     if {![info exists no(settings.xml)]} then {
-      checkForFile $test_channel [file join $test_path settings.xml]
+      checkForFile $test_channel [file join $test_data_path settings.xml]
     }
 
     #
@@ -2235,7 +2304,7 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     if {![info exists no(test.sqlite3)]} then {
-      checkForFile $test_channel [file join $test_path test.sqlite3]
+      checkForFile $test_channel [file join $test_data_path test.sqlite3]
     }
   }
 

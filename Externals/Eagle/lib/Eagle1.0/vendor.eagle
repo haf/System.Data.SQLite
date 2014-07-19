@@ -3,7 +3,7 @@
 # vendor.eagle --
 #
 # Extensible Adaptable Generalized Logic Engine (Eagle)
-# Vendor Initialization File
+# Vendor Initialization File for System.Data.SQLite
 #
 # Copyright (c) 2007-2012 by Joe Mistachkin.  All rights reserved.
 #

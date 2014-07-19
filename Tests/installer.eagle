@@ -21,8 +21,8 @@ runSQLiteTestPrologue
 ###############################################################################
 
 #
-# NOTE: Setup the variables that refer to the various files required by the
-#       tests in this file.
+# NOTE: Setup the variables that refer to the various non-data files required
+#       by the tests in this file.
 #
 set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
 set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
@@ -34,35 +34,35 @@ set installerExeFile [getBuildFileName Installer.exe]
 # NOTE: The various install/uninstall log files used to test the design-time
 #       component installer.
 #
-set testInstallVs2005LogFile [file nativename [file join $path \
-    Installer_Test_Vs2005.log]]
+set testInstallVs2005LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Installer_Test_Vs2005.log]]
 
-set testInstallVs2008LogFile [file nativename [file join $path \
-    Installer_Test_Vs2008.log]]
+set testInstallVs2008LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Installer_Test_Vs2008.log]]
 
-set testInstallVs2010LogFile [file nativename [file join $path \
-    Installer_Test_Vs2010.log]]
+set testInstallVs2010LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Installer_Test_Vs2010.log]]
 
-set testInstallVs2012LogFile [file nativename [file join $path \
-    Installer_Test_Vs2012.log]]
+set testInstallVs2012LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Installer_Test_Vs2012.log]]
 
-set testInstallVs2013LogFile [file nativename [file join $path \
-    Installer_Test_Vs2013.log]]
+set testInstallVs2013LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Installer_Test_Vs2013.log]]
 
-set testUninstallVs2005LogFile [file nativename [file join $path \
-    Uninstaller_Test_Vs2005.log]]
+set testUninstallVs2005LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Uninstaller_Test_Vs2005.log]]
 
-set testUninstallVs2008LogFile [file nativename [file join $path \
-    Uninstaller_Test_Vs2008.log]]
+set testUninstallVs2008LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Uninstaller_Test_Vs2008.log]]
 
-set testUninstallVs2010LogFile [file nativename [file join $path \
-    Uninstaller_Test_Vs2010.log]]
+set testUninstallVs2010LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Uninstaller_Test_Vs2010.log]]
 
-set testUninstallVs2012LogFile [file nativename [file join $path \
-    Uninstaller_Test_Vs2012.log]]
+set testUninstallVs2012LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Uninstaller_Test_Vs2012.log]]
 
-set testUninstallVs2013LogFile [file nativename [file join $path \
-    Uninstaller_Test_Vs2013.log]]
+set testUninstallVs2013LogFile [file nativename [file join \
+    [getSQLiteTestDataPath] Uninstaller_Test_Vs2013.log]]
 
 #
 # NOTE: Setup the test constraints specific to the tests in this file.

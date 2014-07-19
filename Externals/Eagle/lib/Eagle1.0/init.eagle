@@ -1141,10 +1141,15 @@ namespace eval ::Eagle {
 
       if {[llength $args] > 0} then {
         #
-        # NOTE: Temporarily start trusting ONLY our self-signed certificate
-        #       which is used primarily for "software updates".
+        # NOTE: Start trusting ONLY our self-signed SSL certificate.
         #
-        uri softwareupdates true
+        set trusted true
+
+        if {[lindex [uri softwareupdates] end] eq "untrusted"} then {
+          uri softwareupdates true
+        } else {
+          set trusted false; # NOTE: Already trusted.
+        }
 
         try {
           #
@@ -1152,11 +1157,13 @@ namespace eval ::Eagle {
           #
           eval uri download $args; # synchronous.
         } finally {
-          #
-          # NOTE: Stop trusting ONLY our self-signed certificate which is
-          #       used primarily for "software updates".
-          #
-          uri softwareupdates false
+          if {$trusted && \
+              [lindex [uri softwareupdates] end] eq "trusted"} then {
+            #
+            # NOTE: Stop trusting ONLY our self-signed SSL certificate.
+            #
+            uri softwareupdates false
+          }
         }
 
         #
@@ -1184,10 +1191,15 @@ namespace eval ::Eagle {
 
     proc getUpdateData { uri } {
       #
-      # NOTE: Temporarily start trusting ONLY our own self-signed
-      #       certificate which is used primarily for updates.
+      # NOTE: Start trusting ONLY our own self-signed SSL certificate.
       #
-      uri softwareupdates true
+      set trusted true
+
+      if {[lindex [uri softwareupdates] end] eq "untrusted"} then {
+        uri softwareupdates true
+      } else {
+        set trusted false; # NOTE: Already trusted.
+      }
 
       try {
         #
@@ -1195,20 +1207,27 @@ namespace eval ::Eagle {
         #
         return [uri download -inline $uri]; # synchronous.
       } finally {
-        #
-        # NOTE: Stop trusting ONLY our own self-signed certificate
-        #       which is used primarily for updates.
-        #
-        uri softwareupdates false
+        if {$trusted && \
+            [lindex [uri softwareupdates] end] eq "trusted"} then {
+          #
+          # NOTE: Stop trusting ONLY our own self-signed SSL certificate.
+          #
+          uri softwareupdates false
+        }
       }
     }
 
     proc getUpdateScriptData { uri } {
       #
-      # NOTE: Temporarily start trusting ONLY our own self-signed
-      #       certificate which is used primarily for updates.
+      # NOTE: Start trusting ONLY our own self-signed SSL certificate.
       #
-      uri softwareupdates true
+      set trusted true
+
+      if {[lindex [uri softwareupdates] end] eq "untrusted"} then {
+        uri softwareupdates true
+      } else {
+        set trusted false; # NOTE: Already trusted.
+      }
 
       try {
         #
@@ -1216,11 +1235,13 @@ namespace eval ::Eagle {
         #
         return [interp readorgetscriptfile $uri]; # synchronous.
       } finally {
-        #
-        # NOTE: Stop trusting ONLY our own self-signed certificate
-        #       which is used primarily for updates.
-        #
-        uri softwareupdates false
+        if {$trusted && \
+            [lindex [uri softwareupdates] end] eq "trusted"} then {
+          #
+          # NOTE: Stop trusting ONLY our own self-signed SSL certificate.
+          #
+          uri softwareupdates false
+        }
       }
     }
 

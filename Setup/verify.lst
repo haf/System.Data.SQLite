@@ -622,18 +622,25 @@ set sds_manifests(source) {
   Tests/backup.eagle
   Tests/basic.eagle
   Tests/common.eagle
+  Tests/data/
+  Tests/data/Installer_Test_Vs2005.log
+  Tests/data/Installer_Test_Vs2008.log
+  Tests/data/Installer_Test_Vs2010.log
+  Tests/data/Installer_Test_Vs2012.log
+  Tests/data/Installer_Test_Vs2013.log
+  Tests/data/nonWal.db
+  Tests/data/testlinq.out
+  Tests/data/Uninstaller_Test_Vs2005.log
+  Tests/data/Uninstaller_Test_Vs2008.log
+  Tests/data/Uninstaller_Test_Vs2010.log
+  Tests/data/Uninstaller_Test_Vs2012.log
+  Tests/data/Uninstaller_Test_Vs2013.log
+  Tests/data/wal.db
   Tests/empty.eagle
   Tests/installer.eagle
-  Tests/Installer_Test_Vs2005.log
-  Tests/Installer_Test_Vs2008.log
-  Tests/Installer_Test_Vs2010.log
-  Tests/Installer_Test_Vs2012.log
-  Tests/Installer_Test_Vs2013.log
-  Tests/nonWal.db
   Tests/pkgIndex.eagle
   Tests/speed.eagle
   Tests/stress.eagle
-  Tests/testlinq.out
   Tests/thread.eagle
   Tests/tkt-00f86f9739.eagle
   Tests/tkt-0d5b1ef362.eagle
@@ -681,14 +688,8 @@ set sds_manifests(source) {
   Tests/tkt-f2c47a01eb.eagle
   Tests/tkt-f8dbab8baf.eagle
   Tests/tkt-fe50b8c2e8.eagle
-  Tests/Uninstaller_Test_Vs2005.log
-  Tests/Uninstaller_Test_Vs2008.log
-  Tests/Uninstaller_Test_Vs2010.log
-  Tests/Uninstaller_Test_Vs2012.log
-  Tests/Uninstaller_Test_Vs2013.log
   Tests/version.eagle
   Tests/vtab.eagle
-  Tests/wal.db
   tools/
   tools/install/
   tools/install/Installer.2005.csproj
