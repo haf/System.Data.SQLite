@@ -1635,7 +1635,7 @@ namespace eval ::Eagle {
   }
 
   proc runAllTests {
-          channel path fileNames skipFileNames startFileName stopFileName } {
+          channel path fileNames skipFileNames startFileNames stopFileNames } {
     #
     # NOTE: Are we configured to run the test files in random order?
     #
@@ -1692,16 +1692,17 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If the starting file name has been specified by the caller,
-      #       skip over all the file names before it.
+      # NOTE: If the starting file names have been specified by the caller,
+      #       skip over all the file names before one of them.
       #
-      if {[string length $startFileName] > 0} then {
-        if {[file tail $fileName] eq [file tail $startFileName]} then {
+      if {[llength $startFileNames] > 0} then {
+        if {[inverseLsearchGlob false $startFileNames \
+            [file tail $fileName]] != -1} then {
           #
           # NOTE: Now that we found the starting test file name, do not
           #       skip any more test files.
           #
-          set startFileName ""
+          set startFileNames [list]
         } else {
           #
           # NOTE: We have not found the starting test file name yet, skip
@@ -1712,16 +1713,17 @@ namespace eval ::Eagle {
       }
 
       #
-      # NOTE: If the stopping file name has been specified by the caller,
-      #       skip over all the file names after it.
+      # NOTE: If the stopping file names have been specified by the caller,
+      #       skip over all the file names after one of them.
       #
-      if {[string length $stopFileName] > 0} then {
-        if {[file tail $fileName] eq [file tail $stopFileName]} then {
+      if {[llength $stopFileNames] > 0} then {
+        if {[inverseLsearchGlob false $stopFileNames \
+            [file tail $fileName]] != -1} then {
           #
           # NOTE: Now that we found the stopping test file name, do not
           #       run any more test files.
           #
-          set stopFileName ""
+          set stopFileNames [list]
 
           #
           # NOTE: This will terminate the loop right after the test file

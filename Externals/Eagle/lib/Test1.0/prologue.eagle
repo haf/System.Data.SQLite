@@ -276,8 +276,8 @@ if {![info exists no([file tail [info script]])]} then {
   set test_flags(-suffix) ""; # build suffix, default to empty.
   set test_flags(-file) [list *.eagle]; # default to running all test files.
   set test_flags(-notFile) [list l.*.eagle]; # COMPAT: Tcl.
-  set test_flags(-startFile) ""; # start running at the first test file.
-  set test_flags(-stopFile) ""; # stop running after the last test file.
+  set test_flags(-startFile) [list]; # start running at these test files.
+  set test_flags(-stopFile) [list]; # stop running after these test files.
   set test_flags(-match) [list *]; # default to running all tests.
   set test_flags(-skip) [list]; # default to skipping no tests.
   set test_flags(-constraints) [list]; # default to no manual constraints.
@@ -718,12 +718,14 @@ if {![info exists no([file tail [info script]])]} then {
   }
 
   if {[llength $test_flags(-startFile)] > 0} then {
-    tputs $test_channel [appendArgs "---- starting with test file: " \
+    tputs $test_channel [appendArgs \
+        "---- starting with test files that match: " \
         $test_flags(-startFile) \n]
   }
 
   if {[llength $test_flags(-stopFile)] > 0} then {
-    tputs $test_channel [appendArgs "---- stopping after test file: " \
+    tputs $test_channel [appendArgs \
+        "---- stopping after test files that match: " \
         $test_flags(-stopFile) \n]
   }
 
