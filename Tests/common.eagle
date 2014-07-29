@@ -2200,10 +2200,45 @@ namespace eval ::Eagle {
       }
     }
 
-    proc reportSQLiteResources { channel {quiet false} {collect true} } {
+    proc reportSQLiteResources {
+            channel {quiet false} {reset true} {collect true} } {
       #
-      # NOTE: Skip all output if we are running in "quiet" mode.
+      # NOTE: If available, report on (and possibly reset) the runtime
+      #       configuration statistics.
       #
+      if {[haveConstraint buildConfiguration.Debug] && [catch {
+        object invoke -flags +NonPublic -alias \
+            System.Data.SQLite.UnsafeNativeMethods settingReadCounts
+      } settingReadCounts] == 0} then {
+        set nameCount [$settingReadCounts Count]
+        set valueCount 0
+
+        object foreach -alias pair $settingReadCounts {
+          incr valueCount [$pair Value]
+
+          if {!$quiet} then {
+            tputs $channel [appendArgs \
+                "---- setting \"" [$pair Key] "\" was read " \
+                [$pair Value] " times\n"]
+          }
+        }
+
+        if {$reset} then {
+          if {[catch {$settingReadCounts Clear} error] == 0} then {
+            if {!$quiet} then {
+              tputs $channel [appendArgs \
+                  "---- reset setting statistics for the previous " \
+                  $nameCount " names and " $valueCount " values read\n"]
+            }
+          } else {
+            tputs $channel [appendArgs \
+                "==== WARNING: failed to reset setting statistics for " \
+                "the previous " $nameCount " names and " $valueCount \
+                " values read, error: " \n\t $error \n]
+          }
+        }
+      }
+
       if {[haveConstraint \
               defineConstant.System.Data.SQLite.INTEROP_VIRTUAL_TABLE] && \
           [haveConstraint \

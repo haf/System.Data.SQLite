@@ -92,6 +92,17 @@ namespace System.Data.SQLite
       /// </summary>
       private static readonly object staticSyncRoot = new object();
 
+
+      /////////////////////////////////////////////////////////////////////////
+      /// <summary>
+      /// This dictionary stores the read counts for the runtime configuration
+      /// settings.  This information is only recorded when compiled in the
+      /// "Debug" build configuration.
+      /// </summary>
+#if DEBUG
+      private static Dictionary<string, int> settingReadCounts;
+#endif
+
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
       /// This dictionary stores the mappings between processor architecture
@@ -134,6 +145,15 @@ namespace System.Data.SQLite
 
           lock (staticSyncRoot)
           {
+#if DEBUG
+              //
+              // NOTE: Create the list of statistics that will contain the
+              //       number of times each setting value has been read.
+              //
+              if (settingReadCounts == null)
+                  settingReadCounts = new Dictionary<string, int>();
+#endif
+
               //
               // TODO: Make sure this list is updated if the supported
               //       processor architecture names and/or platform names
@@ -250,6 +270,27 @@ namespace System.Data.SQLite
       {
           if (name == null)
               return @default;
+
+          /////////////////////////////////////////////////////////////////////
+
+          #region Debug Build Only
+#if DEBUG
+          //
+          // NOTE: Update statistics for this setting value.
+          //
+          if (settingReadCounts != null)
+          {
+              int count;
+
+              if (settingReadCounts.TryGetValue(name, out count))
+                  settingReadCounts[name] = count + 1;
+              else
+                  settingReadCounts.Add(name, 1);
+          }
+#endif
+          #endregion
+
+          /////////////////////////////////////////////////////////////////////
 
           string value = null;
 
