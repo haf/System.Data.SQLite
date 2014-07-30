@@ -27,13 +27,13 @@ namespace System.Data.SQLite
     /// The fallback default database type when one cannot be obtained from an
     /// existing connection instance.
     /// </summary>
-    internal const DbType FallbackDefaultDbType = DbType.Object;
+    private const DbType FallbackDefaultDbType = DbType.Object;
 
     /// <summary>
     /// The fallback default database type name when one cannot be obtained from
     /// an existing connection instance.
     /// </summary>
-    internal static readonly string FallbackDefaultTypeName = String.Empty;
+    private static readonly string FallbackDefaultTypeName = String.Empty;
 
     /// <summary>
     /// The value for the Unix epoch (e.g. January 1, 1970 at midnight, in UTC).
@@ -1122,7 +1122,7 @@ namespace System.Data.SQLite
         SQLiteConnectionFlags flags
         )
     {
-        string defaultTypeName = GetDefaultTypeName();
+        string defaultTypeName = null;
 
         if (connection != null)
         {
@@ -1139,16 +1139,16 @@ namespace System.Data.SQLite
                     if (connectionTypeNames.TryGetValue(dbType, out value))
                         return value.typeName;
                 }
-
-                //
-                // NOTE: Use the default database type name for the connection.
-                //
-                defaultTypeName = connection.DefaultTypeName;
             }
+
+            //
+            // NOTE: Use the default database type name for the connection.
+            //
+            defaultTypeName = connection.DefaultTypeName;
         }
 
         if ((flags & SQLiteConnectionFlags.NoGlobalTypes) == SQLiteConnectionFlags.NoGlobalTypes)
-            return defaultTypeName;
+            return (defaultTypeName != null) ? defaultTypeName : GetDefaultTypeName();
 
         lock (_syncRoot)
         {
@@ -1171,7 +1171,7 @@ namespace System.Data.SQLite
         }
 #endif
 
-        return defaultTypeName;
+        return (defaultTypeName != null) ? defaultTypeName : GetDefaultTypeName();
     }
 
     /// <summary>
@@ -1543,7 +1543,7 @@ namespace System.Data.SQLite
         SQLiteConnectionFlags flags
         )
     {
-        DbType defaultDbType = GetDefaultDbType();
+        DbType? defaultDbType = null;
 
         if (connection != null)
         {
@@ -1575,16 +1575,16 @@ namespace System.Data.SQLite
                         }
                     }
                 }
-
-                //
-                // NOTE: Use the default database type for the connection.
-                //
-                defaultDbType = connection.DefaultDbType;
             }
+
+            //
+            // NOTE: Use the default database type for the connection.
+            //
+            defaultDbType = connection.DefaultDbType;
         }
 
         if ((flags & SQLiteConnectionFlags.NoGlobalTypes) == SQLiteConnectionFlags.NoGlobalTypes)
-            return defaultDbType;
+            return (defaultDbType != null) ? (DbType)defaultDbType : GetDefaultDbType();
 
         lock (_syncRoot)
         {
@@ -1623,7 +1623,7 @@ namespace System.Data.SQLite
         }
 #endif
 
-        return defaultDbType;
+        return (defaultDbType != null) ? (DbType)defaultDbType : GetDefaultDbType();
     }
     #endregion
 

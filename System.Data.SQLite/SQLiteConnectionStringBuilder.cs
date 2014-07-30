@@ -610,17 +610,23 @@ namespace System.Data.SQLite
     /// </summary>
     [DisplayName("Default Database Type")]
     [Browsable(true)]
-    [DefaultValue(SQLiteConvert.FallbackDefaultDbType)]
-    public DbType DefaultDbType
+    [DefaultValue(null)]
+    public DbType? DefaultDbType
     {
         get
         {
             object value;
-            TryGetValue("defaultdbtype", out value);
-            if (value is string)
-                return (DbType)TypeDescriptor.GetConverter(typeof(DbType)).ConvertFrom(value);
-            else
-                return (DbType)value;
+
+            if (TryGetValue("defaultdbtype", out value))
+            {
+                if (value is string)
+                    return (DbType)TypeDescriptor.GetConverter(
+                        typeof(DbType)).ConvertFrom(value);
+                else if (value != null)
+                    return (DbType)value;
+            }
+
+            return null;
         }
         set
         {

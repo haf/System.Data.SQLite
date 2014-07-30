@@ -484,7 +484,7 @@ namespace System.Data.SQLite
     /// be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
     /// flag is set.
     /// </summary>
-    private DbType _defaultDbType;
+    private DbType? _defaultDbType;
 
     /// <summary>
     /// The default databse type name for this connection.  This value will only
@@ -634,8 +634,8 @@ namespace System.Data.SQLite
       _typeNames = new SQLiteDbTypeMap();
       _parseViaFramework = parseViaFramework;
       _flags = SQLiteConnectionFlags.Default;
-      _defaultDbType = SQLiteConvert.FallbackDefaultDbType;
-      _defaultTypeName = SQLiteConvert.FallbackDefaultTypeName;
+      _defaultDbType = null;
+      _defaultTypeName = null;
       _connectionState = ConnectionState.Closed;
       _connectionString = null;
 
@@ -1930,13 +1930,16 @@ namespace System.Data.SQLite
         bool ignoreCase
         )
     {
-        try
+        if (!String.IsNullOrEmpty(value))
         {
-            return Enum.Parse(type, value, ignoreCase);
-        }
-        catch
-        {
-            // do nothing.
+            try
+            {
+                return Enum.Parse(type, value, ignoreCase);
+            }
+            catch
+            {
+                // do nothing.
+            }
         }
 
         return null;
@@ -2281,9 +2284,9 @@ namespace System.Data.SQLite
       bool noSharedFlags = SQLiteConvert.ToBoolean(FindKey(opts, "NoSharedFlags", DefaultNoSharedFlags.ToString()));
       if (!noSharedFlags) { lock (_syncRoot) { _flags |= _sharedFlags; } }
 
-      enumValue = TryParseEnum(typeof(DbType), FindKey(opts, "DefaultDbType", SQLiteConvert.FallbackDefaultDbType.ToString()), true);
-      _defaultDbType = (enumValue is DbType) ? (DbType)enumValue : SQLiteConvert.FallbackDefaultDbType;
-      _defaultTypeName = FindKey(opts, "DefaultTypeName", SQLiteConvert.FallbackDefaultTypeName);
+      enumValue = TryParseEnum(typeof(DbType), FindKey(opts, "DefaultDbType", null), true);
+      _defaultDbType = (enumValue is DbType) ? (DbType)enumValue : (DbType?)null;
+      _defaultTypeName = FindKey(opts, "DefaultTypeName", null);
 
 #if !NET_COMPACT_20 && TRACE_WARNING
       bool uri = false;
@@ -2598,7 +2601,7 @@ namespace System.Data.SQLite
     /// will only be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
     /// flag is set.
     /// </summary>
-    public DbType DefaultDbType
+    public DbType? DefaultDbType
     {
       get { CheckDisposed(); return _defaultDbType; }
       set { CheckDisposed(); _defaultDbType = value; }

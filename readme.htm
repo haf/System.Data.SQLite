@@ -212,8 +212,10 @@ released versions of System.Data.SQLite.
     <b>1.0.94.0 - August XX, 2014 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
+    <li>Updated to <a href="http://www.nuget.org/packages/EntityFramework/6.1.1">Entity Framework 6.1.1</a>.</li>
     <li>Add RefreshFlags method to the SQLiteDataReader class to forcibly refresh its connection flags.</li>
     <li>Improve SQLiteDataReader performance slightly by caching the connection flags.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>Minimize usage of the &quot;Use_SQLiteConvert_DefaultDbType&quot; and &quot;Use_SQLiteConvert_DefaultTypeName&quot; settings. Fix for [58ed318f2f].&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>
     <b>1.0.93.0 - June 23, 2014</b>

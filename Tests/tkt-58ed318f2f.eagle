@@ -1,0 +1,155 @@
+###############################################################################
+#
+# tkt-58ed318f2f.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+reportSQLiteResources $test_channel true
+
+###############################################################################
+
+proc getSettingReadCount { name } {
+  if {[haveConstraint buildConfiguration.Debug] && [catch {
+    object invoke -flags +NonPublic -alias \
+        System.Data.SQLite.UnsafeNativeMethods settingReadCounts
+  } settingReadCounts] == 0} then {
+    if {[$settingReadCounts TryGetValue $name value]} then {
+      tputs $::test_channel [appendArgs \
+          "---- setting \"" $name "\" was read " $value " times\n"]
+
+      return $value
+    }
+  }
+
+  tputs $::test_channel [appendArgs \
+      "---- setting \"" $name "\" was not read\n"]
+
+  return -1
+}
+
+###############################################################################
+
+runTest {test tkt-58ed318f2f-1.1 {standard GetDefaultDbType usage} -setup {
+  setupDb [set fileName tkt-58ed318f2f-1.1.db]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x, y);
+    INSERT INTO t1 (x, y) VALUES(0, 1);
+    INSERT INTO t1 (x, y) VALUES('0', '1');
+  }
+
+  sql execute -execute reader -format list $db "SELECT x, y FROM t1;"
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == 2}
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+buildConfiguration.Debug} -result {True}}
+
+###############################################################################
+
+reportSQLiteResources $test_channel true
+
+###############################################################################
+
+runTest {test tkt-58ed318f2f-1.2 {no property GetDefaultDbType usage} -setup {
+  setupDb [set fileName tkt-58ed318f2f-1.2.db] "" "" "" UseConnectionTypes
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x, y);
+    INSERT INTO t1 (x, y) VALUES(0, 1);
+    INSERT INTO t1 (x, y) VALUES('0', '1');
+  }
+
+  sql execute -execute reader -format list $db "SELECT x, y FROM t1;"
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == 2}
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+buildConfiguration.Debug} -result {True}}
+
+###############################################################################
+
+reportSQLiteResources $test_channel true
+
+###############################################################################
+
+runTest {test tkt-58ed318f2f-1.3 {no flag GetDefaultDbType usage} -setup {
+  setupDb [set fileName tkt-58ed318f2f-1.3.db] "" "" "" "" \
+      "DefaultDbType=String;"
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x, y);
+    INSERT INTO t1 (x, y) VALUES(0, 1);
+    INSERT INTO t1 (x, y) VALUES('0', '1');
+  }
+
+  sql execute -execute reader -format list $db "SELECT x, y FROM t1;"
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == -1}
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+buildConfiguration.Debug} -result {True}}
+
+###############################################################################
+
+reportSQLiteResources $test_channel true
+
+###############################################################################
+
+runTest {test tkt-58ed318f2f-1.4 {zero GetDefaultDbType usage} -setup {
+  setupDb [set fileName tkt-58ed318f2f-1.4.db] "" "" "" UseConnectionTypes \
+      "DefaultDbType=String;"
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(x, y);
+    INSERT INTO t1 (x, y) VALUES(0, 1);
+    INSERT INTO t1 (x, y) VALUES('0', '1');
+  }
+
+  sql execute -execute reader -format list $db "SELECT x, y FROM t1;"
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == -1}
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite\
+buildConfiguration.Debug} -result {True}}
+
+###############################################################################
+
+rename getSettingReadCount ""
+
+###############################################################################
+
+reportSQLiteResources $test_channel true
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
