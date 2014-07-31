@@ -1958,11 +1958,6 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Private Static Data
-            private static readonly Process CurrentProcess =
-                System.Diagnostics.Process.GetCurrentProcess();
-
-            ///////////////////////////////////////////////////////////////////
-
             private static Assembly systemEf6Assembly;
             #endregion
 
@@ -2236,8 +2231,8 @@ namespace System.Data.SQLite
             {
                 Console.WriteLine(
                     "Attach a debugger to process {0} and press any key to " +
-                    "continue.", (CurrentProcess != null) ?
-                    CurrentProcess.Id.ToString() : "<unknown>");
+                    "continue.", (thisProcess != null) ?
+                    thisProcess.Id.ToString() : "<unknown>");
 
                 try
                 {
@@ -4207,6 +4202,7 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Constant Data
+        #region Package & Provider Names
         private const string CoreFileName = "System.Data.SQLite.dll";
         private const string LinqFileName = "System.Data.SQLite.Linq.dll";
         private const string Ef6FileName = "System.Data.SQLite.EF6.dll";
@@ -4219,6 +4215,7 @@ namespace System.Data.SQLite
 
         private const string Description =
             ".NET Framework Data Provider for SQLite";
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -4274,27 +4271,50 @@ namespace System.Data.SQLite
         ///////////////////////////////////////////////////////////////////////
 
         #region Private Static Data
+        #region Diagnostics & Logging
+        //
+        // NOTE: Cache the current process and assembly as they do not change
+        //       and may be needed in quite a few different places.
+        //
+        private static Process thisProcess = Process.GetCurrentProcess();
         private static Assembly thisAssembly = Assembly.GetExecutingAssembly();
-
-        private static string traceCategory = Path.GetFileName(
-            thisAssembly.Location); /* NOTE: Same for debug and trace. */
-
-        private static TraceCallback debugCallback = AppDebug;
-        private static TraceCallback traceCallback = AppTrace;
 
         ///////////////////////////////////////////////////////////////////////
 
+        //
+        // NOTE: The trace category is the same for both the debug and trace
+        //       callbacks.
+        //
+        private static string traceCategory = Path.GetFileName(
+            (thisAssembly != null) ? thisAssembly.Location : null);
+
+        ///////////////////////////////////////////////////////////////////////
+
+        //
+        // NOTE: Set the debug and trace logging callbacks used by the
+        //       application.
+        //
+        private static TraceCallback debugCallback = AppDebug;
+        private static TraceCallback traceCallback = AppTrace;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region System Directory
         private static string systemDirectory = null;
 
 #if WINDOWS
         private static string systemDirectoryWow64 = null;
 #endif
+        #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Registry Statistics
         private static int filesCreated = 0;
         private static int filesModified = 0;
         private static int filesDeleted = 0;
+        #endregion
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
