@@ -1826,11 +1826,20 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Properties
-            private string invariantName;
-            public string InvariantName
+            private string configInvariantName;
+            public string ConfigInvariantName
             {
-                get { return invariantName; }
-                set { invariantName = value; }
+                get { return configInvariantName; }
+                set { configInvariantName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string providerInvariantName;
+            public string ProviderInvariantName
+            {
+                get { return providerInvariantName; }
+                set { providerInvariantName = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3498,7 +3507,14 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public string GetInvariantName()
+            public string GetConfigInvariantName()
+            {
+                return InvariantName;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public string GetProviderInvariantName()
             {
                 return IsEf6Supported() ? Ef6InvariantName : InvariantName;
             }
@@ -3728,8 +3744,12 @@ namespace System.Data.SQLite
                     ///////////////////////////////////////////////////////////
 
                     traceCallback(String.Format(NameAndValueFormat,
-                        "GetInvariantName", ForDisplay(GetInvariantName())),
-                        traceCategory);
+                        "GetConfigInvariantName", ForDisplay(
+                        GetConfigInvariantName())), traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetProviderInvariantName", ForDisplay(
+                        GetProviderInvariantName())), traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "GetFactoryTypeName", ForDisplay(
@@ -6017,7 +6037,7 @@ namespace System.Data.SQLite
 
                         RegistryHelper.SetValue(
                             dataProviderKey, "InvariantName",
-                            package.InvariantName, whatIf, verbose);
+                            package.ProviderInvariantName, whatIf, verbose);
 
                         RegistryHelper.SetValue(
                             dataProviderKey, "Technology",
@@ -6158,7 +6178,8 @@ namespace System.Data.SQLite
 
         #region Visual Studio Package Handling
         private static void InitializeVsPackage(
-            string invariantName,
+            string configInvariantName,
+            string providerInvariantName,
             string factoryTypeName,
             AssemblyName providerAssemblyName,
             AssemblyName designerAssemblyName,
@@ -6170,7 +6191,8 @@ namespace System.Data.SQLite
             {
                 package = new Package();
 
-                package.InvariantName = invariantName;
+                package.ConfigInvariantName = configInvariantName;
+                package.ProviderInvariantName = providerInvariantName;
                 package.FactoryTypeName = factoryTypeName;
                 package.ProviderAssemblyName = providerAssemblyName;
                 package.DesignerAssemblyName = designerAssemblyName;
@@ -6840,7 +6862,9 @@ namespace System.Data.SQLite
 
                     ///////////////////////////////////////////////////////////
 
-                    InitializeVsPackage(configuration.GetInvariantName(),
+                    InitializeVsPackage(
+                        configuration.GetConfigInvariantName(),
+                        configuration.GetProviderInvariantName(),
                         configuration.GetFactoryTypeName(),
                         configuration.GetProviderAssemblyName(),
                         configuration.GetDesignerAssemblyName(),
@@ -7029,7 +7053,7 @@ namespace System.Data.SQLite
                         if (!ForEachFrameworkConfig(registry,
                                 frameworkList, ProcessDbProviderFactory,
                                 configuration.ConfigVersion,
-                                package.InvariantName, ProviderName,
+                                package.ConfigInvariantName, ProviderName,
                                 Description, package.FactoryTypeName,
                                 package.ProviderAssemblyName, directoryData,
                                 configuration.PerUser,
