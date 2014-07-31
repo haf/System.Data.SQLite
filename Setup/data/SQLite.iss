@@ -75,11 +75,11 @@ Name: Application\Test; Description: Test components.; Types: custom compact ful
 
 [Tasks]
 #if Year == "2005"
-Components: Application\Core\MSIL; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
+Components: Application\Core\MSIL; Name: ngen; Description: Generate native images for the assemblies and install them into the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
 #elif Year == "2008"
-Components: Application\Core\MSIL Or Application\LINQ; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
+Components: Application\Core\MSIL Or Application\LINQ; Name: ngen; Description: Generate native images for the assemblies and install them into the native image cache.; Check: CheckIsNetFx2Setup() or CheckIsNetFx4Setup()
 #else
-Components: Application\Core\MSIL Or Application\LINQ Or Application\EF6; Name: ngen; Description: Generate native images for the assemblies and install the images in the native image cache.; Check: CheckIsNetFx4Setup()
+Components: Application\Core\MSIL Or Application\LINQ Or Application\EF6; Name: ngen; Description: Generate native images for the assemblies and install them into the native image cache.; Check: CheckIsNetFx4Setup()
 #endif
 
 #if Pos("NativeOnly", AppConfiguration) == 0
