@@ -1,7 +1,7 @@
 Installer.exe: #1: Configuration.Process: No actual changes will be made to this system because "what-if" mode is enabled.
-Installer.exe: #2: Installer.Main: GacInstall: assemblyPath = "[file nativename [file join [getBuildDirectory] System.Data.SQLite.dll]]"
-Installer.exe: #3: Installer.Main: GacInstall: assemblyPath = "[file nativename [file join [getBuildDirectory] System.Data.SQLite.Linq.dll]]"
-Installer.exe: #4: Configuration.IsEf6AssemblyAvailable: Entity Framework 6 assembly was resolved.
+Installer.exe: #2: Configuration.IsSystemEf6AssemblyAvailable: Entity Framework 6 assembly was resolved.
+Installer.exe: #3: Installer.Main: GacInstall: assemblyPath = "[file nativename [file join [getBuildDirectory] System.Data.SQLite.dll]]"
+Installer.exe: #4: Installer.Main: GacInstall: assemblyPath = "[file nativename [file join [getBuildDirectory] System.Data.SQLite.Linq.dll]]"
 Installer.exe: #5: Installer.Main: GacInstall: assemblyPath = "[file nativename [file join [getBuildDirectory] System.Data.SQLite.EF6.dll]]"
 Installer.exe: #6: Installer.Main: GacInstall: assemblyPath = "[file nativename [file join [getBuildDirectory] SQLite.Designer.dll]]"
 Installer.exe: #7: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework\v4.0.30319", writable = False
@@ -14,7 +14,7 @@ Installer.exe: #13: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", s
 Installer.exe: #14: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\.NETFramework", writable = False
 Installer.exe: #15: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\.NETFramework", name = "InstallRoot", defaultValue = <null>
 Installer.exe: #16: Installer.RemoveDbProviderFactory: addElement = <null>, removeElement = <null>
-Installer.exe: #17: Installer.AddDbProviderFactory: addElement = <add name="SQLite Data Provider" invariant="System.Data.SQLite" description=".NET Framework Data Provider for SQLite" type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=[file version $systemDataSQLiteDllFile], Culture=neutral, PublicKeyToken=db937bc2d44ff139" />
+Installer.exe: #17: Installer.AddDbProviderFactory: addElement = <add name="SQLite Data Provider" invariant="System.Data.SQLite.EF6" description=".NET Framework Data Provider for SQLite" type="System.Data.SQLite.EF6.SQLiteProviderFactory, System.Data.SQLite.EF6, Version=[file version $systemDataSQLiteDllFile], Culture=neutral, PublicKeyToken=db937bc2d44ff139" />
 Installer.exe: #18: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\10.0", writable = False
 Installer.exe: #19: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #20: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\10.0", writable = False
@@ -53,7 +53,7 @@ Installer.exe: #52: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\S
 Installer.exe: #53: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = <null>, value = ".NET Framework Data Provider for SQLite"
 Installer.exe: #54: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "Assembly", value = "SQLite.Designer, Version=[file version $sqliteDesignerDllFile], Culture=neutral, PublicKeyToken=db937bc2d44ff139"
 Installer.exe: #55: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "AssociatedSource", value = "{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c71}"
-Installer.exe: #56: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "InvariantName", value = "System.Data.SQLite"
+Installer.exe: #56: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "InvariantName", value = "System.Data.SQLite.EF6"
 Installer.exe: #57: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "Technology", value = "{77ab9a9d-78b9-4ba7-91ac-873f5338f1d2}"
 Installer.exe: #58: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "CodeBase", value = "[file nativename [file join [getBuildDirectory] SQLite.Designer.dll]]"
 Installer.exe: #59: RegistryHelper.SetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0\DataProviders\{0ebaab6e-ca80-4b4a-8ddf-cbe6bf058c70}", name = "FactoryService", value = "{dcbe6c8d-0e57-4099-a183-98ff74c64d9d}"

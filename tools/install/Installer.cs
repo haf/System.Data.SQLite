@@ -40,7 +40,7 @@ namespace System.Data.SQLite
 
     internal delegate bool FrameworkConfigCallback(
         string fileName,           /* in */
-        string invariant,          /* in */
+        string invariantName,      /* in */
         string name,               /* in */
         string description,        /* in */
         string typeName,           /* in */
@@ -1826,11 +1826,38 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Properties
-            private AssemblyName assemblyName;
-            public AssemblyName AssemblyName
+            private string invariantName;
+            public string InvariantName
             {
-                get { return assemblyName; }
-                set { assemblyName = value; }
+                get { return invariantName; }
+                set { invariantName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private string factoryTypeName;
+            public string FactoryTypeName
+            {
+                get { return factoryTypeName; }
+                set { factoryTypeName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private AssemblyName providerAssemblyName;
+            public AssemblyName ProviderAssemblyName
+            {
+                get { return providerAssemblyName; }
+                set { providerAssemblyName = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private AssemblyName designerAssemblyName;
+            public AssemblyName DesignerAssemblyName
+            {
+                get { return designerAssemblyName; }
+                set { designerAssemblyName = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1904,6 +1931,34 @@ namespace System.Data.SQLite
             private static readonly char[] SwitchChars = {
                 Switch, AltSwitch
             };
+
+            ///////////////////////////////////////////////////////////////////
+
+            private const string InvariantName = "System.Data.SQLite";
+            private const string Ef6InvariantName = "System.Data.SQLite.EF6";
+
+            ///////////////////////////////////////////////////////////////////
+
+            private const string FactoryTypeName =
+                "System.Data.SQLite.SQLiteFactory";
+
+            private const string Ef6FactoryTypeName =
+                "System.Data.SQLite.EF6.SQLiteProviderFactory";
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Private Static Data
+            private static Assembly systemEf6Assembly;
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
+            #region Private Data
+            private AssemblyName coreAssemblyName;
+            private AssemblyName linqAssemblyName;
+            private AssemblyName ef6AssemblyName;
+            private AssemblyName designerAssemblyName;
             #endregion
 
             ///////////////////////////////////////////////////////////////////
@@ -2125,14 +2180,17 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            private static bool IsEf6AssemblyAvailable()
+            private static bool IsSystemEf6AssemblyAvailable()
             {
+                if (systemEf6Assembly != null)
+                    return true;
+
                 try
                 {
-                    Assembly assembly = Assembly.ReflectionOnlyLoad(
-                        Ef6AssemblyName);
+                    systemEf6Assembly = Assembly.ReflectionOnlyLoad(
+                        SystemEf6AssemblyName);
 
-                    if (assembly != null)
+                    if (systemEf6Assembly != null)
                     {
                         TraceOps.DebugAndTrace(TracePriority.Highest,
                             debugCallback, traceCallback,
@@ -3334,7 +3392,81 @@ namespace System.Data.SQLite
                 if (noNetFx40 && noNetFx45 && noNetFx451)
                     return false;
 
-                return IsEf6AssemblyAvailable();
+                return IsSystemEf6AssemblyAvailable();
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public AssemblyName GetCoreAssemblyName() /* REQUIRED */
+            {
+                if (coreAssemblyName == null)
+                {
+                    coreAssemblyName = AssemblyName.GetAssemblyName(
+                        CoreFileName); /* throw */
+                }
+
+                return coreAssemblyName;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public AssemblyName GetLinqAssemblyName() /* OPTIONAL */
+            {
+                if (IsLinqSupported() && (linqAssemblyName == null))
+                {
+                    linqAssemblyName = AssemblyName.GetAssemblyName(
+                        LinqFileName); /* throw */
+                }
+
+                return linqAssemblyName;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public AssemblyName GetEf6AssemblyName() /* OPTIONAL */
+            {
+                if (IsEf6Supported() && (ef6AssemblyName == null))
+                {
+                    ef6AssemblyName = AssemblyName.GetAssemblyName(
+                        Ef6FileName); /* throw */
+                }
+
+                return ef6AssemblyName;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public AssemblyName GetDesignerAssemblyName() /* REQUIRED */
+            {
+                if (designerAssemblyName == null)
+                {
+                    designerAssemblyName = AssemblyName.GetAssemblyName(
+                        DesignerFileName); /* throw */
+                }
+
+                return designerAssemblyName;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public string GetInvariantName()
+            {
+                return IsEf6Supported() ? Ef6InvariantName : InvariantName;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public string GetFactoryTypeName()
+            {
+                return IsEf6Supported() ? Ef6FactoryTypeName : FactoryTypeName;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public AssemblyName GetProviderAssemblyName()
+            {
+                return IsEf6Supported() ?
+                    GetEf6AssemblyName() : GetCoreAssemblyName(); /* throw */
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3971,9 +4103,11 @@ namespace System.Data.SQLite
         private const string ProviderName = "SQLite Data Provider";
         private const string ProjectName = "System.Data.SQLite";
         private const string LegacyProjectName = "SQLite";
-        private const string InvariantName = "System.Data.SQLite";
-        private const string FactoryTypeName = "System.Data.SQLite.SQLiteFactory";
-        private const string Description = ".NET Framework Data Provider for SQLite";
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private const string Description =
+            ".NET Framework Data Provider for SQLite";
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -3982,7 +4116,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        private const string Ef6AssemblyName = "EntityFramework, " +
+        private const string SystemEf6AssemblyName = "EntityFramework, " +
             "Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
         ///////////////////////////////////////////////////////////////////////
@@ -4338,8 +4472,8 @@ namespace System.Data.SQLite
         {
             try
             {
-                Assembly assembly =
-                    Assembly.ReflectionOnlyLoadFrom(fileName); /* throw */
+                Assembly assembly = Assembly.ReflectionOnlyLoadFrom(
+                    fileName); /* throw */
 
                 if (assembly != null)
                     return assembly.ImageRuntimeVersion;
@@ -4577,7 +4711,7 @@ namespace System.Data.SQLite
             FrameworkList frameworkList,
             FrameworkConfigCallback callback,
             string version, /* NOTE: Optional. */
-            string invariant,
+            string invariantName,
             string name,
             string description,
             string typeName,
@@ -4756,10 +4890,10 @@ namespace System.Data.SQLite
                     bool localSaved = false;
 
                     if (!callback(
-                            fileName, invariant, name, description, typeName,
-                            assemblyName, installDirectory, clientData,
-                            perUser, wow64, throwOnMissing, whatIf, verbose,
-                            ref localSaved, ref error))
+                            fileName, invariantName, name, description,
+                            typeName, assemblyName, installDirectory,
+                            clientData, perUser, wow64, throwOnMissing,
+                            whatIf, verbose, ref localSaved, ref error))
                     {
                         return false;
                     }
@@ -5103,7 +5237,7 @@ namespace System.Data.SQLite
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool AddDbProviderFactory(
             string fileName,
-            string invariant,
+            string invariantName,
             string name,
             string description,
             string typeName,
@@ -5121,7 +5255,7 @@ namespace System.Data.SQLite
             document.Load(fileName);
 
             XmlElement addElement = document.SelectSingleNode(
-                String.Format(XPathForAddElement, invariant)) as XmlElement;
+                String.Format(XPathForAddElement, invariantName)) as XmlElement;
 
             if (addElement == null)
             {
@@ -5164,9 +5298,9 @@ namespace System.Data.SQLite
             }
 
             if (!String.Equals(addElement.GetAttribute("invariant"),
-                    invariant, StringComparison.Ordinal))
+                    invariantName, StringComparison.Ordinal))
             {
-                addElement.SetAttribute("invariant", invariant);
+                addElement.SetAttribute("invariant", invariantName);
                 dirty = true;
             }
 
@@ -5211,7 +5345,7 @@ namespace System.Data.SQLite
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool RemoveDbProviderFactory(
             string fileName,
-            string invariant,
+            string invariantName,
             bool whatIf,
             bool verbose,
             ref bool saved,
@@ -5225,7 +5359,7 @@ namespace System.Data.SQLite
             document.Load(fileName);
 
             XmlElement addElement = document.SelectSingleNode(
-                String.Format(XPathForAddElement, invariant)) as XmlElement;
+                String.Format(XPathForAddElement, invariantName)) as XmlElement;
 
             if (addElement != null)
             {
@@ -5234,7 +5368,7 @@ namespace System.Data.SQLite
             }
 
             XmlElement removeElement = document.SelectSingleNode(
-                String.Format(XPathForRemoveElement, invariant)) as XmlElement;
+                String.Format(XPathForRemoveElement, invariantName)) as XmlElement;
 
             if (removeElement != null)
             {
@@ -5266,7 +5400,7 @@ namespace System.Data.SQLite
 
         private static bool ProcessDbProviderFactory(
             string fileName,
-            string invariant,
+            string invariantName,
             string name,
             string description,
             string typeName,
@@ -5293,16 +5427,16 @@ namespace System.Data.SQLite
             if (pair.Y)
             {
                 return RemoveDbProviderFactory(
-                    fileName, invariant, whatIf, verbose, ref saved,
+                    fileName, invariantName, whatIf, verbose, ref saved,
                     ref error) &&
                 AddDbProviderFactory(
-                    fileName, invariant, name, description, typeName,
+                    fileName, invariantName, name, description, typeName,
                     assemblyName, whatIf, verbose, ref saved, ref error);
             }
             else
             {
                 return RemoveDbProviderFactory(
-                    fileName, invariant, whatIf, verbose, ref saved,
+                    fileName, invariantName, whatIf, verbose, ref saved,
                     ref error);
             }
         }
@@ -5778,7 +5912,7 @@ namespace System.Data.SQLite
                         {
                             RegistryHelper.SetValue(
                                 dataProviderKey, "Assembly",
-                                package.AssemblyName.ToString(),
+                                package.DesignerAssemblyName.ToString(),
                                 whatIf, verbose);
                         }
 
@@ -5791,8 +5925,8 @@ namespace System.Data.SQLite
                             whatIf, verbose);
 
                         RegistryHelper.SetValue(
-                            dataProviderKey, "InvariantName", InvariantName,
-                            whatIf, verbose);
+                            dataProviderKey, "InvariantName",
+                            package.InvariantName, whatIf, verbose);
 
                         RegistryHelper.SetValue(
                             dataProviderKey, "Technology",
@@ -5933,7 +6067,10 @@ namespace System.Data.SQLite
 
         #region Visual Studio Package Handling
         private static void InitializeVsPackage(
-            AssemblyName assemblyName,
+            string invariantName,
+            string factoryTypeName,
+            AssemblyName providerAssemblyName,
+            AssemblyName designerAssemblyName,
             bool globalAssemblyCache,
             ref Package package
             )
@@ -5942,7 +6079,10 @@ namespace System.Data.SQLite
             {
                 package = new Package();
 
-                package.AssemblyName = assemblyName;
+                package.InvariantName = invariantName;
+                package.FactoryTypeName = factoryTypeName;
+                package.ProviderAssemblyName = providerAssemblyName;
+                package.DesignerAssemblyName = designerAssemblyName;
                 package.GlobalAssemblyCache = globalAssemblyCache;
 
                 package.AdoNetTechnologyId = new Guid(
@@ -6550,18 +6690,24 @@ namespace System.Data.SQLite
                 {
                     #region Core Assembly Name Check
                     //
-                    // NOTE: Do this first, before making any changes to the
-                    //       system, because it will throw an exception if the
-                    //       file name does not represent a valid managed
-                    //       assembly.
+                    // NOTE: Query all the assembly names first, before making
+                    //       any changes to the system, because this will throw
+                    //       an exception if any of the file names do not point
+                    //       to a valid managed assembly.  The values of these
+                    //       local variables are never used after this point;
+                    //       however, do not remove them.
                     //
                     AssemblyName coreAssemblyName =
-                        AssemblyName.GetAssemblyName(
-                            configuration.CoreFileName); /* throw */
+                        configuration.GetCoreAssemblyName(); /* NOT USED */
+
+                    AssemblyName linqAssemblyName =
+                        configuration.GetLinqAssemblyName(); /* NOT USED */
+
+                    AssemblyName ef6AssemblyName =
+                        configuration.GetEf6AssemblyName(); /* NOT USED */
 
                     AssemblyName designerAssemblyName =
-                        AssemblyName.GetAssemblyName(
-                            configuration.DesignerFileName); /* throw */
+                        configuration.GetDesignerAssemblyName(); /* NOT USED */
                     #endregion
 
                     ///////////////////////////////////////////////////////////
@@ -6598,7 +6744,10 @@ namespace System.Data.SQLite
 
                     ///////////////////////////////////////////////////////////
 
-                    InitializeVsPackage(designerAssemblyName,
+                    InitializeVsPackage(configuration.GetInvariantName(),
+                        configuration.GetFactoryTypeName(),
+                        configuration.GetProviderAssemblyName(),
+                        configuration.GetDesignerAssemblyName(),
                         configuration.HasFlags(
                             InstallFlags.GlobalAssemblyCache, true) &&
                         configuration.HasFlags(
@@ -6783,9 +6932,10 @@ namespace System.Data.SQLite
 
                         if (!ForEachFrameworkConfig(registry,
                                 frameworkList, ProcessDbProviderFactory,
-                                configuration.ConfigVersion, InvariantName,
-                                ProviderName, Description, FactoryTypeName,
-                                coreAssemblyName, directoryData,
+                                configuration.ConfigVersion,
+                                package.InvariantName, ProviderName,
+                                Description, package.FactoryTypeName,
+                                package.ProviderAssemblyName, directoryData,
                                 configuration.PerUser,
                                 NetFxIs32BitOnly || configuration.Wow64,
                                 configuration.ThrowOnMissing,
