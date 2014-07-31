@@ -1949,6 +1949,11 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Private Static Data
+            private static readonly Process CurrentProcess =
+                System.Diagnostics.Process.GetCurrentProcess();
+
+            ///////////////////////////////////////////////////////////////////
+
             private static Assembly systemEf6Assembly;
             #endregion
 
@@ -2193,8 +2198,9 @@ namespace System.Data.SQLite
                     if (systemEf6Assembly != null)
                     {
                         TraceOps.DebugAndTrace(TracePriority.Highest,
-                            debugCallback, traceCallback,
-                            "Entity Framework 6 assembly was resolved.",
+                            debugCallback, traceCallback, String.Format(
+                            "Entity Framework 6 assembly was resolved to {0}.",
+                            ForDisplay(systemEf6Assembly.Location)),
                             traceCategory);
 
                         return true;
@@ -2217,6 +2223,27 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Static Methods
+            public static void BreakIntoDebugger()
+            {
+                Console.WriteLine(
+                    "Attach a debugger to process {0} and press any key to " +
+                    "continue.", (CurrentProcess != null) ?
+                    CurrentProcess.Id.ToString() : "<unknown>");
+
+                try
+                {
+                    Console.ReadKey(true); /* throw */
+                }
+                catch (InvalidOperationException) // Console.ReadKey
+                {
+                    // do nothing.
+                }
+
+                Debugger.Break();
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             public static Configuration CreateDefault()
             {
                 string directory = null;
@@ -2334,7 +2361,29 @@ namespace System.Data.SQLite
                         //       to interpret the textual value as the correct
                         //       type.
                         //
-                        if (MatchOption(newArg, "configVersion"))
+                        if (MatchOption(newArg, "break"))
+                        {
+                            bool? value = ParseBoolean(text);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid {0} boolean value: {1}",
+                                    ForDisplay(arg), ForDisplay(text)),
+                                    traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            if ((bool)value)
+                                BreakIntoDebugger();
+                        }
+                        else if (MatchOption(newArg, "configVersion"))
                         {
                             configuration.configVersion = text;
                         }
@@ -6632,6 +6681,11 @@ namespace System.Data.SQLite
             string[] args
             )
         {
+            if (Environment.GetEnvironmentVariable("BREAK") != null)
+                Configuration.BreakIntoDebugger();
+
+            ///////////////////////////////////////////////////////////////////
+
             try
             {
                 Configuration configuration = null;
