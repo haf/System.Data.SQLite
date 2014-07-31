@@ -3696,6 +3696,48 @@ namespace System.Data.SQLite
                             ForDisplay(GetAssemblyConfiguration(assembly))),
                             traceCategory);
                     }
+
+                    ///////////////////////////////////////////////////////////
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "IsLinqSupported", ForDisplay(IsLinqSupported())),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "IsEf6Supported", ForDisplay(IsEf6Supported())),
+                        traceCategory);
+
+                    ///////////////////////////////////////////////////////////
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetCoreAssemblyName", ForDisplay(
+                        GetCoreAssemblyName())), traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetLinqAssemblyName", ForDisplay(
+                        GetLinqAssemblyName())), traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetEf6AssemblyName", ForDisplay(
+                        GetEf6AssemblyName())), traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetDesignerAssemblyName", ForDisplay(
+                        GetDesignerAssemblyName())), traceCategory);
+
+                    ///////////////////////////////////////////////////////////
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetInvariantName", ForDisplay(GetInvariantName())),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetFactoryTypeName", ForDisplay(
+                        GetFactoryTypeName())), traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetProviderAssemblyName", ForDisplay(
+                        GetProviderAssemblyName())), traceCategory);
                 }
             }
             #endregion
