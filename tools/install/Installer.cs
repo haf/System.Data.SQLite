@@ -6745,8 +6745,10 @@ namespace System.Data.SQLite
             string[] args
             )
         {
-            if (Environment.GetEnvironmentVariable("BREAK") != null)
+            #region Debugger Hook
+            if (Environment.GetEnvironmentVariable("Break") != null)
                 Configuration.BreakIntoDebugger();
+            #endregion
 
             ///////////////////////////////////////////////////////////////////
 
@@ -6754,29 +6756,6 @@ namespace System.Data.SQLite
             {
                 Configuration configuration = null;
                 string error = null;
-
-                ///////////////////////////////////////////////////////////////
-
-                #region Debugger Hook
-                if (Environment.GetEnvironmentVariable("Break") != null)
-                {
-                    Console.WriteLine(
-                        "Attach a debugger to process {0} and " +
-                        "press any key to continue.",
-                        Process.GetCurrentProcess().Id);
-
-                    try
-                    {
-                        Console.ReadKey(true); /* throw */
-                    }
-                    catch (InvalidOperationException) // Console.ReadKey
-                    {
-                        // do nothing.
-                    }
-
-                    Debugger.Break();
-                }
-                #endregion
 
                 ///////////////////////////////////////////////////////////////
 
