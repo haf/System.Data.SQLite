@@ -31,6 +31,17 @@ namespace SQLite.Designer
         ///////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// This is the name of the environment variable that will be checked
+        /// prior to setting the initial default value for the configured
+        /// ADO.NET provider name, thus allowing the default value to be
+        /// overridden via the environment.
+        /// </summary>
+        private static readonly string ProviderNameEnvVarName =
+            "ProviderName_SQLiteDesigner";
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
         /// This is the legacy provider name used by the System.Data.SQLite
         /// design-time components.  It is also the default value for the
         /// associated option key.
@@ -91,7 +102,14 @@ namespace SQLite.Designer
                 else
                     options = new Dictionary<string, string>();
 
-                options[ProviderNameKey] = DefaultProviderName;
+                string key = ProviderNameKey;
+                string value = Environment.GetEnvironmentVariable(
+                    ProviderNameEnvVarName);
+
+                if (IsValidValue(key, value))
+                    options[key] = value;
+                else
+                    options[key] = DefaultProviderName;
             }
         }
         #endregion
