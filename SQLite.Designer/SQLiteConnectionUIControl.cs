@@ -24,14 +24,10 @@ namespace SQLite.Designer
   [ToolboxItem(false)]
   public partial class SQLiteConnectionUIControl : DataConnectionUIControl
   {
-    bool enableProviderChanged = false;
-
     public SQLiteConnectionUIControl()
     {
       InitializeComponent();
       SQLiteOptions.AddProviderNames(providerComboBox.Items);
-      SQLiteOptions.SelectProviderName(providerComboBox);
-      enableProviderChanged = true;
     }
 
     private void browseButton_Click(object sender, EventArgs e)
@@ -62,6 +58,8 @@ namespace SQLite.Designer
 
     public override void LoadProperties()
     {
+      SQLiteOptions.SelectProviderName(providerComboBox);
+
       if (ConnectionProperties.Contains("data source"))
         fileTextBox.Text = ConnectionProperties["data source"] as string;
       else
@@ -109,10 +107,7 @@ namespace SQLite.Designer
         object item = providerComboBox.SelectedItem;
 
         if (item != null)
-        {
             SQLiteOptions.SetProviderName(item.ToString());
-            LoadProperties();
-        }
     }
 
     private void sync_Changed(object sender, EventArgs e)
