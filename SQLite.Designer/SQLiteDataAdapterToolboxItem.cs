@@ -63,6 +63,7 @@ namespace SQLite.Designer
     /// <returns>The components created by this toolbox item</returns>
     protected override IComponent[] CreateComponentsCore(IDesignerHost host)
     {
+          // TODO: Fix me.
       DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
 
       DbDataAdapter dataAdapter = fact.CreateDataAdapter();
