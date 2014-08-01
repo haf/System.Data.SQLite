@@ -24,11 +24,14 @@ namespace SQLite.Designer
   [ToolboxItem(false)]
   public partial class SQLiteConnectionUIControl : DataConnectionUIControl
   {
+    bool enableProviderChanged = false;
+
     public SQLiteConnectionUIControl()
     {
       InitializeComponent();
       SQLiteOptions.AddProviderNames(providerComboBox.Items);
       SQLiteOptions.SelectProviderName(providerComboBox);
+      enableProviderChanged = true;
     }
 
     private void browseButton_Click(object sender, EventArgs e)
@@ -100,6 +103,9 @@ namespace SQLite.Designer
 
     private void provider_Changed(object sender, EventArgs e)
     {
+        if (!enableProviderChanged)
+            return;
+
         object item = providerComboBox.SelectedItem;
 
         if (item != null)
