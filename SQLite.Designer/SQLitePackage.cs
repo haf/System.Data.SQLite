@@ -24,7 +24,7 @@ namespace SQLite.Designer
   {
     public SQLitePackage()
     {
-        IEnumerable<string> keys = SQLiteOptions.GetOptionKeys(true);
+        IEnumerable<string> keys = SQLiteOptions.GetKeys(true);
 
         if (keys != null)
         {
@@ -50,14 +50,14 @@ namespace SQLite.Designer
 
     protected override void OnLoadOptions(string key, Stream stream)
     {
-        if (SQLiteOptions.HaveOptionKey(key))
+        if (SQLiteOptions.HaveKey(key))
         {
             string value;
 
             if (SQLiteOptions.ReadValue(stream, out value) &&
                 SQLiteOptions.IsValidValue(key, value))
             {
-                SQLiteOptions.SetOptionValue(key, value);
+                SQLiteOptions.SetValue(key, value);
             }
 
             return;
@@ -68,11 +68,11 @@ namespace SQLite.Designer
 
     protected override void OnSaveOptions(string key, Stream stream)
     {
-        if (SQLiteOptions.HaveOptionKey(key))
+        if (SQLiteOptions.HaveKey(key))
         {
             string value;
 
-            if (SQLiteOptions.GetOptionValue(key, out value) &&
+            if (SQLiteOptions.GetValue(key, out value) &&
                 SQLiteOptions.IsValidValue(key, value) &&
                 !SQLiteOptions.IsDefaultValue(key, value))
             {

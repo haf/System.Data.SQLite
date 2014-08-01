@@ -77,8 +77,7 @@ namespace SQLite.Designer.Editors
         if (_typeQB != null)
         {
           _queryDesigner = Activator.CreateInstance(_typeQB) as UserControl;
-          // TODO: Fix me.
-          _typeQB.InvokeMember("Provider", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.NonPublic, null, _queryDesigner, new object[] { "System.Data.SQLite" });
+          _typeQB.InvokeMember("Provider", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.NonPublic, null, _queryDesigner, new object[] { SQLiteOptions.GetProviderName() });
           _typeQB.InvokeMember("ConnectionString", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.NonPublic, null, _queryDesigner, new object[] { _connection.ConnectionSupport.ConnectionString });
           _typeQB.InvokeMember("EnableMorphing", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.NonPublic, null, _queryDesigner, new object[] { false });
           Controls.Add(_queryDesigner);

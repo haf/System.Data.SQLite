@@ -23,8 +23,7 @@ namespace SQLite.Designer
     }
 
     public SQLiteConnectionProperties(string connectionString)
-          // TODO: Fix me.
-      : base("System.Data.SQLite", connectionString)
+      : base(SQLiteOptions.GetProviderName(), connectionString)
     {
     }
 

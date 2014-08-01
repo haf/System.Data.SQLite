@@ -90,6 +90,30 @@ namespace SQLite.Designer
         ///////////////////////////////////////////////////////////////////////
 
         #region Public Static Methods
+        #region Provider Name Handling
+        /// <summary>
+        /// This method determines the name of the ADO.NET provider for the
+        /// System.Data.SQLite design-time components to use.
+        /// </summary>
+        /// <returns>
+        /// The configured ADO.NET provider name for System.Data.SQLite -OR-
+        /// the default ADO.NET provider name for System.Data.SQLite in the
+        /// event of any failure.  This method cannot return null.
+        /// </returns>
+        public static string GetProviderName()
+        {
+            string key = ProviderNameKey;
+            string value;
+
+            if (GetValue(key, out value) && IsValidValue(key, value))
+                return value;
+
+            return DefaultProviderName;
+        }
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
         #region Hard-Coded Default Value Handling
         /// <summary>
         /// This method determines if the specified key/value pair represents
@@ -167,7 +191,7 @@ namespace SQLite.Designer
         /// option keys supported by the System.Data.SQLite design-time
         /// components -OR- null in the event of any failure.
         /// </returns>
-        public static IEnumerable<string> GetOptionKeys(
+        public static IEnumerable<string> GetKeys(
             bool reset
             )
         {
@@ -192,7 +216,7 @@ namespace SQLite.Designer
         /// <returns>
         /// Non-zero if the specified option key is supported by this class.
         /// </returns>
-        public static bool HaveOptionKey(
+        public static bool HaveKey(
             string key
             )
         {
@@ -221,7 +245,7 @@ namespace SQLite.Designer
         /// <returns>
         /// Non-zero for success; otherwise, zero.
         /// </returns>
-        public static bool GetOptionValue(
+        public static bool GetValue(
             string key,
             out string value
             )
@@ -254,7 +278,7 @@ namespace SQLite.Designer
         /// <returns>
         /// Non-zero for success; otherwise, zero.
         /// </returns>
-        public static bool SetOptionValue(
+        public static bool SetValue(
             string key,
             string value
             )
