@@ -101,9 +101,6 @@ namespace SQLite.Designer
 
     private void provider_Changed(object sender, EventArgs e)
     {
-        if (!enableProviderChanged)
-            return;
-
         object item = providerComboBox.SelectedItem;
 
         if (item != null)
