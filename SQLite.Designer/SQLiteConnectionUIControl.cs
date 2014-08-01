@@ -27,6 +27,8 @@ namespace SQLite.Designer
     public SQLiteConnectionUIControl()
     {
       InitializeComponent();
+      SQLiteOptions.AddProviderNames(providerComboBox.Items);
+      SQLiteOptions.SelectProviderName(providerComboBox);
     }
 
     private void browseButton_Click(object sender, EventArgs e)
@@ -94,6 +96,17 @@ namespace SQLite.Designer
         ConnectionProperties["datetimeformat"] = "Ticks";
       else
         ConnectionProperties["datetimeformat"] = "JulianDay";
+    }
+
+    private void provider_Changed(object sender, EventArgs e)
+    {
+        object item = providerComboBox.SelectedItem;
+
+        if (item != null)
+        {
+            SQLiteOptions.SetProviderName(item.ToString());
+            LoadProperties();
+        }
     }
 
     private void sync_Changed(object sender, EventArgs e)

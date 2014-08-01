@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
 
 namespace SQLite.Designer
@@ -32,7 +33,7 @@ namespace SQLite.Designer
         /// <summary>
         /// This is the legacy provider name used by the System.Data.SQLite
         /// design-time components.  It is also the default value for the
-        /// associated option.
+        /// associated option key.
         /// </summary>
         private static readonly string DefaultProviderName = "System.Data.SQLite";
 
@@ -54,7 +55,9 @@ namespace SQLite.Designer
 
         /// <summary>
         /// This dictionary contains the key/value pairs representing the
-        /// per-solution options configured for the current solution.
+        /// per-solution options configured for the current solution.  When
+        /// a new solution is loaded by Visual Studio, this dictionary must
+        /// be reset.
         /// </summary>
         private static Dictionary<string, string> options;
         #endregion
@@ -110,6 +113,111 @@ namespace SQLite.Designer
 
             return DefaultProviderName;
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// This method attempts to set the name of the ADO.NET provider for
+        /// the System.Data.SQLite design-time components to use.
+        /// </summary>
+        /// <param name="value">
+        /// The ADO.NET provider name to use.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success; otherwise, zero.  All ADO.NET provider names
+        /// unknown to this class are rejected.
+        /// </returns>
+        public static bool SetProviderName(
+            string value
+            )
+        {
+            string key = ProviderNameKey;
+
+            if (IsValidValue(key, value))
+                return SetValue(key, value);
+
+            return false;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region User-Interface Handling
+        /// <summary>
+        /// This method attempts to select the configured ADO.NET provider name
+        /// in the specified <see cref="ComboBox" />.  This method will only
+        /// work correctly when called from the user-interface thread.
+        /// </summary>
+        /// <param name="comboBox">
+        /// The <see cref="ComboBox" /> object where the selection is to be
+        /// modified.
+        /// </param>
+        /// <returns>
+        /// Non-zero upon success; otherwise, zero.
+        /// </returns>
+        public static bool SelectProviderName(
+            ComboBox comboBox
+            )
+        {
+            if (comboBox == null)
+                return false;
+
+            string value = GetProviderName();
+
+            if (value == null)
+                return false;
+
+            for (int index = 0; index < comboBox.Items.Count; index++)
+            {
+                object item = comboBox.Items[index];
+
+                if (item == null)
+                    continue;
+
+                if (String.Equals(
+                        item.ToString(), value, StringComparison.Ordinal))
+                {
+                    comboBox.SelectedIndex = index;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// This method populates the specified <see cref="ComboBox" /> item
+        /// list with the recognized ADO.NET provider names.  This method will
+        /// only work correctly when called from the user-interface thread.
+        /// </summary>
+        /// <param name="items">
+        /// The <see cref="ComboBox.Items" /> property value containing the
+        /// list of items to be modified.  This value cannot be null.
+        /// </param>
+        /// <returns>
+        /// The number of items actually added to the list, which may be zero.
+        /// </returns>
+        public static int AddProviderNames(
+            ComboBox.ObjectCollection items
+            )
+        {
+            int result = 0;
+
+            if (items == null)
+                return result;
+
+            items.Add(DefaultProviderName);
+            result++;
+
+#if NET_40 || NET_45 || NET_451
+            items.Add(Ef6ProviderName);
+            result++;
+#endif
+
+            return result;
+        }
+        #endregion
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
