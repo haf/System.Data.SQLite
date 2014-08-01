@@ -37,11 +37,17 @@ namespace SQLite.Designer
         /// </summary>
         private static readonly string DefaultProviderName = "System.Data.SQLite";
 
+        ///////////////////////////////////////////////////////////////////////
+
+#if NET_40 || NET_45 || NET_451
         /// <summary>
         /// This is the provider name used when Entity Framework 6.x support is
         /// required for use with the System.Data.SQLite design-time components.
+        /// This provider name is only available when this class is compiled for
+        /// the .NET Framework 4.0 or later.
         /// </summary>
         private static readonly string Ef6ProviderName = "System.Data.SQLite.EF6";
+#endif
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -276,9 +282,12 @@ namespace SQLite.Designer
             if (String.Equals(
                     key, ProviderNameKey, StringComparison.Ordinal) &&
                 (String.Equals(
-                    value, DefaultProviderName, StringComparison.Ordinal) ||
-                String.Equals(
-                    value, Ef6ProviderName, StringComparison.Ordinal)))
+                    value, DefaultProviderName, StringComparison.Ordinal)
+#if NET_40 || NET_45 || NET_451
+                || String.Equals(
+                    value, Ef6ProviderName, StringComparison.Ordinal)
+#endif
+                ))
             {
                 return true;
             }
