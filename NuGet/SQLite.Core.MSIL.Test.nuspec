@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * SQLite.Core.MSIL.nuspec -
+ * SQLite.Core.MSIL.Test.nuspec -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -9,8 +9,8 @@
 -->
 <package>
   <metadata>
-    <id>System.Data.SQLite.Core.MSIL</id>
-    <title>System.Data.SQLite (MSIL)</title>
+    <id>System.Data.SQLite.Core.MSIL.Test</id>
+    <title>System.Data.SQLite (MSIL) Test</title>
     <version>1.0.94.0</version>
     <authors>SQLite Development Team</authors>
     <description>An ADO.NET provider for SQLite (managed-only).</description>

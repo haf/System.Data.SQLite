@@ -391,6 +391,22 @@ lappend patterns \
         </version>]
 
 ###############################################################################
+# SQLite.Core.Beta.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>]
+
+###############################################################################
+# SQLite.Core.Test.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>]
+
+###############################################################################
 # SQLite.Core.MSIL.nuspec
 ###############################################################################
 
@@ -399,7 +415,51 @@ lappend patterns \
         </version>]
 
 ###############################################################################
+# SQLite.Core.MSIL.Beta.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>]
+
+###############################################################################
+# SQLite.Core.MSIL.Test.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>]
+
+###############################################################################
 # SQLite.EF6.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
+    [appendArgs " targetFramework=\"net40\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*?\" version=\"" $version(nuget) \
+        "\" "]
+
+###############################################################################
+# SQLite.EF6.Beta.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
+    [appendArgs " targetFramework=\"net40\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*?\" version=\"" $version(nuget) \
+        "\" "]
+
+###############################################################################
+# SQLite.EF6.Test.nuspec
 ###############################################################################
 
 lappend patterns \
@@ -429,7 +489,55 @@ lappend patterns \
         "\" "]
 
 ###############################################################################
+# SQLite.Linq.Beta.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
+    [appendArgs " targetFramework=\"net20\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*?\" version=\"" $version(nuget) \
+        "\" "]
+
+###############################################################################
+# SQLite.Linq.Test.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>] \
+    [appendArgs " targetFramework=\"net20\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net40\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net45\".*?\" version=\"" $version(nuget) \
+        "\" "] \
+    [appendArgs " targetFramework=\"net451\".*?\" version=\"" $version(nuget) \
+        "\" "]
+
+###############################################################################
 # SQLite.MSIL.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>]
+
+###############################################################################
+# SQLite.MSIL.Beta.nuspec
+###############################################################################
+
+lappend patterns \
+    [appendArgs <version> [string map [list . \\.] $version(nuget)] \
+        </version>]
+
+###############################################################################
+# SQLite.MSIL.Test.nuspec
 ###############################################################################
 
 lappend patterns \
@@ -766,17 +874,41 @@ set fileNames [list \
     [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Beta.nuspec] \
     [file join NuGet SQLite.Core.nuspec] \
+    [file join NuGet SQLite.Core.Beta.nuspec] \
+    [file join NuGet SQLite.Core.Test.nuspec] \
     [file join NuGet SQLite.Core.MSIL.nuspec] \
+    [file join NuGet SQLite.Core.MSIL.Beta.nuspec] \
+    [file join NuGet SQLite.Core.MSIL.Test.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \
     [file join NuGet SQLite.EF6.nuspec] \
+    [file join NuGet SQLite.EF6.Beta.nuspec] \
+    [file join NuGet SQLite.EF6.Beta.nuspec] \
+    [file join NuGet SQLite.EF6.Beta.nuspec] \
+    [file join NuGet SQLite.EF6.Beta.nuspec] \
+    [file join NuGet SQLite.EF6.Test.nuspec] \
+    [file join NuGet SQLite.EF6.Test.nuspec] \
+    [file join NuGet SQLite.EF6.Test.nuspec] \
+    [file join NuGet SQLite.EF6.Test.nuspec] \
     [file join NuGet SQLite.Linq.nuspec] \
     [file join NuGet SQLite.Linq.nuspec] \
     [file join NuGet SQLite.Linq.nuspec] \
     [file join NuGet SQLite.Linq.nuspec] \
     [file join NuGet SQLite.Linq.nuspec] \
+    [file join NuGet SQLite.Linq.Beta.nuspec] \
+    [file join NuGet SQLite.Linq.Beta.nuspec] \
+    [file join NuGet SQLite.Linq.Beta.nuspec] \
+    [file join NuGet SQLite.Linq.Beta.nuspec] \
+    [file join NuGet SQLite.Linq.Beta.nuspec] \
+    [file join NuGet SQLite.Linq.Test.nuspec] \
+    [file join NuGet SQLite.Linq.Test.nuspec] \
+    [file join NuGet SQLite.Linq.Test.nuspec] \
+    [file join NuGet SQLite.Linq.Test.nuspec] \
+    [file join NuGet SQLite.Linq.Test.nuspec] \
     [file join NuGet SQLite.MSIL.nuspec] \
+    [file join NuGet SQLite.MSIL.Beta.nuspec] \
+    [file join NuGet SQLite.MSIL.Test.nuspec] \
     [file join NuGet SQLite.Test.nuspec] \
     [file join NuGet SQLite.Test.nuspec] \
     [file join NuGet SQLite.Test.nuspec] \
