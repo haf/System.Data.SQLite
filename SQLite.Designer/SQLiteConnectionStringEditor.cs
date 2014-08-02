@@ -60,7 +60,7 @@ namespace SQLite.Designer
             object manager = Activator.CreateInstance(_managerType, new object[] { provider });
             if (manager != null)
             {
-              index = (int)_managerType.InvokeMember("AddNewConnection", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { "System.Data.SQLite" });
+              index = (int)_managerType.InvokeMember("AddNewConnection", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { SQLiteOptions.GetProviderName() });
               if (index > -1 && _selector != null)
               {
                 connectionString = (string)_managerType.InvokeMember("GetConnectionString", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public, null, manager, new object[] { index });
