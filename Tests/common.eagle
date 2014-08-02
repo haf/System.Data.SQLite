@@ -1888,6 +1888,58 @@ namespace eval ::Eagle {
           $db $connection
     }
 
+    proc getRowsFromDataTable { dataTable } {
+      set rows [list]
+      set count [$dataTable Columns.Count]
+
+      for {set index 0} {$index < $count} {incr index} {
+        set dataColumn [$dataTable -alias Columns.get_Item $index]
+        set names($index) [$dataColumn ColumnName]
+      }
+
+      object foreach -alias dataRow [set dataRows [$dataTable Rows]] {
+        set row [list]
+
+        for {set index 0} {$index < $count} {incr index} {
+          set value [$dataRow -create -alias get_Item $index]
+
+          if {[string length $value] > 0 && \
+              ![object invoke Convert IsDBNull $value]} then {
+            lappend row [list $names($index) [$value ToString]]
+          } else {
+            lappend row [list $names($index)]
+          }
+        }
+
+        lappend rows $row
+      }
+
+      return $rows
+    }
+
+    proc dumpRowsFromDataTable { channel rows } {
+      set sequence 1
+
+      foreach row $rows {
+        tputs $channel [appendArgs \
+            [expr {$sequence > 1 ? "\n" : ""}] "---- ROW #" $sequence :\n]
+
+        foreach pair $row {
+          if {[llength $pair] >= 2} then {
+            tputs $channel [appendArgs \t \
+                [list [lindex $pair 0]] ": " [list [lindex $pair 1]] \n]
+          } elseif {[llength $pair] == 1} then {
+            tputs $channel [appendArgs \t \
+                [list [lindex $pair 0]] ": <null>\n"]
+          } else {
+            tputs $channel \t<empty>\n; # NOTE: No data?
+          }
+        }
+
+        incr sequence
+      }
+    }
+
     proc cleanupDb { fileName {varName db} {collect true} {qualify true}
                      {delete true} } {
       #
