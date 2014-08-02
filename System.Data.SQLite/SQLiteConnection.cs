@@ -2598,8 +2598,7 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Gets/sets the default database type for this connection.  This value
-    /// will only be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
-    /// flag is set.
+    /// will only be used when not null.
     /// </summary>
     public DbType? DefaultDbType
     {
@@ -2608,9 +2607,8 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// Gets/sets the default database type name for this connection.  This value
-    /// will only be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
-    /// flag is set.
+    /// Gets/sets the default database type name for this connection.  This
+    /// value will only be used when not null.
     /// </summary>
     public string DefaultTypeName
     {
