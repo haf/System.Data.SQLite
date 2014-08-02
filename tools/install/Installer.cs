@@ -1826,15 +1826,6 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Properties
-            private string configInvariantName;
-            public string ConfigInvariantName
-            {
-                get { return configInvariantName; }
-                set { configInvariantName = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
             private string providerInvariantName;
             public string ProviderInvariantName
             {
@@ -3405,6 +3396,15 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            #region Private Methods
+            private string GetInvariantName()
+            {
+                return IsEf6Supported() ? Ef6InvariantName : InvariantName;
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
             #region Public Methods
             public bool HasFlags(
                 InstallFlags hasFlags,
@@ -3504,14 +3504,14 @@ namespace System.Data.SQLite
 
             public string GetConfigInvariantName()
             {
-                return InvariantName;
+                return GetInvariantName();
             }
 
             ///////////////////////////////////////////////////////////////////
 
             public string GetProviderInvariantName()
             {
-                return IsEf6Supported() ? Ef6InvariantName : InvariantName;
+                return GetInvariantName();
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3737,6 +3737,10 @@ namespace System.Data.SQLite
                         GetDesignerAssemblyName())), traceCategory);
 
                     ///////////////////////////////////////////////////////////
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "GetInvariantName", ForDisplay(GetInvariantName())),
+                        traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "GetConfigInvariantName", ForDisplay(
@@ -6198,7 +6202,6 @@ namespace System.Data.SQLite
 
         #region Visual Studio Package Handling
         private static void InitializeVsPackage(
-            string configInvariantName,
             string providerInvariantName,
             string factoryTypeName,
             AssemblyName providerAssemblyName,
@@ -6211,7 +6214,6 @@ namespace System.Data.SQLite
             {
                 package = new Package();
 
-                package.ConfigInvariantName = configInvariantName;
                 package.ProviderInvariantName = providerInvariantName;
                 package.FactoryTypeName = factoryTypeName;
                 package.ProviderAssemblyName = providerAssemblyName;
@@ -6862,7 +6864,6 @@ namespace System.Data.SQLite
                     ///////////////////////////////////////////////////////////
 
                     InitializeVsPackage(
-                        configuration.GetConfigInvariantName(),
                         configuration.GetProviderInvariantName(),
                         configuration.GetFactoryTypeName(),
                         configuration.GetProviderAssemblyName(),
@@ -7052,8 +7053,9 @@ namespace System.Data.SQLite
                         if (!ForEachFrameworkConfig(registry,
                                 frameworkList, ProcessDbProviderFactory,
                                 configuration.ConfigVersion,
-                                package.ConfigInvariantName, ProviderName,
-                                Description, package.FactoryTypeName,
+                                configuration.GetConfigInvariantName(),
+                                ProviderName, Description,
+                                package.FactoryTypeName,
                                 package.ProviderAssemblyName, directoryData,
                                 configuration.PerUser,
                                 NetFxIs32BitOnly || configuration.Wow64,
