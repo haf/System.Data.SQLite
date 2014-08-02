@@ -97,7 +97,7 @@ namespace System.Data.SQLite
     [Flags()]
     public enum InstallFlags
     {
-        #region Normal Flags
+        #region Normal Values
         None = 0x0,
         GlobalAssemblyCache = 0x1,
         AssemblyFolders = 0x2,
@@ -111,7 +111,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Composite Flags
+        #region Composite Values
         Framework = GlobalAssemblyCache | AssemblyFolders |
                     DbProviderFactory,
 
@@ -132,7 +132,32 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Suggested Default Values
         Default = All
+        #endregion
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [Flags()]
+    public enum ProviderFlags
+    {
+        #region Normal Values
+        None = 0x0,
+        SystemEf6MustBeGlobal = 0x1,
+        DidLinqWarning = 0x2,
+        DidEf6Warning = 0x4,
+        ForceLinqEnabled = 0x8,
+        ForceLinqDisabled = 0x10,
+        ForceEf6Enabled = 0x20,
+        ForceEf6Disabled = 0x40,
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Suggested Default Values
+        Default = None
+        #endregion
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -140,6 +165,7 @@ namespace System.Data.SQLite
     [Flags()]
     public enum TracePriority
     {
+        #region Normal Values
         None = 0x0,
         Lowest = 0x1,
         Lower = 0x2,
@@ -150,7 +176,13 @@ namespace System.Data.SQLite
         High = 0x40,
         Higher = 0x80,
         Highest = 0x100,
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Suggested Default Flags
         Default = Medium
+        #endregion
     }
     #endregion
 
@@ -1978,6 +2010,7 @@ namespace System.Data.SQLite
                 string debugFormat,
                 string traceFormat,
                 InstallFlags installFlags,
+                ProviderFlags providerFlags,
                 TracePriority debugPriority,
                 TracePriority tracePriority,
                 bool perUser,
@@ -2019,6 +2052,7 @@ namespace System.Data.SQLite
                 this.debugFormat = debugFormat;
                 this.traceFormat = traceFormat;
                 this.installFlags = installFlags;
+                this.providerFlags = providerFlags;
                 this.debugPriority = debugPriority;
                 this.tracePriority = tracePriority;
                 this.perUser = perUser;
@@ -2213,6 +2247,16 @@ namespace System.Data.SQLite
 
                 return false;
             }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static bool IsSystemEf6AssemblyGlobal()
+            {
+                if (systemEf6Assembly == null)
+                    return false;
+
+                return systemEf6Assembly.GlobalAssemblyCache;
+            }
             #endregion
 
             ///////////////////////////////////////////////////////////////////
@@ -2221,8 +2265,8 @@ namespace System.Data.SQLite
             public static void BreakIntoDebugger()
             {
                 Console.WriteLine(
-                    "Attach a debugger to process {0} and press any key to " +
-                    "continue.", (thisProcess != null) ?
+                    "Attach a debugger to process {0} and press " +
+                    "any key to continue.", (thisProcess != null) ?
                     thisProcess.Id.ToString() : "<unknown>");
 
                 try
@@ -2255,11 +2299,11 @@ namespace System.Data.SQLite
                     thisAssembly, null, directory, coreFileName, linqFileName,
                     ef6FileName, designerFileName, null, null, null,
                     TraceOps.DebugFormat, TraceOps.TraceFormat,
-                    InstallFlags.Default, TracePriority.Default,
-                    TracePriority.Default, false, true, false, false, false,
+                    InstallFlags.Default, ProviderFlags.Default,
+                    TracePriority.Default, TracePriority.Default, false, true,
                     false, false, false, false, false, false, false, false,
-                    false, false, false, false, false, false, true, true,
-                    false, false, false);
+                    false, false, false, false, false, false, false, false,
+                    false, true, true, false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2924,6 +2968,27 @@ namespace System.Data.SQLite
 
                             configuration.perUser = (bool)value;
                         }
+                        else if (MatchOption(newArg, "providerFlags"))
+                        {
+                            object value = ParseEnum(
+                                typeof(ProviderFlags), text, true);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid provider flags value: {0}",
+                                    ForDisplay(text)), traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.providerFlags = (ProviderFlags)value;
+                        }
                         else if (MatchOption(newArg, "registryVersion"))
                         {
                             configuration.registryVersion = text;
@@ -3419,8 +3484,55 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            public bool HasFlags(
+                ProviderFlags hasFlags,
+                bool all
+                )
+            {
+                if (all)
+                    return ((providerFlags & hasFlags) == hasFlags);
+                else
+                    return ((providerFlags & hasFlags) != ProviderFlags.None);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             public bool IsLinqSupported()
             {
+                //
+                // NOTE: Check to see if the caller has forced LINQ support to
+                //       be enabled -OR- disabled, thereby bypassing the need
+                //       for "automatic detection" by this method.
+                //
+                if (HasFlags(ProviderFlags.ForceLinqEnabled, true))
+                {
+                    if (!HasFlags(ProviderFlags.DidLinqWarning, true))
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                            debugCallback, traceCallback,
+                            "Forced to enable support for \"Linq\".",
+                            traceCategory);
+
+                        providerFlags |= ProviderFlags.DidLinqWarning;
+                    }
+
+                    return true;
+                }
+                else if (HasFlags(ProviderFlags.ForceLinqDisabled, true))
+                {
+                    if (!HasFlags(ProviderFlags.DidLinqWarning, true))
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                            debugCallback, traceCallback,
+                            "Forced to disable support for \"Linq\".",
+                            traceCategory);
+
+                        providerFlags |= ProviderFlags.DidLinqWarning;
+                    }
+
+                    return false;
+                }
+
                 //
                 // NOTE: Return non-zero if the System.Data.SQLite.Linq
                 //       assembly should be processed during the install.
@@ -3435,17 +3547,62 @@ namespace System.Data.SQLite
             public bool IsEf6Supported()
             {
                 //
+                // NOTE: Check to see if the caller has forced EF6 support to
+                //       be enabled -OR- disabled, thereby bypassing the need
+                //       for "automatic detection" by this method.
+                //
+                if (HasFlags(ProviderFlags.ForceEf6Enabled, true))
+                {
+                    if (!HasFlags(ProviderFlags.DidEf6Warning, true))
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                            debugCallback, traceCallback,
+                            "Forced to enable support for \"Ef6\".",
+                            traceCategory);
+
+                        providerFlags |= ProviderFlags.DidEf6Warning;
+                    }
+
+                    return true;
+                }
+                else if (HasFlags(ProviderFlags.ForceEf6Disabled, true))
+                {
+                    if (!HasFlags(ProviderFlags.DidEf6Warning, true))
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                            debugCallback, traceCallback,
+                            "Forced to disable support for \"Ef6\".",
+                            traceCategory);
+
+                        providerFlags |= ProviderFlags.DidEf6Warning;
+                    }
+
+                    return false;
+                }
+
+                //
                 // NOTE: Return non-zero if the System.Data.SQLite.EF6
                 //       assembly should be processed during the install.
-                //       If the target is Visual Studio 2005 or Visual
-                //       Studio 2008, this must return zero.  Also, if
-                //       the EF6 core assembly is unavailable, this must
-                //       return zero.
+                //       If the target is Visual Studio 2005 or Visual Studio
+                //       2008, this must return zero.
                 //
                 if (noNetFx40 && noNetFx45 && noNetFx451)
                     return false;
 
-                return IsSystemEf6AssemblyAvailable();
+                //
+                // NOTE: Also, if the EF6 core assembly is unavailable, this
+                //       must return zero.
+                //
+                if (!IsSystemEf6AssemblyAvailable())
+                    return false;
+
+                //
+                // NOTE: Finally, if the EF6 core assembly is not available
+                //       globally [and this is a requirement for the current
+                //       install], return zero.
+                //
+                return HasFlags(ProviderFlags.SystemEf6MustBeGlobal, true) ?
+                    IsSystemEf6AssemblyGlobal() : true;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3590,6 +3747,10 @@ namespace System.Data.SQLite
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "ProviderFlags", ForDisplay(providerFlags)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "DebugPriority", ForDisplay(debugPriority)),
                         traceCategory);
 
@@ -3707,6 +3868,18 @@ namespace System.Data.SQLite
                             ForDisplay(GetAssemblyConfiguration(assembly))),
                             traceCategory);
                     }
+
+                    ///////////////////////////////////////////////////////////
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "IsSystemEf6AssemblyAvailable", ForDisplay(
+                        IsSystemEf6AssemblyAvailable())),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "IsSystemEf6AssemblyGlobal", ForDisplay(
+                        IsSystemEf6AssemblyGlobal())),
+                        traceCategory);
 
                     ///////////////////////////////////////////////////////////
 
@@ -3877,6 +4050,15 @@ namespace System.Data.SQLite
             {
                 get { return installFlags; }
                 set { installFlags = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private ProviderFlags providerFlags;
+            public ProviderFlags ProviderFlags
+            {
+                get { return providerFlags; }
+                set { providerFlags = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
