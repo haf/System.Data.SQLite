@@ -227,19 +227,33 @@ Components: Application\Designer; Source: ..\..\bin\{#Year}\{#BaseConfiguration}
 Components: Application\Designer and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\SQLite.Designer.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Designer\Installer; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\Installer.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Designer\Installer and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\Installer.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+
+#if AppProcessor == "x86"
+Components: Application\Test; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\test32.exe; DestDir: {app}\bin; DestName: test.exe; Flags: restartreplace uninsrestartdelete
+#else
 Components: Application\Test; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#endif
+
 Components: Application\Test and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\test.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\test.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 
 #if Year != "2005"
+#if AppProcessor == "x86"
+Components: Application\Test and Application\LINQ; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq32.exe; DestDir: {app}\bin; DestName: testlinq.exe; Flags: restartreplace uninsrestartdelete
+#else
 Components: Application\Test and Application\LINQ; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#endif
 Components: Application\Test and Application\LINQ and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test and Application\LINQ; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testlinq.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
 #if Year != "2005" && Year != "2008"
 Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\..\testlinq\northwindEF.db; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#if AppProcessor == "x86"
+Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testef632.exe; DestDir: {app}\bin; DestName: testef6.exe; Flags: restartreplace uninsrestartdelete
+#else
 Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
+#endif
 Components: Application\Test and (Application\LINQ or Application\EF6) and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\Test and (Application\LINQ or Application\EF6); Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\testef6.exe.config; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #elif Year != "2005"
