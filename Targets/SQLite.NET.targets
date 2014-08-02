@@ -156,7 +156,7 @@
     <Exec Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
                      HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And
                      Exists('$(TargetFrameworkSDKToolsDirectory)sn.exe')"
-          Command="&quot;$(TargetFrameworkSDKToolsDirectory)sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(AssemblyOriginatorKeyFile)&quot;" />
+          Command="&quot;$(TargetFrameworkSDKToolsDirectory)sn.exe&quot; -Ra &quot;$(TargetDir)$(TargetName)32$(TargetExt)&quot; &quot;$(AssemblyOriginatorKeyFile)&quot;" />
 
     <Touch Condition="'$(TargetFrameworkSDKToolsDirectory)' != '' And
                       HasTrailingSlash('$(TargetFrameworkSDKToolsDirectory)') And
