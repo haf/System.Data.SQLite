@@ -145,12 +145,13 @@ namespace System.Data.SQLite
         #region Normal Values
         None = 0x0,
         SystemEf6MustBeGlobal = 0x1,
-        DidLinqWarning = 0x2,
-        DidEf6Warning = 0x4,
-        ForceLinqEnabled = 0x8,
-        ForceLinqDisabled = 0x10,
-        ForceEf6Enabled = 0x20,
-        ForceEf6Disabled = 0x40,
+        DidLinqForceTrace = 0x2,
+        DidEf6ForceTrace = 0x4,
+        DidEf6ResolveTrace = 0x8,
+        ForceLinqEnabled = 0x10,
+        ForceLinqDisabled = 0x20,
+        ForceEf6Enabled = 0x40,
+        ForceEf6Disabled = 0x80,
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -871,6 +872,7 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public "Registry" Methods
+#if false
             public object GetValue(
                 string keyName,
                 string valueName,
@@ -912,6 +914,7 @@ namespace System.Data.SQLite
                 if (!whatIf)
                     Registry.SetValue(keyName, valueName, value, valueKind);
             }
+#endif
             #endregion
 
             ///////////////////////////////////////////////////////////////////
@@ -1522,10 +1525,18 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            private static int keyValuesSet;
-            public static int KeyValuesSet
+            private static int keyValuesRead;
+            public static int KeyValuesRead
             {
-                get { return keyValuesSet; }
+                get { return keyValuesRead; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static int keyValuesWritten;
+            public static int KeyValuesWritten
+            {
+                get { return keyValuesWritten; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1718,7 +1729,11 @@ namespace System.Data.SQLite
                         ForDisplay(key), ForDisplay(name),
                         ForDisplay(defaultValue)), traceCategory);
 
-                return key.GetValue(name, defaultValue);
+                object value = key.GetValue(name, defaultValue);
+
+                keyValuesRead++;
+
+                return value;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1745,7 +1760,7 @@ namespace System.Data.SQLite
                 if (!whatIf)
                     key.SetValue(name, value);
 
-                keyValuesSet++;
+                keyValuesWritten++;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2214,7 +2229,9 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            private static bool IsSystemEf6AssemblyAvailable()
+            private static bool IsSystemEf6AssemblyAvailable(
+                bool trace
+                )
             {
                 if (systemEf6Assembly != null)
                     return true;
@@ -2226,11 +2243,15 @@ namespace System.Data.SQLite
 
                     if (systemEf6Assembly != null)
                     {
-                        TraceOps.DebugAndTrace(TracePriority.Highest,
-                            debugCallback, traceCallback, String.Format(
-                            "Entity Framework 6 assembly was resolved to {0}.",
-                            ForDisplay(systemEf6Assembly.Location)),
-                            traceCategory);
+                        if (trace)
+                        {
+                            TraceOps.DebugAndTrace(TracePriority.Highest,
+                                debugCallback, traceCallback, String.Format(
+                                "Entity Framework 6 assembly was " +
+                                "resolved to {0}.", ForDisplay(
+                                systemEf6Assembly.Location)),
+                                traceCategory);
+                        }
 
                         return true;
                     }
@@ -2240,10 +2261,13 @@ namespace System.Data.SQLite
                     // do nothing.
                 }
 
-                TraceOps.DebugAndTrace(TracePriority.Highest,
-                    debugCallback, traceCallback,
-                    "Entity Framework 6 assembly was not resolved.",
-                    traceCategory);
+                if (trace)
+                {
+                    TraceOps.DebugAndTrace(TracePriority.Highest,
+                        debugCallback, traceCallback,
+                        "Entity Framework 6 assembly was not resolved.",
+                        traceCategory);
+                }
 
                 return false;
             }
@@ -3506,28 +3530,28 @@ namespace System.Data.SQLite
                 //
                 if (HasFlags(ProviderFlags.ForceLinqEnabled, true))
                 {
-                    if (!HasFlags(ProviderFlags.DidLinqWarning, true))
+                    if (!HasFlags(ProviderFlags.DidLinqForceTrace, true))
                     {
                         TraceOps.DebugAndTrace(TracePriority.MediumHigh,
                             debugCallback, traceCallback,
                             "Forced to enable support for \"Linq\".",
                             traceCategory);
 
-                        providerFlags |= ProviderFlags.DidLinqWarning;
+                        providerFlags |= ProviderFlags.DidLinqForceTrace;
                     }
 
                     return true;
                 }
                 else if (HasFlags(ProviderFlags.ForceLinqDisabled, true))
                 {
-                    if (!HasFlags(ProviderFlags.DidLinqWarning, true))
+                    if (!HasFlags(ProviderFlags.DidLinqForceTrace, true))
                     {
                         TraceOps.DebugAndTrace(TracePriority.MediumHigh,
                             debugCallback, traceCallback,
                             "Forced to disable support for \"Linq\".",
                             traceCategory);
 
-                        providerFlags |= ProviderFlags.DidLinqWarning;
+                        providerFlags |= ProviderFlags.DidLinqForceTrace;
                     }
 
                     return false;
@@ -3553,28 +3577,28 @@ namespace System.Data.SQLite
                 //
                 if (HasFlags(ProviderFlags.ForceEf6Enabled, true))
                 {
-                    if (!HasFlags(ProviderFlags.DidEf6Warning, true))
+                    if (!HasFlags(ProviderFlags.DidEf6ForceTrace, true))
                     {
                         TraceOps.DebugAndTrace(TracePriority.MediumHigh,
                             debugCallback, traceCallback,
                             "Forced to enable support for \"Ef6\".",
                             traceCategory);
 
-                        providerFlags |= ProviderFlags.DidEf6Warning;
+                        providerFlags |= ProviderFlags.DidEf6ForceTrace;
                     }
 
                     return true;
                 }
                 else if (HasFlags(ProviderFlags.ForceEf6Disabled, true))
                 {
-                    if (!HasFlags(ProviderFlags.DidEf6Warning, true))
+                    if (!HasFlags(ProviderFlags.DidEf6ForceTrace, true))
                     {
                         TraceOps.DebugAndTrace(TracePriority.MediumHigh,
                             debugCallback, traceCallback,
                             "Forced to disable support for \"Ef6\".",
                             traceCategory);
 
-                        providerFlags |= ProviderFlags.DidEf6Warning;
+                        providerFlags |= ProviderFlags.DidEf6ForceTrace;
                     }
 
                     return false;
@@ -3583,8 +3607,8 @@ namespace System.Data.SQLite
                 //
                 // NOTE: Return non-zero if the System.Data.SQLite.EF6
                 //       assembly should be processed during the install.
-                //       If the target is Visual Studio 2005 or Visual Studio
-                //       2008, this must return zero.
+                //       If the target is Visual Studio 2005 or Visual
+                //       Studio 2008, this must return zero.
                 //
                 if (noNetFx40 && noNetFx45 && noNetFx451)
                     return false;
@@ -3593,8 +3617,12 @@ namespace System.Data.SQLite
                 // NOTE: Also, if the EF6 core assembly is unavailable, this
                 //       must return zero.
                 //
-                if (!IsSystemEf6AssemblyAvailable())
+                if (!IsSystemEf6AssemblyAvailable(!HasFlags(
+                        ProviderFlags.DidEf6ResolveTrace, true)))
+                {
+                    providerFlags |= ProviderFlags.DidEf6ResolveTrace;
                     return false;
+                }
 
                 //
                 // NOTE: Finally, if the EF6 core assembly is not available
@@ -3873,7 +3901,7 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "IsSystemEf6AssemblyAvailable", ForDisplay(
-                        IsSystemEf6AssemblyAvailable())),
+                        IsSystemEf6AssemblyAvailable(false))),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -4471,8 +4499,8 @@ namespace System.Data.SQLite
         // NOTE: The trace category is the same for both the debug and trace
         //       callbacks.
         //
-        private static string traceCategory = Path.GetFileName(
-            (thisAssembly != null) ? thisAssembly.Location : null);
+        private static string traceCategory = (thisAssembly != null) ?
+            Path.GetFileName(thisAssembly.Location) : null;
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -6943,7 +6971,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Application Entry Point
+        #region Installer Entry Point
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static int Main(
             string[] args
@@ -6986,10 +7014,19 @@ namespace System.Data.SQLite
 
                 ///////////////////////////////////////////////////////////////
 
+                //
+                // NOTE: Setup the "mock" registry per the "what-if" mode.
+                //       Since all registry access performed by this installer
+                //       uses this "mock" registry, it is impossible for any
+                //       actual system changes to occur unless "what-if" mode
+                //       is disabled.  Furthermore, protections are in place
+                //       to prevent direct access to the wrapped registry keys
+                //       when "safe" mode is enabled.
+                //
                 using (MockRegistry registry = new MockRegistry(
                         configuration.WhatIf, false, false))
                 {
-                    #region Core Assembly Name Check
+                    #region Assembly Name Checks
                     //
                     // NOTE: Query all the assembly names first, before making
                     //       any changes to the system, because this will throw
@@ -7381,10 +7418,12 @@ namespace System.Data.SQLite
                     TraceOps.DebugAndTrace(TracePriority.MediumHigh,
                         debugCallback, traceCallback, String.Format(
                         "subKeysCreated = {0}, subKeysDeleted = {1}, " +
-                        "keyValuesSet = {2}, keyValuesDeleted = {3}",
+                        "keyValuesRead = {2}, keyValuesWritten = {3}, " +
+                        "keyValuesDeleted = {4}",
                         ForDisplay(RegistryHelper.SubKeysCreated),
                         ForDisplay(RegistryHelper.SubKeysDeleted),
-                        ForDisplay(RegistryHelper.KeyValuesSet),
+                        ForDisplay(RegistryHelper.KeyValuesRead),
+                        ForDisplay(RegistryHelper.KeyValuesWritten),
                         ForDisplay(RegistryHelper.KeyValuesDeleted)),
                         traceCategory);
 

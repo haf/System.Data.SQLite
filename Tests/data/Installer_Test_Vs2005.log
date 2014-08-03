@@ -62,6 +62,6 @@ Installer.exe: #61: RegistryHelper.CreateSubKey: rootKey = "HKEY_LOCAL_MACHINE\S
 Installer.exe: #62: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", subKeyName = "Software${wow64}\Microsoft\VisualStudio\8.0", writable = False
 Installer.exe: #63: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\8.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #64: Installer.AddVsDevEnvSetup: fileName = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 8} Common7 IDE devenv.exe]]", arguments = "/setup", workingDirectory = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 8} Common7 IDE]]\", useShellExecute = False, redirectStandardOutput = True, redirectStandardError = True
-Installer.exe: #65: Installer.Main: subKeysCreated = 12, subKeysDeleted = 1, keyValuesSet = 23, keyValuesDeleted = 0
+Installer.exe: #65: Installer.Main: subKeysCreated = 12, subKeysDeleted = 1, keyValuesRead = 5, keyValuesWritten = 23, keyValuesDeleted = 0
 Installer.exe: #66: Installer.Main: filesCreated = 1, filesModified = 2, filesDeleted = 0
 Installer.exe: #67: Installer.Main: Success.

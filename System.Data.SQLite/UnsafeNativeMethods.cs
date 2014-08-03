@@ -92,14 +92,13 @@ namespace System.Data.SQLite
       /// </summary>
       private static readonly object staticSyncRoot = new object();
 
-
+#if DEBUG
       /////////////////////////////////////////////////////////////////////////
       /// <summary>
       /// This dictionary stores the read counts for the runtime configuration
       /// settings.  This information is only recorded when compiled in the
       /// "Debug" build configuration.
       /// </summary>
-#if DEBUG
       private static Dictionary<string, int> settingReadCounts;
 #endif
 

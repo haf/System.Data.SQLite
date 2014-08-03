@@ -34,6 +34,6 @@ Installer.exe: #33: RegistryHelper.OpenSubKey: rootKey = "HKEY_LOCAL_MACHINE", s
 Installer.exe: #34: RegistryHelper.GetValue: key = "HKEY_LOCAL_MACHINE\Software${wow64}\Microsoft\VisualStudio\10.0", name = "InstallDir", defaultValue = <null>
 Installer.exe: #35: Installer.RemoveVsDevEnvSetup: Preparing to run Visual Studio v10.0 'setup' mode to refresh its configuration.
 Installer.exe: #36: Installer.AddVsDevEnvSetup: fileName = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 10.0} Common7 IDE devenv.exe]]", arguments = "/setup", workingDirectory = "[file nativename [file join [expr {$is64 ? ${::env(ProgramFiles(x86))} : $::env(ProgramFiles)}] {Microsoft Visual Studio 10.0} Common7 IDE]]\", useShellExecute = False, redirectStandardOutput = True, redirectStandardError = True
-Installer.exe: #37: Installer.Main: subKeysCreated = 0, subKeysDeleted = 5, keyValuesSet = 0, keyValuesDeleted = 1
+Installer.exe: #37: Installer.Main: subKeysCreated = 0, subKeysDeleted = 5, keyValuesRead = 5, keyValuesWritten = 0, keyValuesDeleted = 1
 Installer.exe: #38: Installer.Main: filesCreated = 1, filesModified = 1, filesDeleted = 0
 Installer.exe: #39: Installer.Main: Success.
