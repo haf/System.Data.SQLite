@@ -53,16 +53,16 @@ IF NOT DEFINED PREARGS (
 
 %_VECHO% PreArgs = '%PREARGS%'
 
-IF NOT DEFINED TESTFILE (
+IF NOT DEFINED TEST_FILE (
   %_AECHO% No test file specified, using default...
-  SET TESTFILE=Tests\empty.eagle
+  SET TEST_FILE=Tests\empty.eagle
 )
 
-%_VECHO% TestFile = '%TESTFILE%'
+%_VECHO% TestFile = '%TEST_FILE%'
 
 IF NOT DEFINED POSTARGS (
   %_AECHO% No post-arguments specified, using default...
-  SET POSTARGS=-file "%TESTFILE%"
+  SET POSTARGS=-file "%TEST_FILE%"
 )
 
 %_VECHO% PostArgs = '%POSTARGS%'
