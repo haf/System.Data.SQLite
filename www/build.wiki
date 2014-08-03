@@ -133,10 +133,20 @@
         <li>&lt;root&gt;\NuGet\SQLite.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Beta.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Core.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Core.Beta.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Core.Test.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Core.MSIL.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Core.MSIL.Beta.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Core.MSIL.Test.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.EF6.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.EF6.Beta.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.EF6.Test.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Linq.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Linq.Beta.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.Linq.Test.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.MSIL.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.MSIL.Beta.nuspec</li>
+        <li>&lt;root&gt;\NuGet\SQLite.MSIL.Test.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.Test.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.x86.nuspec</li>
         <li>&lt;root&gt;\NuGet\SQLite.x64.nuspec</li>

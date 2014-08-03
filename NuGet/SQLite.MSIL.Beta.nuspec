@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * SQLite.MSIL.nuspec -
+ * SQLite.MSIL.Beta.nuspec -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -9,8 +9,8 @@
 -->
 <package>
   <metadata>
-    <id>System.Data.SQLite.MSIL</id>
-    <title>System.Data.SQLite (MSIL)</title>
+    <id>System.Data.SQLite.MSIL.Beta</id>
+    <title>System.Data.SQLite (MSIL) Beta</title>
     <version>1.0.94.0</version>
     <authors>SQLite Development Team</authors>
     <description>This is a legacy package; if possible, please use either the &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot; package instead.  An ADO.NET provider for SQLite (managed-only).</description>

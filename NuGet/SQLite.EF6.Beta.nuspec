@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  *
- * SQLite.MSIL.nuspec -
+ * SQLite.EF6.Beta.nuspec -
  *
  * Written by Joe Mistachkin.
  * Released to the public domain, use at your own risk!
@@ -9,11 +9,11 @@
 -->
 <package>
   <metadata>
-    <id>System.Data.SQLite.MSIL</id>
-    <title>System.Data.SQLite (MSIL)</title>
+    <id>System.Data.SQLite.EF6.Beta</id>
+    <title>System.Data.SQLite EF6 (x86/x64) Beta</title>
     <version>1.0.94.0</version>
     <authors>SQLite Development Team</authors>
-    <description>This is a legacy package; if possible, please use either the &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot; package instead.  An ADO.NET provider for SQLite (managed-only).</description>
+    <description>Support for Entity Framework 6 using System.Data.SQLite.</description>
     <language>en-US</language>
     <projectUrl>http://system.data.sqlite.org/</projectUrl>
     <iconUrl>http://system.data.sqlite.org/images/sqlite128.png</iconUrl>
@@ -21,6 +21,15 @@
     <tags>sqlite database ado.net provider interop</tags>
     <copyright>Public Domain</copyright>
     <dependencies>
+      <group targetFramework="net40">
+        <dependency id="System.Data.SQLite.Core.Beta" version="1.0.94.0" />
+      </group>
+      <group targetFramework="net45">
+        <dependency id="System.Data.SQLite.Core.Beta" version="1.0.94.0" />
+      </group>
+      <group targetFramework="net451">
+        <dependency id="System.Data.SQLite.Core.Beta" version="1.0.94.0" />
+      </group>
       <group targetFramework="net40">
         <dependency id="EntityFramework" version="6.1.1.0" />
       </group>
@@ -33,23 +42,9 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\bin\2008\Release\bin\System.Data.SQLite.dll" target="lib\net20" />
-    <file src="..\bin\2008\Release\bin\System.Data.SQLite.xml" target="lib\net20" />
-    <file src="..\bin\2010\Release\bin\System.Data.SQLite.dll" target="lib\net40" />
-    <file src="..\bin\2010\Release\bin\System.Data.SQLite.xml" target="lib\net40" />
-    <file src="..\bin\2012\Release\bin\System.Data.SQLite.dll" target="lib\net45" />
-    <file src="..\bin\2012\Release\bin\System.Data.SQLite.xml" target="lib\net45" />
-    <file src="..\bin\2013\Release\bin\System.Data.SQLite.dll" target="lib\net451" />
-    <file src="..\bin\2013\Release\bin\System.Data.SQLite.xml" target="lib\net451" />
-    <file src="..\bin\2008\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net20" />
-    <file src="..\bin\2010\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net40" />
-    <file src="..\bin\2012\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net45" />
-    <file src="..\bin\2013\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net451" />
     <file src="..\bin\2010\Release\bin\System.Data.SQLite.EF6.dll" target="lib\net40" />
     <file src="..\bin\2012\Release\bin\System.Data.SQLite.EF6.dll" target="lib\net45" />
     <file src="..\bin\2013\Release\bin\System.Data.SQLite.EF6.dll" target="lib\net451" />
-    <file src="net20\Core\config.transform" target="content\net20\app.config.transform" />
-    <file src="net20\Core\config.transform" target="content\net20\web.config.transform" />
     <file src="net40\EF6\config.transform" target="content\net40\app.config.transform" />
     <file src="net40\EF6\config.transform" target="content\net40\web.config.transform" />
     <file src="net40\EF6\config.transform" target="content\net45\app.config.transform" />

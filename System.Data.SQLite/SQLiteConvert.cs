@@ -1109,8 +1109,67 @@ namespace System.Data.SQLite
         return value;
     }
 
+#if !NET_COMPACT_20 && TRACE_WARNING
     /// <summary>
-    /// Determines the type name for the given database value type.
+    /// If applicable, issues a trace log message warning about falling back to
+    /// the default database type name.
+    /// </summary>
+    /// <param name="dbType">
+    /// The database value type.
+    /// </param>
+    /// <param name="flags">
+    /// The flags associated with the parent connection object.
+    /// </param>
+    /// <param name="typeName">
+    /// The textual name of the database type.
+    /// </param>
+    private static void DefaultTypeNameWarning(
+        DbType dbType,
+        SQLiteConnectionFlags flags,
+        string typeName
+        )
+    {
+        if ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning)
+        {
+            Trace.WriteLine(String.Format(
+                CultureInfo.CurrentCulture,
+                "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
+                typeName, dbType));
+        }
+    }
+
+    /// <summary>
+    /// If applicable, issues a trace log message warning about falling back to
+    /// the default database value type.
+    /// </summary>
+    /// <param name="typeName">
+    /// The textual name of the database type.
+    /// </param>
+    /// <param name="flags">
+    /// The flags associated with the parent connection object.
+    /// </param>
+    /// <param name="dbType">
+    /// The database value type.
+    /// </param>
+    private static void DefaultDbTypeWarning(
+        string typeName,
+        SQLiteConnectionFlags flags,
+        DbType? dbType
+        )
+    {
+        if (!String.IsNullOrEmpty(typeName) &&
+            ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning))
+        {
+            Trace.WriteLine(String.Format(
+                CultureInfo.CurrentCulture,
+                "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
+                dbType, typeName));
+        }
+    }
+#endif
+
+    /// <summary>
+    /// For a given database value type, return the "closest-match" textual database type name.
     /// </summary>
     /// <param name="connection">The connection context for custom type mappings, if any.</param>
     /// <param name="dbType">The database value type.</param>
@@ -1148,7 +1207,18 @@ namespace System.Data.SQLite
         }
 
         if ((flags & SQLiteConnectionFlags.NoGlobalTypes) == SQLiteConnectionFlags.NoGlobalTypes)
-            return (defaultTypeName != null) ? defaultTypeName : GetDefaultTypeName();
+        {
+            if (defaultTypeName != null)
+                return defaultTypeName;
+
+            defaultTypeName = GetDefaultTypeName();
+
+#if !NET_COMPACT_20 && TRACE_WARNING
+            DefaultTypeNameWarning(dbType, flags, defaultTypeName);
+#endif
+
+            return defaultTypeName;
+        }
 
         lock (_syncRoot)
         {
@@ -1161,17 +1231,16 @@ namespace System.Data.SQLite
                 return value.typeName;
         }
 
+        if (defaultTypeName != null)
+            return defaultTypeName;
+
+        defaultTypeName = GetDefaultTypeName();
+
 #if !NET_COMPACT_20 && TRACE_WARNING
-        if ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning)
-        {
-            Trace.WriteLine(String.Format(
-                CultureInfo.CurrentCulture,
-                "WARNING: Type mapping failed, returning default name \"{0}\" for type {1}.",
-                defaultTypeName, dbType));
-        }
+        DefaultTypeNameWarning(dbType, flags, defaultTypeName);
 #endif
 
-        return (defaultTypeName != null) ? defaultTypeName : GetDefaultTypeName();
+        return defaultTypeName;
     }
 
     /// <summary>
@@ -1531,15 +1600,17 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
-    /// For a given type name, return a closest-match .NET type
+    /// For a given textual database type name, return the "closest-match" database type.
+    /// This method is called during query result processing; therefore, its performance
+    /// is critical.
     /// </summary>
     /// <param name="connection">The connection context for custom type mappings, if any.</param>
-    /// <param name="name">The name of the type to match</param>
+    /// <param name="typeName">The textual name of the database type to match.</param>
     /// <param name="flags">The flags associated with the parent connection object.</param>
     /// <returns>The .NET DBType the text evaluates to.</returns>
     internal static DbType TypeNameToDbType(
         SQLiteConnection connection,
-        string name,
+        string typeName,
         SQLiteConnectionFlags flags
         )
     {
@@ -1555,20 +1626,20 @@ namespace System.Data.SQLite
 
                 if (connectionTypeNames != null)
                 {
-                    if (name != null)
+                    if (typeName != null)
                     {
                         SQLiteDbTypeMapping value;
 
-                        if (connectionTypeNames.TryGetValue(name, out value))
+                        if (connectionTypeNames.TryGetValue(typeName, out value))
                         {
                             return value.dataType;
                         }
                         else
                         {
-                            int index = name.IndexOf('(');
+                            int index = typeName.IndexOf('(');
 
                             if ((index > 0) &&
-                                connectionTypeNames.TryGetValue(name.Substring(0, index).TrimEnd(), out value))
+                                connectionTypeNames.TryGetValue(typeName.Substring(0, index).TrimEnd(), out value))
                             {
                                 return value.dataType;
                             }
@@ -1584,27 +1655,38 @@ namespace System.Data.SQLite
         }
 
         if ((flags & SQLiteConnectionFlags.NoGlobalTypes) == SQLiteConnectionFlags.NoGlobalTypes)
-            return (defaultDbType != null) ? (DbType)defaultDbType : GetDefaultDbType();
+        {
+            if (defaultDbType != null)
+                return (DbType)defaultDbType;
+
+            defaultDbType = GetDefaultDbType();
+
+#if !NET_COMPACT_20 && TRACE_WARNING
+            DefaultDbTypeWarning(typeName, flags, defaultDbType);
+#endif
+
+            return (DbType)defaultDbType;
+        }
 
         lock (_syncRoot)
         {
             if (_typeNames == null)
                 _typeNames = GetSQLiteDbTypeMap();
 
-            if (name != null)
+            if (typeName != null)
             {
                 SQLiteDbTypeMapping value;
 
-                if (_typeNames.TryGetValue(name, out value))
+                if (_typeNames.TryGetValue(typeName, out value))
                 {
                     return value.dataType;
                 }
                 else
                 {
-                    int index = name.IndexOf('(');
+                    int index = typeName.IndexOf('(');
 
                     if ((index > 0) &&
-                        _typeNames.TryGetValue(name.Substring(0, index).TrimEnd(), out value))
+                        _typeNames.TryGetValue(typeName.Substring(0, index).TrimEnd(), out value))
                     {
                         return value.dataType;
                     }
@@ -1612,18 +1694,16 @@ namespace System.Data.SQLite
             }
         }
 
+        if (defaultDbType != null)
+            return (DbType)defaultDbType;
+
+        defaultDbType = GetDefaultDbType();
+
 #if !NET_COMPACT_20 && TRACE_WARNING
-        if (!String.IsNullOrEmpty(name) &&
-            ((flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning))
-        {
-            Trace.WriteLine(String.Format(
-                CultureInfo.CurrentCulture,
-                "WARNING: Type mapping failed, returning default type {0} for name \"{1}\".",
-                defaultDbType, name));
-        }
+        DefaultDbTypeWarning(typeName, flags, defaultDbType);
 #endif
 
-        return (defaultDbType != null) ? (DbType)defaultDbType : GetDefaultDbType();
+        return (DbType)defaultDbType;
     }
     #endregion
 
