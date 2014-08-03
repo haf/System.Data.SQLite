@@ -4285,8 +4285,8 @@ namespace System.Data.SQLite
         // NOTE: The trace category is the same for both the debug and trace
         //       callbacks.
         //
-        private static string traceCategory = Path.GetFileName(
-            (thisAssembly != null) ? thisAssembly.Location : null);
+        private static string traceCategory = (thisAssembly != null) ?
+            Path.GetFileName(thisAssembly.Location) : null;
 
         ///////////////////////////////////////////////////////////////////////
 
