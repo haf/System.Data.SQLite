@@ -3635,7 +3635,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public AssemblyName GetCoreAssemblyName() /* REQUIRED */
+            /* REQUIRED */
+            public AssemblyName GetCoreAssemblyName() /* throw */
             {
                 if (coreAssemblyName == null)
                 {
@@ -3648,7 +3649,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public AssemblyName GetLinqAssemblyName() /* OPTIONAL */
+            /* OPTIONAL */
+            public AssemblyName GetLinqAssemblyName() /* throw */
             {
                 if (IsLinqSupported() && (linqAssemblyName == null))
                 {
@@ -3661,7 +3663,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public AssemblyName GetEf6AssemblyName() /* OPTIONAL */
+            /* OPTIONAL */
+            public AssemblyName GetEf6AssemblyName() /* throw */
             {
                 if (IsEf6Supported() && (ef6AssemblyName == null))
                 {
@@ -3674,7 +3677,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public AssemblyName GetDesignerAssemblyName() /* REQUIRED */
+            /* REQUIRED */
+            public AssemblyName GetDesignerAssemblyName() /* throw */
             {
                 if (designerAssemblyName == null)
                 {
@@ -3683,6 +3687,15 @@ namespace System.Data.SQLite
                 }
 
                 return designerAssemblyName;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /* REQUIRED */
+            public AssemblyName GetProviderAssemblyName() /* throw */
+            {
+                return IsEf6Supported() ?
+                    GetEf6AssemblyName() : GetCoreAssemblyName();
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3704,14 +3717,6 @@ namespace System.Data.SQLite
             public string GetFactoryTypeName()
             {
                 return IsEf6Supported() ? Ef6FactoryTypeName : FactoryTypeName;
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            public AssemblyName GetProviderAssemblyName()
-            {
-                return IsEf6Supported() ?
-                    GetEf6AssemblyName() : GetCoreAssemblyName(); /* throw */
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3921,21 +3926,63 @@ namespace System.Data.SQLite
 
                     ///////////////////////////////////////////////////////////
 
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetCoreAssemblyName", ForDisplay(
-                        GetCoreAssemblyName())), traceCategory);
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetCoreAssemblyName", ForDisplay(
+                            GetCoreAssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetCoreAssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
 
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetLinqAssemblyName", ForDisplay(
-                        GetLinqAssemblyName())), traceCategory);
+                    ///////////////////////////////////////////////////////////
 
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetEf6AssemblyName", ForDisplay(
-                        GetEf6AssemblyName())), traceCategory);
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetLinqAssemblyName", ForDisplay(
+                            GetLinqAssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetLinqAssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
 
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetDesignerAssemblyName", ForDisplay(
-                        GetDesignerAssemblyName())), traceCategory);
+                    ///////////////////////////////////////////////////////////
+
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetEf6AssemblyName", ForDisplay(
+                            GetEf6AssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetEf6AssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
+
+                    ///////////////////////////////////////////////////////////
+
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetDesignerAssemblyName", ForDisplay(
+                            GetDesignerAssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetDesignerAssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
 
                     ///////////////////////////////////////////////////////////
 
@@ -3955,9 +4002,20 @@ namespace System.Data.SQLite
                         "GetFactoryTypeName", ForDisplay(
                         GetFactoryTypeName())), traceCategory);
 
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetProviderAssemblyName", ForDisplay(
-                        GetProviderAssemblyName())), traceCategory);
+                    ///////////////////////////////////////////////////////////
+
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetProviderAssemblyName", ForDisplay(
+                            GetProviderAssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetProviderAssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
                 }
             }
             #endregion
@@ -4707,9 +4765,15 @@ namespace System.Data.SQLite
                 if (result.Length == 0)
                     return "<empty>";
 
-                result = String.Format(
-                    type.IsSubclassOf(typeof(ValueType)) ? "{0}" : "\"{0}\"",
-                    result);
+                if (type.IsSubclassOf(typeof(Exception)))
+                {
+                    result = String.Format(
+                        "{0}{1}{0}", Environment.NewLine, result);
+                }
+                else if (!type.IsSubclassOf(typeof(ValueType)))
+                {
+                    result = String.Format("\"{0}\"", result);
+                }
             }
 
             return result;
@@ -7029,11 +7093,11 @@ namespace System.Data.SQLite
                     #region Assembly Name Checks
                     //
                     // NOTE: Query all the assembly names first, before making
-                    //       any changes to the system, because this will throw
-                    //       an exception if any of the file names do not point
-                    //       to a valid managed assembly.  The values of these
-                    //       local variables are never used after this point;
-                    //       however, do not remove them.
+                    //       any changes to the system, because these calls
+                    //       will throw exceptions if any of the file names do
+                    //       not point to a valid managed assembly.  The values
+                    //       of these local variables are never used after this
+                    //       point; however, do not remove them.
                     //
                     AssemblyName coreAssemblyName =
                         configuration.GetCoreAssemblyName(); /* NOT USED */
