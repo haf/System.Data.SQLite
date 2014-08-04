@@ -1,22 +1,17 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
 namespace SQLite.Designer
 {
   using System;
-  using System.Collections.Generic;
   using System.ComponentModel;
-  using System.Data;
-  using System.Drawing;
-  using System.Text;
   using System.Windows.Forms;
   using System.Globalization;
   using Microsoft.VisualStudio.Data;
-  using Microsoft.Win32;
 
   /// <summary>
   /// Provides a UI to edit/create SQLite database connections
@@ -60,21 +55,26 @@ namespace SQLite.Designer
     {
       SQLiteOptions.SelectProviderName(providerComboBox);
 
+      fileTextBox.Text = String.Empty;
+      passwordTextBox.Text = String.Empty;
+
+      if (ConnectionProperties == null)
+        return;
+
       if (ConnectionProperties.Contains("data source"))
         fileTextBox.Text = ConnectionProperties["data source"] as string;
-      else
-        fileTextBox.Text = String.Empty;
 
       if (ConnectionProperties.Contains("password"))
         passwordTextBox.Text = ConnectionProperties["password"] as string;
-      else
-        passwordTextBox.Text = String.Empty;
     }
 
     #endregion
 
     private void passwordTextBox_Leave(object sender, EventArgs e)
     {
+      if (ConnectionProperties == null)
+       return;
+
       if (String.IsNullOrEmpty(passwordTextBox.Text))
         ConnectionProperties.Remove("password");
       else
@@ -83,6 +83,9 @@ namespace SQLite.Designer
 
     private void encoding_Changed(object sender, EventArgs e)
     {
+      if (ConnectionProperties == null)
+        return;
+
       if (utf8RadioButton.Checked == true)
         ConnectionProperties.Remove("useutf16encoding");
       else
@@ -91,6 +94,9 @@ namespace SQLite.Designer
 
     private void datetime_Changed(object sender, EventArgs e)
     {
+      if (ConnectionProperties == null)
+        return;
+
       if (iso8601RadioButton.Checked == true)
         ConnectionProperties.Remove("datetimeformat");
       else if (ticksRadioButton.Checked == true)
@@ -109,6 +115,9 @@ namespace SQLite.Designer
 
     private void sync_Changed(object sender, EventArgs e)
     {
+      if (ConnectionProperties == null)
+        return;
+
       string sync = "Normal";
       if (fullRadioButton.Checked == true) sync = "Full";
       else if (offRadioButton.Checked == true) sync = "Off";
@@ -121,18 +130,27 @@ namespace SQLite.Designer
 
     private void pageSizeTextBox_Leave(object sender, EventArgs e)
     {
+      if (ConnectionProperties == null)
+        return;
+
       int n = Convert.ToInt32(pageSizeTextBox.Text, CultureInfo.CurrentCulture);
       ConnectionProperties["page size"] = n;
     }
 
     private void cacheSizeTextbox_Leave(object sender, EventArgs e)
     {
+      if (ConnectionProperties == null)
+        return;
+
       int n = Convert.ToInt32(cacheSizeTextbox.Text, CultureInfo.CurrentCulture);
       ConnectionProperties["cache size"] = n;
     }
 
     private void fileTextBox_Leave(object sender, EventArgs e)
     {
+      if (ConnectionProperties == null)
+        return;
+
       ConnectionProperties["data source"] = fileTextBox.Text;
     }
   }
