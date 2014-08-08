@@ -610,8 +610,8 @@ namespace System.Data.SQLite
     /// </summary>
     [DisplayName("Default Database Type")]
     [Browsable(true)]
-    [DefaultValue(null)]
-    public DbType? DefaultDbType
+    [DefaultValue(SQLiteConnection.BadDbType)]
+    public DbType DefaultDbType
     {
         get
         {
@@ -626,7 +626,7 @@ namespace System.Data.SQLite
                     return (DbType)value;
             }
 
-            return null;
+            return SQLiteConnection.BadDbType;
         }
         set
         {

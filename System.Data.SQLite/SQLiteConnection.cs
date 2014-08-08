@@ -328,6 +328,13 @@ namespace System.Data.SQLite
   {
     #region Private Constants
     /// <summary>
+    /// The "invalid value" for the <see cref="DbType" /> enumeration used
+    /// by the <see cref="DefaultDbType" /> property.  This constant is shared
+    /// by this class and the SQLiteConnectionStringBuilder class.
+    /// </summary>
+    internal const DbType BadDbType = (DbType)(-1);
+
+    /// <summary>
     /// The default "stub" (i.e. placeholder) base schema name to use when
     /// returning column schema information.  Used as the initial value of
     /// the BaseSchemaName property.  This should start with "sqlite_*"
@@ -2286,6 +2293,17 @@ namespace System.Data.SQLite
 
       enumValue = TryParseEnum(typeof(DbType), FindKey(opts, "DefaultDbType", null), true);
       _defaultDbType = (enumValue is DbType) ? (DbType)enumValue : (DbType?)null;
+
+      //
+      // NOTE: Nullable values types are not supported by the .NET Framework
+      //       ADO.NET support components that work with the connection string
+      //       builder; therefore, translate the "invalid value" used by the
+      //       SQLiteConnectionStringBuilder.DefaultDbType property to null
+      //       here.
+      //
+      if ((_defaultDbType != null) && ((DbType)_defaultDbType == BadDbType))
+        _defaultDbType = null;
+
       _defaultTypeName = FindKey(opts, "DefaultTypeName", null);
 
 #if !NET_COMPACT_20 && TRACE_WARNING

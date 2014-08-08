@@ -1,4 +1,3 @@
-*.sln
 Externals/Eagle/bin/Eagle*.pdb
 Externals/Eagle/bin/x64/Spilornis.pdb
 Externals/Eagle/bin/x86/Spilornis.pdb
