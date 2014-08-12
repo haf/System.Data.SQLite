@@ -216,6 +216,7 @@ released versions of System.Data.SQLite.
     <li>Add RefreshFlags method to the SQLiteDataReader class to forcibly refresh its connection flags.</li>
     <li>Improve automatic detection and handling of the Entity Framework 6 assembly by the design-time components installer. Pursuant to [e634e330a6].&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Improve SQLiteDataReader performance slightly by caching the connection flags.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>Add NoConvertSettings connection flag to disable querying of runtime configuration settings from within the SQLiteConvert class. Pursuant to [58ed318f2f].</li>
     <li>Minimize usage of the &quot;Use_SQLiteConvert_DefaultDbType&quot; and &quot;Use_SQLiteConvert_DefaultTypeName&quot; settings. Fix for [58ed318f2f].&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>

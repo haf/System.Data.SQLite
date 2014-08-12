@@ -1095,11 +1095,25 @@ namespace System.Data.SQLite
     /// Determines the default database type name to be used when a
     /// per-connection value is not available.
     /// </summary>
+    /// <param name="connection">
+    /// The connection context for type mappings, if any.
+    /// </param>
     /// <returns>
     /// The default database type name to use.
     /// </returns>
-    private static string GetDefaultTypeName()
+    private static string GetDefaultTypeName(
+        SQLiteConnection connection
+        )
     {
+        SQLiteConnectionFlags flags = (connection != null) ?
+            connection.Flags : SQLiteConnectionFlags.None;
+
+        if ((flags & SQLiteConnectionFlags.NoConvertSettings)
+                == SQLiteConnectionFlags.NoConvertSettings)
+        {
+            return FallbackDefaultTypeName;
+        }
+
         string value = UnsafeNativeMethods.GetSettingValue(
             "Use_SQLiteConvert_DefaultTypeName", null);
 
@@ -1211,7 +1225,7 @@ namespace System.Data.SQLite
             if (defaultTypeName != null)
                 return defaultTypeName;
 
-            defaultTypeName = GetDefaultTypeName();
+            defaultTypeName = GetDefaultTypeName(connection);
 
 #if !NET_COMPACT_20 && TRACE_WARNING
             DefaultTypeNameWarning(dbType, flags, defaultTypeName);
@@ -1234,7 +1248,7 @@ namespace System.Data.SQLite
         if (defaultTypeName != null)
             return defaultTypeName;
 
-        defaultTypeName = GetDefaultTypeName();
+        defaultTypeName = GetDefaultTypeName(connection);
 
 #if !NET_COMPACT_20 && TRACE_WARNING
         DefaultTypeNameWarning(dbType, flags, defaultTypeName);
@@ -1438,11 +1452,25 @@ namespace System.Data.SQLite
     /// Determines the default <see cref="DbType" /> value to be used when a
     /// per-connection value is not available.
     /// </summary>
+    /// <param name="connection">
+    /// The connection context for type mappings, if any.
+    /// </param>
     /// <returns>
     /// The default <see cref="DbType" /> value to use.
     /// </returns>
-    private static DbType GetDefaultDbType()
+    private static DbType GetDefaultDbType(
+        SQLiteConnection connection
+        )
     {
+        SQLiteConnectionFlags flags = (connection != null) ?
+            connection.Flags : SQLiteConnectionFlags.None;
+
+        if ((flags & SQLiteConnectionFlags.NoConvertSettings)
+                == SQLiteConnectionFlags.NoConvertSettings)
+        {
+            return FallbackDefaultDbType;
+        }
+
         string value = UnsafeNativeMethods.GetSettingValue(
             "Use_SQLiteConvert_DefaultDbType", null);
 
@@ -1659,7 +1687,7 @@ namespace System.Data.SQLite
             if (defaultDbType != null)
                 return (DbType)defaultDbType;
 
-            defaultDbType = GetDefaultDbType();
+            defaultDbType = GetDefaultDbType(connection);
 
 #if !NET_COMPACT_20 && TRACE_WARNING
             DefaultDbTypeWarning(typeName, flags, defaultDbType);
@@ -1697,7 +1725,7 @@ namespace System.Data.SQLite
         if (defaultDbType != null)
             return (DbType)defaultDbType;
 
-        defaultDbType = GetDefaultDbType();
+        defaultDbType = GetDefaultDbType(connection);
 
 #if !NET_COMPACT_20 && TRACE_WARNING
         DefaultDbTypeWarning(typeName, flags, defaultDbType);

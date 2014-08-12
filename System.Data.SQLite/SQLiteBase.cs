@@ -1086,6 +1086,19 @@ namespace System.Data.SQLite
       DetectStringType = 0x4000000,
 
       /// <summary>
+      /// Skip querying runtime configuration settings for use by the
+      /// <see cref="SQLiteConvert" /> class, including the default
+      /// <see cref="DbType" /> value and default database type name.
+      /// <b>NOTE: If the <see cref="SQLiteConnection.DefaultDbType" />
+      /// and/or <see cref="SQLiteConnection.DefaultTypeName" />
+      /// properties are not set explicitly nor set via their connection
+      /// string properties and repeated calls to determine these runtime
+      /// configuration settings are seen to be a problem, this flag
+      /// should be set.</b>
+      /// </summary>
+      NoConvertSettings = 0x8000000,
+
+      /// <summary>
       /// When binding parameter values or returning column values, always
       /// treat them as though they were plain text (i.e. no numeric,
       /// date/time, or other conversions should be attempted).
