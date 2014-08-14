@@ -350,6 +350,13 @@ if {$argc >= 0 && $argc <= 7} then {
   #       non-zero otherwise.
   #
   set testFileName [file nativename [file join $device_directory testce.exe]]
+
+  #
+  # NOTE: The first (and only) argument passed to "testce.exe" on the device
+  #       is the auto-close flag.  When non-zero, it will close automatically
+  #       upon completion.  Setting this to zero is sometimes useful in order
+  #       to more carefully examine the detailed results.
+  #
   set exitCode [startRemoteProcess $device $testFileName true]
 
   #
