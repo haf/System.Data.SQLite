@@ -72,9 +72,14 @@ runTest {test speed-1.1 {SQLiteDataReader speed testing} -setup {
   sql execute $db "INSERT INTO t3 (y) VALUES('1');"
   sql execute $db "INSERT INTO t3 (y) VALUES('1.1');"
 
+  set char [expr {int(rand() * 0x7F) + 1}]; # NOTE: Skip NUL.
+
+  tputs $test_channel [appendArgs \
+      "---- using random character 0x" [format %X $char] ...\n]
+
   sql execute $db [appendArgs \
       "INSERT INTO t3 (y) VALUES('" [string map [list ' ''] [string \
-      repeat [format %c [expr {int(rand() * 0x80)}]] 1048576]] "');"]
+      repeat [format %c $char] 1048576]] "');"]
 
   sql execute $db "INSERT INTO t4 (z) VALUES(NULL);"
   sql execute $db "INSERT INTO t4 (z) VALUES(X'01');"
@@ -107,7 +112,7 @@ runTest {test speed-1.1 {SQLiteDataReader speed testing} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain time sql result db fileName
+  unset -nocomplain time sql result char db fileName
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -result {{-9223372036854775808 0 9223372036854775807}\
 {-Infinity 0 Infinity} {1 1.1 1048576} {1 {1 35 69 103 137} 1048576}}}
@@ -136,9 +141,14 @@ runTest {test speed-1.2 {SQLiteDataReader speed testing} -setup {
   sql execute $db "INSERT INTO t3 (y) VALUES('1');"
   sql execute $db "INSERT INTO t3 (y) VALUES('1.1');"
 
+  set char [expr {int(rand() * 0x7F) + 1}]; # NOTE: Skip NUL.
+
+  tputs $test_channel [appendArgs \
+      "---- using random character 0x" [format %X $char] ...\n]
+
   sql execute $db [appendArgs \
       "INSERT INTO t3 (y) VALUES('" [string map [list ' ''] [string \
-      repeat [format %c [expr {int(rand() * 0x80)}]] 1048576]] "');"]
+      repeat [format %c $char] 1048576]] "');"]
 
   sql execute $db "INSERT INTO t4 (z) VALUES(NULL);"
   sql execute $db "INSERT INTO t4 (z) VALUES(X'01');"
@@ -165,7 +175,7 @@ runTest {test speed-1.2 {SQLiteDataReader speed testing} -setup {
 } -cleanup {
   cleanupDb $fileName
 
-  unset -nocomplain time sql table column result db fileName
+  unset -nocomplain time sql table column result char db fileName
 } -time true -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
 System.Data.SQLite} -result {3 3 3 3}}
 
