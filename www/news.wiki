@@ -6,7 +6,8 @@
     <b>1.0.94.0 - August XX, 2014</b>
 </p>
 <ul>
-    <li>Updated to <a href="http://www.nuget.org/packages/EntityFramework/6.1.1">Entity Framework 6.1.1</a>.</li>
+    <li>Updated to [http://www.sqlite.org/releaselog/3_8_6.html|SQLite 3.8.6].</li>
+    <li>Updated to [http://www.nuget.org/packages/EntityFramework/6.1.1|Entity Framework 6.1.1].</li>
     <li>Add RefreshFlags method to the SQLiteDataReader class to forcibly refresh its connection flags.</li>
     <li>Improve automatic detection and handling of the Entity Framework 6 assembly by the design-time components installer. Pursuant to [e634e330a6].&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Improve SQLiteDataReader performance slightly by caching the connection flags.&nbsp;<b>** Potentially Incompatible Change **</b></li>
