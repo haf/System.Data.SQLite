@@ -160,10 +160,12 @@ set sds_manifests(source) {
   NuGet/net20/Core/
   NuGet/net20/Core/config.transform
   NuGet/net20/Core/install.ps1
+  NuGet/net20/Core/uninstall.ps1
   NuGet/net40/
   NuGet/net40/Core/
   NuGet/net40/Core/config.transform
   NuGet/net40/Core/install.ps1
+  NuGet/net40/Core/uninstall.ps1
   NuGet/net40/EF6/
   NuGet/net40/EF6/config.transform
   NuGet/net40/EF6/provider.ps1
