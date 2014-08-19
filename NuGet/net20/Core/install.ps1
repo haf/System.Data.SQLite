@@ -37,6 +37,12 @@ foreach($platformName in $platformNames) {
         $item.Remove()
       }
     } else {
+      #
+      # NOTE: Apparently, there are circumstances where this call to add
+      #       the folder can fail, e.g. when the user manually excludes
+      #       it from the project and then deletes the directory on the
+      #       file system from outside of Visual Studio.
+      #
       $folder = $project.ProjectItems.AddFolder($platformName)
     }
   }
