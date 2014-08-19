@@ -28,7 +28,7 @@ foreach($platformName in $platformNames) {
       #
       # NOTE: Since the EnvDTE.AddFromDirectory method is hard-wired to
       #       recursively add an existing folder *and* all of its files,
-      #       it is necessary to remove all its items after adding.
+      #       it is necessary to remove all of its items after adding.
       #       This should be completely "safe" since the folder was just
       #       added by this script and did not exist in the project prior
       #       to that point.
