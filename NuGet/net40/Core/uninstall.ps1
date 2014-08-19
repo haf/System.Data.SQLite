@@ -41,12 +41,16 @@ foreach($platformName in $platformNames) {
   #       be deleted if it ends up empty due to this script.
   #
   if ($folder.ProjectItems.Count -eq 0) {
-    $folderItems = Get-ChildItem -Path $folder.FileNames(1) -Recurse
+    $folderPath = $folder.FileNames(1)
 
-    if ($folderItems -eq $null) {
-      $folder.Delete()
-    } else {
-      $folder.Remove()
+    if (Test-Path $folderPath) {
+      $folderItems = Get-ChildItem -Path $folderPath -Recurse
+
+      if ($folderItems -eq $null) {
+        $folder.Delete()
+      } else {
+        $folder.Remove()
+      }
     }
   }
 }
