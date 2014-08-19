@@ -1114,13 +1114,28 @@ namespace System.Data.SQLite
             return FallbackDefaultTypeName;
         }
 
-        string value = UnsafeNativeMethods.GetSettingValue(
-            "Use_SQLiteConvert_DefaultTypeName", null);
+        string name = "Use_SQLiteConvert_DefaultTypeName";
+        object value = null;
+        string @default = null;
 
-        if (value == null)
-            return FallbackDefaultTypeName;
+        if ((connection == null) ||
+            !connection.TryGetCachedSetting(name, @default, out value))
+        {
+            try
+            {
+                value = UnsafeNativeMethods.GetSettingValue(name, @default);
 
-        return value;
+                if (value == null)
+                    value = FallbackDefaultTypeName;
+            }
+            finally
+            {
+                if (connection != null)
+                    connection.SetCachedSetting(name, value);
+            }
+        }
+
+        return SettingValueToString(value);
     }
 
 #if !NET_COMPACT_20 && TRACE_WARNING
@@ -1449,6 +1464,30 @@ namespace System.Data.SQLite
     }
 
     /// <summary>
+    /// Determines and returns the runtime configuration setting string that
+    /// should be used in place of the specified object value.
+    /// </summary>
+    /// <param name="value">
+    /// The object value to convert to a string.
+    /// </param>
+    /// <returns>
+    /// Either the string to use in place of the object value -OR- null if it
+    /// cannot be determined.
+    /// </returns>
+    private static string SettingValueToString(
+        object value
+        )
+    {
+        if (value is string)
+            return (string)value;
+
+        if (value != null)
+            return value.ToString();
+
+        return null;
+    }
+
+    /// <summary>
     /// Determines the default <see cref="DbType" /> value to be used when a
     /// per-connection value is not available.
     /// </summary>
@@ -1471,19 +1510,42 @@ namespace System.Data.SQLite
             return FallbackDefaultDbType;
         }
 
-        string value = UnsafeNativeMethods.GetSettingValue(
-            "Use_SQLiteConvert_DefaultDbType", null);
+        bool found = false;
+        string name = "Use_SQLiteConvert_DefaultDbType";
+        object value = null;
+        string @default = null;
 
-        if (value == null)
-            return FallbackDefaultDbType;
+        if ((connection == null) ||
+            !connection.TryGetCachedSetting(name, @default, out value))
+        {
+            value = UnsafeNativeMethods.GetSettingValue(name, @default);
 
-        object enumValue = SQLiteConnection.TryParseEnum(
-            typeof(DbType), value, true);
+            if (value == null)
+                value = FallbackDefaultDbType;
+        }
+        else
+        {
+            found = true;
+        }
 
-        if (!(enumValue is DbType))
-            return FallbackDefaultDbType;
+        try
+        {
+            if (!(value is DbType))
+            {
+                value = SQLiteConnection.TryParseEnum(
+                    typeof(DbType), SettingValueToString(value), true);
 
-        return (DbType)enumValue;
+                if (!(value is DbType))
+                    value = FallbackDefaultDbType;
+            }
+
+            return (DbType)value;
+        }
+        finally
+        {
+            if (!found && (connection != null))
+                connection.SetCachedSetting(name, value);
+        }
     }
 
     /// <summary>
