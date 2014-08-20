@@ -14,11 +14,9 @@ namespace System.Data.SQLite
   using System.Diagnostics;
 #endif
 
-#if PRELOAD_NATIVE_LIBRARY
   using System.Collections.Generic;
   using System.IO;
   using System.Reflection;
-#endif
 
 #if !PLATFORM_COMPACTFRAMEWORK && !DEBUG
   using System.Security;
@@ -274,17 +272,20 @@ namespace System.Data.SQLite
 
           #region Debug Build Only
 #if DEBUG
-          //
-          // NOTE: Update statistics for this setting value.
-          //
-          if (settingReadCounts != null)
+          lock (staticSyncRoot)
           {
-              int count;
+              //
+              // NOTE: Update statistics for this setting value.
+              //
+              if (settingReadCounts != null)
+              {
+                  int count;
 
-              if (settingReadCounts.TryGetValue(name, out count))
-                  settingReadCounts[name] = count + 1;
-              else
-                  settingReadCounts.Add(name, 1);
+                  if (settingReadCounts.TryGetValue(name, out count))
+                      settingReadCounts[name] = count + 1;
+                  else
+                      settingReadCounts.Add(name, 1);
+              }
           }
 #endif
           #endregion

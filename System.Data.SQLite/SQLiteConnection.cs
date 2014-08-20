@@ -487,6 +487,13 @@ namespace System.Data.SQLite
     private SQLiteConnectionFlags _flags;
 
     /// <summary>
+    /// The cached values for all settings that have been fetched on behalf
+    /// of this connection.  This cache may be cleared by calling the
+    /// <see cref="ClearCachedSettings" /> method.
+    /// </summary>
+    private Dictionary<string, object> _cachedSettings;
+
+    /// <summary>
     /// The default databse type for this connection.  This value will only
     /// be used if the <see cref="SQLiteConnectionFlags.UseConnectionTypes" />
     /// flag is set.
@@ -637,6 +644,9 @@ namespace System.Data.SQLite
               SQLiteErrorCode.Ok, SQLiteConvert.ToUTF8("logging initialized."));
       }
 #endif
+
+      _cachedSettings = new Dictionary<string, object>(
+          new TypeNameStringComparer());
 
       _typeNames = new SQLiteDbTypeMap();
       _parseViaFramework = parseViaFramework;
@@ -918,6 +928,89 @@ namespace System.Data.SQLite
             if (backup != null)
                 sqliteBase.FinishBackup(backup); /* throw */
         }
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Per-Connection Settings
+    /// <summary>
+    /// Clears the per-connection cached settings.
+    /// </summary>
+    /// <returns>
+    /// The total number of per-connection settings cleared.
+    /// </returns>
+    public int ClearCachedSettings()
+    {
+        CheckDisposed();
+
+        int result = -1; /* NO SETTINGS */
+
+        if (_cachedSettings != null)
+        {
+            result = _cachedSettings.Count;
+            _cachedSettings.Clear();
+        }
+
+        return result;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Queries and returns the value of the specified setting, using the
+    /// cached setting names and values for this connection, when available.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the setting.
+    /// </param>
+    /// <param name="default">
+    /// The value to be returned if the setting has not been set explicitly
+    /// or cannot be determined.
+    /// </param>
+    /// <param name="value">
+    /// The value of the cached setting is stored here if found; otherwise,
+    /// the value of <paramref name="default" /> is stored here.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the cached setting was found; otherwise, zero.
+    /// </returns>
+    internal bool TryGetCachedSetting(
+        string name,     /* in */
+        string @default, /* in */
+        out object value /* out */
+        )
+    {
+        if ((name == null) || (_cachedSettings == null))
+        {
+            value = @default;
+            return false;
+        }
+
+        return _cachedSettings.TryGetValue(name, out value);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Adds or sets the cached setting specified by <paramref name="name" />
+    /// to the value specified by <paramref name="value" />.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the cached setting to add or replace.
+    /// </param>
+    /// <param name="value">
+    /// The new value of the cached setting.
+    /// </param>
+    internal void SetCachedSetting(
+        string name, /* in */
+        object value /* in */
+        )
+    {
+        if ((name == null) || (_cachedSettings == null))
+            return;
+
+        _cachedSettings[name] = value;
     }
     #endregion
 
