@@ -3,7 +3,7 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.94.0 - August XX, 2014</b>
+    <b>1.0.94.0 - September XX, 2014</b>
 </p>
 <ul>
     <li>Updated to [http://www.sqlite.org/releaselog/3_8_6.html|SQLite 3.8.6].</li>
@@ -11,6 +11,7 @@
     <li>Add RefreshFlags method to the SQLiteDataReader class to forcibly refresh its connection flags.</li>
     <li>Improve automatic detection and handling of the Entity Framework 6 assembly by the design-time components installer. Pursuant to [e634e330a6].&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Improve SQLiteDataReader performance slightly by caching the connection flags.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>Add ClearCachedSettings method to the SQLiteConnection class.</li>
     <li>Add NoConvertSettings connection flag to disable querying of runtime configuration settings from within the SQLiteConvert class. Pursuant to [58ed318f2f].</li>
     <li>Minimize usage of the &quot;Use_SQLiteConvert_DefaultDbType&quot; and &quot;Use_SQLiteConvert_DefaultTypeName&quot; settings. Fix for [58ed318f2f].&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>

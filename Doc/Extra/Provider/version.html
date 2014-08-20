@@ -43,13 +43,14 @@
     <div id="mainSection">
     <div id="mainBody">
     <h1 class="heading">Version History</h1>
-    <p><b>1.0.94.0 - August XX, 2014 <font color="red">(release scheduled)</font></b></p>
+    <p><b>1.0.94.0 - September XX, 2014 <font color="red">(release scheduled)</font></b></p>
     <ul>
       <li>Updated to <a href="http://www.sqlite.org/releaselog/3_8_6.html">SQLite 3.8.6</a>.</li>
       <li>Updated to <a href="http://www.nuget.org/packages/EntityFramework/6.1.1">Entity Framework 6.1.1</a>.</li>
       <li>Add RefreshFlags method to the SQLiteDataReader class to forcibly refresh its connection flags.</li>
       <li>Improve automatic detection and handling of the Entity Framework 6 assembly by the design-time components installer. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/e634e330a6">[e634e330a6]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Improve SQLiteDataReader performance slightly by caching the connection flags.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>Add ClearCachedSettings method to the SQLiteConnection class.</li>
       <li>Add NoConvertSettings connection flag to disable querying of runtime configuration settings from within the SQLiteConvert class. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/58ed318f2f">[58ed318f2f]</a>.</li>
       <li>Minimize usage of the &quot;Use_SQLiteConvert_DefaultDbType&quot; and &quot;Use_SQLiteConvert_DefaultTypeName&quot; settings. Fix for <a href="http://system.data.sqlite.org/index.html/info/58ed318f2f">[58ed318f2f]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     </ul>

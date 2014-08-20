@@ -56,7 +56,7 @@ runTest {test tkt-58ed318f2f-1.1 {standard GetDefaultDbType usage} -setup {
 
   sql execute -execute reader -format list $db "SELECT x, y FROM t1;"
 
-  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == 2}
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == 1}
 } -cleanup {
   cleanupDb $fileName
 
@@ -82,7 +82,7 @@ runTest {test tkt-58ed318f2f-1.2 {no property GetDefaultDbType usage} -setup {
 
   sql execute -execute reader -format list $db "SELECT x, y FROM t1;"
 
-  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == 2}
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == 1}
 } -cleanup {
   cleanupDb $fileName
 
@@ -164,7 +164,7 @@ runTest {test tkt-58ed318f2f-1.5 {standard GetDefaultTypeName usage} -setup {
 
   set columns [$connection GetSchema COLUMNS]
 
-  expr {[getSettingReadCount Use_SQLiteConvert_DefaultTypeName] == 2}
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultTypeName] == 1}
 } -cleanup {
   cleanupDb $fileName
 
@@ -194,7 +194,7 @@ runTest {test tkt-58ed318f2f-1.6 {no property GetDefaultTypeName usage} -setup {
 
   set columns [$connection GetSchema COLUMNS]
 
-  expr {[getSettingReadCount Use_SQLiteConvert_DefaultTypeName] == 2}
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultTypeName] == 1}
 } -cleanup {
   cleanupDb $fileName
 
@@ -346,8 +346,8 @@ runTest {test tkt-58ed318f2f-1.11 {normal SQLiteConvert settings usage} -setup {
   #
   # TODO: These counts may need to be updated in future versions.
   #
-  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == 7 && \
-      [getSettingReadCount Use_SQLiteConvert_DefaultTypeName] == 2}
+  expr {[getSettingReadCount Use_SQLiteConvert_DefaultDbType] == 1 && \
+      [getSettingReadCount Use_SQLiteConvert_DefaultTypeName] == 1}
 } -cleanup {
   cleanupDb $fileName
 
