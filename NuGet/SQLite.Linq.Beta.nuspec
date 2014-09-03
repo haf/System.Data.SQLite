@@ -40,13 +40,13 @@
     <file src="..\bin\2010\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net40" />
     <file src="..\bin\2012\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net45" />
     <file src="..\bin\2013\Release\bin\System.Data.SQLite.Linq.dll" target="lib\net451" />
-    <file src="net20\Core\config.transform" target="content\net20\app.config.transform" />
-    <file src="net20\Core\config.transform" target="content\net20\web.config.transform" />
-    <file src="net40\Core\config.transform" target="content\net40\app.config.transform" />
-    <file src="net40\Core\config.transform" target="content\net40\web.config.transform" />
-    <file src="net40\Core\config.transform" target="content\net45\app.config.transform" />
-    <file src="net40\Core\config.transform" target="content\net45\web.config.transform" />
-    <file src="net40\Core\config.transform" target="content\net451\app.config.transform" />
-    <file src="net40\Core\config.transform" target="content\net451\web.config.transform" />
+    <file src="shared\Core\content\config.transform" target="content\net20\app.config.transform" />
+    <file src="shared\Core\content\config.transform" target="content\net20\web.config.transform" />
+    <file src="shared\Core\content\config.transform" target="content\net40\app.config.transform" />
+    <file src="shared\Core\content\config.transform" target="content\net40\web.config.transform" />
+    <file src="shared\Core\content\config.transform" target="content\net45\app.config.transform" />
+    <file src="shared\Core\content\config.transform" target="content\net45\web.config.transform" />
+    <file src="shared\Core\content\config.transform" target="content\net451\app.config.transform" />
+    <file src="shared\Core\content\config.transform" target="content\net451\web.config.transform" />
   </files>
 </package>

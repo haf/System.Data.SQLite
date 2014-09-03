@@ -1,0 +1,131 @@
+<!--
+ *
+ * System.Data.SQLite.Core.targets -
+ *
+ * Written by Joe Mistachkin and David Archer.
+ * Released to the public domain, use at your own risk!
+ *
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+  ******************************************************************************
+  **                   SQLite Interop Library Build Targets                   **
+  ******************************************************************************
+  -->
+
+  <Target Name="CopyProjectSQLiteInteropFiles"
+          Condition="'$(CopyProjectSQLiteInteropFiles)' != 'false' And
+                     '$(MSBuildProjectDirectory)' != '' And
+                     !HasTrailingSlash('$(MSBuildProjectDirectory)') And
+                     Exists('$(MSBuildProjectDirectory)\packages') And
+                     '$(OutputPath)' != '' And
+                     HasTrailingSlash('$(OutputPath)') And
+                     Exists('$(OutputPath)')">
+    <CreateItem Include="$(MSBuildProjectDirectory)\packages\System.Data.SQLite.Core.*\**\x86\SQLite.Interop.*">
+      <Output ItemName="SQLiteInteropX86Files"
+              TaskParameter="Include" />
+    </CreateItem>
+
+    <CreateItem Include="$(MSBuildProjectDirectory)\packages\System.Data.SQLite.Core.*\**\x64\SQLite.Interop.*">
+      <Output ItemName="SQLiteInteropX64Files"
+              TaskParameter="Include" />
+    </CreateItem>
+
+    <Copy SourceFiles="@(SQLiteInteropX86Files)"
+          DestinationFolder="$(OutputPath)x86" />
+
+    <Copy SourceFiles="@(SQLiteInteropX64Files)"
+          DestinationFolder="$(OutputPath)x64" />
+  </Target>
+
+  <!--
+  ******************************************************************************
+  -->
+
+  <Target Name="CopySolutionSQLiteInteropFiles"
+          Condition="'$(CopySolutionSQLiteInteropFiles)' != 'false' And
+                     '$(MSBuildProjectDirectory)' != '' And
+                     !HasTrailingSlash('$(MSBuildProjectDirectory)') And
+                     Exists('$(MSBuildProjectDirectory)\..\packages') And
+                     '$(OutputPath)' != '' And
+                     HasTrailingSlash('$(OutputPath)') And
+                     Exists('$(OutputPath)')">
+    <CreateItem Include="$(MSBuildProjectDirectory)\..\packages\System.Data.SQLite.Core.*\**\x86\SQLite.Interop.*">
+      <Output ItemName="SQLiteInteropX86Files"
+              TaskParameter="Include" />
+    </CreateItem>
+
+    <CreateItem Include="$(MSBuildProjectDirectory)\..\packages\System.Data.SQLite.Core.*\**\x64\SQLite.Interop.*">
+      <Output ItemName="SQLiteInteropX64Files"
+              TaskParameter="Include" />
+    </CreateItem>
+
+    <Copy SourceFiles="@(SQLiteInteropX86Files)"
+          DestinationFolder="$(OutputPath)x86" />
+
+    <Copy SourceFiles="@(SQLiteInteropX64Files)"
+          DestinationFolder="$(OutputPath)x64" />
+  </Target>
+
+  <!--
+  ******************************************************************************
+  -->
+
+  <Target Name="CleanSQLiteInteropFiles"
+          Condition="'$(CleanSQLiteInteropFiles)' != 'false' And
+                     '$(OutputPath)' != '' And
+                     HasTrailingSlash('$(OutputPath)') And
+                     Exists('$(OutputPath)')">
+    <CreateItem Include="$(OutputPath)\x86\SQLite.Interop.*">
+      <Output ItemName="SQLiteInteropX86Files" TaskParameter="Include" />
+    </CreateItem>
+
+    <CreateItem Include="$(OutputPath)\x64\SQLite.Interop.*">
+      <Output ItemName="SQLiteInteropX64Files" TaskParameter="Include" />
+    </CreateItem>
+
+    <Delete Condition="'@(SQLiteInteropX86Files)' != ''"
+            Files="@(SQLiteInteropX86Files)" />
+
+    <Delete Condition="'@(SQLiteInteropX64Files)' != ''"
+            Files="@(SQLiteInteropX86Files)" />
+  </Target>
+
+  <!--
+  ******************************************************************************
+  **          Per-Project Packages Support (i.e. no solution folder)          **
+  ******************************************************************************
+  -->
+
+  <PropertyGroup Condition="'$(MSBuildProjectDirectory)' != '' And
+                            !HasTrailingSlash('$(MSBuildProjectDirectory)') And
+                            Exists('$(MSBuildProjectDirectory)\..\packages')">
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      CopySolutionSQLiteInteropFiles;
+    </BuildDependsOn>
+    <CleanDependsOn>
+      $(CleanDependsOn);
+      CleanSQLiteInteropFiles;
+    </CleanDependsOn>
+  </PropertyGroup>
+
+  <!--
+  ******************************************************************************
+  **                      Per-Solution Packages Support                       **
+  ******************************************************************************
+  -->
+
+  <PropertyGroup Condition="'$(MSBuildProjectDirectory)' != '' And
+                            !HasTrailingSlash('$(MSBuildProjectDirectory)') And
+                            Exists('$(MSBuildProjectDirectory)\packages')">
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      CopyProjectSQLiteInteropFiles;
+    </BuildDependsOn>
+    <CleanDependsOn>
+      $(CleanDependsOn);
+      CleanSQLiteInteropFiles;
+    </CleanDependsOn>
+  </PropertyGroup>
+</Project>
