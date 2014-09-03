@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -129,13 +130,35 @@ namespace SQLite.Designer
         /// </returns>
         public static string GetProviderName()
         {
+            return GetProviderName(DefaultProviderName);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// This method determines the name of the ADO.NET provider for the
+        /// System.Data.SQLite design-time components to use.
+        /// </summary>
+        /// <param name="default">
+        /// The value to return from this method if the name of the ADO.NET
+        /// provider is unavailable -OR- cannot be determined.
+        /// </param>
+        /// <returns>
+        /// The configured ADO.NET provider name for System.Data.SQLite -OR-
+        /// the default ADO.NET provider name for System.Data.SQLite in the
+        /// event of any failure.
+        /// </returns>
+        private static string GetProviderName(
+            string @default
+            )
+        {
             string key = ProviderNameKey;
             string value;
 
             if (GetValue(key, out value) && IsValidValue(key, value))
                 return value;
 
-            return DefaultProviderName;
+            return @default;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -185,10 +208,7 @@ namespace SQLite.Designer
             if (comboBox == null)
                 return false;
 
-            string value = GetProviderName();
-
-            if (value == null)
-                return false;
+            string value = GetProviderName(null);
 
             for (int index = 0; index < comboBox.Items.Count; index++)
             {
@@ -197,11 +217,49 @@ namespace SQLite.Designer
                 if (item == null)
                     continue;
 
-                if (String.Equals(
+                if ((value == null) || String.Equals(
                         item.ToString(), value, StringComparison.Ordinal))
                 {
                     comboBox.SelectedIndex = index;
                     return true;
+                }
+            }
+
+            return false;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private static bool CheckProviderName(
+            string name
+            )
+        {
+            DbProviderFactory dbProviderFactory = null;
+
+            try
+            {
+                dbProviderFactory = DbProviderFactories.GetFactory(
+                    name); /* throw */
+
+                return (dbProviderFactory != null);
+            }
+            catch
+            {
+                // do nothing.
+            }
+            finally
+            {
+                if (dbProviderFactory != null)
+                {
+                    IDisposable disposable = dbProviderFactory as IDisposable;
+
+                    if (disposable != null)
+                    {
+                        disposable.Dispose();
+                        disposable = null;
+                    }
+
+                    dbProviderFactory = null;
                 }
             }
 
@@ -231,13 +289,22 @@ namespace SQLite.Designer
             if (items == null)
                 return result;
 
-            items.Add(DefaultProviderName);
-            result++;
+            IList<string> names = new List<string>();
 
 #if NET_40 || NET_45 || NET_451
-            items.Add(Ef6ProviderName);
-            result++;
+            names.Add(Ef6ProviderName);
 #endif
+
+            names.Add(DefaultProviderName);
+
+            foreach (string name in names)
+            {
+                if (CheckProviderName(name))
+                {
+                    items.Add(name);
+                    result++;
+                }
+            }
 
             return result;
         }
