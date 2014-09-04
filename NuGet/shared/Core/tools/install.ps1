@@ -13,6 +13,12 @@ $platformNames = "x86", "x64"
 $fileName = "SQLite.Interop.dll"
 $copyToOutputDirectoryPropertyName = "CopyToOutputDirectory"
 
+$netFxPath = Split-Path $toolsPath -Leaf
+$buildPath = Join-Path $toolsPath ".." -Resolve
+$buildPath = Join-Path $buildPath ".." -Resolve
+$buildPath = Join-Path $buildPath "build" -Resolve
+$buildPath = Join-Path $buildPath $netFxPath -Resolve
+
 foreach($platformName in $platformNames) {
   $folder = $project.ProjectItems | where {
     $_.Name -eq $platformName
@@ -55,7 +61,7 @@ foreach($platformName in $platformNames) {
     continue
   }
 
-  $itemSourceDirectory = Join-Path $toolsPath $platformName
+  $itemSourceDirectory = Join-Path $buildPath $platformName
   $itemSourceFileName = Join-Path $itemSourceDirectory $fileName
 
   $item = $folder.ProjectItems.AddFromFile($itemSourceFileName)
