@@ -129,8 +129,8 @@ a:visited { color: #734559 }
 <div class=startsearch></div>
   
 <h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>ON CONFLICT clause</h2><p><b><a href="syntaxdiagrams.html#conflict-clause">conflict-clause:</a></b>
-<button id='x1117' onclick='hideorshow("x1117","x1118")'>hide</button></p>
- <blockquote id='x1118'>
+<button id='x1133' onclick='hideorshow("x1133","x1134")'>hide</button></p>
+ <blockquote id='x1134'>
  <img alt="syntax diagram conflict-clause" src="images/syntax/conflict-clause.gif" />
 </blockquote>
 
@@ -148,9 +148,8 @@ the syntax reads more naturally.  For example, instead of
 The keywords change but the meaning of the clause is the same
 either way.</p>
 
-<p>The ON CONFLICT clause applies to UNIQUE and NOT NULL
-constraints (and to PRIMARY KEY constraints which for the purposes 
-of this section are the same thing as UNIQUE constraints).
+<p>The ON CONFLICT clause applies to <a href="lang_createtable.html#uniqueconst">UNIQUE</a>, <a href="lang_createtable.html#notnullconst">NOT NULL</a>,
+<a href="lang_createtable.html#ckconst">CHECK</a>, and <a href="lang_createtable.html#primkeyconst">PRIMARY KEY</a> constraints.
 The ON CONFLICT algorithm does not
 apply to <a href="foreignkeys.html">FOREIGN KEY constraints</a>.
 There are five conflict resolution algorithm choices:
@@ -200,15 +199,16 @@ normally. No error is returned when the IGNORE conflict resolution
 algorithm is used.</p></dd>
 
 <dt><b>REPLACE</b></dt>
-<dd><p> When a UNIQUE constraint violation occurs, the REPLACE algorithm
+<dd><p> When a <a href="lang_createtable.html#uniqueconst">UNIQUE</a> or <a href="lang_createtable.html#primkeyconst">PRIMARY KEY</a> constraint violation occurs, 
+the REPLACE algorithm
 deletes pre-existing rows that are causing the constraint violation
 prior to inserting or updating the current row and the command continues 
 executing normally.
-If a NOT NULL constraint violation occurs, the REPLACE conflict
+If a <a href="lang_createtable.html#notnullconst">NOT NULL</a> constraint violation occurs, the REPLACE conflict
 resolution replaces the NULL value with
 the default value for that column, or if the column has no default
 value, then the ABORT algorithm is used.
-If a CHECK constraint violation occurs, the REPLACE conflict resolution
+If a <a href="lang_createtable.html#ckconst">CHECK</a> constraint violation occurs, the REPLACE conflict resolution
 algorithm always works like ABORT.</p>
 
 <p>When the REPLACE conflict resolution strategy deletes rows in order to
