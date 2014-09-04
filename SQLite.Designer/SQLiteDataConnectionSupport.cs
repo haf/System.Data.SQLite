@@ -23,7 +23,7 @@ namespace SQLite.Designer
     private SQLiteDataObjectIdentifierResolver _dataObjectIdentifierResolver;
 
     public SQLiteDataConnectionSupport()
-      : base("System.Data.SQLite")
+      : base(SQLiteOptions.GetProviderName())
     {
     }
 

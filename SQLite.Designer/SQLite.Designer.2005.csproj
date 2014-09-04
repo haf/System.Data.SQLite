@@ -135,6 +135,7 @@
     <Compile Include="SQLiteDataObjectSupport.cs" />
     <Compile Include="SQLiteDataSourceInformation.cs" />
     <Compile Include="SQLiteDataViewSupport.cs" />
+    <Compile Include="SQLiteOptions.cs" />
     <Compile Include="SQLitePackage.cs" />
     <Compile Include="SQLiteProviderObjectFactory.cs" />
     <Compile Include="TableNameDialog.cs">

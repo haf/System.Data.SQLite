@@ -97,22 +97,30 @@ namespace System.Data.SQLite
     [Flags()]
     public enum InstallFlags
     {
-        #region Normal Flags
+        #region Normal Values
         None = 0x0,
-        GlobalAssemblyCache = 0x1,
-        AssemblyFolders = 0x2,
-        DbProviderFactory = 0x4,
-        VsPackage = 0x8,
-        VsPackageGlobalAssemblyCache = 0x10,
-        VsDataSource = 0x20,
-        VsDataProvider = 0x40,
-        VsDevEnvSetup = 0x80,
+        CoreGlobalAssemblyCache = 0x1,
+        LinqGlobalAssemblyCache = 0x2,
+        Ef6GlobalAssemblyCache = 0x4,
+        AssemblyFolders = 0x8,
+        DbProviderFactory = 0x10,
+        VsPackage = 0x20,
+        VsPackageGlobalAssemblyCache = 0x40,
+        VsDataSource = 0x80,
+        VsDataProvider = 0x100,
+        VsDevEnvSetup = 0x200,
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Composite Flags
-        Framework = GlobalAssemblyCache | AssemblyFolders |
+        #region Composite Values
+        FrameworkGlobalAssemblyCache = CoreGlobalAssemblyCache |
+                                       LinqGlobalAssemblyCache |
+                                       Ef6GlobalAssemblyCache,
+
+        ///////////////////////////////////////////////////////////////////////
+
+        Framework = FrameworkGlobalAssemblyCache | AssemblyFolders |
                     DbProviderFactory,
 
         ///////////////////////////////////////////////////////////////////////
@@ -122,17 +130,47 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
+        AllGlobalAssemblyCache = FrameworkGlobalAssemblyCache |
+                                 VsPackageGlobalAssemblyCache,
+
+        ///////////////////////////////////////////////////////////////////////
+
         All = Framework | Vs,
 
         ///////////////////////////////////////////////////////////////////////
 
-        AllExceptGlobalAssemblyCache = All & ~(GlobalAssemblyCache |
-                                       VsPackageGlobalAssemblyCache),
+        AllExceptGlobalAssemblyCache = All & ~AllGlobalAssemblyCache,
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
 
+        #region Suggested Default Values
         Default = All
+        #endregion
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    [Flags()]
+    public enum ProviderFlags
+    {
+        #region Normal Values
+        None = 0x0,
+        SystemEf6MustBeGlobal = 0x1,
+        DidLinqForceTrace = 0x2,
+        DidEf6ForceTrace = 0x4,
+        DidEf6ResolveTrace = 0x8,
+        ForceLinqEnabled = 0x10,
+        ForceLinqDisabled = 0x20,
+        ForceEf6Enabled = 0x40,
+        ForceEf6Disabled = 0x80,
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Suggested Default Values
+        Default = None
+        #endregion
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -140,6 +178,7 @@ namespace System.Data.SQLite
     [Flags()]
     public enum TracePriority
     {
+        #region Normal Values
         None = 0x0,
         Lowest = 0x1,
         Lower = 0x2,
@@ -150,7 +189,13 @@ namespace System.Data.SQLite
         High = 0x40,
         Higher = 0x80,
         Highest = 0x100,
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+
+        #region Suggested Default Flags
         Default = Medium
+        #endregion
     }
     #endregion
 
@@ -839,6 +884,7 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public "Registry" Methods
+#if false
             public object GetValue(
                 string keyName,
                 string valueName,
@@ -880,6 +926,7 @@ namespace System.Data.SQLite
                 if (!whatIf)
                     Registry.SetValue(keyName, valueName, value, valueKind);
             }
+#endif
             #endregion
 
             ///////////////////////////////////////////////////////////////////
@@ -1490,10 +1537,18 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            private static int keyValuesSet;
-            public static int KeyValuesSet
+            private static int keyValuesRead;
+            public static int KeyValuesRead
             {
-                get { return keyValuesSet; }
+                get { return keyValuesRead; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static int keyValuesWritten;
+            public static int KeyValuesWritten
+            {
+                get { return keyValuesWritten; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1686,7 +1741,11 @@ namespace System.Data.SQLite
                         ForDisplay(key), ForDisplay(name),
                         ForDisplay(defaultValue)), traceCategory);
 
-                return key.GetValue(name, defaultValue);
+                object value = key.GetValue(name, defaultValue);
+
+                keyValuesRead++;
+
+                return value;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1713,7 +1772,7 @@ namespace System.Data.SQLite
                 if (!whatIf)
                     key.SetValue(name, value);
 
-                keyValuesSet++;
+                keyValuesWritten++;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -1826,15 +1885,6 @@ namespace System.Data.SQLite
             ///////////////////////////////////////////////////////////////////
 
             #region Public Properties
-            private string configInvariantName;
-            public string ConfigInvariantName
-            {
-                get { return configInvariantName; }
-                set { configInvariantName = value; }
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
             private string providerInvariantName;
             public string ProviderInvariantName
             {
@@ -1987,6 +2037,7 @@ namespace System.Data.SQLite
                 string debugFormat,
                 string traceFormat,
                 InstallFlags installFlags,
+                ProviderFlags providerFlags,
                 TracePriority debugPriority,
                 TracePriority tracePriority,
                 bool perUser,
@@ -2028,6 +2079,7 @@ namespace System.Data.SQLite
                 this.debugFormat = debugFormat;
                 this.traceFormat = traceFormat;
                 this.installFlags = installFlags;
+                this.providerFlags = providerFlags;
                 this.debugPriority = debugPriority;
                 this.tracePriority = tracePriority;
                 this.perUser = perUser;
@@ -2189,7 +2241,9 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            private static bool IsSystemEf6AssemblyAvailable()
+            private static bool IsSystemEf6AssemblyAvailable(
+                bool trace
+                )
             {
                 if (systemEf6Assembly != null)
                     return true;
@@ -2201,11 +2255,15 @@ namespace System.Data.SQLite
 
                     if (systemEf6Assembly != null)
                     {
-                        TraceOps.DebugAndTrace(TracePriority.Highest,
-                            debugCallback, traceCallback, String.Format(
-                            "Entity Framework 6 assembly was resolved to {0}.",
-                            ForDisplay(systemEf6Assembly.Location)),
-                            traceCategory);
+                        if (trace)
+                        {
+                            TraceOps.DebugAndTrace(TracePriority.Highest,
+                                debugCallback, traceCallback, String.Format(
+                                "Entity Framework 6 assembly was " +
+                                "resolved to {0}.", ForDisplay(
+                                systemEf6Assembly.Location)),
+                                traceCategory);
+                        }
 
                         return true;
                     }
@@ -2215,12 +2273,25 @@ namespace System.Data.SQLite
                     // do nothing.
                 }
 
-                TraceOps.DebugAndTrace(TracePriority.Highest,
-                    debugCallback, traceCallback,
-                    "Entity Framework 6 assembly was not resolved.",
-                    traceCategory);
+                if (trace)
+                {
+                    TraceOps.DebugAndTrace(TracePriority.Highest,
+                        debugCallback, traceCallback,
+                        "Entity Framework 6 assembly was not resolved.",
+                        traceCategory);
+                }
 
                 return false;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private static bool IsSystemEf6AssemblyGlobal()
+            {
+                if (systemEf6Assembly == null)
+                    return false;
+
+                return systemEf6Assembly.GlobalAssemblyCache;
             }
             #endregion
 
@@ -2230,8 +2301,8 @@ namespace System.Data.SQLite
             public static void BreakIntoDebugger()
             {
                 Console.WriteLine(
-                    "Attach a debugger to process {0} and press any key to " +
-                    "continue.", (thisProcess != null) ?
+                    "Attach a debugger to process {0} and press " +
+                    "any key to continue.", (thisProcess != null) ?
                     thisProcess.Id.ToString() : "<unknown>");
 
                 try
@@ -2264,11 +2335,11 @@ namespace System.Data.SQLite
                     thisAssembly, null, directory, coreFileName, linqFileName,
                     ef6FileName, designerFileName, null, null, null,
                     TraceOps.DebugFormat, TraceOps.TraceFormat,
-                    InstallFlags.Default, TracePriority.Default,
-                    TracePriority.Default, false, true, false, false, false,
+                    InstallFlags.Default, ProviderFlags.Default,
+                    TracePriority.Default, TracePriority.Default, false, true,
                     false, false, false, false, false, false, false, false,
-                    false, false, false, false, false, false, true, true,
-                    false, false, false);
+                    false, false, false, false, false, false, false, false,
+                    false, true, true, false, false, false);
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -2933,6 +3004,27 @@ namespace System.Data.SQLite
 
                             configuration.perUser = (bool)value;
                         }
+                        else if (MatchOption(newArg, "providerFlags"))
+                        {
+                            object value = ParseEnum(
+                                typeof(ProviderFlags), text, true);
+
+                            if (value == null)
+                            {
+                                error = TraceOps.DebugAndTrace(
+                                    TracePriority.Lowest, debugCallback,
+                                    traceCallback, String.Format(
+                                    "Invalid provider flags value: {0}",
+                                    ForDisplay(text)), traceCategory);
+
+                                if (strict)
+                                    return false;
+
+                                continue;
+                            }
+
+                            configuration.providerFlags = (ProviderFlags)value;
+                        }
                         else if (MatchOption(newArg, "registryVersion"))
                         {
                             configuration.registryVersion = text;
@@ -3405,6 +3497,15 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            #region Private Methods
+            private string GetInvariantName()
+            {
+                return UseEf6Provider() ? Ef6InvariantName : InvariantName;
+            }
+            #endregion
+
+            ///////////////////////////////////////////////////////////////////
+
             #region Public Methods
             public bool HasFlags(
                 InstallFlags hasFlags,
@@ -3419,8 +3520,55 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            public bool HasFlags(
+                ProviderFlags hasFlags,
+                bool all
+                )
+            {
+                if (all)
+                    return ((providerFlags & hasFlags) == hasFlags);
+                else
+                    return ((providerFlags & hasFlags) != ProviderFlags.None);
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             public bool IsLinqSupported()
             {
+                //
+                // NOTE: Check to see if the caller has forced LINQ support to
+                //       be enabled -OR- disabled, thereby bypassing the need
+                //       for "automatic detection" by this method.
+                //
+                if (HasFlags(ProviderFlags.ForceLinqEnabled, true))
+                {
+                    if (!HasFlags(ProviderFlags.DidLinqForceTrace, true))
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                            debugCallback, traceCallback,
+                            "Forced to enable support for \"Linq\".",
+                            traceCategory);
+
+                        providerFlags |= ProviderFlags.DidLinqForceTrace;
+                    }
+
+                    return true;
+                }
+                else if (HasFlags(ProviderFlags.ForceLinqDisabled, true))
+                {
+                    if (!HasFlags(ProviderFlags.DidLinqForceTrace, true))
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                            debugCallback, traceCallback,
+                            "Forced to disable support for \"Linq\".",
+                            traceCategory);
+
+                        providerFlags |= ProviderFlags.DidLinqForceTrace;
+                    }
+
+                    return false;
+                }
+
                 //
                 // NOTE: Return non-zero if the System.Data.SQLite.Linq
                 //       assembly should be processed during the install.
@@ -3435,22 +3583,104 @@ namespace System.Data.SQLite
             public bool IsEf6Supported()
             {
                 //
+                // NOTE: Check to see if the caller has forced EF6 support to
+                //       be enabled -OR- disabled, thereby bypassing the need
+                //       for "automatic detection" by this method.
+                //
+                if (HasFlags(ProviderFlags.ForceEf6Enabled, true))
+                {
+                    if (!HasFlags(ProviderFlags.DidEf6ForceTrace, true))
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                            debugCallback, traceCallback,
+                            "Forced to enable support for \"Ef6\".",
+                            traceCategory);
+
+                        providerFlags |= ProviderFlags.DidEf6ForceTrace;
+                    }
+
+                    return true;
+                }
+                else if (HasFlags(ProviderFlags.ForceEf6Disabled, true))
+                {
+                    if (!HasFlags(ProviderFlags.DidEf6ForceTrace, true))
+                    {
+                        TraceOps.DebugAndTrace(TracePriority.MediumHigh,
+                            debugCallback, traceCallback,
+                            "Forced to disable support for \"Ef6\".",
+                            traceCategory);
+
+                        providerFlags |= ProviderFlags.DidEf6ForceTrace;
+                    }
+
+                    return false;
+                }
+
+                //
                 // NOTE: Return non-zero if the System.Data.SQLite.EF6
                 //       assembly should be processed during the install.
                 //       If the target is Visual Studio 2005 or Visual
-                //       Studio 2008, this must return zero.  Also, if
-                //       the EF6 core assembly is unavailable, this must
-                //       return zero.
+                //       Studio 2008, this must return zero.
                 //
                 if (noNetFx40 && noNetFx45 && noNetFx451)
                     return false;
 
-                return IsSystemEf6AssemblyAvailable();
+                //
+                // NOTE: Also, if the EF6 core assembly is unavailable, this
+                //       must return zero.
+                //
+                if (!IsSystemEf6AssemblyAvailable(!HasFlags(
+                        ProviderFlags.DidEf6ResolveTrace, true)))
+                {
+                    providerFlags |= ProviderFlags.DidEf6ResolveTrace;
+                    return false;
+                }
+
+                //
+                // NOTE: Finally, if the EF6 core assembly is not available
+                //       globally [and this is a requirement for the current
+                //       install], return zero.
+                //
+                return HasFlags(ProviderFlags.SystemEf6MustBeGlobal, true) ?
+                    IsSystemEf6AssemblyGlobal() : true;
             }
 
             ///////////////////////////////////////////////////////////////////
 
-            public AssemblyName GetCoreAssemblyName() /* REQUIRED */
+            private bool IsEf6AssemblyGlobal()
+            {
+                if (ef6AssemblyName == null)
+                    return false;
+
+                Assembly assembly = Assembly.ReflectionOnlyLoad(
+                    ef6AssemblyName.ToString());
+
+                return (assembly != null) && assembly.GlobalAssemblyCache;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            public bool UseEf6Provider()
+            {
+                //
+                // NOTE: We cannot use the EF6 assembly as the provider if it
+                //       is not supported by this installation.
+                //
+                if (!IsEf6Supported())
+                    return false;
+
+                //
+                // NOTE: For the EF6 assembly to be usable as a provider in
+                //       the machine configuration file, it must be in the
+                //       global assembly cache.
+                //
+                return IsEf6AssemblyGlobal();
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            /* REQUIRED */
+            public AssemblyName GetCoreAssemblyName() /* throw */
             {
                 if (coreAssemblyName == null)
                 {
@@ -3463,7 +3693,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public AssemblyName GetLinqAssemblyName() /* OPTIONAL */
+            /* OPTIONAL */
+            public AssemblyName GetLinqAssemblyName() /* throw */
             {
                 if (IsLinqSupported() && (linqAssemblyName == null))
                 {
@@ -3476,7 +3707,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public AssemblyName GetEf6AssemblyName() /* OPTIONAL */
+            /* OPTIONAL */
+            public AssemblyName GetEf6AssemblyName() /* throw */
             {
                 if (IsEf6Supported() && (ef6AssemblyName == null))
                 {
@@ -3489,7 +3721,8 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
-            public AssemblyName GetDesignerAssemblyName() /* REQUIRED */
+            /* REQUIRED */
+            public AssemblyName GetDesignerAssemblyName() /* throw */
             {
                 if (designerAssemblyName == null)
                 {
@@ -3502,31 +3735,32 @@ namespace System.Data.SQLite
 
             ///////////////////////////////////////////////////////////////////
 
+            /* REQUIRED */
+            public AssemblyName GetProviderAssemblyName() /* throw */
+            {
+                return UseEf6Provider() ?
+                    GetEf6AssemblyName() : GetCoreAssemblyName();
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
             public string GetConfigInvariantName()
             {
-                return InvariantName;
+                return GetInvariantName();
             }
 
             ///////////////////////////////////////////////////////////////////
 
             public string GetProviderInvariantName()
             {
-                return IsEf6Supported() ? Ef6InvariantName : InvariantName;
+                return GetInvariantName();
             }
 
             ///////////////////////////////////////////////////////////////////
 
             public string GetFactoryTypeName()
             {
-                return IsEf6Supported() ? Ef6FactoryTypeName : FactoryTypeName;
-            }
-
-            ///////////////////////////////////////////////////////////////////
-
-            public AssemblyName GetProviderAssemblyName()
-            {
-                return IsEf6Supported() ?
-                    GetEf6AssemblyName() : GetCoreAssemblyName(); /* throw */
+                return UseEf6Provider() ? Ef6FactoryTypeName : FactoryTypeName;
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -3587,6 +3821,10 @@ namespace System.Data.SQLite
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "InstallFlags", ForDisplay(installFlags)),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "ProviderFlags", ForDisplay(providerFlags)),
                         traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
@@ -3711,6 +3949,18 @@ namespace System.Data.SQLite
                     ///////////////////////////////////////////////////////////
 
                     traceCallback(String.Format(NameAndValueFormat,
+                        "IsSystemEf6AssemblyAvailable", ForDisplay(
+                        IsSystemEf6AssemblyAvailable(false))),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "IsSystemEf6AssemblyGlobal", ForDisplay(
+                        IsSystemEf6AssemblyGlobal())),
+                        traceCategory);
+
+                    ///////////////////////////////////////////////////////////
+
+                    traceCallback(String.Format(NameAndValueFormat,
                         "IsLinqSupported", ForDisplay(IsLinqSupported())),
                         traceCategory);
 
@@ -3718,25 +3968,80 @@ namespace System.Data.SQLite
                         "IsEf6Supported", ForDisplay(IsEf6Supported())),
                         traceCategory);
 
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "IsEf6AssemblyGlobal", ForDisplay(
+                        IsEf6AssemblyGlobal())),
+                        traceCategory);
+
+                    traceCallback(String.Format(NameAndValueFormat,
+                        "UseEf6Provider", ForDisplay(UseEf6Provider())),
+                        traceCategory);
+
+                    ///////////////////////////////////////////////////////////
+
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetCoreAssemblyName", ForDisplay(
+                            GetCoreAssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetCoreAssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
+
+                    ///////////////////////////////////////////////////////////
+
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetLinqAssemblyName", ForDisplay(
+                            GetLinqAssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetLinqAssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
+
+                    ///////////////////////////////////////////////////////////
+
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetEf6AssemblyName", ForDisplay(
+                            GetEf6AssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetEf6AssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
+
+                    ///////////////////////////////////////////////////////////
+
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetDesignerAssemblyName", ForDisplay(
+                            GetDesignerAssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetDesignerAssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
+
                     ///////////////////////////////////////////////////////////
 
                     traceCallback(String.Format(NameAndValueFormat,
-                        "GetCoreAssemblyName", ForDisplay(
-                        GetCoreAssemblyName())), traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetLinqAssemblyName", ForDisplay(
-                        GetLinqAssemblyName())), traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetEf6AssemblyName", ForDisplay(
-                        GetEf6AssemblyName())), traceCategory);
-
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetDesignerAssemblyName", ForDisplay(
-                        GetDesignerAssemblyName())), traceCategory);
-
-                    ///////////////////////////////////////////////////////////
+                        "GetInvariantName", ForDisplay(GetInvariantName())),
+                        traceCategory);
 
                     traceCallback(String.Format(NameAndValueFormat,
                         "GetConfigInvariantName", ForDisplay(
@@ -3750,9 +4055,20 @@ namespace System.Data.SQLite
                         "GetFactoryTypeName", ForDisplay(
                         GetFactoryTypeName())), traceCategory);
 
-                    traceCallback(String.Format(NameAndValueFormat,
-                        "GetProviderAssemblyName", ForDisplay(
-                        GetProviderAssemblyName())), traceCategory);
+                    ///////////////////////////////////////////////////////////
+
+                    try
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetProviderAssemblyName", ForDisplay(
+                            GetProviderAssemblyName())), traceCategory);
+                    }
+                    catch (Exception e)
+                    {
+                        traceCallback(String.Format(NameAndValueFormat,
+                            "GetProviderAssemblyName", ForDisplay(e)),
+                            traceCategory);
+                    }
                 }
             }
             #endregion
@@ -3873,6 +4189,15 @@ namespace System.Data.SQLite
             {
                 get { return installFlags; }
                 set { installFlags = value; }
+            }
+
+            ///////////////////////////////////////////////////////////////////
+
+            private ProviderFlags providerFlags;
+            public ProviderFlags ProviderFlags
+            {
+                get { return providerFlags; }
+                set { providerFlags = value; }
             }
 
             ///////////////////////////////////////////////////////////////////
@@ -4493,9 +4818,15 @@ namespace System.Data.SQLite
                 if (result.Length == 0)
                     return "<empty>";
 
-                result = String.Format(
-                    type.IsSubclassOf(typeof(ValueType)) ? "{0}" : "\"{0}\"",
-                    result);
+                if (type.IsSubclassOf(typeof(Exception)))
+                {
+                    result = String.Format(
+                        "{0}{1}{0}", Environment.NewLine, result);
+                }
+                else if (!type.IsSubclassOf(typeof(ValueType)))
+                {
+                    result = String.Format("\"{0}\"", result);
+                }
             }
 
             return result;
@@ -6198,7 +6529,6 @@ namespace System.Data.SQLite
 
         #region Visual Studio Package Handling
         private static void InitializeVsPackage(
-            string configInvariantName,
             string providerInvariantName,
             string factoryTypeName,
             AssemblyName providerAssemblyName,
@@ -6211,7 +6541,6 @@ namespace System.Data.SQLite
             {
                 package = new Package();
 
-                package.ConfigInvariantName = configInvariantName;
                 package.ProviderInvariantName = providerInvariantName;
                 package.FactoryTypeName = factoryTypeName;
                 package.ProviderAssemblyName = providerAssemblyName;
@@ -6759,7 +7088,7 @@ namespace System.Data.SQLite
 
         ///////////////////////////////////////////////////////////////////////
 
-        #region Application Entry Point
+        #region Installer Entry Point
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static int Main(
             string[] args
@@ -6802,17 +7131,26 @@ namespace System.Data.SQLite
 
                 ///////////////////////////////////////////////////////////////
 
+                //
+                // NOTE: Setup the "mock" registry per the "what-if" mode.
+                //       Since all registry access performed by this installer
+                //       uses this "mock" registry, it is impossible for any
+                //       actual system changes to occur unless "what-if" mode
+                //       is disabled.  Furthermore, protections are in place
+                //       to prevent direct access to the wrapped registry keys
+                //       when "safe" mode is enabled.
+                //
                 using (MockRegistry registry = new MockRegistry(
                         configuration.WhatIf, false, false))
                 {
-                    #region Core Assembly Name Check
+                    #region Assembly Name Checks
                     //
                     // NOTE: Query all the assembly names first, before making
-                    //       any changes to the system, because this will throw
-                    //       an exception if any of the file names do not point
-                    //       to a valid managed assembly.  The values of these
-                    //       local variables are never used after this point;
-                    //       however, do not remove them.
+                    //       any changes to the system, because these calls
+                    //       will throw exceptions if any of the file names do
+                    //       not point to a valid managed assembly.  The values
+                    //       of these local variables are never used after this
+                    //       point; however, do not remove them.
                     //
                     AssemblyName coreAssemblyName =
                         configuration.GetCoreAssemblyName(); /* NOT USED */
@@ -6862,13 +7200,12 @@ namespace System.Data.SQLite
                     ///////////////////////////////////////////////////////////
 
                     InitializeVsPackage(
-                        configuration.GetConfigInvariantName(),
                         configuration.GetProviderInvariantName(),
                         configuration.GetFactoryTypeName(),
                         configuration.GetProviderAssemblyName(),
                         configuration.GetDesignerAssemblyName(),
                         configuration.HasFlags(
-                            InstallFlags.GlobalAssemblyCache, true) &&
+                            InstallFlags.AllGlobalAssemblyCache, true) &&
                         configuration.HasFlags(
                             InstallFlags.VsPackageGlobalAssemblyCache, true),
                         ref package);
@@ -6898,7 +7235,7 @@ namespace System.Data.SQLite
 
                     #region .NET GAC Install/Remove
                     if (configuration.HasFlags(
-                            InstallFlags.GlobalAssemblyCache, true))
+                            InstallFlags.AllGlobalAssemblyCache, false))
                     {
                         Publish publish = null;
 
@@ -6907,21 +7244,37 @@ namespace System.Data.SQLite
 
                         if (configuration.Install)
                         {
-                            if (!configuration.WhatIf)
-                                /* throw */
-                                publish.GacInstall(configuration.CoreFileName);
-
-                            TraceOps.DebugAndTrace(TracePriority.Highest,
-                                debugCallback, traceCallback, String.Format(
-                                "GacInstall: assemblyPath = {0}",
-                                ForDisplay(configuration.CoreFileName)),
-                                traceCategory);
-
-                            if (configuration.IsLinqSupported())
+                            if (configuration.HasFlags(
+                                    InstallFlags.CoreGlobalAssemblyCache,
+                                    true))
                             {
                                 if (!configuration.WhatIf)
+                                {
                                     /* throw */
-                                    publish.GacInstall(configuration.LinqFileName);
+                                    publish.GacInstall(
+                                        configuration.CoreFileName);
+                                }
+
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacInstall: assemblyPath = {0}",
+                                    ForDisplay(configuration.CoreFileName)),
+                                    traceCategory);
+                            }
+
+                            ///////////////////////////////////////////////////
+
+                            if (configuration.HasFlags(
+                                    InstallFlags.LinqGlobalAssemblyCache,
+                                    true) &&
+                                configuration.IsLinqSupported())
+                            {
+                                if (!configuration.WhatIf)
+                                {
+                                    /* throw */
+                                    publish.GacInstall(
+                                        configuration.LinqFileName);
+                                }
 
                                 TraceOps.DebugAndTrace(TracePriority.Highest,
                                     debugCallback, traceCallback, String.Format(
@@ -6930,11 +7283,19 @@ namespace System.Data.SQLite
                                     traceCategory);
                             }
 
-                            if (configuration.IsEf6Supported())
+                            ///////////////////////////////////////////////////
+
+                            if (configuration.HasFlags(
+                                    InstallFlags.Ef6GlobalAssemblyCache,
+                                    true) &&
+                                configuration.IsEf6Supported())
                             {
                                 if (!configuration.WhatIf)
+                                {
                                     /* throw */
-                                    publish.GacInstall(configuration.Ef6FileName);
+                                    publish.GacInstall(
+                                        configuration.Ef6FileName);
+                                }
 
                                 TraceOps.DebugAndTrace(TracePriority.Highest,
                                     debugCallback, traceCallback, String.Format(
@@ -6943,12 +7304,18 @@ namespace System.Data.SQLite
                                     traceCategory);
                             }
 
+                            ///////////////////////////////////////////////////
+
                             if (configuration.HasFlags(
-                                    InstallFlags.VsPackageGlobalAssemblyCache, true))
+                                    InstallFlags.VsPackageGlobalAssemblyCache,
+                                    true))
                             {
                                 if (!configuration.WhatIf)
+                                {
                                     /* throw */
-                                    publish.GacInstall(configuration.DesignerFileName);
+                                    publish.GacInstall(
+                                        configuration.DesignerFileName);
+                                }
 
                                 TraceOps.DebugAndTrace(TracePriority.Highest,
                                     debugCallback, traceCallback, String.Format(
@@ -6960,11 +7327,15 @@ namespace System.Data.SQLite
                         else
                         {
                             if (configuration.HasFlags(
-                                    InstallFlags.VsPackageGlobalAssemblyCache, true))
+                                    InstallFlags.VsPackageGlobalAssemblyCache,
+                                    true))
                             {
                                 if (!configuration.WhatIf)
+                                {
                                     /* throw */
-                                    publish.GacRemove(configuration.DesignerFileName);
+                                    publish.GacRemove(
+                                        configuration.DesignerFileName);
+                                }
 
                                 TraceOps.DebugAndTrace(TracePriority.Highest,
                                     debugCallback, traceCallback, String.Format(
@@ -6973,11 +7344,19 @@ namespace System.Data.SQLite
                                     traceCategory);
                             }
 
-                            if (configuration.IsEf6Supported())
+                            ///////////////////////////////////////////////////
+
+                            if (configuration.HasFlags(
+                                    InstallFlags.Ef6GlobalAssemblyCache,
+                                    true) &&
+                                configuration.IsEf6Supported())
                             {
                                 if (!configuration.WhatIf)
+                                {
                                     /* throw */
-                                    publish.GacRemove(configuration.Ef6FileName);
+                                    publish.GacRemove(
+                                        configuration.Ef6FileName);
+                                }
 
                                 TraceOps.DebugAndTrace(TracePriority.Highest,
                                     debugCallback, traceCallback, String.Format(
@@ -6986,11 +7365,19 @@ namespace System.Data.SQLite
                                     traceCategory);
                             }
 
-                            if (configuration.IsLinqSupported())
+                            ///////////////////////////////////////////////////
+
+                            if (configuration.HasFlags(
+                                    InstallFlags.LinqGlobalAssemblyCache,
+                                    true) &&
+                                configuration.IsLinqSupported())
                             {
                                 if (!configuration.WhatIf)
+                                {
                                     /* throw */
-                                    publish.GacRemove(configuration.LinqFileName);
+                                    publish.GacRemove(
+                                        configuration.LinqFileName);
+                                }
 
                                 TraceOps.DebugAndTrace(TracePriority.Highest,
                                     debugCallback, traceCallback, String.Format(
@@ -6999,15 +7386,25 @@ namespace System.Data.SQLite
                                     traceCategory);
                             }
 
-                            if (!configuration.WhatIf)
-                                /* throw */
-                                publish.GacRemove(configuration.CoreFileName);
+                            ///////////////////////////////////////////////////
 
-                            TraceOps.DebugAndTrace(TracePriority.Highest,
-                                debugCallback, traceCallback, String.Format(
-                                "GacRemove: assemblyPath = {0}",
-                                ForDisplay(configuration.CoreFileName)),
-                                traceCategory);
+                            if (configuration.HasFlags(
+                                    InstallFlags.CoreGlobalAssemblyCache,
+                                    true))
+                            {
+                                if (!configuration.WhatIf)
+                                {
+                                    /* throw */
+                                    publish.GacRemove(
+                                        configuration.CoreFileName);
+                                }
+
+                                TraceOps.DebugAndTrace(TracePriority.Highest,
+                                    debugCallback, traceCallback, String.Format(
+                                    "GacRemove: assemblyPath = {0}",
+                                    ForDisplay(configuration.CoreFileName)),
+                                    traceCategory);
+                            }
                         }
                     }
                     #endregion
@@ -7052,8 +7449,9 @@ namespace System.Data.SQLite
                         if (!ForEachFrameworkConfig(registry,
                                 frameworkList, ProcessDbProviderFactory,
                                 configuration.ConfigVersion,
-                                package.ConfigInvariantName, ProviderName,
-                                Description, package.FactoryTypeName,
+                                configuration.GetConfigInvariantName(),
+                                ProviderName, Description,
+                                package.FactoryTypeName,
                                 package.ProviderAssemblyName, directoryData,
                                 configuration.PerUser,
                                 NetFxIs32BitOnly || configuration.Wow64,
@@ -7197,10 +7595,12 @@ namespace System.Data.SQLite
                     TraceOps.DebugAndTrace(TracePriority.MediumHigh,
                         debugCallback, traceCallback, String.Format(
                         "subKeysCreated = {0}, subKeysDeleted = {1}, " +
-                        "keyValuesSet = {2}, keyValuesDeleted = {3}",
+                        "keyValuesRead = {2}, keyValuesWritten = {3}, " +
+                        "keyValuesDeleted = {4}",
                         ForDisplay(RegistryHelper.SubKeysCreated),
                         ForDisplay(RegistryHelper.SubKeysDeleted),
-                        ForDisplay(RegistryHelper.KeyValuesSet),
+                        ForDisplay(RegistryHelper.KeyValuesRead),
+                        ForDisplay(RegistryHelper.KeyValuesWritten),
                         ForDisplay(RegistryHelper.KeyValuesDeleted)),
                         traceCategory);
 

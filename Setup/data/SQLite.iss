@@ -213,6 +213,10 @@ Components: Application\EF6; Source: ..\..\Externals\EntityFramework\lib\net40\E
 Components: Application\EF6; Source: ..\..\Externals\EntityFramework\lib\net45\EntityFramework.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif
 
+#if Pos("NativeOnly", AppConfiguration) == 0
+Components: Application\EF6; Tasks: gac; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.dll; DestDir: {app}\GAC; StrongAssemblyName: "System.Data.SQLite.EF6, Version={#AppVersion}, Culture=neutral, PublicKeyToken={#AppPublicKey}, ProcessorArchitecture=MSIL"; Flags: restartreplace uninsrestartdelete uninsnosharedfileprompt sharedfile gacinstall
+#endif
+
 Components: Application\EF6; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.dll; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 Components: Application\EF6 and Application\Symbols; Source: ..\..\bin\{#Year}\{#BaseConfiguration}\bin\System.Data.SQLite.EF6.pdb; DestDir: {app}\bin; Flags: restartreplace uninsrestartdelete
 #endif

@@ -23,7 +23,7 @@ namespace SQLite.Designer
     }
 
     public SQLiteConnectionProperties(string connectionString)
-      : base("System.Data.SQLite", connectionString)
+      : base(SQLiteOptions.GetProviderName(), connectionString)
     {
     }
 
@@ -42,7 +42,7 @@ namespace SQLite.Designer
     public override bool Contains(string propertyName)
     {
       if (String.Compare(propertyName, "Database", StringComparison.OrdinalIgnoreCase) == 0)
-        return (base.Contains("data source") || base.Contains("uri"));
+        return (base.Contains("data source") || base.Contains("uri") || base.Contains("fulluri"));
 
       return base.Contains(propertyName);
     }
@@ -68,6 +68,8 @@ namespace SQLite.Designer
         return (string)this["data source"];
       else if (this["uri"] is string)
         return MapUriPath((string)this["uri"]);
+      else if (this["fulluri"] is string)
+        return (string)this["fulluri"];
       return String.Empty;
     }
 
@@ -83,6 +85,11 @@ namespace SQLite.Designer
         else if (Contains("uri") == true)
         {
           if (this["uri"] is string && MapUriPath((string)this["uri"]).Length > 0)
+            return true;
+        }
+        else if (Contains("fulluri") == true)
+        {
+          if (this["fulluri"] is string && ((string)this["fulluri"]).Length > 0)
             return true;
         }
 
