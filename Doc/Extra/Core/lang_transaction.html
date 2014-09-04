@@ -129,9 +129,19 @@ a:visited { color: #734559 }
 <div class=startsearch></div>
   
 <h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>BEGIN TRANSACTION</h2><p><b><a href="syntaxdiagrams.html#begin-stmt">begin-stmt:</a></b>
-<button id='x801' onclick='hideorshow("x801","x802")'>hide</button></p>
- <blockquote id='x802'>
+<button id='x809' onclick='hideorshow("x809","x810")'>hide</button></p>
+ <blockquote id='x810'>
  <img alt="syntax diagram begin-stmt" src="images/syntax/begin-stmt.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#commit-stmt">commit-stmt:</a></b>
+<button id='x811' onclick='hideorshow("x811","x812")'>hide</button></p>
+ <blockquote id='x812'>
+ <img alt="syntax diagram commit-stmt" src="images/syntax/commit-stmt.gif" />
+</blockquote>
+<p><b><a href="syntaxdiagrams.html#rollback-stmt">rollback-stmt:</a></b>
+<button id='x813' onclick='hideorshow("x813","x814")'>hide</button></p>
+ <blockquote id='x814'>
+ <img alt="syntax diagram rollback-stmt" src="images/syntax/rollback-stmt.gif" />
 </blockquote>
 
 
@@ -212,11 +222,11 @@ finishes when it is <a href="c3ref/blob_close.html">closed</a>.
 The explicit COMMIT command runs immediately, even if there are
 pending <a href="lang_select.html">SELECT</a> statements.  However, if there are pending
 write operations, the COMMIT command
-will fail with an error code <a href="c3ref/c_abort.html">SQLITE_BUSY</a>.
+will fail with an error code <a href="rescode.html#busy">SQLITE_BUSY</a>.
 </p>
 
 <p>
-An attempt to execute COMMIT might also result in an <a href="c3ref/c_abort.html">SQLITE_BUSY</a> return code
+An attempt to execute COMMIT might also result in an <a href="rescode.html#busy">SQLITE_BUSY</a> return code
 if an another thread or process has a <a href="lockingv3.html#shared_lock">shared lock</a> on the database
 that prevented the database from being updated.  When COMMIT fails in this
 way, the transaction remains active and the COMMIT can be retried later
@@ -224,12 +234,11 @@ after the reader has had a chance to clear.
 </p>
 
 <p>
-The ROLLBACK will fail with an error code <a href="c3ref/c_abort.html">SQLITE_BUSY</a> if there
-are any pending queries.  Both read-only and read/write queries will
-cause a ROLLBACK to fail.  A ROLLBACK must fail if there are pending
-read operations (unlike COMMIT which can succeed) because bad things
-will happen if the in-memory image of the database is changed out from under
-an active query.
+In older versions of SQLite the ROLLBACK will fail with an error code 
+<a href="rescode.html#busy">SQLITE_BUSY</a> if there are any pending queries.  In more recent
+versions of SQLite (since version 3.7.11 circa 2012-03-20) the ROLLBACK
+will proceed and pending statements will be aborted with an
+<a href="rescode.html#abort">SQLITE_ABORT</a> or <a href="rescode.html#abort_rollback">SQLITE_ABORT_ROLLBACK</a> error.
 </p>
 
 <p>
@@ -244,11 +253,11 @@ transaction may or may not be rolled back automatically.  The
 errors that can cause an automatic rollback include:</p>
 
 <ul>
-<li> <a href="c3ref/c_abort.html">SQLITE_FULL</a>: database or disk full
-<li> <a href="c3ref/c_abort.html">SQLITE_IOERR</a>: disk I/O error
-<li> <a href="c3ref/c_abort.html">SQLITE_BUSY</a>: database in use by another process
-<li> <a href="c3ref/c_abort.html">SQLITE_NOMEM</a>: out or memory
-<li> <a href="c3ref/c_abort.html">SQLITE_INTERRUPT</a>: processing <a href="c3ref/interrupt.html">interrupted</a>
+<li> <a href="rescode.html#full">SQLITE_FULL</a>: database or disk full
+<li> <a href="rescode.html#ioerr">SQLITE_IOERR</a>: disk I/O error
+<li> <a href="rescode.html#busy">SQLITE_BUSY</a>: database in use by another process
+<li> <a href="rescode.html#nomem">SQLITE_NOMEM</a>: out or memory
+<li> <a href="rescode.html#interrupt">SQLITE_INTERRUPT</a>: processing <a href="c3ref/interrupt.html">interrupted</a>
      by application request
 </ul>
 

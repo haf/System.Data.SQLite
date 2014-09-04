@@ -236,6 +236,17 @@ likelihood(<i>X</i>,<i>Y</i>)</td><td valign="top">
   to the query planner that the argument X is a boolean that is
   true with a probability of approximately Y.
   The <a href="lang_corefunc.html#unlikely">unlikely(X)</a> function is short-hand for likelihood(X,0.0625).
+  The <a href="lang_corefunc.html#likely">likely(X)</a> function is short-hand for likelihood(X,0.9375).
+</td></tr><tr><td valign="top" align="right" width="120"><a name="likely"></a>
+likely(<i>X</i>)</td><td valign="top">
+  The likely(X) function returns the argument X unchanged.
+  The likely(X) function is a no-op that the code generator
+  optimizes away so that it consumes no CPU cycles at
+  run-time (that is, during calls to <a href="c3ref/step.html">sqlite3_step()</a>).
+  The purpose of the likely(X) function is to provide a hint
+  to the query planner that the argument X is a boolean value
+  that is usually true. The likely(X) function is equivalent
+  to <a href="lang_corefunc.html#likelihood">likelihood</a>(X,0.9375). See also: <a href="lang_corefunc.html#unlikely">unlikely(X)</a>.
 </td></tr><tr><td valign="top" align="right" width="120"><a name="load_extension"></a>
 load_extension(<i>X</i>)<br />load_extension(<i>X</i>,<i>Y</i>)</td><td valign="top">
   The load_extension(X,Y) function loads <a href="loadext.html">SQLite extensions</a> out of the shared
@@ -277,7 +288,7 @@ max(<i>X</i>,<i>Y</i>,...)</td><td valign="top">
   define a collating function, then the BINARY collating function is used.
   Note that <b>max()</b> is a simple function when
   it has 2 or more arguments but operates as an
-  <a href="lang_aggfunc.html#minggunc">aggregate function</a> if given only a single argument.
+  <a href="lang_aggfunc.html#maxggunc">aggregate function</a> if given only a single argument.
 </td></tr><tr><td valign="top" align="right" width="120"><a name="minoreunc"></a>
 min(<i>X</i>,<i>Y</i>,...)</td><td valign="top">
   The multi-argument min() function returns the argument with the
@@ -288,7 +299,7 @@ min(<i>X</i>,<i>Y</i>,...)</td><td valign="top">
   define a collating function, then the BINARY collating function is used.
   Note that <b>min()</b> is a simple function when
   it has 2 or more arguments but operates as an 
-  <a href="lang_aggfunc.html#maxggunc">aggregate function</a> if given
+  <a href="lang_aggfunc.html#minggunc">aggregate function</a> if given
   only a single argument.
 </td></tr><tr><td valign="top" align="right" width="120"><a name="nullif"></a>
 nullif(<i>X</i>,<i>Y</i>)</td><td valign="top">
