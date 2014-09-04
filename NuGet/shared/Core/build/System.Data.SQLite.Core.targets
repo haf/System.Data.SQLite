@@ -63,7 +63,7 @@
             Files="@(SQLiteInteropX86Files)" />
 
     <Delete Condition="'@(SQLiteInteropX64Files)' != ''"
-            Files="@(SQLiteInteropX86Files)" />
+            Files="@(SQLiteInteropX64Files)" />
   </Target>
 
   <!--

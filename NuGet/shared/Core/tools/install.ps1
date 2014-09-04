@@ -11,7 +11,6 @@ param($installPath, $toolsPath, $package, $project)
 
 $platformNames = "x86", "x64"
 $fileName = "SQLite.Interop.dll"
-$copyToOutputDirectoryPropertyName = "CopyToOutputDirectory"
 
 $netFxPath = Split-Path $toolsPath -Leaf
 $buildPath = Join-Path $toolsPath ".." -Resolve
@@ -65,5 +64,4 @@ foreach($platformName in $platformNames) {
   $itemSourceFileName = Join-Path $itemSourceDirectory $fileName
 
   $item = $folder.ProjectItems.AddFromFile($itemSourceFileName)
-  $item.Properties.Item($copyToOutputDirectoryPropertyName).Value = 1
 }
