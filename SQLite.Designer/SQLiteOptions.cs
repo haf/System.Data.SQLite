@@ -139,7 +139,11 @@ namespace SQLite.Designer
         /// </returns>
         public static string GetProviderName()
         {
+#if NET_40 || NET_45 || NET_451
+            return GetProviderName(Ef6ProviderName);
+#else
             return GetProviderName(LegacyProviderName);
+#endif
         }
 
         ///////////////////////////////////////////////////////////////////////
