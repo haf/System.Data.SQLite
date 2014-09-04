@@ -25,7 +25,7 @@ foreach($platformName in $platformNames) {
 
   if ($folder -eq $null) {
     $projectPath = Split-Path $project.FullName
-    $folderPath = Join-Path $projectPath $platformName
+    $folderPath = Join-Path $projectPath $platformName -Resolve
 
     if (Test-Path $folderPath) {
       $folder = $project.ProjectItems.AddFromDirectory($folderPath)
@@ -60,8 +60,8 @@ foreach($platformName in $platformNames) {
     continue
   }
 
-  $itemSourceDirectory = Join-Path $buildPath $platformName
-  $itemSourceFileName = Join-Path $itemSourceDirectory $fileName
+  $itemSourceDirectory = Join-Path $buildPath $platformName -Resolve
+  $itemSourceFileName = Join-Path $itemSourceDirectory $fileName -Resolve
 
   $item = $folder.ProjectItems.AddFromFile($itemSourceFileName)
 }
