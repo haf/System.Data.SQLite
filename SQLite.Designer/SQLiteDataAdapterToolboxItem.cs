@@ -63,55 +63,58 @@ namespace SQLite.Designer
     /// <returns>The components created by this toolbox item</returns>
     protected override IComponent[] CreateComponentsCore(IDesignerHost host)
     {
-      DbProviderFactory fact = DbProviderFactories.GetFactory(SQLiteOptions.GetProviderName());
+        List<IComponent> list = new List<IComponent>();
+        DbProviderFactory fact;
 
-      DbDataAdapter dataAdapter = fact.CreateDataAdapter();
-      IContainer container = host.Container;
-      
-      using (DbCommand adapterCommand = fact.CreateCommand())
-      {
-        ICloneable adapter = (ICloneable)adapterCommand;
-
-        adapterCommand.DesignTimeVisible = false;
-        dataAdapter.SelectCommand = (DbCommand)adapter.Clone();
-        container.Add(dataAdapter.SelectCommand, GenerateName(container, "SelectCommand"));
-
-        dataAdapter.InsertCommand = (DbCommand)adapter.Clone();
-        container.Add(dataAdapter.InsertCommand, GenerateName(container, "InsertCommand"));
-
-        dataAdapter.UpdateCommand = (DbCommand)adapter.Clone();
-        container.Add(dataAdapter.UpdateCommand, GenerateName(container, "UpdateCommand"));
-
-        dataAdapter.DeleteCommand = (DbCommand)adapter.Clone();
-        container.Add(dataAdapter.DeleteCommand, GenerateName(container, "DeleteCommand"));
-      }
-
-      ITypeResolutionService typeResService = (ITypeResolutionService)host.GetService(typeof(ITypeResolutionService));
-      if (typeResService != null)
-      {
-        typeResService.ReferenceAssembly(dataAdapter.GetType().Assembly.GetName());
-      }
-
-      container.Add(dataAdapter);
-
-      List<IComponent> list = new List<IComponent>();
-      list.Add(dataAdapter);
-
-      // Show the connection wizard if we have a type for it
-      if (_wizard != null)
-      {
-        using (Form wizard = (Form)Activator.CreateInstance(_wizard, new object[] { host, dataAdapter }))
+        if (SQLiteOptions.GetProviderFactory(SQLiteOptions.GetProviderName(), true, out fact))
         {
-          wizard.ShowDialog();
+            DbDataAdapter dataAdapter = fact.CreateDataAdapter();
+            IContainer container = host.Container;
+
+            using (DbCommand adapterCommand = fact.CreateCommand())
+            {
+                ICloneable adapter = (ICloneable)adapterCommand;
+
+                adapterCommand.DesignTimeVisible = false;
+                dataAdapter.SelectCommand = (DbCommand)adapter.Clone();
+                container.Add(dataAdapter.SelectCommand, GenerateName(container, "SelectCommand"));
+
+                dataAdapter.InsertCommand = (DbCommand)adapter.Clone();
+                container.Add(dataAdapter.InsertCommand, GenerateName(container, "InsertCommand"));
+
+                dataAdapter.UpdateCommand = (DbCommand)adapter.Clone();
+                container.Add(dataAdapter.UpdateCommand, GenerateName(container, "UpdateCommand"));
+
+                dataAdapter.DeleteCommand = (DbCommand)adapter.Clone();
+                container.Add(dataAdapter.DeleteCommand, GenerateName(container, "DeleteCommand"));
+            }
+
+            ITypeResolutionService typeResService = (ITypeResolutionService)host.GetService(typeof(ITypeResolutionService));
+            if (typeResService != null)
+            {
+                typeResService.ReferenceAssembly(dataAdapter.GetType().Assembly.GetName());
+            }
+
+            container.Add(dataAdapter);
+
+            list.Add(dataAdapter);
+
+            // Show the connection wizard if we have a type for it
+            if (_wizard != null)
+            {
+                using (Form wizard = (Form)Activator.CreateInstance(_wizard, new object[] { host, dataAdapter }))
+                {
+                    wizard.ShowDialog();
+                }
+            }
+
+            if (dataAdapter.SelectCommand != null) list.Add(dataAdapter.SelectCommand);
+            if (dataAdapter.InsertCommand != null) list.Add(dataAdapter.InsertCommand);
+            if (dataAdapter.DeleteCommand != null) list.Add(dataAdapter.DeleteCommand);
+            if (dataAdapter.UpdateCommand != null) list.Add(dataAdapter.UpdateCommand);
         }
-      }
 
-      if (dataAdapter.SelectCommand != null) list.Add(dataAdapter.SelectCommand);
-      if (dataAdapter.InsertCommand != null) list.Add(dataAdapter.InsertCommand);
-      if (dataAdapter.DeleteCommand != null) list.Add(dataAdapter.DeleteCommand);
-      if (dataAdapter.UpdateCommand != null) list.Add(dataAdapter.UpdateCommand);
-
-      return list.ToArray();      
+        return list.ToArray();
     }
 
     /// <summary>
