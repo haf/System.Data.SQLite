@@ -39,16 +39,8 @@
     <file src="..\bin\2013\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net451\x86" />
     <file src="..\bin\2013\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net451\x64" />
     <file src="shared\Core\build\System.Data.SQLite.Core.targets" target="build\net20\System.Data.SQLite.Core.targets" />
-    <file src="shared\Core\tools\install.ps1" target="tools\net20\install.ps1" />
-    <file src="shared\Core\tools\uninstall.ps1" target="tools\net20\uninstall.ps1" />
     <file src="shared\Core\build\System.Data.SQLite.Core.targets" target="build\net40\System.Data.SQLite.Core.targets" />
-    <file src="shared\Core\tools\install.ps1" target="tools\net40\install.ps1" />
-    <file src="shared\Core\tools\uninstall.ps1" target="tools\net40\uninstall.ps1" />
     <file src="shared\Core\build\System.Data.SQLite.Core.targets" target="build\net45\System.Data.SQLite.Core.targets" />
-    <file src="shared\Core\tools\install.ps1" target="tools\net45\install.ps1" />
-    <file src="shared\Core\tools\uninstall.ps1" target="tools\net45\uninstall.ps1" />
     <file src="shared\Core\build\System.Data.SQLite.Core.targets" target="build\net451\System.Data.SQLite.Core.targets" />
-    <file src="shared\Core\tools\install.ps1" target="tools\net451\install.ps1" />
-    <file src="shared\Core\tools\uninstall.ps1" target="tools\net451\uninstall.ps1" />
   </files>
 </package>
