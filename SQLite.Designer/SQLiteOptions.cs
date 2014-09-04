@@ -47,7 +47,7 @@ namespace SQLite.Designer
         /// design-time components.  It is also the default value for the
         /// associated option key.
         /// </summary>
-        private static readonly string DefaultProviderName = "System.Data.SQLite";
+        private static readonly string LegacyProviderName = "System.Data.SQLite";
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -67,7 +67,7 @@ namespace SQLite.Designer
         #region Private Static Data
         /// <summary>
         /// This is used to synchronize access to the static dictionary of
-        /// options (just below).
+        /// options and <see cref="DbProviderFactory" /> objects.
         /// </summary>
         private static readonly object syncRoot = new object();
 
@@ -78,6 +78,13 @@ namespace SQLite.Designer
         /// be reset.
         /// </summary>
         private static Dictionary<string, string> options;
+
+        /// <summary>
+        /// This dictionary contains the <see cref="DbProviderFactory" />
+        /// objects cached by this class.
+        /// </summary>
+        private static Dictionary<string, DbProviderFactory>
+            dbProviderFactories;
         #endregion
 
         ///////////////////////////////////////////////////////////////////////
@@ -109,8 +116,10 @@ namespace SQLite.Designer
 
                 if (IsValidValue(key, value))
                     options[key] = value;
+#if !NET_40 && !NET_45 && !NET_451
                 else
-                    options[key] = DefaultProviderName;
+                    options[key] = LegacyProviderName;
+#endif
             }
         }
         #endregion
@@ -130,7 +139,7 @@ namespace SQLite.Designer
         /// </returns>
         public static string GetProviderName()
         {
-            return GetProviderName(DefaultProviderName);
+            return GetProviderName(LegacyProviderName);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -141,7 +150,7 @@ namespace SQLite.Designer
         /// </summary>
         /// <param name="default">
         /// The value to return from this method if the name of the ADO.NET
-        /// provider is unavailable -OR- cannot be determined.
+        /// provider is unavailable or cannot be determined.
         /// </param>
         /// <returns>
         /// The configured ADO.NET provider name for System.Data.SQLite -OR-
@@ -230,40 +239,91 @@ namespace SQLite.Designer
 
         ///////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Determines if the specified ADO.NET provider name appears to be
+        /// usable.
+        /// </summary>
+        /// <param name="name">
+        /// The invariant name of the ADO.NET provider to create.  Using null
+        /// or an empty string will cause this method to return false.
+        /// </param>
+        /// <returns>
+        /// Non-zero if the <see cref="DbProviderFactory" /> was created or
+        /// queried successfully; otherwise, zero.
+        /// </returns>
         private static bool CheckProviderName(
             string name
             )
         {
-            DbProviderFactory dbProviderFactory = null;
+            DbProviderFactory dbProviderFactory; /* NOT USED */
 
-            try
+            return GetProviderFactory(name, true, out dbProviderFactory);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Gets the cached <see cref="DbProviderFactory" /> object associated
+        /// with the specified name, creating a new instance if necessary.
+        /// </summary>
+        /// <param name="name">
+        /// The invariant name of the ADO.NET provider to create.  Using null
+        /// or an empty string will cause this method to return false.
+        /// </param>
+        /// <param name="create">
+        /// Non-zero to create a new instance of the ADO.NET provider, if
+        /// necessary.
+        /// </param>
+        /// <param name="dbProviderFactory">
+        /// The newly created <see cref="DbProviderFactory" /> object or null
+        /// if it is unavailable or could not be created.
+        /// </param>
+        /// <returns>
+        /// Non-zero if the <see cref="DbProviderFactory" /> was created or
+        /// queried successfully; otherwise, zero.
+        /// </returns>
+        public static bool GetProviderFactory(
+            string name,
+            bool create,
+            out DbProviderFactory dbProviderFactory
+            )
+        {
+            lock (syncRoot)
             {
-                dbProviderFactory = DbProviderFactories.GetFactory(
-                    name); /* throw */
+                dbProviderFactory = null;
 
+                if (dbProviderFactories == null)
+                {
+                    dbProviderFactories =
+                        new Dictionary<string, DbProviderFactory>();
+                }
+
+                if (String.IsNullOrEmpty(name))
+                    return false;
+
+                if (dbProviderFactories.TryGetValue(
+                        name, out dbProviderFactory))
+                {
+                    return (dbProviderFactory != null);
+                }
+
+                if (!create)
+                    return false;
+
+                dbProviderFactory = null; /* NOTE: Pedantic. */
+
+                try
+                {
+                    dbProviderFactory = DbProviderFactories.GetFactory(name);
+                }
+                catch
+                {
+                    // do nothing.
+                }
+
+                dbProviderFactories.Add(name, dbProviderFactory);
                 return (dbProviderFactory != null);
             }
-            catch
-            {
-                // do nothing.
-            }
-            finally
-            {
-                if (dbProviderFactory != null)
-                {
-                    IDisposable disposable = dbProviderFactory as IDisposable;
-
-                    if (disposable != null)
-                    {
-                        disposable.Dispose();
-                        disposable = null;
-                    }
-
-                    dbProviderFactory = null;
-                }
-            }
-
-            return false;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -295,7 +355,7 @@ namespace SQLite.Designer
             names.Add(Ef6ProviderName);
 #endif
 
-            names.Add(DefaultProviderName);
+            names.Add(LegacyProviderName);
 
             foreach (string name in names)
             {
@@ -335,7 +395,7 @@ namespace SQLite.Designer
             if (String.Equals(
                     key, ProviderNameKey, StringComparison.Ordinal) &&
                 String.Equals(
-                    value, DefaultProviderName, StringComparison.Ordinal))
+                    value, LegacyProviderName, StringComparison.Ordinal))
             {
                 return true;
             }
@@ -367,7 +427,7 @@ namespace SQLite.Designer
             if (String.Equals(
                     key, ProviderNameKey, StringComparison.Ordinal) &&
                 (String.Equals(
-                    value, DefaultProviderName, StringComparison.Ordinal)
+                    value, LegacyProviderName, StringComparison.Ordinal)
 #if NET_40 || NET_45 || NET_451
                 || String.Equals(
                     value, Ef6ProviderName, StringComparison.Ordinal)
