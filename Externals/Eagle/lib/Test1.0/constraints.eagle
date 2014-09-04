@@ -248,8 +248,6 @@ namespace eval ::Eagle {
       # BUGFIX: We do not normally want to skip any Mono bugs in native Tcl.
       #
       if {![info exists ::no(runtimeVersion)]} then {
-        set constraints [list monoToDo monoBug monoCrash]
-
         #
         # NOTE: Add the necessary constraints for each version of Mono that
         #       we know about.
@@ -258,14 +256,19 @@ namespace eval ::Eagle {
           set constraintVersion [join $monoVersion ""]
 
           addConstraint [appendArgs monoToDo $constraintVersion]
+          addConstraint [appendArgs monoToDo $constraintVersion Only]
           addConstraint [appendArgs monoBug $constraintVersion]
+          addConstraint [appendArgs monoBug $constraintVersion Only]
           addConstraint [appendArgs monoCrash $constraintVersion]
+          addConstraint [appendArgs monoCrash $constraintVersion Only]
         }
 
         #
         # NOTE: Also add just the generic Mono constraints that do not have
         #       a trailing version.
         #
+        set constraints [list monoToDo monoBug monoCrash]
+
         foreach constraint $constraints {
           addConstraint $constraint
         }
@@ -771,8 +774,10 @@ namespace eval ::Eagle {
         #       version.
         #
         addConstraint tcl84
-        addConstraint tcl84OrHigher
         addConstraint tcl84Feature
+        addConstraint tcl84OrLower
+        addConstraint tcl84OrHigher
+        addConstraint tcl85OrLower
 
         if {[isEagle]} then {
           #
@@ -793,11 +798,12 @@ namespace eval ::Eagle {
         #       version.  Tcl 8.5 includes all the
         #       features from itself and Tcl 8.4.
         #
-        addConstraint tcl85
-        addConstraint tcl84OrHigher
-        addConstraint tcl85OrHigher
         addConstraint tcl84Feature
+        addConstraint tcl84OrHigher
+        addConstraint tcl85
         addConstraint tcl85Feature
+        addConstraint tcl85OrLower
+        addConstraint tcl85OrHigher
 
         if {[isEagle]} then {
           #
@@ -818,13 +824,14 @@ namespace eval ::Eagle {
         #       features from itself Tcl 8.4, and Tcl
         #       8.5.
         #
-        addConstraint tcl86
-        addConstraint tcl84OrHigher
-        addConstraint tcl85OrHigher
-        addConstraint tcl86OrHigher
         addConstraint tcl84Feature
+        addConstraint tcl84OrHigher
         addConstraint tcl85Feature
+        addConstraint tcl85OrHigher
+        addConstraint tcl86
         addConstraint tcl86Feature
+        addConstraint tcl86OrLower
+        addConstraint tcl86OrHigher
       }
 
       tputs $channel [appendArgs $::tcl_version \n]
@@ -852,7 +859,7 @@ namespace eval ::Eagle {
     }
   }
 
-  proc checkForNamespaces { channel } {
+  proc checkForNamespaces { channel quiet } {
     tputs $channel "---- checking for namespace support... "
 
     if {[isEagle]} then {
@@ -891,7 +898,7 @@ namespace eval ::Eagle {
           # NOTE: Check if namespace support was compiled into the core
           #       library (i.e. is this beta 30 or later).
           #
-          if {$available} then {
+          if {!$quiet && $available} then {
             #
             # NOTE: The tests seem to be running with namespace support
             #       available, but disabled.  Emit a warning into the
@@ -916,7 +923,7 @@ namespace eval ::Eagle {
     }
   }
 
-  proc checkForTestExec { channel } {
+  proc checkForTestExec { channel quiet } {
     tputs $channel "---- checking for test use of \"exec\" command... "
 
     set procName [lindex [info level [info level]] 0]
@@ -926,7 +933,7 @@ namespace eval ::Eagle {
 
       tputs $channel yes\n
 
-      if {[info exists ::no(exec)]} then {
+      if {!$quiet && [info exists ::no(exec)]} then {
         tputs $channel \
             "==== WARNING: running with the \"testExec\" procedure disabled\n"
       }
@@ -1255,6 +1262,21 @@ namespace eval ::Eagle {
     }
   }
 
+  proc checkForTip429 { channel } {
+    tputs $channel "---- checking for TIP #429... "
+
+    #
+    # NOTE: Is the interpreter TIP #429 ready?
+    #
+    if {[catch {string cat}] == 0} then {
+      addConstraint tip429
+
+      tputs $channel yes\n
+    } else {
+      tputs $channel no\n
+    }
+  }
+
   proc checkForTiming {
           channel threshold {constraint ""} {tries 1} {delay 1000}
           {average false} {asynchronous false} } {
@@ -1393,6 +1415,21 @@ namespace eval ::Eagle {
 
         tputs $channel yes\n
       }
+    } else {
+      tputs $channel no\n
+    }
+  }
+
+  proc checkForMemoryIntensive { channel } {
+    tputs $channel "---- checking for memory intensive testing... "
+
+    #
+    # NOTE: Are we allowed to do memory intensive testing?
+    #
+    if {![info exists ::no(memoryIntensive)]} then {
+      addConstraint memoryIntensive
+
+      tputs $channel yes\n
     } else {
       tputs $channel no\n
     }
@@ -2039,6 +2076,35 @@ namespace eval ::Eagle {
               addConstraint [appendArgs monoBug $constraintVersion]
               addConstraint [appendArgs monoCrash $constraintVersion]
             }
+
+            #
+            # NOTE: Check all known versions of Mono for an exact match with
+            #       the currently running one.
+            #
+            foreach monoVersion [getKnownMonoVersions] {
+              #
+              # NOTE: Check if Mono major/minor version is exactly the one
+              #       we are currently processing.
+              #
+              set constraintVersion [join $monoVersion ""]
+
+              if {[lindex $monoVersion 0] == $majorVersion && \
+                  [lindex $monoVersion 1] == $minorVersion} then {
+                #
+                # NOTE: Add test constraints that only apply to this exact
+                #       version of Mono.
+                #
+                addConstraint [appendArgs mono $constraintVersion Only]
+              } else {
+                #
+                # NOTE: Add test constraints that apply to all versions of
+                #       Mono except this exact version.
+                #
+                addConstraint [appendArgs monoToDo $constraintVersion Only]
+                addConstraint [appendArgs monoBug $constraintVersion Only]
+                addConstraint [appendArgs monoCrash $constraintVersion Only]
+              }
+            }
           }
         } else {
           #
@@ -2063,8 +2129,11 @@ namespace eval ::Eagle {
             set constraintVersion [join $monoVersion ""]
 
             addConstraint [appendArgs monoToDo $constraintVersion]
+            addConstraint [appendArgs monoToDo $constraintVersion Only]
             addConstraint [appendArgs monoBug $constraintVersion]
+            addConstraint [appendArgs monoBug $constraintVersion Only]
             addConstraint [appendArgs monoCrash $constraintVersion]
+            addConstraint [appendArgs monoCrash $constraintVersion Only]
           }
         }
 
@@ -2185,19 +2254,26 @@ namespace eval ::Eagle {
       }
     }
 
-    proc checkForQuiet { channel } {
-      tputs $channel "---- checking for quiet... "
+    proc checkForQuiet { channel quiet } {
+      if {!$quiet} then {
+        tputs $channel "---- checking for quiet... "
+      }
 
-      if {[catch {object invoke Interpreter.GetActive Quiet} quiet] == 0 && \
-          $quiet} then {
+      if {[catch {
+        object invoke Interpreter.GetActive Quiet
+      } isQuiet] == 0 && $isQuiet} then {
         #
         # NOTE: Yes, quiet mode is enabled.
         #
         addConstraint quiet
 
-        tputs $channel yes\n
+        if {!$quiet} then {
+          tputs $channel yes\n
+        }
       } else {
-        tputs $channel no\n
+        if {!$quiet} then {
+          tputs $channel no\n
+        }
       }
     }
 
@@ -3120,11 +3196,11 @@ namespace eval ::Eagle {
         checkForTestMachine checkForTestPlatform checkForTestConfiguration \
         checkForTestSuffix checkForFile checkForPathFile checkForNativeCode \
         checkForTip127 checkForTip194 checkForTip207 checkForTip241 \
-        checkForTip285 checkForTip405 checkForTip426 checkForTiming \
-        checkForPerformance checkForBigLists checkForStackIntensive \
-        checkForInteractive checkForInteractiveCommand \
-        checkForUserInteraction checkForNetwork checkForCompileOption \
-        checkForKnownCompileOptions] false false
+        checkForTip285 checkForTip405 checkForTip426 checkForTip429 \
+        checkForTiming checkForPerformance checkForBigLists \
+        checkForMemoryIntensive checkForStackIntensive checkForInteractive \
+        checkForInteractiveCommand checkForUserInteraction checkForNetwork \
+        checkForCompileOption checkForKnownCompileOptions] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

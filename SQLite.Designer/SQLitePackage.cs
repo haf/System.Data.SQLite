@@ -1,13 +1,15 @@
 /********************************************************
  * ADO.NET 2.0 Data Provider for SQLite Version 3.X
  * Written by Robert Simpson (robert@blackcastlesoft.com)
- * 
+ *
  * Released to the public domain, use at your own risk!
  ********************************************************/
 
 namespace SQLite.Designer
 {
   using System;
+  using System.Collections.Generic;
+  using System.IO;
   using Microsoft.VisualStudio.Shell;
   using System.Runtime.InteropServices;
   using System.ComponentModel.Design;
@@ -22,6 +24,18 @@ namespace SQLite.Designer
   {
     public SQLitePackage()
     {
+        IEnumerable<string> keys = SQLiteOptions.GetKeys(true);
+
+        if (keys != null)
+        {
+            foreach (string key in keys)
+            {
+                if (key == null)
+                    continue;
+
+                AddOptionKey(key);
+            }
+        }
     }
 
     protected override void Initialize()
@@ -32,6 +46,43 @@ namespace SQLite.Designer
       ToolboxInitialized += new EventHandler(SQLitePackage_ToolboxInitialized);
       ToolboxUpgraded += new EventHandler(SQLitePackage_ToolboxUpgraded);
       base.Initialize();
+    }
+
+    protected override void OnLoadOptions(string key, Stream stream)
+    {
+        if (SQLiteOptions.HaveKey(key))
+        {
+            string value;
+
+            if (SQLiteOptions.ReadValue(stream, out value) &&
+                SQLiteOptions.IsValidValue(key, value))
+            {
+                SQLiteOptions.SetValue(key, value);
+            }
+
+            return;
+        }
+
+        base.OnLoadOptions(key, stream);
+    }
+
+    protected override void OnSaveOptions(string key, Stream stream)
+    {
+        if (SQLiteOptions.HaveKey(key))
+        {
+            string value;
+
+            if (SQLiteOptions.GetValue(key, out value) &&
+                SQLiteOptions.IsValidValue(key, value) &&
+                !SQLiteOptions.IsDefaultValue(key, value))
+            {
+                SQLiteOptions.WriteValue(stream, value);
+            }
+
+            return;
+        }
+
+        base.OnSaveOptions(key, stream);
     }
 
     void SQLitePackage_ToolboxUpgraded(object sender, EventArgs e)
