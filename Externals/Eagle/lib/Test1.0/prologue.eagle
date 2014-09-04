@@ -94,6 +94,20 @@ if {![info exists no([file tail [info script]])]} then {
   #############################################################################
 
   #
+  # NOTE: Set the location of the Eagle main strong name keys directory,
+  #       if necessary.
+  #
+  if {![info exists key_path]} then {
+    #
+    # NOTE: Normally, there should be a "Keys" sub-directory just within
+    #       the base directory.
+    #
+    set key_path [file join $base_path Keys]
+  }
+
+  #############################################################################
+
+  #
   # NOTE: Set the executable file name for the process, if
   #       necessary.
   #
@@ -286,6 +300,7 @@ if {![info exists no([file tail [info script]])]} then {
   set test_flags(-randomOrder) ""; # default to deterministic order.
   set test_flags(-breakOnLeak) ""; # default to continue on leak.
   set test_flags(-stopOnFailure) ""; # default to continue on failure.
+  set test_flags(-stopOnLeak) ""; # default to continue on leak.
   set test_flags(-exitOnComplete) ""; # default to not exit after complete.
   set test_flags(-preTest) ""; # default to not evaluating anything.
   set test_flags(-postTest) ""; # default to not evaluating anything.
@@ -355,6 +370,15 @@ if {![info exists no([file tail [info script]])]} then {
       set test_stop_on_failure $test_flags(-stopOnFailure)
     }
 
+    if {[info exists test_flags(-stopOnLeak)] && \
+        [string is boolean -strict $test_flags(-stopOnLeak)]} then {
+      #
+      # NOTE: Set the test stop-on-leak flag to the one provided by the
+      #       command line.
+      #
+      set test_stop_on_leak $test_flags(-stopOnLeak)
+    }
+
     if {[info exists test_flags(-exitOnComplete)] && \
         [string is boolean -strict $test_flags(-exitOnComplete)]} then {
       #
@@ -418,10 +442,33 @@ if {![info exists no([file tail [info script]])]} then {
     # NOTE: Set the log to use for test output, if necessary.
     #
     if {![info exists test_log]} then {
-      set test_log [file join [getTemporaryPath] [appendArgs [file tail [info \
-          nameofexecutable]] [getTestLogId] .test. [pid] .log]]
+      set test_log [getDefaultTestLog]
     }
   }
+
+  #############################################################################
+
+  #
+  # NOTE: *SPECIAL* This test constraint must be checked first as it can
+  #       determine if subsequent ones will emit warnings.  This is only
+  #       applicable to Eagle.
+  #
+  if {[isEagle]} then {
+    #
+    # NOTE: Has quiet testing support been disabled?
+    #
+    if {![info exists no(preQuiet)]} then {
+      #
+      # NOTE: There are checks for the "quiet" test constraint prior to
+      #       the real test constraints being initialized.  Prepare for
+      #       those checks now.  This will have to be repeated later,
+      #       after the real test constraints are initialized.
+      #
+      checkForQuiet $test_channel true
+    }
+  }
+
+  #############################################################################
 
   #
   # NOTE: Has native Tcl shell detection and use been disabled?
@@ -453,7 +500,8 @@ if {![info exists no([file tail [info script]])]} then {
             # NOTE: Attempt to automatically select the native Tcl shell
             #       to use.
             #
-            if {![info exists no(warningForTclShell)]} then {
+            if {![info exists no(warningForTclShell)] && \
+                ![haveConstraint quiet]} then {
               tputs $test_channel \
                   "==== WARNING: attempting automatic Tcl shell selection...\n"
             }
@@ -479,7 +527,8 @@ if {![info exists no([file tail [info script]])]} then {
   #       plugins being loaded (i.e. there are some tests are sensitive to
   #       having "unexpected" plugins loaded).
   #
-  if {[isEagle] && ![info exists no(warningForPlugin)]} then {
+  if {[isEagle] && ![info exists no(warningForPlugin)] && \
+      ![haveConstraint quiet]} then {
     foreach loaded [info loaded] {
       #
       # HACK: This code assumes that all plugins in the "Eagle._Plugins"
@@ -583,44 +632,7 @@ if {![info exists no([file tail [info script]])]} then {
       [expr {[info exists test_suffix] ? \
           $test_suffix : "<none>"}] \n]
 
-  if {[isEagle] && ![info exists no(warningForStrongName)]} then {
-    catch {info engine PublicKeyToken} publicKeyToken
-
-    if {[string length $publicKeyToken] == 0} then {
-      #
-      # NOTE: The Eagle core library is not strong name signed.  This is not an
-      #       error, per se; however, it may cause some tests to fail and it
-      #       should be reported to the user and noted in the test suite log
-      #       file.
-      #
-      tputs $test_channel \
-          "==== WARNING: running without any strong name signature...\n"
-    } else {
-      #
-      # BUGBUG: Tcl 8.4 does not like this expression because it contains the
-      #         "ni" operator (and Tcl tries to compile it even though it will
-      #         only actually ever be evaluated in Eagle).
-      #
-      set expr {$publicKeyToken ni \
-          "29c6297630be05eb 1e22ec67879739a2 358030063a832bc3"}
-
-      if {[expr $expr]} then {
-        #
-        # NOTE: The Eagle core library is strong name signed with a key that is
-        #       not official.  This is also not an error, per se; however, it
-        #       may cause some tests to fail and it should be reported to the
-        #       user and noted in the test suite log file.
-        #
-        tputs $test_channel [appendArgs \
-            "==== WARNING: running without official strong name signature: " \
-            $publicKeyToken \n]
-      }
-
-      unset expr
-    }
-
-    unset publicKeyToken
-
+  if {[isEagle]} then {
     tputs $test_channel [appendArgs "---- original command line: " \
         [info cmdline] \n]
 
@@ -698,6 +710,11 @@ if {![info exists no([file tail [info script]])]} then {
           [string is boolean -strict $test_stop_on_failure] ? \
               $test_stop_on_failure : "<none>"}] \n]
 
+  tputs $test_channel [appendArgs "---- stop on leak: " \
+      [expr {[info exists test_stop_on_leak] && \
+          [string is boolean -strict $test_stop_on_leak] ? \
+              $test_stop_on_leak : "<none>"}] \n]
+
   tputs $test_channel [appendArgs "---- exit on complete: " \
       [expr {[info exists test_exit_on_complete] && \
           [string is boolean -strict $test_exit_on_complete] ? \
@@ -746,6 +763,9 @@ if {![info exists no([file tail [info script]])]} then {
   tputs $test_channel [appendArgs "---- base path: \"" \
       $base_path \"\n]
 
+  tputs $test_channel [appendArgs "---- key path: \"" \
+      $key_path \"\n]
+
   tputs $test_channel [appendArgs "---- root path: \"" \
       $root_path \"\n]
 
@@ -778,6 +798,10 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Initialize the Eagle test constraints.
   #
   if {[isEagle]} then {
+    #
+    # NOTE: *WARNING* This has the effect of removing test constraints
+    #       added prior to this point.
+    #
     initializeTests; configureTcltest [list] [list] [list] [list] false
 
     #
@@ -796,6 +820,90 @@ if {![info exists no([file tail [info script]])]} then {
 
     tputs $test_channel \
         "---- start of Eagle specific test constraints...\n"
+
+    #
+    # NOTE: *WARNING* Has quiet testing support been disabled?
+    #       Please do not move this "quietness" test constraint
+    #       check as subsequent test constraints may rely on it
+    #       when determining if a warning should be emitted.
+    #
+    if {![info exists no(quiet)]} then {
+      #
+      # NOTE: For tests "basic-1.36", "benchmark-1.*", "debug-1.3",
+      #       "debug-1.4", "glob-99.*", "object-10.*", "perf-2.2",
+      #       and various other places within the test suite code
+      #       itself.
+      #
+      checkForQuiet $test_channel false
+    }
+
+    #
+    # NOTE: Has strong name key detection been disabled?
+    #
+    if {![info exists no(strongNameKey)]} then {
+      catch {info engine PublicKeyToken} publicKeyToken
+
+      if {[string length $publicKeyToken] == 0} then {
+        #
+        # NOTE: The Eagle core library is not signed with a strong name key.
+        #       This is not an error, per se; however, it may cause selected
+        #       tests to fail and it should be reported to the user and noted
+        #       in the test suite log file.
+        #
+        addConstraint strongName.none
+
+        if {![info exists no(warningForStrongNameKey)] && \
+            ![haveConstraint quiet]} then {
+          tputs $test_channel \
+              "==== WARNING: no Eagle strong name signature detected...\n"
+        }
+      } else {
+        #
+        # NOTE: Add a test constraint for this specific strong name key.
+        #
+        addConstraint [appendArgs strongName. $publicKeyToken]
+
+        #
+        # BUGBUG: Tcl 8.4 does not seem to like this expression because it
+        #         contains the "ni" operator added in Tcl 8.5 (and Tcl 8.4
+        #         tries to compile it even though it will only be evaluated
+        #         in Eagle).
+        #
+        set expr {$publicKeyToken ni \
+            "29c6297630be05eb 1e22ec67879739a2 358030063a832bc3"}
+
+        if {[expr $expr]} then {
+          #
+          # NOTE: The Eagle core library is strong name signed with a key that
+          #       is not official.  This is also not an error, per se; however,
+          #       it may cause some tests to fail and it should be reported to
+          #       the user and noted in the test suite log file.
+          #
+          addConstraint strongName.unofficial
+
+          if {![info exists no(warningForStrongNameKey)] && \
+              ![haveConstraint quiet]} then {
+            tputs $test_channel [appendArgs \
+                "==== WARNING: unofficial Eagle strong name signature " \
+                "detected: " $publicKeyToken \n]
+          }
+        } else {
+          #
+          # NOTE: Several tests require one of the official strong name keys to
+          #       be used in order for them to pass.
+          #
+          addConstraint strongName.official
+
+          tputs $test_channel [appendArgs \
+              "---- official Eagle strong name signature detected: " \
+              $publicKeyToken \n]
+        }
+
+        unset expr
+      }
+
+      unset publicKeyToken
+    }
 
     #
     # NOTE: Has administrator detection support been disabled?  We do
@@ -1013,17 +1121,6 @@ if {![info exists no([file tail [info script]])]} then {
     #
     if {![info exists no(assemblySymbols)]} then {
       checkForSymbols $test_channel [lindex [info assembly] end]
-    }
-
-    #
-    # NOTE: Has quiet testing support been disabled?
-    #
-    if {![info exists no(quiet)]} then {
-      #
-      # NOTE: For tests "basic-1.36", "debug-1.3", "debug-1.4", "object-10.*",
-      #       and "perf-2.2".
-      #
-      checkForQuiet $test_channel
     }
 
     #
@@ -1519,6 +1616,24 @@ if {![info exists no([file tail [info script]])]} then {
       }
 
       #
+      # NOTE: Has system array variable testing support been disabled?
+      #
+      if {![info exists no(testSystemArrayVariables)]} then {
+        #
+        # NOTE: For tests "basic-1.62", "basic-1.63", "basic-1.64",
+        #       and "basic-1.65".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestIntPtrChangeTypeCallback*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestSetVariableSystemArray*
+
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestUnsetVariableSystemArray*
+      }
+
+      #
       # NOTE: Has field testing support been disabled?
       #
       if {![info exists no(testFields)]} then {
@@ -1587,6 +1702,12 @@ if {![info exists no([file tail [info script]])]} then {
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
             *TestComplexMethod*
+
+        #
+        # NOTE: For test "object-2.12".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestMoreComplexMethod*
 
         #
         # NOTE: For test "object-2.3".
@@ -2026,7 +2147,7 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Has all use of [exec] for tests been disabled?
   #
   if {![info exists no(checkForTestExec)]} then {
-    checkForTestExec $test_channel
+    checkForTestExec $test_channel [haveConstraint quiet]
   }
 
   #
@@ -2334,6 +2455,10 @@ if {![info exists no([file tail [info script]])]} then {
     checkForBigLists $test_channel
   }
 
+  if {![info exists no(checkForMemoryIntensive)]} then {
+    checkForMemoryIntensive $test_channel
+  }
+
   if {![info exists no(checkForStackIntensive)]} then {
     checkForStackIntensive $test_channel
   }
@@ -2423,7 +2548,7 @@ if {![info exists no([file tail [info script]])]} then {
   # NOTE: Has namespace detection support been disabled?
   #
   if {![info exists no(namespaces)]} then {
-    checkForNamespaces $test_channel
+    checkForNamespaces $test_channel [haveConstraint quiet]
   }
 
   #
@@ -2458,6 +2583,10 @@ if {![info exists no([file tail [info script]])]} then {
     checkForTip426 $test_channel
   }
 
+  if {![info exists no(tip429)]} then {
+    checkForTip429 $test_channel
+  }
+
   #
   # NOTE: Has performance testing been disabled?
   #
@@ -2482,7 +2611,15 @@ if {![info exists no([file tail [info script]])]} then {
 
   if {![info exists no(core)] && \
       ![info exists no(preciseTiming)]} then {
-    checkForTiming $test_channel 25 preciseTiming; # 1/40th second.
+    #
+    # NOTE: Normally, the "preciseTiming" constraint implicitly requires that
+    #       the "timing" constraint be present as well; however, that can be
+    #       overridden.
+    #
+    if {[info exists no(requireTiming)] || \
+        [haveConstraint timing]} then {
+      checkForTiming $test_channel 25 preciseTiming; # 1/40th second.
+    }
   }
 
   #

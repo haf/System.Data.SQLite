@@ -104,6 +104,23 @@ namespace eval ::Eagle {
         [string compare -nocase mono $::eagle_platform(runtime)] == 0}]
   }
 
+  #
+  # NOTE: This procedure returns non-zero if the specified file names refer
+  #       to the same file, using the most robust method available for the
+  #       script engine and platform.
+  #
+  proc isSameFileName { fileName1 fileName2 } {
+    if {[isEagle]} then {
+      return [file same $fileName1 $fileName2]
+    } else {
+      if {[isWindows]} then {
+        return [string equal -nocase $fileName1 $fileName2]
+      } else {
+        return [string equal $fileName1 $fileName2]
+      }
+    }
+  }
+
   proc getEnvironmentVariable { name } {
     #
     # NOTE: This should work properly in both Tcl and Eagle.
@@ -918,18 +935,47 @@ namespace eval ::Eagle {
           [info exists ::eagle_platform(compileOptions)] ? \
           $::eagle_platform(compileOptions) : [list]}]
 
-      if {[llength $platformOptions] > 0} then {
+      #
+      # NOTE: Permit extra C# compiler options to be passed via the global
+      #       array element "csharpOptions", if it exists.
+      #
+      set csharpOptions [expr { \
+          [info exists ::eagle_platform(csharpOptions)] ? \
+          $::eagle_platform(csharpOptions) : [list]}]
+
+      if {[llength $platformOptions] > 0 || \
+          [llength $csharpOptions] > 0} then {
         #
         # NOTE: Grab the existing compiler options, if any.
         #
         set compilerOptions [$parameters CompilerOptions]
 
         if {"DEBUG" in $platformOptions} then {
-          append compilerOptions " /define:DEBUG"
+          if {[string length $compilerOptions] > 0} then {
+            append compilerOptions " "
+          }
+
+          append compilerOptions /define:DEBUG
         }
 
         if {"TRACE" in $platformOptions} then {
-          append compilerOptions " /define:TRACE"
+          if {[string length $compilerOptions] > 0} then {
+            append compilerOptions " "
+          }
+
+          append compilerOptions /define:TRACE
+        }
+
+        #
+        # NOTE: Append the configured extra C# compiler options configured
+        #       via the global array element "csharpOptions", if any.
+        #
+        foreach csharpOption $csharpOptions {
+          if {[string length $compilerOptions] > 0} then {
+            append compilerOptions " "
+          }
+
+          append compilerOptions $csharpOption
         }
 
         #
@@ -1814,6 +1860,7 @@ namespace eval ::Eagle {
         }
       }
 
+      set stringMap [list \b " " \t " " \r \xB6 \n \xB6]
       set maxLength [expr {$maxLength + [string length $a] + 2}]
       set hostLength [lindex [getHostSize] 0]
       set valueLength [expr {$hostLength - $maxLength - 5}]; # " ... "
@@ -1822,13 +1869,13 @@ namespace eval ::Eagle {
         #
         # NOTE: Format the array element name for display.
         #
-        set nameString [appendArgs $a ( $name )]
+        set nameString [string map $stringMap [appendArgs $a ( $name )]]
 
         #
         # NOTE: If the value by itself is too long to fit on one host line,
         #       just truncate and ellipsis it.
         #
-        set valueString $array($name)
+        set valueString [string map $stringMap $array($name)]
 
         if {[string length $valueString] > $valueLength} then {
           set valueString [appendArgs [string range $valueString 0 \
@@ -1968,7 +2015,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Block non-Windows platforms since this is Windows specific.
       #
-      if {$::tcl_platform(platform) ne "windows"} then {
+      if {![isWindows]} then {
         error "not supported on this operating system"
       }
 
@@ -2016,7 +2063,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Block non-Windows platforms since this is Windows specific.
       #
-      if {$::tcl_platform(platform) ne "windows"} then {
+      if {![isWindows]} then {
         error "not supported on this operating system"
       }
 
@@ -2064,7 +2111,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Block non-Windows platforms since this is Windows specific.
       #
-      if {$::tcl_platform(platform) ne "windows"} then {
+      if {![isWindows]} then {
         error "not supported on this operating system"
       }
 
@@ -2171,7 +2218,7 @@ namespace eval ::Eagle {
       #
       # NOTE: Block non-Windows platforms since this is Windows specific.
       #
-      if {$::tcl_platform(platform) ne "windows"} then {
+      if {![isWindows]} then {
         error "not supported on this operating system"
       }
 
@@ -2262,7 +2309,7 @@ namespace eval ::Eagle {
     #       into the global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        isEagle isWindows haveGaruda isTclThread isMono \
+        isEagle isWindows haveGaruda isTclThread isMono isSameFileName \
         getEnvironmentVariable combineFlags getCompileInfo getPlatformInfo \
         getPluginPath appendArgs lappendArgs getDictionaryValue \
         getColumnValue getRowColumnValue tqputs tqlog readFile \
