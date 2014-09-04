@@ -1651,7 +1651,7 @@ namespace eval ::Eagle {
       set error null; # IGNORED
       set value [object invoke Utility TryParseFlagsEnum "" \
           System.Data.SQLite.SQLiteConnectionFlags "" $flags null true \
-          error]
+          true error]
 
       #
       # NOTE: If the combined flags string could not actually be converted
