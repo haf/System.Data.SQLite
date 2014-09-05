@@ -51,11 +51,11 @@
                      '$(OutputPath)' != '' And
                      HasTrailingSlash('$(OutputPath)') And
                      Exists('$(OutputPath)')">
-    <CreateItem Include="$(OutputPath)\x86\SQLite.Interop.*">
+    <CreateItem Include="$(OutputPath)x86\SQLite.Interop.*">
       <Output ItemName="SQLiteInteropX86Files" TaskParameter="Include" />
     </CreateItem>
 
-    <CreateItem Include="$(OutputPath)\x64\SQLite.Interop.*">
+    <CreateItem Include="$(OutputPath)x64\SQLite.Interop.*">
       <Output ItemName="SQLiteInteropX64Files" TaskParameter="Include" />
     </CreateItem>
 
