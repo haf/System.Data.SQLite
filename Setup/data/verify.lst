@@ -156,17 +156,18 @@ set sds_manifests(source) {
   Keys/System.Data.SQLite.CF.snk
   Keys/System.Data.SQLite.snk
   NuGet/
-  NuGet/net20/
-  NuGet/net20/Core/
-  NuGet/net20/Core/config.transform
-  NuGet/net20/Core/install.ps1
+  NuGet/shared/
+  NuGet/shared/Core/
+  NuGet/shared/Core/build/
+  NuGet/shared/Core/build/System.Data.SQLite.Core.targets
+  NuGet/shared/Core/content/
+  NuGet/shared/Core/content/config.transform
   NuGet/net40/
-  NuGet/net40/Core/
-  NuGet/net40/Core/config.transform
-  NuGet/net40/Core/install.ps1
   NuGet/net40/EF6/
-  NuGet/net40/EF6/config.transform
-  NuGet/net40/EF6/provider.ps1
+  NuGet/net40/EF6/content/
+  NuGet/net40/EF6/content/config.transform
+  NuGet/net40/EF6/tools/
+  NuGet/net40/EF6/tools/provider.ps1
   NuGet/SQLite.Beta.nuspec
   NuGet/SQLite.Core.nuspec
   NuGet/SQLite.Core.Beta.nuspec

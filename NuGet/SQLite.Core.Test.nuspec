@@ -30,17 +30,17 @@
     <file src="..\bin\2012\Release\bin\System.Data.SQLite.xml" target="lib\net45" />
     <file src="..\bin\2013\Release\bin\System.Data.SQLite.dll" target="lib\net451" />
     <file src="..\bin\2013\Release\bin\System.Data.SQLite.xml" target="lib\net451" />
-    <file src="..\bin\2008\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net20\x86" />
-    <file src="..\bin\2008\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net20\x64" />
-    <file src="..\bin\2010\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net40\x86" />
-    <file src="..\bin\2010\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net40\x64" />
-    <file src="..\bin\2012\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net45\x86" />
-    <file src="..\bin\2012\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net45\x64" />
-    <file src="..\bin\2013\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net451\x86" />
-    <file src="..\bin\2013\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="content\net451\x64" />
-    <file src="net20\Core\install.ps1" target="tools\net20\install.ps1" />
-    <file src="net40\Core\install.ps1" target="tools\net40\install.ps1" />
-    <file src="net40\Core\install.ps1" target="tools\net45\install.ps1" />
-    <file src="net40\Core\install.ps1" target="tools\net451\install.ps1" />
+    <file src="..\bin\2008\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net20\x86" />
+    <file src="..\bin\2008\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net20\x64" />
+    <file src="..\bin\2010\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net40\x86" />
+    <file src="..\bin\2010\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net40\x64" />
+    <file src="..\bin\2012\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net45\x86" />
+    <file src="..\bin\2012\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net45\x64" />
+    <file src="..\bin\2013\Win32\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net451\x86" />
+    <file src="..\bin\2013\x64\ReleaseNativeOnlyStatic\SQLite.Interop.dll" target="build\net451\x64" />
+    <file src="shared\Core\build\System.Data.SQLite.Core.targets" target="build\net20\System.Data.SQLite.Core.targets" />
+    <file src="shared\Core\build\System.Data.SQLite.Core.targets" target="build\net40\System.Data.SQLite.Core.targets" />
+    <file src="shared\Core\build\System.Data.SQLite.Core.targets" target="build\net45\System.Data.SQLite.Core.targets" />
+    <file src="shared\Core\build\System.Data.SQLite.Core.targets" target="build\net451\System.Data.SQLite.Core.targets" />
   </files>
 </package>
