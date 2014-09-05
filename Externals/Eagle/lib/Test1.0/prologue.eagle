@@ -1698,6 +1698,12 @@ if {![info exists no([file tail [info script]])]} then {
             *TestExecuteDelegateCommands*
 
         #
+        # NOTE: For test "namespace-97.10".
+        #
+        checkForObjectMember $test_channel Eagle._Tests.Default \
+            *TestRenameNamespace*
+
+        #
         # NOTE: For test "object-2.1".
         #
         checkForObjectMember $test_channel Eagle._Tests.Default \
