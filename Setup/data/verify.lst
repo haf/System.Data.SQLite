@@ -368,6 +368,7 @@ set sds_manifests(source) {
   SQLite.Designer/SQLiteDataViewSupport2010.xml
   SQLite.Designer/SQLiteDataViewSupport2012.xml
   SQLite.Designer/SQLiteDataViewSupport2013.xml
+  SQLite.Designer/SQLiteOptions.cs
   SQLite.Designer/SQLitePackage.cs
   SQLite.Designer/SQLiteProviderObjectFactory.cs
   SQLite.Designer/TableNameDialog.cs
@@ -435,6 +436,7 @@ set sds_manifests(source) {
   SQLite.NET.2012.sln
   SQLite.NET.2013.MSBuild.sln
   SQLite.NET.2013.sln
+  System.Data.SQLite.url
   System.Data.SQLite/
   System.Data.SQLite/AssemblyInfo.cs
   System.Data.SQLite/AssemblySourceIdAttribute.cs
@@ -807,6 +809,7 @@ set sds_manifests(binaryCompact) {
 #       archives supporting the desktop versions of the .NET Framework.
 #
 set sds_manifests(setupCore) {
+  {{app}\System.Data.SQLite.url}
   {{app}\readme.htm}
   {{app}\bin\System.Data.SQLite.pdb}
   {{app}\doc\SQLite.NET.chm}

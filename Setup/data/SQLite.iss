@@ -184,6 +184,7 @@ Name: {app}\GAC; Tasks: gac
 
 [Files]
 Components: Application\Core\{#AppProcessor}; Source: ..\..\Externals\MSVCPP\vcredist_{#AppProcessor}_{#VcRuntime}.exe; DestDir: {tmp}; Flags: dontcopy
+Components: Application; Source: ..\..\System.Data.SQLite.url; DestDir: {app}; Flags: restartreplace uninsrestartdelete
 Components: Application; Source: ..\..\readme.htm; DestDir: {app}; Flags: restartreplace uninsrestartdelete isreadme
 
 #if Pos("NativeOnly", AppConfiguration) == 0
