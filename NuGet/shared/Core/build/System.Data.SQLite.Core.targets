@@ -2,11 +2,25 @@
  *
  * System.Data.SQLite.Core.targets -
  *
+ * WARNING: This MSBuild file requires MSBuild 4.0 features.
+ *
  * Written by Joe Mistachkin and David Archer.
  * Released to the public domain, use at your own risk!
  *
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+  ******************************************************************************
+  **                    SQLite Interop Library Build Items                    **
+  ******************************************************************************
+  -->
+
+  <ItemGroup>
+    <SQLiteInteropFiles Condition="'$(MSBuildThisFileDirectory)' != '' And
+                                   HasTrailingSlash('$(MSBuildThisFileDirectory)')"
+                        Include="$(MSBuildThisFileDirectory)**\SQLite.Interop.*" />
+  </ItemGroup>
+
   <!--
   ******************************************************************************
   **                   SQLite Interop Library Build Targets                   **
@@ -15,31 +29,17 @@
 
   <Target Name="CopySQLiteInteropFiles"
           Condition="'$(CopySQLiteInteropFiles)' != 'false' And
-                     '$(MSBuildThisFileDirectory)' != '' And
-                     HasTrailingSlash('$(MSBuildThisFileDirectory)') And
                      '$(OutputPath)' != '' And
                      HasTrailingSlash('$(OutputPath)') And
                      Exists('$(OutputPath)')"
-          Inputs="$(TargetPath)"
-          Outputs="$(TargetPath).CopySQLiteInteropFiles.done">
-    <CreateItem Include="$(MSBuildThisFileDirectory)x86\SQLite.Interop.*">
-      <Output ItemName="SQLiteInteropX86Files"
-              TaskParameter="Include" />
-    </CreateItem>
-
-    <CreateItem Include="$(MSBuildThisFileDirectory)x64\SQLite.Interop.*">
-      <Output ItemName="SQLiteInteropX64Files"
-              TaskParameter="Include" />
-    </CreateItem>
-
-    <Copy SourceFiles="@(SQLiteInteropX86Files)"
-          DestinationFolder="$(OutputPath)x86" />
-
-    <Copy SourceFiles="@(SQLiteInteropX64Files)"
-          DestinationFolder="$(OutputPath)x64" />
-
-    <Touch AlwaysCreate="true"
-           Files="$(TargetPath).CopySQLiteInteropFiles.done" />
+          Inputs="@(SQLiteInteropFiles)"
+          Outputs="@(SQLiteInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')">
+    <!--
+        NOTE: Copy "SQLite.Interop.dll" and all related files, for every
+              architecture that we support, to the build output directory.
+    -->
+    <Copy SourceFiles="@(SQLiteInteropFiles)"
+          DestinationFiles="@(SQLiteInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <!--
@@ -51,24 +51,16 @@
                      '$(OutputPath)' != '' And
                      HasTrailingSlash('$(OutputPath)') And
                      Exists('$(OutputPath)')">
-    <CreateItem Include="$(OutputPath)x86\SQLite.Interop.*">
-      <Output ItemName="SQLiteInteropX86Files" TaskParameter="Include" />
-    </CreateItem>
-
-    <CreateItem Include="$(OutputPath)x64\SQLite.Interop.*">
-      <Output ItemName="SQLiteInteropX64Files" TaskParameter="Include" />
-    </CreateItem>
-
-    <Delete Condition="'@(SQLiteInteropX86Files)' != ''"
-            Files="@(SQLiteInteropX86Files)" />
-
-    <Delete Condition="'@(SQLiteInteropX64Files)' != ''"
-            Files="@(SQLiteInteropX64Files)" />
+    <!--
+        NOTE: Delete "SQLite.Interop.dll" and all related files, for every
+              architecture that we support, from the build output directory.
+    -->
+    <Delete Files="@(SQLiteInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <!--
   ******************************************************************************
-  **                      Per-Solution Packages Support                       **
+  **                 SQLite Interop Library Build Properties                  **
   ******************************************************************************
   -->
 
