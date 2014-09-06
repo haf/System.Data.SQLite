@@ -909,6 +909,18 @@ set sds_manifests(setupEf6Interop) {
 
 ###############################################################################
 #
+# NOTE: This is the list of core files that should be present in the bundled
+#       setup archives (i.e. those containing the mixed-mode assembly) that
+#       support EF6 (i.e. available with the desktop .NET Framework 4.0 and
+#       later).
+#
+set sds_manifests(setupEf6Bundle) {
+  {{app}\bin\EntityFramework.dll}
+  {{app}\GAC\System.Data.SQLite.EF6.dll}
+}
+
+###############################################################################
+#
 # NOTE: This is the list of files that should be present in all setup archives
 #       supporting the .NET Framework 2.0 for x86.
 #
@@ -1232,13 +1244,13 @@ set manifests(sqlite-netFx40-setup-x64-2010-.exe) [list sds \
 
 set manifests(sqlite-netFx40-setup-bundle-x86-2010-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Interop setupX86Vs2010]
+    setupEf6Bundle setupX86Vs2010]
 
 ###############################################################################
 
 set manifests(sqlite-netFx40-setup-bundle-x64-2010-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Interop setupX64Vs2010]
+    setupEf6Bundle setupX64Vs2010]
 
 ###############################################################################
 ################### Visual Studio 2012 / .NET Framework 4.5 ###################
@@ -1302,13 +1314,13 @@ set manifests(sqlite-netFx45-setup-x64-2012-.exe) [list sds \
 
 set manifests(sqlite-netFx45-setup-bundle-x86-2012-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Interop setupX86Vs2012]
+    setupEf6Bundle setupX86Vs2012]
 
 ###############################################################################
 
 set manifests(sqlite-netFx45-setup-bundle-x64-2012-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Interop setupX64Vs2012]
+    setupEf6Bundle setupX64Vs2012]
 
 ###############################################################################
 ############### Visual Studio 2012 / .NET Compact Framework 3.9 ###############
@@ -1389,13 +1401,13 @@ set manifests(sqlite-netFx451-setup-x64-2013-.exe) [list sds \
 
 set manifests(sqlite-netFx451-setup-bundle-x86-2013-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Interop setupX86Vs2013]
+    setupEf6Bundle setupX86Vs2013]
 
 ###############################################################################
 
 set manifests(sqlite-netFx451-setup-bundle-x64-2013-.exe) [list sds \
     setupCore setupBundle setupLinqCore setupEf6Core setupLinqBundle \
-    setupEf6Interop setupX64Vs2013]
+    setupEf6Bundle setupX64Vs2013]
 
 ###############################################################################
 # end of file
