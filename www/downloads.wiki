@@ -1875,7 +1875,7 @@
         &quot;System.Data.SQLite.EF6&quot; packages.</i></b></big>
         <br />
         <br />
-        (sha1: 962dbd6b30499ece0f1882ebbb442ca9df81c73a)
+        (sha1: 62affc97284e2a3d142b433e81b8de4c40a6dc67)
       </td>
     </tr>
 
@@ -1898,7 +1898,7 @@
         <br />
         <big><b>This package does not depend on any other package.</b></big>
         <br />
-        (sha1: 9664e820fff1cb1187eb98519c58fe581cf0c2a7)
+        (sha1: a642dc2cb0af24cc23d3ffdc485212d741d2c2be)
       </td>
     </tr>
 
@@ -1924,7 +1924,7 @@
         native library search path.</i></b></big>
         <br />
         <br />
-        (sha1: fde45d78f0093d6f52376796b538d9c40d62e957)
+        (sha1: 361b827a299b5fc4e0c9d3401a93c05bf46f6323)
       </td>
     </tr>
 
@@ -1945,7 +1945,7 @@
         &quot;System.Data.SQLite.Core&quot; and &quot;EntityFramework&quot;
         packages.</b></big>
         <br />
-        (sha1: 106fc53ed9768de271e4f7a730f02e5f19ce0061)
+        (sha1: 06b9723fb553b4daa41795e796ec541ce60c8bbd)
       </td>
     </tr>
 
@@ -1965,7 +1965,7 @@
         <big><b>This package depends on the &quot;System.Data.SQLite.Core&quot;
         package.</b></big>
         <br />
-        (sha1: f949379a2ee7b1a75b577fb2a33f4a1d007e1a53)
+        (sha1: 11f814b9da87a61cfe15f9122053f7df9dd1394f)
       </td>
     </tr>
 
@@ -1994,7 +1994,7 @@
         native library search path.</i></b></big>
         <br />
         <br />
-        (sha1: d15900a6b6a85400f76d612576f4777c59e9b494)
+        (sha1: 95e5633744b1da252e8503a1cd4b61b7b3b859a8)
       </td>
     </tr>
 
