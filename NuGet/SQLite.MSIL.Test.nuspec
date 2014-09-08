@@ -11,7 +11,7 @@
   <metadata>
     <id>System.Data.SQLite.MSIL.Test</id>
     <title>System.Data.SQLite (MSIL) Test</title>
-    <version>1.0.94.0</version>
+    <version>1.0.94.1</version>
     <authors>SQLite Development Team</authors>
     <description>This is a legacy package; if possible, please use either the &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot; package instead.  An ADO.NET provider for SQLite (managed-only).</description>
     <language>en-US</language>

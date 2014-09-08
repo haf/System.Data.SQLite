@@ -11,7 +11,7 @@
   <metadata>
     <id>System.Data.SQLite.Test</id>
     <title>System.Data.SQLite (x86/x64) Test</title>
-    <version>1.0.94.0</version>
+    <version>1.0.94.1</version>
     <authors>SQLite Development Team</authors>
     <description>The official SQLite database engine for both x86 and x64 along with the ADO.NET provider.  This package includes support for LINQ and Entity Framework 6.</description>
     <language>en-US</language>
@@ -22,37 +22,37 @@
     <copyright>Public Domain</copyright>
     <dependencies>
       <group targetFramework="net20">
-        <dependency id="System.Data.SQLite.Core.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.Core.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net40">
-        <dependency id="System.Data.SQLite.Core.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.Core.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net45">
-        <dependency id="System.Data.SQLite.Core.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.Core.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net451">
-        <dependency id="System.Data.SQLite.Core.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.Core.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net20">
-        <dependency id="System.Data.SQLite.Linq.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.Linq.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net40">
-        <dependency id="System.Data.SQLite.Linq.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.Linq.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net45">
-        <dependency id="System.Data.SQLite.Linq.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.Linq.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net451">
-        <dependency id="System.Data.SQLite.Linq.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.Linq.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net40">
-        <dependency id="System.Data.SQLite.EF6.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.EF6.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net45">
-        <dependency id="System.Data.SQLite.EF6.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.EF6.Test" version="1.0.94.1" />
       </group>
       <group targetFramework="net451">
-        <dependency id="System.Data.SQLite.EF6.Test" version="1.0.94.0" />
+        <dependency id="System.Data.SQLite.EF6.Test" version="1.0.94.1" />
       </group>
     </dependencies>
   </metadata>
