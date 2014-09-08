@@ -2088,6 +2088,7 @@
       <li><b>sqlite-netFx-source-</b>date<b>.zip</b></li>
       <li><b>System.Data.SQLite.</b>version<b>.nupkg</b></li>
       <li><b>System.Data.SQLite.</b>variant<b>.</b>version<b>.nupkg</b></li>
+      <li><b>System.Data.SQLite.</b>variant<b>.</b>releaseType<b>.</b>version<b>.nupkg</b></li>
     </ol>
   </p>
 
@@ -2136,8 +2137,23 @@
   </p>
 
   <p>
-    The <b>variant</b> in template (11) will be one of Beta, MSIL, x86, x64.
+    The <b>variant</b> in template (11) will be MSIL, x86, or x64.
     Alternatively, it may be absent, which represents the default variant.
+  </p>
+
+  <p>
+    The <b>releaseType</b> in template (12) will be Beta or Test.
+    Alternatively, it may be absent, which represents the default release type.
+    <ul>
+    <li>The &quot;Beta&quot; release type is used to indicate that the package
+    was intended to be used for
+    <a href="http://en.wikipedia.org/wiki/Software_release_life_cycle#Beta">beta</a>
+    testing.</li>
+    <li>The &quot;Test&quot; release type is used to indicate that the package
+    was intended to be used for
+    <a href="http://en.wikipedia.org/wiki/Software_release_life_cycle#Release_candidate">release candidate</a>
+    testing.</li>
+    </ul>
   </p>
 
   <h3>Canonical Source Code</h3>
