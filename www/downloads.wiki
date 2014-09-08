@@ -1851,9 +1851,6 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <!--
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite/1.0.94.0">System.Data.SQLite.1.0.94.0.nupkg</a>
-        -->
         <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Test/1.0.94.1">System.Data.SQLite.Test.1.0.94.1.nupkg</a>
         <br />
         (0.00 MiB)
@@ -1885,9 +1882,6 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <!--
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core/1.0.94.0">System.Data.SQLite.Core.1.0.94.0.nupkg</a>
-        -->
         <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core.Test/1.0.94.1">System.Data.SQLite.Core.Test.1.0.94.1.nupkg</a>
         <br />
         (4.92 MiB)
@@ -1911,9 +1905,6 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <!--
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core.MSIL/1.0.94.0">System.Data.SQLite.Core.MSIL.1.0.94.0.nupkg</a>
-        -->
         <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core.MSIL.Test/1.0.94.1">System.Data.SQLite.Core.MSIL.Test.1.0.94.1.nupkg</a>
         <br />
         (0.68 MiB)
@@ -1940,9 +1931,6 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <!--
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.EF6/1.0.94.0">System.Data.SQLite.EF6.1.0.94.0.nupkg</a>
-        -->
         <a href="http://nuget.org/api/v2/package/System.Data.SQLite.EF6.Test/1.0.94.1">System.Data.SQLite.EF6.Test.1.0.94.1.nupkg</a>
         <br />
         (0.13 MiB)
@@ -1964,9 +1952,6 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <!--
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Linq/1.0.94.0">System.Data.SQLite.Linq.1.0.94.0.nupkg</a>
-        -->
         <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Linq.Test/1.0.94.1">System.Data.SQLite.Linq.Test.1.0.94.1.nupkg</a>
         <br />
         (0.17 MiB)
@@ -1987,9 +1972,6 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <!--
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.MSIL/1.0.94.0">System.Data.SQLite.MSIL.1.0.94.0.nupkg</a>
-        -->
         <a href="http://nuget.org/api/v2/package/System.Data.SQLite.MSIL.Test/1.0.94.1">System.Data.SQLite.MSIL.Test.1.0.94.1.nupkg</a>
         <br />
         (0.98 MiB)
@@ -2015,56 +1997,6 @@
         (sha1: d15900a6b6a85400f76d612576f4777c59e9b494)
       </td>
     </tr>
-
-    <!--
-    <tr>
-      <td width="10">&nbsp;</td>
-      <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.x86/1.0.94.0">System.Data.SQLite.x86.1.0.94.0.nupkg</a>
-        <br />
-        (2.84 MiB)
-      </td>
-      <td width="5"></td>
-      <td valign="top">
-        This NuGet package contains all the binaries for the x86 version of
-        System.Data.SQLite 1.0.94.0 (3.8.6).  The .NET Framework 3.5 SP1,
-        4.0, 4.5, or 4.5.1 is required.  For the included native binaries, the
-        version of the Visual C++ runtime corresponding to the .NET Framework
-        used by the associated managed assembly is statically linked.
-        <br />
-        <big><b>This is a legacy package; if possible, please use either the
-        &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot;
-        package instead.  This package depends on the &quot;EntityFramework&quot;
-        package.</b></big>
-        <br />
-        (sha1: 6fff1da5842bca7e72f7fb78646d02bfb0af2508)
-      </td>
-    </tr>
-
-    <tr>
-      <td width="10">&nbsp;</td>
-      <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.x64/1.0.94.0">System.Data.SQLite.x64.1.0.94.0.nupkg</a>
-        <br />
-        (3.11 MiB)
-      </td>
-      <td width="5"></td>
-      <td valign="top">
-        This NuGet package contains all the binaries for the x64 version of
-        System.Data.SQLite 1.0.94.0 (3.8.6).  The .NET Framework 3.5 SP1,
-        4.0, 4.5, or 4.5.1 is required.  For the included native binaries, the
-        version of the Visual C++ runtime corresponding to the .NET Framework
-        used by the associated managed assembly is statically linked.
-        <br />
-        <big><b>This is a legacy package; if possible, please use either the
-        &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot;
-        package instead.  This package depends on the
-        &quot;EntityFramework&quot; package.</b></big>
-        <br />
-        (sha1: 48b4bd43c87882a700e915e86934d4df832f162c)
-      </td>
-    </tr>
-    -->
 
     <tr>
       <td colspan="4">
