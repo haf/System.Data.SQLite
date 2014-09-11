@@ -53,16 +53,16 @@
           <tr>
             <td>
               <ul>
-                <li><a href="features.wiki">Features</a></li>
                 <li><a href="faq.wiki">Frequently Asked Questions</a></li>
                 <li><a href="news.wiki">News</a></li>
                 <li><a href="support.wiki">Support</a></li>
                 <li><a href="downloads.wiki">Downloads</a></li>
-                <li><a href="contribute.wiki">Contributing</a></li>
                 <li><a href="source.wiki">Source Code</a></li>
                 <li><a href="build.wiki">Build Procedures</a></li>
                 <li><a href="test.wiki">Test Procedures</a></li>
                 <li><a href="release.wiki">Release Procedures</a></li>
+                <li><a href="contribute.wiki">Contributing</a></li>
+                <li><a href="features.wiki">Features</a></li>
                 <li><a href="copyright.wiki">Copyright</a></li>
               </ul>
             </td>
