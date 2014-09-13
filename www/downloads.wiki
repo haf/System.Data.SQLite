@@ -1851,7 +1851,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Test/1.0.94.1">System.Data.SQLite.Test.1.0.94.1.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Test/1.0.94.2">System.Data.SQLite.Test.1.0.94.2.nupkg</a>
         <br />
         (0.00 MiB)
       </td>
@@ -1875,14 +1875,14 @@
         &quot;System.Data.SQLite.EF6&quot; packages.</i></b></big>
         <br />
         <br />
-        (sha1: 62affc97284e2a3d142b433e81b8de4c40a6dc67)
+        (sha1: c8903e4875b8e4a45790d696f77a150de3022a20)
       </td>
     </tr>
 
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core.Test/1.0.94.1">System.Data.SQLite.Core.Test.1.0.94.1.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core.Test/1.0.94.2">System.Data.SQLite.Core.Test.1.0.94.2.nupkg</a>
         <br />
         (4.92 MiB)
       </td>
@@ -1898,16 +1898,16 @@
         <br />
         <big><b>This package does not depend on any other package.</b></big>
         <br />
-        (sha1: a642dc2cb0af24cc23d3ffdc485212d741d2c2be)
+        (sha1: 9b1ee72e9b14452e75cf4c85200618cfff6cac05)
       </td>
     </tr>
 
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core.MSIL.Test/1.0.94.1">System.Data.SQLite.Core.MSIL.Test.1.0.94.1.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Core.MSIL.Test/1.0.94.2">System.Data.SQLite.Core.MSIL.Test.1.0.94.2.nupkg</a>
         <br />
-        (0.68 MiB)
+        (0.69 MiB)
       </td>
       <td width="5"></td>
       <td valign="top">
@@ -1924,14 +1924,14 @@
         native library search path.</i></b></big>
         <br />
         <br />
-        (sha1: 361b827a299b5fc4e0c9d3401a93c05bf46f6323)
+        (sha1: e2c0d88d3adf0ba1c3b7aa0d8ce4dfe368679018)
       </td>
     </tr>
 
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.EF6.Test/1.0.94.1">System.Data.SQLite.EF6.Test.1.0.94.1.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.EF6.Test/1.0.94.2">System.Data.SQLite.EF6.Test.1.0.94.2.nupkg</a>
         <br />
         (0.13 MiB)
       </td>
@@ -1945,14 +1945,14 @@
         &quot;System.Data.SQLite.Core&quot; and &quot;EntityFramework&quot;
         packages.</b></big>
         <br />
-        (sha1: 06b9723fb553b4daa41795e796ec541ce60c8bbd)
+        (sha1: 537a9c7a8054f32973bed591d70636a70206fe9a)
       </td>
     </tr>
 
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Linq.Test/1.0.94.1">System.Data.SQLite.Linq.Test.1.0.94.1.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Linq.Test/1.0.94.2">System.Data.SQLite.Linq.Test.1.0.94.2.nupkg</a>
         <br />
         (0.17 MiB)
       </td>
@@ -1965,16 +1965,16 @@
         <big><b>This package depends on the &quot;System.Data.SQLite.Core&quot;
         package.</b></big>
         <br />
-        (sha1: 11f814b9da87a61cfe15f9122053f7df9dd1394f)
+        (sha1: 6c827573479e5141e7c501f5f83e7c1b97d399b9)
       </td>
     </tr>
 
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.MSIL.Test/1.0.94.1">System.Data.SQLite.MSIL.Test.1.0.94.1.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.MSIL.Test/1.0.94.2">System.Data.SQLite.MSIL.Test.1.0.94.2.nupkg</a>
         <br />
-        (0.98 MiB)
+        (0.99 MiB)
       </td>
       <td width="5"></td>
       <td valign="top">
@@ -1994,7 +1994,7 @@
         native library search path.</i></b></big>
         <br />
         <br />
-        (sha1: 95e5633744b1da252e8503a1cd4b61b7b3b859a8)
+        (sha1: 4f9b8b813d76d61f1f0ead5b5be30b89444ecb76)
       </td>
     </tr>
 
