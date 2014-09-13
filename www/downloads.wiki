@@ -1,6 +1,6 @@
-<title>System.Data.SQLite Download Page</title>
+<title>Downloads Page</title>
 <nowiki>
-  <h1>System.Data.SQLite Download Page</h1>
+  <h1>System.Data.SQLite Downloads</h1>
 
   <table width="100%" cellpadding="5" cellspacing="0">
     <tr bgcolor="#fff1c8">

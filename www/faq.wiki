@@ -237,8 +237,8 @@
       <a href="http://www.nuget.org/packages/System.Data.SQLite.Beta">
       System.Data.SQLite.Beta</a>: The SQLite database engine for both x86
       and x64 along with the ADO.NET provider, including support for LINQ
-      and Entity Framework 6.  <b>This package may contain beta code and
-      is not intended for production use.</b>
+      and Entity Framework 6.  <br><b>This package may contain &quot;beta&quot;
+      code and is not intended for production use.</b>
     </li>
 
     <li>
@@ -248,9 +248,37 @@
     </li>
 
     <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.Core.Beta">
+      System.Data.SQLite.Core.Beta</a>: The SQLite database engine for both x86
+      and x64 along with the ADO.NET provider.  <br><b>This package may contain
+      &quot;beta&quot; code and is not intended for production use.</b>
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.Core.Test">
+      System.Data.SQLite.Core.Test</a>: The SQLite database engine for both x86
+      and x64 along with the ADO.NET provider.  <br><b>This package may contain
+      pre-release code and is not intended for production use.</b>
+    </li>
+
+    <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.Core.MSIL">
       System.Data.SQLite.Core.MSIL</a>: Just the managed ADO.NET provider for
       SQLite.
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.Core.MSIL.Beta">
+      System.Data.SQLite.Core.MSIL</a>: Just the managed ADO.NET provider for
+      SQLite.  <br><b>This package may contain &quot;beta&quot; code and is not
+      intended for production use.</b>
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.Core.MSIL.Test">
+      System.Data.SQLite.Core.MSIL.Test</a>: Just the managed ADO.NET provider
+      for SQLite.  <br><b>This package may contain pre-release code and is not
+      intended for production use.</b>
     </li>
 
     <li>
@@ -260,9 +288,37 @@
     </li>
 
     <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.EF6.Beta">
+      System.Data.SQLite.EF6.Beta</a>: Just support for Entity Framework 6
+      using System.Data.SQLite.  <br><b>This package may contain
+      &quot;beta&quot; code and is not intended for production use.</b>
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.EF6.Test">
+      System.Data.SQLite.EF6.Test</a>: Just support for Entity Framework 6
+      using System.Data.SQLite.  <br><b>This package may contain pre-release
+      code and is not intended for production use.</b>
+    </li>
+
+    <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.Linq">
       System.Data.SQLite.Linq</a>: Just support for LINQ using
       System.Data.SQLite.
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.Linq.Beta">
+      System.Data.SQLite.Linq.Beta</a>: Just support for LINQ using
+      System.Data.SQLite.  <br><b>This package may contain &quot;beta&quot;
+      code and is not intended for production use.</b>
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.Linq.Test">
+      System.Data.SQLite.Linq.Test</a>: Just support for LINQ using
+      System.Data.SQLite.  <br><b>This package may contain pre-release code
+      and is not intended for production use.</b>
     </li>
 
     <li>
@@ -272,11 +328,25 @@
     </li>
 
     <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.MSIL.Beta">
+      System.Data.SQLite.MSIL</a>: Just the managed ADO.NET provider for
+      SQLite.  <br><b>This package may contain &quot;beta&quot; code and is
+      not intended for production use.</b>
+    </li>
+
+    <li>
+      <a href="http://www.nuget.org/packages/System.Data.SQLite.MSIL.Test">
+      System.Data.SQLite.MSIL</a>: Just the managed ADO.NET provider for
+      SQLite.  <br><b>This package may contain pre-release code and is not
+      intended for production use.</b>
+    </li>
+
+    <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.Test">
       System.Data.SQLite.Test</a>: The SQLite database engine for both x86
       and x64 along with the ADO.NET provider, including support for LINQ
-      and Entity Framework 6.  <b>This package may contain untested code
-      and is not intended for production use.</b>
+      and Entity Framework 6.  <br><b>This package may contain pre-release
+      code and is not intended for production use.</b>
     </li>
 
     <li>
