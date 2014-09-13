@@ -1,6 +1,6 @@
-<title>System.Data.SQLite Download Page</title>
+<title>Downloads Page</title>
 <nowiki>
-  <h1>System.Data.SQLite Download Page</h1>
+  <h1>System.Data.SQLite Downloads</h1>
 
   <table width="100%" cellpadding="5" cellspacing="0">
     <tr bgcolor="#fff1c8">
@@ -332,7 +332,7 @@
         <br /><br />
         Alternatively, as of version 1.0.91.0, all configuration settings can be
         specified via an optional
-        <a href="/index.html/artifact?ci=trunk&filename=System.Data.SQLite/System.Data.SQLite.dll.config">XML configuration file</a>.
+        <a href="/index.html/artifact?ci=trunk&filename=System.Data.SQLite/Configurations/System.Data.SQLite.dll.config">XML configuration file</a>.
         Using the XML configuration file when the primary System.Data.SQLite
         assembly (&quot;System.Data.SQLite.dll&quot;) is being executed from the
         Global Assembly Cache is <b>unsupported</b>.
