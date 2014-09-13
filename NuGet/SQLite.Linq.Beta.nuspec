@@ -13,7 +13,7 @@
     <title>System.Data.SQLite LINQ (x86/x64) Beta</title>
     <version>1.0.94.0</version>
     <authors>SQLite Development Team</authors>
-    <description>Support for LINQ using System.Data.SQLite.</description>
+    <description>This is a &quot;beta&quot; package and is not intended for production use.  Support for LINQ using System.Data.SQLite.</description>
     <language>en-US</language>
     <projectUrl>http://system.data.sqlite.org/</projectUrl>
     <iconUrl>http://system.data.sqlite.org/images/sqlite128.png</iconUrl>
