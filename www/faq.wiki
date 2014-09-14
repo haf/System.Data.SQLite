@@ -269,9 +269,9 @@
 
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.Core.MSIL.Beta">
-      System.Data.SQLite.Core.MSIL</a>: Just the managed ADO.NET provider for
-      SQLite.  <br><b>This package may contain &quot;beta&quot; code and is not
-      intended for production use.</b>
+      System.Data.SQLite.Core.MSIL.Beta</a>: Just the managed ADO.NET provider
+      for SQLite.  <br><b>This package may contain &quot;beta&quot; code and is
+      not intended for production use.</b>
     </li>
 
     <li>
@@ -329,14 +329,14 @@
 
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.MSIL.Beta">
-      System.Data.SQLite.MSIL</a>: Just the managed ADO.NET provider for
+      System.Data.SQLite.MSIL.Beta</a>: Just the managed ADO.NET provider for
       SQLite.  <br><b>This package may contain &quot;beta&quot; code and is
       not intended for production use.</b>
     </li>
 
     <li>
       <a href="http://www.nuget.org/packages/System.Data.SQLite.MSIL.Test">
-      System.Data.SQLite.MSIL</a>: Just the managed ADO.NET provider for
+      System.Data.SQLite.MSIL.Test</a>: Just the managed ADO.NET provider for
       SQLite.  <br><b>This package may contain pre-release code and is not
       intended for production use.</b>
     </li>
