@@ -112,38 +112,50 @@ IF EXIST "%TOOLS%\set_user_%USERNAME%.bat" (
   )
 )
 
+IF NOT DEFINED MSBUILD (
+  SET MSBUILD=MSBuild.exe
+)
+
+%_VECHO% MsBuild = '%MSBUILD%'
+
+IF NOT DEFINED CSC (
+  SET CSC=csc.exe
+)
+
+%_VECHO% Csc = '%CSC%'
+
 IF DEFINED NETFX20ONLY (
   %_AECHO% Forcing the use of the .NET Framework 2.0...
   SET YEAR=2005
-  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v2.0.50727
+  CALL :fn_CheckFramework v2.0.50727
   GOTO skip_netFxCheck
 )
 
 IF DEFINED NETFX35ONLY (
   %_AECHO% Forcing the use of the .NET Framework 3.5...
   SET YEAR=2008
-  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v3.5
+  CALL :fn_CheckFramework v3.5
   GOTO skip_netFxCheck
 )
 
 IF DEFINED NETFX40ONLY (
   %_AECHO% Forcing the use of the .NET Framework 4.0...
   SET YEAR=2010
-  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v4.0.30319
+  CALL :fn_CheckFramework v4.0.30319
   GOTO skip_netFxCheck
 )
 
 IF DEFINED NETFX45ONLY (
   %_AECHO% Forcing the use of the .NET Framework 4.5...
   SET YEAR=2012
-  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v4.0.30319
+  CALL :fn_CheckFramework v4.0.30319
   GOTO skip_netFxCheck
 )
 
 IF DEFINED NETFX451ONLY (
   %_AECHO% Forcing the use of the .NET Framework 4.5.1...
   SET YEAR=2013
-  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v4.0.30319
+  CALL :fn_CheckFramework v4.0.30319
   GOTO skip_netFxCheck
 )
 
@@ -154,7 +166,10 @@ IF DEFINED FRAMEWORKDIR (
 )
 
 IF DEFINED FRAMEWORKDIR (
-  IF NOT EXIST "%FRAMEWORKDIR%\csc.exe" (
+  IF NOT EXIST "%FRAMEWORKDIR%\%MSBUILD%" (
+    CALL :fn_UnsetVariable FRAMEWORKDIR
+  )
+  IF NOT EXIST "%FRAMEWORKDIR%\%CSC%" (
     CALL :fn_UnsetVariable FRAMEWORKDIR
   )
 )
@@ -162,22 +177,35 @@ IF DEFINED FRAMEWORKDIR (
 IF NOT DEFINED FRAMEWORKDIR (
   %_AECHO% Checking for the .NET Framework 4.0...
   SET YEAR=2010
-  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v4.0.30319
+  CALL :fn_CheckFramework v4.0.30319
 )
 
 IF NOT EXIST "%FRAMEWORKDIR%" (
   %_AECHO% Checking for the .NET Framework 3.5...
   SET YEAR=2008
-  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v3.5
+  CALL :fn_CheckFramework v3.5
 )
 
 IF NOT EXIST "%FRAMEWORKDIR%" (
   %_AECHO% Checking for the .NET Framework 2.0...
   SET YEAR=2005
-  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\v2.0.50727
+  CALL :fn_CheckFramework v2.0.50727
 )
 
 :skip_netFxCheck
+
+%_VECHO% Year = '%YEAR%'
+%_VECHO% FrameworkDir = '%FRAMEWORKDIR%'
+
+IF NOT DEFINED FRAMEWORKDIR (
+  ECHO.
+  ECHO The .NET Framework directory "FRAMEWORKDIR" is not defined.
+  ECHO.
+  ECHO Please install the .NET Framework or set the "FRAMEWORKDIR"
+  ECHO environment variable to the location where it is installed.
+  ECHO.
+  GOTO errors
+)
 
 IF NOT EXIST "%FRAMEWORKDIR%" (
   ECHO.
@@ -188,9 +216,6 @@ IF NOT EXIST "%FRAMEWORKDIR%" (
   ECHO.
   GOTO errors
 )
-
-%_VECHO% Year = '%YEAR%'
-%_VECHO% FrameworkDir = '%FRAMEWORKDIR%'
 
 CALL :fn_ResetErrorLevel
 
@@ -306,7 +331,7 @@ IF NOT DEFINED NOTAG (
 %_VECHO% BuildArgs = '%BUILD_ARGS%'
 %_VECHO% MsBuildArgs = '%MSBUILD_ARGS%'
 
-%__ECHO% MSBuild.exe "%SOLUTION%" "/target:%TARGET%" "/property:Configuration=%CONFIGURATION%" "/property:Platform=%PLATFORM%" %LOGGING% %BUILD_ARGS% %MSBUILD_ARGS%
+%__ECHO% "%MSBUILD%" "%SOLUTION%" "/target:%TARGET%" "/property:Configuration=%CONFIGURATION%" "/property:Platform=%PLATFORM%" %LOGGING% %BUILD_ARGS% %MSBUILD_ARGS%
 
 IF ERRORLEVEL 1 (
   ECHO Build failed.
@@ -321,6 +346,38 @@ IF ERRORLEVEL 1 (
 )
 
 GOTO no_errors
+
+:fn_CheckFramework
+  SET FRAMEWORKVER=%1
+  IF NOT DEFINED FRAMEWORKVER GOTO :EOF
+  IF DEFINED NOMSBUILD64 (
+    %_AECHO% Forced into using 32-bit version of MSBuild...
+    SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\%FRAMEWORKVER%
+    GOTO :EOF
+  )
+  IF NOT "%PROCESSOR_ARCHITECTURE%" == "x86" (
+    %_AECHO% The operating system appears to be 64-bit.
+    IF EXIST "%windir%\Microsoft.NET\Framework64\%FRAMEWORKVER%" (
+      IF EXIST "%windir%\Microsoft.NET\Framework64\%FRAMEWORKVER%\%MSBUILD%" (
+        IF EXIST "%windir%\Microsoft.NET\Framework64\%FRAMEWORKVER%\%CSC%" (
+          %_AECHO% Using 64-bit version of MSBuild...
+          SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework64\%FRAMEWORKVER%
+          GOTO :EOF
+        ) ELSE (
+          %_AECHO% Missing 64-bit version of "%CSC%".
+        )
+      ) ELSE (
+        %_AECHO% Missing 64-bit version of "%MSBUILD%".
+      )
+    ) ELSE (
+      %_AECHO% Missing 64-bit version of .NET Framework "%FRAMEWORKVER%".
+    )
+  ) ELSE (
+    %_AECHO% The operating system appears to be 32-bit.
+  )
+  %_AECHO% Using 32-bit version of MSBuild...
+  SET FRAMEWORKDIR=%windir%\Microsoft.NET\Framework\%FRAMEWORKVER%
+  GOTO :EOF
 
 :fn_UnquoteVariable
   IF NOT DEFINED %1 GOTO :EOF
