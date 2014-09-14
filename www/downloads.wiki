@@ -442,7 +442,7 @@
         This ZIP archive contains all current source code for System.Data.SQLite
         1.0.94.0 (3.8.6) combined into a single archive file.
         <br />
-        (sha1: d581ac783315e51bde70496f15ee69f181273b80)
+        (sha1: a254d5c89176b60d976d41741abddf5eeb6d334f)
       </td>
     </tr>
 
