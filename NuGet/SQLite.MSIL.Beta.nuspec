@@ -13,7 +13,7 @@
     <title>System.Data.SQLite (MSIL) Beta</title>
     <version>1.0.94.0</version>
     <authors>SQLite Development Team</authors>
-    <description>This is a legacy package; if possible, please use either the &quot;System.Data.SQLite&quot; or &quot;System.Data.SQLite.Core&quot; package instead.  An ADO.NET provider for SQLite (managed-only).</description>
+    <description>This is a &quot;beta&quot; package and is not intended for production use.  This is a legacy package; if possible, please use either the &quot;System.Data.SQLite.Beta&quot; or &quot;System.Data.SQLite.Core.Beta&quot; package instead.  An ADO.NET provider for SQLite (managed-only).</description>
     <language>en-US</language>
     <projectUrl>http://system.data.sqlite.org/</projectUrl>
     <iconUrl>http://system.data.sqlite.org/images/sqlite128.png</iconUrl>
