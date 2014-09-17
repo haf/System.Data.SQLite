@@ -1851,7 +1851,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite/1.0.94.0">System.Data.SQLite.1.0.94.0.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite/1.0.94.1">System.Data.SQLite.1.0.94.1.nupkg</a>
         <br />
         (0.00 MiB)
       </td>
@@ -1875,7 +1875,7 @@
         &quot;System.Data.SQLite.EF6&quot; packages.</i></b></big>
         <br />
         <br />
-        (sha1: f2b6ab4c789e093b022c4003b3f56e67e2b7e168)
+        (sha1: 45eaa9eab15571878adc89750a491e1990d63e12)
       </td>
     </tr>
 
