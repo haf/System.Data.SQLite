@@ -433,7 +433,7 @@
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
         <a name="sqlite-netFx-source"></a>
-        <a href="/downloads/1.0.94.0/sqlite-netFx-source-1.0.94.0.zip">sqlite-netFx-source-1.0.94.0.zip</a>
+        <a href="/downloads/1.0.94.0/sqlite-netFx-source-1.0.94.1.zip">sqlite-netFx-source-1.0.94.1.zip</a>
         <br />
         (4.93 MiB)
       </td>
@@ -442,7 +442,7 @@
         This ZIP archive contains all current source code for System.Data.SQLite
         1.0.94.0 (3.8.6) combined into a single archive file.
         <br />
-        (sha1: a254d5c89176b60d976d41741abddf5eeb6d334f)
+        (sha1: c59b48c22a0471634adb204f920ec397f69cfe1d)
       </td>
     </tr>
 
