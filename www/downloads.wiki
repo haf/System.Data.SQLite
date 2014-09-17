@@ -1851,7 +1851,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite/1.0.94.0">System.Data.SQLite.1.0.94.0.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite/1.0.94.1">System.Data.SQLite.1.0.94.1.nupkg</a>
         <br />
         (0.00 MiB)
       </td>
@@ -1875,7 +1875,7 @@
         &quot;System.Data.SQLite.EF6&quot; packages.</i></b></big>
         <br />
         <br />
-        (sha1: f2b6ab4c789e093b022c4003b3f56e67e2b7e168)
+        (sha1: 45eaa9eab15571878adc89750a491e1990d63e12)
       </td>
     </tr>
 
@@ -1952,7 +1952,7 @@
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Linq/1.0.94.0">System.Data.SQLite.Linq.1.0.94.0.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.Linq/1.0.94.1">System.Data.SQLite.Linq.1.0.94.1.nupkg</a>
         <br />
         (0.17 MiB)
       </td>
@@ -1965,14 +1965,14 @@
         <big><b>This package depends on the &quot;System.Data.SQLite.Core&quot;
         package.</b></big>
         <br />
-        (sha1: 2dd6fc1b9775e04b04038367c3f91a89e29011da)
+        (sha1: a08052b4d350e3ba830ebf0618bc8c221a2ef70e)
       </td>
     </tr>
 
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.MSIL/1.0.94.0">System.Data.SQLite.MSIL.1.0.94.0.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.MSIL/1.0.94.1">System.Data.SQLite.MSIL.1.0.94.1.nupkg</a>
         <br />
         (0.99 MiB)
       </td>
@@ -1994,14 +1994,14 @@
         native library search path.</i></b></big>
         <br />
         <br />
-        (sha1: ef2ed4cce24235f2a072f5a1ad23de51f5b503f9)
+        (sha1: 7689db66a5b1f2c9c751dbece99ec2faa840f48d)
       </td>
     </tr>
 
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.x86/1.0.94.0">System.Data.SQLite.x86.1.0.94.0.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.x86/1.0.94.1">System.Data.SQLite.x86.1.0.94.1.nupkg</a>
         <br />
         (2.84 MiB)
       </td>
@@ -2018,14 +2018,14 @@
         package instead.  This package depends on the &quot;EntityFramework&quot;
         package.</b></big>
         <br />
-        (sha1: 5abff17294c93d8a37084fd89501ce14880d1223)
+        (sha1: 501c8252fc23134ab99bc6c170a66732578e4a73)
       </td>
     </tr>
 
     <tr>
       <td width="10">&nbsp;</td>
       <td width="30%" valign="top" align="right">
-        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.x64/1.0.94.0">System.Data.SQLite.x64.1.0.94.0.nupkg</a>
+        <a href="http://nuget.org/api/v2/package/System.Data.SQLite.x64/1.0.94.1">System.Data.SQLite.x64.1.0.94.1.nupkg</a>
         <br />
         (3.11 MiB)
       </td>
@@ -2042,7 +2042,7 @@
         package instead.  This package depends on the
         &quot;EntityFramework&quot; package.</b></big>
         <br />
-        (sha1: fe0cfce19c186e0c675da2c8e2bf086900f7bc78)
+        (sha1: 0c9fffde7bd3ed7181ad5aa4dba8e372abe54f0c)
       </td>
     </tr>
 

@@ -1,7 +1,6 @@
 <configuration>
   <system.data>
     <DbProviderFactories>
-      <remove invariant="System.Data.SQLite" />
       <add name="SQLite Data Provider"
            invariant="System.Data.SQLite"
            description=".NET Framework Data Provider for SQLite"
