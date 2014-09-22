@@ -80,7 +80,7 @@ namespace System.Data.SQLite.Linq
       // where c1 = ..., c2 = ...
       commandText.Append("WHERE ");
       tree.Predicate.Accept(translator);
-      commandText.AppendLine();
+      commandText.AppendLine(";");
 
       // generate returning sql
       GenerateReturningSql(commandText, tree, translator, tree.Returning);
