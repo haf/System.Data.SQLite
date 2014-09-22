@@ -387,6 +387,7 @@ namespace System.Data.SQLite
           if (typ == DbType.Int32) return affinity;
           if (typ == DbType.Int64) return affinity;
           if (typ == DbType.Boolean) return affinity;
+          if (typ == DbType.SByte) return affinity;
           if (typ == DbType.Byte) return affinity;
           if (typ == DbType.DateTime) return affinity;
           if (typ == DbType.Single) return affinity;
@@ -400,9 +401,7 @@ namespace System.Data.SQLite
           if (typ == DbType.DateTime) return affinity;
           break;
         case TypeAffinity.Text:
-          if (typ == DbType.SByte) return affinity;
           if (typ == DbType.String) return affinity;
-          if (typ == DbType.SByte) return affinity;
           if (typ == DbType.Guid) return affinity;
           if (typ == DbType.DateTime) return affinity;
           if (typ == DbType.Decimal) return affinity;
