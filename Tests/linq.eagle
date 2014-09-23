@@ -17,56 +17,7 @@ runTestPrologue
 
 package require System.Data.SQLite.Test
 runSQLiteTestPrologue
-
-###############################################################################
-
-#
-# NOTE: Setup the variables that refer to the various non-data files required
-#       by the tests in this file.
-#
-set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
-set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
-set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
-set testLinqExeFile [getBuildFileName testlinq.exe]
-set testEf6ExeFile [getBuildFileName testef6.exe]
-
-#
-# NOTE: Setup the variables that refer to the various data files required by
-#       the tests in this file.
-#
-set northwindEfDbFile [file nativename [file join \
-    [file dirname [file dirname [getSQLiteTestDataPath]]] testlinq \
-    northwindEF.db]]
-
-#
-# NOTE: Setup the test constraints specific to the tests in this file.
-#
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteDllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteDllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteLinqDllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteLinqDllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteEf6DllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteEf6DllFile
-}
-
-if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
-  checkForFile $test_channel $testLinqExeFile testlinq.exe
-}
-
-if {![haveConstraint [appendArgs file_ [file tail $testEf6ExeFile]]]} then {
-  checkForFile $test_channel $testEf6ExeFile testef6.exe
-}
-
-if {![haveConstraint [appendArgs file_ [file tail $northwindEfDbFile]]]} then {
-  checkForFile $test_channel $northwindEfDbFile
-}
+runSQLiteTestFilesPrologue
 
 ###############################################################################
 
@@ -108,11 +59,6 @@ file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db} \
 
 ###############################################################################
 
-unset -nocomplain northwindEfDbFile testEf6ExeFile testLinqExeFile \
-    systemDataSQLiteEf6DllFile systemDataSQLiteLinqDllFile \
-    systemDataSQLiteDllFile
-
-###############################################################################
-
+runSQLiteTestFilesEpilogue
 runSQLiteTestEpilogue
 runTestEpilogue

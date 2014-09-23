@@ -17,6 +17,7 @@ runTestPrologue
 
 package require System.Data.SQLite.Test
 runSQLiteTestPrologue
+runSQLiteTestFilesPrologue
 
 ###############################################################################
 # ******************** BEGIN VOLATILE VERSION INFORMATION *********************
@@ -53,55 +54,6 @@ set version(full) [appendArgs $version(major) . $version(minor) . \
 #
 set version(nuget) [appendArgs $version(major) . $version(minor) . \
                                $version(build) . \\d+]
-
-###############################################################################
-
-#
-# NOTE: Setup the variables that refer to the various non-data files required
-#       by the tests in this file.
-#
-set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
-set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
-set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
-set sqliteDesignerDllFile [getBuildFileName SQLite.Designer.dll]
-set testExeFile [getBuildFileName test.exe]
-set testLinqExeFile [getBuildFileName testlinq.exe]
-set testEf6ExeFile [getBuildFileName testef6.exe]
-
-#
-# NOTE: Setup the test constraints specific to the tests in this file.
-#
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteDllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteDllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteLinqDllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteLinqDllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteEf6DllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteEf6DllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $sqliteDesignerDllFile]]]} then {
-  checkForFile $test_channel $sqliteDesignerDllFile
-}
-
-if {![haveConstraint [appendArgs file_ [file tail $testExeFile]]]} then {
-  checkForFile $test_channel $testExeFile test.exe
-}
-
-if {![haveConstraint [appendArgs file_ [file tail $testLinqExeFile]]]} then {
-  checkForFile $test_channel $testLinqExeFile testlinq.exe
-}
-
-if {![haveConstraint [appendArgs file_ [file tail $testEf6ExeFile]]]} then {
-  checkForFile $test_channel $testEf6ExeFile testef6.exe
-}
 
 ###############################################################################
 
@@ -979,7 +931,7 @@ for {set i 1} {$i <= [llength $fileNames]} {incr i} {
   set pattern [lindex $patterns [expr {$i - 1}]]
   set fileName [lindex $fileNames [expr {$i - 1}]]
   set constraint [string map [list / _ \\ _] $fileName]
-  set fileName [file join $root_path $fileName]
+  set fileName [file nativename [file join $root_path $fileName]]
 
   if {![haveConstraint [appendArgs file_ $constraint]]} then {
     checkForFile $test_channel $fileName $constraint
@@ -1002,11 +954,6 @@ unset -nocomplain constraint fileName pattern fileNames patterns i version
 
 ###############################################################################
 
-unset -nocomplain testEf6ExeFile testLinqExeFile testExeFile \
-    sqliteDesignerDllFile systemDataSQLiteEf6DllFile \
-    systemDataSQLiteLinqDllFile systemDataSQLiteDllFile
-
-###############################################################################
-
+runSQLiteTestFilesEpilogue
 runSQLiteTestEpilogue
 runTestEpilogue

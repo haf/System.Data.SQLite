@@ -17,130 +17,7 @@ runTestPrologue
 
 package require System.Data.SQLite.Test
 runSQLiteTestPrologue
-
-###############################################################################
-
-#
-# NOTE: Setup the variables that refer to the various non-data files required
-#       by the tests in this file.
-#
-set systemDataSQLiteDllFile [getBuildFileName System.Data.SQLite.dll]
-set systemDataSQLiteLinqDllFile [getBuildFileName System.Data.SQLite.Linq.dll]
-set systemDataSQLiteEf6DllFile [getBuildFileName System.Data.SQLite.EF6.dll]
-set sqliteDesignerDllFile [getBuildFileName SQLite.Designer.dll]
-set installerExeFile [getBuildFileName Installer.exe]
-
-#
-# NOTE: The various install/uninstall log files used to test the design-time
-#       component installer.
-#
-set testInstallVs2005LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Installer_Test_Vs2005.log]]
-
-set testInstallVs2008LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Installer_Test_Vs2008.log]]
-
-set testInstallVs2010LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Installer_Test_Vs2010.log]]
-
-set testInstallVs2012LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Installer_Test_Vs2012.log]]
-
-set testInstallVs2013LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Installer_Test_Vs2013.log]]
-
-set testUninstallVs2005LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Uninstaller_Test_Vs2005.log]]
-
-set testUninstallVs2008LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Uninstaller_Test_Vs2008.log]]
-
-set testUninstallVs2010LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Uninstaller_Test_Vs2010.log]]
-
-set testUninstallVs2012LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Uninstaller_Test_Vs2012.log]]
-
-set testUninstallVs2013LogFile [file nativename [file join \
-    [getSQLiteTestDataPath] Uninstaller_Test_Vs2013.log]]
-
-#
-# NOTE: Setup the test constraints specific to the tests in this file.
-#
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteDllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteDllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteLinqDllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteLinqDllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $systemDataSQLiteEf6DllFile]]]} then {
-  checkForFile $test_channel $systemDataSQLiteEf6DllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $sqliteDesignerDllFile]]]} then {
-  checkForFile $test_channel $sqliteDesignerDllFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $installerExeFile]]]} then {
-  checkForFile $test_channel $installerExeFile Installer.exe
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testInstallVs2005LogFile]]]} then {
-  checkForFile $test_channel $testInstallVs2005LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testInstallVs2008LogFile]]]} then {
-  checkForFile $test_channel $testInstallVs2008LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testInstallVs2010LogFile]]]} then {
-  checkForFile $test_channel $testInstallVs2010LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testInstallVs2012LogFile]]]} then {
-  checkForFile $test_channel $testInstallVs2012LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testInstallVs2013LogFile]]]} then {
-  checkForFile $test_channel $testInstallVs2013LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testUninstallVs2005LogFile]]]} then {
-  checkForFile $test_channel $testUninstallVs2005LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testUninstallVs2008LogFile]]]} then {
-  checkForFile $test_channel $testUninstallVs2008LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testUninstallVs2010LogFile]]]} then {
-  checkForFile $test_channel $testUninstallVs2010LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testUninstallVs2012LogFile]]]} then {
-  checkForFile $test_channel $testUninstallVs2012LogFile
-}
-
-if {![haveConstraint [appendArgs file_ \
-    [file tail $testUninstallVs2013LogFile]]]} then {
-  checkForFile $test_channel $testUninstallVs2013LogFile
-}
+runSQLiteTestFilesPrologue
 
 ###############################################################################
 
@@ -544,15 +421,6 @@ file_Uninstaller_Test_Vs2013.log}] -result {0 True}}
 
 ###############################################################################
 
-unset -nocomplain testUninstallVs2013LogFile testUninstallVs2012LogFile \
-    testUninstallVs2010LogFile testUninstallVs2008LogFile \
-    testUninstallVs2005LogFile testInstallVs2013LogFile \
-    testInstallVs2012LogFile testInstallVs2010LogFile \
-    testInstallVs2008LogFile testInstallVs2005LogFile sqliteDesignerDllFile \
-    installerExeFile systemDataSQLiteEf6DllFile systemDataSQLiteLinqDllFile \
-    systemDataSQLiteDllFile
-
-###############################################################################
-
+runSQLiteTestFilesEpilogue
 runSQLiteTestEpilogue
 runTestEpilogue

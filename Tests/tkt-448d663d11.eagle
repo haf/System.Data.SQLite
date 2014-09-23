@@ -17,26 +17,7 @@ runTestPrologue
 
 package require System.Data.SQLite.Test
 runSQLiteTestPrologue
-
-###############################################################################
-
-#
-# NOTE: Setup the variables that refer to the various data files required by
-#       the tests in this file.
-#
-set walDbFile [file nativename [file join [getSQLiteTestDataPath] wal.db]]
-set nonWalDbFile [file nativename [file join [getSQLiteTestDataPath] nonWal.db]]
-
-#
-# NOTE: Setup the test constraints specific to the tests in this file.
-#
-if {![haveConstraint [appendArgs file_ [file tail $walDbFile]]]} then {
-  checkForFile $test_channel $walDbFile
-}
-
-if {![haveConstraint [appendArgs file_ [file tail $nonWalDbFile]]]} then {
-  checkForFile $test_channel $nonWalDbFile
-}
+runSQLiteTestFilesPrologue
 
 ###############################################################################
 
@@ -297,9 +278,6 @@ System.Data.SQLite file_wal.db} -result {wal}}
 
 ###############################################################################
 
-unset -nocomplain nonWalDbFile walDbFile
-
-###############################################################################
-
+runSQLiteTestFilesEpilogue
 runSQLiteTestEpilogue
 runTestEpilogue
