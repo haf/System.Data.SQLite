@@ -122,6 +122,10 @@ namespace testlinq
 
                       return EFTransactionTest(value);
                   }
+              case "update":
+                  {
+                      return UpdateTest();
+                  }
               default:
                   {
                       Console.WriteLine("unknown test \"{0}\"", arg);
@@ -325,6 +329,77 @@ namespace testlinq
                   }
 #endif
               }
+          }
+
+          return 0;
+      }
+
+      //
+      // NOTE: Used to test the UPDATE fix (i.e. the missing semi-colon
+      //       in the SQL statement between the actual UPDATE statement
+      //       and the follow-up SELECT statement).
+      //
+      private static int UpdateTest()
+      {
+          long[] orderIds = new long[] {
+              0
+          };
+
+          using (northwindEFEntities db = new northwindEFEntities())
+          {
+              int[] counts = { 0, 0 };
+
+              //
+              // NOTE: *REQUIRED* This is required so that the
+              //       Entity Framework is prevented from opening
+              //       multiple connections to the underlying SQLite
+              //       database (i.e. which would result in multiple
+              //       IMMEDIATE transactions, thereby failing [later
+              //       on] with locking errors).
+              //
+              db.Connection.Open();
+
+              for (int index = 0; index < orderIds.Length; index++)
+              {
+                  Orders newOrders = new Orders();
+
+                  newOrders.ShipAddress = String.Format(
+                      "Test Order Ship Address, Index #{0}",
+                      index);
+
+                  db.Orders.AddObject(newOrders);
+
+                  try
+                  {
+                      db.SaveChanges();
+                      counts[0]++;
+
+                      // StoreGeneratedPattern="Identity"
+                      orderIds[index] = newOrders.OrderID;
+
+                      // StoreGeneratedPattern="None"
+                      newOrders.ShipAddress = String.Format(
+                          "New Order Ship Address #{0}",
+                          orderIds[index]);
+
+                      // StoreGeneratedPattern="Computed"
+                      newOrders.Freight = 1;
+
+                      db.SaveChanges();
+                      counts[1]++;
+                  }
+                  catch (Exception e)
+                  {
+                      Console.WriteLine(e);
+                  }
+                  finally
+                  {
+                      db.AcceptAllChanges();
+                  }
+              }
+
+              Console.WriteLine(
+                  "inserted {0} updated {1}", counts[0], counts[1]);
           }
 
           return 0;

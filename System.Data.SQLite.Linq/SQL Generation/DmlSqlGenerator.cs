@@ -227,6 +227,7 @@ namespace System.Data.SQLite.Linq
         if (translator.MemberValues.TryGetValue(keyMember, out value))
         {
           commandText.Append(value.ParameterName);
+          commandText.AppendLine(";");
         }
         else
         {

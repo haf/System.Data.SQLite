@@ -651,6 +651,7 @@ set sds_manifests(source) {
   Tests/data/wal.db
   Tests/empty.eagle
   Tests/installer.eagle
+  Tests/linq.eagle
   Tests/pkgIndex.eagle
   Tests/speed.eagle
   Tests/stress.eagle
