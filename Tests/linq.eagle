@@ -21,7 +21,7 @@ runSQLiteTestFilesPrologue
 
 ###############################################################################
 
-runTest {test linq-1.1 {LINQ Transaction Scope} -body {
+runTest {test linq-1.1 {DbUpdateCommandTree with UPDATE and SELECT} -body {
   #
   # NOTE: Re-copy the reference database file used for this unit test to the
   #       build directory in case it has been changed by a previous test run.

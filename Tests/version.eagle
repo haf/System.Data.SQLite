@@ -934,7 +934,7 @@ for {set i 1} {$i <= [llength $fileNames]} {incr i} {
   set fileName [file nativename [file join $root_path $fileName]]
 
   if {![haveConstraint [appendArgs file_ $constraint]]} then {
-    checkForFile $test_channel $fileName $constraint
+    checkForFile $test_channel $fileName $constraint; # EXEMPT: Dynamic.
   }
 
   runTest {test [appendArgs version-1.21. $i] \
