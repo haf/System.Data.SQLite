@@ -11,7 +11,7 @@
   <metadata>
     <id>System.Data.SQLite.Core.MSIL.Test</id>
     <title>System.Data.SQLite (MSIL) Test</title>
-    <version>1.0.94.2</version>
+    <version>1.0.95.0</version>
     <authors>SQLite Development Team</authors>
     <description>This is a pre-release package and is not intended for production use.  An ADO.NET provider for SQLite (managed-only).</description>
     <language>en-US</language>

@@ -31,7 +31,7 @@ runSQLiteTestFilesPrologue
 #
 set version(major)             1
 set version(minor)             0
-set version(build)            94; # NOTE: Incremented with each release.
+set version(build)            95; # NOTE: Incremented with each release.
 set version(revision)          0
 
 ###############################################################################

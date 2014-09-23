@@ -5,7 +5,7 @@
 </head>
 <body>
 ADO.NET SQLite Data Provider<br />
-Version 1.0.94.0 September 9, 2014<br />
+Version 1.0.95.0 November XX, 2014 <font color="red">(release scheduled)</font><br />
 Using <a href="http://www.sqlite.org/releaselog/3_8_6.html">SQLite 3.8.6</a><br />
 Originally written by Robert Simpson<br />
 Released to the public domain, use at your own risk!<br />
@@ -146,7 +146,7 @@ app.config file:<br />
         &lt;DbProviderFactories&gt;
             &lt;remove invariant="System.Data.SQLite" /&gt;
             &lt;add name="SQLite Data Provider" invariant="System.Data.SQLite" description=".NET Framework Data Provider for SQLite"
-                 type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=1.0.94.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139" /&gt;
+                 type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=1.0.95.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139" /&gt;
         &lt;/DbProviderFactories&gt;
     &lt;/system.data&gt;
 &lt;/configuration&gt;
@@ -208,6 +208,13 @@ released versions of System.Data.SQLite.
 
 <h2><b>Version History</b></h2>
 
+<p>
+    <b>1.0.95.0 - November XX, 2014 <font color="red">(release scheduled)</font></b>
+</p>
+<ul>
+    <li>Make sure SQL statements generated for DbUpdateCommandTree objects are properly delimited.</li>
+    <li>In the SQLiteDataReader.VerifyType method, remove duplicate &quot;if&quot; statement for the DbType.SByte value and move the remaining &quot;if&quot; to the Int64 affinity.  Fix for [c5cc2fb334].&nbsp;<b>** Potentially Incompatible Change **</b></li>
+</ul>
 <p>
     <b>1.0.94.0 - September 9, 2014</b>
 </p>
