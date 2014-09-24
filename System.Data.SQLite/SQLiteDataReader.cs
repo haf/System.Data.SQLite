@@ -347,6 +347,11 @@ namespace System.Data.SQLite
         }
     }
 
+    private int PrivateVisibleFieldCount
+    {
+        get { return _fieldCount; }
+    }
+
     /// <summary>
     /// Returns the number of visible fields in the current resultset
     /// </summary>
@@ -356,8 +361,17 @@ namespace System.Data.SQLite
       {
         CheckDisposed();
         CheckClosed();
-        return _fieldCount;
+        return PrivateVisibleFieldCount;
       }
+    }
+
+    /// <summary>
+    /// This method is used to make sure the result set is open and a row is currently available.
+    /// </summary>
+    private void VerifyForGet()
+    {
+        CheckClosed();
+        CheckValidRow();
     }
 
     /// <summary>
@@ -375,45 +389,42 @@ namespace System.Data.SQLite
     /// <param name="typ">The type we want to get out of the column</param>
     private TypeAffinity VerifyType(int i, DbType typ)
     {
-      CheckClosed();
-      CheckValidRow();
+        TypeAffinity affinity = GetSQLiteType(_flags, i).Affinity;
 
-      TypeAffinity affinity = GetSQLiteType(_flags, i).Affinity;
+        switch (affinity)
+        {
+            case TypeAffinity.Int64:
+                if (typ == DbType.Int16) return affinity;
+                if (typ == DbType.Int32) return affinity;
+                if (typ == DbType.Int64) return affinity;
+                if (typ == DbType.Boolean) return affinity;
+                if (typ == DbType.SByte) return affinity;
+                if (typ == DbType.Byte) return affinity;
+                if (typ == DbType.DateTime) return affinity;
+                if (typ == DbType.Single) return affinity;
+                if (typ == DbType.Double) return affinity;
+                if (typ == DbType.Decimal) return affinity;
+                break;
+            case TypeAffinity.Double:
+                if (typ == DbType.Single) return affinity;
+                if (typ == DbType.Double) return affinity;
+                if (typ == DbType.Decimal) return affinity;
+                if (typ == DbType.DateTime) return affinity;
+                break;
+            case TypeAffinity.Text:
+                if (typ == DbType.String) return affinity;
+                if (typ == DbType.Guid) return affinity;
+                if (typ == DbType.DateTime) return affinity;
+                if (typ == DbType.Decimal) return affinity;
+                break;
+            case TypeAffinity.Blob:
+                if (typ == DbType.Guid) return affinity;
+                if (typ == DbType.String) return affinity;
+                if (typ == DbType.Binary) return affinity;
+                break;
+        }
 
-      switch (affinity)
-      {
-        case TypeAffinity.Int64:
-          if (typ == DbType.Int16) return affinity;
-          if (typ == DbType.Int32) return affinity;
-          if (typ == DbType.Int64) return affinity;
-          if (typ == DbType.Boolean) return affinity;
-          if (typ == DbType.SByte) return affinity;
-          if (typ == DbType.Byte) return affinity;
-          if (typ == DbType.DateTime) return affinity;
-          if (typ == DbType.Single) return affinity;
-          if (typ == DbType.Double) return affinity;
-          if (typ == DbType.Decimal) return affinity;
-          break;
-        case TypeAffinity.Double:
-          if (typ == DbType.Single) return affinity;
-          if (typ == DbType.Double) return affinity;
-          if (typ == DbType.Decimal) return affinity;
-          if (typ == DbType.DateTime) return affinity;
-          break;
-        case TypeAffinity.Text:
-          if (typ == DbType.String) return affinity;
-          if (typ == DbType.Guid) return affinity;
-          if (typ == DbType.DateTime) return affinity;
-          if (typ == DbType.Decimal) return affinity;
-          break;
-        case TypeAffinity.Blob:
-          if (typ == DbType.Guid) return affinity;
-          if (typ == DbType.String) return affinity;
-          if (typ == DbType.Binary) return affinity;
-          break;
-      }
-
-      throw new InvalidCastException();
+        throw new InvalidCastException();
     }
 
     /// <summary>
@@ -423,13 +434,14 @@ namespace System.Data.SQLite
     /// <returns>bool</returns>
     public override bool GetBoolean(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetBoolean(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetBoolean(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.Boolean);
-      return Convert.ToBoolean(GetValue(i), CultureInfo.CurrentCulture);
+        VerifyType(i, DbType.Boolean);
+        return Convert.ToBoolean(GetValue(i), CultureInfo.CurrentCulture);
     }
 
     /// <summary>
@@ -439,13 +451,14 @@ namespace System.Data.SQLite
     /// <returns>byte</returns>
     public override byte GetByte(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetByte(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetByte(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.Byte);
-      return Convert.ToByte(_activeStatement._sql.GetInt32(_activeStatement, i));
+        VerifyType(i, DbType.Byte);
+        return Convert.ToByte(_activeStatement._sql.GetInt32(_activeStatement, i));
     }
 
     /// <summary>
@@ -462,13 +475,14 @@ namespace System.Data.SQLite
     /// </remarks>
     public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetBytes(i - VisibleFieldCount, fieldOffset, buffer, bufferoffset, length);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetBytes(i - PrivateVisibleFieldCount, fieldOffset, buffer, bufferoffset, length);
 
-      VerifyType(i, DbType.Binary);
-      return _activeStatement._sql.GetBytes(_activeStatement, i, (int)fieldOffset, buffer, bufferoffset, length);
+        VerifyType(i, DbType.Binary);
+        return _activeStatement._sql.GetBytes(_activeStatement, i, (int)fieldOffset, buffer, bufferoffset, length);
     }
 
     /// <summary>
@@ -478,13 +492,14 @@ namespace System.Data.SQLite
     /// <returns>char</returns>
     public override char GetChar(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetChar(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetChar(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.SByte);
-      return Convert.ToChar(_activeStatement._sql.GetInt32(_activeStatement, i));
+        VerifyType(i, DbType.SByte);
+        return Convert.ToChar(_activeStatement._sql.GetInt32(_activeStatement, i));
     }
 
     /// <summary>
@@ -501,13 +516,14 @@ namespace System.Data.SQLite
     /// </remarks>
     public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetChars(i - VisibleFieldCount, fieldoffset, buffer, bufferoffset, length);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetChars(i - PrivateVisibleFieldCount, fieldoffset, buffer, bufferoffset, length);
 
-      VerifyType(i, DbType.String);
-      return _activeStatement._sql.GetChars(_activeStatement, i, (int)fieldoffset, buffer, bufferoffset, length);
+        VerifyType(i, DbType.String);
+        return _activeStatement._sql.GetChars(_activeStatement, i, (int)fieldoffset, buffer, bufferoffset, length);
     }
 
     /// <summary>
@@ -517,14 +533,15 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetDataTypeName(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetDataTypeName(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetDataTypeName(i - PrivateVisibleFieldCount);
 
-      SQLiteType typ = GetSQLiteType(_flags, i);
-      if (typ.Type == DbType.Object) return SQLiteConvert.SQLiteTypeToType(typ).Name;
-      return _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity);
+        SQLiteType typ = GetSQLiteType(_flags, i);
+        if (typ.Type == DbType.Object) return SQLiteConvert.SQLiteTypeToType(typ).Name;
+        return _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity);
     }
 
     /// <summary>
@@ -534,13 +551,14 @@ namespace System.Data.SQLite
     /// <returns>DateTime</returns>
     public override DateTime GetDateTime(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetDateTime(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetDateTime(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.DateTime);
-      return _activeStatement._sql.GetDateTime(_activeStatement, i);
+        VerifyType(i, DbType.DateTime);
+        return _activeStatement._sql.GetDateTime(_activeStatement, i);
     }
 
     /// <summary>
@@ -550,13 +568,14 @@ namespace System.Data.SQLite
     /// <returns>decimal</returns>
     public override decimal GetDecimal(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetDecimal(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetDecimal(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.Decimal);
-      return Decimal.Parse(_activeStatement._sql.GetText(_activeStatement, i), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
+        VerifyType(i, DbType.Decimal);
+        return Decimal.Parse(_activeStatement._sql.GetText(_activeStatement, i), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -566,13 +585,14 @@ namespace System.Data.SQLite
     /// <returns>double</returns>
     public override double GetDouble(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetDouble(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetDouble(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.Double);
-      return _activeStatement._sql.GetDouble(_activeStatement, i);
+        VerifyType(i, DbType.Double);
+        return _activeStatement._sql.GetDouble(_activeStatement, i);
     }
 
     /// <summary>
@@ -582,12 +602,13 @@ namespace System.Data.SQLite
     /// <returns>Type</returns>
     public override Type GetFieldType(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetFieldType(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetFieldType(i - PrivateVisibleFieldCount);
 
-      return SQLiteConvert.SQLiteTypeToType(GetSQLiteType(_flags, i));
+        return SQLiteConvert.SQLiteTypeToType(GetSQLiteType(_flags, i));
     }
 
     /// <summary>
@@ -597,13 +618,14 @@ namespace System.Data.SQLite
     /// <returns>float</returns>
     public override float GetFloat(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetFloat(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetFloat(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.Single);
-      return Convert.ToSingle(_activeStatement._sql.GetDouble(_activeStatement, i));
+        VerifyType(i, DbType.Single);
+        return Convert.ToSingle(_activeStatement._sql.GetDouble(_activeStatement, i));
     }
 
     /// <summary>
@@ -613,20 +635,21 @@ namespace System.Data.SQLite
     /// <returns>Guid</returns>
     public override Guid GetGuid(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetGuid(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetGuid(i - PrivateVisibleFieldCount);
 
-      TypeAffinity affinity = VerifyType(i, DbType.Guid);
-      if (affinity == TypeAffinity.Blob)
-      {
-        byte[] buffer = new byte[16];
-        _activeStatement._sql.GetBytes(_activeStatement, i, 0, buffer, 0, 16);
-        return new Guid(buffer);
-      }
-      else
-        return new Guid(_activeStatement._sql.GetText(_activeStatement, i));
+        TypeAffinity affinity = VerifyType(i, DbType.Guid);
+        if (affinity == TypeAffinity.Blob)
+        {
+            byte[] buffer = new byte[16];
+            _activeStatement._sql.GetBytes(_activeStatement, i, 0, buffer, 0, 16);
+            return new Guid(buffer);
+        }
+        else
+            return new Guid(_activeStatement._sql.GetText(_activeStatement, i));
     }
 
     /// <summary>
@@ -636,13 +659,14 @@ namespace System.Data.SQLite
     /// <returns>Int16</returns>
     public override Int16 GetInt16(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetInt16(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetInt16(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.Int16);
-      return Convert.ToInt16(_activeStatement._sql.GetInt32(_activeStatement, i));
+        VerifyType(i, DbType.Int16);
+        return Convert.ToInt16(_activeStatement._sql.GetInt32(_activeStatement, i));
     }
 
     /// <summary>
@@ -652,13 +676,14 @@ namespace System.Data.SQLite
     /// <returns>Int32</returns>
     public override Int32 GetInt32(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetInt32(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetInt32(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.Int32);
-      return _activeStatement._sql.GetInt32(_activeStatement, i);
+        VerifyType(i, DbType.Int32);
+        return _activeStatement._sql.GetInt32(_activeStatement, i);
     }
 
     /// <summary>
@@ -668,13 +693,14 @@ namespace System.Data.SQLite
     /// <returns>Int64</returns>
     public override Int64 GetInt64(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetInt64(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetInt64(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.Int64);
-      return _activeStatement._sql.GetInt64(_activeStatement, i);
+        VerifyType(i, DbType.Int64);
+        return _activeStatement._sql.GetInt64(_activeStatement, i);
     }
 
     /// <summary>
@@ -684,12 +710,13 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetName(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetName(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetName(i - PrivateVisibleFieldCount);
 
-      return _activeStatement._sql.ColumnName(_activeStatement, i);
+        return _activeStatement._sql.ColumnName(_activeStatement, i);
     }
 
     /// <summary>
@@ -700,7 +727,8 @@ namespace System.Data.SQLite
     public override int GetOrdinal(string name)
     {
       CheckDisposed();
-      CheckClosed();
+      VerifyForGet();
+
       if (_throwOnDisposed) SQLiteCommand.Check(_command);
 
       //
@@ -727,7 +755,7 @@ namespace System.Data.SQLite
           if (r == -1 && _keyInfo != null)
           {
               r = _keyInfo.GetOrdinal(name);
-              if (r > -1) r += VisibleFieldCount;
+              if (r > -1) r += PrivateVisibleFieldCount;
           }
 
           _fieldIndexes.Add(name, r);
@@ -1125,13 +1153,14 @@ namespace System.Data.SQLite
     /// <returns>string</returns>
     public override string GetString(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetString(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetString(i - PrivateVisibleFieldCount);
 
-      VerifyType(i, DbType.String);
-      return _activeStatement._sql.GetText(_activeStatement, i);
+        VerifyType(i, DbType.String);
+        return _activeStatement._sql.GetText(_activeStatement, i);
     }
 
     /// <summary>
@@ -1141,28 +1170,28 @@ namespace System.Data.SQLite
     /// <returns>object</returns>
     public override object GetValue(int i)
     {
-      CheckDisposed();
-      CheckValidRow();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.GetValue(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.GetValue(i - PrivateVisibleFieldCount);
 
-      SQLiteType typ = GetSQLiteType(_flags, i);
+        SQLiteType typ = GetSQLiteType(_flags, i);
 
-      if (((_flags & SQLiteConnectionFlags.DetectTextAffinity) == SQLiteConnectionFlags.DetectTextAffinity) &&
-          ((typ == null) || (typ.Affinity == TypeAffinity.Text)))
-      {
-          typ = GetSQLiteType(
-              typ, _activeStatement._sql.GetText(_activeStatement, i));
-      }
-      else if (((_flags & SQLiteConnectionFlags.DetectStringType) == SQLiteConnectionFlags.DetectStringType) &&
-          ((typ == null) || SQLiteConvert.IsStringDbType(typ.Type)))
-      {
-          typ = GetSQLiteType(
-              typ, _activeStatement._sql.GetText(_activeStatement, i));
-      }
+        if (((_flags & SQLiteConnectionFlags.DetectTextAffinity) == SQLiteConnectionFlags.DetectTextAffinity) &&
+            ((typ == null) || (typ.Affinity == TypeAffinity.Text)))
+        {
+            typ = GetSQLiteType(
+                typ, _activeStatement._sql.GetText(_activeStatement, i));
+        }
+        else if (((_flags & SQLiteConnectionFlags.DetectStringType) == SQLiteConnectionFlags.DetectStringType) &&
+            ((typ == null) || SQLiteConvert.IsStringDbType(typ.Type)))
+        {
+            typ = GetSQLiteType(
+                typ, _activeStatement._sql.GetText(_activeStatement, i));
+        }
 
-      return _activeStatement._sql.GetValue(_activeStatement, _flags, i, typ);
+        return _activeStatement._sql.GetValue(_activeStatement, _flags, i, typ);
     }
 
     /// <summary>
@@ -1202,7 +1231,7 @@ namespace System.Data.SQLite
         if ((_activeStatement == null) || (_activeStatement._sql == null))
             throw new InvalidOperationException();
 
-        int nMax = VisibleFieldCount;
+        int nMax = PrivateVisibleFieldCount;
         NameValueCollection result = new NameValueCollection(nMax);
 
         for (int n = 0; n < nMax; n++)
@@ -1262,12 +1291,13 @@ namespace System.Data.SQLite
     /// <returns>True or False</returns>
     public override bool IsDBNull(int i)
     {
-      CheckDisposed();
+        CheckDisposed();
+        VerifyForGet();
 
-      if (i >= VisibleFieldCount && _keyInfo != null)
-        return _keyInfo.IsDBNull(i - VisibleFieldCount);
+        if (i >= PrivateVisibleFieldCount && _keyInfo != null)
+            return _keyInfo.IsDBNull(i - PrivateVisibleFieldCount);
 
-      return _activeStatement._sql.IsNull(_activeStatement, i);
+        return _activeStatement._sql.IsNull(_activeStatement, i);
     }
 
     /// <summary>
@@ -1448,25 +1478,26 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteType structure</returns>
     private SQLiteType GetSQLiteType(SQLiteConnectionFlags flags, int i)
     {
-      SQLiteType typ;
+        SQLiteType typ;
 
-      // Initialize the field types array if not already initialized
-      if (_fieldTypeArray == null)
-        _fieldTypeArray = new SQLiteType[VisibleFieldCount];
+        // Initialize the field types array if not already initialized
+        if (_fieldTypeArray == null)
+            _fieldTypeArray = new SQLiteType[PrivateVisibleFieldCount];
 
-      // Initialize this column's field type instance
-      if (_fieldTypeArray[i] == null) _fieldTypeArray[i] = new SQLiteType();
+        // Initialize this column's field type instance
+        if (_fieldTypeArray[i] == null) _fieldTypeArray[i] = new SQLiteType();
+        typ = _fieldTypeArray[i];
 
-      typ = _fieldTypeArray[i];
+        // If not initialized, then fetch the declared column datatype and attempt to convert it
+        // to a known DbType.
+        if (typ.Affinity == TypeAffinity.Uninitialized)
+        {
+            typ.Type = SQLiteConvert.TypeNameToDbType(
+                GetConnection(this), _activeStatement._sql.ColumnType(
+                _activeStatement, i, out typ.Affinity), flags);
+        }
 
-      // If not initialized, then fetch the declared column datatype and attempt to convert it
-      // to a known DbType.
-      if (typ.Affinity == TypeAffinity.Uninitialized)
-        typ.Type = SQLiteConvert.TypeNameToDbType(GetConnection(this), _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity), flags);
-      else
-        typ.Affinity = _activeStatement._sql.ColumnAffinity(_activeStatement, i);
-
-      return typ;
+        return typ;
     }
 
     /// <summary>
