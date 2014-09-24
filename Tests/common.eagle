@@ -2230,6 +2230,49 @@ namespace eval ::Eagle {
       #
       if {$force || [isSQLiteReady]} then {
         #
+        # BUGFIX: Make sure that any "leaked" transactions and/or connections
+        #         are cleaned up before calling the native shutdown function.
+        #
+        foreach transaction [info transactions] {
+          if {[string match \
+              System#Data#SQLite#SQLiteTransaction#* $transaction]} then {
+            if {[catch {
+              sql transaction rollback $transaction
+            } error] == 0} then {
+              if {!$quiet} then {
+                tputs $channel [appendArgs \
+                    "---- rolled back leaked transaction \"" \
+                    $transaction \"\n]
+              }
+            } else {
+              if {!$quiet} then {
+                tputs $channel [appendArgs \
+                    "==== WARNING: failed to rollback leaked transaction \"" \
+                    $transaction "\", error: " \n\t $error \n]
+              }
+            }
+          }
+        }
+
+        foreach db [info connections] {
+          if {[string match \
+              System#Data#SQLite#SQLiteConnection#* $db]} then {
+            if {[catch {sql close $db} error] == 0} then {
+              if {!$quiet} then {
+                tputs $channel [appendArgs \
+                    "---- closed leaked database \"" $db \"\n]
+              }
+            } else {
+              if {!$quiet} then {
+                tputs $channel [appendArgs \
+                    "==== WARNING: failed to close leaked database \"" \
+                    $db "\", error: " \n\t $error \n]
+              }
+            }
+          }
+        }
+
+        #
         # BUGFIX: Before calling the native shutdown function, make sure both
         #         of the PRAGMA related directory names are freed.
         #
