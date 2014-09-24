@@ -603,7 +603,6 @@ namespace System.Data.SQLite
     public override Type GetFieldType(int i)
     {
         CheckDisposed();
-        VerifyForGet();
 
         if (i >= PrivateVisibleFieldCount && _keyInfo != null)
             return _keyInfo.GetFieldType(i - PrivateVisibleFieldCount);
@@ -711,7 +710,6 @@ namespace System.Data.SQLite
     public override string GetName(int i)
     {
         CheckDisposed();
-        VerifyForGet();
 
         if (i >= PrivateVisibleFieldCount && _keyInfo != null)
             return _keyInfo.GetName(i - PrivateVisibleFieldCount);
@@ -1495,6 +1493,11 @@ namespace System.Data.SQLite
             typ.Type = SQLiteConvert.TypeNameToDbType(
                 GetConnection(this), _activeStatement._sql.ColumnType(
                 _activeStatement, i, out typ.Affinity), flags);
+        }
+        else
+        {
+            typ.Affinity = _activeStatement._sql.ColumnAffinity(
+                _activeStatement, i);
         }
 
         return typ;
