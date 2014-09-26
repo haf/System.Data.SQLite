@@ -88,7 +88,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// Matches the version of the connection.
     /// </summary>
-    internal long _version;
+    internal int _version;
 
     /// <summary>
     /// The "stub" (i.e. placeholder) base schema name to use when returning

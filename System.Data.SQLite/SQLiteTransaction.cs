@@ -21,7 +21,7 @@ namespace System.Data.SQLite
     /// The connection to which this transaction is bound
     /// </summary>
     internal SQLiteConnection _cnn;
-    internal long _version; // Matches the version of the connection
+    internal int _version; // Matches the version of the connection
     private IsolationLevel _level;
 
     /// <summary>
