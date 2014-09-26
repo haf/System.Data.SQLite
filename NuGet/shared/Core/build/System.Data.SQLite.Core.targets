@@ -29,17 +29,17 @@
 
   <Target Name="CopySQLiteInteropFiles"
           Condition="'$(CopySQLiteInteropFiles)' != 'false' And
-                     '$(OutputPath)' != '' And
-                     HasTrailingSlash('$(OutputPath)') And
-                     Exists('$(OutputPath)')"
+                     '$(OutDir)' != '' And
+                     HasTrailingSlash('$(OutDir)') And
+                     Exists('$(OutDir)')"
           Inputs="@(SQLiteInteropFiles)"
-          Outputs="@(SQLiteInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')">
+          Outputs="@(SQLiteInteropFiles -> '$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')">
     <!--
         NOTE: Copy "SQLite.Interop.dll" and all related files, for every
               architecture that we support, to the build output directory.
     -->
     <Copy SourceFiles="@(SQLiteInteropFiles)"
-          DestinationFiles="@(SQLiteInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(SQLiteInteropFiles -> '$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <!--
@@ -48,14 +48,14 @@
 
   <Target Name="CleanSQLiteInteropFiles"
           Condition="'$(CleanSQLiteInteropFiles)' != 'false' And
-                     '$(OutputPath)' != '' And
-                     HasTrailingSlash('$(OutputPath)') And
-                     Exists('$(OutputPath)')">
+                     '$(OutDir)' != '' And
+                     HasTrailingSlash('$(OutDir)') And
+                     Exists('$(OutDir)')">
     <!--
         NOTE: Delete "SQLite.Interop.dll" and all related files, for every
               architecture that we support, from the build output directory.
     -->
-    <Delete Files="@(SQLiteInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Delete Files="@(SQLiteInteropFiles -> '$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <!--
