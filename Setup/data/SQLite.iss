@@ -163,7 +163,7 @@ Components: {#InstallerCondition}; Tasks: gac\vs2005; Filename: {app}\bin\Instal
 #endif
 
 #if Year != "2005" && Year != "2008"
-Components: Application\LINQ; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.EF6.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
+Components: Application\EF6; Tasks: ngen; Filename: {code:GetNetFx4InstallRoot|Ngen.exe}; Parameters: "uninstall ""{app}\bin\System.Data.SQLite.EF6.dll"" /nologo"; Flags: skipifdoesntexist; Check: CheckIsNetFx4Setup()
 #endif
 
 #if Year != "2005"
