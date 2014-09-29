@@ -1469,6 +1469,7 @@ namespace eval ::Eagle {
       set array(tclInterps,$index) 0
       set array(tclThreads,$index) 0
       set array(tclCommands,$index) 0
+      set array(scriptThreads,$index) 0
 
       catch {set array(connections,$index) [llength [info connections]]}
       catch {set array(transactions,$index) [llength [info transactions]]}
@@ -1482,6 +1483,16 @@ namespace eval ::Eagle {
       catch {set array(tclInterps,$index) [llength [tcl interps]]}
       catch {set array(tclThreads,$index) [llength [tcl threads]]}
       catch {set array(tclCommands,$index) [llength [tcl command list]]}
+
+      #
+      # NOTE: Grab the number of active threads that are active because
+      #       of ScriptThread object instances.  This only works if Eagle
+      #       is Beta 31 or higher.
+      #
+      catch {
+        set array(scriptThreads,$index) [object invoke -flags +NonPublic \
+            ScriptThread activeCount]
+      }
     }
   }
 
@@ -1495,10 +1506,10 @@ namespace eval ::Eagle {
       #       the .NET Framework has no way to unload them without tearing
       #       down the entire application domain.
       #
-      lappend statistics scopes processes objects objectCallbacks \
-          objectTypes objectInterfaces objectNamespaces connections \
-          transactions modules delegates tcl tclInterps tclThreads \
-          tclCommands; # assemblies
+      lappend statistics \
+          scopes assemblies processes objects objectCallbacks objectTypes \
+          objectInterfaces objectNamespaces connections transactions modules \
+          delegates tcl tclInterps tclThreads tclCommands scriptThreads
     }
 
     #

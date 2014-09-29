@@ -48,6 +48,18 @@ namespace eval ::Eagle {
         $::tcl_platform(platform) eq "windows"}]
   }
 
+  #
+  # NOTE: This procedure should return non-zero if and only if only there
+  #       is currently an interactive user that can respond to prompts and
+  #       other requests for input.
+  #
+  proc isInteractive {} {
+    #
+    # TODO: Is more complex checking required here?
+    #
+    return [expr {[info exists ::tcl_interactive] && $::tcl_interactive}]
+  }
+
   proc haveGaruda { {varName ""} } {
     #
     # NOTE: Check for a variable name to place the Garuda package Id into.
@@ -1297,7 +1309,9 @@ namespace eval ::Eagle {
     #       "#check" command.  To disable this functionality, simply
     #       redefine this procedure to do nothing.
     #
-    proc checkForUpdate { {wantScripts false} {quiet false} } {
+    proc checkForUpdate {
+            {wantScripts false} {quiet false} {prompt false}
+            {automatic false} } {
       #
       # NOTE: This should work properly in Eagle only.
       #
@@ -1515,11 +1529,31 @@ namespace eval ::Eagle {
                 #       checking now.
                 #
                 if {$checkBuild} then {
-                  return [list [appendArgs \
+                  #
+                  # NOTE: Are we supposed to prompt the interactive user,
+                  #       if any, to upgrade now?
+                  #
+                  set text [appendArgs \
                       "latest build " $patchLevel ", dated " $dateTime \
                       ", is newer than the running build " $enginePatchLevel \
-                      ", dated " $engineDateTime] [list $baseUri \
-                      $patchLevel] [list $notes]]
+                      ", dated " $engineDateTime]
+
+                  if {$prompt && [isInteractive]} then {
+                    set caption [appendArgs \
+                        [info engine Name] " " [lindex [info level 0] 0]]
+
+                    if {[object invoke -flags +NonPublic \
+                        Eagle._Components.Private.WindowOps YesOrNo \
+                        [appendArgs $text \n\n "Run the updater now?"] \
+                        $caption false]} then {
+                      #
+                      # NOTE: Ok, run the updater now and then exit.
+                      #
+                      runUpdateAndExit $automatic
+                    }
+                  }
+
+                  return [list $text [list $baseUri $patchLevel] [list $notes]]
                 }
 
                 #
@@ -2309,15 +2343,15 @@ namespace eval ::Eagle {
     #       into the global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        isEagle isWindows haveGaruda isTclThread isMono isSameFileName \
-        getEnvironmentVariable combineFlags getCompileInfo getPlatformInfo \
-        getPluginPath appendArgs lappendArgs getDictionaryValue \
-        getColumnValue getRowColumnValue tqputs tqlog readFile \
-        readSharedFile writeFile appendFile appendLogFile appendSharedFile \
-        appendSharedLogFile readAsciiFile writeAsciiFile readUnicodeFile \
-        writeUnicodeFile getDirResultPath addToPath removeFromPath execShell \
-        lshuffle ldifference filter map reduce getLengthModifier debug \
-        findDirectories findFiles findFilesRecursive \
+        isEagle isWindows isInteractive haveGaruda isTclThread isMono \
+        isSameFileName getEnvironmentVariable combineFlags getCompileInfo \
+        getPlatformInfo getPluginPath appendArgs lappendArgs \
+        getDictionaryValue getColumnValue getRowColumnValue tqputs tqlog \
+        readFile readSharedFile writeFile appendFile appendLogFile \
+        appendSharedFile appendSharedLogFile readAsciiFile writeAsciiFile \
+        readUnicodeFile writeUnicodeFile getDirResultPath addToPath \
+        removeFromPath execShell lshuffle ldifference filter map reduce \
+        getLengthModifier debug findDirectories findFiles findFilesRecursive \
         exportAndImportPackageCommands] false false
 
     ###########################################################################
