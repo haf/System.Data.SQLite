@@ -269,7 +269,9 @@ namespace System.Data.SQLite
       if (_version == 0)
         throw new SQLiteException("Execution was aborted by the user");
 
-      if (_command.Connection.State != ConnectionState.Open || _command.Connection._version != _version)
+      SQLiteConnection connection = _command.Connection;
+
+      if (connection._version != _version || connection.State != ConnectionState.Open)
         throw new InvalidOperationException("Connection was closed, statement was terminated");
     }
 
@@ -406,8 +408,8 @@ namespace System.Data.SQLite
                 if (typ == DbType.Decimal) return affinity;
                 break;
             case TypeAffinity.Double:
-                if (typ == DbType.Single) return affinity;
                 if (typ == DbType.Double) return affinity;
+                if (typ == DbType.Single) return affinity;
                 if (typ == DbType.Decimal) return affinity;
                 if (typ == DbType.DateTime) return affinity;
                 break;
