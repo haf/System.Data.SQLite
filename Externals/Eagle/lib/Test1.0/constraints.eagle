@@ -58,6 +58,36 @@ namespace eval ::Eagle {
         [list 3 4] [list 3 5] [list 3 6]]
   }
 
+  #
+  # NOTE: This procedure was adapted from the one listed on the Tcl Wiki page
+  #       at "http://wiki.tcl.tk/43".  It is only intended to be used on very
+  #       small lists because of its heavy use of recursion and complexity on
+  #       the order of O(N!).
+  #
+  proc lpermute { list } {
+    set length [llength $list]
+    if {$length < 2} {
+      return [list $list]
+    }
+    set index 0
+    foreach element1 $list {
+      if {$index == 0} then {
+        set rest [lrange $list 1 end]
+      } elseif {$index == $length - 1} then {
+        set rest [lrange $list 0 end-1]
+      } else {
+        set rest [concat \
+            [lrange $list 0 [expr {$index - 1}]] \
+            [lrange $list [expr {$index + 1}] end]]
+      }
+      incr index
+      foreach list2 [lpermute $rest] {
+        lappend result [concat [list $element1] $list2]
+      }
+    }
+    return $result
+  }
+
   proc alwaysFullInterpReady {} {
     #
     # NOTE: The [interp readylimit] sub-command is only in Eagle.
@@ -997,8 +1027,8 @@ namespace eval ::Eagle {
   }
 
   proc checkForFile { channel name {constraint ""} } {
-    tputs $channel [appendArgs "---- checking for file \"" $name \
-        "\"... "]
+    tputs $channel [appendArgs "---- checking for file \"" \
+        [file normalize $name] "\"... "]
 
     if {[file exists $name]} then {
       #
@@ -1540,11 +1570,11 @@ namespace eval ::Eagle {
 
     if {[isEagle]} then {
       #
-      # NOTE: Running this check on the Mono 3.3.0 release build will lock
-      #       up the process; therefore, attempt to skip it in that case.
+      # NOTE: Running this check on the Mono 3.3.0 (or 3.4.0?) release build
+      #       will lock up the process; therefore, skip it in that case.
       #
       if {[info exists ::no(mono)] || ![isMono] || \
-          ![haveConstraint mono33]} then {
+          (![haveConstraint mono33] && ![haveConstraint mono34])} then {
         #
         # BUGBUG: Tcl 8.4 does not like this expression (and Tcl tries to
         #         compile it even though it will only actually ever be
@@ -1570,7 +1600,7 @@ namespace eval ::Eagle {
           tputs $channel no\n
         }
       } else {
-        tputs $channel "skipped, broken on Mono 3.3.0\n"
+        tputs $channel "skipped, may hang on Mono 3.3.0 and 3.4.0\n"
       }
     } else {
       #
@@ -2143,6 +2173,19 @@ namespace eval ::Eagle {
             " " ( $dotVersion ) \n]
       } else {
         tputs $channel no\n
+      }
+    }
+
+    proc checkForProcessBits { channel } {
+      tputs $channel "---- checking for process bits... "
+
+      if {[info exists ::tcl_platform(processBits)] && \
+          [string is integer -strict $::tcl_platform(processBits)]} then {
+        addConstraint [appendArgs $::tcl_platform(processBits) bit]
+
+        tputs $channel [appendArgs $::tcl_platform(processBits) -bit\n]
+      } else {
+        tputs $channel unknown\n
       }
     }
 
@@ -3188,21 +3231,22 @@ namespace eval ::Eagle {
     #       global namespace.
     #
     exportAndImportPackageCommands [namespace current] [list \
-        getKnownCompileOptions getKnownMonoVersions alwaysFullInterpReady \
-        canExecTclShell canExecFossil checkForTestSuiteFiles checkForPlatform \
-        checkForWindowsVersion checkForScriptLibrary checkForVariable \
-        checkForTclOptions checkForWindowsCommandProcessor checkForFossil \
-        checkForEagle checkForSymbols checkForLogFile checkForGaruda \
-        checkForShell checkForDebug checkForTk checkForVersion \
-        checkForCommand checkForNamespaces checkForTestExec \
-        checkForTestMachine checkForTestPlatform checkForTestConfiguration \
-        checkForTestSuffix checkForFile checkForPathFile checkForNativeCode \
-        checkForTip127 checkForTip194 checkForTip207 checkForTip241 \
-        checkForTip285 checkForTip405 checkForTip426 checkForTip429 \
-        checkForTiming checkForPerformance checkForBigLists \
-        checkForMemoryIntensive checkForStackIntensive checkForInteractive \
-        checkForInteractiveCommand checkForUserInteraction checkForNetwork \
-        checkForCompileOption checkForKnownCompileOptions] false false
+        getKnownCompileOptions getKnownMonoVersions lpermute \
+        alwaysFullInterpReady canExecTclShell canExecFossil \
+        checkForTestSuiteFiles checkForPlatform checkForWindowsVersion \
+        checkForScriptLibrary checkForVariable checkForTclOptions \
+        checkForWindowsCommandProcessor checkForFossil checkForEagle \
+        checkForSymbols checkForLogFile checkForGaruda checkForShell \
+        checkForDebug checkForTk checkForVersion checkForCommand \
+        checkForNamespaces checkForTestExec checkForTestMachine \
+        checkForTestPlatform checkForTestConfiguration checkForTestSuffix \
+        checkForFile checkForPathFile checkForNativeCode checkForTip127 \
+        checkForTip194 checkForTip207 checkForTip241 checkForTip285 \
+        checkForTip405 checkForTip426 checkForTip429 checkForTiming \
+        checkForPerformance checkForBigLists checkForMemoryIntensive \
+        checkForStackIntensive checkForInteractive checkForInteractiveCommand \
+        checkForUserInteraction checkForNetwork checkForCompileOption \
+        checkForKnownCompileOptions] false false
 
     ###########################################################################
     ############################## END Tcl ONLY ###############################

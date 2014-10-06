@@ -980,6 +980,13 @@ if {![info exists no([file tail [info script]])]} then {
     }
 
     #
+    # NOTE: Has process bits detection support been disabled?
+    #
+    if {![info exists no(processBits)]} then {
+      checkForProcessBits $test_channel
+    }
+
+    #
     # NOTE: Has machine detection support been disabled?
     #
     if {![info exists no(machine)]} then {
@@ -2693,6 +2700,15 @@ if {![info exists no([file tail [info script]])]} then {
 
     tputs $test_channel [appendArgs $test_base_cops \n]
     tputs $test_channel \
+        "---- checking for baseline BogoCops multipliers... "
+
+    if {![info exists test_base_cops_multipliers]} then {
+      set test_base_cops_multipliers [list \
+          2 4 8 10 16 20 32 50 64 100 1000 10000 100000 1000000]
+    }
+
+    tputs $test_channel [appendArgs $test_base_cops_multipliers \n]
+    tputs $test_channel \
         "---- checking for current BogoCops (commands-per-second)... "
 
     if {![info exists test_cops]} then {
@@ -2704,19 +2720,45 @@ if {![info exists no([file tail [info script]])]} then {
         "---- checking for current BogoCops against baseline BogoCops... "
 
     if {$test_cops > $test_base_cops} then {
-      addConstraint sameOrFasterBogoCops
-      addConstraint fasterBogoCops
+      if {![info exists no(fasterBogoCops)]} then {
+        addConstraint sameOrFasterBogoCops
+        addConstraint fasterBogoCops
+
+        if {![info exists no(bogoCopsMultipliers)]} then {
+          foreach multiplier $test_base_cops_multipliers {
+            if {$test_cops >= $test_base_cops * $multiplier} then {
+              addConstraint [appendArgs fasterBogoCopsBy $multiplier X]
+            }
+          }
+
+          unset multiplier
+        }
+      }
 
       tputs $test_channel faster\n
     } elseif {$test_cops < $test_base_cops} then {
-      addConstraint sameOrSlowerBogoCops
-      addConstraint slowerBogoCops
+      if {![info exists no(slowerBogoCops)]} then {
+        addConstraint sameOrSlowerBogoCops
+        addConstraint slowerBogoCops
+
+        if {![info exists no(bogoCopsMultipliers)]} then {
+          foreach multiplier $test_base_cops_multipliers {
+            if {$test_cops <= $test_base_cops * (1.0 / $multiplier)} then {
+              addConstraint [appendArgs slowerBogoCopsBy $multiplier X]
+            }
+          }
+
+          unset multiplier
+        }
+      }
 
       tputs $test_channel slower\n
     } else {
-      addConstraint sameOrFasterBogoCops
-      addConstraint sameOrSlowerBogoCops
-      addConstraint sameBogoCops
+      if {![info exists no(sameBogoCops)]} then {
+        addConstraint sameOrFasterBogoCops
+        addConstraint sameOrSlowerBogoCops
+        addConstraint sameBogoCops
+      }
 
       tputs $test_channel same\n
     }
