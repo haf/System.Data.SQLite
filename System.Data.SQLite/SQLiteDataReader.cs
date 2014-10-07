@@ -396,15 +396,15 @@ namespace System.Data.SQLite
         switch (affinity)
         {
             case TypeAffinity.Int64:
-                if (typ == DbType.Int16) return affinity;
-                if (typ == DbType.Int32) return affinity;
                 if (typ == DbType.Int64) return affinity;
-                if (typ == DbType.Boolean) return affinity;
-                if (typ == DbType.SByte) return affinity;
+                if (typ == DbType.Int32) return affinity;
+                if (typ == DbType.Int16) return affinity;
                 if (typ == DbType.Byte) return affinity;
+                if (typ == DbType.SByte) return affinity;
+                if (typ == DbType.Boolean) return affinity;
                 if (typ == DbType.DateTime) return affinity;
-                if (typ == DbType.Single) return affinity;
                 if (typ == DbType.Double) return affinity;
+                if (typ == DbType.Single) return affinity;
                 if (typ == DbType.Decimal) return affinity;
                 break;
             case TypeAffinity.Double:
@@ -421,8 +421,8 @@ namespace System.Data.SQLite
                 break;
             case TypeAffinity.Blob:
                 if (typ == DbType.Guid) return affinity;
-                if (typ == DbType.String) return affinity;
                 if (typ == DbType.Binary) return affinity;
+                if (typ == DbType.String) return affinity;
                 break;
         }
 
@@ -1390,8 +1390,8 @@ namespace System.Data.SQLite
         // Ahh, we found a row-returning resultset eligible to be returned!
         _activeStatement = stmt;
         _fieldCount = fieldCount;
-        _fieldIndexes = null;
-        _fieldTypeArray = null;
+        _fieldIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        _fieldTypeArray = new SQLiteType[PrivateVisibleFieldCount];
 
         if ((_commandBehavior & CommandBehavior.KeyInfo) != 0)
           LoadKeyInfo();
@@ -1478,15 +1478,13 @@ namespace System.Data.SQLite
     /// <returns>A SQLiteType structure</returns>
     private SQLiteType GetSQLiteType(SQLiteConnectionFlags flags, int i)
     {
-        SQLiteType typ;
+        SQLiteType typ = _fieldTypeArray[i];
 
-        // Initialize the field types array if not already initialized
-        if (_fieldTypeArray == null)
-            _fieldTypeArray = new SQLiteType[PrivateVisibleFieldCount];
-
-        // Initialize this column's field type instance
-        if (_fieldTypeArray[i] == null) _fieldTypeArray[i] = new SQLiteType();
-        typ = _fieldTypeArray[i];
+        if (typ == null)
+        {
+            // Initialize this column's field type instance
+            typ = _fieldTypeArray[i] = new SQLiteType();
+        }
 
         // If not initialized, then fetch the declared column datatype and attempt to convert it
         // to a known DbType.
