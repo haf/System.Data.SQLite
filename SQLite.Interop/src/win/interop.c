@@ -744,17 +744,26 @@ SQLITE_API void WINAPI sqlite3_result_int64_interop(sqlite3_context *pctx, sqlit
 
 SQLITE_API int WINAPI sqlite3_context_collcompare_interop(sqlite3_context *ctx, const void *p1, int p1len, const void *p2, int p2len)
 {
+#if SQLITE_VERSION_NUMBER >= 3008007
+  CollSeq *pColl = sqlite3GetFuncCollSeq(ctx);
+#else
+  CollSeq *pColl = ctx->pColl;
+#endif
 #if SQLITE_VERSION_NUMBER >= 3008001
   if ((ctx->pFunc->funcFlags & SQLITE_FUNC_NEEDCOLL) == 0) return 2;
 #else
   if ((ctx->pFunc->flags & SQLITE_FUNC_NEEDCOLL) == 0) return 2;
 #endif
-  return ctx->pColl->xCmp(ctx->pColl->pUser, p1len, p1, p2len, p2);
+  return pColl->xCmp(pColl->pUser, p1len, p1, p2len, p2);
 }
 
 SQLITE_API const char * WINAPI sqlite3_context_collseq_interop(sqlite3_context *ctx, int *ptype, int *enc, int *plen)
 {
+#if SQLITE_VERSION_NUMBER >= 3008007
+  CollSeq *pColl = sqlite3GetFuncCollSeq(ctx);
+#else
   CollSeq *pColl = ctx->pColl;
+#endif
   *ptype = 0;
   *plen = 0;
   *enc = 0;

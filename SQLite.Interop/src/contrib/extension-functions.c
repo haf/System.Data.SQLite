@@ -1025,7 +1025,11 @@ static void charindexFunc(sqlite3_context *context, int argc, sqlite3_value **ar
   u8 *z2;                /* s2 string */
   int s=0;
   int rVal=0;
+#if SQLITE_VERSION_NUMBER >= 3008007
+  CollSeq *pColl = sqlite3GetFuncCollSeq(context);
+#else
   CollSeq *pColl = context->pColl;
+#endif
 
   assert( argc==3 ||argc==2);
 

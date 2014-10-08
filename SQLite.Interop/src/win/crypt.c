@@ -290,7 +290,11 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *pKey, int nKeyLen)
     hKey = DeriveKey(pKey, nKeyLen);
     if (hKey == MAXDWORD)
     {
+#if SQLITE_VERSION_NUMBER >= 3008007
+      sqlite3ErrorWithMsg(db, rc, SQLITECRYPTERROR_PROVIDER);
+#else
       sqlite3Error(db, rc, SQLITECRYPTERROR_PROVIDER);
+#endif
       return rc;
     }
   }
@@ -344,7 +348,11 @@ SQLITE_API int sqlite3_rekey_v2(sqlite3 *db, const char *zDbName, const void *pK
 
   if (hKey == MAXDWORD)
   {
+#if SQLITE_VERSION_NUMBER >= 3008007
+    sqlite3ErrorWithMsg(db, rc, SQLITECRYPTERROR_PROVIDER);
+#else
     sqlite3Error(db, rc, SQLITECRYPTERROR_PROVIDER);
+#endif
     return rc;
   }
 
