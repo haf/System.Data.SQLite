@@ -47,7 +47,8 @@
     <ul>
       <li>Updated to <a href="http://www.sqlite.org/src/info/trunk">SQLite 3.8.7</a>.</li>
       <li>Make sure SQL statements generated for DbUpdateCommandTree objects are properly delimited.</li>
-      <li>In the SQLiteDataReader.VerifyType method, remove duplicate &quot;if&quot; statement for the DbType.SByte value and move the remaining &quot;if&quot; to the Int64 affinity.  Fix for <a href="http://system.data.sqlite.org/index.html/info/c5cc2fb334">[c5cc2fb334]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>Various minor performance enhancements to the SQLiteDataReader class. Pursuant to <a href="http://system.data.sqlite.org/index.html/info/e122d26e70">[e122d26e70]</a>.</li>
+      <li>In the SQLiteDataReader.VerifyType method, remove duplicate &quot;if&quot; statement for the DbType.SByte value and move the remaining &quot;if&quot; to the Int64 affinity. Fix for <a href="http://system.data.sqlite.org/index.html/info/c5cc2fb334">[c5cc2fb334]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     </ul>
     <p><b>1.0.94.0 - September 9, 2014</b></p>
     <ul>

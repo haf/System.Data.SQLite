@@ -42,7 +42,7 @@ namespace System.Data.SQLite
     /// <summary>
     /// The version of the connection the command is associated with
     /// </summary>
-    private long _version;
+    private int _version;
     /// <summary>
     /// Indicates whether or not a DataReader is active on the command.
     /// </summary>

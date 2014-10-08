@@ -520,7 +520,7 @@ namespace System.Data.SQLite
 
     internal bool _binaryGuid;
 
-    internal long _version;
+    internal int _version;
 
     private event SQLiteAuthorizerEventHandler _authorizerHandler;
     private event SQLiteUpdateEventHandler _updateHandler;
