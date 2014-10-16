@@ -923,11 +923,14 @@ SQLITE_API int WINAPI sqlite3_cursor_rowid_interop(sqlite3_stmt *pstmt, int curs
     if(ret)
       break;
 
+#if SQLITE_VERSION_NUMBER < 3008007
     if(pC->rowidIsValid)
     {
       *prowid = pC->lastRowid;
     }
-    else if(pC->pseudoTableReg > 0)
+    else
+#endif
+    if(pC->pseudoTableReg > 0)
     {
       ret = SQLITE_ERROR;
       break;
