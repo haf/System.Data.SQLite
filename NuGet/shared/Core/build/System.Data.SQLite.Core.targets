@@ -62,8 +62,8 @@
   ******************************************************************************
   -->
 
-  <Target Name="IncludeSQLiteInteropFilesForPackage"
-          Condition="'$(IncludeSQLiteInteropFilesForPackage)' != 'false'">
+  <Target Name="IncludeSQLiteInteropFilesForPackaging"
+          Condition="'$(IncludeSQLiteInteropFilesForPackaging)' != 'false'">
     <ItemGroup>
       <FilesForPackagingFromProject Include="@(SQLiteInteropFiles)">
         <DestinationRelativePath>bin\%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
@@ -97,7 +97,7 @@
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '' Or
                             '$(VisualStudioVersion)' == '10.0'">
     <CopyAllFilesToSingleFolderForPackageDependsOn>
-      IncludeSQLiteInteropFilesForPackage;
+      IncludeSQLiteInteropFilesForPackaging;
       $(CopyAllFilesToSingleFolderForPackageDependsOn);
     </CopyAllFilesToSingleFolderForPackageDependsOn>
   </PropertyGroup>
@@ -111,7 +111,7 @@
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '11.0' Or
                             '$(VisualStudioVersion)' == '12.0'">
     <CopyAllFilesToSingleFolderForMsdeployDependsOn>
-      IncludeSQLiteInteropFilesForPackage;
+      IncludeSQLiteInteropFilesForPackaging;
       $(CopyAllFilesToSingleFolderForMsdeployDependsOn);
     </CopyAllFilesToSingleFolderForMsdeployDependsOn>
   </PropertyGroup>
