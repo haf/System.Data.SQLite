@@ -6,7 +6,7 @@
     <b>1.0.95.0 - November XX, 2014 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
-    <li>Updated to [http://www.sqlite.org/src/info/trunk|SQLite 3.8.7].</li>
+    <li>Updated to [http://www.sqlite.org/releaselog/3_8_7.html|SQLite 3.8.7].</li>
     <li>Make sure SQL statements generated for DbUpdateCommandTree objects are properly delimited.</li>
     <li>Various minor performance enhancements to the SQLiteDataReader class. Pursuant to [e122d26e70].</li>
     <li>In the SQLiteDataReader.VerifyType method, remove duplicate &quot;if&quot; statement for the DbType.SByte value and move the remaining &quot;if&quot; to the Int64 affinity.  Fix for [c5cc2fb334].&nbsp;<b>** Potentially Incompatible Change **</b></li>
