@@ -60,6 +60,19 @@
 
   <!--
   ******************************************************************************
+  -->
+
+  <Target Name="IncludeSQLiteInteropFilesForPackage"
+          Condition="'$(IncludeSQLiteInteropFilesForPackage)' != 'false'">
+    <ItemGroup>
+      <FilesForPackagingFromProject Include="@(SQLiteInteropFiles)">
+        <DestinationRelativePath>bin\%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
+      </FilesForPackagingFromProject>
+    </ItemGroup>
+  </Target>
+
+  <!--
+  ******************************************************************************
   **                 SQLite Interop Library Build Properties                  **
   ******************************************************************************
   -->
@@ -73,5 +86,33 @@
       $(CleanDependsOn);
       CleanSQLiteInteropFiles;
     </CleanDependsOn>
+  </PropertyGroup>
+
+  <!--
+  ******************************************************************************
+  **     SQLite Interop Library Publish Properties for Visual Studio 2010     **
+  ******************************************************************************
+  -->
+
+  <PropertyGroup Condition="'$(VisualStudioVersion)' == '' Or
+                            '$(VisualStudioVersion)' == '10.0'">
+    <CopyAllFilesToSingleFolderForPackageDependsOn>
+      IncludeSQLiteInteropFilesForPackage;
+      $(CopyAllFilesToSingleFolderForPackageDependsOn);
+    </CopyAllFilesToSingleFolderForPackageDependsOn>
+  </PropertyGroup>
+
+  <!--
+  ******************************************************************************
+  **     SQLite Interop Library Publish Properties for Visual Studio 2012     **
+  ******************************************************************************
+  -->
+
+  <PropertyGroup Condition="'$(VisualStudioVersion)' == '11.0' Or
+                            '$(VisualStudioVersion)' == '12.0'">
+    <CopyAllFilesToSingleFolderForMsdeployDependsOn>
+      IncludeSQLiteInteropFilesForPackage;
+      $(CopyAllFilesToSingleFolderForMsdeployDependsOn);
+    </CopyAllFilesToSingleFolderForMsdeployDependsOn>
   </PropertyGroup>
 </Project>
