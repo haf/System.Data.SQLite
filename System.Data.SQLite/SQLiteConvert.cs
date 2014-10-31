@@ -41,10 +41,13 @@ namespace System.Data.SQLite
     protected static readonly DateTime UnixEpoch =
         new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
+    #pragma warning disable 414
     /// <summary>
-    /// The value of the OLE Automation epoch represented as a Julian day.
+    /// The value of the OLE Automation epoch represented as a Julian day.  This
+    /// field cannot be removed as the test suite relies upon it.
     /// </summary>
     private static readonly double OleAutomationEpochAsJulianDay = 2415018.5;
+    #pragma warning restore 414
 
     /// <summary>
     /// The format string for DateTime values when using the InvariantCulture or CurrentCulture formats.
@@ -55,13 +58,13 @@ namespace System.Data.SQLite
     /// This is the minimum Julian Day value supported by this library
     /// (148731163200000).
     /// </summary>
-    private static readonly long MinimumJD = computeJD(DateTime.MinValue);
+    private static readonly long MinimumJd = computeJD(DateTime.MinValue);
 
     /// <summary>
     /// This is the maximum Julian Day value supported by this library
     /// (464269060799000).
     /// </summary>
-    private static readonly long MaximumJD = computeJD(DateTime.MaxValue);
+    private static readonly long MaximumJd = computeJD(DateTime.MaxValue);
 
     /// <summary>
     /// An array of ISO-8601 DateTime formats that we support parsing.
@@ -217,6 +220,8 @@ namespace System.Data.SQLite
 
     #endregion
 
+    ///////////////////////////////////////////////////////////////////////////
+
     #region DateTime Conversion Functions
     #region New Julian Day Conversion Methods
     /// <summary>
@@ -230,17 +235,57 @@ namespace System.Data.SQLite
     /// Non-zero if the specified Julian Day value is in the supported
     /// range; otherwise, zero.
     /// </returns>
-    private static bool isValidJD(
+    private static bool isValidJd(
         long jd
         )
     {
-        return ((jd >= MinimumJD) && (jd <= MaximumJD));
+        return ((jd >= MinimumJd) && (jd <= MaximumJd));
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Converts a Julian Day value from a <see cref="Double" /> to an
+    /// <see cref="Int64" />.
+    /// </summary>
+    /// <param name="julianDay">
+    /// The Julian Day <see cref="Double" /> value to convert.
+    /// </param>
+    /// <returns>
+    /// The resulting Julian Day <see cref="Int64" /> value.
+    /// </returns>
+    private static long DoubleToJd(
+        double julianDay
+        )
+    {
+        return (long)(julianDay * 86400000.0);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Converts a Julian Day value from an <see cref="Int64" /> to a
+    /// <see cref="Double" />.
+    /// </summary>
+    /// <param name="jd">
+    /// The Julian Day <see cref="Int64" /> value to convert.
+    /// </param>
+    /// <returns>
+    /// The resulting Julian Day <see cref="Double" /> value.
+    /// </returns>
+    private static double JdToDouble(
+        long jd
+        )
+    {
+        return (double)(jd / 86400000.0);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// Converts a Julian Day value to a <see cref="DateTime" />.
-    /// This function was copied from the "date.c" file belonging
-    /// to the SQLite core library.
+    /// This method was translated from the "computeYMD" function in the
+    /// "date.c" file belonging to the SQLite core library.
     /// </summary>
     /// <param name="jd">
     /// The Julian Day value to convert.
@@ -258,7 +303,7 @@ namespace System.Data.SQLite
         DateTime badValue
         )
     {
-        if (!isValidJD(jd))
+        if (!isValidJd(jd))
             return badValue;
 
         int Z, A, B, C, D, E, X1;
@@ -292,8 +337,8 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Converts a Julian Day value to a <see cref="DateTime" />.
-    /// This function was copied from the "date.c" file belonging
-    /// to the SQLite core library.
+    /// This method was translated from the "computeHMS" function in the
+    /// "date.c" file belonging to the SQLite core library.
     /// </summary>
     /// <param name="jd">
     /// The Julian Day value to convert.
@@ -311,7 +356,7 @@ namespace System.Data.SQLite
         DateTime badValue
         )
     {
-        if (!isValidJD(jd))
+        if (!isValidJd(jd))
             return badValue;
 
         int s;
@@ -334,7 +379,7 @@ namespace System.Data.SQLite
         minute = s / 60;
         seconds += s - minute * 60;
 
-        int second = (int)Math.Truncate(seconds);
+        int second = (int)seconds;
         int millisecond = (int)((seconds - second) * 1000.0);
 
         try
@@ -355,12 +400,12 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// Converts a <see cref="DateTime" /> to a Julian Day value.
-    /// This function was copied from the "date.c" file belonging
-    /// to the SQLite core library.  Since the range of Julian Day
-    /// values supported by this method includes all possible valid
-    /// values of a <see cref="DateTime" /> value, it should be
-    /// impossible for this method to raise an exception or return
-    /// an undefined result.
+    /// This method was translated from the "computeJD" function in
+    /// the "date.c" file belonging to the SQLite core library.
+    /// Since the range of Julian Day values supported by this method
+    /// includes all possible (valid) values of a <see cref="DateTime" />
+    /// value, it should be extremely difficult for this method to
+    /// raise an exception or return an undefined result.
     /// </summary>
     /// <param name="dateTime">
     /// The <see cref="DateTime" /> value to convert.  This value
@@ -611,10 +656,19 @@ namespace System.Data.SQLite
     /// <param name="julianDay">The value to convert</param>
     /// <param name="kind">The DateTimeKind to use.</param>
     /// <returns>A .NET DateTime</returns>
-    public static DateTime ToDateTime(double julianDay, DateTimeKind kind)
+    public static DateTime ToDateTime(
+        double julianDay,
+        DateTimeKind kind
+        )
     {
-        return DateTime.SpecifyKind(
-            DateTime.FromOADate(julianDay - OleAutomationEpochAsJulianDay), kind);
+        long jd = DoubleToJd(julianDay);
+        DateTime dateTimeYMD = computeYMD(jd, DateTime.MinValue);
+        DateTime dateTimeHMS = computeHMS(jd, DateTime.MinValue);
+
+        return new DateTime(
+            dateTimeYMD.Year, dateTimeYMD.Month, dateTimeYMD.Day,
+            dateTimeHMS.Hour, dateTimeHMS.Minute, dateTimeHMS.Second,
+            dateTimeHMS.Millisecond, kind);
     }
 
     /// <summary>
@@ -660,7 +714,7 @@ namespace System.Data.SQLite
     /// <returns>The JulianDay value the Datetime represents</returns>
     public static double ToJulianDay(DateTime value)
     {
-      return value.ToOADate() + OleAutomationEpochAsJulianDay;
+        return JdToDouble(computeJD(value));
     }
 
     /// <summary>
