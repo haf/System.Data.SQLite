@@ -52,6 +52,18 @@ namespace System.Data.SQLite
     private const string FullFormat = "yyyy-MM-ddTHH:mm:ss.fffffffK";
 
     /// <summary>
+    /// This is the minimum Julian Day value supported by this library
+    /// (148731163200000).
+    /// </summary>
+    private static readonly long MinimumJD = computeJD(DateTime.MinValue);
+
+    /// <summary>
+    /// This is the maximum Julian Day value supported by this library
+    /// (464269060799000).
+    /// </summary>
+    private static readonly long MaximumJD = computeJD(DateTime.MaxValue);
+
+    /// <summary>
     /// An array of ISO-8601 DateTime formats that we support parsing.
     /// </summary>
     private static string[] _datetimeFormats = new string[] {
@@ -208,21 +220,47 @@ namespace System.Data.SQLite
     #region DateTime Conversion Functions
     #region New Julian Day Conversion Methods
     /// <summary>
-    /// Converts a Julian Day number to a <see cref="DateTime" />.
+    /// Checks if the specified <see cref="Int64" /> is within the
+    /// supported range for a Julian Day value.
+    /// </summary>
+    /// <param name="jd">
+    /// The Julian Day value to check.
+    /// </param>
+    /// <returns>
+    /// Non-zero if the specified Julian Day value is in the supported
+    /// range; otherwise, zero.
+    /// </returns>
+    private static bool isValidJD(
+        long jd
+        )
+    {
+        return ((jd >= MinimumJD) && (jd <= MaximumJD));
+    }
+
+    /// <summary>
+    /// Converts a Julian Day value to a <see cref="DateTime" />.
     /// This function was copied from the "date.c" file belonging
     /// to the SQLite core library.
     /// </summary>
     /// <param name="jd">
-    /// The Julian Day number to convert.
+    /// The Julian Day value to convert.
+    /// </param>
+    /// <param name="badValue">
+    /// The <see cref="DateTime" /> value to return in the event that the
+    /// Julian Day is out of the supported range.
     /// </param>
     /// <returns>
-    /// A <see cref="DateTime" /> value that contains the year, month, and day
-    /// values that are closest to the specified Julian Day value.
+    /// A <see cref="DateTime" /> value that contains the year, month, and
+    /// day values that are closest to the specified Julian Day value.
     /// </returns>
     private static DateTime computeYMD(
-        long jd
+        long jd,
+        DateTime badValue
         )
     {
+        if (!isValidJD(jd))
+            return badValue;
+
         int Z, A, B, C, D, E, X1;
 
         Z = (int)((jd + 43200000) / 86400000);
@@ -240,27 +278,42 @@ namespace System.Data.SQLite
         month = E < 14 ? E - 1 : E - 13;
         year = month > 2 ? C - 4716 : C - 4715;
 
-        return new DateTime(year, month, day);
+        try
+        {
+            return new DateTime(year, month, day);
+        }
+        catch
+        {
+            return badValue;
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
     /// <summary>
-    /// Converts a Julian Day number to a <see cref="DateTime" />.
+    /// Converts a Julian Day value to a <see cref="DateTime" />.
     /// This function was copied from the "date.c" file belonging
     /// to the SQLite core library.
     /// </summary>
     /// <param name="jd">
-    /// The Julian Day number to convert.
+    /// The Julian Day value to convert.
+    /// </param>
+    /// <param name="badValue">
+    /// The <see cref="DateTime" /> value to return in the event that the
+    /// Julian Day value is out of the supported range.
     /// </param>
     /// <returns>
     /// A <see cref="DateTime" /> value that contains the hour, minute, and
     /// second values that are closest to the specified Julian Day value.
     /// </returns>
     private static DateTime computeHMS(
-        long jd
+        long jd,
+        DateTime badValue
         )
     {
+        if (!isValidJD(jd))
+            return badValue;
+
         int s;
 
         s = (int)((jd + 43200000) % 86400000);
@@ -284,25 +337,40 @@ namespace System.Data.SQLite
         int second = (int)Math.Truncate(seconds);
         int millisecond = (int)((seconds - second) * 1000.0);
 
-        DateTime minValue = DateTime.MinValue;
+        try
+        {
+            DateTime minValue = DateTime.MinValue;
 
-        return new DateTime(
-            minValue.Year, minValue.Month, minValue.Day,
-            hour, minute, second, millisecond);
+            return new DateTime(
+                minValue.Year, minValue.Month, minValue.Day,
+                hour, minute, second, millisecond);
+        }
+        catch
+        {
+            return badValue;
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
     /// <summary>
-    /// Converts a <see cref="DateTime" /> to a Julian Day number.
+    /// Converts a <see cref="DateTime" /> to a Julian Day value.
     /// This function was copied from the "date.c" file belonging
-    /// to the SQLite core library.
+    /// to the SQLite core library.  Since the range of Julian Day
+    /// values supported by this method includes all possible valid
+    /// values of a <see cref="DateTime" /> value, it should be
+    /// impossible for this method to raise an exception or return
+    /// an undefined result.
     /// </summary>
     /// <param name="dateTime">
-    /// The <see cref="DateTime" /> value to convert.
+    /// The <see cref="DateTime" /> value to convert.  This value
+    /// will be within the range of <see cref="DateTime.MinValue" />
+    /// (00:00:00.0000000, January 1, 0001) to
+    /// <see cref="DateTime.MaxValue" /> (23:59:59.9999999, December
+    /// 31, 9999).
     /// </param>
     /// <returns>
-    /// The nearest Julian Day number corresponding to the specified
+    /// The nearest Julian Day value corresponding to the specified
     /// <see cref="DateTime" /> value.
     /// </returns>
     private static long computeJD(
