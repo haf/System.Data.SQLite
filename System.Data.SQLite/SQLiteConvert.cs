@@ -206,6 +206,141 @@ namespace System.Data.SQLite
     #endregion
 
     #region DateTime Conversion Functions
+    #region New Julian Day Conversion Methods
+    /// <summary>
+    /// Converts a Julian Day number to a <see cref="DateTime" />.
+    /// This function was copied from the "date.c" file belonging
+    /// to the SQLite core library.
+    /// </summary>
+    /// <param name="jd">
+    /// The Julian Day number to convert.
+    /// </param>
+    /// <returns>
+    /// A <see cref="DateTime" /> value that contains the year, month, and day
+    /// values that are closest to the specified Julian Day value.
+    /// </returns>
+    private static DateTime computeYMD(
+        long jd
+        )
+    {
+        int Z, A, B, C, D, E, X1;
+
+        Z = (int)((jd + 43200000) / 86400000);
+        A = (int)((Z - 1867216.25) / 36524.25);
+        A = Z + 1 + A - (A / 4);
+        B = A + 1524;
+        C = (int)((B - 122.1) / 365.25);
+        D = (36525 * C) / 100;
+        E = (int)((B - D) / 30.6001);
+        X1 = (int)(30.6001 * E);
+
+        int day, month, year;
+
+        day = B - D - X1;
+        month = E < 14 ? E - 1 : E - 13;
+        year = month > 2 ? C - 4716 : C - 4715;
+
+        return new DateTime(year, month, day);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Converts a Julian Day number to a <see cref="DateTime" />.
+    /// This function was copied from the "date.c" file belonging
+    /// to the SQLite core library.
+    /// </summary>
+    /// <param name="jd">
+    /// The Julian Day number to convert.
+    /// </param>
+    /// <returns>
+    /// A <see cref="DateTime" /> value that contains the hour, minute, and
+    /// second values that are closest to the specified Julian Day value.
+    /// </returns>
+    private static DateTime computeHMS(
+        long jd
+        )
+    {
+        int s;
+
+        s = (int)((jd + 43200000) % 86400000);
+
+        double seconds;
+
+        seconds = s / 1000.0;
+        s = (int)seconds;
+        seconds -= s;
+
+        int hour;
+
+        hour = s / 3600;
+        s -= hour * 3600;
+
+        int minute;
+
+        minute = s / 60;
+        seconds += s - minute * 60;
+
+        int second = (int)Math.Truncate(seconds);
+        int millisecond = (int)((seconds - second) * 1000.0);
+
+        DateTime minValue = DateTime.MinValue;
+
+        return new DateTime(
+            minValue.Year, minValue.Month, minValue.Day,
+            hour, minute, second, millisecond);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Converts a <see cref="DateTime" /> to a Julian Day number.
+    /// This function was copied from the "date.c" file belonging
+    /// to the SQLite core library.
+    /// </summary>
+    /// <param name="dateTime">
+    /// The <see cref="DateTime" /> value to convert.
+    /// </param>
+    /// <returns>
+    /// The nearest Julian Day number corresponding to the specified
+    /// <see cref="DateTime" /> value.
+    /// </returns>
+    private static long computeJD(
+        DateTime dateTime
+        )
+    {
+        int Y, M, D;
+
+        Y = dateTime.Year;
+        M = dateTime.Month;
+        D = dateTime.Day;
+
+        if (M <= 2)
+        {
+            Y--;
+            M += 12;
+        }
+
+        int A, B, X1, X2;
+
+        A = Y / 100;
+        B = 2 - A + (A / 4);
+        X1 = 36525 * (Y + 4716) / 100;
+        X2 = 306001 * (M + 1) / 10000;
+
+        long jd;
+
+        jd = (long)((X1 + X2 + D + B - 1524.5) * 86400000);
+
+        jd += dateTime.Hour * 3600000 + dateTime.Minute *
+            60000 + (long)(dateTime.Second * 1000);
+
+        return jd;
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// Converts a string into a DateTime, using the DateTimeFormat, DateTimeKind,
     /// and DateTimeFormatString specified for the connection when it was opened.
