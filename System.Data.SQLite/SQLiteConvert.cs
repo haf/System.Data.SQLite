@@ -379,30 +379,30 @@ namespace System.Data.SQLite
             return (DateTime)badValue;
         }
 
-        int s;
+        int si;
 
-        s = (int)((jd + 43200000) % 86400000);
+        si = (int)((jd + 43200000) % 86400000);
 
-        decimal seconds;
+        decimal sd;
 
-        seconds = s / 1000.0M;
-        s = (int)seconds;
+        sd = si / 1000.0M;
+        si = (int)sd;
 
-        int millisecond = (int)((seconds - s) * 1000.0M);
+        int millisecond = (int)((sd - si) * 1000.0M);
 
-        seconds -= s;
+        sd -= si;
 
         int hour;
 
-        hour = s / 3600;
-        s -= hour * 3600;
+        hour = si / 3600;
+        si -= hour * 3600;
 
         int minute;
 
-        minute = s / 60;
-        seconds += s - minute * 60;
+        minute = si / 60;
+        sd += si - minute * 60;
 
-        int second = (int)seconds;
+        int second = (int)sd;
 
         try
         {
