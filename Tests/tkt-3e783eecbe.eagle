@@ -26,29 +26,37 @@ runTest {test tkt-3e783eecbe-1.1 {Julian Day w/o OLE Automation} -setup {
 
   set dateTimeValues [list $minDateTime 0099-12-31 0100-01-01 $maxDateTime]
 } -body {
-  set result [list]
+  set results [list]
 
   foreach dateTimeValue $dateTimeValues {
     if {$dateTimeValue ni [info objects]} then {
       set dateTimeValue [object invoke \
           -create DateTime Parse $dateTimeValue]
 
-      set dateTimeValue [object invoke \
-          -create -alias DateTime SpecifyKind $dateTimeValue Utc]
+      set dateTimeValue [object invoke -create -alias \
+          DateTime SpecifyKind $dateTimeValue Utc]
     }
 
-    lappend result [list [$dateTimeValue ToString [getDateTimeFormat]] \
-        [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
-        ToJulianDay $dateTimeValue]]
+    set code [catch {
+      object invoke System.Data.SQLite.SQLiteConvert ToJulianDay \
+          $dateTimeValue
+    } result]
+
+    if {$code != 0} then {
+      regexp -- {---> (.*?)(?:\r|\n)} $result result result
+    }
+
+    lappend results [list [$dateTimeValue ToString [getDateTimeFormat]] \
+        $code $result]
   }
 
-  set result
+  set results
 } -cleanup {
-  unset -nocomplain result dateTimeValue dateTimeValues maxDateTime \
-      minDateTime
-} -constraints {eagle System.Data.SQLite} -result {{{0001-01-01 00:00:00}\
-1721425.5} {{0099-12-31 00:00:00Z} 1757583.5} {{0100-01-01 00:00:00Z}\
-1757584.5} {{9999-12-31 23:59:59.9999999} 5373484.49998843}}}
+  unset -nocomplain code result results dateTimeValue dateTimeValues \
+      maxDateTime minDateTime
+} -constraints {eagle System.Data.SQLite} -result {{{0001-01-01 00:00:00} 0\
+1721425.5} {{0099-12-31 00:00:00Z} 0 1757583.5} {{0100-01-01 00:00:00Z} 0\
+1757584.5} {{9999-12-31 23:59:59.9999999} 0 5373484.49998843}}}
 
 ###############################################################################
 
@@ -60,7 +68,7 @@ runTest {test tkt-3e783eecbe-1.2 {Julian Day w/o OLE Automation} -setup {
       $minDoubleValue -1.0 0.0 1.0 1721425.5 2451910.5 2456962.0 \
       5373484.49998843 $maxDoubleValue]
 } -body {
-  set result [list]
+  set results [list]
 
   foreach doubleValue $doubleValues {
     if {$doubleValue ni [info objects]} then {
@@ -68,22 +76,30 @@ runTest {test tkt-3e783eecbe-1.2 {Julian Day w/o OLE Automation} -setup {
           -create -alias Double Parse $doubleValue]
     }
 
-    set dateTimeValue [object invoke -create -alias \
-        System.Data.SQLite.SQLiteConvert ToDateTime $doubleValue Utc]
+    set code [catch {
+      set dateTimeValue [object invoke -create -alias \
+          System.Data.SQLite.SQLiteConvert ToDateTime $doubleValue Utc]
 
-    lappend result [list [$doubleValue ToString] [$dateTimeValue \
-        ToString [getDateTimeFormat]]]
+      $dateTimeValue ToString [getDateTimeFormat]
+    } result]
+
+    if {$code != 0} then {
+      regexp -- {---> (.*?)(?:\r|\n)} $result result result
+    }
+
+    lappend results [list [$doubleValue ToString] $code $result]
   }
 
-  set result
+  set results
 } -cleanup {
-  unset -nocomplain result dateTimeValue doubleValue doubleValues \
-      maxDoubleValue minDoubleValue
-} -constraints {eagle System.Data.SQLite} -result {{-1.79769313486232E+308\
-{0001-01-01 00:00:00Z}} {-1 {0001-01-01 00:00:00Z}} {0 {0001-01-01 00:00:00Z}}\
-{1 {0001-01-01 00:00:00Z}} {1721425.5 {0001-01-01 00:00:00Z}} {2451910.5\
-{2001-01-01 00:00:00Z}} {2456962 {2014-10-31 12:00:00Z}} {5373484.49998843\
-{9999-12-31 23:59:59Z}} {1.79769313486232E+308 {0001-01-01 00:00:00Z}}}}
+  unset -nocomplain code result results dateTimeValue doubleValue \
+      doubleValues maxDoubleValue minDoubleValue
+} -constraints {eagle System.Data.SQLite} -result {{-1.79769313486232E+308 0\
+{0001-01-01 00:00:00Z}} {-1 0 {0001-01-01 00:00:00Z}} {0 0 {0001-01-01\
+00:00:00Z}} {1 0 {0001-01-01 00:00:00Z}} {1721425.5 0 {0001-01-01 00:00:00Z}}\
+{2451910.5 0 {2001-01-01 00:00:00Z}} {2456962 0 {2014-10-31 12:00:00Z}}\
+{5373484.49998843 0 {9999-12-31 23:59:59Z}} {1.79769313486232E+308 0\
+{0001-01-01 00:00:00Z}}}}
 
 ###############################################################################
 
