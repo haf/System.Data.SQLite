@@ -46,6 +46,7 @@ runTest {test tkt-3e783eecbe-1.1 {To Julian Day w/o OLE Automation} -setup {
 
     if {$code != 0} then {
       regexp -- {---> (.*?):} $result result result
+      regexp -- {(System\..*?):} $result result result
     }
 
     lappend results [list [$dateTimeValue ToString [getDateTimeFormat]] \
@@ -67,8 +68,8 @@ runTest {test tkt-3e783eecbe-1.2 {From Julian Day w/o OLE Automation} -setup {
   set maxDoubleValue [object invoke -create -alias Double MaxValue]
 
   set doubleValues [list \
-      $minDoubleValue -1.0 0.0 1.0 1721425.5 2451910.5 2456962.0 \
-      5373484.49999998 5373484.49999999 $maxDoubleValue]
+      $minDoubleValue -1.0 0.0 1.0 1721425.5 1757583.5 2451910.5 \
+      2456962.0 5373484.49999998 5373484.49999999 $maxDoubleValue]
 } -body {
   set results [list]
 
@@ -87,6 +88,7 @@ runTest {test tkt-3e783eecbe-1.2 {From Julian Day w/o OLE Automation} -setup {
 
     if {$code != 0} then {
       regexp -- {---> (.*?):} $result result result
+      regexp -- {(System\..*?):} $result result result
     }
 
     lappend results [list [$doubleValue ToString] $code $result]
@@ -99,10 +101,64 @@ runTest {test tkt-3e783eecbe-1.2 {From Julian Day w/o OLE Automation} -setup {
 } -constraints {eagle System.Data.SQLite} -result {{-1.79769313486232E+308 1\
 System.ArgumentException} {-1 1 System.ArgumentException} {0 1\
 System.ArgumentException} {1 1 System.ArgumentException} {1721425.5 0\
-{0001-01-01 00:00:00Z}} {2451910.5 0 {2001-01-01 00:00:00Z}} {2456962 0\
-{2014-10-31 12:00:00Z}} {5373484.49999998 0 {9999-12-31 23:59:59.998Z}}\
-{5373484.49999999 0 {9999-12-31 23:59:59.999Z}} {1.79769313486232E+308 1\
-System.ArgumentException}}}
+{0001-01-01 00:00:00Z}} {1757583.5 0 {0099-12-31 00:00:00Z}} {2451910.5 0\
+{2001-01-01 00:00:00Z}} {2456962 0 {2014-10-31 12:00:00Z}} {5373484.49999998 0\
+{9999-12-31 23:59:59.998Z}} {5373484.49999999 0 {9999-12-31 23:59:59.999Z}}\
+{1.79769313486232E+308 1 System.ArgumentException}}}
+
+###############################################################################
+
+runTest {test tkt-3e783eecbe-1.3 {Julian Day storage} -setup {
+  set doubleValues [list \
+      -1.0 0.0 1.0 1721425.5 1757583.5 2451910.5 2456962.0 \
+      5373484.49999998 5373484.49999999]
+
+  setupDb [set fileName tkt-3e783eecbe-1.3.db] "" JulianDay
+} -body {
+  sql execute $db "CREATE TABLE t1(x INTEGER, y DATETIME);"
+
+  set i 1
+  set results [list]
+
+  foreach doubleValue $doubleValues {
+    if {$doubleValue ni [info objects]} then {
+      set doubleValue [object invoke \
+          -create -alias Double Parse $doubleValue]
+    }
+
+    set code [catch {
+      sql execute $db "INSERT INTO t1 (x, y) VALUES(?, ?);" \
+          [list param1 Int32 $i] [list param2 Double $doubleValue]
+
+      sql execute -execute reader -format list -datetimeformat \
+          [getDateTimeFormat] $db "SELECT y FROM t1 WHERE x = ?;" \
+          [list param1 Int32 $i]
+    } result]
+
+    if {$code != 0} then {
+      regexp -- {---> (.*?):} $result result result
+      regexp -- {(System\..*?):} $result result result
+    }
+
+    lappend results [list [$doubleValue ToString] $code $result]
+    incr i
+  }
+
+  set results
+} -cleanup {
+  unset -nocomplain code result results i dateTimeValue doubleValue \
+      doubleValues maxDoubleValue minDoubleValue
+
+  cleanupDb $fileName
+
+  unset -nocomplain db fileName
+} -constraints \
+{eagle monoBug28 command.sql compile.DATA SQLite System.Data.SQLite} -result \
+{{-1 1 System.ArgumentException} {0 1 System.ArgumentException} {1 1\
+System.ArgumentException} {1721425.5 0 {{0001-01-01 00:00:00}}} {1757583.5 0\
+{{0099-12-31 00:00:00}}} {2451910.5 0 {{2001-01-01 00:00:00}}} {2456962 0\
+{{2014-10-31 12:00:00}}} {5373484.49999998 0 {{9999-12-31 23:59:59.998}}}\
+{5373484.49999999 0 {{9999-12-31 23:59:59.999}}}}}
 
 ###############################################################################
 
