@@ -24,14 +24,16 @@ runTest {test tkt-3e783eecbe-1.1 {Julian Day w/o OLE Automation} -setup {
   set minDateTime [object invoke -create -alias DateTime MinValue]
   set maxDateTime [object invoke -create -alias DateTime MaxValue]
 
-  set dateTimeValues [list $minDateTime 0099-12-31 0100-01-01 $maxDateTime]
+  set dateTimeValues [list $minDateTime "0099-12-31 00:00:00" \
+      "0100-01-01 00:00:00" $maxDateTime]
 } -body {
   set results [list]
 
   foreach dateTimeValue $dateTimeValues {
     if {$dateTimeValue ni [info objects]} then {
       set dateTimeValue [object invoke \
-          -create DateTime Parse $dateTimeValue]
+          -create DateTime ParseExact $dateTimeValue \
+          [getDateTimeFormat] null]
 
       set dateTimeValue [object invoke -create -alias \
           DateTime SpecifyKind $dateTimeValue Utc]
