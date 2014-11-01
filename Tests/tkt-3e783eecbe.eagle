@@ -1,0 +1,91 @@
+###############################################################################
+#
+# tkt-3e783eecbe.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-3e783eecbe-1.1 {Julian Day w/o OLE Automation} -setup {
+  set minDateTime [object invoke -create -alias DateTime MinValue]
+  set maxDateTime [object invoke -create -alias DateTime MaxValue]
+
+  set dateTimeValues [list $minDateTime 0099-12-31 0100-01-01 $maxDateTime]
+} -body {
+  set result [list]
+
+  foreach dateTimeValue $dateTimeValues {
+    if {$dateTimeValue ni [info objects]} then {
+      set dateTimeValue [object invoke \
+          -create DateTime Parse $dateTimeValue]
+
+      set dateTimeValue [object invoke \
+          -create -alias DateTime SpecifyKind $dateTimeValue Utc]
+    }
+
+    lappend result [list [$dateTimeValue ToString [getDateTimeFormat]] \
+        [object invoke -flags +NonPublic System.Data.SQLite.SQLiteConvert \
+        ToJulianDay $dateTimeValue]]
+  }
+
+  set result
+} -cleanup {
+  unset -nocomplain result dateTimeValue dateTimeValues maxDateTime \
+      minDateTime
+} -constraints {eagle System.Data.SQLite} -result {{{0001-01-01 00:00:00}\
+1721425.5} {{0099-12-31 00:00:00Z} 1757583.5} {{0100-01-01 00:00:00Z}\
+1757584.5} {{9999-12-31 23:59:59.9999999} 5373484.49998843}}}
+
+###############################################################################
+
+runTest {test tkt-3e783eecbe-1.2 {Julian Day w/o OLE Automation} -setup {
+  set minDoubleValue [object invoke -create -alias Double MinValue]
+  set maxDoubleValue [object invoke -create -alias Double MaxValue]
+
+  set doubleValues [list \
+      $minDoubleValue -1.0 0.0 1.0 1721425.5 2451910.5 2456962.0 \
+      5373484.49998843 $maxDoubleValue]
+} -body {
+  set result [list]
+
+  foreach doubleValue $doubleValues {
+    if {$doubleValue ni [info objects]} then {
+      set doubleValue [object invoke \
+          -create -alias Double Parse $doubleValue]
+    }
+
+    set dateTimeValue [object invoke -create -alias \
+        System.Data.SQLite.SQLiteConvert ToDateTime $doubleValue Utc]
+
+    lappend result [list [$doubleValue ToString] [$dateTimeValue \
+        ToString [getDateTimeFormat]]]
+  }
+
+  set result
+} -cleanup {
+  unset -nocomplain result dateTimeValue doubleValue doubleValues \
+      maxDoubleValue minDoubleValue
+} -constraints {eagle System.Data.SQLite} -result {{-1.79769313486232E+308\
+{0001-01-01 00:00:00Z}} {-1 {0001-01-01 00:00:00Z}} {0 {0001-01-01 00:00:00Z}}\
+{1 {0001-01-01 00:00:00Z}} {1721425.5 {0001-01-01 00:00:00Z}} {2451910.5\
+{2001-01-01 00:00:00Z}} {2456962 {2014-10-31 12:00:00Z}} {5373484.49998843\
+{9999-12-31 23:59:59Z}} {1.79769313486232E+308 {0001-01-01 00:00:00Z}}}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
