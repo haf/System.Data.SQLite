@@ -216,8 +216,6 @@ namespace System.Data.SQLite
 
       return _utf8.GetString(byteArray, 0, nativestringlen);
     }
-
-
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////
