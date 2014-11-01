@@ -290,7 +290,8 @@ namespace System.Data.SQLite
     /// </param>
     /// <param name="badValue">
     /// The <see cref="DateTime" /> value to return in the event that the
-    /// Julian Day is out of the supported range.
+    /// Julian Day is out of the supported range.  If this value is null,
+    /// an exception will be thrown instead.
     /// </param>
     /// <returns>
     /// A <see cref="DateTime" /> value that contains the year, month, and
@@ -298,11 +299,19 @@ namespace System.Data.SQLite
     /// </returns>
     private static DateTime computeYMD(
         long jd,
-        DateTime badValue
+        DateTime? badValue
         )
     {
         if (!isValidJd(jd))
-            return badValue;
+        {
+            if (badValue == null)
+            {
+                throw new ArgumentException(
+                    "Not a supported Julian Day value.");
+            }
+
+            return (DateTime)badValue;
+        }
 
         int Z, A, B, C, D, E, X1;
 
@@ -327,7 +336,10 @@ namespace System.Data.SQLite
         }
         catch
         {
-            return badValue;
+            if (badValue == null)
+                throw;
+
+            return (DateTime)badValue;
         }
     }
 
@@ -343,28 +355,41 @@ namespace System.Data.SQLite
     /// </param>
     /// <param name="badValue">
     /// The <see cref="DateTime" /> value to return in the event that the
-    /// Julian Day value is out of the supported range.
+    /// Julian Day value is out of the supported range.  If this value is
+    /// null, an exception will be thrown instead.
     /// </param>
     /// <returns>
     /// A <see cref="DateTime" /> value that contains the hour, minute, and
-    /// second values that are closest to the specified Julian Day value.
+    /// second, and millisecond values that are closest to the specified
+    /// Julian Day value.
     /// </returns>
     private static DateTime computeHMS(
         long jd,
-        DateTime badValue
+        DateTime? badValue
         )
     {
         if (!isValidJd(jd))
-            return badValue;
+        {
+            if (badValue == null)
+            {
+                throw new ArgumentException(
+                    "Not a supported Julian Day value.");
+            }
+
+            return (DateTime)badValue;
+        }
 
         int s;
 
         s = (int)((jd + 43200000) % 86400000);
 
-        double seconds;
+        decimal seconds;
 
-        seconds = s / 1000.0;
+        seconds = s / 1000.0M;
         s = (int)seconds;
+
+        int millisecond = (int)((seconds - s) * 1000.0M);
+
         seconds -= s;
 
         int hour;
@@ -378,7 +403,6 @@ namespace System.Data.SQLite
         seconds += s - minute * 60;
 
         int second = (int)seconds;
-        int millisecond = (int)((seconds - second) * 1000.0);
 
         try
         {
@@ -390,7 +414,10 @@ namespace System.Data.SQLite
         }
         catch
         {
-            return badValue;
+            if (badValue == null)
+                throw;
+
+            return (DateTime)badValue;
         }
     }
 
@@ -443,8 +470,8 @@ namespace System.Data.SQLite
 
         jd = (long)((X1 + X2 + D + B - 1524.5) * 86400000);
 
-        jd += dateTime.Hour * 3600000 + dateTime.Minute *
-            60000 + (long)(dateTime.Second * 1000);
+        jd += (dateTime.Hour * 3600000) + (dateTime.Minute * 60000) +
+            (dateTime.Second * 1000) + dateTime.Millisecond;
 
         return jd;
     }
@@ -660,8 +687,8 @@ namespace System.Data.SQLite
         )
     {
         long jd = DoubleToJd(julianDay);
-        DateTime dateTimeYMD = computeYMD(jd, DateTime.MinValue);
-        DateTime dateTimeHMS = computeHMS(jd, DateTime.MinValue);
+        DateTime dateTimeYMD = computeYMD(jd, null);
+        DateTime dateTimeHMS = computeHMS(jd, null);
 
         return new DateTime(
             dateTimeYMD.Year, dateTimeYMD.Month, dateTimeYMD.Day,

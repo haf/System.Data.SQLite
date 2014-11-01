@@ -20,7 +20,7 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test tkt-3e783eecbe-1.1 {Julian Day w/o OLE Automation} -setup {
+runTest {test tkt-3e783eecbe-1.1 {To Julian Day w/o OLE Automation} -setup {
   set minDateTime [object invoke -create -alias DateTime MinValue]
   set maxDateTime [object invoke -create -alias DateTime MaxValue]
 
@@ -45,7 +45,7 @@ runTest {test tkt-3e783eecbe-1.1 {Julian Day w/o OLE Automation} -setup {
     } result]
 
     if {$code != 0} then {
-      regexp -- {---> (.*?)(?:\r|\n)} $result result result
+      regexp -- {---> (.*?):} $result result result
     }
 
     lappend results [list [$dateTimeValue ToString [getDateTimeFormat]] \
@@ -58,17 +58,17 @@ runTest {test tkt-3e783eecbe-1.1 {Julian Day w/o OLE Automation} -setup {
       maxDateTime minDateTime
 } -constraints {eagle System.Data.SQLite} -result {{{0001-01-01 00:00:00} 0\
 1721425.5} {{0099-12-31 00:00:00Z} 0 1757583.5} {{0100-01-01 00:00:00Z} 0\
-1757584.5} {{9999-12-31 23:59:59.9999999} 0 5373484.49998843}}}
+1757584.5} {{9999-12-31 23:59:59.9999999} 0 5373484.49999999}}}
 
 ###############################################################################
 
-runTest {test tkt-3e783eecbe-1.2 {Julian Day w/o OLE Automation} -setup {
+runTest {test tkt-3e783eecbe-1.2 {From Julian Day w/o OLE Automation} -setup {
   set minDoubleValue [object invoke -create -alias Double MinValue]
   set maxDoubleValue [object invoke -create -alias Double MaxValue]
 
   set doubleValues [list \
       $minDoubleValue -1.0 0.0 1.0 1721425.5 2451910.5 2456962.0 \
-      5373484.49998843 $maxDoubleValue]
+      5373484.49999998 5373484.49999999 $maxDoubleValue]
 } -body {
   set results [list]
 
@@ -86,7 +86,7 @@ runTest {test tkt-3e783eecbe-1.2 {Julian Day w/o OLE Automation} -setup {
     } result]
 
     if {$code != 0} then {
-      regexp -- {---> (.*?)(?:\r|\n)} $result result result
+      regexp -- {---> (.*?):} $result result result
     }
 
     lappend results [list [$doubleValue ToString] $code $result]
@@ -96,12 +96,13 @@ runTest {test tkt-3e783eecbe-1.2 {Julian Day w/o OLE Automation} -setup {
 } -cleanup {
   unset -nocomplain code result results dateTimeValue doubleValue \
       doubleValues maxDoubleValue minDoubleValue
-} -constraints {eagle System.Data.SQLite} -result {{-1.79769313486232E+308 0\
-{0001-01-01 00:00:00Z}} {-1 0 {0001-01-01 00:00:00Z}} {0 0 {0001-01-01\
-00:00:00Z}} {1 0 {0001-01-01 00:00:00Z}} {1721425.5 0 {0001-01-01 00:00:00Z}}\
-{2451910.5 0 {2001-01-01 00:00:00Z}} {2456962 0 {2014-10-31 12:00:00Z}}\
-{5373484.49998843 0 {9999-12-31 23:59:59Z}} {1.79769313486232E+308 0\
-{0001-01-01 00:00:00Z}}}}
+} -constraints {eagle System.Data.SQLite} -result {{-1.79769313486232E+308 1\
+System.ArgumentException} {-1 1 System.ArgumentException} {0 1\
+System.ArgumentException} {1 1 System.ArgumentException} {1721425.5 0\
+{0001-01-01 00:00:00Z}} {2451910.5 0 {2001-01-01 00:00:00Z}} {2456962 0\
+{2014-10-31 12:00:00Z}} {5373484.49999998 0 {9999-12-31 23:59:59.998Z}}\
+{5373484.49999999 0 {9999-12-31 23:59:59.999Z}} {1.79769313486232E+308 1\
+System.ArgumentException}}}
 
 ###############################################################################
 
