@@ -1,0 +1,75 @@
+###############################################################################
+#
+# tkt-daeaf3150a.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-daeaf3150a-1.1 {static Execute connection disposal} -setup {
+  unset -nocomplain result sql
+} -body {
+  set sql(1) { \
+    CREATE TABLE t1(x); \
+    INSERT INTO t1 (x) VALUES (NULL); \
+    SELECT x FROM t1 ORDER BY x; \
+  }
+
+  set sql(2) { \
+    CREATE TABLE t1(x); \
+    INSERT INTO t1 (x) VALUES (?); \
+    SELECT x FROM t1 ORDER BY x; \
+  }
+
+  set result(1) [object invoke System.Data.SQLite.SQLiteCommand Execute \
+      "this will not execute" None null]
+
+  set result(2) [object invoke System.Data.SQLite.SQLiteCommand Execute \
+      $sql(1) NonQuery null]
+
+  set result(3) [object invoke System.Data.SQLite.SQLiteCommand Execute \
+      $sql(1) Scalar null]
+
+  set result(4) [object invoke System.Data.SQLite.SQLiteCommand Execute \
+      $sql(1) Reader null]
+
+  object invoke $result(4) Read; object invoke $result(4) Close
+
+  set result(5) [object invoke System.Data.SQLite.SQLiteCommand Execute \
+      "this will not execute" None null 1]
+
+  set result(6) [object invoke System.Data.SQLite.SQLiteCommand Execute \
+      $sql(2) NonQuery null 1]
+
+  set result(7) [object invoke System.Data.SQLite.SQLiteCommand Execute \
+      $sql(2) Scalar null 1]
+
+  set result(8) [object invoke System.Data.SQLite.SQLiteCommand Execute \
+      $sql(2) Reader null 1]
+
+  list $result(1) $result(2) $result(3) $result(4) $result(5) $result(6) \
+      $result(7) $result(8)
+} -cleanup {
+  unset -nocomplain result sql
+} -constraints {eagle monoBug28 SQLite System.Data.SQLite} -match regexp \
+-result {^\{\} 1 System#DBNull#\d+ System#Data#SQLite#SQLiteDataReader#\d+ \{\}\
+1 1 System#Data#SQLite#SQLiteDataReader#\d+$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue

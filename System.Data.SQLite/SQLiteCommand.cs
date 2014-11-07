@@ -706,9 +706,9 @@ namespace System.Data.SQLite
 
     /// <summary>
     /// This method creates a new connection, executes the query using the given
-    /// execution type and command behavior, closes the connection, and returns
-    /// the results.  If the connection string is null, a temporary in-memory
-    /// database connection will be used.
+    /// execution type and command behavior, closes the connection unless a data
+    /// reader is created, and returns the results.  If the connection string is
+    /// null, a temporary in-memory database connection will be used.
     /// </summary>
     /// <param name="commandText">
     /// The text of the command to be executed.
@@ -741,51 +741,104 @@ namespace System.Data.SQLite
         params object[] args
         )
     {
-        if (connectionString == null)
-            connectionString = DefaultConnectionString;
+        SQLiteConnection connection = null;
 
-        using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+        try
         {
-            connection.Open();
+            if (connectionString == null)
+                connectionString = DefaultConnectionString;
 
-            using (SQLiteCommand command = connection.CreateCommand())
+            using (connection = new SQLiteConnection(connectionString))
             {
-                command.CommandText = commandText;
+                connection.Open();
 
-                if (args != null)
+                using (SQLiteCommand command = connection.CreateCommand())
                 {
-                    foreach (object arg in args)
+                    command.CommandText = commandText;
+
+                    if (args != null)
                     {
-                        if (arg is SQLiteParameter)
-                            command.Parameters.Add((SQLiteParameter)arg);
-                        else
-                            command.Parameters.Add(new SQLiteParameter(DbType.Object, arg));
+                        foreach (object arg in args)
+                        {
+                            if (arg is SQLiteParameter)
+                                command.Parameters.Add((SQLiteParameter)arg);
+                            else
+                                command.Parameters.Add(new SQLiteParameter(DbType.Object, arg));
+                        }
+                    }
+
+                    switch (executeType)
+                    {
+                        case SQLiteExecuteType.None:
+                            {
+                                //
+                                // NOTE: Do nothing.
+                                //
+                                break;
+                            }
+                        case SQLiteExecuteType.NonQuery:
+                            {
+                                return command.ExecuteNonQuery(commandBehavior);
+                            }
+                        case SQLiteExecuteType.Scalar:
+                            {
+                                return command.ExecuteScalar(commandBehavior);
+                            }
+                        case SQLiteExecuteType.Reader:
+                            {
+                                bool success = true;
+
+                                try
+                                {
+                                    //
+                                    // NOTE: The CloseConnection flag is being added here.
+                                    //       This should force the returned data reader to
+                                    //       close the connection when it is disposed.  In
+                                    //       order to prevent the containing using block
+                                    //       from disposing the connection prematurely,
+                                    //       the innermost finally block sets the internal
+                                    //       no-disposal flag to true.  The outer finally
+                                    //       block will reset the internal no-disposal flag
+                                    //       to false so that the data reader will be able
+                                    //       to (eventually) dispose of the connection.
+                                    //
+                                    return command.ExecuteReader(
+                                        commandBehavior | CommandBehavior.CloseConnection);
+                                }
+                                catch
+                                {
+                                    success = false;
+                                    throw;
+                                }
+                                finally
+                                {
+                                    //
+                                    // NOTE: If an exception was not thrown, that can only
+                                    //       mean the data reader was successfully created
+                                    //       and now owns the connection.  Therefore, set
+                                    //       the internal no-disposal flag (temporarily)
+                                    //       in order to exit the containing using block
+                                    //       without disposing it.
+                                    //
+                                    if (success)
+                                        connection._noDispose = true;
+                                }
+                            }
                     }
                 }
-
-                switch (executeType)
-                {
-                    case SQLiteExecuteType.None:
-                        {
-                            //
-                            // NOTE: Do nothing.
-                            //
-                            break;
-                        }
-                    case SQLiteExecuteType.NonQuery:
-                        {
-                            return command.ExecuteNonQuery(commandBehavior);
-                        }
-                    case SQLiteExecuteType.Scalar:
-                        {
-                            return command.ExecuteScalar(commandBehavior);
-                        }
-                    case SQLiteExecuteType.Reader:
-                        {
-                            return command.ExecuteReader(commandBehavior);
-                        }
-                }
             }
+        }
+        finally
+        {
+            //
+            // NOTE: Now that the using block has been exited, reset the
+            //       internal disposal flag for the connection.  This is
+            //       always done if the connection was created because
+            //       it will be harmless whether or not the data reader
+            //       now owns it.
+            //
+            if (connection != null)
+                connection._noDispose = false;
         }
 
         return null;

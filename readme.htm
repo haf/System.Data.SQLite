@@ -215,6 +215,7 @@ released versions of System.Data.SQLite.
     <li>Updated to <a href="http://www.sqlite.org/releaselog/3_8_7.html">SQLite 3.8.7</a>.</li>
     <li>Make sure SQL statements generated for DbUpdateCommandTree objects are properly delimited.</li>
     <li>Various minor performance enhancements to the SQLiteDataReader class. Pursuant to [e122d26e70].</li>
+    <li>Defer disposing of connections created by the static SQLiteCommand.Execute method when a data reader is returned. Fix for [daeaf3150a].</li>
     <li>In the SQLiteDataReader.VerifyType method, remove duplicate &quot;if&quot; statement for the DbType.SByte value and move the remaining &quot;if&quot; to the Int64 affinity. Fix for [c5cc2fb334].&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>

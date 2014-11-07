@@ -324,7 +324,7 @@ namespace System.Data.SQLite
   /// </item>
   /// </list>
   /// </remarks>
-  public sealed partial class SQLiteConnection : DbConnection, ICloneable
+  public sealed partial class SQLiteConnection : DbConnection, ICloneable, IDisposable
   {
     #region Private Constants
     /// <summary>
@@ -433,6 +433,13 @@ namespace System.Data.SQLite
     /// Nesting level of the transactions open on the connection
     /// </summary>
     internal int _transactionLevel;
+
+    /// <summary>
+    /// If this flag is non-zero, the <see cref="Dispose()" /> method will have
+    /// no effect; however, the <see cref="Close" /> method will continue to
+    /// behave as normal.
+    /// </summary>
+    internal bool _noDispose;
 
     /// <summary>
     /// If set, then the connection is currently being disposed.
@@ -607,6 +614,8 @@ namespace System.Data.SQLite
     /// </param>
     public SQLiteConnection(string connectionString, bool parseViaFramework)
     {
+      _noDispose = false;
+
 #if (SQLITE_STANDARD || USE_INTEROP_DLL || PLATFORM_COMPACTFRAMEWORK) && PRELOAD_NATIVE_LIBRARY
       UnsafeNativeMethods.Initialize();
 #endif
@@ -1244,6 +1253,21 @@ namespace System.Data.SQLite
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    #region IDisposable Members
+    /// <summary>
+    /// Disposes and finalizes the connection, if applicable.
+    /// </summary>
+    public new void Dispose()
+    {
+        if (_noDispose)
+            return;
+
+        base.Dispose();
+    }
+    #endregion
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     #region IDisposable "Pattern" Members
     private bool disposed;
     private void CheckDisposed() /* throw */
@@ -1258,6 +1282,18 @@ namespace System.Data.SQLite
 
     protected override void Dispose(bool disposing)
     {
+#if !NET_COMPACT_20 && TRACE_WARNING
+        if ((_flags & SQLiteConnectionFlags.TraceWarning) == SQLiteConnectionFlags.TraceWarning)
+        {
+            if (_noDispose)
+            {
+                System.Diagnostics.Trace.WriteLine(String.Format(CultureInfo.CurrentCulture,
+                    "WARNING: Disposing of connection \"{0}\" with the no-dispose flag set.",
+                    _connectionString));
+            }
+        }
+#endif
+
         _disposing = true;
 
         try
