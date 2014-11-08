@@ -196,6 +196,16 @@ namespace System.Data.SQLite.Linq
       set { this.isTopMost = value; }
     }
 
+    /// <summary>
+    /// Clears the ORDER BY, LIMIT, and OFFSET clauses.
+    /// </summary>
+    public void ClearOrderByLimitAndOffset()
+    {
+        this.orderBy = null;
+        this.top = null;
+        this.skip = null;
+    }
+
     #region ISqlFragment Members
 
     /// <summary>

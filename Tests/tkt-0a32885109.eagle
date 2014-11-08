@@ -1,0 +1,64 @@
+###############################################################################
+#
+# tkt-0a32885109.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+runSQLiteTestFilesPrologue
+
+###############################################################################
+
+runTest {test tkt-0a32885109-1.1 {LINQ compound-operator handling} -body {
+  #
+  # NOTE: Re-copy the reference database file used for this unit test to the
+  #       build directory in case it has been changed by a previous test run.
+  #
+  file copy -force $northwindEfDbFile \
+      [file join [getBuildDirectory] [file tail $northwindEfDbFile]]
+
+  set result [list]
+  set output ""
+
+  set code [catch {
+    testClrExec $testLinqExeFile [list -eventflags Wait -directory \
+        [file dirname $testLinqExeFile] -nocarriagereturns -stdout output \
+        -success 0] -unionall
+  } error]
+
+  tlog "---- BEGIN STDOUT OUTPUT\n"
+  tlog $output
+  tlog "\n---- END STDOUT OUTPUT\n"
+
+  lappend result $code
+
+  if {$code == 0} then {
+    lappend result [string trim $output]
+  } else {
+    lappend result [string trim $error]
+  }
+
+  set result
+} -cleanup {
+  unset -nocomplain code output error result
+} -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll testExec\
+file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db} \
+-result {0 {WHITC ANATR BERGS ALFKI BSBEV}}}
+
+###############################################################################
+
+runSQLiteTestFilesEpilogue
+runSQLiteTestEpilogue
+runTestEpilogue
