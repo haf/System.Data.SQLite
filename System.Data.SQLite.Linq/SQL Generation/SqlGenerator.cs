@@ -2470,21 +2470,31 @@ namespace System.Data.SQLite.Linq
     {
 
       SqlSelectStatement leftSelectStatement = VisitExpressionEnsureSqlStatement(left);
+      bool leftOrderByLimitOrOffset = leftSelectStatement.HaveOrderByLimitOrOffset();
       SqlSelectStatement rightSelectStatement = VisitExpressionEnsureSqlStatement(right);
-
-      //
-      // BUGFIX: [0a32885109] When using compound operators (e.g. UNION ALL),
-      //         the non-rightmost SELECT statement(s) may NOT have an ORDER
-      //         BY, LIMIT, or OFFSET clause.
-      //
-      leftSelectStatement.ClearOrderByLimitAndOffset();
+      bool rightOrderByLimitOrOffset = rightSelectStatement.HaveOrderByLimitOrOffset();
 
       SqlBuilder setStatement = new SqlBuilder();
+
+      if (leftOrderByLimitOrOffset)
+          setStatement.Append("SELECT * FROM (");
+
       setStatement.Append(leftSelectStatement);
+
+      if (leftOrderByLimitOrOffset)
+          setStatement.Append(") ");
+
       setStatement.AppendLine();
       setStatement.Append(separator); // e.g. UNION ALL
       setStatement.AppendLine();
+
+      if (rightOrderByLimitOrOffset)
+          setStatement.Append("SELECT * FROM (");
+
       setStatement.Append(rightSelectStatement);
+
+      if (rightOrderByLimitOrOffset)
+          setStatement.Append(") ");
 
       return setStatement;
     }

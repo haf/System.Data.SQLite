@@ -55,7 +55,7 @@ runTest {test tkt-0a32885109-1.1 {LINQ compound-operator handling} -body {
   unset -nocomplain code output error result
 } -constraints {eagle monoToDo SQLite file_System.Data.SQLite.dll testExec\
 file_System.Data.SQLite.Linq.dll file_testlinq.exe file_northwindEF.db} \
--result {0 {WHITC ANATR BERGS ALFKI BSBEV}}}
+-result {0 {WHITC ANATR BERGS WHITC ANATR WHITC ANATR BERGS}}}
 
 ###############################################################################
 
