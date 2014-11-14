@@ -758,11 +758,11 @@ SQLITE_API int WINAPI sqlite3_context_collcompare_interop(sqlite3_context *ctx, 
 {
 #if SQLITE_VERSION_NUMBER >= 3008007
   CollSeq *pColl = ctx ? sqlite3GetFuncCollSeq(ctx) : 0;
-  if (!ctx || !ctx->pFunc || !pColl || !pColl->xCmp) return 3; /* ERROR */
 #else
-  CollSeq *pColl = ctx->pColl;
-  if (!ctx || !ctx->pFunc || !ctx->pColl || !ctx->pColl->xCmp) return 3; /* ERROR */
+  CollSeq *pColl = ctx ? ctx->pColl : 0;
 #endif
+  if (!ctx || !ctx->pFunc) return 4; /* ERROR */
+  if (!pColl || !pColl->xCmp) return 3; /* ERROR */
 #if SQLITE_VERSION_NUMBER >= 3008001
   if ((ctx->pFunc->funcFlags & SQLITE_FUNC_NEEDCOLL) == 0) return 2; /* ERROR */
 #else
