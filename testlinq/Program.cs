@@ -76,6 +76,10 @@ namespace testlinq
 
                       return SkipTest(pageSize);
                   }
+              case "unionall":
+                  {
+                      return UnionAllTest();
+                  }
               case "endswith":
                   {
                       string value = null;
@@ -214,6 +218,77 @@ namespace testlinq
 
                   Console.Write(customers.CustomerID);
 
+                  once = true;
+              }
+          }
+
+          return 0;
+      }
+
+      //
+      // NOTE: Used to test the fix for ticket [0a32885109].
+      //
+      private static int UnionAllTest()
+      {
+          using (northwindEFEntities db = new northwindEFEntities())
+          {
+              bool once = false;
+
+              var customers1 = db.Customers.Where(
+                  f => f.Orders.Any()).OrderByDescending(
+                    f => f.CompanyName).Skip(1).Take(1);
+
+              var customers2 = db.Customers.Where(
+                  f => f.Orders.Any()).OrderBy(
+                    f => f.CompanyName).Skip(1).Take(1);
+
+              var customers3 = db.Customers.Where(
+                  f => f.CustomerID.StartsWith("B")).OrderBy(
+                    f => f.CompanyName).Skip(1).Take(1);
+
+              foreach (var customer in customers1)
+              {
+                  if (once)
+                      Console.Write(' ');
+
+                  Console.Write(customer.CustomerID);
+                  once = true;
+              }
+
+              foreach (var customer in customers2)
+              {
+                  if (once)
+                      Console.Write(' ');
+
+                  Console.Write(customer.CustomerID);
+                  once = true;
+              }
+
+              foreach (var customer in customers3)
+              {
+                  if (once)
+                      Console.Write(' ');
+
+                  Console.Write(customer.CustomerID);
+                  once = true;
+              }
+
+              foreach (var customer in customers1.Concat(customers2))
+              {
+                  if (once)
+                      Console.Write(' ');
+
+                  Console.Write(customer.CustomerID);
+                  once = true;
+              }
+
+              foreach (var customer in
+                    customers1.Concat(customers2).Concat(customers3))
+              {
+                  if (once)
+                      Console.Write(' ');
+
+                  Console.Write(customer.CustomerID);
                   once = true;
               }
           }

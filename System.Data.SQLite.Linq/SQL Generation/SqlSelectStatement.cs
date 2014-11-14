@@ -196,6 +196,27 @@ namespace System.Data.SQLite.Linq
       set { this.isTopMost = value; }
     }
 
+    /// <summary>
+    /// Checks if the statement has an ORDER BY, LIMIT, or OFFSET clause.
+    /// </summary>
+    /// <returns>
+    /// Non-zero if there is an ORDER BY, LIMIT, or OFFSET clause;
+    /// otherwise, zero.
+    /// </returns>
+    public bool HaveOrderByLimitOrOffset()
+    {
+        if ((this.orderBy != null) && !this.orderBy.IsEmpty)
+            return true;
+
+        if (this.top != null)
+            return true;
+
+        if (this.skip != null)
+            return true;
+
+        return false;
+    }
+
     #region ISqlFragment Members
 
     /// <summary>

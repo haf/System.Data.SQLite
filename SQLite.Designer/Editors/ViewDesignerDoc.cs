@@ -568,7 +568,7 @@ namespace SQLite.Designer.Editors
           if (_warned == false)
           {
             _warned = true;
-            MessageBox.Show(this, "The view designer is still in development.  Please report bugs to robert@blackcastlesoft.com", "Feature Under Review", MessageBoxButtons.OK);
+            MessageBox.Show(this, "The view designer is still in development.  Please report bugs to the sqlite-users mailing list at sqlite-users@sqlite.org", "Feature Under Review", MessageBoxButtons.OK);
           }
           break;
       }
