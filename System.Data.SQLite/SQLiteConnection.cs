@@ -887,9 +887,9 @@ namespace System.Data.SQLite
             backup = sqliteBase.InitializeBackup(
                 destination, destinationName, sourceName); /* throw */
 
-            bool retry;
+            bool retry = false;
 
-            while (sqliteBase.StepBackup(backup, pages, out retry)) /* throw */
+            while (sqliteBase.StepBackup(backup, pages, ref retry)) /* throw */
             {
                 //
                 // NOTE: If a callback was supplied by our caller, call it.
@@ -4360,10 +4360,10 @@ namespace System.Data.SQLite
                         row["INDEX_NAME"] = rdIndexes.GetString(1);
                         row["ORDINAL_POSITION"] = ordinal; // rdIndex.GetInt32(1);
 
-                        string collationSequence;
-                        int sortMode;
-                        int onError;
-                        _sql.GetIndexColumnExtendedInfo(strCatalog, rdIndexes.GetString(1), rdIndex.GetString(2), out sortMode, out onError, out collationSequence);
+                        string collationSequence = null;
+                        int sortMode = 0;
+                        int onError = 0;
+                        _sql.GetIndexColumnExtendedInfo(strCatalog, rdIndexes.GetString(1), rdIndex.GetString(2), ref sortMode, ref onError, ref collationSequence);
 
                         if (String.IsNullOrEmpty(collationSequence) == false)
                           row["COLLATION_NAME"] = collationSequence;

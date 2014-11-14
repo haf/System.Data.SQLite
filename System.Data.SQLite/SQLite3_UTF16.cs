@@ -165,13 +165,13 @@ namespace System.Data.SQLite
         }
         finally /* NOTE: Thread.Abort() protection. */
         {
-          IntPtr db;
+          IntPtr db = IntPtr.Zero;
           SQLiteErrorCode n;
 
 #if !SQLITE_STANDARD
           if ((connectionFlags & SQLiteConnectionFlags.NoExtensionFunctions) != SQLiteConnectionFlags.NoExtensionFunctions)
           {
-            n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), openFlags, out db);
+            n = UnsafeNativeMethods.sqlite3_open16_interop(ToUTF8(strFilename), openFlags, ref db);
           }
           else
 #endif
@@ -185,7 +185,7 @@ namespace System.Data.SQLite
             if (((openFlags & SQLiteOpenFlagsEnum.Create) != SQLiteOpenFlagsEnum.Create) && !File.Exists(strFilename))
               throw new SQLiteException(SQLiteErrorCode.CantOpen, strFilename);
 
-            n = UnsafeNativeMethods.sqlite3_open16(strFilename, out db);
+            n = UnsafeNativeMethods.sqlite3_open16(strFilename, ref db);
           }
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
@@ -276,8 +276,8 @@ namespace System.Data.SQLite
     internal override string ColumnName(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      IntPtr p = UnsafeNativeMethods.sqlite3_column_name16_interop(stmt._sqlite_stmt, index, out len);
+      int len = 0;
+      IntPtr p = UnsafeNativeMethods.sqlite3_column_name16_interop(stmt._sqlite_stmt, index, ref len);
 #else
       IntPtr p = UnsafeNativeMethods.sqlite3_column_name16(stmt._sqlite_stmt, index);
 #endif
@@ -293,8 +293,8 @@ namespace System.Data.SQLite
     internal override string GetText(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_text16_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_text16_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return UTF16ToString(UnsafeNativeMethods.sqlite3_column_text16(stmt._sqlite_stmt, index),
         UnsafeNativeMethods.sqlite3_column_bytes16(stmt._sqlite_stmt, index));
@@ -304,8 +304,8 @@ namespace System.Data.SQLite
     internal override string ColumnOriginalName(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_origin_name16_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_origin_name16_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return UTF16ToString(UnsafeNativeMethods.sqlite3_column_origin_name16(stmt._sqlite_stmt, index), -1);
 #endif
@@ -314,8 +314,8 @@ namespace System.Data.SQLite
     internal override string ColumnDatabaseName(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_database_name16_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_database_name16_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return UTF16ToString(UnsafeNativeMethods.sqlite3_column_database_name16(stmt._sqlite_stmt, index), -1);
 #endif
@@ -324,8 +324,8 @@ namespace System.Data.SQLite
     internal override string ColumnTableName(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_table_name16_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_column_table_name16_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return UTF16ToString(UnsafeNativeMethods.sqlite3_column_table_name16(stmt._sqlite_stmt, index), -1);
 #endif
@@ -334,8 +334,8 @@ namespace System.Data.SQLite
     internal override string GetParamValueText(IntPtr ptr)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF16ToString(UnsafeNativeMethods.sqlite3_value_text16_interop(ptr, out len), len);
+      int len = 0;
+      return UTF16ToString(UnsafeNativeMethods.sqlite3_value_text16_interop(ptr, ref len), len);
 #else
       return UTF16ToString(UnsafeNativeMethods.sqlite3_value_text16(ptr),
         UnsafeNativeMethods.sqlite3_value_bytes16(ptr));

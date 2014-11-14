@@ -722,18 +722,18 @@ namespace System.Data.SQLite
         }
         finally /* NOTE: Thread.Abort() protection. */
         {
-          IntPtr db;
+          IntPtr db = IntPtr.Zero;
           SQLiteErrorCode n;
 
 #if !SQLITE_STANDARD
           if ((connectionFlags & SQLiteConnectionFlags.NoExtensionFunctions) != SQLiteConnectionFlags.NoExtensionFunctions)
           {
-            n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), openFlags, out db);
+            n = UnsafeNativeMethods.sqlite3_open_interop(ToUTF8(strFilename), openFlags, ref db);
           }
           else
 #endif
           {
-            n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), out db, openFlags, IntPtr.Zero);
+            n = UnsafeNativeMethods.sqlite3_open_v2(ToUTF8(strFilename), ref db, openFlags, IntPtr.Zero);
           }
 
 #if !NET_COMPACT_20 && TRACE_CONNECTION
@@ -853,8 +853,8 @@ namespace System.Data.SQLite
       if (n == SQLiteErrorCode.Schema)
       {
         // Recreate a dummy statement
-        string str;
-        using (SQLiteStatement tmp = Prepare(null, stmt._sqlStatement, null, (uint)(stmt._command._commandTimeout * 1000), out str))
+        string str = null;
+        using (SQLiteStatement tmp = Prepare(null, stmt._sqlStatement, null, (uint)(stmt._command._commandTimeout * 1000), ref str))
         {
           // Finalize the existing statement
           stmt._sqlite_stmt.Dispose();
@@ -888,7 +888,7 @@ namespace System.Data.SQLite
         return result;
     }
 
-    internal override SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, uint timeoutMS, out string strRemain)
+    internal override SQLiteStatement Prepare(SQLiteConnection cnn, string strSql, SQLiteStatement previous, uint timeoutMS, ref string strRemain)
     {
       if (!String.IsNullOrEmpty(strSql))
       {
@@ -948,13 +948,17 @@ namespace System.Data.SQLite
           }
           finally /* NOTE: Thread.Abort() protection. */
           {
+            stmt = IntPtr.Zero;
+            ptr = IntPtr.Zero;
+
 #if !SQLITE_STANDARD
-            n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, psql, b.Length - 1, out stmt, out ptr, out len);
+            len = 0;
+            n = UnsafeNativeMethods.sqlite3_prepare_interop(_sql, psql, b.Length - 1, ref stmt, ref ptr, ref len);
 #else
 #if USE_PREPARE_V2
-            n = UnsafeNativeMethods.sqlite3_prepare_v2(_sql, psql, b.Length - 1, out stmt, out ptr);
+            n = UnsafeNativeMethods.sqlite3_prepare_v2(_sql, psql, b.Length - 1, ref stmt, ref ptr);
 #else
-            n = UnsafeNativeMethods.sqlite3_prepare(_sql, psql, b.Length - 1, out stmt, out ptr);
+            n = UnsafeNativeMethods.sqlite3_prepare(_sql, psql, b.Length - 1, ref stmt, ref ptr);
 #endif
             len = -1;
 #endif
@@ -994,7 +998,7 @@ namespace System.Data.SQLite
 
               while (cmd == null && strSql.Length > 0)
               {
-                cmd = Prepare(cnn, strSql, previous, timeoutMS, out strRemain);
+                cmd = Prepare(cnn, strSql, previous, timeoutMS, ref strRemain);
                 strSql = strRemain;
               }
 
@@ -1017,7 +1021,7 @@ namespace System.Data.SQLite
 
                 while (cmd == null && strSql.Length > 0)
                 {
-                  cmd = Prepare(cnn, strSql, previous, timeoutMS, out strRemain);
+                  cmd = Prepare(cnn, strSql, previous, timeoutMS, ref strRemain);
                   strSql = strRemain;
                 }
 
@@ -1407,8 +1411,8 @@ namespace System.Data.SQLite
         string name;
 
 #if !SQLITE_STANDARD
-        int len;
-        name = UTF8ToString(UnsafeNativeMethods.sqlite3_bind_parameter_name_interop(handle, index, out len), len);
+        int len = 0;
+        name = UTF8ToString(UnsafeNativeMethods.sqlite3_bind_parameter_name_interop(handle, index, ref len), len);
 #else
         name = UTF8ToString(UnsafeNativeMethods.sqlite3_bind_parameter_name(handle, index), -1);
 #endif
@@ -1452,8 +1456,8 @@ namespace System.Data.SQLite
     internal override string ColumnName(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      IntPtr p = UnsafeNativeMethods.sqlite3_column_name_interop(stmt._sqlite_stmt, index, out len);
+      int len = 0;
+      IntPtr p = UnsafeNativeMethods.sqlite3_column_name_interop(stmt._sqlite_stmt, index, ref len);
 #else
       IntPtr p = UnsafeNativeMethods.sqlite3_column_name(stmt._sqlite_stmt, index);
 #endif
@@ -1471,11 +1475,12 @@ namespace System.Data.SQLite
       return UnsafeNativeMethods.sqlite3_column_type(stmt._sqlite_stmt, index);
     }
 
-    internal override string ColumnType(SQLiteStatement stmt, int index, out TypeAffinity nAffinity)
+    internal override string ColumnType(SQLiteStatement stmt, int index, ref TypeAffinity nAffinity)
     {
       int len;
 #if !SQLITE_STANDARD
-      IntPtr p = UnsafeNativeMethods.sqlite3_column_decltype_interop(stmt._sqlite_stmt, index, out len);
+      len = 0;
+      IntPtr p = UnsafeNativeMethods.sqlite3_column_decltype_interop(stmt._sqlite_stmt, index, ref len);
 #else
       len = -1;
       IntPtr p = UnsafeNativeMethods.sqlite3_column_decltype(stmt._sqlite_stmt, index);
@@ -1522,8 +1527,8 @@ namespace System.Data.SQLite
     internal override string ColumnOriginalName(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_origin_name_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_origin_name_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return UTF8ToString(UnsafeNativeMethods.sqlite3_column_origin_name(stmt._sqlite_stmt, index), -1);
 #endif
@@ -1532,8 +1537,8 @@ namespace System.Data.SQLite
     internal override string ColumnDatabaseName(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_database_name_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_database_name_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return UTF8ToString(UnsafeNativeMethods.sqlite3_column_database_name(stmt._sqlite_stmt, index), -1);
 #endif
@@ -1542,31 +1547,33 @@ namespace System.Data.SQLite
     internal override string ColumnTableName(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_table_name_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_table_name_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return UTF8ToString(UnsafeNativeMethods.sqlite3_column_table_name(stmt._sqlite_stmt, index), -1);
 #endif
     }
 
-    internal override void ColumnMetaData(string dataBase, string table, string column, out string dataType, out string collateSequence, out bool notNull, out bool primaryKey, out bool autoIncrement)
+    internal override void ColumnMetaData(string dataBase, string table, string column, ref string dataType, ref string collateSequence, ref bool notNull, ref bool primaryKey, ref bool autoIncrement)
     {
-      IntPtr dataTypePtr;
-      IntPtr collSeqPtr;
-      int nnotNull;
-      int nprimaryKey;
-      int nautoInc;
+      IntPtr dataTypePtr = IntPtr.Zero;
+      IntPtr collSeqPtr = IntPtr.Zero;
+      int nnotNull = 0;
+      int nprimaryKey = 0;
+      int nautoInc = 0;
       SQLiteErrorCode n;
       int dtLen;
       int csLen;
 
 #if !SQLITE_STANDARD
-      n = UnsafeNativeMethods.sqlite3_table_column_metadata_interop(_sql, ToUTF8(dataBase), ToUTF8(table), ToUTF8(column), out dataTypePtr, out collSeqPtr, out nnotNull, out nprimaryKey, out nautoInc, out dtLen, out csLen);
+      dtLen = 0;
+      csLen = 0;
+      n = UnsafeNativeMethods.sqlite3_table_column_metadata_interop(_sql, ToUTF8(dataBase), ToUTF8(table), ToUTF8(column), ref dataTypePtr, ref collSeqPtr, ref nnotNull, ref nprimaryKey, ref nautoInc, ref dtLen, ref csLen);
 #else
       dtLen = -1;
       csLen = -1;
 
-      n = UnsafeNativeMethods.sqlite3_table_column_metadata(_sql, ToUTF8(dataBase), ToUTF8(table), ToUTF8(column), out dataTypePtr, out collSeqPtr, out nnotNull, out nprimaryKey, out nautoInc);
+      n = UnsafeNativeMethods.sqlite3_table_column_metadata(_sql, ToUTF8(dataBase), ToUTF8(table), ToUTF8(column), ref dataTypePtr, ref collSeqPtr, ref nnotNull, ref nprimaryKey, ref nautoInc);
 #endif
       if (n != SQLiteErrorCode.Ok) throw new SQLiteException(n, GetLastError());
 
@@ -1584,7 +1591,8 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_column_double(stmt._sqlite_stmt, index);
 #elif !SQLITE_STANDARD
-      UnsafeNativeMethods.sqlite3_column_double_interop(stmt._sqlite_stmt, index, out value);
+      value = 0.0;
+      UnsafeNativeMethods.sqlite3_column_double_interop(stmt._sqlite_stmt, index, ref value);
 #else
       throw new NotImplementedException();
 #endif
@@ -1627,7 +1635,8 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_column_int64(stmt._sqlite_stmt, index);
 #elif !SQLITE_STANDARD
-      UnsafeNativeMethods.sqlite3_column_int64_interop(stmt._sqlite_stmt, index, out value);
+      value = 0;
+      UnsafeNativeMethods.sqlite3_column_int64_interop(stmt._sqlite_stmt, index, ref value);
 #else
       throw new NotImplementedException();
 #endif
@@ -1642,8 +1651,8 @@ namespace System.Data.SQLite
     internal override string GetText(SQLiteStatement stmt, int index)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_text_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_column_text_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return UTF8ToString(UnsafeNativeMethods.sqlite3_column_text(stmt._sqlite_stmt, index),
         UnsafeNativeMethods.sqlite3_column_bytes(stmt._sqlite_stmt, index));
@@ -1660,8 +1669,8 @@ namespace System.Data.SQLite
         return ToDateTime(GetInt32(stmt, index), _datetimeKind);
 
 #if !SQLITE_STANDARD
-      int len;
-      return ToDateTime(UnsafeNativeMethods.sqlite3_column_text_interop(stmt._sqlite_stmt, index, out len), len);
+      int len = 0;
+      return ToDateTime(UnsafeNativeMethods.sqlite3_column_text_interop(stmt._sqlite_stmt, index, ref len), len);
 #else
       return ToDateTime(UnsafeNativeMethods.sqlite3_column_text(stmt._sqlite_stmt, index),
         UnsafeNativeMethods.sqlite3_column_bytes(stmt._sqlite_stmt, index));
@@ -1807,10 +1816,10 @@ namespace System.Data.SQLite
     {
 #if !SQLITE_STANDARD
       CollationSequence seq = new CollationSequence();
-      int len;
-      int type;
-      int enc;
-      IntPtr p = UnsafeNativeMethods.sqlite3_context_collseq_interop(context, out type, out enc, out len);
+      int len = 0;
+      int type = 0;
+      int enc = 0;
+      IntPtr p = UnsafeNativeMethods.sqlite3_context_collseq_interop(context, ref type, ref enc, ref len);
 
       if (p != null) seq.Name = UTF8ToString(p, len);
       seq.Type = (CollationTypeEnum)type;
@@ -1855,7 +1864,8 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_value_double(ptr);
 #elif !SQLITE_STANDARD
-      UnsafeNativeMethods.sqlite3_value_double_interop(ptr, out value);
+      value = 0.0;
+      UnsafeNativeMethods.sqlite3_value_double_interop(ptr, ref value);
 #else
       throw new NotImplementedException();
 #endif
@@ -1873,7 +1883,8 @@ namespace System.Data.SQLite
 #if !PLATFORM_COMPACTFRAMEWORK
       value = UnsafeNativeMethods.sqlite3_value_int64(ptr);
 #elif !SQLITE_STANDARD
-      UnsafeNativeMethods.sqlite3_value_int64_interop(ptr, out value);
+      value = 0;
+      UnsafeNativeMethods.sqlite3_value_int64_interop(ptr, ref value);
 #else
       throw new NotImplementedException();
 #endif
@@ -1883,8 +1894,8 @@ namespace System.Data.SQLite
     internal override string GetParamValueText(IntPtr ptr)
     {
 #if !SQLITE_STANDARD
-      int len;
-      return UTF8ToString(UnsafeNativeMethods.sqlite3_value_text_interop(ptr, out len), len);
+      int len = 0;
+      return UTF8ToString(UnsafeNativeMethods.sqlite3_value_text_interop(ptr, ref len), len);
 #else
       return UTF8ToString(UnsafeNativeMethods.sqlite3_value_text(ptr),
         UnsafeNativeMethods.sqlite3_value_bytes(ptr));
@@ -2379,7 +2390,7 @@ namespace System.Data.SQLite
     internal override bool StepBackup(
         SQLiteBackup backup,
         int nPage,
-        out bool retry
+        ref bool retry
         )
     {
         retry = false;
@@ -2649,8 +2660,8 @@ namespace System.Data.SQLite
     internal override long GetRowIdForCursor(SQLiteStatement stmt, int cursor)
     {
 #if !SQLITE_STANDARD
-      long rowid;
-      SQLiteErrorCode rc = UnsafeNativeMethods.sqlite3_cursor_rowid_interop(stmt._sqlite_stmt, cursor, out rowid);
+      long rowid = 0;
+      SQLiteErrorCode rc = UnsafeNativeMethods.sqlite3_cursor_rowid_interop(stmt._sqlite_stmt, cursor, ref rowid);
       if (rc == SQLiteErrorCode.Ok) return rowid;
 
       return 0;
@@ -2659,14 +2670,14 @@ namespace System.Data.SQLite
 #endif
     }
 
-    internal override void GetIndexColumnExtendedInfo(string database, string index, string column, out int sortMode, out int onError, out string collationSequence)
+    internal override void GetIndexColumnExtendedInfo(string database, string index, string column, ref int sortMode, ref int onError, ref string collationSequence)
     {
 #if !SQLITE_STANDARD
-      IntPtr coll;
-      int colllen;
+      IntPtr coll = IntPtr.Zero;
+      int colllen = 0;
       SQLiteErrorCode rc;
 
-      rc = UnsafeNativeMethods.sqlite3_index_column_info_interop(_sql, ToUTF8(database), ToUTF8(index), ToUTF8(column), out sortMode, out onError, out coll, out colllen);
+      rc = UnsafeNativeMethods.sqlite3_index_column_info_interop(_sql, ToUTF8(database), ToUTF8(index), ToUTF8(column), ref sortMode, ref onError, ref coll, ref colllen);
       if (rc != SQLiteErrorCode.Ok) throw new SQLiteException(rc, null);
 
       collationSequence = UTF8ToString(coll, colllen);
