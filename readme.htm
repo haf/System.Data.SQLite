@@ -217,6 +217,7 @@ released versions of System.Data.SQLite.
     <li>Various minor performance enhancements to the SQLiteDataReader class. Pursuant to [e122d26e70].</li>
     <li>Defer disposing of connections created by the static SQLiteCommand.Execute method when a data reader is returned. Fix for [daeaf3150a].</li>
     <li>In the SQLiteDataReader.VerifyType method, remove duplicate &quot;if&quot; statement for the DbType.SByte value and move the remaining &quot;if&quot; to the Int64 affinity. Fix for [c5cc2fb334].&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>Handle Julian Day values that fall outside of the supported range for OLE Automation dates. Fix for [3e783eecbe].&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>
     <b>1.0.94.0 - September 9, 2014</b>
