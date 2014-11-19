@@ -413,7 +413,11 @@ SQLITE_API int sqlite3_rekey_v2(sqlite3 *db, const char *zDbName, const void *pK
   // If we failed, rollback */
   if (rc)
   {
+#if SQLITE_VERSION_NUMBER >= 3008007
+    sqlite3BtreeRollback(pbt, SQLITE_OK, 0);
+#else
     sqlite3BtreeRollback(pbt, SQLITE_OK);
+#endif
   }
 
   /* If we succeeded, destroy any previous read key this database used
