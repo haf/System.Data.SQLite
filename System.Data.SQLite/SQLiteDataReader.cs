@@ -543,7 +543,7 @@ namespace System.Data.SQLite
 
         SQLiteType typ = GetSQLiteType(_flags, i);
         if (typ.Type == DbType.Object) return SQLiteConvert.SQLiteTypeToType(typ).Name;
-        return _activeStatement._sql.ColumnType(_activeStatement, i, out typ.Affinity);
+        return _activeStatement._sql.ColumnType(_activeStatement, i, ref typ.Affinity);
     }
 
     /// <summary>
@@ -1006,10 +1006,10 @@ namespace System.Data.SQLite
         // If we have a table-bound column, extract the extra information from it
         if (String.IsNullOrEmpty(strColumn) == false)
         {
-          string collSeq;
-          bool bNotNull;
-          bool bPrimaryKey;
-          bool bAutoIncrement;
+          string collSeq = null;
+          bool bNotNull = false;
+          bool bPrimaryKey = false;
+          bool bAutoIncrement = false;
           string[] arSize;
 
           // Get the column meta data
@@ -1017,7 +1017,7 @@ namespace System.Data.SQLite
             (string)row[SchemaTableOptionalColumn.BaseCatalogName],
             (string)row[SchemaTableColumn.BaseTableName],
             strColumn,
-            out dataType, out collSeq, out bNotNull, out bPrimaryKey, out bAutoIncrement);
+            ref dataType, ref collSeq, ref bNotNull, ref bPrimaryKey, ref bAutoIncrement);
 
           if (bNotNull || bPrimaryKey) row[SchemaTableColumn.AllowDBNull] = false;
 
@@ -1127,8 +1127,8 @@ namespace System.Data.SQLite
 
           if (String.IsNullOrEmpty(dataType))
           {
-            TypeAffinity affin;
-            dataType = _activeStatement._sql.ColumnType(_activeStatement, n, out affin);
+            TypeAffinity affin = TypeAffinity.Uninitialized;
+            dataType = _activeStatement._sql.ColumnType(_activeStatement, n, ref affin);
           }
 
           if (String.IsNullOrEmpty(dataType) == false)
@@ -1492,7 +1492,7 @@ namespace System.Data.SQLite
         {
             typ.Type = SQLiteConvert.TypeNameToDbType(
                 GetConnection(this), _activeStatement._sql.ColumnType(
-                _activeStatement, i, out typ.Affinity), flags);
+                _activeStatement, i, ref typ.Affinity), flags);
         }
         else
         {
