@@ -14,6 +14,7 @@
     <li>In the SQLiteDataReader.VerifyType method, remove duplicate &quot;if&quot; statement for the DbType.SByte value and move the remaining &quot;if&quot; to the Int64 affinity.  Fix for [c5cc2fb334].&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Handle Julian Day values that fall outside of the supported range for OLE Automation dates. Fix for [3e783eecbe].&nbsp;<b>** Potentially Incompatible Change **</b></li>
     <li>Make sure the interop files are copied when publishing a project that refers to a NuGet package containing them. Fix for [e796ac82c1].&nbsp;<b>** Potentially Incompatible Change **</b></li>
+    <li>Make sure the interop files are copied before the PostBuildEvent. Fix for [f16c93a932].&nbsp;<b>** Potentially Incompatible Change **</b></li>
 </ul>
 <p>
     <b>1.0.94.0 - September 9, 2014</b>

@@ -78,10 +78,10 @@
   -->
 
   <PropertyGroup>
-    <BuildDependsOn>
-      $(BuildDependsOn);
+    <PostBuildEventDependsOn>
+      $(PostBuildEventDependsOn);
       CopySQLiteInteropFiles;
-    </BuildDependsOn>
+    </PostBuildEventDependsOn>
     <CleanDependsOn>
       $(CleanDependsOn);
       CleanSQLiteInteropFiles;
