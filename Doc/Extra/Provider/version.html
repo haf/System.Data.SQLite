@@ -52,6 +52,7 @@
       <li>Wrap SELECT statements in parenthesis if they have an ORDER BY, LIMIT, or OFFSET clause and a compound operator is involved. Fix for <a href="http://system.data.sqlite.org/index.html/info/0a32885109">[0a32885109]</a>.</li>
       <li>In the SQLiteDataReader.VerifyType method, remove duplicate &quot;if&quot; statement for the DbType.SByte value and move the remaining &quot;if&quot; to the Int64 affinity. Fix for <a href="http://system.data.sqlite.org/index.html/info/c5cc2fb334">[c5cc2fb334]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Handle Julian Day values that fall outside of the supported range for OLE Automation dates. Fix for <a href="http://system.data.sqlite.org/index.html/info/3e783eecbe">[3e783eecbe]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>Make sure the interop files are copied when publishing a project that refers to a NuGet package containing them. Fix for <a href="http://system.data.sqlite.org/index.html/info/e796ac82c1">[e796ac82c1]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     </ul>
     <p><b>1.0.94.0 - September 9, 2014</b></p>
     <ul>
