@@ -322,7 +322,7 @@
     Enter the following command to build all the source release packages:
     <br />
     <br />
-    <b>..\Externals\Eagle\bin\EagleShell.exe -file verify.eagle Output</b>
+    <b>..\Externals\Eagle\bin\EagleShell.exe -file verify.eagle Output true</b>
     <br />
     <br />
     <i>If errors are generated, the file
