@@ -25,6 +25,10 @@ proc usage { error } {
 proc getSha1Hashes { varName } {
   variable fossil
 
+  if {![file exists $fossil]} then {
+    usage [appendArgs "tool \"" $fossil "\" is missing"]
+  }
+
   upvar 1 $varName hashes
 
   set data [exec -success Success -nocarriagereturns -- \
@@ -49,6 +53,10 @@ proc getSha1Hashes { varName } {
 
 proc getSha1Sum { fileName } {
   variable fossil
+
+  if {![file exists $fossil]} then {
+    usage [appendArgs "tool \"" $fossil "\" is missing"]
+  }
 
   return [string range [exec -success Success -nocarriagereturns \
       -trimall -- $fossil sha1sum $fileName] 0 39]
