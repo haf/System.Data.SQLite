@@ -305,6 +305,13 @@ if {$argc == 2} then {
           continue
         }
 
+        #
+        # NOTE: Skip anything that does not look like a file.
+        #
+        if {[string index $manifestFileName end] in [list / \\]} then {
+          continue
+        }
+
         set extractCommandMap [list \
             %fileName% [file nativename $manifestFileName] \
             %directory% [file nativename $extractDirectory]]
@@ -341,6 +348,13 @@ if {$argc == 2} then {
 
               set exitCode 1
             }
+          } else {
+            puts stdout [appendArgs \
+                "ERROR: Failed to extract file \"" \
+                $manifestFileName "\" from archive \"" \
+                $archiveFileName "\", error: " $result]
+
+            set exitCode 1
           }
         } finally {
           catch {
