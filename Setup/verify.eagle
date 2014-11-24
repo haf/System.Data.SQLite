@@ -38,7 +38,9 @@ proc getSha1Hashes { varName } {
       set fields [split $line " "]
 
       if {[llength $fields] >= 3} then {
-        set hashes([lindex $fields 1]) [lindex $fields 2]
+        set hashes([string map [list \\s " "] [lindex $fields 1]]) \
+            [lindex $fields 2]
+
         incr result
       }
     }
@@ -51,7 +53,7 @@ proc getSha1Sum { fileName } {
   variable fossil
 
   return [string range [exec -success Success -nocarriagereturns \
-      -trimall -- $fossil sha1sum $fileName] 0 39]
+      -trimall -- $fossil sha1sum [appendArgs \" $fileName \"]] 0 39]
 }
 
 set argc [llength $argv]
