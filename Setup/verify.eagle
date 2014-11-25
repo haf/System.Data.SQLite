@@ -38,10 +38,12 @@ proc getSha1Hashes { varName } {
       set fields [split $line " "]
 
       if {[llength $fields] >= 3} then {
-        set hashes([string map [list \\s " "] [lindex $fields 1]]) \
-            [lindex $fields 2]
+        set fileName [string map [list \\s " "] [lindex $fields 1]]
+        set hash [lindex $fields 2]
 
-        incr result
+        if {[regexp -- {[0-9a-f]{40}} $hash]} then {
+          set hashes($fileName) $hash; incr result
+        }
       }
     }
   }
@@ -52,8 +54,14 @@ proc getSha1Hashes { varName } {
 proc getSha1Sum { fileName } {
   variable fossil
 
-  return [string range [exec -success Success -nocarriagereturns \
+  set hash [string range [exec -success Success -nocarriagereturns \
       -trimall -- $fossil sha1sum [appendArgs \" $fileName \"]] 0 39]
+
+  if {[regexp -- {[0-9a-f]{40}} $hash]} then {
+    return $hash
+  }
+
+  return ""
 }
 
 set argc [llength $argv]
@@ -298,10 +306,11 @@ if {$argc == 2} then {
         }
 
         #
-        # HACK: For now, only verify SHA1 hashes for those files present
-        #       in the repository.
+        # HACK: For now, only verify SHA1 hashes for those files actually
+        #       present in the repository.
         #
-        if {![string match -nocase -- *Source* $archiveFileName]} then {
+        if {![string match -nocase -- *Source* $archiveFileName] && \
+            ![info exists hashes($manifestFileName)]} then {
           continue
         }
 
@@ -330,13 +339,22 @@ if {$argc == 2} then {
             if {[info exists hashes($manifestFileName)]} then {
               set hash [getSha1Sum $extractFileName]
 
-              if {$hash ne $hashes($manifestFileName)} then {
+              if {[string length $hash] > 0} then {
+                if {$hash ne $hashes($manifestFileName)} then {
+                  puts stdout [appendArgs \
+                      "ERROR: Archive \"" $archiveFileName \
+                      "\" file \"" $manifestFileName \
+                      "\" repository hash mismatch, have \"" \
+                      $hash "\", want \"" $hashes($manifestFileName) \
+                      "\"."]
+
+                  set exitCode 1
+                }
+              } else {
                 puts stdout [appendArgs \
                     "ERROR: Archive \"" $archiveFileName \
                     "\" file \"" $manifestFileName \
-                    "\" repository hash mismatch, have \"" \
-                    $hash "\", want \"" $hashes($manifestFileName) \
-                    "\"."]
+                    "\" could not be hashed."]
 
                 set exitCode 1
               }
