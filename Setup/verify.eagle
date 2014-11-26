@@ -28,7 +28,7 @@ proc getSha1Hashes { varName } {
   upvar 1 $varName hashes
 
   set data [exec -success Success -nocarriagereturns -- \
-      $fossil artifact current]
+      $fossil artifact current]; # or "release"
 
   set result 0
   set lines [split $data \n]
@@ -334,9 +334,10 @@ if {$argc == 2} then {
         }
 
         try {
-          if {[catch {eval [string map \
-              $extractCommandMap $extractCommand]} result] == 0} then {
-            if {[info exists hashes($manifestFileName)]} then {
+          if {[info exists hashes($manifestFileName)]} then {
+            if {[catch {
+              eval [string map $extractCommandMap $extractCommand]
+            } result] == 0} then {
               set hash [getSha1Sum $extractFileName]
 
               if {[string length $hash] > 0} then {
@@ -360,17 +361,17 @@ if {$argc == 2} then {
               }
             } else {
               puts stdout [appendArgs \
-                  "ERROR: Archive \"" $archiveFileName \
-                  "\" file \"" $manifestFileName \
-                  "\" has no repository hash."]
+                  "ERROR: Failed to extract file \"" \
+                  $manifestFileName "\" from archive \"" \
+                  $archiveFileName "\", error: " $result]
 
               set exitCode 1
             }
           } else {
             puts stdout [appendArgs \
-                "ERROR: Failed to extract file \"" \
-                $manifestFileName "\" from archive \"" \
-                $archiveFileName "\", error: " $result]
+                "ERROR: Archive \"" $archiveFileName \
+                "\" file \"" $manifestFileName \
+                "\" has no repository hash."]
 
             set exitCode 1
           }
