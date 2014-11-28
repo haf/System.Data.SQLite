@@ -102,7 +102,7 @@
 
 <ol>
   <li>
-    Intead of testing the Windows CE binaries
+    Instead of testing the Windows CE binaries
     <a href="#testCeBinariesManually">manually</a> as described in the next
     section, the following steps may be used.
   </li>
