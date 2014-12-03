@@ -20,7 +20,7 @@ runSQLiteTestPrologue
 
 ###############################################################################
 
-runTest {test tkt-47c6fa04d3-1.1 {} -setup {
+runTest {test tkt-47c6fa04d3-1.1 {loading DataTable with JOIN} -setup {
   setupDb [set fileName tkt-47c6fa04d3-1.1.db]
 } -body {
   sql execute $db {
