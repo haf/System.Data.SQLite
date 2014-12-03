@@ -1,0 +1,129 @@
+###############################################################################
+#
+# tkt-47c6fa04d3.eagle --
+#
+# Written by Joe Mistachkin.
+# Released to the public domain, use at your own risk!
+#
+###############################################################################
+
+package require Eagle
+package require Eagle.Library
+package require Eagle.Test
+
+runTestPrologue
+
+###############################################################################
+
+package require System.Data.SQLite.Test
+runSQLiteTestPrologue
+
+###############################################################################
+
+runTest {test tkt-47c6fa04d3-1.1 {} -setup {
+  setupDb [set fileName tkt-47c6fa04d3-1.1.db]
+} -body {
+  sql execute $db {
+    CREATE TABLE t1(
+      t1x INTEGER PRIMARY KEY NOT NULL,
+      t1y TEXT NOT NULL
+    );
+
+    INSERT INTO t1 (t1x, t1y) VALUES(1, 'one_t1');
+    INSERT INTO t1 (t1x, t1y) VALUES(2, 'two_t1');
+    INSERT INTO t1 (t1x, t1y) VALUES(3, 'three_t1');
+
+    CREATE TABLE t2(
+      t2x INTEGER PRIMARY KEY NOT NULL,
+      t2t1x INTEGER NOT NULL,
+      t2y TEXT,
+      t2z INTEGER NOT NULL DEFAULT(0)
+    );
+
+    INSERT INTO t2 (t2x, t2t1x, t2y, t2z) VALUES(1, 2, 'one_t2', 1);
+    INSERT INTO t2 (t2x, t2t1x, t2y, t2z) VALUES(2, 2, 'two_t2', 2);
+    INSERT INTO t2 (t2x, t2t1x, t2y, t2z) VALUES(3, 2, 'three_t2', 3);
+
+    CREATE TABLE t3(
+      t3x INTEGER PRIMARY KEY NOT NULL,
+      t3y INTEGER NOT NULL,
+      t3z INTEGER NOT NULL
+    );
+
+    INSERT INTO t3 (t3x, t3y, t3z) VALUES(1, 2, 3);
+    INSERT INTO t3 (t3x, t3y, t3z) VALUES(2, 1, 2);
+  }
+
+  set id [object invoke Interpreter.GetActive NextId]
+  set dataSource [file join [getDatabaseDirectory] $fileName]
+
+  set sql {
+    SELECT t1.t1x AS id, t3.t3y AS min, t3.t3z AS max,
+           SUM(t2.t2z) AS sum
+    FROM t1 t1 INNER JOIN t3 t3 INNER JOIN t2 t2
+    ON t2.t2t1x = t1.t1x AND t2.t2z BETWEEN t3.t3y AND t3.t3z
+    GROUP BY t1.t1x, t3.t3x, t3.t3y, t3.t3z;
+  }
+
+  unset -nocomplain results errors
+
+  set code [compileCSharpWith [subst {
+    using System.Data;
+    using System.Data.SQLite;
+
+    namespace _Dynamic${id}
+    {
+      public static class Test${id}
+      {
+        public static DataTable GetDataTable()
+        {
+          DataTable dataTable;
+
+          using (SQLiteConnection connection = new SQLiteConnection(
+              "Data Source=${dataSource};[getFlagsProperty]"))
+          {
+            connection.Open();
+
+            using (SQLiteCommand command = new SQLiteCommand(@"${sql}",
+                connection))
+            {
+              using (SQLiteDataReader dataReader = command.ExecuteReader())
+              {
+                dataTable = new DataTable();
+                dataTable.Load(dataReader);
+
+                return dataTable;
+              }
+            }
+          }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public static void Main()
+        {
+          // do nothing.
+        }
+      }
+    }
+  }] true true true results errors System.Data.SQLite.dll]
+
+  list $code $results \
+      [expr {[info exists errors] ? $errors : ""}] \
+      [expr {$code eq "Ok" ? [catch {
+        object invoke -alias _Dynamic${id}.Test${id} GetDataTable
+      } result] : [set result ""]}] $result [getRowsFromDataTable $result]
+} -cleanup {
+  cleanupDb $fileName
+
+  unset -nocomplain result results errors code sql dataSource id db fileName
+} -constraints {eagle monoBug28 command.sql compile.DATA SQLite\
+System.Data.SQLite compileCSharp} -match regexp -result {^Ok\
+System#CodeDom#Compiler#CompilerResults#\d+ \{\} 0 System#Data#DataTable#\d+\
+\{\{\{id 2\} \{min 2\} \{max 3\} \{sum 5\}\} \{\{id 2\} \{min 1\} \{max 2\}\
+\{sum 3\}\}\}$}}
+
+###############################################################################
+
+runSQLiteTestEpilogue
+runTestEpilogue
