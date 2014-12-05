@@ -442,7 +442,7 @@ namespace testlinq
                       "Test Order Ship Address, Index #{0}",
                       index);
 
-                  db.Orders.AddObject(newOrders);
+                  db.AddObject("Orders", newOrders);
 
                   try
                   {
