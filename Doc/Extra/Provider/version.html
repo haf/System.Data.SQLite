@@ -54,6 +54,7 @@
       <li>Handle Julian Day values that fall outside of the supported range for OLE Automation dates. Fix for <a href="http://system.data.sqlite.org/index.html/info/3e783eecbe">[3e783eecbe]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Make sure the interop files are copied when publishing a project that refers to a NuGet package containing them. Fix for <a href="http://system.data.sqlite.org/index.html/info/e796ac82c1">[e796ac82c1]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
       <li>Make sure the interop files are copied before the PostBuildEvent. Fix for <a href="http://system.data.sqlite.org/index.html/info/f16c93a932">[f16c93a932]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
+      <li>Modify GetSchemaTable method to avoid setting SchemaTableColumn.IsKey column to true when more than one table is referenced. Fix for <a href="http://system.data.sqlite.org/index.html/info/47c6fa04d3">[47c6fa04d3]</a>.&nbsp;<b>** Potentially Incompatible Change **</b></li>
     </ul>
     <p><b>1.0.94.0 - September 9, 2014</b></p>
     <ul>

@@ -1021,7 +1021,7 @@ namespace System.Data.SQLite
 
           if (bNotNull || bPrimaryKey) row[SchemaTableColumn.AllowDBNull] = false;
 
-          row[SchemaTableColumn.IsKey] = bPrimaryKey;
+          row[SchemaTableColumn.IsKey] = bPrimaryKey && parentToColumns.Count <= 1;
           row[SchemaTableOptionalColumn.IsAutoIncrement] = bAutoIncrement;
           row["CollationType"] = collSeq;
 
