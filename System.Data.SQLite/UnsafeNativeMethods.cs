@@ -1645,6 +1645,14 @@ namespace System.Data.SQLite
 #else
     [DllImport(SQLITE_DLL)]
 #endif
+    internal static extern SQLiteErrorCode sqlite3_enable_shared_cache(
+        int enable);
+
+#if !PLATFORM_COMPACTFRAMEWORK
+    [DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(SQLITE_DLL)]
+#endif
     internal static extern SQLiteErrorCode sqlite3_enable_load_extension(
         IntPtr db, int enable);
 

@@ -1673,6 +1673,26 @@ namespace eval ::Eagle {
       return ""
     }
 
+    proc enableSharedCache { channel enable {quiet false} } {
+      if {[catch {
+        object invoke -flags +NonPublic \
+            System.Data.SQLite.UnsafeNativeMethods \
+            sqlite3_enable_shared_cache [expr int($enable)]
+      } result] == 0} then {
+        if {!$quiet} then {
+          tputs $channel [appendArgs \
+              "---- call sqlite3_enable_shared_cache(" $enable \
+              ")... ok: " $result \n]
+        }
+      } else {
+        if {!$quiet} then {
+          tputs $channel [appendArgs \
+              "---- call sqlite3_enable_shared_cache(" $enable \
+              ")... error: " \n\t $result \n]
+        }
+      }
+    }
+
     proc setupDb {
             fileName {mode ""} {dateTimeFormat ""} {dateTimeKind ""} {flags ""}
             {extra ""} {qualify true} {delete true} {uri false}
@@ -3180,6 +3200,11 @@ namespace eval ::Eagle {
         checkForRuntimeOption $::test_channel noPoolCounts
 
         #
+        # NOTE: Check if the test suite should use shared-cache mode.
+        #
+        checkForRuntimeOption $::test_channel sharedCache
+
+        #
         # NOTE: Report the resource usage prior to running any tests.
         #
         reportSQLiteResources $::test_channel
@@ -3259,6 +3284,13 @@ namespace eval ::Eagle {
         #       test settings now.
         #
         uplevel 1 [list loadSQLiteTestSettings $::test_channel .after]
+
+        #
+        # NOTE: If necessary, enable shared-cache mode now.
+        #
+        if {[hasRuntimeOption sharedCache]} then {
+          enableSharedCache $::test_channel true
+        }
 
         #
         # NOTE: Show when our tests actually began (now).
@@ -3520,6 +3552,13 @@ namespace eval ::Eagle {
         # NOTE: Report the critical handle counts after running the tests.
         #
         getSQLiteHandleCounts $::test_channel
+
+        #
+        # NOTE: If necessary, disable shared-cache mode now.
+        #
+        if {[hasRuntimeOption sharedCache]} then {
+          enableSharedCache $::test_channel false
+        }
       }
     }
 

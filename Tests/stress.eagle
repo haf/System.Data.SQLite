@@ -392,6 +392,27 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
   #############################################################################
 
+  #
+  # NOTE: In shared-cache mode, skip the backup tests.  The SQLite core library
+  #       documentation states:
+  #
+  #       "If running in shared cache mode, the application must guarantee
+  #        that the shared cache used by the destination database is not
+  #        accessed while the backup is running. In practice this means that
+  #        the application must guarantee that the disk file being backed up
+  #        to is not accessed by any connection within the process, not just
+  #        the specific connection that was passed to sqlite3_backup_init()."
+  #
+  #       The only reasonable way that this test can guarantee this condition
+  #       is to disable the backup tests when shared-cache mode is being used
+  #       for testing.
+  #
+  if {[hasRuntimeOption sharedCache]} then {
+    lappend noWorkload 12 13; # TODO: Update if the workload numbers change.
+  }
+
+  #############################################################################
+
   tputs $test_channel [appendArgs \
       "---- workloads will repeat " $count(0) " time(s)\n"]
 
@@ -1352,6 +1373,9 @@ runTest {test stress-1.1 {multithreaded stress testing} -setup {
 
     sql execute $srcDb "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
     sql execute $db "CREATE TABLE IF NOT EXISTS t1(x PRIMARY KEY, y, z);"
+
+    sql execute $srcDb "CREATE INDEX IF NOT EXISTS i1 ON t1(y);"
+    sql execute $db "CREATE INDEX IF NOT EXISTS i1 ON t1(y);"
 
     foreach index(1) [lsort -integer $workloadNames(enabled)] {
       set workloadCallbacks($index(1)) [list \
