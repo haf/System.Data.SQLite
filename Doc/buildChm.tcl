@@ -259,6 +259,7 @@ if {$count > 0} then {
 set outputPath [file join Output]
 set temporaryPath [file join $outputPath ndoc3_msdn_temp]
 set corePath [file join $temporaryPath Core]
+set coreSyntaxPath [file join $corePath syntax]
 set providerPath [file join $temporaryPath Provider]
 
 if {[file isdirectory $nDocExtPath]} then {
@@ -280,7 +281,20 @@ foreach fileName [glob -nocomplain [file join $corePath *.html]] {
     exit 1
   }
 
-  transformCoreDocumentationFile $fileName http://www.sqlite.org/
+  transformCoreDocumentationFile $fileName https://www.sqlite.org/
+}
+
+###############################################################################
+
+foreach fileName [glob -nocomplain [file join $coreSyntaxPath *.html]] {
+  set fileName [file join $path $fileName]
+
+  if {![file isfile $fileName]} then {
+    puts stdout "Cannot find core syntax file: $fileName"
+    exit 1
+  }
+
+  transformCoreDocumentationFile $fileName https://www.sqlite.org/
 }
 
 ###############################################################################

@@ -197,6 +197,10 @@
 			<param name="Local" value="Core/pragma.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="List of Syntax Diagrams">
+			<param name="Local" value="Core/syntax.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Syntax Diagrams">
 			<param name="Local" value="Core/syntaxdiagrams.html">
 			</OBJECT>

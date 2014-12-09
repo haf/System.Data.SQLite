@@ -118,7 +118,7 @@ a:visited { color: #734559 }
 </script>
 <td>
     <div style="padding:0 1em 0px 0;white-space:nowrap">
-    <form name=f method="GET" action="http://www.sqlite.org/search">
+    <form name=f method="GET" action="https://www.sqlite.org/search">
       <input id=q name=q type=text
        onfocus="entersearch()" onblur="leavesearch()" style="width:24ex;padding:1px 1ex; border:solid white 1px; font-size:0.9em ; font-style:italic;color:#044a64;" value="Search SQLite Docs...">
       <input type=submit value="Go" style="border:solid white 1px;background-color:#044a64;color:white;font-size:0.9em;padding:0 1ex">
@@ -166,15 +166,15 @@ built-in PRAGMA statements.</p>
 
 <hr /><a name="syntax"></a>
 <h2>PRAGMA command syntax</h2>
-<p><b><a href="syntaxdiagrams.html#pragma-stmt">pragma-stmt:</a></b>
+<p><b><a href="syntax/pragma-stmt.html">pragma-stmt:</a></b>
 <button id='x1467' onclick='hideorshow("x1467","x1468")'>hide</button></p>
  <blockquote id='x1468'>
  <img alt="syntax diagram pragma-stmt" src="images/syntax/pragma-stmt.gif" />
-<p><b><a href="syntaxdiagrams.html#pragma-value">pragma-value:</a></b>
+<p><b><a href="syntax/pragma-value.html">pragma-value:</a></b>
 <button id='x1469' onclick='hideorshow("x1469","x1470")'>hide</button></p>
  <blockquote id='x1470'>
  <img alt="syntax diagram pragma-value" src="images/syntax/pragma-value.gif" />
-<p><b><a href="syntaxdiagrams.html#signed-number">signed-number:</a></b>
+<p><b><a href="syntax/signed-number.html">signed-number:</a></b>
 <button id='x1471' onclick='hideorshow("x1471","x1472")'>show</button></p>
  <blockquote id='x1472' style='display:none;'>
  <img alt="syntax diagram signed-number" src="images/syntax/signed-number.gif" />
@@ -235,8 +235,8 @@ name is meaningless and is simply ignored.</p>
 <li><a href="#pragma_foreign_key_check">foreign_key_check</a>
 <li><a href="#pragma_foreign_key_list">foreign_key_list</a>
 <li><a href="#pragma_foreign_keys">foreign_keys</a>
-</ul></td><td valign="top" align="left"><ul>
 <li><a href="#pragma_freelist_count">freelist_count</a>
+</ul></td><td valign="top" align="left"><ul>
 <li><a href="#pragma_full_column_names"><s>full_column_names</s></a>&sup1;
 <li><a href="#pragma_fullfsync">fullfsync</a>
 <li><a href="#pragma_ignore_check_constraints">ignore_check_constraints</a>
@@ -256,9 +256,9 @@ name is meaningless and is simply ignored.</p>
 <li><a href="#pragma_query_only">query_only</a>
 <li><a href="#pragma_quick_check">quick_check</a>
 <li><a href="#pragma_read_uncommitted">read_uncommitted</a>
-</ul></td><td valign="top" align="left"><ul>
 <li><a href="#pragma_recursive_triggers">recursive_triggers</a>
 <li><a href="#pragma_reverse_unordered_selects">reverse_unordered_selects</a>
+</ul></td><td valign="top" align="left"><ul>
 <li><a href="#pragma_schema_version">schema_version</a>
 <li><a href="#pragma_secure_delete">secure_delete</a>
 <li><a href="#pragma_short_column_names"><s>short_column_names</s></a>&sup1;
@@ -269,6 +269,7 @@ name is meaningless and is simply ignored.</p>
 <li><a href="#pragma_table_info">table_info</a>
 <li><a href="#pragma_temp_store">temp_store</a>
 <li><a href="#pragma_temp_store_directory"><s>temp_store_directory</s></a>&sup1;
+<li><a href="#pragma_threads">threads</a>
 <li><a href="#pragma_schema_version">user_version</a>
 <li><a href="#pragma_vdbe_addoptrace"><i>vdbe_addoptrace</i></a>&sup2;
 <li><a href="#pragma_vdbe_debug"><i>vdbe_debug</i></a>&sup2;
@@ -1426,6 +1427,22 @@ PRAGMA <b>main.</b>locking_mode=EXCLUSIVE;
     from the build when SQLite is compiled using <a href="compile.html#omit_deprecated">SQLITE_OMIT_DEPRECATED</a>.
     </p>
   
+<a name="pragma_threads"></a>
+<hr>
+    <p><b>PRAGMA threads;
+       <br>PRAGMA threads = </b><i>N</i><b>;</b></p>
+    <p>Query or change the value of the 
+    <a href="c3ref/limit.html">sqlite3_limit</a>(db,<a href="c3ref/c_limit_attached.html#sqlitelimitworkerthreads">SQLITE_LIMIT_WORKER_THREADS</a>,...) limit for
+    the current database connection.  This limit sets an upper bound
+    on the number of auxiliary threads that a <a href="c3ref/stmt.html">prepared statement</a> is
+    allowed to launch to assist with a query.  The default limit is 0
+    unless it is changed using the <a href="compile.html#default_worker_threads">SQLITE_DEFAULT_WORKER_THREADS</a>
+    compile-time option.  When the limit is zero, that means no
+    auxiliary threads will be launched.</p>
+
+    <p>This pragma is a thin wrapper around the
+    <a href="c3ref/limit.html">sqlite3_limit</a>(db,<a href="c3ref/c_limit_attached.html#sqlitelimitworkerthreads">SQLITE_LIMIT_WORKER_THREADS</a>,...) interface.
+    </p>
 <a name="pragma_vdbe_addoptrace"></a>
 <hr>
     <p><b>PRAGMA vdbe_addoptrace = </b><i>boolean</i><b>;</b></p>
