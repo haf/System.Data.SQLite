@@ -3,10 +3,10 @@
 <b>Version History</b>
 
 <p>
-    <b>1.0.95.0 - December XX, 2014 <font color="red">(release scheduled)</font></b>
+    <b>1.0.95.0 - January XX, 2015 <font color="red">(release scheduled)</font></b>
 </p>
 <ul>
-    <li>Updated to [http://www.sqlite.org/releaselog/3_8_7_2.html|SQLite 3.8.7.2].</li>
+    <li>Updated to [http://www.sqlite.org/releaselog/3_8_7_4.html|SQLite 3.8.7.4].</li>
     <li>Make sure SQL statements generated for DbUpdateCommandTree objects are properly delimited.</li>
     <li>Various minor performance enhancements to the SQLiteDataReader class. Pursuant to [e122d26e70].</li>
     <li>Defer disposing of connections created by the static SQLiteCommand.Execute method when a data reader is returned. Fix for [daeaf3150a].</li>
