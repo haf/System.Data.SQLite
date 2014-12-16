@@ -325,6 +325,15 @@
     <b>..\Externals\Eagle\bin\EagleShell.exe -file verify.eagle Output true</b>
     <br />
     <br />
+    <i>This assumes that the <a href="http://www.fossil-scm.org/">Fossil</a>,
+    <a href="http://sourceforge.net/projects/innounp/">Inno Setup Unpacker</a>,
+    <a href="http://www.rarlab.com/">UnRAR</a>, and
+    <a href="http://www.info-zip.org/">UnZip</a> binaries are available in the
+    locations specified via the &quot;FossilTool&quot;,
+    &quot;InnoUnpackTool&quot;, &quot;UnRARTool&quot;, &quot;UnZipTool&quot;
+    environment variables, respectively.</i>
+    <br />
+    <br />
     <i>If errors are generated, the file
     &quot;&lt;root&gt;\Setup\data\verify.lst&quot; may need to be updated to
     account for the files that have been added and/or removed from the release
