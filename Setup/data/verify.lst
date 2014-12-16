@@ -26,7 +26,6 @@ set sds_manifests(source) {
   Doc/Extra/Core/images/
   Doc/Extra/Core/images/sqlite370_banner.gif
   Doc/Extra/Core/images/syntax/
-  Doc/Extra/Core/images/syntax/a.gif
   Doc/Extra/Core/images/syntax/alter-table-stmt.gif
   Doc/Extra/Core/images/syntax/analyze-stmt.gif
   Doc/Extra/Core/images/syntax/attach-stmt.gif
@@ -54,16 +53,12 @@ set sds_manifests(source) {
   Doc/Extra/Core/images/syntax/drop-view-stmt.gif
   Doc/Extra/Core/images/syntax/expr.gif
   Doc/Extra/Core/images/syntax/factored-select-stmt.gif
-  Doc/Extra/Core/images/syntax/floating-point-literal.gif
   Doc/Extra/Core/images/syntax/foreign-key-clause.gif
-  Doc/Extra/Core/images/syntax/foreign-key-clause2.gif
   Doc/Extra/Core/images/syntax/indexed-column.gif
   Doc/Extra/Core/images/syntax/insert-stmt.gif
   Doc/Extra/Core/images/syntax/join-clause.gif
   Doc/Extra/Core/images/syntax/join-constraint.gif
-  Doc/Extra/Core/images/syntax/join-op.gif
   Doc/Extra/Core/images/syntax/join-operator.gif
-  Doc/Extra/Core/images/syntax/join-source.gif
   Doc/Extra/Core/images/syntax/literal-value.gif
   Doc/Extra/Core/images/syntax/numeric-literal.gif
   Doc/Extra/Core/images/syntax/ordering-term.gif
@@ -81,7 +76,6 @@ set sds_manifests(source) {
   Doc/Extra/Core/images/syntax/select-stmt.gif
   Doc/Extra/Core/images/syntax/signed-number.gif
   Doc/Extra/Core/images/syntax/simple-select-stmt.gif
-  Doc/Extra/Core/images/syntax/single-source.gif
   Doc/Extra/Core/images/syntax/sql-stmt-list.gif
   Doc/Extra/Core/images/syntax/sql-stmt.gif
   Doc/Extra/Core/images/syntax/table-constraint.gif
@@ -126,6 +120,67 @@ set sds_manifests(source) {
   Doc/Extra/Core/lang_vacuum.html
   Doc/Extra/Core/lang_with.html
   Doc/Extra/Core/pragma.html
+  Doc/Extra/Core/syntax.html
+  Doc/Extra/Core/syntax/
+  Doc/Extra/Core/syntax/alter-table-stmt.html
+  Doc/Extra/Core/syntax/analyze-stmt.html
+  Doc/Extra/Core/syntax/attach-stmt.html
+  Doc/Extra/Core/syntax/begin-stmt.html
+  Doc/Extra/Core/syntax/column-constraint.html
+  Doc/Extra/Core/syntax/column-def.html
+  Doc/Extra/Core/syntax/comment-syntax.html
+  Doc/Extra/Core/syntax/commit-stmt.html
+  Doc/Extra/Core/syntax/common-table-expression.html
+  Doc/Extra/Core/syntax/compound-operator.html
+  Doc/Extra/Core/syntax/compound-select-stmt.html
+  Doc/Extra/Core/syntax/conflict-clause.html
+  Doc/Extra/Core/syntax/create-index-stmt.html
+  Doc/Extra/Core/syntax/create-table-stmt.html
+  Doc/Extra/Core/syntax/create-trigger-stmt.html
+  Doc/Extra/Core/syntax/create-view-stmt.html
+  Doc/Extra/Core/syntax/create-virtual-table-stmt.html
+  Doc/Extra/Core/syntax/cte-table-name.html
+  Doc/Extra/Core/syntax/delete-stmt-limited.html
+  Doc/Extra/Core/syntax/delete-stmt.html
+  Doc/Extra/Core/syntax/detach-stmt.html
+  Doc/Extra/Core/syntax/drop-index-stmt.html
+  Doc/Extra/Core/syntax/drop-table-stmt.html
+  Doc/Extra/Core/syntax/drop-trigger-stmt.html
+  Doc/Extra/Core/syntax/drop-view-stmt.html
+  Doc/Extra/Core/syntax/expr.html
+  Doc/Extra/Core/syntax/factored-select-stmt.html
+  Doc/Extra/Core/syntax/foreign-key-clause.html
+  Doc/Extra/Core/syntax/indexed-column.html
+  Doc/Extra/Core/syntax/insert-stmt.html
+  Doc/Extra/Core/syntax/join-clause.html
+  Doc/Extra/Core/syntax/join-constraint.html
+  Doc/Extra/Core/syntax/join-operator.html
+  Doc/Extra/Core/syntax/literal-value.html
+  Doc/Extra/Core/syntax/numeric-literal.html
+  Doc/Extra/Core/syntax/ordering-term.html
+  Doc/Extra/Core/syntax/pragma-stmt.html
+  Doc/Extra/Core/syntax/pragma-value.html
+  Doc/Extra/Core/syntax/qualified-table-name.html
+  Doc/Extra/Core/syntax/raise-function.html
+  Doc/Extra/Core/syntax/recursive-cte.html
+  Doc/Extra/Core/syntax/reindex-stmt.html
+  Doc/Extra/Core/syntax/release-stmt.html
+  Doc/Extra/Core/syntax/result-column.html
+  Doc/Extra/Core/syntax/rollback-stmt.html
+  Doc/Extra/Core/syntax/savepoint-stmt.html
+  Doc/Extra/Core/syntax/select-core.html
+  Doc/Extra/Core/syntax/select-stmt.html
+  Doc/Extra/Core/syntax/signed-number.html
+  Doc/Extra/Core/syntax/simple-select-stmt.html
+  Doc/Extra/Core/syntax/sql-stmt-list.html
+  Doc/Extra/Core/syntax/sql-stmt.html
+  Doc/Extra/Core/syntax/table-constraint.html
+  Doc/Extra/Core/syntax/table-or-subquery.html
+  Doc/Extra/Core/syntax/type-name.html
+  Doc/Extra/Core/syntax/update-stmt-limited.html
+  Doc/Extra/Core/syntax/update-stmt.html
+  Doc/Extra/Core/syntax/vacuum-stmt.html
+  Doc/Extra/Core/syntax/with-clause.html
   Doc/Extra/Core/syntaxdiagrams.html
   Doc/Extra/Include/
   Doc/Extra/Include/ndoc.css
@@ -672,6 +727,7 @@ set sds_manifests(source) {
   Tests/tkt-3c00ec5b52.eagle
   Tests/tkt-3e783eecbe.eagle
   Tests/tkt-448d663d11.eagle
+  Tests/tkt-47c6fa04d3.eagle
   Tests/tkt-47f4bac575.eagle
   Tests/tkt-48a6b8e4ca.eagle
   Tests/tkt-4a791e70ab.eagle
