@@ -330,7 +330,7 @@
     <a href="http://www.rarlab.com/">UnRAR</a>, and
     <a href="http://www.info-zip.org/">UnZip</a> binaries are available in the
     locations specified via the &quot;FossilTool&quot;,
-    &quot;InnoUnpackTool&quot;, &quot;UnRARTool&quot;, &quot;UnZipTool&quot;
+    &quot;InnoUnpackTool&quot;, &quot;UnRARTool&quot;, and &quot;UnZipTool&quot;
     environment variables, respectively.</i>
     <br />
     <br />
